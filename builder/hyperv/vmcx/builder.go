@@ -93,6 +93,7 @@ type Config struct {
 	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
+	Version                        string `mapstructure:"configuration_version"`
 
 	Communicator string `mapstructure:"communicator"`
 
