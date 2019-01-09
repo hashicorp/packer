@@ -76,3 +76,5 @@ resources of the artifact are also removed. For example, when building a VMware
 image, if you turn it into a Vagrant box, the files of the VMware image will be
 deleted since they were compressed into the Vagrant box. With creating AWS
 images, however, the AMI is kept around, since Vagrant needs it to function.
+
+[Continue to Next Steps](./next.html)
