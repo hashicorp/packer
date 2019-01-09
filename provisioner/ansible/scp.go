@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 const (
@@ -43,7 +43,7 @@ func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, com
 		return errors.New("no scp target specified")
 	}
 
-	d, err := ioutil.TempDir("", "packer-ansible-upload")
+	d, err := tmp.Dir("ansible-upload")
 	if err != nil {
 		fmt.Fprintf(out, scpEmptyError)
 		return err
@@ -68,7 +68,7 @@ func scpDownloadSession(opts []byte, rest string, in io.Reader, out io.Writer, c
 		return errors.New("no scp source specified")
 	}
 
-	d, err := ioutil.TempDir("", "packer-ansible-download")
+	d, err := tmp.Dir("ansible-download")
 	if err != nil {
 		fmt.Fprintf(out, scpEmptyError)
 		return err
