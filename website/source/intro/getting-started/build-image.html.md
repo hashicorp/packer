@@ -109,7 +109,7 @@ Next, let's build the image from this template.
 An astute reader may notice that we said earlier we'd be building an image with
 Redis pre-installed, and yet the template we made doesn't reference Redis
 anywhere. In fact, this part of the documentation will only cover making a first
-basic, non-provisioned image. The next section on provisioning will cover
+basic, non-provisioned image. The [next section on provisioning](./provision.html) will cover
 installing Redis.
 
 ## Your First Image
@@ -637,5 +637,7 @@ For Windows 2016:
 
 The bootstrapping and sample provisioning should work the same across all
 Windows server versions.
+
+[Continue to provisioning an image](./provision.html)
 
 [platforms]: /docs/builders/index.html
