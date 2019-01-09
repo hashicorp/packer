@@ -41,6 +41,7 @@ import (
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	qemubuilder "github.com/hashicorp/packer/builder/qemu"
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
+	tencentcloudbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
@@ -113,6 +114,7 @@ var Builders = map[string]packer.Builder{
 	"profitbricks":        new(profitbricksbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"scaleway":            new(scalewaybuilder.Builder),
+	"tencentcloud-cvm":    new(tencentcloudbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),

@@ -22,6 +22,7 @@ type StepCreateVM struct {
 	RamSize                        uint
 	DiskSize                       uint
 	DiskBlockSize                  uint
+	UseLegacyNetworkAdapter        bool
 	Generation                     uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
@@ -33,6 +34,7 @@ type StepCreateVM struct {
 	DifferencingDisk               bool
 	MacAddress                     string
 	FixedVHD                       bool
+	Version                        string
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -64,12 +66,22 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	diskBlockSize := int64(s.DiskBlockSize * 1024 * 1024)
 
 	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
-		s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD)
+		s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	if s.UseLegacyNetworkAdapter {
+		err := driver.ReplaceVirtualMachineNetworkAdapter(s.VMName, true)
+		if err != nil {
+			err := fmt.Errorf("Error creating legacy network adapter: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)

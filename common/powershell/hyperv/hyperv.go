@@ -1,14 +1,33 @@
 package hyperv
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/hashicorp/packer/common/powershell"
 )
+
+type scriptOptions struct {
+	Version            string
+	VMName             string
+	VHDX               string
+	Path               string
+	HardDrivePath      string
+	MemoryStartupBytes int64
+	NewVHDSizeBytes    int64
+	VHDBlockSizeBytes  int64
+	SwitchName         string
+	Generation         uint
+	DiffDisks          bool
+	FixedVHD           bool
+}
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
@@ -135,7 +154,7 @@ func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation ui
 	if generation < 2 {
 		script := `
 param([string]$vmName)
-Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","Floppy")
+Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("IDE","CD","LegacyNetworkAdapter","Floppy")
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName)
@@ -202,77 +221,101 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
+// This was created as a proof of concept for moving logic out of the powershell
+// scripting so that we can test the pathways activated by our variables.
+// Rather than creating a powershell script with several conditionals, this will
+// generate a conditional-free script which already sets all of the necessary
+// variables inline.
+//
+// For examples of what this template will generate, you can look at the
+// test cases in ./hyperv_test.go
+//
+func getCreateVMScript(opts *scriptOptions) (string, error) {
+
+	if opts.FixedVHD && opts.Generation == 2 {
+		return "", fmt.Errorf("Generation 2 VMs don't support fixed disks.")
+	}
+
+	opts.VHDX = opts.VMName + ".vhdx"
+	if opts.FixedVHD {
+		opts.VHDX = opts.VMName + ".vhd"
+	}
+
+	var tpl = template.Must(template.New("createVM").Parse(`
+$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}
+
+{{ if ne .HardDrivePath "" -}}
+    {{- if .DiffDisks -}}
+    Hyper-V\New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+    {{- else -}}
+    Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
+    {{- end -}}
+{{- else -}}
+    {{- if .FixedVHD -}}
+    Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}
+    {{- else -}}
+    Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+    {{- end -}}
+{{- end }}
+
+Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}
+{{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
+{{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
+`))
+
+	var b bytes.Buffer
+	err := tpl.Execute(&b, opts)
+	if err != nil {
+		return "", err
+	}
+
+	// Tidy away the excess newlines left over by the template
+	regex, err := regexp.Compile("^\n")
+	if err != nil {
+		return "", err
+	}
+	final := regex.ReplaceAllString(b.String(), "")
+	regex, err = regexp.Compile("\n\n")
+	final = regex.ReplaceAllString(final, "\n")
+
+	return final, nil
+}
+
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
-	diffDisks bool, fixedVHD bool) error {
+	diffDisks bool, fixedVHD bool, version string) error {
 
-	if generation == 2 {
-		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
-$vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-if ($harddrivePath){
-	if($diffDisks -eq "true"){
-		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
-	} else {
-		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	opts := scriptOptions{
+		Version:            version,
+		VMName:             vmName,
+		Path:               path,
+		HardDrivePath:      harddrivePath,
+		MemoryStartupBytes: ram,
+		NewVHDSizeBytes:    diskSize,
+		VHDBlockSizeBytes:  diskBlockSize,
+		SwitchName:         switchName,
+		Generation:         generation,
+		DiffDisks:          diffDisks,
+		FixedVHD:           fixedVHD,
 	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
-} else {
-	Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
-}
-`
-		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
-			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
-			switchName, strconv.FormatInt(int64(generation), 10),
-			strconv.FormatBool(diffDisks)); err != nil {
-			return err
-		}
 
-		return DisableAutomaticCheckpoints(vmName)
-	} else {
-		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
-if($fixedVHD -eq "true"){
-	$vhdx = $vmName + '.vhd'
-}
-else{
-	$vhdx = $vmName + '.vhdx'
-}
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-if ($harddrivePath){
-	if($diffDisks -eq "true"){
-		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
+	script, err := getCreateVMScript(&opts)
+	if err != nil {
+		return err
 	}
-	else{
-		Copy-Item -Path $harddrivePath -Destination $vhdPath
-	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
-} else {
-	if($fixedVHD -eq "true"){
-		Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes $newVHDSizeBytes
-	}
-	else {
-		Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
-	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
-}
-`
-		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
-			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
-			switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
-			return err
-		}
 
-		if err := DisableAutomaticCheckpoints(vmName); err != nil {
-			return err
-		}
+	var ps powershell.PowerShellCmd
+	if err = ps.Run(script); err != nil {
+		return err
+	}
 
+	if err := DisableAutomaticCheckpoints(vmName); err != nil {
+		return err
+	}
+	if generation != 2 {
 		return DeleteAllDvdDrives(vmName)
 	}
+	return nil
 }
 
 func DisableAutomaticCheckpoints(vmName string) error {
@@ -366,10 +409,10 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 }
 
 func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
-	ram int64, switchName string) error {
+	ram int64, switchName string, copyTF bool) error {
 
 	var script = `
-param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)
+param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName, [string]$copy)
 
 $VirtualHarddisksPath = Join-Path -Path $importPath -ChildPath 'Virtual Hard Disks'
 if (!(Test-Path $VirtualHarddisksPath)) {
@@ -395,7 +438,13 @@ if (!$VirtualMachinePath){
     $VirtualMachinePath = Get-ChildItem -Path $importPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 }
 
-$compatibilityReport = Hyper-V\Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId
+$copyBool = $false
+switch($copy) {
+    "true" { $copyBool = $true }
+    default { $copyBool = $false }
+}
+
+$compatibilityReport = Hyper-V\Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy:$false
 if ($vhdPath){
 	Copy-Item -Path $harddrivePath -Destination $vhdPath
 	$existingFirstHarddrive = $compatibilityReport.VM.HardDrives | Select -First 1
@@ -415,16 +464,15 @@ if ($vm) {
     $result = Hyper-V\Rename-VM -VM $vm -NewName $VMName
 }
 	`
-
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName)
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName, strconv.FormatBool(copyTF))
 
 	return err
 }
 
 func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
-	path string, harddrivePath string, ram int64, switchName string) error {
+	path string, harddrivePath string, ram int64, switchName string, copyTF bool) error {
 
 	if cloneFromVmName != "" {
 		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
@@ -439,7 +487,7 @@ func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 		}
 	}
 
-	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
+	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName, copyTF); err != nil {
 		return err
 	}
 
@@ -947,6 +995,24 @@ Hyper-V\Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 `
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, vlanId)
+	return err
+}
+
+func ReplaceVirtualMachineNetworkAdapter(vmName string, legacy bool) error {
+
+	var script = `
+param([string]$vmName,[string]$legacyString)
+$legacy = [System.Boolean]::Parse($legacyString)
+$switch = (Get-VMNetworkAdapter -VMName $vmName).SwitchName
+Remove-VMNetworkAdapter -VMName $vmName
+Add-VMNetworkAdapter -VMName $vmName -SwitchName $switch -Name $vmName -IsLegacy $legacy
+`
+	legacyString := "False"
+	if legacy {
+		legacyString = "True"
+	}
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, legacyString)
 	return err
 }
 

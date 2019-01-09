@@ -44,7 +44,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepCreateLoginKey(conn, ui),
 			NewStepCreateServerInstance(conn, ui, b.config),
 			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui),
+			NewStepGetRootPassword(conn, ui, b.config),
 			NewStepCreatePublicIPInstance(conn, ui, b.config),
 			&communicator.StepConnectSSH{
 				Config: &b.config.Comm,
@@ -68,7 +68,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepCreateLoginKey(conn, ui),
 			NewStepCreateServerInstance(conn, ui, b.config),
 			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui),
+			NewStepGetRootPassword(conn, ui, b.config),
 			NewStepCreatePublicIPInstance(conn, ui, b.config),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
@@ -78,7 +78,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				WinRMConfig: func(state multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.Comm.WinRMUser,
-						Password: state.Get("Password").(string),
+						Password: b.config.Comm.WinRMPassword,
 					}, nil
 				},
 			},

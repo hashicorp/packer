@@ -28,6 +28,7 @@ var accels = map[string]struct{}{
 	"xen":  {},
 	"hax":  {},
 	"hvf":  {},
+	"whpx": {},
 }
 
 var netDevice = map[string]bool{
@@ -274,7 +275,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', or 'none' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {

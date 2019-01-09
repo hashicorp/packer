@@ -176,6 +176,41 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	}
 }
 
+func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
+	c := testAMIConfig()
+	c.AMIEncryptBootVolume = true
+
+	accessConf := testAccessConfig()
+
+	validCases := []string{
+		"abcd1234-e567-890f-a12b-a123b4cd56ef",
+		"alias/foo/bar",
+		"arn:aws:kms:us-east-1:012345678910:key/abcd1234-a123-456a-a12b-a123b4cd56ef",
+		"arn:aws:kms:us-east-1:012345678910:alias/foo/bar",
+	}
+	for _, validCase := range validCases {
+		c.AMIKmsKeyId = validCase
+		if err := c.Prepare(accessConf, nil); err != nil {
+			t.Fatalf("%s should not have failed KMS key validation", validCase)
+		}
+	}
+
+	invalidCases := []string{
+		"ABCD1234-e567-890f-a12b-a123b4cd56ef",
+		"ghij1234-e567-890f-a12b-a123b4cd56ef",
+		"ghij1234+e567_890f-a12b-a123b4cd56ef",
+		"foo/bar",
+		"arn:aws:kms:us-east-1:012345678910:foo/bar",
+	}
+	for _, invalidCase := range invalidCases {
+		c.AMIKmsKeyId = invalidCase
+		if err := c.Prepare(accessConf, nil); err == nil {
+			t.Fatalf("%s should have failed KMS key validation", invalidCase)
+		}
+	}
+
+}
+
 func TestAMINameValidation(t *testing.T) {
 	c := testAMIConfig()
 

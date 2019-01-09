@@ -43,6 +43,10 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 			state.Put("error", fmt.Errorf("Error fetching SSH key: %s", err))
 			return multistep.ActionHalt
 		}
+		if sshKey == nil {
+			state.Put("error", fmt.Errorf("Could not find key: %s", k))
+			return multistep.ActionHalt
+		}
 		sshKeys = append(sshKeys, sshKey)
 	}
 

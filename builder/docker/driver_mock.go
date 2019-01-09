@@ -101,7 +101,7 @@ func (d *MockDriver) Export(id string, dst io.Writer) error {
 	return d.ExportError
 }
 
-func (d *MockDriver) Import(path, repo string) (string, error) {
+func (d *MockDriver) Import(path string, changes []string, repo string) (string, error) {
 	d.ImportCalled = true
 	d.ImportPath = path
 	d.ImportRepo = repo

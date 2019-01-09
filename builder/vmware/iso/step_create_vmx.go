@@ -25,8 +25,6 @@ type vmxTemplateData struct {
 	CpuCount   string
 	MemorySize string
 
-	HDD_BootOrder string
-
 	SCSI_Present         string
 	SCSI_diskAdapterType string
 	SATA_Present         string
@@ -167,7 +165,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		NVME_Present:         "FALSE",
 
 		DiskType:                   "scsi",
-		HDD_BootOrder:              "scsi0:0",
 		CDROMType:                  "ide",
 		CDROMType_PrimarySecondary: "0",
 
@@ -190,20 +187,17 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "ide"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_PrimarySecondary = "1"
-		templateData.HDD_BootOrder = "ide0:0"
 	case "sata":
 		templateData.SATA_Present = "TRUE"
 		templateData.DiskType = "sata"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_PrimarySecondary = "1"
-		templateData.HDD_BootOrder = "sata0:0"
 	case "nvme":
 		templateData.NVME_Present = "TRUE"
 		templateData.DiskType = "nvme"
 		templateData.SATA_Present = "TRUE"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_PrimarySecondary = "0"
-		templateData.HDD_BootOrder = "nvme0:0"
 	case "scsi":
 		diskAdapterType = "lsilogic"
 		fallthrough
@@ -213,7 +207,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "scsi"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_PrimarySecondary = "0"
-		templateData.HDD_BootOrder = "scsi0:0"
 	}
 
 	/// Handle the cdrom adapter type. If the disk adapter type and the
@@ -477,7 +470,6 @@ nvram = "{{ .Name }}.nvram"
 
 floppy0.present = "FALSE"
 bios.bootOrder = "hdd,cdrom"
-bios.hddOrder = "{{ .HDD_BootOrder }}"
 
 // Configuration
 extendedConfigFile = "{{ .Name }}.vmxf"

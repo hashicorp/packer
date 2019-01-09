@@ -631,3 +631,32 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 		t.Fatalf("should not have error: %#v", ret)
 	}
 }
+
+func TestBuilderPrepare_UseLegacyNetworkAdapter(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// should be allowed for default config
+	config["use_legacy_network_adapter"] = true
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	// should not be allowed for gen 2
+	config["generation"] = 2
+
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}

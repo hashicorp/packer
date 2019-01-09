@@ -81,6 +81,7 @@ type Config struct {
 	DifferencingDisk bool `mapstructure:"differencing_disk"`
 
 	SwitchName                     string `mapstructure:"switch_name"`
+	CompareCopy                    bool   `mapstructure:"copy_in_compare"`
 	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
 	MacAddress                     string `mapstructure:"mac_address"`
 	VlanId                         string `mapstructure:"vlan_id"`
@@ -92,6 +93,7 @@ type Config struct {
 	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
+	Version                        string `mapstructure:"configuration_version"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -430,6 +432,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
+			CompareCopy:                    b.config.CompareCopy,
 			RamSize:                        b.config.RamSize,
 			Cpu:                            b.config.Cpu,
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
@@ -480,7 +483,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// configure the communicator ssh, winrm
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
-			Host:      hypervcommon.CommHost,
+			Host:      hypervcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
 			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 
