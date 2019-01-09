@@ -47,6 +47,7 @@ func tmpnam(prefix string) string {
 	dir := os.TempDir()
 	max := int(math.Pow(2, float64(length)))
 
+	// FIXME use ioutil.TempFile() or at least mimic implementation, this could loop forever
 	n, err := rand.Intn(max), nil
 	for path = filepath.Join(dir, prefix+strconv.Itoa(n)); err == nil; _, err = os.Stat(path) {
 		n = rand.Intn(max)

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -14,6 +13,7 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // Communicator is a special communicator that works by executing
@@ -67,7 +67,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
-	tf, err := ioutil.TempFile("", "packer-amazon-chroot")
+	tf, err := tmp.File("packer-amazon-chroot")
 	if err != nil {
 		return fmt.Errorf("Error preparing shell script: %s", err)
 	}

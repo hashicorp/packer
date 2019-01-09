@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // This step attaches the ISO to the virtual machine.
@@ -106,7 +106,7 @@ func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepAttachFloppy) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	tempdir, err := tmp.Dir("virtualbox")
 	if err != nil {
 		return "", err
 	}
