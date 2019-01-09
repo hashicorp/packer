@@ -355,7 +355,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 
 	var envvars []string
 
-	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
+	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s -o IdentitiesOnly=yes",
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {

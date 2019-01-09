@@ -51,6 +51,11 @@ configuration is actually required.
     should use a custom configuration template. See the dedicated "Chef
     Configuration" section below for more details.
 
+-   `elevated_user` and `elevated_password` (string) - If specified, Chef will
+    be run with elevated privileges using the given Windows user. See the
+    [powershell](/docs/provisionders/powershell.html) provisioner for the full
+    details.
+
 -   `encrypted_data_bag_secret_path` (string) - The path to the file containing
     the secret for encrypted data bags. By default, this is empty, so no secret
     will be available.

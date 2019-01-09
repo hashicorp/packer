@@ -21,6 +21,17 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 
+	var instanceIP floatingips.FloatingIP
+
+	// This is here in case we error out before putting instanceIp into the
+	// statebag below, because it is requested by Cleanup()
+	state.Put("access_ip", &instanceIP)
+
+	if s.FloatingIP == "" && !s.ReuseIPs && s.FloatingIPNetwork == "" {
+		ui.Message("Floating IP not required")
+		return multistep.ActionContinue
+	}
+
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
@@ -36,12 +47,6 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-
-	var instanceIP floatingips.FloatingIP
-
-	// This is here in case we error out before putting instanceIp into the
-	// statebag below, because it is requested by Cleanup()
-	state.Put("access_ip", &instanceIP)
 
 	// Try to Use the OpenStack floating IP by checking provided parameters in
 	// the following order:
@@ -141,6 +146,11 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	instanceIP := state.Get("access_ip").(*floatingips.FloatingIP)
+
+	// Don't clean up if unless required
+	if instanceIP.ID == "" && instanceIP.FloatingIP == "" {
+		return
+	}
 
 	// Don't delete pool addresses we didn't allocate
 	if state.Get("floatingip_istemp") == false {
