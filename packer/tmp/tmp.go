@@ -1,8 +1,8 @@
 // Package tmp provides temporary directory helpers.
 //
 // tmp stores temporary items in the system's
-// temporary directory ( see os.TempDir ) unless
-// a corresponding environment variable is set.git
+// temporary directory unless a corresponding
+// environment variable is set ( see os.TempDir ).
 //
 // On Unix systems, it uses $TMPDIR if non-empty, else /tmp.
 // On Windows, it uses GetTempPath, returning the first non-empty
