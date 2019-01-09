@@ -74,6 +74,13 @@ Optional parameters:
     this as an environment variable. For example:
     `"environment_vars": "WINRMPASS={{.WinRMPassword}}"`
 
+-   `env_var_format` (string) - When we parse the environment_vars that you
+    provide, this gives us a string template to use in order to make sure that
+    we are setting the environment vars correctly. By default on Windows hosts
+    this format is `set %s=%s && ` and on Unix, it is `%s='%s' `.  You probably
+    won't need to change this format, but you can see usage examples for where
+    it is necessary below.
+
 -   `execute_command` (array of strings) - The command used to execute the
     script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows. This is
@@ -270,6 +277,7 @@ env\_var\_format and execute\_command
               "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
               "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
               "env_var_format": "$env:%s=\"%s\"; ",
+              "script": "./scripts/example_ps.ps1"
           }
 
 Example of running a powershell script on windows as "inline": Required
@@ -290,7 +298,7 @@ Example of running a bash script on unix:
           {
               "type": "shell-local",
               "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-              "scripts": ["./scripts/dummy_bash.sh"]
+              "scripts": ["./scripts/example_bash.sh"]
           }
 
 Example of running a bash "inline" on unix:
