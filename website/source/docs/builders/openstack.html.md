@@ -127,6 +127,9 @@ builder.
     after creation. An image member is usually a project (also called the
     "tenant") with whom the image is shared.
 
+-   `image_tags` (array of strings) - List of tags to add to the image after
+    creation.
+
 -   `image_visibility` (string) - One of "public", "private", "shared", or
     "community".
 
@@ -274,6 +277,11 @@ builder.
 -   `volume_type` (string) - Type of the Block Storage service volume. If this
     isn't specified, the default enforced by your OpenStack cluster will be
     used.
+
+-   `volume_size` (int) - Size of the Block Storage service volume in GB. If this
+    isn't specified, it is set to source image min disk value (if set) or
+    calculated from the source image bytes size. Note that in some cases this
+    needs to be specified, if `use_blockstorage_volume` is true.
 
 -   `volume_availability_zone` (string) - Availability zone of the Block
     Storage service volume. If omitted, Compute instance availability zone will

@@ -101,6 +101,11 @@ listed below:
     be run. If using Hiera files with relative paths, this option can be
     helpful. (default: `staging_directory`)
 
+-   `elevated_user` and `elevated_password` (string) - If specified, Puppet
+    will be run with elevated privileges using the given Windows user. See the
+    [powershell](/docs/provisioners/powershell.html) provisioner for the full
+    details.
+
     ## Execute Command
 
 By default, Packer uses the following command (broken across multiple lines for

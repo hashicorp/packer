@@ -95,7 +95,7 @@ Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
 
-While the binary packages is the only official method of installation, there are
+While the binary packages are the only official method of installation, there are
 alternatives available.
 
 ### Homebrew

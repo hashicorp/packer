@@ -23,6 +23,12 @@ var retryableSleep = 5 * time.Second
 var TryCheckReboot = `shutdown /r /f /t 60 /c "packer restart test"`
 var AbortReboot = `shutdown /a`
 
+var DefaultRegistryKeys = []string{
+	"HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootPending",
+	"HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\PackagesPending",
+	"HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootInProgress",
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -35,6 +41,12 @@ type Config struct {
 
 	// The timeout for waiting for the machine to restart
 	RestartTimeout time.Duration `mapstructure:"restart_timeout"`
+
+	// Whether to check the registry (see RegistryKeys) for pending reboots
+	CheckKey bool `mapstructure:"check_registry"`
+
+	// custom keys to check for
+	RegistryKeys []string `mapstructure:"registry_keys"`
 
 	ctx interpolate.Context
 }
@@ -71,6 +83,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.RestartTimeout == 0 {
 		p.config.RestartTimeout = 5 * time.Minute
+	}
+
+	if len(p.config.RegistryKeys) == 0 {
+		p.config.RegistryKeys = DefaultRegistryKeys
 	}
 
 	return nil
@@ -212,7 +228,6 @@ var waitForCommunicator = func(p *Provisioner) error {
 			log.Printf("Connected to machine")
 			runCustomRestartCheck = false
 		}
-
 		// This is the non-user-configurable check that powershell
 		// modules have loaded.
 
@@ -233,6 +248,37 @@ var waitForCommunicator = func(p *Provisioner) error {
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
+		}
+
+		if p.config.CheckKey {
+			log.Printf("Connected to machine")
+			shouldContinue := false
+			for _, RegKey := range p.config.RegistryKeys {
+				KeyTestCommand := winrm.Powershell(fmt.Sprintf(`Test-Path "%s"`, RegKey))
+				cmdKeyCheck := &packer.RemoteCmd{Command: KeyTestCommand}
+				log.Printf("Checking registry for pending reboots")
+				var buf, buf2 bytes.Buffer
+				cmdKeyCheck.Stdout = &buf
+				cmdKeyCheck.Stdout = io.MultiWriter(cmdKeyCheck.Stdout, &buf2)
+
+				err := p.comm.Start(cmdKeyCheck)
+				if err != nil {
+					log.Printf("Communication connection err: %s", err)
+					shouldContinue = true
+				}
+				cmdKeyCheck.Wait()
+
+				stdoutToRead := buf2.String()
+				if strings.Contains(stdoutToRead, "True") {
+					log.Printf("RegistryKey %s exists; waiting...", KeyTestCommand)
+					shouldContinue = true
+				} else {
+					log.Printf("No Registry keys found; exiting wait loop")
+				}
+			}
+			if shouldContinue {
+				continue
+			}
 		}
 		break
 	}

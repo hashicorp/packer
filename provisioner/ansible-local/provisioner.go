@@ -376,7 +376,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
-	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s\" ",
+	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s -o IdentitiesOnly=yes\" ",
 		p.config.PackerBuildName, p.config.PackerBuilderType, common.GetHTTPAddr())
 	if len(p.config.ExtraArguments) > 0 {
 		extraArgs = extraArgs + strings.Join(p.config.ExtraArguments, " ")

@@ -97,12 +97,23 @@ func (d *DockerDriver) Export(id string, dst io.Writer) error {
 	return nil
 }
 
-func (d *DockerDriver) Import(path string, repo string) (string, error) {
+func (d *DockerDriver) Import(path string, changes []string, repo string) (string, error) {
 	var stdout, stderr bytes.Buffer
-	cmd := exec.Command("docker", "import", "-", repo)
+
+	args := []string{"import"}
+
+	for _, change := range changes {
+		args = append(args, "--change", change)
+	}
+
+	args = append(args, "-")
+	args = append(args, repo)
+
+	cmd := exec.Command("docker", args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	stdin, err := cmd.StdinPipe()
+
 	if err != nil {
 		return "", err
 	}
@@ -113,6 +124,8 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 		return "", err
 	}
 	defer file.Close()
+
+	log.Printf("Importing tarball with args: %v", args)
 
 	if err := cmd.Start(); err != nil {
 		return "", err

@@ -290,24 +290,24 @@ In order to perform extra customization of the virtual machine, a template can
 define extra calls to `prlctl` to perform.
 [prlctl](http://download.parallels.com/desktop/v9/ga/docs/en_US/Parallels%20Command%20Line%20Reference%20Guide.pdf)
 is the command-line interface to Parallels Desktop. It can be used to configure
-the virtual machine, such as set RAM, CPUs, etc.
+the advanced virtual machine options. 
 
-Extra `prlctl` commands are defined in the template in the `prlctl` section. An
-example is shown below that sets the memory and number of CPUs within the
-virtual machine:
+Extra `prlctl` commands are defined in the template in the `prlctl` section. In the
+example below `prlctl` is used to explicitly enable the adaptive hypervisor, and
+disable 3d acceleration:
 
 ``` json
 {
   "prlctl": [
-    ["set", "{{.Name}}", "--memsize", "1024"],
-    ["set", "{{.Name}}", "--cpus", "2"]
+    ["set", "{{.Name}}", "--3d-accelerate", "off"],
+    ["set", "{{.Name}}", "--adaptive-hypervisor", "on"]
   ]
 }
 ```
 
 The value of `prlctl` is an array of commands to execute. These commands are
-executed in the order defined. So in the above example, the memory will be set
-followed by the CPUs.
+executed in the order defined. So in the above example, 3d acceleration will be disabled
+first, followed by the command which enables the adaptive hypervisor.
 
 Each command itself is an array of strings, where each string is an argument to
 `prlctl`. Each argument is treated as a [template engine](/docs/templates/engine.html). The only available
