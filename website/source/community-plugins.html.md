@@ -8,10 +8,14 @@ description: |-
 
 # Community Maintained Plugins
 
-The following plugins (i.e. Builders, Provisioners, and Post-Processors) are
+The following plugins (i.e. Pre-Processors, Builders, Provisioners, and Post-Processors) are
 maintained by HashiCorp. Any plugins not on this list are maintained by the
 community, and not actively contributed to by HashiCorp, although they are
 still distributed with Packer.
+
+## Pre-Processors
+
+- Local Shell
 
 ## Builders
 

@@ -83,6 +83,14 @@ func TestHelperProcess(*testing.T) {
 		}
 		server.RegisterPostProcessor(new(helperPostProcessor))
 		server.Serve()
+	case "pre-processor":
+		server, err := Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.RegisterPreProcessor(new(helperPreProcessor))
+		server.Serve()
 	case "provisioner":
 		server, err := Server()
 		if err != nil {

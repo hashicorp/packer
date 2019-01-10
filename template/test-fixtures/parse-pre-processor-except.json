@@ -1,0 +1,8 @@
+{
+    "pre-processors": [
+        {
+            "type": "foo",
+            "except": ["bar"]
+        }
+    ]
+}

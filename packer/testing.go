@@ -41,6 +41,22 @@ func TestUi(t *testing.T) Ui {
 	}
 }
 
+// TestPreProcessor sets the prov. with the name n to the component finder
+// and returns the mock.
+func TestPreProcessor(t *testing.T, c *CoreConfig, n string) *MockPreProcessor {
+	var b MockPreProcessor
+
+	c.Components.PreProcessor = func(actual string) (PreProcessor, error) {
+		if actual != n {
+			return nil, nil
+		}
+
+		return &b, nil
+	}
+
+	return &b
+}
+
 // TestBuilder sets the builder with the name n to the component finder
 // and returns the mock.
 func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {

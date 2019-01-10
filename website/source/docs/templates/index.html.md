@@ -51,6 +51,13 @@ Along with each key, it is noted whether it is required or not.
     [configuring post-processors in
     templates](/docs/templates/post-processors.html).
 
+-   `pre-processors` (optional) is an array of one or more objects that defines
+    the various pre-processing steps to take before building images. If not
+    specified, then no pre-processing will be done. For more information on
+    what pre-processors do and how they're defined, read the sub-section on
+    [configuring pre-processors in
+    templates](/docs/templates/pre-processors.html).
+
 -   `provisioners` (optional) is an array of one or more objects that defines
     the provisioners that will be used to install and configure software for
     the machines created by each of the builders. If it is not specified, then

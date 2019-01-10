@@ -56,11 +56,15 @@ later, it will take precedence over one found earlier.
 
 3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
 
-4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined (windows)
+4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+    (windows)
 
-4.  The current working directory.
+5.  The current working directory.
 
 The valid types for plugins are:
+
+-   `pre-processor` - A pre-processor responsible for setting up a environment
+    before a builder is run.
 
 -   `builder` - Plugins responsible for building images for a specific
     platform.

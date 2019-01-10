@@ -41,6 +41,9 @@ type HookFunc func(name string) (Hook, error)
 // The function type used to lookup PostProcessor implementations.
 type PostProcessorFunc func(name string) (PostProcessor, error)
 
+// The function type used to lookup PreProcessor implementations.
+type PreProcessorFunc func(name string) (PreProcessor, error)
+
 // The function type used to lookup Provisioner implementations.
 type ProvisionerFunc func(name string) (Provisioner, error)
 
@@ -51,6 +54,7 @@ type ComponentFinder struct {
 	Builder       BuilderFunc
 	Hook          HookFunc
 	PostProcessor PostProcessorFunc
+	PreProcessor  PreProcessorFunc
 	Provisioner   ProvisionerFunc
 }
 
@@ -121,6 +125,43 @@ func (c *Core) Build(n string) (Build, error) {
 
 	// rawName is the uninterpolated name that we use for various lookups
 	rawName := configBuilder.Name
+
+	// Setup the pre-processors
+	preProcessors := make([][]coreBuildPreProcessor, 0, len(c.Template.PreProcessors))
+	for _, rawPs := range c.Template.PreProcessors {
+		current := make([]coreBuildPreProcessor, 0, len(rawPs))
+		for _, rawP := range rawPs {
+			// If we skip, ignore
+			if rawP.Skip(rawName) {
+				continue
+			}
+
+			// Get the pre-processor
+			preProcessor, err := c.components.PreProcessor(rawP.Type)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"error initializing pre-processor '%s': %s",
+					rawP.Type, err)
+			}
+			if preProcessor == nil {
+				return nil, fmt.Errorf(
+					"pre-processor type not found: %s", rawP.Type)
+			}
+
+			current = append(current, coreBuildPreProcessor{
+				processor:     preProcessor,
+				processorType: rawP.Type,
+				config:        rawP.Config,
+			})
+		}
+
+		// If we have no pre-processors in this chain, just continue.
+		if len(current) == 0 {
+			continue
+		}
+
+		preProcessors = append(preProcessors, current)
+	}
 
 	// Setup the provisioners for this build
 	provisioners := make([]coreBuildProvisioner, 0, len(c.Template.Provisioners))
@@ -212,6 +253,7 @@ func (c *Core) Build(n string) (Build, error) {
 		builderConfig:  configBuilder.Config,
 		builderType:    configBuilder.Type,
 		postProcessors: postProcessors,
+		preProcessors:  preProcessors,
 		provisioners:   provisioners,
 		templatePath:   c.Template.Path,
 		variables:      c.variables,

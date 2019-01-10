@@ -161,6 +161,17 @@ func (c *Client) PostProcessor() (packer.PostProcessor, error) {
 	return &cmdPostProcessor{client.PostProcessor(), c}, nil
 }
 
+// Returns a pre-processor implementation that is communicating over
+// this client. If the client hasn't been started, this will start it.
+func (c *Client) PreProcessor() (packer.PreProcessor, error) {
+	client, err := c.packrpcClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &cmdPreProcessor{client.PreProcessor(), c}, nil
+}
+
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Provisioner() (packer.Provisioner, error) {

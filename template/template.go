@@ -23,6 +23,7 @@ type Template struct {
 	Builders           map[string]*Builder
 	Provisioners       []*Provisioner
 	PostProcessors     [][]*PostProcessor
+	PreProcessors      [][]*PreProcessor
 	Push               Push
 
 	// RawContents is just the raw data for this template
@@ -43,6 +44,14 @@ type PostProcessor struct {
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	Config            map[string]interface{}
+}
+
+// PreProcessor represents a post-processor within the template.
+type PreProcessor struct {
+	OnlyExcept `mapstructure:",squash"`
+
+	Type   string
+	Config map[string]interface{}
 }
 
 // Provisioner represents a provisioner within the template.

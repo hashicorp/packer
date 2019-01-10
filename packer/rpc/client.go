@@ -115,6 +115,13 @@ func (c *Client) PostProcessor() packer.PostProcessor {
 	}
 }
 
+func (c *Client) PreProcessor() packer.PreProcessor {
+	return &preProcessor{
+		client: c.client,
+		mux:    c.mux,
+	}
+}
+
 func (c *Client) Provisioner() packer.Provisioner {
 	return &provisioner{
 		client: c.client,

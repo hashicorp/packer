@@ -26,6 +26,7 @@ type rawTemplate struct {
 	Builders           []map[string]interface{}
 	Push               map[string]interface{}
 	PostProcessors     []interface{} `mapstructure:"post-processors"`
+	PreProcessors      []interface{} `mapstructure:"pre-processors"`
 	Provisioners       []map[string]interface{}
 	Variables          map[string]interface{}
 	SensitiveVariables []string `mapstructure:"sensitive-variables"`
@@ -159,6 +160,50 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.PostProcessors = append(result.PostProcessors, pps)
 	}
 
+	// Gather all the pre-processors
+	if len(r.PreProcessors) > 0 {
+		result.PreProcessors = make([][]*PreProcessor, 0, len(r.PreProcessors))
+	}
+	for i, v := range r.PreProcessors {
+		// Parse the configurations. We need to do this because pre-processors
+		// can take three different formats.
+		configs, err := r.parsePreProcessor(i, v)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+
+		// Parse the PreProcessors out of the configs
+		pps := make([]*PreProcessor, 0, len(configs))
+		for j, c := range configs {
+			var pp PreProcessor
+			if err := r.decoder(&pp, nil).Decode(c); err != nil {
+				errs = multierror.Append(errs, fmt.Errorf(
+					"pre-processor %d.%d: %s", i+1, j+1, err))
+				continue
+			}
+
+			// Type is required
+			if pp.Type == "" {
+				errs = multierror.Append(errs, fmt.Errorf(
+					"pre-processor %d.%d: type is required", i+1, j+1))
+				continue
+			}
+
+			// Set the configuration
+			delete(c, "except")
+			delete(c, "only")
+			delete(c, "type")
+			if len(c) > 0 {
+				pp.Config = c
+			}
+
+			pps = append(pps, &pp)
+		}
+
+		result.PreProcessors = append(result.PreProcessors, pps)
+	}
+
 	// Gather all the provisioners
 	if len(r.Provisioners) > 0 {
 		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
@@ -264,6 +309,45 @@ func (r *rawTemplate) parsePostProcessor(
 		return result, nil
 	default:
 		return nil, fmt.Errorf("post-processor %d: bad format", i+1)
+	}
+}
+
+func (r *rawTemplate) parsePreProcessor(
+	i int, raw interface{}) ([]map[string]interface{}, error) {
+	switch v := raw.(type) {
+	case string:
+		return []map[string]interface{}{
+			{"type": v},
+		}, nil
+	case map[string]interface{}:
+		return []map[string]interface{}{v}, nil
+	case []interface{}:
+		var err error
+		result := make([]map[string]interface{}, len(v))
+		for j, innerRaw := range v {
+			switch innerV := innerRaw.(type) {
+			case string:
+				result[j] = map[string]interface{}{"type": innerV}
+			case map[string]interface{}:
+				result[j] = innerV
+			case []interface{}:
+				err = multierror.Append(err, fmt.Errorf(
+					"pre-processor %d.%d: sequence not allowed to be nested in a sequence",
+					i+1, j+1))
+			default:
+				err = multierror.Append(err, fmt.Errorf(
+					"pre-processor %d.%d: unknown format",
+					i+1, j+1))
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	default:
+		return nil, fmt.Errorf("pre-processor %d: bad format", i+1)
 	}
 }
 

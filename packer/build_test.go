@@ -17,9 +17,14 @@ func testBuild() *coreBuild {
 		provisioners: []coreBuildProvisioner{
 			{"mock-provisioner", &MockProvisioner{}, []interface{}{42}},
 		},
+		preProcessors: [][]coreBuildPreProcessor{
+			{
+				{&MockPreProcessor{}, "testPre", make(map[string]interface{})},
+			},
+		},
 		postProcessors: [][]coreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
+				{&MockPostProcessor{ArtifactId: "post"}, "testPost", make(map[string]interface{}), true},
 			},
 		},
 		variables: make(map[string]string),
@@ -52,6 +57,16 @@ func TestBuild_Prepare(t *testing.T) {
 	builder := build.builder.(*MockBuilder)
 
 	build.Prepare()
+
+	corePre := build.preProcessors[0][0]
+	pre := corePre.processor.(*MockPreProcessor)
+	if !pre.ConfigureCalled {
+		t.Fatal("should be called")
+	}
+	if !reflect.DeepEqual(pre.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig}) {
+		t.Fatalf("bad: %#v", pre.ConfigureConfigs)
+	}
+
 	if !builder.PrepareCalled {
 		t.Fatal("should be called")
 	}
@@ -68,13 +83,13 @@ func TestBuild_Prepare(t *testing.T) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 
-	corePP := build.postProcessors[0][0]
-	pp := corePP.processor.(*MockPostProcessor)
-	if !pp.ConfigureCalled {
+	corePost := build.postProcessors[0][0]
+	post := corePost.processor.(*MockPostProcessor)
+	if !post.ConfigureCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig}) {
-		t.Fatalf("bad: %#v", pp.ConfigureConfigs)
+	if !reflect.DeepEqual(post.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig}) {
+		t.Fatalf("bad: %#v", post.ConfigureConfigs)
 	}
 }
 
@@ -185,6 +200,12 @@ func TestBuild_Run(t *testing.T) {
 		t.Fatalf("bad: %#v", artifacts)
 	}
 
+	// Verify pre-processor was run
+	pre := build.preProcessors[0][0].processor.(*MockPreProcessor)
+	if !pre.PreProcessCalled {
+		t.Fatal("should be called")
+	}
+
 	// Verify builder was run
 	builder := build.builder.(*MockBuilder)
 	if !builder.RunCalled {
@@ -211,8 +232,8 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify post-processor was run
-	pp := build.postProcessors[0][0].processor.(*MockPostProcessor)
-	if !pp.PostProcessCalled {
+	post := build.postProcessors[0][0].processor.(*MockPostProcessor)
+	if !post.PostProcessCalled {
 		t.Fatal("should be called")
 	}
 }

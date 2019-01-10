@@ -26,6 +26,11 @@ func main() {
 	}
 
 	// Collect all of the data we need about plugins we have in the project
+	preProcessors, err := discoverPreProcessors()
+	if err != nil {
+		log.Fatalf("Failed to discover pre processors: %s", err)
+	}
+
 	builders, err := discoverBuilders()
 	if err != nil {
 		log.Fatalf("Failed to discover builders: %s", err)
@@ -43,7 +48,8 @@ func main() {
 
 	// Do some simple code generation and templating
 	output := source
-	output = strings.Replace(output, "IMPORTS", makeImports(builders, provisioners, postProcessors), 1)
+	output = strings.Replace(output, "IMPORTS", makeImports(preProcessors, builders, provisioners, postProcessors), 1)
+	output = strings.Replace(output, "PREPROCESSORS", makeMap("PreProcessors", "PreProcessor", preProcessors), 1)
 	output = strings.Replace(output, "BUILDERS", makeMap("Builders", "Builder", builders), 1)
 	output = strings.Replace(output, "PROVISIONERS", makeMap("Provisioners", "Provisioner", provisioners), 1)
 	output = strings.Replace(output, "POSTPROCESSORS", makeMap("PostProcessors", "PostProcessor", postProcessors), 1)
@@ -92,8 +98,12 @@ func makeMap(varName, varType string, items []plugin) string {
 	return output
 }
 
-func makeImports(builders, provisioners, postProcessors []plugin) string {
+func makeImports(preProcessors, builders, provisioners, postProcessors []plugin) string {
 	plugins := []string{}
+
+	for _, preProcessor := range preProcessors {
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", preProcessor.ImportName, filepath.ToSlash(preProcessor.Path)))
+	}
 
 	for _, builder := range builders {
 		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", builder.ImportName, filepath.ToSlash(builder.Path)))
@@ -164,18 +174,18 @@ func deriveImport(typeName, derivedName string) string {
 // discoverTypesInPath searches for types of typeID in path and returns a list
 // of plugins it finds.
 func discoverTypesInPath(path, typeID string) ([]plugin, error) {
-	postProcessors := []plugin{}
+	plugins := []plugin{}
 
 	dirs, err := listDirectories(path)
 	if err != nil {
-		return postProcessors, err
+		return plugins, err
 	}
 
 	for _, dir := range dirs {
 		fset := token.NewFileSet()
 		goPackages, err := parser.ParseDir(fset, dir, nil, parser.AllErrors)
 		if err != nil {
-			return postProcessors, fmt.Errorf("Failed parsing directory %s: %s", dir, err)
+			return plugins, fmt.Errorf("Failed parsing directory %s: %s", dir, err)
 		}
 
 		for _, goPackage := range goPackages {
@@ -185,7 +195,7 @@ func discoverTypesInPath(path, typeID string) ([]plugin, error) {
 				case *ast.TypeSpec:
 					if x.Name.Name == typeID {
 						derivedName := deriveName(path, dir)
-						postProcessors = append(postProcessors, plugin{
+						plugins = append(plugins, plugin{
 							Package:    goPackage.Name,
 							PluginName: derivedName,
 							ImportName: deriveImport(x.Name.Name, derivedName),
@@ -205,7 +215,13 @@ func discoverTypesInPath(path, typeID string) ([]plugin, error) {
 		}
 	}
 
-	return postProcessors, nil
+	return plugins, nil
+}
+
+func discoverPreProcessors() ([]plugin, error) {
+	path := "./pre-processor"
+	typeID := "PreProcessor"
+	return discoverTypesInPath(path, typeID)
 }
 
 func discoverBuilders() ([]plugin, error) {
@@ -248,13 +264,15 @@ type PluginCommand struct {
 	Meta
 }
 
+PREPROCESSORS
+
 BUILDERS
 
 PROVISIONERS
 
 POSTPROCESSORS
 
-var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|pre-processor|provisioner)-(.+)")
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
@@ -272,7 +290,7 @@ func (c *PluginCommand) Run(args []string) int {
 		c.Ui.Error(fmt.Sprintf("Error parsing plugin argument [DEBUG]: %#v", parts))
 		return 1
 	}
-	pluginType := parts[1] // capture group 1 (builder|post-processor|provisioner)
+	pluginType := parts[1] // capture group 1 (builder|pre-processor|post-processor|provisioner)
 	pluginName := parts[2] // capture group 2 (.+)
 
 	server, err := plugin.Server()
@@ -282,6 +300,13 @@ func (c *PluginCommand) Run(args []string) int {
 	}
 
 	switch pluginType {
+	case "pre-processor":
+		preProcessor, found := PreProcessors[pluginName]
+		if !found {
+			c.Ui.Error(fmt.Sprintf("Could not load pre-processor: %s", pluginName))
+			return 1
+		}
+		server.RegisterPreProcessor(preProcessor)
 	case "builder":
 		builder, found := Builders[pluginName]
 		if !found {

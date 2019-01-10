@@ -1,0 +1,6 @@
+{
+    "pre-processors": [{
+        "type": "foo",
+        "foo": "bar"
+    }]
+}

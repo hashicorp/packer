@@ -45,6 +45,11 @@ for quick referencing.
     artifact. Examples of post-processors are compress to compress artifacts,
     upload to upload artifacts, etc.
 
+-   `Pre-processors` are components of Packer that are used to setup a
+    environment. Example usages of pre-processors are setting up infrastructure
+    or downloading a iso image and uploading it to a cloud provider for use in
+    a builder.
+
 -   `Provisioners` are components of Packer that install and configure software
     within a running machine prior to that machine being turned into a static
     image. They perform the major work of making the image contain useful

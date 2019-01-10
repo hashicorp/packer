@@ -112,12 +112,13 @@ AMI.
 }
 ```
 
-## Issues when using numerous Builders/Provisioners/Post-Processors
+## Issues when using numerous Pre-Processors/Builders/Provisioners/Post-Processors
 
-Packer uses a separate process for each builder, provisioner, post-processor,
-and plugin. In certain cases, if you have too many of these, you can run out of
-[file descriptors](https://en.wikipedia.org/wiki/File_descriptor). This results
-in an error that might look like
+Packer uses a separate process for each pre-processor, builder, provisioner,
+post-processor, and plugin. In certain cases, if you have too many of these,
+you can run out of [file
+descriptors](https://en.wikipedia.org/wiki/File_descriptor). This results in an
+error that might look like
 
 ``` text
 error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:

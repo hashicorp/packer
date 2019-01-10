@@ -1,0 +1,7 @@
+{
+    "builders": [{
+        "type": "test"
+    }],
+
+    "pre-processors": ["test"]
+}

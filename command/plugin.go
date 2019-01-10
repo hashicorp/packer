@@ -64,6 +64,7 @@ import (
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
+	shelllocalpreprocessor "github.com/hashicorp/packer/pre-processor/shell-local"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
@@ -83,6 +84,10 @@ import (
 
 type PluginCommand struct {
 	Meta
+}
+
+var PreProcessors = map[string]packer.PreProcessor{
+	"shell-local": new(shelllocalpreprocessor.PreProcessor),
 }
 
 var Builders = map[string]packer.Builder{
@@ -160,7 +165,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 }
 
-var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|pre-processor|provisioner)-(.+)")
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
@@ -178,7 +183,7 @@ func (c *PluginCommand) Run(args []string) int {
 		c.Ui.Error(fmt.Sprintf("Error parsing plugin argument [DEBUG]: %#v", parts))
 		return 1
 	}
-	pluginType := parts[1] // capture group 1 (builder|post-processor|provisioner)
+	pluginType := parts[1] // capture group 1 (builder|pre-processor|post-processor|provisioner)
 	pluginName := parts[2] // capture group 2 (.+)
 
 	server, err := plugin.Server()
@@ -188,6 +193,13 @@ func (c *PluginCommand) Run(args []string) int {
 	}
 
 	switch pluginType {
+	case "pre-processor":
+		preProcessor, found := PreProcessors[pluginName]
+		if !found {
+			c.Ui.Error(fmt.Sprintf("Could not load pre-processor: %s", pluginName))
+			return 1
+		}
+		server.RegisterPreProcessor(preProcessor)
 	case "builder":
 		builder, found := Builders[pluginName]
 		if !found {

@@ -29,6 +29,7 @@ type config struct {
 
 	Builders       map[string]string
 	PostProcessors map[string]string `json:"post-processors"`
+	PreProcessors  map[string]string `json:"pre-processors"`
 	Provisioners   map[string]string
 }
 
@@ -120,6 +121,19 @@ func (c *config) LoadPostProcessor(name string) (packer.PostProcessor, error) {
 	return c.pluginClient(bin).PostProcessor()
 }
 
+// This is a proper packer.PreProcessorFunc that can be used to load
+// packer.PreProcessor implementations from defined plugins.
+func (c *config) LoadPreProcessor(name string) (packer.PreProcessor, error) {
+	log.Printf("Loading pre-processor: %s", name)
+	bin, ok := c.PreProcessors[name]
+	if !ok {
+		log.Printf("Pre-processor not found: %s", name)
+		return nil, nil
+	}
+
+	return c.pluginClient(bin).PreProcessor()
+}
+
 // This is a proper packer.ProvisionerFunc that can be used to load
 // packer.Provisioner implementations from defined plugins.
 func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
@@ -151,6 +165,12 @@ func (c *config) discover(path string) error {
 
 	err = c.discoverSingle(
 		filepath.Join(path, "packer-post-processor-*"), &c.PostProcessors)
+	if err != nil {
+		return err
+	}
+
+	err = c.discoverSingle(
+		filepath.Join(path, "packer-pre-processor-*"), &c.PreProcessors)
 	if err != nil {
 		return err
 	}
@@ -203,6 +223,16 @@ func (c *config) discoverInternal() error {
 	if err != nil {
 		log.Printf("[ERR] Error loading exe directory: %s", err)
 		return err
+	}
+
+	for preProcessor := range command.PreProcessors {
+		_, found := (c.PreProcessors)[preProcessor]
+		if !found {
+			log.Printf("Using internal plugin for %s", preProcessor)
+			(c.PreProcessors)[preProcessor] = fmt.Sprintf(
+				"%s%splugin%spacker-pre-processor-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, preProcessor)
+		}
 	}
 
 	for builder := range command.Builders {

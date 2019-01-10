@@ -210,6 +210,7 @@ func wrappedMain() int {
 				Builder:       config.LoadBuilder,
 				Hook:          config.LoadHook,
 				PostProcessor: config.LoadPostProcessor,
+				PreProcessor:  config.LoadPreProcessor,
 				Provisioner:   config.LoadProvisioner,
 			},
 			Version: version.Version,

@@ -363,7 +363,7 @@ func TestCoreBuild_provOverride(t *testing.T) {
 
 func TestCoreBuild_postProcess(t *testing.T) {
 	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-pp.json"))
+	testCoreTemplate(t, config, fixtureDir("build-post.json"))
 	b := TestBuilder(t, config, "test")
 	p := TestPostProcessor(t, config, "test")
 	core := TestCore(t, config)
@@ -394,6 +394,29 @@ func TestCoreBuild_postProcess(t *testing.T) {
 	}
 	if p.PostProcessArtifact.Id() != b.ArtifactId {
 		t.Fatalf("bad: %s", p.PostProcessArtifact.Id())
+	}
+}
+
+func TestCoreBuild_preProcess(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-pre.json"))
+	TestBuilder(t, config, "test")
+	TestPreProcessor(t, config, "test")
+	core := TestCore(t, config)
+	ui := TestUi(t)
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, err = build.Run(ui, nil)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
 
@@ -579,11 +602,13 @@ func TestSensitiveVars(t *testing.T) {
 
 func testComponentFinder() *ComponentFinder {
 	builderFactory := func(n string) (Builder, error) { return new(MockBuilder), nil }
-	ppFactory := func(n string) (PostProcessor, error) { return new(MockPostProcessor), nil }
+	postFactory := func(n string) (PostProcessor, error) { return new(MockPostProcessor), nil }
+	preFactory := func(n string) (PreProcessor, error) { return new(MockPreProcessor), nil }
 	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
 	return &ComponentFinder{
 		Builder:       builderFactory,
-		PostProcessor: ppFactory,
+		PostProcessor: postFactory,
+		PreProcessor:  preFactory,
 		Provisioner:   provFactory,
 	}
 }

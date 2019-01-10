@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/packer/builder/amazon/chroot"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/post-processor/docker-push"
+	"github.com/hashicorp/packer/pre-processor/shell-local"
 	"github.com/hashicorp/packer/provisioner/powershell"
 )
 
@@ -31,6 +32,7 @@ func main() {
 	// provisioner, or post-processor.
 	server.RegisterBuilder(new(chroot.Builder))
 	server.RegisterPostProcessor(new(dockerpush.PostProcessor))
+	server.RegisterPreProcessor(new(shell_local.PreProcessor))
 	server.RegisterProvisioner(new(powershell.Provisioner))
 	server.Serve()
 }

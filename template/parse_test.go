@@ -145,8 +145,11 @@ func TestParse(t *testing.T) {
 			false,
 		},
 
+		/*
+		 * PostProcessor
+		 */
 		{
-			"parse-pp-basic.json",
+			"parse-post-processor-basic.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -163,7 +166,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-keep.json",
+			"parse-post-processor-keep.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -178,7 +181,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-only.json",
+			"parse-post-processor-only.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -195,7 +198,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-except.json",
+			"parse-post-processor-except.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -212,7 +215,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-string.json",
+			"parse-post-processor-string.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -226,7 +229,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-map.json",
+			"parse-post-processor-map.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -240,7 +243,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-slice.json",
+			"parse-post-processor-slice.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -259,7 +262,7 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-multi.json",
+			"parse-post-processor-multi.json",
 			&Template{
 				PostProcessors: [][]*PostProcessor{
 					{
@@ -276,7 +279,131 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-pp-no-type.json",
+			"parse-post-processor-no-type.json",
+			nil,
+			true,
+		},
+
+		/*
+		 * PreProcessor
+		 */
+		{
+			"parse-pre-processor-basic.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+							Config: map[string]interface{}{
+								"foo": "bar",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-only.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+							OnlyExcept: OnlyExcept{
+								Only: []string{"bar"},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-except.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+							OnlyExcept: OnlyExcept{
+								Except: []string{"bar"},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-string.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-map.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-slice.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+						},
+					},
+					{
+						{
+							Type: "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-multi.json",
+			&Template{
+				PreProcessors: [][]*PreProcessor{
+					{
+						{
+							Type: "foo",
+						},
+						{
+							Type: "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"parse-pre-processor-no-type.json",
 			nil,
 			true,
 		},

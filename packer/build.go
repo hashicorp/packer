@@ -92,6 +92,7 @@ type coreBuild struct {
 	builderType    string
 	hooks          map[string][]Hook
 	postProcessors [][]coreBuildPostProcessor
+	preProcessors  [][]coreBuildPreProcessor
 	provisioners   []coreBuildProvisioner
 	templatePath   string
 	variables      map[string]string
@@ -110,6 +111,14 @@ type coreBuildPostProcessor struct {
 	processorType     string
 	config            map[string]interface{}
 	keepInputArtifact bool
+}
+
+// Keeps track of the pre-processor and the configuration of the
+// pre-processor used within a build.
+type coreBuildPreProcessor struct {
+	processor     PreProcessor
+	processorType string
+	config        map[string]interface{}
 }
 
 // Keeps track of the provisioner and the configuration of the provisioner
@@ -148,6 +157,16 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 		UserVariablesConfigKey: b.variables,
 	}
 
+	// Prepare the pre-processors
+	for _, ppSeq := range b.preProcessors {
+		for _, corePP := range ppSeq {
+			err = corePP.processor.Configure(corePP.config, packerConfig)
+			if err != nil {
+				return
+			}
+		}
+	}
+
 	// Prepare the builder
 	warn, err = b.builder.Prepare(b.builderConfig, packerConfig)
 	if err != nil {
@@ -183,6 +202,32 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
+	}
+
+	// The builder just has a normal Ui, but targeted
+	builderUi := &TargetedUI{
+		Target: b.Name(),
+		Ui:     originalUi,
+	}
+
+	errors := make([]error, 0)
+
+	// Run the pre-processors
+	for _, ppSeq := range b.preProcessors {
+		for _, corePP := range ppSeq {
+			ppUi := &TargetedUI{
+				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
+				Ui:     originalUi,
+			}
+
+			builderUi.Say(fmt.Sprintf("Running pre-processor: %s", corePP.processorType))
+			ts := CheckpointReporter.AddSpan(corePP.processorType, "pre-processor", corePP.config)
+			err := corePP.processor.PreProcess(ppUi)
+			ts.End(err)
+			if err != nil {
+				errors = append(errors, fmt.Errorf("Pre-processor failed: %s", err))
+			}
+		}
 	}
 
 	// Copy the hooks
@@ -227,12 +272,6 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{Mapping: hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	// The builder just has a normal Ui, but targeted
-	builderUi := &TargetedUI{
-		Target: b.Name(),
-		Ui:     originalUi,
-	}
-
 	log.Printf("Running builder: %s", b.builderType)
 	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
 	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
@@ -247,7 +286,6 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 		return nil, nil
 	}
 
-	errors := make([]error, 0)
 	keepOriginalArtifact := len(b.postProcessors) == 0
 
 	// Run the post-processors
