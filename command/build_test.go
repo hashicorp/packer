@@ -102,7 +102,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-except=chocolate",
+		"-except=chocolate,apple",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
 
@@ -112,12 +112,12 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"chocolate.txt"} {
+	for _, f := range []string{"chocolate.txt", "apple.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
 	}
-	for _, f := range []string{"vanilla.txt", "cherry.txt", "apple.txt", "peach.txt"} {
+	for _, f := range []string{"vanilla.txt", "cherry.txt", "peach.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
