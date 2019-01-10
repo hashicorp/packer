@@ -76,6 +76,7 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	args := []string{
 		"-only=chocolate",
 		"-only=cherry",
+		"-only=apple",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
 
@@ -93,6 +94,9 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 	if !fileExists("cherry.txt") {
 		t.Error("Expected to find cherry.txt")
+	}
+	if !fileExists("apple.txt") {
+		t.Error("Expected to find apple.txt")
 	}
 }
 
