@@ -21,10 +21,12 @@
     ],
     "post-processors": [
         {
+            "name": "apple",
             "type": "shell-local",
             "inline": ["touch apple.txt"]
         },
         {
+            "name": "peach",
             "type": "shell-local",
             "inline": ["touch peach.txt"]
         }
