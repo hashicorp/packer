@@ -18,5 +18,15 @@
             "content":"cherry",
             "target":"cherry.txt"
         }
+    ],
+    "post-processors": [
+        {
+            "type": "shell-local",
+            "inline": ["touch apple.txt"]
+        },
+        {
+            "type": "shell-local",
+            "inline": ["touch peach.txt"]
+        }
     ]
 }
