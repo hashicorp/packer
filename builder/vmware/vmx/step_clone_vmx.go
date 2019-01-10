@@ -7,8 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -20,13 +22,52 @@ type StepCloneVMX struct {
 	Path      string
 	VMName    string
 	Linked    bool
-	tempDir   string
+
+	tempDir    string
+	extractDir string
 }
 
 func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	halt := func(err error) multistep.StepAction {
 		state.Put("error", err)
 		return multistep.ActionHalt
+	}
+
+	// if it's a vagrant box, extract the box and read the vmx inside.
+	if strings.HasSuffix(s.Path, ".box") {
+		// Use Dir of the vm_path to extract box to
+		vmDir := filepath.Dir(s.Path)
+		s.extractDir = filepath.Join(vmDir, s.VMName)
+		err := os.Mkdir(s.extractDir, 0777)
+		if err != nil {
+			return halt(fmt.Errorf("Trouble extracting vagrant box for use: %s", err.Error()))
+		}
+
+		err = commonhelper.UntarBox(s.extractDir, s.Path)
+		if err != nil {
+			return halt(err)
+		}
+
+		log.Printf("extractdir is %s", s.extractDir)
+		globber := fmt.Sprintf(s.extractDir + "/*.vmx")
+		log.Printf("globber is %s", globber)
+		vmPaths, err := filepath.Glob(globber)
+
+		log.Printf("vmpaths is %#v", vmPaths)
+
+		if err != nil {
+			return halt(err)
+		}
+
+		if len(vmPaths) != 1 {
+			return halt(fmt.Errorf("Could not find a .vmx inside of the given " +
+				"vagrant box; please make sure that this box has VMWare " +
+				"as its provider"))
+		}
+
+		s.Path = vmPaths[0]
+
+		log.Printf("s.Path is %s", s.Path)
 	}
 
 	driver := state.Get("driver").(vmwcommon.Driver)
@@ -126,4 +167,8 @@ func (s *StepCloneVMX) Cleanup(state multistep.StateBag) {
 	if s.tempDir != "" {
 		os.RemoveAll(s.tempDir)
 	}
+
+	// if s.extractDir != "" {
+	// 	os.RemoveAll(s.extractDir)
+	// }
 }

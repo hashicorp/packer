@@ -41,7 +41,13 @@ func (s *StepImport) Run(_ context.Context, state multistep.StateBag) multistep.
 			return multistep.ActionHalt
 		}
 
-		commonhelper.UntarBox(s.extractDir, vmPath)
+		err = commonhelper.UntarBox(s.extractDir, vmPath)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
 		vmPath = filepath.Join(s.extractDir, "box.ovf")
 
 		log.Printf("vmPath is %s", vmPath)
