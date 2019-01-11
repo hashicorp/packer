@@ -61,11 +61,7 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 	if ok && isVagrantBox.(bool) {
 		if len(s.CustomData) == 0 {
 			// The following code mimics the network setup that vagrant does.
-
-			// Find present ethernet adapters.   ^ethernet\d+\.present$
-			adapterRegex := regexp.MustCompile(`^ethernet\d+\.present$`)
-
-			adapters := "ethernet0"
+			adapter := "ethernet0"
 
 			// Now add necesasry configuration to those adapters; this
 			// mimics code in vagrant which sets up network:
