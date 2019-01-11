@@ -65,37 +65,26 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 			// Find present ethernet adapters.   ^ethernet\d+\.present$
 			adapterRegex := regexp.MustCompile(`^ethernet\d+\.present$`)
 
-			var adapters []string
-			for k := range vmxData {
-				mymatch := adapterRegex.FindAllString(k, 1)
-				if len(mymatch) == 1 {
-					adapters = append(adapters, strings.Split(mymatch[0], ".")[0])
-				}
-			}
-			// if len(adapters) == 0 {
-			// 	log.Printf("No adapters found; using eth0")
-			// 	adapters = []string{"ethernet0"}
-			// }
-			log.Printf("adapters is %#v", adapters)
-			for _, adapter := range adapters {
-				// Now add necesasry configuration to those adapters; this
-				// mimics code in vagrant which sets up network:
+			adapters := "ethernet0"
 
-				// https://github.com/hashicorp/vagrant-vmware-desktop/blob/60d3f74b283e9ffbd8eea719f4cc2644899c031d/lib/vagrant-vmware-desktop/driver/base.rb#L668-L687
-				vmxData[fmt.Sprintf("%s.present", adapter)] = "true"
-				connectionType := state.Get("vmnetwork").(string)
-				vmxData[fmt.Sprintf("%s.connectionType", adapter)] = connectionType
-				vmxData[fmt.Sprintf("%s.virtualdev", adapter)] = "e1000"
+			// Now add necesasry configuration to those adapters; this
+			// mimics code in vagrant which sets up network:
 
-				// assume that we're using a generated addres. For now, if
-				// users want to have a static IP, they can set their "vmx_data"
-				// themselves and we'll skip this logic.
-				if _, ok := vmxData[fmt.Sprintf("%s.address", adapter)]; ok {
-					vmxData[fmt.Sprintf("%s.addresstype", adapter)] = "static"
-				} else {
-					vmxData[fmt.Sprintf("%s.addresstype", adapter)] = "generated"
-				}
+			// https://github.com/hashicorp/vagrant-vmware-desktop/blob/60d3f74b283e9ffbd8eea719f4cc2644899c031d/lib/vagrant-vmware-desktop/driver/base.rb#L668-L687
+			vmxData[fmt.Sprintf("%s.present", adapter)] = "true"
+			connectionType := state.Get("vmnetwork").(string)
+			vmxData[fmt.Sprintf("%s.connectionType", adapter)] = connectionType
+			vmxData[fmt.Sprintf("%s.virtualdev", adapter)] = "e1000"
+
+			// assume that we're using a generated addres. For now, if
+			// users want to have a static IP, they can set their "vmx_data"
+			// themselves and we'll skip this logic.
+			if _, ok := vmxData[fmt.Sprintf("%s.address", adapter)]; ok {
+				vmxData[fmt.Sprintf("%s.addresstype", adapter)] = "static"
+			} else {
+				vmxData[fmt.Sprintf("%s.addresstype", adapter)] = "generated"
 			}
+
 		}
 	}
 	// Set custom data
