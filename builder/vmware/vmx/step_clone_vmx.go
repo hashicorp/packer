@@ -33,8 +33,16 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
+	isVagrantBox := false
+
 	// if it's a vagrant box, extract the box and read the vmx inside.
 	if strings.HasSuffix(s.Path, ".box") {
+		// we need to track this information so that we can update the vmx
+		// in StepConfigureVmx, so that the box launches the way it would if we
+		// were using Vagrant:
+		// https://github.com/hashicorp/vagrant-vmware-desktop/blob/60d3f74b283e9ffbd8eea719f4cc2644899c031d/lib/vagrant-vmware-desktop/driver/base.rb#L668-L687
+		isVagrantBox = true
+
 		// Use Dir of the vm_path to extract box to
 		vmDir := filepath.Dir(s.Path)
 		s.extractDir = filepath.Join(vmDir, s.VMName)
@@ -48,12 +56,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 			return halt(err)
 		}
 
-		log.Printf("extractdir is %s", s.extractDir)
-		globber := fmt.Sprintf(s.extractDir + "/*.vmx")
-		log.Printf("globber is %s", globber)
-		vmPaths, err := filepath.Glob(globber)
-
-		log.Printf("vmpaths is %#v", vmPaths)
+		vmPaths, err := filepath.Glob(fmt.Sprintf(s.extractDir + "/*.vmx"))
 
 		if err != nil {
 			return halt(err)
@@ -67,7 +70,6 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 
 		s.Path = vmPaths[0]
 
-		log.Printf("s.Path is %s", s.Path)
 	}
 
 	driver := state.Get("driver").(vmwcommon.Driver)
@@ -159,6 +161,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	state.Put("vmx_path", vmxPath)
 	state.Put("disk_full_paths", diskFullPaths)
 	state.Put("vmnetwork", networkType)
+	state.Put("is_vagrant_box", isVagrantBox)
 
 	return multistep.ActionContinue
 }
