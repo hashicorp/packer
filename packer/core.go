@@ -182,12 +182,11 @@ func (c *Core) Build(n string) (Build, error) {
 		for _, rawP := range rawPs {
 			// If we skip, ignore
 			rawP.OnlyExcept.Except = append(rawP.OnlyExcept.Except, c.except...)
-			rawP.OnlyExcept.Only = append(rawP.OnlyExcept.Only, c.only...)
 			if rawP.OnlyExcept.Skip(rawName) {
 				continue
 			}
 			if rawP.OnlyExcept.Skip(rawP.Name) {
-				continue
+				break
 			}
 
 			// Get the post-processor
