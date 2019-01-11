@@ -218,9 +218,9 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get
-the current time. If you're on Linux, you can try setting the time with ntp by
-running `sudo ntpd -q`.
+<a href="http://www.time.gov/" class="uri">http://www.time.gov/</a>. On
+Linux/OS X, you can run the `date` command to get the current time. If you're
+on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
 
 ### `exceeded wait attempts` while waiting for tasks to complete
 
