@@ -44,7 +44,7 @@ builder.
     while waiting for the build to complete. Default value "600".
 
 -   `url` (string) - Endpoint for the 1&1 REST API. Default URL
-    "<https://cloudpanel-api.1and1.com/v1>"
+    "<a href="https://cloudpanel-api.1and1.com/v1" class="uri">https://cloudpanel-api.1and1.com/v1</a>"
 
 ## Example
 

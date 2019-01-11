@@ -60,16 +60,16 @@ Optional:
 
 -   `insecure` (boolean) - If it's true skip verification of server
     certificate. Default is false
-    
--   `snapshot_enable` (boolean) - Create a snapshot before marking as a 
+
+-   `snapshot_enable` (boolean) - Create a snapshot before marking as a
     template. Default is false
-    
--   `snapshot_name` (string) - Name for the snapshot. 
-    Required when `snapshot_enable` is `true`
-    
--   `snapshot_description` (string) - Description for the snapshot. 
-    Required when `snapshot_enable` is `true`
-    
+
+-   `snapshot_name` (string) - Name for the snapshot. Required when
+    `snapshot_enable` is `true`
+
+-   `snapshot_description` (string) - Description for the snapshot. Required
+    when `snapshot_enable` is `true`
+
 ## Using the vSphere Template with local builders
 
 Once the [vSphere](/docs/post-processors/vsphere.html) takes an artifact from

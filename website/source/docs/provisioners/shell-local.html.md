@@ -74,10 +74,10 @@ Optional parameters:
     this as an environment variable. For example:
     `"environment_vars": "WINRMPASS={{.WinRMPassword}}"`
 
--   `env_var_format` (string) - When we parse the environment_vars that you
+-   `env_var_format` (string) - When we parse the environment\_vars that you
     provide, this gives us a string template to use in order to make sure that
     we are setting the environment vars correctly. By default on Windows hosts
-    this format is `set %s=%s && ` and on Unix, it is `%s='%s' `.  You probably
+    this format is `set %s=%s &&` and on Unix, it is `%s='%s'`. You probably
     won't need to change this format, but you can see usage examples for where
     it is necessary below.
 
@@ -230,6 +230,7 @@ For a shell script, that means the script **must** exit with a zero code. You
 ## Usage Examples:
 
 ### Windows Host
+
 Example of running a .cmd file on windows:
 
           {
@@ -271,7 +272,6 @@ Contents of "example\_bash.sh":
 Example of running a powershell script on windows: Required customizations:
 env\_var\_format and execute\_command
 
-
           {
               "type": "shell-local",
               "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
@@ -293,6 +293,7 @@ customizations: env\_var\_format, tempfile\_extension, and execute\_command
           }
 
 ### Unix Host
+
 Example of running a bash script on unix:
 
           {
@@ -312,19 +313,15 @@ Example of running a bash "inline" on unix:
 
 Example of running a python script on unix:
 
-```
-      {
-          "type": "shell-local",
-          "script": "hello.py",
-          "environment_vars": ["HELLO_USER=packeruser"],
-          "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
-      }
-```
+          {
+              "type": "shell-local",
+              "script": "hello.py",
+              "environment_vars": ["HELLO_USER=packeruser"],
+              "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
+          }
 
 Where "hello.py" contains:
 
-```
-import os
+    import os
 
-print('Hello, %s!' % os.getenv("HELLO_USER"))
-```
+    print('Hello, %s!' % os.getenv("HELLO_USER"))
