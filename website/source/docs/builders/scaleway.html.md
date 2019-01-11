@@ -48,8 +48,8 @@ builder.
 
 -   `image` (string) - The UUID of the base image to use. This is the image
     that will be used to launch a new server and provision it. See
-    <https://api-marketplace.scaleway.com/images> get the complete list of the
-    accepted image UUID.
+    <a href="https://api-marketplace.scaleway.com/images" class="uri">https://api-marketplace.scaleway.com/images</a>
+    get the complete list of the accepted image UUID.
 
 -   `region` (string) - The name of the region to launch the server in (`par1`
     or `ams1`). Consequently, this is the region where the snapshot will be

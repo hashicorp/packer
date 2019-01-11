@@ -24,7 +24,7 @@ builder is able to build an EBS-backed AMI without launching a new EC2
 instance. This can dramatically speed up AMI builds for organizations who need
 the extra fast build.
 
-~&gt; **This is an advanced builder** If you're just getting started with
+\~&gt; **This is an advanced builder** If you're just getting started with
 Packer, we recommend starting with the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 
@@ -154,8 +154,8 @@ each category, the available configuration keys are alphabetized.
     associated with AMIs, which have been deregistered by `force_deregister`.
     Default `false`.
 
--   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
-    the AWS EC2 endpoint. The default is `false`.
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+    verification of the AWS EC2 endpoint. The default is `false`.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot
     volume encryption. This only applies to the main `region`, other regions
@@ -457,8 +457,8 @@ services:
 
 ### Ansible provisioner
 
-Running ansible against `amazon-chroot` requires changing the Ansible connection
-to chroot and running Ansible as root/sudo.
+Running ansible against `amazon-chroot` requires changing the Ansible
+connection to chroot and running Ansible as root/sudo.
 
 ### Using Instances with NVMe block devices.
 

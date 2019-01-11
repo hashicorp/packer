@@ -19,7 +19,7 @@ as a tar.gz of the root file system.
 The LXC builder requires a modern linux kernel and the `lxc` or `lxc1` package.
 This builder does not work with LXD.
 
-~&gt; Note: to build Centos images on a Debian family host, you will need the
+\~&gt; Note: to build Centos images on a Debian family host, you will need the
 `yum` package installed. <br>Some provisioners such as `ansible-local` get
 confused when running in a container of a different family. E.G. it will
 attempt to use `apt-get` to install packages, when running in a Centos
