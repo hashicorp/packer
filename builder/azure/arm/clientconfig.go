@@ -2,10 +2,13 @@ package arm
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -21,7 +24,11 @@ type ClientConfig struct {
 	// Client ID
 	ClientID string `mapstructure:"client_id"`
 	// Client secret/password
-	ClientSecret   string `mapstructure:"client_secret"`
+	ClientSecret string `mapstructure:"client_secret"`
+	// Certificate path for client auth
+	ClientCertPath string `mapstructure:"client_cert_path"`
+	// JWT bearer token for client auth (RFC 7523, Sec. 2.2)
+	ClientJWT      string `mapstructure:"client_jwt"`
 	ObjectID       string `mapstructure:"object_id"`
 	TenantID       string `mapstructure:"tenant_id"`
 	SubscriptionID string `mapstructure:"subscription_id"`
@@ -86,29 +93,69 @@ func (c ClientConfig) assertRequiredParametersSet(errs *packer.MultiError) {
 		return
 	}
 
-	if c.SubscriptionID == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
-	}
-
 	if c.useDeviceLogin() {
 		return
 	}
 
-	if c.SubscriptionID != "" && c.ClientID != "" && c.ClientSecret != "" {
+	if c.SubscriptionID != "" && c.ClientID != "" &&
+		c.ClientSecret != "" &&
+		c.ClientCertPath == "" &&
+		c.ClientJWT == "" {
 		// Service principal using secret
 		return
 	}
 
+	if c.SubscriptionID != "" && c.ClientID != "" &&
+		c.ClientSecret == "" &&
+		c.ClientCertPath != "" &&
+		c.ClientJWT == "" {
+		// Service principal using certificate
+
+		if _, err := os.Stat(c.ClientCertPath); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_cert_path is not an accessible file: %v", err))
+		}
+		return
+	}
+
+	if c.SubscriptionID != "" && c.ClientID != "" &&
+		c.ClientSecret == "" &&
+		c.ClientCertPath == "" &&
+		c.ClientJWT != "" {
+		// Service principal using JWT
+		// Check that JWT is valid for at least 5 more minutes
+
+		p := jwt.Parser{}
+		claims := jwt.StandardClaims{}
+		token, _, err := p.ParseUnverified(c.ClientJWT, &claims)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is not a JWT: %v", err))
+		} else {
+			if claims.ExpiresAt < time.Now().Add(5*time.Minute).Unix() {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt will expire within 5 minutes, please use a JWT that is valid for at least 5 minutes"))
+			}
+			if t, ok := token.Header["x5t"]; !ok || t == "" {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is missing the x5t header value, which is required for bearer JWT client authentication to Azure"))
+			}
+		}
+
+		return
+	}
+
 	errs = packer.MultiErrorAppend(errs, fmt.Errorf("No valid set of authentication values specified:\n"+
-		"* to use the Managed Identity of teh current machine, do not specify any of the fields below\n"+
-		"* to use interactive user authentication, specify only subscription_id\n"+
-		"* to use an Azure Active Directory service principal, specify subscription_id, client_id and client_secret."))
+		"  to use the Managed Identity of the current machine, do not specify any of the fields below\n"+
+		"  to use interactive user authentication, specify only subscription_id\n"+
+		"  to use an Azure Active Directory service principal, specify either:\n"+
+		"  - subscription_id, client_id and client_secret\n"+
+		"  - subscription_id, client_id and client_cert_path\n"+
+		"  - subscription_id, client_id and client_jwt."))
 }
 
 func (c ClientConfig) useDeviceLogin() bool {
 	return c.SubscriptionID != "" &&
 		c.ClientID == "" &&
 		c.ClientSecret == "" &&
+		c.ClientJWT == "" &&
+		c.ClientCertPath == "" &&
 		c.TenantID == ""
 }
 
@@ -116,6 +163,8 @@ func (c ClientConfig) useMSI() bool {
 	return c.SubscriptionID == "" &&
 		c.ClientID == "" &&
 		c.ClientSecret == "" &&
+		c.ClientJWT == "" &&
+		c.ClientCertPath == "" &&
 		c.TenantID == ""
 }
 
@@ -135,9 +184,18 @@ func (c ClientConfig) getServicePrincipalTokens(
 	} else if c.useMSI() {
 		say("Getting tokens using Managed Identity for Azure")
 		auth = NewMSIOAuthTokenProvider(*c.cloudEnvironment)
-	} else {
+	} else if c.ClientSecret != "" {
 		say("Getting tokens using client secret")
 		auth = NewSecretOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientSecret, tenantID)
+	} else if c.ClientCertPath != "" {
+		say("Getting tokens using client certificate")
+		auth, err = NewCertOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientCertPath, tenantID)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		say("Getting tokens using client bearer JWT")
+		auth = NewJWTOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientJWT, tenantID)
 	}
 
 	servicePrincipalToken, err = auth.getServicePrincipalToken()
