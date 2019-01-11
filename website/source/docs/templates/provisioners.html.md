@@ -77,10 +77,10 @@ effectively the same:
 }
 ```
 
-The values within `only` or `except` are *build names*, not builder types. If
-you recall, build names by default are just their builder type, but if you
-specify a custom `name` parameter, then you should use that as the value
-instead of the type.
+The values within `only` or `except` can be *build or post-processor names*,
+not builder types. If you recall, build and post-processor names by default are
+just their builder type, but if you specify a custom `name` parameter, then you
+should use that as the value instead of the type.
 
 ## Build-Specific Overrides
 
