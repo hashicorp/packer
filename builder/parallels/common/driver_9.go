@@ -154,6 +154,7 @@ func (d *Parallels9Driver) DeviceAddCDROM(name string, image string) (string, er
 		"set", name,
 		"--device-add", "cdrom",
 		"--image", image,
+		"--enable", "--connect",
 	}
 
 	out, err := exec.Command(d.PrlctlPath, command...).Output()
