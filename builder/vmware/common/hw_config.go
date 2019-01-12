@@ -14,6 +14,7 @@ type HWConfig struct {
 	// cpu information
 	CpuCount   int `mapstructure:"cpus"`
 	MemorySize int `mapstructure:"memory"`
+	CoreCount  int `mapstructure:"cores"`
 
 	// network type and adapter
 	Network            string `mapstructure:"network"`
@@ -38,6 +39,11 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.MemorySize < 0 {
 		errs = append(errs, fmt.Errorf("An invalid amount of memory was specified (memory < 0): %d", c.MemorySize))
+	}
+
+	// Hardware and cpu options
+	if c.CoreCount < 0 {
+		errs = append(errs, fmt.Errorf("An invalid number of cores was specified (cores < 0): %d", c.CoreCount))
 	}
 
 	// Peripherals
