@@ -8,6 +8,7 @@ import (
 func testHWConfig() *HWConfig {
 	return &HWConfig{
 		CpuCount:   1,
+		CoreCount:  1,
 		MemorySize: 512,
 
 		Sound: true,
@@ -24,6 +25,10 @@ func TestHWConfigPrepare(t *testing.T) {
 
 	if c.CpuCount < 0 {
 		t.Errorf("bad cpu count: %d", c.CpuCount)
+	}
+
+	if c.CoreCount < 0 {
+		t.Errorf("bad core count: %d", c.CoreCount)
 	}
 
 	if c.MemorySize < 0 {
