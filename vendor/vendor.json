@@ -811,10 +811,10 @@
 			"revisionTime": "2017-11-29T19:10:14Z"
 		},
 		{
-			"checksumSHA1": "qduT9GZUhXc00XoHEwLx16Xn9gM=",
+			"checksumSHA1": "90HfuOdlP9yK6xUnJCAnCrL73DQ=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
-			"revisionTime": "2018-05-31T02:06:30Z"
+			"revision": "ea7289ebdf06687b792c087e2516317579d3003b",
+			"revisionTime": "2018-09-03T13:40:57Z"
 		},
 		{
 			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",
@@ -1488,16 +1488,16 @@
 			"revisionTime": "2016-03-31T20:48:55Z"
 		},
 		{
-			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
-			"path": "github.com/ryanuber/go-glob",
-			"revision": "256dc444b735e061061cf46c809487313d5b0065",
-			"revisionTime": "2017-01-28T01:21:29Z"
-		},
-		{
 			"checksumSHA1": "4gVuzkHbQoznf+lCSJhIJnvS5tc=",
 			"path": "github.com/rwtodd/Go.Sed/sed",
 			"revision": "d6d5d585814e4c3560c684f52e3d8aeed721313d",
 			"revisionTime": "2017-05-07T04:53:31Z"
+		},
+		{
+			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
+			"path": "github.com/ryanuber/go-glob",
+			"revision": "256dc444b735e061061cf46c809487313d5b0065",
+			"revisionTime": "2017-01-28T01:21:29Z"
 		},
 		{
 			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
