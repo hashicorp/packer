@@ -28,7 +28,7 @@ func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui) *StepPowerOffComp
 }
 
 func (s *StepPowerOffCompute) powerOffCompute(ctx context.Context, resourceGroupName string, computeName string) error {
-	f, err := s.client.VirtualMachinesClient.PowerOff(ctx, resourceGroupName, computeName)
+	f, err := s.client.VirtualMachinesClient.Deallocate(ctx, resourceGroupName, computeName)
 	if err == nil {
 		err = f.WaitForCompletion(ctx, s.client.VirtualMachinesClient.Client)
 	}
