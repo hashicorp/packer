@@ -55,10 +55,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	config = config.WithMaxRetries(8)
 
 	region, _ := c.region()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Could not get region, "+
-	// 		"probably because it's not set or we're not running on AWS. %s", err)
-	// }
 	config = config.WithRegion(region)
 
 	if c.CustomEndpointEc2 != "" {
