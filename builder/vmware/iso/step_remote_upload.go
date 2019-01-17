@@ -22,65 +22,15 @@ func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
+	// Check if the driver is a remote driver (it should never be)
 	remote, ok := driver.(vmwcommon.RemoteDriver)
 	if !ok {
 		return multistep.ActionContinue
 	}
 
-	path, ok := state.Get(s.Key).(string)
-	if !ok {
-		return multistep.ActionContinue
-	}
-
-	config := state.Get("config").(*Config)
-	checksum := config.ISOChecksum
-	checksumType := config.ISOChecksumType
-
-	if esx5, ok := remote.(*vmwcommon.ESX5Driver); ok {
-		remotePath := esx5.CachePath(path)
-
-		if esx5.VerifyChecksum(checksumType, checksum, remotePath) {
-			ui.Say("Remote cache was verified skipping remote upload...")
-			state.Put(s.Key, remotePath)
-			return multistep.ActionContinue
-		}
-
-	}
-
-	ui.Say(s.Message)
-	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path, checksum, checksumType)
-	if err != nil {
-		err := fmt.Errorf("Error uploading file: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	state.Put(s.Key, newPath)
-
-	return multistep.ActionContinue
+	// Inform the user that this component has been de-fanged
+	ui.Say("The regular vmware builders do not have the ability to be uploaded. Please use the vmware-esx builders.")
+	return multistep.ActionHalt
 }
 
-func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
-	if !s.DoCleanup {
-		return
-	}
-
-	driver := state.Get("driver").(vmwcommon.Driver)
-
-	remote, ok := driver.(vmwcommon.RemoteDriver)
-	if !ok {
-		return
-	}
-
-	path, ok := state.Get(s.Key).(string)
-	if !ok {
-		return
-	}
-
-	log.Printf("Cleaning up remote path: %s", path)
-	err := remote.RemoveCache(path)
-	if err != nil {
-		log.Printf("Error cleaning up: %s", err)
-	}
-}
+func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {}
