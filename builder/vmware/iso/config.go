@@ -102,28 +102,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DiskAdapterType = "lsilogic"
 	}
 
-	if !c.SkipCompaction {
-		if c.RemoteType == "esx5" {
-			if c.DiskTypeId == "" {
-				c.SkipCompaction = true
-			}
-		}
-	}
-
 	if c.DiskTypeId == "" {
 		// Default is growable virtual disk split in 2GB files.
 		c.DiskTypeId = "1"
-
-		if c.RemoteType == "esx5" {
-			c.DiskTypeId = "zeroedthick"
-		}
-	}
-
-	if c.RemoteType == "esx5" {
-		if c.DiskTypeId != "thin" && !c.SkipCompaction {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("skip_compaction must be 'true' for disk_type_id: %s", c.DiskTypeId))
-		}
 	}
 
 	if c.GuestOSType == "" {
@@ -154,25 +135,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.HWConfig.Network = "nat"
 	}
 
-	// Remote configuration validation
-	if c.RemoteType != "" {
-		if c.RemoteHost == "" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
-		}
-
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
-		}
-	}
-
-	if c.Format != "" {
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format is only valid when RemoteType=esx5"))
-		}
-	} else {
+	// Validate the export os one of the valid types
+	if c.Format == "" {
 		c.Format = "ovf"
 	}
 
@@ -181,6 +145,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			fmt.Errorf("format must be one of ova, ovf, or vmx"))
 	}
 
+	// Validate the rest of the driver
 	err = c.DriverConfig.Validate(c.SkipExport)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
