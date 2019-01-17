@@ -14,7 +14,7 @@ type HWConfig struct {
 	// cpu information
 	CpuCount   int `mapstructure:"cpus"`
 	MemorySize int `mapstructure:"memory"`
-	CoreCount  int `mapstructure:"cores_per_socket"`
+	CoreCount  int `mapstructure:"cores"`
 
 	// network type and adapter
 	Network            string `mapstructure:"network"`
