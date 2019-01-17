@@ -11,7 +11,6 @@ import (
 const (
 	// BuilderId for the local artifacts
 	BuilderId    = "mitchellh.vmware"
-	BuilderIdESX = "mitchellh.vmware-esx"
 
 	ArtifactConfFormat         = "artifact.conf.format"
 	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
@@ -72,9 +71,6 @@ func NewArtifact(remoteType string, format string, exportOutputPath string, vmNa
 
 	// Set the proper builder ID
 	builderId := BuilderId
-	if remoteType != "" {
-		builderId = BuilderIdESX
-	}
 
 	config := make(map[string]string)
 	config[ArtifactConfKeepRegistered] = strconv.FormatBool(keepRegistered)
