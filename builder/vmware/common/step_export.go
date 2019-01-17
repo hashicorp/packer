@@ -66,44 +66,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
-	if c.RemoteType != "esx5" {
-		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi)...")
-		return multistep.ActionContinue
-	}
-
-	ovftool := GetOVFTool()
-	if ovftool == "" {
-		err := fmt.Errorf("Error %s not found: ", ovftool)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// Export the VM
-	if s.OutputDir == "" {
-		s.OutputDir = s.VMName + "." + s.Format
-	}
-
-	os.MkdirAll(s.OutputDir, 0755)
-
-	ui.Say("Exporting virtual machine...")
-	var displayName string
-	if v, ok := state.GetOk("display_name"); ok {
-		displayName = v.(string)
-	}
-	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(s.generateArgs(c, displayName, true), " ")))
-	var out bytes.Buffer
-	cmd := exec.Command(ovftool, s.generateArgs(c, displayName, false)...)
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		err := fmt.Errorf("Error exporting virtual machine: %s\n%s\n", err, out.String())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	ui.Message(fmt.Sprintf("%s", out.String()))
-
+	ui.Say("Skipping export of virtual machine (export is allowed only for ESXi)...")
 	return multistep.ActionContinue
 }
 
