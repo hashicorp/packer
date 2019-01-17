@@ -57,7 +57,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			"packer-%s-%d", c.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
-	// Prepare the errors
+	// Prepare any and all errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
@@ -71,25 +71,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 
-	if c.RemoteType == "" {
-		if c.SourcePath == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
-		} else {
-			if _, err := os.Stat(c.SourcePath); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("source_path is invalid: %s", err))
-			}
-		}
+	// Validate the source path
+	if c.SourcePath == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
 	} else {
-		// Remote configuration validation
-		if c.RemoteHost == "" {
+		if _, err := os.Stat(c.SourcePath); err != nil {
 			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
-		}
-
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+				fmt.Errorf("source_path is invalid: %s", err))
 		}
 	}
 
@@ -98,12 +86,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if c.Format != "" {
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format is only valid when remote_type=esx5"))
-		}
-	} else {
+	// Validate the formats are of a type that we support
+	if c.Format == "" {
 		c.Format = "ovf"
 	}
 
