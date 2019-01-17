@@ -87,6 +87,7 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	ui.Say("Building and writing VMX file")
 
+	// Read the VMX template and convert it to a string so we can bulild it
 	vmxTemplate := DefaultVMXTemplate
 	if config.VMXTemplatePath != "" {
 		f, err := os.Open(config.VMXTemplatePath)
@@ -111,6 +112,8 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	ictx := config.ctx
 
+	// Check to see if an additional disk was requested so we can append
+	// the template to the actual vmx
 	if len(config.AdditionalDiskSize) > 0 {
 		for i := range config.AdditionalDiskSize {
 			ictx.Data = &additionalDiskTemplateData{
@@ -152,6 +155,7 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 		}
 	}
 
+	// Initialize the parameters to apply to the VMX template data
 	templateData := vmxTemplateData{
 		Name:     config.VMName,
 		GuestOS:  config.GuestOSType,
@@ -398,8 +402,8 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	ictx.Data = &templateData
 
-	/// render the .vmx template
-	vmxContents, err := interpolate.Render(vmxTemplate, &ictx)
+	/// Render the .vmx template with the parameters we've assigned
+	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing VMX template: %s", err)
 		state.Put("error", err)
@@ -408,20 +412,6 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	vmxDir := config.OutputDir
-	if config.RemoteType != "" {
-		// For remote builds, we just put the VMX in a temporary
-		// directory since it just gets uploaded anyways.
-		vmxDir, err = tmp.Dir("vmw-iso")
-		if err != nil {
-			err := fmt.Errorf("Error preparing VMX template: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		// Set the tempDir so we clean it up
-		s.tempDir = vmxDir
-	}
 
 	/// Now to handle options that will modify the template without using "vmxTemplateData"
 	vmxData := vmwcommon.ParseVMX(vmxContents)
