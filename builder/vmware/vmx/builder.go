@@ -53,9 +53,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// the path to the output on the machine running Packer.
 	exportOutputPath := b.config.OutputDir
 
-	if b.config.RemoteType != "" {
-		b.config.OutputDir = b.config.VMName
-	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Set up the state.
@@ -73,7 +70,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps.
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
-			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
 		},
 		&vmwcommon.StepOutputDir{
@@ -100,9 +96,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
-		&vmwcommon.StepUploadVMX{
-			RemoteType: b.config.RemoteType,
-		},
+		&vmwcommon.StepUploadVMX{},
 		&vmwcommon.StepConfigureVNC{
 			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
@@ -133,7 +127,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&vmwcommon.StepUploadTools{
-			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
 			ToolsUploadPath:   b.config.ToolsUploadPath,
 			Ctx:               b.config.ctx,
@@ -192,7 +185,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Artifact
 	log.Printf("Generating artifact...")
-	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, exportOutputPath,
+	return vmwcommon.NewArtifact(b.config.Format, exportOutputPath,
 		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 

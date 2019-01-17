@@ -9,7 +9,6 @@ import (
 )
 
 type StepPrepareTools struct {
-	RemoteType        string
 	ToolsUploadFlavor string
 }
 

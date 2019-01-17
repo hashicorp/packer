@@ -15,7 +15,6 @@ type toolsUploadPathTemplate struct {
 }
 
 type StepUploadTools struct {
-	RemoteType        string
 	ToolsUploadFlavor string
 	ToolsUploadPath   string
 	Ctx               interpolate.Context

@@ -19,7 +19,6 @@ import (
 // Produces:
 //   <nothing>
 type StepUploadVMX struct {
-	RemoteType string
 }
 
 func (c *StepUploadVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
