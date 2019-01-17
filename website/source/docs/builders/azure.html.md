@@ -333,6 +333,9 @@ Providing `temp_resource_group_name` or `location` in combination with
     is set, snapshot of the data disk(s) is created with the same prefix as this value before the VM 
     is captured.
 
+-   `managed_image_zone_resilient` (bool) Store the image in zone-resilient storage. You need to create it
+    in a region that supports [availability zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
+
 ## Basic Example
 
 Here is a basic example for Azure.
