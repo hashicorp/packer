@@ -28,13 +28,6 @@ func (c *StepUploadTools) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionContinue
 	}
 
-	if c.RemoteType == "esx5" {
-		if err := driver.ToolsInstall(); err != nil {
-			state.Put("error", fmt.Errorf("Couldn't mount VMware tools ISO. Please check the 'guest_os_type' in your template.json."))
-		}
-		return multistep.ActionContinue
-	}
-
 	comm := state.Get("communicator").(packer.Communicator)
 	tools_source := state.Get("tools_upload_source").(string)
 	ui := state.Get("ui").(packer.Ui)
