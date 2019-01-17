@@ -411,7 +411,7 @@ func TestDownloadFileUrl(t *testing.T) {
 
 	// Verify that we fail to match the checksum
 	_, err = client.Get()
-	if err.Error() != "checksums didn't match expected: 6e6f7065" {
+	if err.Error() != "checksums didn't match. expected 6e6f7065 and got 606f1945f81a022d0ed0bd99edfd4f99081c1cb1f97fae087291ee14e945e608" {
 		t.Fatalf("Unexpected failure; expected checksum not to match. Error was \"%v\"", err)
 	}
 
@@ -442,7 +442,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 	path, err := client.Get()
 
 	// ignore any non-important checksum errors if it's not a unc path
-	if !strings.HasPrefix(path, "\\\\") && err.Error() != "checksums didn't match expected: 6e6f7065" {
+	if !strings.HasPrefix(path, "\\\\") && err.Error() != "checksums didn't match. expected 6e6f7065 and got 606f1945f81a022d0ed0bd99edfd4f99081c1cb1f97fae087291ee14e945e608" {
 		t.Fatalf("Unexpected failure; expected checksum not to match")
 	}
 
