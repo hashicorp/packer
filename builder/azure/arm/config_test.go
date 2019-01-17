@@ -794,6 +794,51 @@ func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
 	}
 }
 
+func TestConfigZoneResilientShouldDefaultToFalse(t *testing.T) {
+	config := map[string]interface{}{
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"build_resource_group_name":         "ignore",
+		"image_publisher":                   "igore",
+		"image_offer":                       "ignore",
+		"image_sku":                         "ignore",
+		"os_type":                           "linux",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := c.toImageParameters()
+	if *p.ImageProperties.StorageProfile.ZoneResilient {
+		t.Fatal("expected zone resilient default to be false")
+	}
+}
+
+func TestConfigZoneResilientSetFromConfig(t *testing.T) {
+	config := map[string]interface{}{
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"build_resource_group_name":         "ignore",
+		"image_publisher":                   "igore",
+		"image_offer":                       "ignore",
+		"image_sku":                         "ignore",
+		"os_type":                           "linux",
+		"managed_image_zone_resilient":      true,
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := c.toImageParameters()
+	if *p.ImageProperties.StorageProfile.ZoneResilient == false {
+		t.Fatal("expected managed image zone resilient to be true from config")
+	}
+}
+
 func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 	config := map[string]interface{}{
 		"capture_name_prefix":    "ignore",
