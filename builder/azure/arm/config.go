@@ -107,6 +107,7 @@ type Config struct {
 	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
 	manageImageLocation                string
+	ManagedImageZoneResilient          bool `mapstructure:"managed_image_zone_resilient"`
 
 	// Deployment
 	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
@@ -195,6 +196,9 @@ func (c *Config) toImageParameters() *compute.Image {
 		ImageProperties: &compute.ImageProperties{
 			SourceVirtualMachine: &compute.SubResource{
 				ID: to.StringPtr(c.toVMID()),
+			},
+			StorageProfile: &compute.ImageStorageProfile{
+				ZoneResilient: to.BoolPtr(c.ManagedImageZoneResilient),
 			},
 		},
 		Location: to.StringPtr(c.Location),
