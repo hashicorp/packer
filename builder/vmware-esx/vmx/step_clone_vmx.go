@@ -12,6 +12,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // StepCloneVMX takes a VMX file and clones the VM into the output directory.
@@ -40,7 +41,6 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 
 	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
 		return halt(err)
-
 	}
 
 	// Read in the machine configuration from the cloned VMX file
@@ -51,7 +51,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	// * The disk compaction step needs the paths to all attached disks
 	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
 		remoteVmxPath := vmxPath
-		tempDir, err := ioutil.TempDir("", "packer-vmx")
+		tempDir, err := tmp.Dir("packer-vmx")
 		if err != nil {
 			return halt(err)
 		}
