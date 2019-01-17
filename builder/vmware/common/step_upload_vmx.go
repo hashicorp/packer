@@ -28,20 +28,6 @@ func (c *StepUploadVMX) Run(ctx context.Context, state multistep.StateBag) multi
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	if c.RemoteType == "esx5" {
-		remoteDriver, ok := driver.(RemoteDriver)
-		if ok {
-			remoteVmxPath := filepath.ToSlash(filepath.Join(fmt.Sprintf("%s", remoteDriver), filepath.Base(vmxPath)))
-			if err := remoteDriver.upload(remoteVmxPath, vmxPath); err != nil {
-				state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
-				return multistep.ActionHalt
-			}
-		}
-		if err := remoteDriver.ReloadVM(); err != nil {
-			ui.Error(fmt.Sprintf("Error reload VM: %s", err))
-		}
-	}
-
 	return multistep.ActionContinue
 }
 
