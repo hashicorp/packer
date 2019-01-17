@@ -42,25 +42,7 @@ func (s *StepCloneVMX) Run(ctx context.Context, state multistep.StateBag) multis
 		return halt(err)
 	}
 
-	// Read in the machine configuration from the cloned VMX file
-	//
-	// * The main driver needs the path to the vmx (set above) and the
-	// network type so that it can work out things like IP's and MAC
-	// addresses
-	// * The disk compaction step needs the paths to all attached disks
-	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
-		remoteVmxPath := vmxPath
-		tempDir, err := tmp.Dir("packer-vmx")
-		if err != nil {
-			return halt(err)
-		}
-		s.tempDir = tempDir
-		vmxPath = filepath.Join(tempDir, s.VMName+".vmx")
-		if err = remoteDriver.Download(remoteVmxPath, vmxPath); err != nil {
-			return halt(err)
-		}
-	}
-
+	// Now we can read the data from the vmx file
 	vmxData, err := vmwcommon.ReadVMX(vmxPath)
 	if err != nil {
 		return halt(err)
