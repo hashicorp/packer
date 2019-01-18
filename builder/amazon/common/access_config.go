@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/go-cleanhttp"
+	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -52,7 +52,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	// default is 3, and when it was causing failures for users being throttled
 	// retries are exponentially backed off.
-	config = config.WithMaxRetries(8)
+	config = config.WithMaxRetries(20)
 
 	region, err := c.region()
 	if err != nil {
