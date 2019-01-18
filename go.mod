@@ -139,7 +139,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pierrec/lz4 v0.0.0-20160112163551-383c0d87b5dd
 	github.com/pierrec/xxHash v0.0.0-20160112165351-5a004441f897 // indirect
-	github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e // indirect
+	github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v0.0.0-20170908125245-88e59760adad
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
