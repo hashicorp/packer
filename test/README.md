@@ -27,6 +27,8 @@ running on macOS, most of these are available with `brew`:
 * [gcutil](https://developers.google.com/compute/docs/gcutil/#install) for
   Google Compute Engine tests.
 
+* [h1-cli](https://github.com/hyperonecom/h1-client-go) for HyperOne tests.
+
 ### Configuring Tests
 
 **For tests that require AWS credentials:**
@@ -43,6 +45,15 @@ Set the following environmental variables:
 * `GC_BUCKET_NAME`
 * `GC_ACCOUNT_FILE`
 * `GC_PROJECT_ID`
+
+**For tests that test HyperOne:**
+
+Set the following environmental variables:
+
+* `HYPERONE_TOKEN`
+* `HYPERONE_PROJECT`
+
+You have to be authenticated within the `h1` tool (use `h1 login`).
 
 ### Running
 
