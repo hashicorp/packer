@@ -191,8 +191,9 @@ func (d *DownloadClient) Get() (string, error) {
 			}
 
 			err = fmt.Errorf(
-				"checksums didn't match expected: %s",
-				hex.EncodeToString(d.config.Checksum))
+				"checksums didn't match. expected %s and got %s",
+				hex.EncodeToString(d.config.Checksum),
+				hex.EncodeToString(d.config.Hash.Sum(nil)))
 		}
 	}
 

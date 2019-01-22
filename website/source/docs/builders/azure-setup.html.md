@@ -204,37 +204,12 @@ Make sure that `GROUPNAME` and `LOCATION` are the same as above. Also, ensure
 that `GROUPNAME` is less than 24 characters long and contains only lowercase
 letters and numbers.
 
-### Create an Application
-
-An application represents a way to authorize access to the Azure API. Note that
-you will need to specify a URL for your application (this is intended to be
-used for OAuth callbacks) but these do not actually need to be valid URLs.
-
-First pick APPNAME, APPURL and PASSWORD:
-
-``` shell
-APPNAME=packer.test
-APPURL=packer.test
-PASSWORD=xxx
-```
-
-Password is your `client_secret` and can be anything you like. I recommend
-using `openssl rand -base64 24`.
-
-``` shell
-$ az ad app create \
-  --display-name $APPNAME \
-  --identifier-uris $APPURL \
-  --homepage $APPURL \
-  --password $PASSWORD
-```
-
 ### Create a Service Principal
 
-You cannot directly grant permissions to an application. Instead, you create a
-service principal and assign permissions to the service principal. To create a
-service principal for use with Packer, run the below command specifying the
-subscription. This will grant Packer the contributor role to the subscription.
+A service principal acts on behalf of an application (Packer) on your Azure
+subscription. To create an application and service principal for use with
+Packer, run the below command specifying the subscription. This will grant
+Packer the contributor role to the subscription.
 The output of this command is your service principal credentials, save these in
 a safe place as you will need these to configure Packer.
 
@@ -263,8 +238,13 @@ pre-configured roles via:
 $ az role definition list --output json | jq ".[] | {name:.roleName, description:.description}"
 ```
 
+If you would rather use a certificate to autenticate your service principal,
+please follow the [Azure Active Directory documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-azure-ad).
+
 ### Configuring Packer
 
 Now (finally) everything has been setup in Azure and our service principal has
 been created. You can use the output from creating your service principal in
-your template.
+your template. Use the value from the `appId` field above as a value for
+`client_id` in your configuration and set `client_secret` to the `password`
+value from above.
