@@ -209,7 +209,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
 		},
-		&vboxcommon.StepOutputDir{
+		&common.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},

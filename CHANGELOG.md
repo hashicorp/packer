@@ -9,6 +9,8 @@
 * builder/amazon: don't Cleanup Temp Keys when there is no communicator to
     avoid a panic [GH-7100] [GH-7095]
 * builder/azure: allow to configure disk caching [GH-7061]
+* builder/azure: add certificate authentication [GH-7189]
+* builder/azure: use deallocate instead of just power-off [GH-7203]
 * builder/openstack: Don't require network v2 [GH-6933]
 * builder/openstack: Support for tagging new images [GH-7037]
 * core/shell: Add env vars "PACKER_HTTP_IP" and "PACKER_HTTP_PORT" to shell
