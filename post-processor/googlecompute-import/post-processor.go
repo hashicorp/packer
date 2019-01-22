@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/storage/v1"
 
-	googlecompute "github.com/hashicorp/packer/builder/googlecompute"
+	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
