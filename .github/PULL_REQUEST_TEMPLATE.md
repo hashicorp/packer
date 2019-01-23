@@ -1,5 +1,11 @@
 **DELETE THIS TEMPLATE BEFORE SUBMITTING**
 
+In order to have a good experience with our community, we recommend that you
+read the contributing guidelines for making a PR, and understand the lifecycle
+of a Packer PR:
+
+https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md#opening-an-pull-request
+
 Describe the change you are making here!
 
 Please include tests. Check out these examples:
