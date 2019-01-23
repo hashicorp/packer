@@ -90,6 +90,7 @@ require (
 	github.com/hashicorp/vault-plugin-secrets-kv v0.0.0-20181106190520-2236f141171e // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb
 	github.com/hetznercloud/hcloud-go v1.12.0
+	github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
 	github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
