@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/hashicorp/packer/helper/flag-kv"
-	"github.com/hashicorp/packer/helper/flag-slice"
+	kvflag "github.com/hashicorp/packer/helper/flag-kv"
+	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 )
@@ -31,9 +31,7 @@ type Meta struct {
 	Version    string
 
 	// These are set by command-line flags
-	flagBuildExcept []string
-	flagBuildOnly   []string
-	flagVars        map[string]string
+	flagVars map[string]string
 }
 
 // Core returns the core for the given template given the configured
@@ -59,7 +57,7 @@ func (m *Meta) BuildNames(c *packer.Core) []string {
 	// TODO: test
 
 	// Filter the "only"
-	if len(m.flagBuildOnly) > 0 {
+	if len(m.CoreConfig.Only) > 0 {
 		// Build a set of all the available names
 		nameSet := make(map[string]struct{})
 		for _, n := range c.BuildNames() {
@@ -67,8 +65,8 @@ func (m *Meta) BuildNames(c *packer.Core) []string {
 		}
 
 		// Build our result set which we pre-allocate some sane number
-		result := make([]string, 0, len(m.flagBuildOnly))
-		for _, n := range m.flagBuildOnly {
+		result := make([]string, 0, len(m.CoreConfig.Only))
+		for _, n := range m.CoreConfig.Only {
 			if _, ok := nameSet[n]; ok {
 				result = append(result, n)
 			}
@@ -78,10 +76,10 @@ func (m *Meta) BuildNames(c *packer.Core) []string {
 	}
 
 	// Filter the "except"
-	if len(m.flagBuildExcept) > 0 {
+	if len(m.CoreConfig.Except) > 0 {
 		// Build a set of the things we don't want
 		nameSet := make(map[string]struct{})
-		for _, n := range m.flagBuildExcept {
+		for _, n := range m.CoreConfig.Except {
 			nameSet[n] = struct{}{}
 		}
 
@@ -111,8 +109,8 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	// FlagSetBuildFilter tells us to enable the settings for selecting
 	// builds we care about.
 	if fs&FlagSetBuildFilter != 0 {
-		f.Var((*sliceflag.StringFlag)(&m.flagBuildExcept), "except", "")
-		f.Var((*sliceflag.StringFlag)(&m.flagBuildOnly), "only", "")
+		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Except), "except", "")
+		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Only), "only", "")
 	}
 
 	// FlagSetVars tells us what variables to use

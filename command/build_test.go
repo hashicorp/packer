@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	shell_local "github.com/hashicorp/packer/post-processor/shell-local"
 )
 
 func TestBuildOnlyFileCommaFlags(t *testing.T) {
@@ -26,12 +27,13 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	if !fileExists("chocolate.txt") {
-		t.Error("Expected to find chocolate.txt")
+	for _, f := range []string{"chocolate.txt", "vanilla.txt",
+		"apple.txt", "peach.txt", "pear.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
 	}
-	if !fileExists("vanilla.txt") {
-		t.Error("Expected to find vanilla.txt")
-	}
+
 	if fileExists("cherry.txt") {
 		t.Error("Expected NOT to find cherry.txt")
 	}
@@ -56,14 +58,10 @@ func TestBuildStdin(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	if !fileExists("chocolate.txt") {
-		t.Error("Expected to find chocolate.txt")
-	}
-	if !fileExists("vanilla.txt") {
-		t.Error("Expected to find vanilla.txt")
-	}
-	if !fileExists("cherry.txt") {
-		t.Error("Expected to find cherry.txt")
+	for _, f := range []string{"vanilla.txt", "cherry.txt", "chocolate.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
 	}
 }
 
@@ -75,6 +73,9 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	args := []string{
 		"-only=chocolate",
 		"-only=cherry",
+		"-only=apple", // ignored
+		"-only=peach", // ignored
+		"-only=pear",  // ignored
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
 
@@ -84,14 +85,16 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	if !fileExists("chocolate.txt") {
-		t.Error("Expected to find chocolate.txt")
+	for _, f := range []string{"vanilla.txt"} {
+		if fileExists(f) {
+			t.Errorf("Expected NOT to find %s", f)
+		}
 	}
-	if fileExists("vanilla.txt") {
-		t.Error("Expected NOT to find vanilla.txt")
-	}
-	if !fileExists("cherry.txt") {
-		t.Error("Expected to find cherry.txt")
+	for _, f := range []string{"chocolate.txt", "cherry.txt",
+		"apple.txt", "peach.txt", "pear.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
 	}
 }
 
@@ -101,7 +104,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-except=chocolate",
+		"-except=chocolate,apple",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
 
@@ -111,14 +114,15 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	if fileExists("chocolate.txt") {
-		t.Error("Expected NOT to find chocolate.txt")
+	for _, f := range []string{"chocolate.txt", "apple.txt", "peach.txt"} {
+		if fileExists(f) {
+			t.Errorf("Expected NOT to find %s", f)
+		}
 	}
-	if !fileExists("vanilla.txt") {
-		t.Error("Expected to find vanilla.txt")
-	}
-	if !fileExists("cherry.txt") {
-		t.Error("Expected to find cherry.txt")
+	for _, f := range []string{"vanilla.txt", "cherry.txt", "pear.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
 	}
 }
 
@@ -136,6 +140,9 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		Builder: func(n string) (packer.Builder, error) {
 			return &file.Builder{}, nil
+		},
+		PostProcessor: func(n string) (packer.PostProcessor, error) {
+			return &shell_local.PostProcessor{}, nil
 		},
 	}
 	return &packer.CoreConfig{
@@ -159,4 +166,7 @@ func cleanup() {
 	os.RemoveAll("chocolate.txt")
 	os.RemoveAll("vanilla.txt")
 	os.RemoveAll("cherry.txt")
+	os.RemoveAll("apple.txt")
+	os.RemoveAll("peach.txt")
+	os.RemoveAll("pear.txt")
 }
