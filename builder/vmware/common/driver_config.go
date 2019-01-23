@@ -69,9 +69,9 @@ func (c *DriverConfig) Validate(SkipExport bool) error {
 	// now, so that we don't fail for a simple mistake after a long
 	// build
 	ovftool := GetOVFTool()
-	ovfToolArgs := []string{"--verifyOnly", fmt.Sprintf("vi://" +
-		url.QueryEscape(c.RemoteUser) + ":" +
-		url.QueryEscape(c.RemotePassword) + "@" +
+	ovfToolArgs := []string{"--verifyOnly", fmt.Sprintf("vi://%s:%s@%s",
+		url.QueryEscape(c.RemoteUser),
+		url.QueryEscape(c.RemotePassword),
 		c.RemoteHost)}
 
 	var out bytes.Buffer
