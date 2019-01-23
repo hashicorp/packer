@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/mitchellh/mapstructure"
 )
@@ -149,6 +149,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 			delete(c, "only")
 			delete(c, "keep_input_artifact")
 			delete(c, "type")
+			delete(c, "name")
 			if len(c) > 0 {
 				pp.Config = c
 			}
