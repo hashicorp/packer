@@ -19,6 +19,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
+	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6 // indirect
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20160115234725-4239b77079c7 // indirect
@@ -115,7 +116,7 @@ require (
 	github.com/mitchellh/cli v0.0.0-20170908181043-65fcae5817c8
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
-	github.com/mitchellh/go-homedir v0.0.0-20151025052427-d682a8f0cf13 // indirect
+	github.com/mitchellh/go-homedir v0.0.0-20151025052427-d682a8f0cf13
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 	github.com/mitchellh/iochan v0.0.0-20150529224432-87b45ffd0e95
