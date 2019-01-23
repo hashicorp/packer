@@ -25,16 +25,18 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Bucket            string            `mapstructure:"bucket"`
-	GCSObjectName     string            `mapstructure:"gcs_object_name"`
-	ImageDescription  string            `mapstructure:"image_description"`
-	ImageFamily       string            `mapstructure:"image_family"`
-	ImageLabels       map[string]string `mapstructure:"image_labels"`
-	ImageName         string            `mapstructure:"image_name"`
-	ProjectId         string            `mapstructure:"project_id"`
-	AccountFile       string            `mapstructure:"account_file"`
-	KeepOriginalImage bool              `mapstructure:"keep_input_artifact"`
-	SkipClean         bool              `mapstructure:"skip_clean"`
+	AccountFile string `mapstructure:"account_file"`
+	ProjectId   string `mapstructure:"project_id"`
+
+	Bucket               string            `mapstructure:"bucket"`
+	GCSObjectName        string            `mapstructure:"gcs_object_name"`
+	ImageDescription     string            `mapstructure:"image_description"`
+	ImageFamily          string            `mapstructure:"image_family"`
+	ImageGuestOsFeatures []string          `mapstructure:"image_guest_os_features"`
+	ImageLabels          map[string]string `mapstructure:"image_labels"`
+	ImageName            string            `mapstructure:"image_name"`
+	KeepOriginalImage    bool              `mapstructure:"keep_input_artifact"`
+	SkipClean            bool              `mapstructure:"skip_clean"`
 
 	ctx interpolate.Context
 }
@@ -111,7 +113,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, p.config.KeepOriginalImage, err
 	}
 
-	gceImageArtifact, err := CreateGceImage(p.config.AccountFile, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
+	gceImageArtifact, err := CreateGceImage(p.config.AccountFile, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
 	if err != nil {
 		return nil, p.config.KeepOriginalImage, err
 	}
@@ -179,7 +181,7 @@ func UploadToBucket(accountFile string, ui packer.Ui, artifact packer.Artifact, 
 	return "https://storage.googleapis.com/" + bucket + "/" + gcsObjectName, nil
 }
 
-func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (packer.Artifact, error) {
+func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
 	var client *http.Client
 	var account googlecompute.AccountFile
 
@@ -203,13 +205,22 @@ func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageUR
 		return nil, err
 	}
 
+	// Build up the imageFeatures
+	imageFeatures := make([]*compute.GuestOsFeature, len(imageGuestOsFeatures))
+	for _, v := range imageGuestOsFeatures {
+		imageFeatures = append(imageFeatures, &compute.GuestOsFeature{
+			Type: v,
+		})
+	}
+
 	gceImage := &compute.Image{
-		Name:        imageName,
-		Description: imageDescription,
-		Family:      imageFamily,
-		Labels:      imageLabels,
-		RawDisk:     &compute.ImageRawDisk{Source: rawImageURL},
-		SourceType:  "RAW",
+		Description:     imageDescription,
+		Family:          imageFamily,
+		GuestOsFeatures: imageFeatures,
+		Labels:          imageLabels,
+		Name:            imageName,
+		RawDisk:         &compute.ImageRawDisk{Source: rawImageURL},
+		SourceType:      "RAW",
 	}
 
 	ui.Say(fmt.Sprintf("Creating GCE image %v...", imageName))
