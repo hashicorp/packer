@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -13,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -258,11 +258,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
-	}
+	httpClient := commonhelper.HttpClientWithEnvironmentProxy()
 
 	_, err = httpClient.Do(req)
 	if err != nil {
