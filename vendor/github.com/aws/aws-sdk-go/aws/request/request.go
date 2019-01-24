@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -565,7 +566,10 @@ type temporary interface {
 	Temporary() bool
 }
 
-func shouldRetryCancel(err error) bool {
+func shouldRetryCancel(err error) (shouldRetry bool) {
+	defer func() {
+		log.Printf("shouldRetry returned %t with %#v", shouldRetry, err)
+	}()
 	switch err := err.(type) {
 	case awserr.Error:
 		if err.Code() == CanceledErrorCode {
