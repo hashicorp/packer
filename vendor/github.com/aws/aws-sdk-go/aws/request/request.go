@@ -572,14 +572,20 @@ func shouldRetryCancel(err error) bool {
 			return false
 		}
 		return shouldRetryCancel(err.OrigErr())
+	case *url.Error:
+		if strings.Contains(err.Error(), "connection refused") {
+			// Refused connections should be retried as the service may not yet
+			// be running on the port. Go TCP dial considers refused
+			// connections as not temporary.
+			return true
+		}
+		// *url.Error only implements Temporary after golang 1.6 but since
+		// url.Error only wraps the error:
+		return shouldRetryCancel(err.Err)
 	case temporary:
 		// If the error is temporary, we want to allow continuation of the
 		// retry process
 		return err.Temporary()
-	case *url.Error:
-		// *url.Error only implements Temporary after golang 1.6 but since
-		// url.Error only wraps the error:
-		return shouldRetryCancel(err.Err)
 	case nil:
 		// `awserr.Error.OrigErr()` can be nil, meaning there was an error but
 		// because we don't know the cause, it is marked as retriable. See
@@ -587,7 +593,8 @@ func shouldRetryCancel(err error) bool {
 		return true
 	default:
 		switch err.Error() {
-		case "net/http: request canceled while waiting for connection":
+		case "net/http: request canceled",
+			"net/http: request canceled while waiting for connection":
 			// known 1.5 error case when an http request is cancelled
 			return false
 		}
