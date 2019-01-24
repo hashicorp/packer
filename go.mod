@@ -23,7 +23,7 @@ require (
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20160115234725-4239b77079c7 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/aws/aws-sdk-go v1.16.21
+	github.com/aws/aws-sdk-go v1.16.24
 	github.com/bgentry/speakeasy v0.0.0-20150902231413-36e9cfdd6909 // indirect
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
