@@ -9,9 +9,11 @@ import (
 	"log"
 	"runtime"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -190,7 +192,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err != nil {
 		return nil, err
 	}
-	ec2conn := ec2.New(session)
+	ec2conn := ec2.New(session, &aws.Config{
+		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+	})
 
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx

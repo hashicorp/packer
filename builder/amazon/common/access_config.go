@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -145,5 +146,10 @@ func (c *AccessConfig) NewEC2Connection() (ec2iface.EC2API, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ec2.New(sess), nil
+
+	ec2conn := ec2.New(sess, &aws.Config{
+		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+	})
+
+	return ec2conn, nil
 }

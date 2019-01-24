@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -37,8 +38,9 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 		}
 
 		regionconn := ec2.New(session.Copy(&aws.Config{
-			Region: aws.String(region)},
-		))
+			Region:     aws.String(region),
+			HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+		}))
 
 		resp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
 			Owners: aws.StringSlice([]string{"self"}),
