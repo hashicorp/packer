@@ -193,6 +193,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
+				"us-west-2":      endpoint{},
 			},
 		},
 		"api.pricing": service{
@@ -1994,7 +1995,7 @@ var awsPartition = partition{
 		},
 		"route53resolver": service{
 			Defaults: endpoint{
-				Protocols: []string{"http", "https"},
+				Protocols: []string{"https"},
 			},
 			Endpoints: endpoints{
 				"ap-northeast-1": endpoint{},
@@ -3108,6 +3109,13 @@ var awscnPartition = partition{
 				"cn-northwest-1": endpoint{},
 			},
 		},
+		"firehose": service{
+
+			Endpoints: endpoints{
+				"cn-north-1":     endpoint{},
+				"cn-northwest-1": endpoint{},
+			},
+		},
 		"glacier": service{
 			Defaults: endpoint{
 				Protocols: []string{"http", "https"},
@@ -3563,6 +3571,12 @@ var awsusgovPartition = partition{
 
 			Endpoints: endpoints{
 				"us-gov-east-1": endpoint{},
+				"us-gov-west-1": endpoint{},
+			},
+		},
+		"firehose": service{
+
+			Endpoints: endpoints{
 				"us-gov-west-1": endpoint{},
 			},
 		},
