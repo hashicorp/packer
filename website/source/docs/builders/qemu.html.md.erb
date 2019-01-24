@@ -139,6 +139,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
 
+-   `cpus` (number) - The number of cpus to use when building the VM.
+     The default is `1` CPU.
+
 -   `disk_cache` (string) - The cache mode to use for disk. Allowed values
     include any of `writethrough`, `writeback`, `none`, `unsafe`
     or `directsync`. By default, this is set to `writeback`.
@@ -240,6 +243,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `machine_type` (string) - The type of machine emulation to use. Run your
     qemu binary with the flags `-machine help` to list available types for
     your system. This defaults to `pc`.
+
+-   `memory` (number) - The amount of memory to use when building the VM
+    in megabytes. This defaults to `512` megabytes.
 
 -   `net_device` (string) - The driver to use for the network interface. Allowed
     values `ne2k_pci`, `i82551`, `i82557b`, `i82559er`, `rtl8139`, `e1000`,
