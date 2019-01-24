@@ -68,14 +68,3 @@ func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {
 		t.Fatal("We should be in gov region.")
 	}
 }
-
-func TestAccessConfig_NoCredentialsFailsQuickly(t *testing.T) {
-	c := &AccessConfig{
-		RawRegion: "not-empty",
-	}
-	_, err := c.Session()
-	if err == nil {
-		t.Errorf("AccessConfig.Session() error is nil")
-		return
-	}
-}
