@@ -26,10 +26,12 @@ artifacts that are created will be outputted at the end of the build.
     will stop between each step, waiting for keyboard input before continuing.
     This will allow the user to inspect state and so on.
 
--   `-except=foo,bar,baz` - Builds all the builds except those with the given
-    comma-separated names. Build names by default are the names of their
-    builders, unless a specific `name` attribute is specified within the
-    configuration.
+-   `-except=foo,bar,baz` - Run all the builds and post-processors except those
+    with the given comma-separated names. Build and post-processor names by
+    default are their type, unless a specific `name` attribute is specified
+    within the configuration. Any post-processor following a skipped
+    post-processor will not run. Because post-processors can be nested in
+    arrays a differ post-processor chain can still run.
 
 -   `-force` - Forces a builder to run when artifacts from a previous build
     prevent a build from running. The exact behavior of a forced build is left
@@ -44,9 +46,10 @@ artifacts that are created will be outputted at the end of the build.
     presents a prompt and waits for you to decide to clean up, abort, or retry
     the failed step.
 
--   `-only=foo,bar,baz` - Only build the builds with the given comma-separated
-    names. Build names by default are the names of their builders, unless a
-    specific `name` attribute is specified within the configuration.
+-   `-only=foo,bar,baz` - Only run the builds with the given comma-separated
+    names. Build names by default are their type, unless a specific `name`
+    attribute is specified within the configuration. `-only` does not apply to
+    post-processors.
 
 -   `-parallel=false` - Disable parallelization of multiple builders (on by
     default).

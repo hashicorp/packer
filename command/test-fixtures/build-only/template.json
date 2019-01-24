@@ -1,22 +1,43 @@
 {
     "builders": [
         {
-            "name":"chocolate",
-            "type":"file",
-            "content":"chocolate",
-            "target":"chocolate.txt"
+            "name": "chocolate",
+            "type": "file",
+            "content": "chocolate",
+            "target": "chocolate.txt"
         },
         {
-            "name":"vanilla",
-            "type":"file",
-            "content":"vanilla",
-            "target":"vanilla.txt"
+            "name": "vanilla",
+            "type": "file",
+            "content": "vanilla",
+            "target": "vanilla.txt"
         },
         {
-            "name":"cherry",
-            "type":"file",
-            "content":"cherry",
-            "target":"cherry.txt"
+            "name": "cherry",
+            "type": "file",
+            "content": "cherry",
+            "target": "cherry.txt"
         }
+    ],
+    "post-processors": [
+        [
+            {
+                "name": "apple",
+                "type": "shell-local",
+                "inline": [ "touch apple.txt" ]
+            },
+            {
+                "name": "peach",
+                "type": "shell-local",
+                "inline": [ "touch peach.txt" ]
+            }
+        ],
+        [
+            {
+                "name": "pear",
+                "type": "shell-local",
+                "inline": [ "touch pear.txt" ]
+            }
+        ]
     ]
 }
