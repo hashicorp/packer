@@ -110,7 +110,7 @@ testacc: deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: fmt-check mode-check vet ## Test with race detection enabled
-	@go test -race $(TEST) $(TESTARGS) -timeout=2m -v -p=8
+	@go test -race $(TEST) $(TESTARGS) -timeout=2m -p=8
 
 updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
