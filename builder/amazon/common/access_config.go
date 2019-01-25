@@ -6,16 +6,14 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/go-cleanhttp"
+	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -50,12 +48,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		config.WithCredentials(staticCreds)
 	}
 
-	// default is 3, and when it was causing failures for users being throttled
-	// retries are exponentially backed off.
-	config = config.WithMaxRetries(8)
-
-	region, _ := c.region()
-	config = config.WithRegion(region)
+	if c.RawRegion != "" {
+		config = config.WithRegion(c.RawRegion)
+	}
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -84,24 +79,24 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		}
 	}
 
-	if sess, err := session.NewSessionWithOptions(opts); err != nil {
+	sess, err := session.NewSessionWithOptions(opts)
+	if err != nil {
 		return nil, err
-	} else {
-		log.Printf("Found region %s", *sess.Config.Region)
-		c.session = sess
-
-		cp, err := c.session.Config.Credentials.Get()
-		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-				return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
-					"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
-					"for more information on providing credentials for the AWS Builder.")
-			} else {
-				return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
-			}
-		}
-		log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 	}
+	log.Printf("Found region %s", *sess.Config.Region)
+	c.session = sess
+
+	cp, err := c.session.Config.Credentials.Get()
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+			return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
+				"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
+				"for more information on providing credentials for the AWS Builder.")
+		} else {
+			return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+		}
+	}
+	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 
 	if c.DecodeAuthZMessages {
 		DecodeAuthZMessages(c.session)
@@ -124,26 +119,6 @@ func (c *AccessConfig) IsGovCloud() bool {
 
 func (c *AccessConfig) IsChinaCloud() bool {
 	return strings.HasPrefix(c.SessionRegion(), "cn-")
-}
-
-// metadataRegion returns the region from the metadata service
-func (c *AccessConfig) metadataRegion() (string, error) {
-
-	client := cleanhttp.DefaultClient()
-
-	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
-	client.Timeout = 100 * time.Millisecond
-	ec2meta := ec2metadata.New(session.New(), &aws.Config{
-		HTTPClient: client,
-	})
-	return ec2meta.Region()
-}
-
-func (c *AccessConfig) region() (string, error) {
-	if c.RawRegion != "" {
-		return c.RawRegion, nil
-	}
-	return c.metadataRegion()
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
