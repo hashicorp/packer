@@ -20,6 +20,66 @@ reusable image.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
+## Authentication
+
+HyperOne supports several authentication methods, which are all supported by
+this builder.
+
+### User session
+
+If using user session, set the `token` field to your authentication token.
+The `project` field is required when using this method.
+
+```json
+{
+    "token": "YOUR TOKEN",
+    "project": "YOUR_PROJECT"
+}
+```
+
+### User session by SSH key
+
+If you've added an SSH key as a credential to your project and the private key
+is added to the ssh-agent on your local machine, you can authenticate by
+setting just the platform login (your e-mail address):
+
+```json
+{
+    "token_login": "your.user@example.com"
+}
+```
+
+### h1 CLI
+
+If you're using [h1-cli](https://github.com/hyperonecom/h1-cli) on your local
+machine, HyperOne builder can use your credentials saved in a config file.
+
+All you have to do is login within the tool:
+
+```bash
+h1 login --username your.user@example.com 
+```
+
+You don't have to set `token` or `project` fields at all using this method.
+
+### Service account
+
+Using `h1`, you can create a new token associated with chosen project.
+
+```bash
+h1 project token add --name packer-builder --project PROJECT_ID
+```
+
+Set the `token` field to the generated token or save it in the `HYPERONE_TOKEN`
+environment variable. You don't have to set the `project` option using this
+method.
+
+```json
+{
+    "token": "YOUR TOKEN"
+}
+```
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
