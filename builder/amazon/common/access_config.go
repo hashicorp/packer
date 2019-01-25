@@ -6,12 +6,10 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
@@ -125,19 +123,6 @@ func (c *AccessConfig) IsGovCloud() bool {
 
 func (c *AccessConfig) IsChinaCloud() bool {
 	return strings.HasPrefix(c.SessionRegion(), "cn-")
-}
-
-// metadataRegion returns the region from the metadata service
-func (c *AccessConfig) metadataRegion() (string, error) {
-
-	client := cleanhttp.DefaultClient()
-
-	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
-	client.Timeout = 100 * time.Millisecond
-	ec2meta := ec2metadata.New(session.New(), &aws.Config{
-		HTTPClient: client,
-	})
-	return ec2meta.Region()
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
