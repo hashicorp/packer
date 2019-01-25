@@ -37,10 +37,13 @@ type Config struct {
 
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
-	OutputDir     string `mapstructure:"output_dir"`
-	SourceBox     string `mapstructure:"source_box"`
-	SourceBoxName string `mapstructure:"source_box_name"`
-	Provider      string `mapstructure:"provider"`
+	OutputDir    string `mapstructure:"output_dir"`
+	SourceBox    string `mapstructure:"source_box"`
+	Checksum     string `mapstructure:"checksum"`
+	ChecksumType string `mapstructure:"checksum_type"`
+	BoxName      string `mapstructure:"box_name"`
+
+	Provider string `mapstructure:"provider"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -104,6 +107,26 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf(`The Vagrant builder currently only supports the ssh communicator"`))
 	}
+	// The box isn't a namespace like you'd pull from vagrant cloud
+	if b.config.BoxName == "" {
+		b.config.BoxName = fmt.Sprintf("packer_%s", b.config.PackerBuildName)
+	}
+
+	if b.config.SourceBox == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+	} else {
+		if !strings.HasSuffix(b.config.SourceBox, ".box") {
+			b.config.SourceBox, err = common.ValidatedURL(b.config.SourceBox)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
+			}
+			fileOK := common.FileExistsLocally(b.config.SourceBox)
+			if !fileOK {
+				packer.MultiErrorAppend(errs,
+					fmt.Errorf("Source file '%s' needs to exist at time of config validation!", b.config.SourceBox))
+			}
+		}
+	}
 
 	if b.config.TeardownMethod == "" {
 		b.config.TeardownMethod = "destroy"
@@ -147,21 +170,30 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{}
-	if !b.config.SkipPackage {
-		steps = append(steps,
-			&common.StepOutputDir{
-				Force: b.config.PackerForce,
-				Path:  b.config.OutputDir,
-			})
+	// Download if source box isn't from vagrant cloud.
+	if !strings.HasSuffix(b.config.SourceBox, ".box") {
+		steps = append(steps, &common.StepDownload{
+			Checksum:     b.config.Checksum,
+			ChecksumType: b.config.ChecksumType,
+			Description:  "Box",
+			Extension:    "box",
+			ResultKey:    "box_path",
+			Url:          []string{b.config.SourceBox},
+		})
 	}
+
 	steps = append(steps,
+		&common.StepOutputDir{
+			Force: b.config.PackerForce,
+			Path:  b.config.OutputDir,
+		},
 		&StepInitializeVagrant{
-			BoxName:    b.config.SourceBoxName,
 			BoxVersion: b.config.BoxVersion,
 			Minimal:    b.config.Minimal,
 			Template:   b.config.Template,
 			SourceBox:  b.config.SourceBox,
 			OutputDir:  b.config.OutputDir,
+			BoxName:    b.config.BoxName,
 		},
 		&StepAddBox{
 			BoxVersion:   b.config.BoxVersion,
@@ -173,7 +205,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Insecure:     b.config.AddInsecure,
 			Provider:     b.config.Provider,
 			SourceBox:    b.config.SourceBox,
-			BoxName:      b.config.SourceBoxName,
+			BoxName:      b.config.BoxName,
 		},
 		&StepUp{
 			b.config.TeardownMethod,
