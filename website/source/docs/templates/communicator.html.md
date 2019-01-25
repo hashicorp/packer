@@ -155,15 +155,15 @@ Packer supports the following ciphers:
 -   arcfour128
 -   arcfour256
 -   arcfour
--   <a href="mailto:es128-gcm@openssh.com" class="email">es128-gcm@openssh.com</a>
--   <a href="mailto:acha20-poly1305@openssh.com" class="email">acha20-poly1305@openssh.com</a>
+-   `es128-gcm@openssh.com`
+-   `acha20-poly1305@openssh.com`
 
 And the following MACs:
 
 -   hmac-sha1
 -   hmac-sha1-96
 -   hmac-sha2-256
--   <a href="mailto:hmac-sha2-256-etm@openssh.com" class="email">hmac-sha2-256-etm@openssh.com</a>
+-   `hmac-sha2-256-etm@openssh.com`
 
 ## WinRM Communicator
 

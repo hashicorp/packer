@@ -38,7 +38,7 @@ func (a *artifact) Id() string {
 }
 
 func (a *artifact) String() string {
-	return fmt.Sprintf("Vagrant box is  %s", a.Id())
+	return fmt.Sprintf("Vagrant box is %s", a.Id())
 }
 
 func (a *artifact) State(name string) interface{} {

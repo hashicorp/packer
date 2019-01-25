@@ -60,7 +60,7 @@ builder.
 -   `snapshot_password` (string) - Password for the snapshot.
 
 -   `url` (string) - Endpoint for the ProfitBricks REST API. Default URL
-    "<a href="https://api.profitbricks.com/rest/v2" class="uri">https://api.profitbricks.com/rest/v2</a>"
+    "<https://api.profitbricks.com/rest/v2>"
 
 ## Example
 

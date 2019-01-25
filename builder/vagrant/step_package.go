@@ -12,6 +12,7 @@ type StepPackage struct {
 	SkipPackage bool
 	Include     []string
 	Vagrantfile string
+	GlobalID    string
 }
 
 func (s *StepPackage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -24,6 +25,10 @@ func (s *StepPackage) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 	ui.Say("Packaging box...")
 	packageArgs := []string{}
+	if s.GlobalID != "" {
+		packageArgs = append(packageArgs, s.GlobalID)
+	}
+
 	if len(s.Include) > 0 {
 		packageArgs = append(packageArgs, "--include", strings.Join(s.Include, ","))
 	}

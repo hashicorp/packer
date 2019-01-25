@@ -8,7 +8,11 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/hashicorp/go-version"
 )
+
+const VAGRANT_MIN_VERSION = ">= 2.0.2"
 
 type Vagrant_2_2_Driver struct {
 	vagrantBinary string
@@ -34,26 +38,38 @@ func (d *Vagrant_2_2_Driver) Up(args []string) (string, string, error) {
 }
 
 // Calls "vagrant halt"
-func (d *Vagrant_2_2_Driver) Halt() error {
-	_, _, err := d.vagrantCmd([]string{"halt"}...)
+func (d *Vagrant_2_2_Driver) Halt(id string) error {
+	args := []string{"halt"}
+	if id != "" {
+		args = append(args, id)
+	}
+	_, _, err := d.vagrantCmd(args...)
 	return err
 }
 
 // Calls "vagrant suspend"
-func (d *Vagrant_2_2_Driver) Suspend() error {
-	_, _, err := d.vagrantCmd([]string{"suspend"}...)
+func (d *Vagrant_2_2_Driver) Suspend(id string) error {
+	args := []string{"suspend"}
+	if id != "" {
+		args = append(args, id)
+	}
+	_, _, err := d.vagrantCmd(args...)
 	return err
 }
 
 // Calls "vagrant destroy"
-func (d *Vagrant_2_2_Driver) Destroy() error {
-	_, _, err := d.vagrantCmd([]string{"destroy", "-f"}...)
+func (d *Vagrant_2_2_Driver) Destroy(id string) error {
+	args := []string{"destroy", "-f"}
+	if id != "" {
+		args = append(args, id)
+	}
+	_, _, err := d.vagrantCmd(args...)
 	return err
 }
 
 // Calls "vagrant package"
 func (d *Vagrant_2_2_Driver) Package(args []string) error {
-	_, _, err := d.vagrantCmd([]string{"package"}...)
+	_, _, err := d.vagrantCmd(append([]string{"package"}, args...)...)
 	return err
 }
 
@@ -67,6 +83,18 @@ func (d *Vagrant_2_2_Driver) Verify() error {
 	if err != nil {
 		return fmt.Errorf("Can't find Vagrant binary.")
 	}
+
+	constraints, err := version.NewConstraint(VAGRANT_MIN_VERSION)
+	vers, err := d.Version()
+	v, err := version.NewVersion(vers)
+	if err != nil {
+		return fmt.Errorf("Error figuring out Vagrant version.")
+	}
+
+	if !constraints.Check(v) {
+		return fmt.Errorf("installed Vagrant version must be >=2.0.2")
+	}
+
 	return nil
 }
 
@@ -99,9 +127,13 @@ func yesno(yn string) bool {
 	return true
 }
 
-func (d *Vagrant_2_2_Driver) SSHConfig() (*VagrantSSHConfig, error) {
+func (d *Vagrant_2_2_Driver) SSHConfig(id string) (*VagrantSSHConfig, error) {
 	// vagrant ssh-config --host 8df7860
-	stdout, _, err := d.vagrantCmd([]string{"ssh-config"}...)
+	args := []string{"ssh-config"}
+	if id != "" {
+		args = append(args, id)
+	}
+	stdout, _, err := d.vagrantCmd(args...)
 	sshConf := &VagrantSSHConfig{}
 
 	lines := strings.Split(stdout, "\n")
@@ -122,7 +154,7 @@ func (d *Vagrant_2_2_Driver) SSHConfig() (*VagrantSSHConfig, error) {
 
 // Version reads the version of VirtualBox that is installed.
 func (d *Vagrant_2_2_Driver) Version() (string, error) {
-	stdoutString, _, err := d.vagrantCmd([]string{"version"}...)
+	stdoutString, _, err := d.vagrantCmd([]string{"--version"}...)
 	// Example stdout:
 
 	// 	Installed Version: 2.2.3
