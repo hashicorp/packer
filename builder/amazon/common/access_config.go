@@ -48,10 +48,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		config.WithCredentials(staticCreds)
 	}
 
-	// default is 3, and when it was causing failures for users being throttled
-	// retries are exponentially backed off.
-	config = config.WithMaxRetries(8)
-
 	if c.RawRegion != "" {
 		config = config.WithRegion(c.RawRegion)
 	}
