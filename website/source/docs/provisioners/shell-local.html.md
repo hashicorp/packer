@@ -77,7 +77,7 @@ Optional parameters:
 -   `env_var_format` (string) - When we parse the environment\_vars that you
     provide, this gives us a string template to use in order to make sure that
     we are setting the environment vars correctly. By default on Windows hosts
-    this format is `set %s=%s &&` and on Unix, it is `%s='%s'`. You probably
+    this format is `set %s=%s && ` and on Unix, it is `%s='%s' `. You probably
     won't need to change this format, but you can see usage examples for where
     it is necessary below.
 

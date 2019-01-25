@@ -18,8 +18,7 @@ based on existing images.
 
 It is possible to build images from scratch, but not with the `googlecompute`
 Packer builder. The process is recommended only for advanced users, please see
-\[Building GCE Images from Scratch\]
-(<a href="https://cloud.google.com/compute/docs/tutorials/building-images" class="uri">https://cloud.google.com/compute/docs/tutorials/building-images</a>)
+[Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images)
 and the [Google Compute Import
 Post-Processor](/docs/post-processors/googlecompute-import.html) for more
 information.

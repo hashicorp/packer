@@ -2,7 +2,6 @@ package vagrant
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
@@ -21,22 +20,14 @@ type StepAddBox struct {
 	Provider     string
 	SourceBox    string
 	BoxName      string
+	GlobalID     string
 }
 
-func (s *StepAddBox) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(VagrantDriver)
-	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
+func (s *StepAddBox) generateAddArgs() []string {
 
-	ui.Say("Adding box using vagrant box add..")
 	addArgs := []string{}
 
 	if strings.HasSuffix(s.SourceBox, ".box") {
-		// The box isn't a namespace like you'd pull from vagrant cloud
-		if s.BoxName == "" {
-			s.BoxName = fmt.Sprintf("packer_%s", config.PackerBuildName)
-		}
-
 		addArgs = append(addArgs, s.BoxName)
 	}
 
@@ -73,6 +64,21 @@ func (s *StepAddBox) Run(_ context.Context, state multistep.StateBag) multistep.
 	if s.Provider != "" {
 		addArgs = append(addArgs, "--provider", s.Provider)
 	}
+
+	return addArgs
+}
+
+func (s *StepAddBox) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(VagrantDriver)
+	ui := state.Get("ui").(packer.Ui)
+
+	if s.GlobalID != "" {
+		ui.Say("Using a global-id; skipping Vagrant add command...")
+		return multistep.ActionContinue
+	}
+
+	ui.Say("Adding box using vagrant box add..")
+	addArgs := s.generateAddArgs()
 
 	log.Printf("[vagrant] Calling box add with following args %s", strings.Join(addArgs, " "))
 	// Call vagrant using prepared arguments
