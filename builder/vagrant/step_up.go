@@ -11,6 +11,7 @@ import (
 type StepUp struct {
 	TeardownMethod string
 	Provider       string
+	GlobalID       string
 }
 
 func (s *StepUp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -20,6 +21,10 @@ func (s *StepUp) Run(_ context.Context, state multistep.StateBag) multistep.Step
 	ui.Say("Calling Vagrant Up...")
 
 	var args []string
+	if s.GlobalID != "" {
+		args = append(args, s.GlobalID)
+	}
+
 	if s.Provider != "" {
 		args = append(args, fmt.Sprintf("--provider=%s", s.Provider))
 	}
@@ -42,11 +47,11 @@ func (s *StepUp) Cleanup(state multistep.StateBag) {
 
 	var err error
 	if s.TeardownMethod == "halt" {
-		err = driver.Halt()
+		err = driver.Halt(s.GlobalID)
 	} else if s.TeardownMethod == "suspend" {
-		err = driver.Suspend()
+		err = driver.Suspend(s.GlobalID)
 	} else if s.TeardownMethod == "destroy" {
-		err = driver.Destroy()
+		err = driver.Destroy(s.GlobalID)
 	} else {
 		// Should never get here because of template validation
 		state.Put("error", fmt.Errorf("Invalid teardown method selected; must be either halt, suspend, or destory."))

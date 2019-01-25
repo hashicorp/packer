@@ -22,13 +22,15 @@ import (
 //   IdentitiesOnly yes
 //   LogLevel FATAL
 
-type StepSSHConfig struct{}
+type StepSSHConfig struct {
+	GlobalID string
+}
 
 func (s *StepSSHConfig) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	config := state.Get("config").(*Config)
 
-	sshConfig, err := driver.SSHConfig()
+	sshConfig, err := driver.SSHConfig(s.GlobalID)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

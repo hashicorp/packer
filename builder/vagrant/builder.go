@@ -38,7 +38,8 @@ type Config struct {
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	OutputDir    string `mapstructure:"output_dir"`
-	SourceBox    string `mapstructure:"source_box"`
+	SourceBox    string `mapstructure:"source_path"`
+	GlobalID     string `mapstructure:"global_id"`
 	Checksum     string `mapstructure:"checksum"`
 	ChecksumType string `mapstructure:"checksum_type"`
 	BoxName      string `mapstructure:"box_name"`
@@ -60,6 +61,7 @@ type Config struct {
 	SyncedFolder string `mapstructure:"synced_folder"`
 
 	// Options for the "vagrant box add" command
+	SkipAdd     bool   `mapstructure:"skip_add"`
 	AddCACert   string `mapstructure:"add_cacert"`
 	AddCAPath   string `mapstructure:"add_capath"`
 	AddCert     string `mapstructure:"add_cert"`
@@ -113,23 +115,35 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.SourceBox == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+		if b.config.GlobalID == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required unless you have set global_id"))
+		}
 	} else {
-		if !strings.HasSuffix(b.config.SourceBox, ".box") {
+		if b.config.GlobalID != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You may either set global_id or source_path but not both"))
+		}
+		if strings.HasSuffix(b.config.SourceBox, ".box") {
 			b.config.SourceBox, err = common.ValidatedURL(b.config.SourceBox)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 			}
 			fileOK := common.FileExistsLocally(b.config.SourceBox)
 			if !fileOK {
-				packer.MultiErrorAppend(errs,
+				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("Source file '%s' needs to exist at time of config validation!", b.config.SourceBox))
 			}
 		}
 	}
 
 	if b.config.TeardownMethod == "" {
-		b.config.TeardownMethod = "destroy"
+		// If we're using a box that's already opened on the system, don't
+		// automatically destroy it. If we open the box ourselves, then go ahead
+		// and kill it by default.
+		if b.config.GlobalID != "" {
+			b.config.TeardownMethod = "halt"
+		} else {
+			b.config.TeardownMethod = "destroy"
+		}
 	} else {
 		matches := false
 		for _, name := range []string{"halt", "suspend", "destroy"} {
@@ -171,7 +185,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{}
 	// Download if source box isn't from vagrant cloud.
-	if !strings.HasSuffix(b.config.SourceBox, ".box") {
+	if strings.HasSuffix(b.config.SourceBox, ".box") {
 		steps = append(steps, &common.StepDownload{
 			Checksum:     b.config.Checksum,
 			ChecksumType: b.config.ChecksumType,
@@ -181,7 +195,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Url:          []string{b.config.SourceBox},
 		})
 	}
-
 	steps = append(steps,
 		&common.StepOutputDir{
 			Force: b.config.PackerForce,
@@ -194,6 +207,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceBox:  b.config.SourceBox,
 			OutputDir:  b.config.OutputDir,
 			BoxName:    b.config.BoxName,
+			GlobalID:   b.config.GlobalID,
 		},
 		&StepAddBox{
 			BoxVersion:   b.config.BoxVersion,
@@ -206,12 +220,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Provider:     b.config.Provider,
 			SourceBox:    b.config.SourceBox,
 			BoxName:      b.config.BoxName,
+			GlobalID:     b.config.GlobalID,
 		},
 		&StepUp{
-			b.config.TeardownMethod,
-			b.config.Provider,
+			TeardownMethod: b.config.TeardownMethod,
+			Provider:       b.config.Provider,
+			GlobalID:       b.config.GlobalID,
 		},
-		&StepSSHConfig{},
+		&StepSSHConfig{
+			b.config.GlobalID,
+		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      CommHost(),
@@ -222,6 +240,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipPackage: b.config.SkipPackage,
 			Include:     b.config.PackageInclude,
 			Vagrantfile: b.config.OutputVagrantfile,
+			GlobalID:    b.config.GlobalID,
 		})
 
 	// Run the steps.
