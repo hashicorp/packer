@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -70,7 +71,8 @@ func (a *Artifact) Destroy() error {
 		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
 
 		regionConn := ec2.New(a.Session, &aws.Config{
-			Region: aws.String(region),
+			Region:     aws.String(region),
+			HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
 		})
 
 		// Get image metadata
