@@ -54,8 +54,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	// retries are exponentially backed off.
 	config = config.WithMaxRetries(8)
 
-	region, _ := c.region()
-	config = config.WithRegion(region)
+	if c.RawRegion != "" {
+		config = config.WithRegion(c.RawRegion)
+	}
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -137,13 +138,6 @@ func (c *AccessConfig) metadataRegion() (string, error) {
 		HTTPClient: client,
 	})
 	return ec2meta.Region()
-}
-
-func (c *AccessConfig) region() (string, error) {
-	if c.RawRegion != "" {
-		return c.RawRegion, nil
-	}
-	return c.metadataRegion()
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
