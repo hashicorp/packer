@@ -1,0 +1,119 @@
+package common
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/outscale/osc-go/oapi"
+)
+
+// BlockDevice
+type BlockDevice struct {
+	DeleteOnVmDeletion bool   `mapstructure:"delete_on_vm_deletion"`
+	DeviceName         string `mapstructure:"device_name"`
+	IOPS               int64  `mapstructure:"iops"`
+	NoDevice           bool   `mapstructure:"no_device"`
+	SnapshotId         string `mapstructure:"snapshot_id"`
+	VirtualName        string `mapstructure:"virtual_name"`
+	VolumeType         string `mapstructure:"volume_type"`
+	VolumeSize         int64  `mapstructure:"volume_size"`
+	// Encrypted          bool   `mapstructure:"encrypted"`
+	// KmsKeyId           string `mapstructure:"kms_key_id"`
+}
+
+type BlockDevices struct {
+	OMIBlockDevices    `mapstructure:",squash"`
+	LaunchBlockDevices `mapstructure:",squash"`
+}
+
+type OMIBlockDevices struct {
+	OMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings"`
+}
+
+type LaunchBlockDevices struct {
+	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
+}
+
+func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
+	var blockDevices []*oapi.BlockDeviceMapping
+
+	for _, blockDevice := range b {
+		mapping := &oapi.BlockDeviceMapping{
+			DeviceName: blockDevice.DeviceName,
+		}
+
+		if blockDevice.NoDevice {
+			mapping.NoDevice = ""
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualDeviceName = blockDevice.VirtualName
+			}
+		} else {
+			bsu := oapi.Bsu{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+			}
+
+			if blockDevice.VolumeType != "" {
+				bsu.VolumeType = blockDevice.VolumeType
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				bsu.VolumeSize = blockDevice.VolumeSize
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				bsu.Iops = blockDevice.IOPS
+			}
+
+			if blockDevice.SnapshotId != "" {
+				bsu.SnapshotId = blockDevice.SnapshotId
+			}
+
+			//missing
+			//BlockDevice Encrypted
+			//KmsKeyId
+
+			mapping.Bsu = bsu
+		}
+
+		blockDevices = append(blockDevices, mapping)
+	}
+	return blockDevices
+}
+
+func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
+	if b.DeviceName == "" {
+		return fmt.Errorf("The `device_name` must be specified " +
+			"for every device in the block device mapping.")
+	}
+	// Warn that encrypted must be true when setting kms_key_id
+	// if b.KmsKeyId != "" && b.Encrypted == false {
+	// 	return fmt.Errorf("The device %v, must also have `encrypted: "+
+	// 		"true` when setting a kms_key_id.", b.DeviceName)
+	// }
+	return nil
+}
+
+func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
+	for _, d := range b.OMIMappings {
+		if err := d.Prepare(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("OMIMapping: %s", err.Error()))
+		}
+	}
+	for _, d := range b.LaunchMappings {
+		if err := d.Prepare(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("LaunchMapping: %s", err.Error()))
+		}
+	}
+	return errs
+}
+
+func (b *OMIBlockDevices) BuildOMIDevices() []*oapi.BlockDeviceMapping {
+	return buildBlockDevices(b.OMIMappings)
+}
+
+func (b *LaunchBlockDevices) BuildLaunchDevices() []*oapi.BlockDeviceMapping {
+	return buildBlockDevices(b.LaunchMappings)
+}
