@@ -17,6 +17,7 @@ const BuilderId = "digitalonus.osc.bsusurrogate"
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	osccommon.AccessConfig `mapstructure:",squash"`
+	osccommon.RunConfig    `mapstructure:",squash"`
 	ctx                    interpolate.Context
 }
 
