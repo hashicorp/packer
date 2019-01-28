@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	commonhelper "github.com/hashicorp/packer/helper/common"
 )
@@ -43,6 +44,7 @@ func (v VagrantCloudClient) New(baseUrl string, token string) (*VagrantCloudClie
 		BaseURL:     baseUrl,
 		AccessToken: token,
 	}
+	c.client.Timeout = 120 * time.Minute
 
 	return c, c.ValidateAuthentication()
 }
