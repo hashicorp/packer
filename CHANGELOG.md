@@ -8,6 +8,8 @@
     per builder [GH-7080]
 * builder/amazon: don't Cleanup Temp Keys when there is no communicator to
     avoid a panic [GH-7100] [GH-7095]
+* builder/amazon: Don't try to guess region from metadata if not set & update
+    aws-sdk-go [GH-7230]
 * builder/amazon: Import error messages should now contain reason for failure
     [GH-7207]
 * builder/azure: add certificate authentication [GH-7189]
@@ -19,14 +21,20 @@
 * builder/openstack: Add `volume_size` option [GH-7130]
 * builder/openstack: Don't require network v2 [GH-6933]
 * builder/openstack: Support for tagging new images [GH-7037]
+* builder/qemu: Add configuration options to specify cpu count and memory size
+    [GH-7156]
 * builder/qemu: Add support for whpx accelerator to qemu builder [GH-7151]
+* builder/vmware: Escape query as suggested in issue #7200 [GH-7223]
 * core/shell: Add env vars "PACKER_HTTP_IP" and "PACKER_HTTP_PORT" to shell
     provisioners [GH-7075]
+* core: allow to use `-except` on post-processors [GH-7183]
 * core: Clean up internal handling and creation of temporary directories
     [GH-7102]
 * core: Deprecate mitchellh/go-homedir package in favor of os/user [GH-7062]
 * core: Download checksum match failures will now log the received checksum.
     [GH-7210]
+* core: Explicitly set ProxyFromEnvironment in httpclients when creating an aws
+    session [GH-7226]
 * core: make packer inspect not print sensitive variables [GH-7084]
 * post-processor/google: Add new `guest-os-features` option. [GH-7218]
 * postprocessor/docker-import: Added `change` support [GH-7127]
