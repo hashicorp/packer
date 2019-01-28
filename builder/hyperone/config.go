@@ -57,6 +57,19 @@ type Config struct {
 	PrivateIP string `mapstructure:"private_ip"`
 	PublicIP  string `mapstructure:"public_ip"`
 
+	ChrootDisk           bool       `mapstructure:"chroot_disk"`
+	ChrootDiskSize       float32    `mapstructure:"chroot_disk_size"`
+	ChrootDiskType       string     `mapstructure:"chroot_disk_type"`
+	ChrootMountPath      string     `mapstructure:"chroot_mount_path"`
+	ChrootMounts         [][]string `mapstructure:"chroot_mounts"`
+	ChrootCopyFiles      []string   `mapstructure:"chroot_copy_files"`
+	ChrootCommandWrapper string     `mapstructure:"chroot_command_wrapper"`
+
+	MountOptions      []string `mapstructure:"mount_options"`
+	MountPartition    string   `mapstructure:"mount_partition"`
+	PreMountCommands  []string `mapstructure:"pre_mount_commands"`
+	PostMountCommands []string `mapstructure:"post_mount_commands"`
+
 	SSHKeys  []string `mapstructure:"ssh_keys"`
 	UserData string   `mapstructure:"user_data"`
 
@@ -74,6 +87,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_command",
+				"chroot_command_wrapper",
+				"post_mount_commands",
+				"pre_mount_commands",
+				"mount_path",
 			},
 		},
 	}, raws...)
@@ -138,6 +155,45 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DiskType = defaultDiskType
 	}
 
+	if c.ChrootCommandWrapper == "" {
+		c.ChrootCommandWrapper = "{{.Command}}"
+	}
+
+	if c.ChrootDiskSize == 0 {
+		c.ChrootDiskSize = c.DiskSize
+	}
+
+	if c.ChrootDiskType == "" {
+		c.ChrootDiskType = c.DiskType
+	}
+
+	if c.ChrootMountPath == "" {
+		c.ChrootMountPath = "/mnt/packer-hyperone-volumes/{{timestamp}}"
+	}
+
+	if c.ChrootMounts == nil {
+		c.ChrootMounts = make([][]string, 0)
+	}
+
+	if len(c.ChrootMounts) == 0 {
+		c.ChrootMounts = [][]string{
+			{"proc", "proc", "/proc"},
+			{"sysfs", "sysfs", "/sys"},
+			{"bind", "/dev", "/dev"},
+			{"devpts", "devpts", "/dev/pts"},
+			{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
+		}
+	}
+
+	if c.ChrootCopyFiles == nil {
+		c.ChrootCopyFiles = []string{"/etc/resolv.conf"}
+	}
+
+	if c.MountPartition == "" {
+		c.MountPartition = "1"
+	}
+
+	// Validation
 	var errs *packer.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
@@ -157,6 +213,20 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.SourceImage == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("source image is required"))
+	}
+
+	if c.ChrootDisk {
+		if len(c.PreMountCommands) == 0 {
+			errs = packer.MultiErrorAppend(errs, errors.New("pre-mount commands are required for chroot disk"))
+		}
+	}
+
+	for _, mounts := range c.ChrootMounts {
+		if len(mounts) != 3 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("each chroot_mounts entry should have three elements"))
+			break
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

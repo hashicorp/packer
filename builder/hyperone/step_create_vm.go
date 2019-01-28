@@ -13,6 +13,10 @@ type stepCreateVM struct {
 	vmID string
 }
 
+const (
+	chrootDiskName = "packer-chroot-disk"
+)
+
 func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*openapi.APIClient)
 	ui := state.Get("ui").(packer.Ui)
@@ -26,17 +30,27 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	var sshKeys = []string{sshKey}
 	sshKeys = append(sshKeys, config.SSHKeys...)
 
-	options := openapi.VmCreate{
-		Name:    config.VmName,
-		Image:   config.SourceImage,
-		Service: config.VmFlavour,
-		SshKeys: sshKeys,
-		Disk: []openapi.VmCreateDisk{
-			{
-				Service: config.DiskType,
-				Size:    config.DiskSize,
-			},
+	disks := []openapi.VmCreateDisk{
+		{
+			Service: config.DiskType,
+			Size:    config.DiskSize,
 		},
+	}
+
+	if config.ChrootDisk {
+		disks = append(disks, openapi.VmCreateDisk{
+			Service: config.ChrootDiskType,
+			Size:    config.ChrootDiskSize,
+			Name:    chrootDiskName,
+		})
+	}
+
+	options := openapi.VmCreate{
+		Name:         config.VmName,
+		Image:        config.SourceImage,
+		Service:      config.VmFlavour,
+		SshKeys:      sshKeys,
+		Disk:         disks,
 		Netadp:       []openapi.VmCreateNetadp{netAdapter},
 		UserMetadata: config.UserData,
 		Tag:          config.VmTags,
@@ -63,7 +77,11 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	var diskIDs []string
 	for _, hdd := range hdds {
-		diskIDs = append(diskIDs, hdd.Disk.Id)
+		if hdd.Disk.Name == chrootDiskName {
+			state.Put("chroot_disk_id", hdd.Disk.Id)
+		} else {
+			diskIDs = append(diskIDs, hdd.Disk.Id)
+		}
 	}
 
 	state.Put("disk_ids", diskIDs)
