@@ -5,6 +5,7 @@ package bsusurrogate
 import (
 	"log"
 
+	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -14,8 +15,9 @@ import (
 const BuilderId = "digitalonus.osc.bsusurrogate"
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	ctx                 interpolate.Context
+	common.PackerConfig    `mapstructure:",squash"`
+	osccommon.AccessConfig `mapstructure:",squash"`
+	ctx                    interpolate.Context
 }
 
 type Builder struct {
