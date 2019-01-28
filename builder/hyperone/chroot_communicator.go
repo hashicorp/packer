@@ -1,0 +1,54 @@
+package hyperone
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strconv"
+
+	"github.com/hashicorp/packer/packer"
+)
+
+type CommandWrapper func(string) (string, error)
+
+// ChrootCommunicator works as a wrapper on SSHCommunicator, modyfing paths in
+// flight to be run in a chroot.
+type ChrootCommunicator struct {
+	Chroot     string
+	CmdWrapper CommandWrapper
+	Wrapped    packer.Communicator
+}
+
+func (c *ChrootCommunicator) Start(cmd *packer.RemoteCmd) error {
+	command := strconv.Quote(cmd.Command)
+	chrootCommand, err := c.CmdWrapper(
+		fmt.Sprintf("sudo chroot %s /bin/sh -c %s", c.Chroot, command))
+	if err != nil {
+		return err
+	}
+
+	cmd.Command = chrootCommand
+
+	return c.Wrapped.Start(cmd)
+}
+
+func (c *ChrootCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
+	dst = filepath.Join(c.Chroot, dst)
+	return c.Wrapped.Upload(dst, r, fi)
+}
+
+func (c *ChrootCommunicator) UploadDir(dst string, src string, exclude []string) error {
+	dst = filepath.Join(c.Chroot, dst)
+	return c.Wrapped.UploadDir(dst, src, exclude)
+}
+
+func (c *ChrootCommunicator) Download(src string, w io.Writer) error {
+	src = filepath.Join(c.Chroot, src)
+	return c.Wrapped.Download(src, w)
+}
+
+func (c *ChrootCommunicator) DownloadDir(src string, dst string, exclude []string) error {
+	src = filepath.Join(c.Chroot, src)
+	return c.Wrapped.DownloadDir(src, dst, exclude)
+}
