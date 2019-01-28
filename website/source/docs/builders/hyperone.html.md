@@ -39,9 +39,9 @@ The `project` field is required when using this method.
 
 ### User session by SSH key
 
-If you've added an SSH key as a credential to your project and the private key
-is added to the ssh-agent on your local machine, you can authenticate by
-setting just the platform login (your e-mail address):
+If you've added an SSH key as a credential to your user account and the
+private key is added to the ssh-agent on your local machine, you can
+authenticate by setting just the platform login (your e-mail address):
 
 ```json
 {
