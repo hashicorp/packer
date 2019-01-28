@@ -18,6 +18,7 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	osccommon.AccessConfig `mapstructure:",squash"`
 	osccommon.RunConfig    `mapstructure:",squash"`
+	osccommon.BlockDevices `mapstructure:",squash"`
 	ctx                    interpolate.Context
 }
 
