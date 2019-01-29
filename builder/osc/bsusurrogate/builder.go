@@ -20,7 +20,10 @@ type Config struct {
 	osccommon.RunConfig    `mapstructure:",squash"`
 	osccommon.BlockDevices `mapstructure:",squash"`
 	osccommon.OMIConfig    `mapstructure:",squash"`
-	ctx                    interpolate.Context
+
+	RootDevice RootBlockDevice `mapstructure:"ami_root_device"`
+
+	ctx interpolate.Context
 }
 
 type Builder struct {
