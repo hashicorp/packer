@@ -8,9 +8,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-//Temporal
-type TagMap map[string]string
-
 // OMIConfig is for common configuration related to creating OMIs.
 type OMIConfig struct {
 	OMIName                 string            `mapstructure:"ami_name"`
