@@ -21,7 +21,8 @@ type Config struct {
 	osccommon.BlockDevices `mapstructure:",squash"`
 	osccommon.OMIConfig    `mapstructure:",squash"`
 
-	RootDevice RootBlockDevice `mapstructure:"ami_root_device"`
+	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
+	VolumeRunTags osccommon.TagMap `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
