@@ -1,6 +1,9 @@
 package hyperone
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -14,6 +17,7 @@ import (
 const (
 	sshAddress   = "api.hyperone.com:22"
 	sshSubsystem = "rbx-auth"
+	hostKeyHash  = "3e2aa423d42d7e8b14d50625512c8ac19db767ed"
 )
 
 type sshData struct {
@@ -33,7 +37,14 @@ func fetchTokenBySSH(user string) (string, error) {
 		Auth: []ssh.AuthMethod{
 			sshAgent(),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			hash := sha1Sum(key)
+			if hash != hostKeyHash {
+				return fmt.Errorf("invalid host key hash: %s", hash)
+			}
+
+			return nil
+		},
 	}
 
 	client, err := ssh.Dial("tcp", sshAddress, sshConfig)
@@ -70,4 +81,9 @@ func fetchTokenBySSH(user string) (string, error) {
 	}
 
 	return data.ID, nil
+}
+
+func sha1Sum(pubKey ssh.PublicKey) string {
+	sum := sha1.Sum(pubKey.Marshal())
+	return hex.EncodeToString(sum[:])
 }
