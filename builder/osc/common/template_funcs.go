@@ -1,6 +1,9 @@
 package common
 
-import "bytes"
+import (
+	"bytes"
+	"html/template"
+)
 
 func isalphanumeric(b byte) bool {
 	if '0' <= b && b <= '9' {
@@ -27,4 +30,8 @@ func templateCleanOMIName(s string) string {
 		}
 	}
 	return string(newb[:])
+}
+
+var TemplateFuncs = template.FuncMap{
+	"clean_omi_name": templateCleanOMIName,
 }
