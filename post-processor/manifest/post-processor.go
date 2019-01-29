@@ -18,8 +18,9 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	OutputPath string `mapstructure:"output"`
-	StripPath  bool   `mapstructure:"strip_path"`
+	OutputPath string            `mapstructure:"output"`
+	StripPath  bool              `mapstructure:"strip_path"`
+	CustomData map[string]string `mapstructure:"custom_data"`
 	ctx        interpolate.Context
 }
 
@@ -75,6 +76,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 		artifact.ArtifactFiles = append(artifact.ArtifactFiles, af)
 	}
 	artifact.ArtifactId = source.Id()
+	artifact.CustomData = p.config.CustomData
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
 	artifact.BuildTime = time.Now().Unix()
