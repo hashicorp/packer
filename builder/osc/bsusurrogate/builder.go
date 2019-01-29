@@ -19,6 +19,7 @@ type Config struct {
 	osccommon.AccessConfig `mapstructure:",squash"`
 	osccommon.RunConfig    `mapstructure:",squash"`
 	osccommon.BlockDevices `mapstructure:",squash"`
+	osccommon.OMIConfig    `mapstructure:",squash"`
 	ctx                    interpolate.Context
 }
 
