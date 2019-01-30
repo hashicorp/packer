@@ -1,4 +1,6 @@
-## 1.3.4 (upcoming)
+## 1.3.5 (upcoming)
+
+## 1.3.4 (January 30, 2019)
 ### IMPROVEMENTS:
 * builder/alicloud: delete copied image and snapshots if corresponding options
     are specified [GH-7050]
