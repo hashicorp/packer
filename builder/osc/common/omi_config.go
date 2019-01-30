@@ -136,7 +136,7 @@ func (c *OMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
 				// make sure we don't try to copy to the region we originally
 				// create the OMI in.
-				log.Printf("Cannot copy OMI to AWS session region '%s', deleting it from `omi_regions`.", region)
+				log.Printf("Cannot copy OMI to OUTSCALE session region '%s', deleting it from `omi_regions`.", region)
 				continue
 			}
 			regions = append(regions, region)
@@ -147,7 +147,6 @@ func (c *OMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 	return errs
 }
 
-// See https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html
 func validateKmsKey(kmsKey string) (valid bool) {
 	kmsKeyIdPattern := `[a-f0-9-]+$`
 	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
