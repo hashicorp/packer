@@ -10,13 +10,13 @@ import (
 
 // OMIConfig is for common configuration related to creating OMIs.
 type OMIConfig struct {
-	OMIName                 string            `mapstructure:"ami_name"`
-	OMIDescription          string            `mapstructure:"ami_description"`
-	OMIVirtType             string            `mapstructure:"ami_virtualization_type"`
-	OMIUsers                []string          `mapstructure:"ami_users"`
-	OMIGroups               []string          `mapstructure:"ami_groups"`
-	OMIProductCodes         []string          `mapstructure:"ami_product_codes"`
-	OMIRegions              []string          `mapstructure:"ami_regions"`
+	OMIName                 string            `mapstructure:"omi_name"`
+	OMIDescription          string            `mapstructure:"omi_description"`
+	OMIVirtType             string            `mapstructure:"omi_virtualization_type"`
+	OMIUsers                []string          `mapstructure:"omi_users"`
+	OMIGroups               []string          `mapstructure:"omi_groups"`
+	OMIProductCodes         []string          `mapstructure:"omi_product_codes"`
+	OMIRegions              []string          `mapstructure:"omi_regions"`
 	OMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	OMITags                 TagMap            `mapstructure:"tags"`
 	OMIENASupport           *bool             `mapstructure:"ena_support"`
@@ -44,15 +44,15 @@ func (c *OMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	var errs []error
 
 	if c.OMIName == "" {
-		errs = append(errs, fmt.Errorf("ami_name must be specified"))
+		errs = append(errs, fmt.Errorf("omi_name must be specified"))
 	}
 
 	// Make sure that if we have region_kms_key_ids defined,
-	//  the regions in region_kms_key_ids are also in ami_regions
+	//  the regions in region_kms_key_ids are also in omi_regions
 	if len(c.OMIRegionKMSKeyIDs) > 0 {
 		for kmsKeyRegion := range c.OMIRegionKMSKeyIDs {
 			if !stringInSlice(c.OMIRegions, kmsKeyRegion) {
-				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
+				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in omi_regions", kmsKeyRegion))
 			}
 		}
 	}
@@ -94,15 +94,15 @@ func (c *OMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	if len(c.OMIName) < 3 || len(c.OMIName) > 128 {
-		errs = append(errs, fmt.Errorf("ami_name must be between 3 and 128 characters long"))
+		errs = append(errs, fmt.Errorf("omi_name must be between 3 and 128 characters long"))
 	}
 
 	if c.OMIName != templateCleanOMIName(c.OMIName) {
 		errs = append(errs, fmt.Errorf("OMIName should only contain "+
 			"alphanumeric characters, parentheses (()), square brackets ([]), spaces "+
 			"( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs "+
-			"(@), or underscores(_). You can use the `clean_ami_name` template "+
-			"filter to automatically clean your ami name."))
+			"(@), or underscores(_). You can use the `clean_omi_name` template "+
+			"filter to automatically clean your omi name."))
 	}
 
 	if len(errs) > 0 {
@@ -127,16 +127,16 @@ func (c *OMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 			regionSet[region] = struct{}{}
 
 			// Make sure that if we have region_kms_key_ids defined,
-			// the regions in ami_regions are also in region_kms_key_ids
+			// the regions in omi_regions are also in region_kms_key_ids
 			if len(c.OMIRegionKMSKeyIDs) > 0 {
 				if _, ok := c.OMIRegionKMSKeyIDs[region]; !ok {
-					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
+					errs = append(errs, fmt.Errorf("Region %s is in omi_regions but not in region_kms_key_ids", region))
 				}
 			}
 			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
 				// make sure we don't try to copy to the region we originally
 				// create the OMI in.
-				log.Printf("Cannot copy OMI to AWS session region '%s', deleting it from `ami_regions`.", region)
+				log.Printf("Cannot copy OMI to AWS session region '%s', deleting it from `omi_regions`.", region)
 				continue
 			}
 			regions = append(regions, region)

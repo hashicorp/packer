@@ -27,7 +27,7 @@ type Config struct {
 	osccommon.BlockDevices `mapstructure:",squash"`
 	osccommon.OMIConfig    `mapstructure:",squash"`
 
-	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
+	RootDevice    RootBlockDevice  `mapstructure:"omi_root_device"`
 	VolumeRunTags osccommon.TagMap `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
@@ -39,6 +39,7 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+
 	b.config.ctx.Funcs = osccommon.TemplateFuncs
 
 	err := config.Decode(&b.config, &config.DecodeOpts{
@@ -73,7 +74,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
 
 	if b.config.OMIVirtType == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("ami_virtualization_type is required."))
+		errs = packer.MultiErrorAppend(errs, errors.New("omi_virtualization_type is required."))
 	}
 
 	foundRootVolume := false
@@ -126,10 +127,37 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	steps := []multistep.Step{}
+	//VMStep
+
+	//omiDevices := b.config.BuildOMIDevices()
+	//launchDevices := b.config.BuildLaunchDevices()
+
+	steps := []multistep.Step{
+		&osccommon.StepPreValidate{
+			DestOmiName:     b.config.OMIName,
+			ForceDeregister: b.config.OMIForceDeregister,
+		},
+	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
+
+	// If there was an error, return that
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
+	}
+
+	//Build the artifact
+	// if omis, ok := state.GetOk("omis"); ok {
+	// 	// Build the artifact and return it
+	// 	artifact := &awscommon.Artifact{
+	// 		Amis:           omis.(map[string]string),
+	// 		BuilderIdValue: BuilderId,
+	// 		Session:        session,
+	// 	}
+
+	// 	return artifact, nil
+	// }
 
 	return nil, nil
 }
