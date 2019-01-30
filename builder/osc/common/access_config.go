@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/outscale/osc-go/oapi"
@@ -33,6 +34,24 @@ type AccessConfig struct {
 func (c *AccessConfig) Config() (*oapi.Config, error) {
 	if c.clientConfig != nil {
 		return c.clientConfig, nil
+	}
+
+	//Check env variables if access configuration is not set.
+
+	if c.AccessKey == "" {
+		c.AccessKey = os.Getenv("OUTSCALE_ACCESSKEYID")
+	}
+
+	if c.SecretKey == "" {
+		c.SecretKey = os.Getenv("OUTSCALE_SECRETKEYID")
+	}
+
+	if c.RawRegion == "" {
+		c.RawRegion = os.Getenv("OUTSCALE_REGION")
+	}
+
+	if c.CustomEndpoint == "" {
+		c.CustomEndpoint = os.Getenv("OUTSCALE_OAPI_URL")
 	}
 
 	config := &oapi.Config{
