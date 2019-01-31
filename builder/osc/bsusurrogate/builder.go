@@ -153,6 +153,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SubnetFilter:        b.config.SubnetFilter,
 			SubregionName:       b.config.Subregion,
 		},
+		&osccommon.StepKeyPair{
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.RunConfig.Comm,
+			DebugKeyPath: fmt.Sprintf("oapi_%s.pem", b.config.PackerBuildName),
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
