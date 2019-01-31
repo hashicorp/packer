@@ -144,6 +144,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			OmiFilters:               b.config.SourceOmiFilter,
 			OMIVirtType:              b.config.OMIVirtType, //TODO: Remove if it is not used
 		},
+		&osccommon.StepNetworkInfo{
+			NetId:               b.config.NetId,
+			NetFilter:           b.config.NetFilter,
+			SecurityGroupIds:    b.config.SecurityGroupIds,
+			SecurityGroupFilter: b.config.SecurityGroupFilter,
+			SubnetId:            b.config.SubnetId,
+			SubnetFilter:        b.config.SubnetFilter,
+			SubregionName:       b.config.Subregion,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
