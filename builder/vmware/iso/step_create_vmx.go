@@ -423,10 +423,17 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		s.tempDir = vmxDir
 	}
 
-	/// Now to handle options that will modify the template
+	/// Now to handle options that will modify the template without using "vmxTemplateData"
 	vmxData := vmwcommon.ParseVMX(vmxContents)
+
+	// If no cpus were specified, then remove the entry to use the default
 	if vmxData["numvcpus"] == "" {
 		delete(vmxData, "numvcpus")
+	}
+
+	// If some number of cores were specified, then update "cpuid.coresPerSocket" with the requested value
+	if config.HWConfig.CoreCount > 0 {
+		vmxData["cpuid.corespersocket"] = strconv.Itoa(config.HWConfig.CoreCount)
 	}
 
 	/// Write the vmxData to the vmxPath
