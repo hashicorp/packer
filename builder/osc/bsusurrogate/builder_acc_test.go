@@ -27,7 +27,7 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "eu-west-2",
 		"vm_type": "m3.medium",
-		"source_omi": "ami-76b2a71e",
+		"source_omi": "ami-46260446",
 		"ssh_username": "ubuntu",
 		"omi_name": "packer-test {{timestamp}}",
 		"omi_virtualization_type": "hvm",

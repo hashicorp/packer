@@ -38,7 +38,17 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	if len(resp.OK.Images) > 0 {
+	//FIXME: Remove when the oAPI filters works
+	images := make([]oapi.Image, 0)
+
+	for _, omi := range resp.OK.Images {
+		if omi.ImageName == s.DestOmiName {
+			images = append(images, omi)
+		}
+	}
+
+	//if len(resp.OK.Images) > 0 {
+	if len(images) > 0 {
 		err := fmt.Errorf("Error: name conflicts with an existing OMI: %s", resp.OK.Images[0].ImageId)
 		state.Put("error", err)
 		ui.Error(err.Error())
