@@ -30,7 +30,7 @@ func (d *OmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	Filters  map[*string]*string
+	Filters  map[string]string
 	MostFree bool `mapstructure:"most_free"`
 	Random   bool `mapstructure:"random"`
 }
@@ -40,7 +40,7 @@ func (d *SubnetFilterOptions) Empty() bool {
 }
 
 type NetFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
 }
 
 func (d *NetFilterOptions) Empty() bool {
