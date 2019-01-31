@@ -137,6 +137,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DestOmiName:     b.config.OMIName,
 			ForceDeregister: b.config.OMIForceDeregister,
 		},
+		&osccommon.StepSourceOMIInfo{
+			SourceOmi:                b.config.SourceOmi,
+			EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
+			EnableOMIENASupport:      b.config.OMIENASupport,
+			OmiFilters:               b.config.SourceOmiFilter,
+			OMIVirtType:              b.config.OMIVirtType, //TODO: Remove if it is not used
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
