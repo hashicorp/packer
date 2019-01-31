@@ -71,7 +71,7 @@ func TestRunConfigPrepare_SourceOmiFilterOwnersBlank(t *testing.T) {
 	c := testConfigFilter()
 	filter_key := "name"
 	filter_value := "foo"
-	c.SourceOmiFilter = OmiFilterOptions{Filters: map[*string]*string{&filter_key: &filter_value}}
+	c.SourceOmiFilter = OmiFilterOptions{Filters: map[string]string{filter_key: filter_value}}
 	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("Should error if Owners is not specified)")
 	}
@@ -82,7 +82,7 @@ func TestRunConfigPrepare_SourceOmiFilterGood(t *testing.T) {
 	owner := "123"
 	filter_key := "name"
 	filter_value := "foo"
-	goodFilter := OmiFilterOptions{Owners: []*string{&owner}, Filters: map[*string]*string{&filter_key: &filter_value}}
+	goodFilter := OmiFilterOptions{Owners: []string{owner}, Filters: map[string]string{filter_key: filter_value}}
 	c.SourceOmiFilter = goodFilter
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)

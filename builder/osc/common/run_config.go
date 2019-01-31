@@ -16,8 +16,8 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type OmiFilterOptions struct {
-	Filters    map[*string]*string
-	Owners     []*string
+	Filters    map[string]string
+	Owners     []string
 	MostRecent bool `mapstructure:"most_recent"`
 }
 
