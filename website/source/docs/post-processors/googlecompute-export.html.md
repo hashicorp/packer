@@ -34,8 +34,38 @@ permissions to the GCS `paths`.
 
 ### Optional
 
+-   `account_file` (string) - The JSON file containing your account
+    credentials. If specified, this take precedence over `googlecompute`
+    builder authentication method.
+
+-   `disk_size` (number) - The size of the export instances disk, this disk
+    is unused for the export but a larger size increase `pd-ssd` read speed.
+    This defaults to `200`, which is 200GB.
+
+-   `disk_type` (string) - Type of disk used to back export instance, like
+    `pd-ssd` or `pd-standard`. Defaults to `pd-ssd`.
+
 -   `keep_input_artifact` (boolean) - If true, do not delete the Google Compute
     Engine (GCE) image being exported.
+
+-   `machine_type` (string) - The export instance machine type. Defaults
+    to `"n1-highcpu-4"`.
+
+-   `network` (string) - The Google Compute network id or URL to use for the
+    export instance. Defaults to `"default"`. If the value is not a URL, it
+    will be interpolated to
+    `projects/((network_project_id))/global/networks/((network))`. This value
+    is not required if a `subnet` is specified.
+
+-   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
+    the export instance. Only required if the `network` has been created with
+    custom subnetting. Note, the region of the subnetwork must match the
+    `zone` in which the VM is launched. If the value is not a URL,
+    it will be interpolated to
+    `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
+
+-   `zone` (string) - The zone in which to launch the export instance. Defaults
+    to `googlecompute` builder zone. Example: `"us-central1-a"`
 
 ## Basic Example
 

@@ -34,7 +34,7 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
+func NewClientGCE(a *AccountFile) (*http.Client, error) {
 	var err error
 
 	var client *http.Client
@@ -74,6 +74,15 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 		//    (In this final case any provided scopes are ignored.)
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
+	client, err := NewClientGCE(a)
 	if err != nil {
 		return nil, err
 	}
