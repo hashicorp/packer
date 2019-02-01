@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ func (p *AddNiciraNvpDeviceParams) toURLValues() url.Values {
 	if v, found := p.p["hostname"]; found {
 		u.Set("hostname", v.(string))
 	}
+	if v, found := p.p["l2gatewayserviceuuid"]; found {
+		u.Set("l2gatewayserviceuuid", v.(string))
+	}
 	if v, found := p.p["l3gatewayserviceuuid"]; found {
 		u.Set("l3gatewayserviceuuid", v.(string))
 	}
@@ -57,6 +60,14 @@ func (p *AddNiciraNvpDeviceParams) SetHostname(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["hostname"] = v
+	return
+}
+
+func (p *AddNiciraNvpDeviceParams) SetL2gatewayserviceuuid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["l2gatewayserviceuuid"] = v
 	return
 }
 
@@ -144,18 +155,20 @@ func (s *NiciraNVPService) AddNiciraNvpDevice(p *AddNiciraNvpDeviceParams) (*Add
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type AddNiciraNvpDeviceResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid,omitempty"`
-	Niciradevicename     string `json:"niciradevicename,omitempty"`
-	Nvpdeviceid          string `json:"nvpdeviceid,omitempty"`
-	Physicalnetworkid    string `json:"physicalnetworkid,omitempty"`
-	Provider             string `json:"provider,omitempty"`
-	Transportzoneuuid    string `json:"transportzoneuuid,omitempty"`
+	JobID                string `json:"jobid"`
+	Hostname             string `json:"hostname"`
+	L2gatewayserviceuuid string `json:"l2gatewayserviceuuid"`
+	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid"`
+	Niciradevicename     string `json:"niciradevicename"`
+	Nvpdeviceid          string `json:"nvpdeviceid"`
+	Physicalnetworkid    string `json:"physicalnetworkid"`
+	Provider             string `json:"provider"`
+	Transportzoneuuid    string `json:"transportzoneuuid"`
 }
 
 type DeleteNiciraNvpDeviceParams struct {
@@ -216,13 +229,14 @@ func (s *NiciraNVPService) DeleteNiciraNvpDevice(p *DeleteNiciraNvpDeviceParams)
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type DeleteNiciraNvpDeviceResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }
 
 type ListNiciraNvpDevicesParams struct {
@@ -313,6 +327,7 @@ func (s *NiciraNVPService) ListNiciraNvpDevices(p *ListNiciraNvpDevicesParams) (
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -322,11 +337,12 @@ type ListNiciraNvpDevicesResponse struct {
 }
 
 type NiciraNvpDevice struct {
-	Hostname             string `json:"hostname,omitempty"`
-	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid,omitempty"`
-	Niciradevicename     string `json:"niciradevicename,omitempty"`
-	Nvpdeviceid          string `json:"nvpdeviceid,omitempty"`
-	Physicalnetworkid    string `json:"physicalnetworkid,omitempty"`
-	Provider             string `json:"provider,omitempty"`
-	Transportzoneuuid    string `json:"transportzoneuuid,omitempty"`
+	Hostname             string `json:"hostname"`
+	L2gatewayserviceuuid string `json:"l2gatewayserviceuuid"`
+	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid"`
+	Niciradevicename     string `json:"niciradevicename"`
+	Nvpdeviceid          string `json:"nvpdeviceid"`
+	Physicalnetworkid    string `json:"physicalnetworkid"`
+	Provider             string `json:"provider"`
+	Transportzoneuuid    string `json:"transportzoneuuid"`
 }

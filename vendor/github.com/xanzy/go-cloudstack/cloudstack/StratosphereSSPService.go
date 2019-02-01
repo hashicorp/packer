@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -121,12 +121,84 @@ func (s *StratosphereSSPService) AddStratosphereSsp(p *AddStratosphereSspParams)
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type AddStratosphereSspResponse struct {
-	Hostid string `json:"hostid,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Url    string `json:"url,omitempty"`
-	Zoneid string `json:"zoneid,omitempty"`
+	Hostid string `json:"hostid"`
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Zoneid string `json:"zoneid"`
+}
+
+type DeleteStratosphereSspParams struct {
+	p map[string]interface{}
+}
+
+func (p *DeleteStratosphereSspParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["hostid"]; found {
+		u.Set("hostid", v.(string))
+	}
+	return u
+}
+
+func (p *DeleteStratosphereSspParams) SetHostid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["hostid"] = v
+	return
+}
+
+// You should always use this function to get a new DeleteStratosphereSspParams instance,
+// as then you are sure you have configured all required params
+func (s *StratosphereSSPService) NewDeleteStratosphereSspParams(hostid string) *DeleteStratosphereSspParams {
+	p := &DeleteStratosphereSspParams{}
+	p.p = make(map[string]interface{})
+	p.p["hostid"] = hostid
+	return p
+}
+
+// Removes stratosphere ssp server
+func (s *StratosphereSSPService) DeleteStratosphereSsp(p *DeleteStratosphereSspParams) (*DeleteStratosphereSspResponse, error) {
+	resp, err := s.cs.newRequest("deleteStratosphereSsp", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DeleteStratosphereSspResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type DeleteStratosphereSspResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteStratosphereSspResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteStratosphereSspResponse
+	return json.Unmarshal(b, (*alias)(r))
 }

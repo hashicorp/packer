@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -156,6 +156,7 @@ func (s *SystemCapacityService) ListCapacity(p *ListCapacityParams) (*ListCapaci
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -165,14 +166,16 @@ type ListCapacityResponse struct {
 }
 
 type Capacity struct {
-	Capacitytotal int64  `json:"capacitytotal,omitempty"`
-	Capacityused  int64  `json:"capacityused,omitempty"`
-	Clusterid     string `json:"clusterid,omitempty"`
-	Clustername   string `json:"clustername,omitempty"`
-	Percentused   string `json:"percentused,omitempty"`
-	Podid         string `json:"podid,omitempty"`
-	Podname       string `json:"podname,omitempty"`
-	Type          int    `json:"type,omitempty"`
-	Zoneid        string `json:"zoneid,omitempty"`
-	Zonename      string `json:"zonename,omitempty"`
+	Capacityallocated int64  `json:"capacityallocated"`
+	Capacitytotal     int64  `json:"capacitytotal"`
+	Capacityused      int64  `json:"capacityused"`
+	Clusterid         string `json:"clusterid"`
+	Clustername       string `json:"clustername"`
+	Name              string `json:"name"`
+	Percentused       string `json:"percentused"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Type              int    `json:"type"`
+	Zoneid            string `json:"zoneid"`
+	Zonename          string `json:"zonename"`
 }
