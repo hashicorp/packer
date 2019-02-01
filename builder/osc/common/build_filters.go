@@ -12,19 +12,19 @@ func buildNetFilters(input map[string]string) oapi.FiltersNet {
 	for k, v := range input {
 		filterValue := []string{v}
 		switch name := k; name {
-		case "ip_range":
+		case "ip-range":
 			filters.IpRanges = filterValue
-		case "dhcp_options_set_id":
+		case "dhcp-options-set-id":
 			filters.DhcpOptionsSetIds = filterValue
-		case "is_default":
+		case "is-default":
 			if isDefault, err := strconv.ParseBool(v); err == nil {
 				filters.IsDefault = isDefault
 			}
 		case "state":
 			filters.States = filterValue
-		case "tag_key":
+		case "tag-key":
 			filters.TagKeys = filterValue
-		case "tag_value":
+		case "tag-value":
 			filters.TagValues = filterValue
 		default:
 			log.Printf("[Debug] Unknown Filter Name: %s.", name)
@@ -38,19 +38,19 @@ func buildSubnetFilters(input map[string]string) oapi.FiltersSubnet {
 	for k, v := range input {
 		filterValue := []string{v}
 		switch name := k; name {
-		case "available_ips_counts":
+		case "available-ips-counts":
 			if ipCount, err := strconv.Atoi(v); err == nil {
 				filters.AvailableIpsCounts = []int64{int64(ipCount)}
 			}
-		case "ip_ranges":
+		case "ip-ranges":
 			filters.IpRanges = filterValue
-		case "net_ids":
+		case "net-ids":
 			filters.NetIds = filterValue
 		case "states":
 			filters.States = filterValue
-		case "subnet_ids":
+		case "subnet-ids":
 			filters.SubnetIds = filterValue
-		case "sub_region_names":
+		case "sub-region-names":
 			filters.SubregionNames = filterValue
 		default:
 			log.Printf("[Debug] Unknown Filter Name: %s.", name)
@@ -65,24 +65,89 @@ func buildOMIFilters(input map[string]string) oapi.FiltersImage {
 		filterValue := []string{v}
 
 		switch name := k; name {
-		case "account_aliases":
+		case "account-aliases":
 			filters.AccountAliases = filterValue
-		case "account_ids":
+		case "account-ids":
 			filters.AccountIds = filterValue
 		case "architectures":
 			filters.Architectures = filterValue
-		case "image_ids":
+		case "image-ids":
 			filters.ImageIds = filterValue
-		case "image_names":
+		case "image-names":
 			filters.ImageNames = filterValue
-		case "image_types":
+		case "image-types":
 			filters.ImageTypes = filterValue
-		case "virtualization_types":
+		case "virtualization-types":
 			filters.VirtualizationTypes = filterValue
-		case "root_device_types":
+		case "root-device-types":
 			filters.RootDeviceTypes = filterValue
-		case "block_device_mapping_volume_type":
+		case "block-device-mapping-volume-type":
 			filters.BlockDeviceMappingVolumeType = filterValue
+		//Some params are missing.
+		default:
+			log.Printf("[Debug] Unknown Filter Name: %s.", name)
+		}
+	}
+	return filters
+}
+
+func buildSecurityGroupFilters(input map[string]string) oapi.FiltersSecurityGroup {
+	var filters oapi.FiltersSecurityGroup
+	for k, v := range input {
+		filterValue := []string{v}
+
+		switch name := k; name {
+		case "account-ids":
+			filters.AccountIds = filterValue
+		case "descriptions":
+			filters.Descriptions = filterValue
+		case "inbound-rule-account-ids":
+			filters.InboundRuleAccountIds = filterValue
+		case "inbound-rule-from-port-ranges":
+			if val, err := strconv.Atoi(v); err == nil {
+				filters.InboundRuleFromPortRanges = []int64{int64(val)}
+			}
+		case "inbound-rule-ip-ranges":
+			filters.InboundRuleIpRanges = filterValue
+		case "inbound-rule-protocols":
+			filters.InboundRuleProtocols = filterValue
+		case "inbound-rule-security-group-ids":
+			filters.InboundRuleSecurityGroupIds = filterValue
+		case "inbound-rule-security-group-names":
+			filters.InboundRuleSecurityGroupNames = filterValue
+		case "inbound-rule-to-port-ranges":
+			if val, err := strconv.Atoi(v); err == nil {
+				filters.InboundRuleToPortRanges = []int64{int64(val)}
+			}
+		case "net-ids":
+			filters.NetIds = filterValue
+
+		case "outbound-rule-account-ids":
+			filters.OutboundRuleAccountIds = filterValue
+		case "outbound-rule-from-port-ranges":
+			if val, err := strconv.Atoi(v); err == nil {
+				filters.OutboundRuleFromPortRanges = []int64{int64(val)}
+			}
+		case "outbound-rule-ip-ranges":
+			filters.OutboundRuleIpRanges = filterValue
+		case "outbound-rule-protocols":
+			filters.OutboundRuleProtocols = filterValue
+		case "outbound-rule-security-group-ids":
+			filters.OutboundRuleSecurityGroupIds = filterValue
+		case "outbound-rule-security-group-names":
+			filters.OutboundRuleSecurityGroupNames = filterValue
+		case "outbound-rule-to-port-ranges":
+			if val, err := strconv.Atoi(v); err == nil {
+				filters.OutboundRuleToPortRanges = []int64{int64(val)}
+			}
+		case "security-group-ids":
+			filters.SecurityGroupIds = filterValue
+		case "security-group-names":
+			filters.SecurityGroupNames = filterValue
+		case "tags-keys":
+			filters.TagKeys = filterValue
+		case "tags-values":
+			filters.TagValues = filterValue
 		//Some params are missing.
 		default:
 			log.Printf("[Debug] Unknown Filter Name: %s.", name)
