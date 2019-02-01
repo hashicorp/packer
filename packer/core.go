@@ -181,12 +181,15 @@ func (c *Core) Build(n string) (Build, error) {
 		current := make([]coreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
 			// If we skip, ignore
-			rawP.OnlyExcept.Except = append(rawP.OnlyExcept.Except, c.except...)
-			if rawP.OnlyExcept.Skip(rawName) {
-				continue
+			foundExcept := false
+			excepts := append(rawP.OnlyExcept.Except, c.except...)
+			for _, except := range excepts {
+				if except == rawName || except == rawP.Name {
+					foundExcept = true
+				}
 			}
-			if rawP.OnlyExcept.Skip(rawP.Name) {
-				break
+			if foundExcept {
+				continue
 			}
 
 			// Get the post-processor
