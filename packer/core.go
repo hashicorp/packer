@@ -180,11 +180,13 @@ func (c *Core) Build(n string) (Build, error) {
 	for _, rawPs := range c.Template.PostProcessors {
 		current := make([]coreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
-			// If we skip, ignore
+			if rawP.Skip(rawName) {
+				continue
+			}
+			// -except skips post-processor & build
 			foundExcept := false
-			excepts := append(rawP.OnlyExcept.Except, c.except...)
-			for _, except := range excepts {
-				if except == rawName || except == rawP.Name {
+			for _, except := range c.except {
+				if except == rawP.Name {
 					foundExcept = true
 				}
 			}
