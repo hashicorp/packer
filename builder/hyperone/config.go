@@ -168,7 +168,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ChrootMountPath == "" {
-		c.ChrootMountPath = "/mnt/packer-hyperone-volumes/{{timestamp}}"
+		path, err := interpolate.Render("/mnt/packer-hyperone-volumes/{{timestamp}}", nil)
+		if err != nil {
+			return nil, nil, err
+		}
+		c.ChrootMountPath = path
 	}
 
 	if c.ChrootMounts == nil {
