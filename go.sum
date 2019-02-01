@@ -358,6 +358,8 @@ github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311 h1:s5pyxd5S6wRs2WpE
 github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311/go.mod h1:URlwyTFZX72RmxtxuaFL2Uj3fD1JTvZdx59bHWk6aFU=
 github.com/xanzy/go-cloudstack v2.1.4+incompatible h1:5c72sRFakVv8wH/HsQFg+xr37CmNQU2UbJfaBjW5f0c=
 github.com/xanzy/go-cloudstack v2.1.4+incompatible/go.mod h1:s3eL3z5pNXF5FVybcT+LIVdId8pYn709yv6v5mrkrQE=
+github.com/xanzy/go-cloudstack v2.4.1+incompatible h1:Oc4xa2+I94h1g/QJ+nHoq597nJz2KXzxuQx/weOx0AU=
+github.com/xanzy/go-cloudstack v2.4.1+incompatible/go.mod h1:s3eL3z5pNXF5FVybcT+LIVdId8pYn709yv6v5mrkrQE=
 golang.org/x/crypto v0.0.0-20180322175230-88942b9c40a4 h1:AJCW0rhPjFKEAoValWpqnRKxX8YV0Xvqfw+dOexCTPc=
 golang.org/x/crypto v0.0.0-20180322175230-88942b9c40a4/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
