@@ -149,7 +149,7 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 		}
 	}
 
-	state.Put("vpc_id", s.NetId)
+	state.Put("net_id", s.NetId)
 	state.Put("availability_zone", s.SubregionName)
 	state.Put("subnet_id", s.SubnetId)
 	return multistep.ActionContinue
