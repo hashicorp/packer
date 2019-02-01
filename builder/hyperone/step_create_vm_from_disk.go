@@ -24,7 +24,7 @@ func (s *stepCreateVMFromDisk) Run(ctx context.Context, state multistep.StateBag
 
 	options := openapi.VmCreate{
 		Name:    config.VmName,
-		Service: config.VmFlavour,
+		Service: config.VmType,
 		Disk: []openapi.VmCreateDisk{
 			{
 				Id: chrootDiskID,

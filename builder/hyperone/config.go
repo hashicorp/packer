@@ -45,9 +45,9 @@ type Config struct {
 	ImageTags        map[string]interface{} `mapstructure:"image_tags"`
 	ImageService     string                 `mapstructure:"image_service"`
 
-	VmFlavour string                 `mapstructure:"vm_flavour"`
-	VmName    string                 `mapstructure:"vm_name"`
-	VmTags    map[string]interface{} `mapstructure:"vm_tags"`
+	VmType string                 `mapstructure:"vm_type"`
+	VmName string                 `mapstructure:"vm_name"`
+	VmTags map[string]interface{} `mapstructure:"vm_tags"`
 
 	DiskName string  `mapstructure:"disk_name"`
 	DiskType string  `mapstructure:"disk_type"`
@@ -207,8 +207,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New("token is required"))
 	}
 
-	if c.VmFlavour == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("vm flavour is required"))
+	if c.VmType == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("vm type is required"))
 	}
 
 	if c.DiskSize == 0 {

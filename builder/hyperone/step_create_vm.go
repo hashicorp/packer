@@ -48,7 +48,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	options := openapi.VmCreate{
 		Name:         config.VmName,
 		Image:        config.SourceImage,
-		Service:      config.VmFlavour,
+		Service:      config.VmType,
 		SshKeys:      sshKeys,
 		Disk:         disks,
 		Netadp:       []openapi.VmCreateNetadp{netAdapter},
