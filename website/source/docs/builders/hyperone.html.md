@@ -108,7 +108,7 @@ builder.
     - In `~/.h1-cli/conf.json` config file used by [h1-cli](https://github.com/hyperonecom/h1-cli).
     - By using SSH authentication if `token_login` variable has been set.
 
--   `vm_flavour` (string) - ID or name of the type this server should be created with.
+-   `vm_type` (string) - ID or name of the type this server should be created with.
 
 ### Optional:
 
@@ -215,7 +215,7 @@ token.
     "type": "hyperone",
     "token": "YOUR_AUTH_TOKEN",
     "source_image": "ubuntu-18.04",
-    "vm_flavour": "a1.nano",
+    "vm_type": "a1.nano",
     "disk_size": 10
 }
 ```
@@ -228,7 +228,7 @@ token.
     "type": "hyperone",
     "token": "YOUR_AUTH_TOKEN",
     "source_image": "ubuntu-18.04",
-    "vm_flavour": "a1.nano",
+    "vm_type": "a1.nano",
     "disk_size": 10,
     "chroot_disk": true,
     "pre_mount_commands": [

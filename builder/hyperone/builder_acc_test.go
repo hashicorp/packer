@@ -25,7 +25,7 @@ const testBuilderAccBasic = `
 {
 	"builders": [{
 		"type": "test",
-		"vm_flavour": "a1.nano",
+		"vm_type": "a1.nano",
 		"source_image": "5c3fef425ceadc3d412beee5",
 		"disk_size": 10
 	}]
