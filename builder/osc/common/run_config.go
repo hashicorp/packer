@@ -48,7 +48,7 @@ func (d *NetFilterOptions) Empty() bool {
 }
 
 type SecurityGroupFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
 }
 
 func (d *SecurityGroupFilterOptions) Empty() bool {

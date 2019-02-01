@@ -158,6 +158,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Comm:         &b.config.RunConfig.Comm,
 			DebugKeyPath: fmt.Sprintf("oapi_%s.pem", b.config.PackerBuildName),
 		},
+		&osccommon.StepSecurityGroup{
+			SecurityGroupFilter:   b.config.SecurityGroupFilter,
+			SecurityGroupIds:      b.config.SecurityGroupIds,
+			CommConfig:            &b.config.RunConfig.Comm,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
