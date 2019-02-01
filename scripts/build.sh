@@ -84,6 +84,7 @@ function convertPathOnCygwin() {
     esac
 }
 
+validatePreconditions
 enterPackerSourceDir
 ensureOutputStructure
 cleanOutputDirs
