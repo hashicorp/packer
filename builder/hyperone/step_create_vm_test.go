@@ -14,8 +14,10 @@ func TestPickNetAdapter(t *testing.T) {
 		Expected openapi.VmCreateNetadp
 	}{
 		{
-			Name:   "no_network",
-			Config: Config{},
+			Name: "no_network",
+			Config: Config{
+				PublicNetAdpService: "public",
+			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "public",
 			},
@@ -23,7 +25,8 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "no_network_public_ip",
 			Config: Config{
-				PublicIP: "some-public-ip",
+				PublicIP:            "some-public-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "public",
@@ -33,7 +36,8 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "no_network_private_ip",
 			Config: Config{
-				PrivateIP: "some-private-ip",
+				PrivateIP:           "some-private-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "public",
@@ -42,8 +46,9 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "no_network_both_ip",
 			Config: Config{
-				PublicIP:  "some-public-ip",
-				PrivateIP: "some-private-ip",
+				PublicIP:            "some-public-ip",
+				PrivateIP:           "some-private-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "public",
@@ -53,7 +58,8 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "network_no_ip",
 			Config: Config{
-				Network: "some-network",
+				Network:             "some-network",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "private",
@@ -63,8 +69,9 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "network_public_ip",
 			Config: Config{
-				Network:  "some-network",
-				PublicIP: "some-public-ip",
+				Network:             "some-network",
+				PublicIP:            "some-public-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "private",
@@ -74,8 +81,9 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "network_private_ip",
 			Config: Config{
-				Network:   "some-network",
-				PrivateIP: "some-private-ip",
+				Network:             "some-network",
+				PrivateIP:           "some-private-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "private",
@@ -86,9 +94,10 @@ func TestPickNetAdapter(t *testing.T) {
 		{
 			Name: "network_both_ip",
 			Config: Config{
-				Network:   "some-network",
-				PublicIP:  "some-public-ip",
-				PrivateIP: "some-private-ip",
+				Network:             "some-network",
+				PublicIP:            "some-public-ip",
+				PrivateIP:           "some-private-ip",
+				PublicNetAdpService: "public",
 			},
 			Expected: openapi.VmCreateNetadp{
 				Service: "private",
