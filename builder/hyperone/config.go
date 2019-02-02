@@ -33,6 +33,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
+	APIURL     string `mapstructure:"api_url"`
 	Token      string `mapstructure:"token"`
 	Project    string `mapstructure:"project"`
 	TokenLogin string `mapstructure:"token_login"`
@@ -53,9 +54,10 @@ type Config struct {
 	DiskType string  `mapstructure:"disk_type"`
 	DiskSize float32 `mapstructure:"disk_size"`
 
-	Network   string `mapstructure:"network"`
-	PrivateIP string `mapstructure:"private_ip"`
-	PublicIP  string `mapstructure:"public_ip"`
+	Network             string `mapstructure:"network"`
+	PrivateIP           string `mapstructure:"private_ip"`
+	PublicIP            string `mapstructure:"public_ip"`
+	PublicNetAdpService string `mapstructure:"public_netadp_service"`
 
 	ChrootDisk           bool       `mapstructure:"chroot_disk"`
 	ChrootDiskSize       float32    `mapstructure:"chroot_disk_size"`
@@ -112,6 +114,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Comm.SSHTimeout = 10 * time.Minute
 	}
 
+	if c.APIURL == "" {
+		c.APIURL = os.Getenv("HYPERONE_API_URL")
+	}
+
 	if c.Token == "" {
 		c.Token = os.Getenv(tokenEnv)
 
@@ -119,7 +125,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			c.Token = cliConfig.Profile.APIKey
 		}
 
-		if c.TokenLogin != "" {
+		// Fetching token by SSH is available only for the default API endpoint
+		if c.TokenLogin != "" && c.APIURL == "" {
 			c.Token, err = fetchTokenBySSH(c.TokenLogin)
 			if err != nil {
 				return nil, nil, err
@@ -153,6 +160,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.DiskType == "" {
 		c.DiskType = defaultDiskType
+	}
+
+	if c.PublicNetAdpService == "" {
+		c.PublicNetAdpService = "public"
 	}
 
 	if c.ChrootCommandWrapper == "" {

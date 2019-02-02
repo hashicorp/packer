@@ -112,6 +112,9 @@ builder.
 
 ### Optional:
 
+-   `api_url` (string) - Custom API endpoint URL, compatible with HyperOne.
+    It can also be specified via environment variable `HYPERONE_API_URL`.
+
 -   `disk_name` (string) - The name of the created disk.
 
 -   `disk_type` (string) - The type of the created disk. Defaults to `ssd`.
@@ -135,6 +138,9 @@ builder.
 -   `public_ip` (string) - The ID of the public IP that should be assigned to
     the created server. If `network` is chosen, the public IP will be associated
     with server's private IP.
+
+-   `public_netadp_service` (string) - Custom service of public network adapter.
+    Can be useful when using custom `api_url`. Defaults to `public`.
 
 -   `ssh_keys` (array of strings) - List of SSH keys by name or id to be added
     to the server on launch.
