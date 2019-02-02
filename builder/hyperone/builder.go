@@ -34,6 +34,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		cfg.AddDefaultHeader("x-project", b.config.Project)
 	}
 
+	if b.config.APIURL != "" {
+		cfg.BasePath = b.config.APIURL
+	}
+
 	prefer := fmt.Sprintf("respond-async,wait=%d", int(b.config.StateTimeout.Seconds()))
 	cfg.AddDefaultHeader("Prefer", prefer)
 

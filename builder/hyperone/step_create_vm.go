@@ -118,7 +118,7 @@ func pickNetAdapter(config *Config) openapi.VmCreateNetadp {
 	if config.Network == "" {
 		if config.PublicIP != "" {
 			return openapi.VmCreateNetadp{
-				Service: "public",
+				Service: config.PublicNetAdpService,
 				Ip:      []string{config.PublicIP},
 			}
 		}
@@ -139,7 +139,7 @@ func pickNetAdapter(config *Config) openapi.VmCreateNetadp {
 	}
 
 	return openapi.VmCreateNetadp{
-		Service: "public",
+		Service: config.PublicNetAdpService,
 	}
 }
 
