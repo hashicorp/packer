@@ -53,18 +53,11 @@ func (s *stepCreateVMFromDisk) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*openapi.APIClient)
 	ui := state.Get("ui").(packer.Ui)
-	chrootDiskID := state.Get("chroot_disk_id").(string)
 
-	ui.Say("Deleting VM (from disk)...")
-
-	deleteOptions := openapi.VmDelete{
-		RemoveDisks: []string{chrootDiskID},
-	}
-
-	_, err := client.VmApi.VmDelete(context.TODO(), s.vmID, deleteOptions)
+	ui.Say(fmt.Sprintf("Deleting VM %s (from chroot disk)...", s.vmID))
+	err := deleteVMWithDisks(s.vmID, state)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting server '%s' - please delete it manually: %s", s.vmID, formatOpenAPIError(err)))
+		ui.Error(err.Error())
 	}
 }

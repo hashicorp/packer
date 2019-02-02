@@ -75,16 +75,12 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	var diskIDs []string
 	for _, hdd := range hdds {
 		if hdd.Disk.Name == chrootDiskName {
 			state.Put("chroot_disk_id", hdd.Disk.Id)
-		} else {
-			diskIDs = append(diskIDs, hdd.Disk.Id)
+			break
 		}
 	}
-
-	state.Put("disk_ids", diskIDs)
 
 	netadp, _, err := client.VmApi.VmListNetadp(ctx, vm.Id)
 	if err != nil {
@@ -169,19 +165,31 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*openapi.APIClient)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deleting VM...")
+	ui.Say(fmt.Sprintf("Deleting VM %s...", s.vmID))
+	err := deleteVMWithDisks(s.vmID, state)
+	if err != nil {
+		ui.Error(err.Error())
+	}
+}
+
+func deleteVMWithDisks(vmID string, state multistep.StateBag) error {
+	client := state.Get("client").(*openapi.APIClient)
+	hdds, _, err := client.VmApi.VmListHdd(context.TODO(), vmID)
+	if err != nil {
+		return fmt.Errorf("error listing hdd: %s", formatOpenAPIError(err))
+	}
 
 	deleteOptions := openapi.VmDelete{}
-	diskIDs, ok := state.Get("disk_ids").([]string)
-	if ok && len(diskIDs) > 0 {
-		deleteOptions.RemoveDisks = diskIDs
+	for _, hdd := range hdds {
+		deleteOptions.RemoveDisks = append(deleteOptions.RemoveDisks, hdd.Disk.Id)
 	}
 
-	_, err := client.VmApi.VmDelete(context.TODO(), s.vmID, deleteOptions)
+	_, err = client.VmApi.VmDelete(context.TODO(), vmID, deleteOptions)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting server '%s' - please delete it manually: %s", s.vmID, formatOpenAPIError(err)))
+		return fmt.Errorf("Error deleting server '%s' - please delete it manually: %s", vmID, formatOpenAPIError(err))
 	}
+
+	return nil
 }
