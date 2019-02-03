@@ -45,7 +45,12 @@ func (o expected) matches(kp sshKeyPair) error {
 			expDescription + "' - got '" + kp.Description() + "'")
 	}
 
-	err := verifySshKeyPair(kp)
+	err := verifyPublickeyAuthorizedKeysFormat(kp)
+	if err != nil {
+		return err
+	}
+
+	err = verifySshKeyPair(kp)
 	if err != nil {
 		return err
 	}
@@ -117,6 +122,42 @@ func verifySshKeyPair(kp sshKeyPair) error {
 	err = signer.PublicKey().Verify(data, signature)
 	if err != nil {
 		return errors.New("failed to verify test data - " + err.Error())
+	}
+
+	return nil
+}
+
+func verifyPublickeyAuthorizedKeysFormat(kp sshKeyPair) error {
+	newLines := []newLineOption{
+		unixNewLine,
+		noNewLine,
+		windowsNewLine,
+	}
+
+	for _, nl := range newLines {
+		publicKeyAk := kp.PublicKeyAuthorizedKeysFormat(nl)
+
+		if len(publicKeyAk) < 2 {
+			return errors.New("expected public key in authorized keys format to be at least 2 bytes")
+		}
+
+		switch nl {
+		case noNewLine:
+			if publicKeyAk[len(publicKeyAk) - 1] == '\n' {
+				return errors.New("public key in authorized keys format has trailing new line when none was specified")
+			}
+		case unixNewLine:
+			if publicKeyAk[len(publicKeyAk) - 1] != '\n' {
+				return errors.New("public key in authorized keys format does not have unix new line when unix was specified")
+			}
+			if string(publicKeyAk[len(publicKeyAk) - 2:]) == windowsNewLine.String() {
+				return errors.New("public key in authorized keys format has windows new line when unix was specified")
+			}
+		case windowsNewLine:
+			if string(publicKeyAk[len(publicKeyAk) - 2:]) != windowsNewLine.String() {
+				return errors.New("public key in authorized keys format does not have windows new line when windows was specified")
+			}
+		}
 	}
 
 	return nil
