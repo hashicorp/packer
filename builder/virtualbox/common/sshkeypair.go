@@ -4,6 +4,7 @@ package common
 //  Perhaps through 'helper/ssh'?
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -33,6 +34,29 @@ type sshKeyPairType string
 
 func (o sshKeyPairType) String() string {
 	return string(o)
+}
+
+const (
+	// unixNewLine is a unix new line.
+	unixNewLine newLineOption = "\n"
+
+	// windowsNewLine is a Windows new line.
+	windowsNewLine newLineOption = "\r\n"
+
+	// noNewLine will not append a new line.
+	noNewLine newLineOption = ""
+)
+
+// newLineOption specifies the type of new line to append to a string.
+// See the 'const' block for choices.
+type newLineOption string
+
+func (o newLineOption) String() string {
+	return string(o)
+}
+
+func (o newLineOption) Bytes() []byte {
+	return []byte(o)
 }
 
 // sshKeyPairBuilder builds SSH key pairs.
@@ -99,9 +123,9 @@ type sshKeyPair interface {
 	PrivateKeyPemBlock() []byte
 
 	// PublicKeyAuthorizedKeysFormat returns a slice of bytes
-	// representing the public key in OpenSSH authorized_keys
-	// format with a trailing new line.
-	PublicKeyAuthorizedKeysFormat() []byte
+	// representing the public key in OpenSSH authorized_keys format
+	// with the specified new line.
+	PublicKeyAuthorizedKeysFormat(newLineOption) []byte
 }
 
 type defaultSshKeyPair struct {
@@ -148,8 +172,26 @@ func (o defaultSshKeyPair) PrivateKeyPemBlock() []byte {
 	})
 }
 
-func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat() []byte {
-	return ssh.MarshalAuthorizedKey(o.publicKey)
+func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat(nl newLineOption) []byte {
+	result := ssh.MarshalAuthorizedKey(o.publicKey)
+
+	switch nl {
+	case noNewLine:
+		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
+	case windowsNewLine:
+		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
+		result = append(result, nl.Bytes()...)
+	case unixNewLine:
+		fallthrough
+	default:
+		// This is how all the other "SSH key pair" code works in
+		// the different builders.
+		if !bytes.HasSuffix(result, unixNewLine.Bytes()) {
+			result = append(result, unixNewLine.Bytes()...)
+		}
+	}
+
+	return result
 }
 
 // newEcdsaSshKeyPair returns a new ECDSA SSH key pair for the given bits
