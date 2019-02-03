@@ -64,6 +64,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
+		&vboxcommon.StepSshKeyPair{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("virtualbox_%s.pem", b.config.PackerBuildName),
+			Comm:         &b.config.Comm,
+		},
 		&vboxcommon.StepDownloadGuestAdditions{
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
 			GuestAdditionsURL:    b.config.GuestAdditionsURL,
@@ -111,6 +116,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:        b.config.VMName,
 			Ctx:           b.config.ctx,
 			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
