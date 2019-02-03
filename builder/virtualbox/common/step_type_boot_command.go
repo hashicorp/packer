@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -14,10 +15,21 @@ import (
 
 const KeyLeftShift uint32 = 0xFFE1
 
+// TODO: Should this be made available for other builders?
+//  It is copy pasted in the VMWare builder as well.
 type bootCommandTemplateData struct {
-	HTTPIP   string
+	// HTTPIP is the HTTP server's IP address.
+	HTTPIP string
+
+	// HTTPPort is the HTTP server port.
 	HTTPPort uint
-	Name     string
+
+	// Name is the VM's name.
+	Name string
+
+	// SSHPublicKey is the URL encoded public key in
+	// authorized_keys format.
+	SSHPublicKey string
 }
 
 type StepTypeBootCommand struct {
@@ -26,6 +38,7 @@ type StepTypeBootCommand struct {
 	VMName        string
 	Ctx           interpolate.Context
 	GroupInterval time.Duration
+	Comm          *communicator.Config
 }
 
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -54,9 +67,10 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	hostIP := "10.0.2.2"
 	common.SetHTTPIP(hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
-		hostIP,
-		httpPort,
-		s.VMName,
+		HTTPIP:       hostIP,
+		HTTPPort:     httpPort,
+		Name:         s.VMName,
+		SSHPublicKey: s.Comm.SSHPublicKeyUrlEncoded(),
 	}
 
 	sendCodes := func(codes []string) error {
