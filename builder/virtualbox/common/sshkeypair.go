@@ -90,6 +90,10 @@ type sshKeyPair interface {
 	// Bits returns the bits of entropy.
 	Bits() int
 
+	// Description returns a brief description of the key pair that
+	// is suitable for log messages or printing.
+	Description() string
+
 	// PrivateKeyPemBlock returns a slice of bytes representing
 	// the private key in ASN.1, DER format in a PEM block.
 	PrivateKeyPemBlock() []byte
@@ -121,6 +125,10 @@ func (o defaultSshKeyPair) Type() sshKeyPairType {
 
 func (o defaultSshKeyPair) Bits() int {
 	return o.bits
+}
+
+func (o defaultSshKeyPair) Description() string {
+	return o.kind.String() + " " + strconv.Itoa(o.bits)
 }
 
 func (o defaultSshKeyPair) PrivateKeyPemBlock() []byte {
