@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/url"
 	"os"
 	"time"
 
@@ -328,4 +329,10 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 	}
 
 	return errs
+}
+
+// SSHPublicKeyUrlEncoded returns a string representing the SSH public key
+// encoded in URL format.
+func (c *Config) SSHPublicKeyUrlEncoded() string {
+	return url.PathEscape(string(c.SSHPublicKey))
 }
