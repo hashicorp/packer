@@ -1,6 +1,7 @@
 package communicator
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -133,6 +134,23 @@ func TestConfig_winrm(t *testing.T) {
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
+	}
+}
+
+func TestConfig_SSHPublicKeyUrlEncoded(t *testing.T) {
+	c := &Config{
+		SSHPublicKey: []byte("ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBADulbdHCjXhsH8wGtyLhhi3qVvX6M0tGgtousr/DzArwf2KX0L2Zm1OZfqMWFCrSVD743OFY60YL5CGsN9/PVQP7gApll5yTWyaQJu8lReptR5TMnUDn0u3mJN/QRT5Zs8qS5J5Q3WhXwaMF96kSuu+MwXrBnl8sK+bwxOKQtlKJXowcw==\n"),
+	}
+
+	encoded := c.SSHPublicKeyUrlEncoded()
+
+	decoded, err := url.PathUnescape(encoded)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if decoded != string(c.SSHPublicKey) {
+		t.Fatal("resulting public key does not match original public key")
 	}
 }
 
