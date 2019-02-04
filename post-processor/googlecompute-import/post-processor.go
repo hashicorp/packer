@@ -13,13 +13,9 @@ import (
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/compress"
 	"github.com/hashicorp/packer/template/interpolate"
-
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/jwt"
 )
 
 type Config struct {
@@ -38,12 +34,12 @@ type Config struct {
 	KeepOriginalImage    bool              `mapstructure:"keep_input_artifact"`
 	SkipClean            bool              `mapstructure:"skip_clean"`
 
-	ctx interpolate.Context
+	Account googlecompute.AccountFile
+	ctx     interpolate.Context
 }
 
 type PostProcessor struct {
 	config Config
-	runner multistep.Runner
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -60,12 +56,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	errs := new(packer.MultiError)
+
 	// Set defaults
 	if p.config.GCSObjectName == "" {
 		p.config.GCSObjectName = "packer-import-{{timestamp}}.tar.gz"
 	}
-
-	errs := new(packer.MultiError)
 
 	// Check and render gcs_object_name
 	if err = interpolate.Validate(p.config.GCSObjectName, &p.config.ctx); err != nil {
@@ -73,11 +69,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("Error parsing gcs_object_name template: %s", err))
 	}
 
+	if p.config.AccountFile != "" {
+		if err := googlecompute.ProcessAccountFile(&p.config.Account, p.config.AccountFile); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	templates := map[string]*string{
-		"bucket":       &p.config.Bucket,
-		"image_name":   &p.config.ImageName,
-		"project_id":   &p.config.ProjectId,
-		"account_file": &p.config.AccountFile,
+		"bucket":     &p.config.Bucket,
+		"image_name": &p.config.ImageName,
+		"project_id": &p.config.ProjectId,
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -94,7 +95,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	var err error
+	client, err := googlecompute.NewClientGCE(&p.config.Account)
+	if err != nil {
+		return nil, false, err
+	}
 
 	if artifact.BuilderId() != compress.BuilderId {
 		err = fmt.Errorf(
@@ -108,18 +112,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Error rendering gcs_object_name template: %s", err)
 	}
 
-	rawImageGcsPath, err := UploadToBucket(p.config.AccountFile, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
+	rawImageGcsPath, err := UploadToBucket(client, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
 	if err != nil {
 		return nil, p.config.KeepOriginalImage, err
 	}
 
-	gceImageArtifact, err := CreateGceImage(p.config.AccountFile, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
+	gceImageArtifact, err := CreateGceImage(client, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
 	if err != nil {
 		return nil, p.config.KeepOriginalImage, err
 	}
 
 	if !p.config.SkipClean {
-		err = DeleteFromBucket(p.config.AccountFile, ui, p.config.Bucket, p.config.GCSObjectName)
+		err = DeleteFromBucket(client, ui, p.config.Bucket, p.config.GCSObjectName)
 		if err != nil {
 			return nil, p.config.KeepOriginalImage, err
 		}
@@ -128,24 +132,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	return gceImageArtifact, p.config.KeepOriginalImage, nil
 }
 
-func UploadToBucket(accountFile string, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
-	var client *http.Client
-	var account googlecompute.AccountFile
-
-	err := googlecompute.ProcessAccountFile(&account, accountFile)
-	if err != nil {
-		return "", err
-	}
-
-	var DriverScopes = []string{"https://www.googleapis.com/auth/devstorage.full_control"}
-	conf := jwt.Config{
-		Email:      account.ClientEmail,
-		PrivateKey: []byte(account.PrivateKey),
-		Scopes:     DriverScopes,
-		TokenURL:   "https://accounts.google.com/o/oauth2/token",
-	}
-
-	client = conf.Client(oauth2.NoContext)
+func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
 	service, err := storage.New(client)
 	if err != nil {
 		return "", err
@@ -162,7 +149,7 @@ func UploadToBucket(accountFile string, ui packer.Ui, artifact packer.Artifact, 
 	}
 
 	if source == "" {
-		return "", fmt.Errorf("No tar.gz file found in list of articats")
+		return "", fmt.Errorf("No tar.gz file found in list of artifacts")
 	}
 
 	artifactFile, err := os.Open(source)
@@ -178,28 +165,10 @@ func UploadToBucket(accountFile string, ui packer.Ui, artifact packer.Artifact, 
 		return "", err
 	}
 
-	return "https://storage.googleapis.com/" + bucket + "/" + gcsObjectName, nil
+	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
-	var client *http.Client
-	var account googlecompute.AccountFile
-
-	err := googlecompute.ProcessAccountFile(&account, accountFile)
-	if err != nil {
-		return nil, err
-	}
-
-	var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
-	conf := jwt.Config{
-		Email:      account.ClientEmail,
-		PrivateKey: []byte(account.PrivateKey),
-		Scopes:     DriverScopes,
-		TokenURL:   "https://accounts.google.com/o/oauth2/token",
-	}
-
-	client = conf.Client(oauth2.NoContext)
-
+func CreateGceImage(client *http.Client, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
 	service, err := compute.New(client)
 	if err != nil {
 		return nil, err
@@ -253,24 +222,7 @@ func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageUR
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
-func DeleteFromBucket(accountFile string, ui packer.Ui, bucket string, gcsObjectName string) error {
-	var client *http.Client
-	var account googlecompute.AccountFile
-
-	err := googlecompute.ProcessAccountFile(&account, accountFile)
-	if err != nil {
-		return err
-	}
-
-	var DriverScopes = []string{"https://www.googleapis.com/auth/devstorage.full_control"}
-	conf := jwt.Config{
-		Email:      account.ClientEmail,
-		PrivateKey: []byte(account.PrivateKey),
-		Scopes:     DriverScopes,
-		TokenURL:   "https://accounts.google.com/o/oauth2/token",
-	}
-
-	client = conf.Client(oauth2.NoContext)
+func DeleteFromBucket(client *http.Client, ui packer.Ui, bucket string, gcsObjectName string) error {
 	service, err := storage.New(client)
 	if err != nil {
 		return err

@@ -10,12 +10,13 @@ type ArtifactFile struct {
 }
 
 type Artifact struct {
-	BuildName     string         `json:"name"`
-	BuilderType   string         `json:"builder_type"`
-	BuildTime     int64          `json:"build_time"`
-	ArtifactFiles []ArtifactFile `json:"files"`
-	ArtifactId    string         `json:"artifact_id"`
-	PackerRunUUID string         `json:"packer_run_uuid"`
+	BuildName     string            `json:"name"`
+	BuilderType   string            `json:"builder_type"`
+	BuildTime     int64             `json:"build_time"`
+	ArtifactFiles []ArtifactFile    `json:"files"`
+	ArtifactId    string            `json:"artifact_id"`
+	PackerRunUUID string            `json:"packer_run_uuid"`
+	CustomData    map[string]string `json:"custom_data"`
 }
 
 func (a *Artifact) BuilderId() string {
