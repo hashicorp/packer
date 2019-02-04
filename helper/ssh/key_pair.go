@@ -210,10 +210,10 @@ type KeyPair interface {
 	// format in a Privacy-Enhanced Mail (PEM) block.
 	PrivateKeyPemBlock() []byte
 
-	// PublicKeyAuthorizedKeysFormat returns a slice of bytes
+	// PublicKeyAuthorizedKeysLine returns a slice of bytes
 	// representing the public key in OpenSSH authorized_keys format
 	// with the specified new line.
-	PublicKeyAuthorizedKeysFormat(NewLineOption) []byte
+	PublicKeyAuthorizedKeysLine(NewLineOption) []byte
 }
 
 type defaultKeyPair struct {
@@ -267,7 +267,7 @@ func (o defaultKeyPair) PrivateKeyPemBlock() []byte {
 	})
 }
 
-func (o defaultKeyPair) PublicKeyAuthorizedKeysFormat(nl NewLineOption) []byte {
+func (o defaultKeyPair) PublicKeyAuthorizedKeysLine(nl NewLineOption) []byte {
 	result := gossh.MarshalAuthorizedKey(o.publicKey)
 
 	if len(strings.TrimSpace(o.name)) > 0 {

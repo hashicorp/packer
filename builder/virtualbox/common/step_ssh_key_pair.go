@@ -59,7 +59,7 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 	s.Comm.SSHKeyPairName = kp.Name()
 	s.Comm.SSHTemporaryKeyPairName = kp.Name()
 	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock()
-	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysFormat(ssh.UnixNewLine)
+	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine(ssh.UnixNewLine)
 	s.Comm.SSHClearAuthorizedKeys = true
 
 	ui.Say(fmt.Sprintf("Created ephemeral SSH key pair of type %s", kp.Description()))
