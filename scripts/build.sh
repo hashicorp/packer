@@ -5,63 +5,109 @@
 ALL_XC_ARCH="386 amd64 arm arm64 ppc64le"
 ALL_XC_OS="linux darwin windows freebsd openbsd solaris"
 
+# Exit immediately if a command fails
 set -e
 
+# Validates that a necessary tool is on the PATH
+function validateToolPresence
+{
+    local TOOLNAME=$1
+    which ${TOOLNAME} >/dev/null || echo "${TOOLNAME} is not on the path. Exiting..."
+    exit 1
+}
+
+# Validates that all used tools are present; exits when any is not found
+function validatePreconditions
+{
+    echo "==> Checking for necessary tools..."
+    validateToolPresence realpath
+    validateToolPresence dirname
+    validateToolPresence tr
+    validateToolPresence find
+}
+
 # Get the parent directory of where this script is.
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+# NOTE: I'm unsure why you don't just use realpath like below
+function enterPackerSourceDir
+{
+    echo "==> Entering Packer source dir..."
+    local BUILD_SCRIPT_PATH="${BASH_SOURCE[0]}"
+    SOURCEDIR=$(dirname $(dirname $(realpath "${BUILD_SCRIPT_PATH}")))
+    cd ${SOURCEDIR}
+}
 
-# Change into that directory
-cd $DIR
+function ensureOutputStructure {
+    echo "==> Ensuring output directories are present..."
+    mkdir -p bin/
+    mkdir -p pkg/
+}
 
-# Delete the old dir
-echo "==> Removing old directory..."
-rm -f bin/*
-rm -rf pkg/*
-mkdir -p bin/
+function cleanOutputDirs {
+    echo "==> Removing old builds..."
+    rm -f bin/*
+    rm -fr pkg/*
+}
 
-# helpers for Cygwin-hosted builds
-: ${OSTYPE:=`uname`}
+function lowerCaseOSType {
+    local OS_TYPE=${OSTYPE:=`uname`}
+    echo "${OS_TYPE}" | tr "[:upper:]" "[:lower:]"
+}
 
-case $OSTYPE in
-    MINGW*|MSYS*|cygwin|CYGWIN*)
-        # cygwin only translates ';' to ':' on select environment variables
-        PATHSEP=';'
-        ;;
-    *)	PATHSEP=':'
-esac
-
-function convert_path() {
-    local flag
-    [ "${1:0:1}" = '-' ] && { flag="$1"; shift; }
-
-    [ -n "$1" ] || return 0
-    case ${OSTYPE:-`uname`} in
-        cygwin|CYGWIN*)
-            cygpath $flag -- "$1"
+# Returns the OS appropriate path separator
+function getPathSeparator {
+    # helpers for Cygwin-hosted builds
+    case "$(lowerCaseOSType)" in
+        mingw*|msys*|cygwin*)
+            # cygwin only translates ';' to ':' on select environment variables
+            echo ';'
             ;;
-        *)  echo "$1"
+        *)	echo ':'
     esac
 }
 
-# XXX works in MINGW?
-which go &>/dev/null || PATH+=":`convert_path "${GOROOT:?}"`/bin"
+function convertPathOnCygwin() {
+    local flag
+    local somePath
+    if [ "${1:0:1}" = '-' ]; then
+        flag=$1
+        somePath=$2
+    else
+        somePath=$1
+    fi
 
-OLDIFS="$IFS"
+    [ -n "${somePath}" ] || return 0
+    case "$(lowerCaseOSType)" in
+        cygwin*)
+            cygpath ${flag} -- "${somePath}"
+            ;;
+        *)  echo "${somePath}"
+    esac
+}
+
+enterPackerSourceDir
+ensureOutputStructure
+cleanOutputDirs
+
+PATHSEP=$(getPathSeparator)
+
+# XXX works in MINGW?
+# FIXME: What if go is not in the PATH and GOROOT isn't set?
+which go &>/dev/null || PATH+=":`convertPathOnCygwin "${GOROOT:?}"`/bin"
+
+OLDIFS="${IFS}"
 
 # make sure GOPATH is consistent - Windows binaries can't handle Cygwin-style paths
-IFS="$PATHSEP"
+IFS="${PATHSEP}"
 for d in ${GOPATH:-$(go env GOPATH)}; do
-    _GOPATH+="${_GOPATH:+$PATHSEP}$(convert_path --windows "$d")"
+    _GOPATH+="${_GOPATH:+${PATHSEP}}$(convertPathOnCygwin --windows "${d}")"
 done
 GOPATH="$_GOPATH"
 
 # locate 'gox' and traverse GOPATH if needed
 which "${GOX:=gox}" &>/dev/null || {
-    for d in $GOPATH; do
-        GOX="$(convert_path --unix "$d")/bin/gox"
-        [ -x "$GOX" ] && break || unset GOX
+    for d in ${GOPATH}; do
+        GOX="$(convertPathOnCygwin --unix "${d}")/bin/gox"
+        [ -x "${GOX}" ] && break || unset GOX
     done
 }
 IFS="$OLDIFS"
@@ -86,17 +132,18 @@ ${GOX:?command not found} \
 set -e
 
 # trim GOPATH to first element
-IFS="$PATHSEP"
-MAIN_GOPATH=($GOPATH)
-MAIN_GOPATH="$(convert_path --unix "$MAIN_GOPATH")"
-IFS=$OLDIFS
+IFS="${PATHSEP}"
+# FIXME: How do you know that the first path of GOPATH is the main GOPATH? Or is the main GOPATH meant to be the first path in GOPATH?
+MAIN_GOPATH=(${GOPATH})
+MAIN_GOPATH="$(convertPathOnCygwin --unix "${MAIN_GOPATH[0]}")"
+IFS="${OLDIFS}"
 
 # Copy our OS/Arch to the bin/ directory
 echo "==> Copying binaries for this platform..."
-DEV_PLATFORM="./pkg/$(go env GOOS)_$(go env GOARCH)"
+DEV_PLATFORM="./pkg/${XC_OS}_${XC_ARCH}"
 for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f 2>/dev/null); do
     cp -v ${F} bin/
-    cp -v ${F} ${MAIN_GOPATH}/bin/
+    cp -v ${F} "${MAIN_GOPATH}/bin/"
 done
 
 # Done!

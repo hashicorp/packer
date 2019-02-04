@@ -38,6 +38,16 @@
                 "type": "shell-local",
                 "inline": [ "touch pear.txt" ]
             }
+        ],
+        [
+            {
+                "only": [
+                    "vanilla"
+                ],
+                "name": "tomato",
+                "type": "shell-local",
+                "inline": [ "touch tomato.txt" ]
+            }
         ]
     ]
 }
