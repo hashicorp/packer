@@ -49,7 +49,7 @@ DigitalOcean. Replace the mock `api_token` value with your own.
 
 Required Parameters:
 
--   `playbook_file` - The playbook to be run by Ansible.
+-   `playbook_file` (string) - The playbook to be run by Ansible.
 
 Optional Parameters:
 
@@ -57,9 +57,7 @@ Optional Parameters:
     running Ansible. Usage example:
 
     ``` json
-    {
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
-    }
     ```
 
     If you are running a Windows build on AWS, Azure or Google Compute and
@@ -82,9 +80,7 @@ Optional Parameters:
     not be quoted. Usage example:
 
     ``` json
-    {
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
-    }
     ```
 
     If you are running a Windows build on AWS, Azure or Google Compute and
@@ -117,7 +113,7 @@ Optional Parameters:
     inventory directory with `host_vars` `group_vars` that you would like to
     use in the playbook that this provisioner will run.
 
--   `local_port` (string) - The port on which to attempt to listen for SSH
+-   `local_port` (uint) - The port on which to attempt to listen for SSH
     connections. This value is a starting point. The provisioner will attempt
     listen for SSH connections on the first available of ten ports, starting at
     `local_port`. A system-chosen port is used when `local_port` is missing or
@@ -175,9 +171,7 @@ To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"`
 to enable verbose logging.
 
 ``` json
-{
   "extra_arguments": [ "-vvvv" ]
-}
 ```
 
 ## Limitations
