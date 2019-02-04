@@ -270,28 +270,23 @@ func (o defaultKeyPair) PrivateKeyPemBlock() []byte {
 func (o defaultKeyPair) PublicKeyAuthorizedKeysLine(nl NewLineOption) []byte {
 	result := gossh.MarshalAuthorizedKey(o.publicKey)
 
+	// Remove the mandatory unix new line.
+	// Awful, but the go ssh library automatically appends
+	// a unix new line.
+	result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
+
 	if len(strings.TrimSpace(o.name)) > 0 {
-		// Awful, but the go ssh library automatically appends
-		// a unix new line.
-		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
 		result = append(result, ' ')
 		result = append(result, o.name...)
 	}
 
 	switch nl {
-	case NoNewLine:
-		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
 	case WindowsNewLine:
-		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
 		result = append(result, nl.Bytes()...)
 	case UnixNewLine:
-		fallthrough
-	default:
 		// This is how all the other "SSH key pair" code works in
 		// the different builders.
-		if !bytes.HasSuffix(result, UnixNewLine.Bytes()) {
-			result = append(result, UnixNewLine.Bytes()...)
-		}
+		result = append(result, UnixNewLine.Bytes()...)
 	}
 
 	return result
