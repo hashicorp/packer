@@ -48,7 +48,6 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 	ui.Say("Creating ephemeral key pair for SSH communicator...")
 
-
 	kp, err := ssh.NewKeyPairBuilder().
 		SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
 		Build()
