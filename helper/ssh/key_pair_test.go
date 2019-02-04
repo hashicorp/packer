@@ -176,6 +176,34 @@ func TestDefaultKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
 	}
 }
 
+func TestDefaultKeyPairBuilder_Build_EcdsaSupportedCurves(t *testing.T) {
+	supportedBits := []int{
+		521,
+		384,
+		256,
+	}
+
+	for _, bits := range supportedBits {
+		kp, err := NewKeyPairBuilder().
+			SetType(Ecdsa).
+			SetBits(bits).
+			Build()
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		err = expected{
+			kind: Ecdsa,
+			bits: bits,
+			desc: "ecdsa " + strconv.Itoa(bits),
+			data: []byte(uuid.TimeOrderedUUID()),
+		}.matches(kp)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+	}
+}
+
 func TestDefaultKeyPairBuilder_Build_RsaDefault(t *testing.T) {
 	kp, err := NewKeyPairBuilder().
 		SetType(Rsa).
