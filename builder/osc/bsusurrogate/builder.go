@@ -215,6 +215,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepSnapshotVolumes{
 			LaunchDevices: launchDevices,
 		},
+		&osccommon.StepDeregisterOMI{
+			AccessConfig:        &b.config.AccessConfig,
+			ForceDeregister:     b.config.OMIForceDeregister,
+			ForceDeleteSnapshot: b.config.OMIForceDeleteSnapshot,
+			OMIName:             b.config.OMIName,
+			Regions:             b.config.OMIRegions,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
