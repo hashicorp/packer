@@ -83,6 +83,54 @@ func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
 	return blockDevices
 }
 
+func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCreation {
+	var blockDevices []oapi.BlockDeviceMappingVmCreation
+
+	for _, blockDevice := range b {
+		mapping := oapi.BlockDeviceMappingVmCreation{
+			DeviceName: blockDevice.DeviceName,
+		}
+
+		if blockDevice.NoDevice {
+			mapping.NoDevice = ""
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualDeviceName = blockDevice.VirtualName
+			}
+		} else {
+			bsu := oapi.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+			}
+
+			if blockDevice.VolumeType != "" {
+				bsu.VolumeType = blockDevice.VolumeType
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				bsu.VolumeSize = blockDevice.VolumeSize
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				bsu.Iops = blockDevice.IOPS
+			}
+
+			if blockDevice.SnapshotId != "" {
+				bsu.SnapshotId = blockDevice.SnapshotId
+			}
+
+			//missing
+			//BlockDevice Encrypted
+			//KmsKeyId
+
+			mapping.Bsu = bsu
+		}
+
+		blockDevices = append(blockDevices, mapping)
+	}
+	return blockDevices
+}
+
 func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	if b.DeviceName == "" {
 		return fmt.Errorf("The `device_name` must be specified " +
@@ -114,6 +162,6 @@ func (b *OMIBlockDevices) BuildOMIDevices() []*oapi.BlockDeviceMapping {
 	return buildBlockDevices(b.OMIMappings)
 }
 
-func (b *LaunchBlockDevices) BuildLaunchDevices() []*oapi.BlockDeviceMapping {
-	return buildBlockDevices(b.LaunchMappings)
+func (b *LaunchBlockDevices) BuildLaunchDevices() []oapi.BlockDeviceMappingVmCreation {
+	return buildBlockDevicesVmCreation(b.LaunchMappings)
 }
