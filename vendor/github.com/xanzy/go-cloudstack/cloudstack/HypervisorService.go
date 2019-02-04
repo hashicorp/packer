@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,140 +23,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type ListHypervisorsParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListHypervisorsParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["zoneid"]; found {
-		u.Set("zoneid", v.(string))
-	}
-	return u
-}
-
-func (p *ListHypervisorsParams) SetZoneid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["zoneid"] = v
-	return
-}
-
-// You should always use this function to get a new ListHypervisorsParams instance,
-// as then you are sure you have configured all required params
-func (s *HypervisorService) NewListHypervisorsParams() *ListHypervisorsParams {
-	p := &ListHypervisorsParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// List hypervisors
-func (s *HypervisorService) ListHypervisors(p *ListHypervisorsParams) (*ListHypervisorsResponse, error) {
-	resp, err := s.cs.newRequest("listHypervisors", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListHypervisorsResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListHypervisorsResponse struct {
-	Count       int           `json:"count"`
-	Hypervisors []*Hypervisor `json:"hypervisor"`
-}
-
-type Hypervisor struct {
-	Name string `json:"name,omitempty"`
-}
-
-type UpdateHypervisorCapabilitiesParams struct {
-	p map[string]interface{}
-}
-
-func (p *UpdateHypervisorCapabilitiesParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["maxguestslimit"]; found {
-		vv := strconv.FormatInt(v.(int64), 10)
-		u.Set("maxguestslimit", vv)
-	}
-	if v, found := p.p["securitygroupenabled"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("securitygroupenabled", vv)
-	}
-	return u
-}
-
-func (p *UpdateHypervisorCapabilitiesParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *UpdateHypervisorCapabilitiesParams) SetMaxguestslimit(v int64) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["maxguestslimit"] = v
-	return
-}
-
-func (p *UpdateHypervisorCapabilitiesParams) SetSecuritygroupenabled(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["securitygroupenabled"] = v
-	return
-}
-
-// You should always use this function to get a new UpdateHypervisorCapabilitiesParams instance,
-// as then you are sure you have configured all required params
-func (s *HypervisorService) NewUpdateHypervisorCapabilitiesParams() *UpdateHypervisorCapabilitiesParams {
-	p := &UpdateHypervisorCapabilitiesParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// Updates a hypervisor capabilities.
-func (s *HypervisorService) UpdateHypervisorCapabilities(p *UpdateHypervisorCapabilitiesParams) (*UpdateHypervisorCapabilitiesResponse, error) {
-	resp, err := s.cs.newRequest("updateHypervisorCapabilities", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r UpdateHypervisorCapabilitiesResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type UpdateHypervisorCapabilitiesResponse struct {
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Hypervisorversion    string `json:"hypervisorversion,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit,omitempty"`
-	Maxguestslimit       int64  `json:"maxguestslimit,omitempty"`
-	Maxhostspercluster   int    `json:"maxhostspercluster,omitempty"`
-	Securitygroupenabled bool   `json:"securitygroupenabled,omitempty"`
-	Storagemotionenabled bool   `json:"storagemotionenabled,omitempty"`
-}
 
 type ListHypervisorCapabilitiesParams struct {
 	p map[string]interface{}
@@ -242,7 +108,7 @@ func (s *HypervisorService) GetHypervisorCapabilityByID(id string, opts ...Optio
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -279,6 +145,7 @@ func (s *HypervisorService) ListHypervisorCapabilities(p *ListHypervisorCapabili
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -288,12 +155,148 @@ type ListHypervisorCapabilitiesResponse struct {
 }
 
 type HypervisorCapability struct {
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Hypervisorversion    string `json:"hypervisorversion,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit,omitempty"`
-	Maxguestslimit       int64  `json:"maxguestslimit,omitempty"`
-	Maxhostspercluster   int    `json:"maxhostspercluster,omitempty"`
-	Securitygroupenabled bool   `json:"securitygroupenabled,omitempty"`
-	Storagemotionenabled bool   `json:"storagemotionenabled,omitempty"`
+	Hypervisor           string `json:"hypervisor"`
+	Hypervisorversion    string `json:"hypervisorversion"`
+	Id                   string `json:"id"`
+	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit"`
+	Maxguestslimit       int64  `json:"maxguestslimit"`
+	Maxhostspercluster   int    `json:"maxhostspercluster"`
+	Securitygroupenabled bool   `json:"securitygroupenabled"`
+	Storagemotionenabled bool   `json:"storagemotionenabled"`
+}
+
+type ListHypervisorsParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListHypervisorsParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["zoneid"]; found {
+		u.Set("zoneid", v.(string))
+	}
+	return u
+}
+
+func (p *ListHypervisorsParams) SetZoneid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["zoneid"] = v
+	return
+}
+
+// You should always use this function to get a new ListHypervisorsParams instance,
+// as then you are sure you have configured all required params
+func (s *HypervisorService) NewListHypervisorsParams() *ListHypervisorsParams {
+	p := &ListHypervisorsParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// List hypervisors
+func (s *HypervisorService) ListHypervisors(p *ListHypervisorsParams) (*ListHypervisorsResponse, error) {
+	resp, err := s.cs.newRequest("listHypervisors", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListHypervisorsResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListHypervisorsResponse struct {
+	Count       int           `json:"count"`
+	Hypervisors []*Hypervisor `json:"hypervisor"`
+}
+
+type Hypervisor struct {
+	Name string `json:"name"`
+}
+
+type UpdateHypervisorCapabilitiesParams struct {
+	p map[string]interface{}
+}
+
+func (p *UpdateHypervisorCapabilitiesParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["maxguestslimit"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("maxguestslimit", vv)
+	}
+	if v, found := p.p["securitygroupenabled"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("securitygroupenabled", vv)
+	}
+	return u
+}
+
+func (p *UpdateHypervisorCapabilitiesParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *UpdateHypervisorCapabilitiesParams) SetMaxguestslimit(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["maxguestslimit"] = v
+	return
+}
+
+func (p *UpdateHypervisorCapabilitiesParams) SetSecuritygroupenabled(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["securitygroupenabled"] = v
+	return
+}
+
+// You should always use this function to get a new UpdateHypervisorCapabilitiesParams instance,
+// as then you are sure you have configured all required params
+func (s *HypervisorService) NewUpdateHypervisorCapabilitiesParams() *UpdateHypervisorCapabilitiesParams {
+	p := &UpdateHypervisorCapabilitiesParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// Updates a hypervisor capabilities.
+func (s *HypervisorService) UpdateHypervisorCapabilities(p *UpdateHypervisorCapabilitiesParams) (*UpdateHypervisorCapabilitiesResponse, error) {
+	resp, err := s.cs.newRequest("updateHypervisorCapabilities", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r UpdateHypervisorCapabilitiesResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type UpdateHypervisorCapabilitiesResponse struct {
+	Hypervisor           string `json:"hypervisor"`
+	Hypervisorversion    string `json:"hypervisorversion"`
+	Id                   string `json:"id"`
+	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit"`
+	Maxguestslimit       int64  `json:"maxguestslimit"`
+	Maxhostspercluster   int    `json:"maxhostspercluster"`
+	Securitygroupenabled bool   `json:"securitygroupenabled"`
+	Storagemotionenabled bool   `json:"storagemotionenabled"`
 }
