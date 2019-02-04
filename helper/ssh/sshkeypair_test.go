@@ -147,7 +147,7 @@ func TestDefaultKeyPairBuilder_Build_Default(t *testing.T) {
 	}
 
 	err = expected{
-		kind: EcdsaSsh,
+		kind: Ecdsa,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -159,14 +159,14 @@ func TestDefaultKeyPairBuilder_Build_Default(t *testing.T) {
 
 func TestDefaultKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
 	kp, err := NewKeyPairBuilder().
-		SetType(EcdsaSsh).
+		SetType(Ecdsa).
 		Build()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	err = expected{
-		kind: EcdsaSsh,
+		kind: Ecdsa,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -178,14 +178,14 @@ func TestDefaultKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
 
 func TestDefaultKeyPairBuilder_Build_RsaDefault(t *testing.T) {
 	kp, err := NewKeyPairBuilder().
-		SetType(RsaSsh).
+		SetType(Rsa).
 		Build()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	err = expected{
-		kind: RsaSsh,
+		kind: Rsa,
 		bits: 4096,
 		desc: "rsa 4096",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -199,7 +199,7 @@ func TestDefaultKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 
 	kp, err := NewKeyPairBuilder().
-		SetType(EcdsaSsh).
+		SetType(Ecdsa).
 		SetName(name).
 		Build()
 	if err != nil {
@@ -207,7 +207,7 @@ func TestDefaultKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	}
 
 	err = expected{
-		kind: EcdsaSsh,
+		kind: Ecdsa,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -222,7 +222,7 @@ func TestDefaultKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 
 	kp, err := NewKeyPairBuilder().
-		SetType(RsaSsh).
+		SetType(Rsa).
 		SetName(name).
 		Build()
 	if err != nil {
@@ -230,7 +230,7 @@ func TestDefaultKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 	}
 
 	err = expected{
-		kind: RsaSsh,
+		kind: Rsa,
 		bits: 4096,
 		desc: "rsa 4096",
 		data: []byte(uuid.TimeOrderedUUID()),

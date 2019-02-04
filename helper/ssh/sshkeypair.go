@@ -19,15 +19,15 @@ const (
 	// That's a lot of bits.
 	defaultRsaBits = 4096
 
-	// RsaSsh is a SSH key pair of RSA type.
-	RsaSsh KeyPairType = "rsa"
+	// Rsa is a SSH key pair of RSA type.
+	Rsa KeyPairType = "rsa"
 
-	// EcdsaSsh is a SSH key pair of ECDSA type.
-	EcdsaSsh KeyPairType = "ecdsa"
+	// Ecdsa is a SSH key pair of ECDSA type.
+	Ecdsa KeyPairType = "ecdsa"
 )
 
 // KeyPairType represents different types of SSH key pairs.
-// For example, RSA.
+// See the 'const' block for details.
 type KeyPairType string
 
 func (o KeyPairType) String() string {
@@ -108,9 +108,9 @@ func (o *defaultKeyPairBuilder) SetName(name string) KeyPairBuilder {
 
 func (o *defaultKeyPairBuilder) Build() (KeyPair, error) {
 	switch o.kind {
-	case RsaSsh:
+	case Rsa:
 		return o.newRsaSshKeyPair()
-	case EcdsaSsh:
+	case Ecdsa:
 		// Default case.
 	}
 
@@ -156,7 +156,7 @@ func (o *defaultKeyPairBuilder) newEcdsaSshKeyPair() (KeyPair, error) {
 	}
 
 	return &defaultKeyPair{
-		kind:               EcdsaSsh,
+		kind:               Ecdsa,
 		bits:               o.bits,
 		name:               o.name,
 		privateKeyDerBytes: raw,
@@ -181,7 +181,7 @@ func (o *defaultKeyPairBuilder) newRsaSshKeyPair() (KeyPair, error) {
 	}
 
 	return &defaultKeyPair{
-		kind:               RsaSsh,
+		kind:               Rsa,
 		bits:               o.bits,
 		name:               o.name,
 		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
@@ -254,9 +254,9 @@ func (o defaultKeyPair) PrivateKeyPemBlock() []byte {
 	t := "UNKNOWN PRIVATE KEY"
 
 	switch o.kind {
-	case EcdsaSsh:
+	case Ecdsa:
 		t = "EC PRIVATE KEY"
-	case RsaSsh:
+	case Rsa:
 		t = "RSA PRIVATE KEY"
 	}
 
