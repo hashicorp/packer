@@ -79,7 +79,7 @@ func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp KeyPair) error {
 	}
 
 	for _, nl := range newLines {
-		publicKeyAk := kp.PublicKeyAuthorizedKeysFormat(nl)
+		publicKeyAk := kp.PublicKeyAuthorizedKeysLine(nl)
 
 		if len(publicKeyAk) < 2 {
 			return errors.New("expected public key in authorized keys format to be at least 2 bytes")
