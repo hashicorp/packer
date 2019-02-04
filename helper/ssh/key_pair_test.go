@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/common/uuid"
-	"golang.org/x/crypto/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 // expected contains the data that the key pair should contain.
@@ -122,7 +122,7 @@ func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp KeyPair) error {
 }
 
 func (o expected) verifyKeyPair(kp KeyPair) error {
-	signer, err := ssh.ParsePrivateKey(kp.PrivateKeyPemBlock())
+	signer, err := gossh.ParsePrivateKey(kp.PrivateKeyPemBlock())
 	if err != nil {
 		return errors.New("failed to parse private key during verification - " + err.Error())
 	}

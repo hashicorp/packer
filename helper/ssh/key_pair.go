@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/crypto/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 const (
@@ -145,7 +145,7 @@ func (o *defaultKeyPairBuilder) newEcdsaSshKeyPair() (KeyPair, error) {
 		return &defaultKeyPair{}, err
 	}
 
-	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	sshPublicKey, err := gossh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
 		return &defaultKeyPair{}, err
 	}
@@ -175,7 +175,7 @@ func (o *defaultKeyPairBuilder) newRsaSshKeyPair() (KeyPair, error) {
 		return &defaultKeyPair{}, err
 	}
 
-	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	sshPublicKey, err := gossh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
 		return &defaultKeyPair{}, err
 	}
@@ -231,7 +231,7 @@ type defaultKeyPair struct {
 	privateKeyDerBytes []byte
 
 	// publicKey is the key pair's public key.
-	publicKey ssh.PublicKey
+	publicKey gossh.PublicKey
 }
 
 func (o defaultKeyPair) Type() KeyPairType {
@@ -268,7 +268,7 @@ func (o defaultKeyPair) PrivateKeyPemBlock() []byte {
 }
 
 func (o defaultKeyPair) PublicKeyAuthorizedKeysFormat(nl NewLineOption) []byte {
-	result := ssh.MarshalAuthorizedKey(o.publicKey)
+	result := gossh.MarshalAuthorizedKey(o.publicKey)
 
 	if len(strings.TrimSpace(o.name)) > 0 {
 		// Awful, but the go ssh library automatically appends
