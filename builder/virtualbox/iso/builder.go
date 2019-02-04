@@ -224,7 +224,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vboxcommon.StepSshKeyPair{
 			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("virtualbox_%s.pem", b.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
 			Comm:         &b.config.Comm,
 		},
 		new(vboxcommon.StepSuppressMessages),
