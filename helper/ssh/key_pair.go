@@ -128,9 +128,9 @@ func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
 	case 521:
 		curve = elliptic.P521()
 	case 384:
-		elliptic.P384()
+		curve = elliptic.P384()
 	case 256:
-		elliptic.P256()
+		curve = elliptic.P256()
 	case 224:
 		// Not supported by "golang.org/x/crypto/ssh".
 		return &defaultKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
