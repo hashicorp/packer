@@ -113,7 +113,7 @@ Optional Parameters:
     inventory directory with `host_vars` `group_vars` that you would like to
     use in the playbook that this provisioner will run.
 
--   `local_port` (string) - The port on which to attempt to listen for SSH
+-   `local_port` (uint) - The port on which to attempt to listen for SSH
     connections. This value is a starting point. The provisioner will attempt
     listen for SSH connections on the first available of ten ports, starting at
     `local_port`. A system-chosen port is used when `local_port` is missing or
