@@ -47,19 +47,20 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 	ui.Say("Creating ephemeral key pair for SSH communicator...")
 
-	// TODO: Should we respect 's.Comm.SSHTemporaryKeyPairName'?
-	//  It appears to be specific to certain other builders, but it is not
-	//  mentioned in the virtualbox builders' documentation.
-	s.Comm.SSHKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 
-	kp, err := newSshKeyPairBuilder().Build()
+	kp, err := newSshKeyPairBuilder().
+		SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
+		Build()
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
+	s.Comm.SSHKeyPairName = kp.Name()
+	s.Comm.SSHTemporaryKeyPairName = kp.Name()
 	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock()
 	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysFormat(unixNewLine)
+	s.Comm.SSHClearAuthorizedKeys = true
 
 	ui.Say(fmt.Sprintf("Created ephemeral SSH key pair of type %s", kp.Description()))
 
