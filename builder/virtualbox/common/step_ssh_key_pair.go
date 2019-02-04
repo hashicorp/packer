@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -48,7 +49,7 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 	ui.Say("Creating ephemeral key pair for SSH communicator...")
 
 
-	kp, err := newSshKeyPairBuilder().
+	kp, err := ssh.NewKeyPairBuilder().
 		SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
 		Build()
 	if err != nil {
@@ -59,7 +60,7 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 	s.Comm.SSHKeyPairName = kp.Name()
 	s.Comm.SSHTemporaryKeyPairName = kp.Name()
 	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock()
-	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysFormat(unixNewLine)
+	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysFormat(ssh.UnixNewLine)
 	s.Comm.SSHClearAuthorizedKeys = true
 
 	ui.Say(fmt.Sprintf("Created ephemeral SSH key pair of type %s", kp.Description()))
