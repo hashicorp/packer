@@ -130,7 +130,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	//VMStep
 
-	//omiDevices := b.config.BuildOMIDevices()
+	omiDevices := b.config.BuildOMIDevices()
 	launchDevices := b.config.BuildLaunchDevices()
 
 	steps := []multistep.Step{
@@ -221,6 +221,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceDeleteSnapshot: b.config.OMIForceDeleteSnapshot,
 			OMIName:             b.config.OMIName,
 			Regions:             b.config.OMIRegions,
+		},
+		&StepRegisterOMI{
+			RootDevice:    b.config.RootDevice,
+			OMIDevices:    omiDevices,
+			LaunchDevices: launchDevices,
 		},
 	}
 

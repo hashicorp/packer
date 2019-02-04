@@ -28,7 +28,7 @@ type BlockDevices struct {
 }
 
 type OMIBlockDevices struct {
-	OMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings"`
+	OMIMappings []BlockDevice `mapstructure:"omi_block_device_mappings"`
 }
 
 type LaunchBlockDevices struct {
@@ -74,6 +74,48 @@ func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
 			//missing
 			//BlockDevice Encrypted
 			//KmsKeyId
+
+			mapping.Bsu = bsu
+		}
+
+		blockDevices = append(blockDevices, mapping)
+	}
+	return blockDevices
+}
+
+func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
+	var blockDevices []oapi.BlockDeviceMappingImage
+
+	for _, blockDevice := range b {
+		mapping := oapi.BlockDeviceMappingImage{
+			DeviceName: blockDevice.DeviceName,
+		}
+
+		if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualDeviceName = blockDevice.VirtualName
+			}
+		} else {
+			bsu := oapi.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+			}
+
+			if blockDevice.VolumeType != "" {
+				bsu.VolumeType = blockDevice.VolumeType
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				bsu.VolumeSize = blockDevice.VolumeSize
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				bsu.Iops = blockDevice.IOPS
+			}
+
+			if blockDevice.SnapshotId != "" {
+				bsu.SnapshotId = blockDevice.SnapshotId
+			}
 
 			mapping.Bsu = bsu
 		}
@@ -158,8 +200,8 @@ func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 	return errs
 }
 
-func (b *OMIBlockDevices) BuildOMIDevices() []*oapi.BlockDeviceMapping {
-	return buildBlockDevices(b.OMIMappings)
+func (b *OMIBlockDevices) BuildOMIDevices() []oapi.BlockDeviceMappingImage {
+	return buildBlockDevicesImage(b.OMIMappings)
 }
 
 func (b *LaunchBlockDevices) BuildLaunchDevices() []oapi.BlockDeviceMappingVmCreation {

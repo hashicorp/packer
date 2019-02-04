@@ -36,9 +36,15 @@ func waitUntilVmStopped(conn *oapi.Client, vmID string) error {
 	return <-errCh
 }
 
-func WaitUntilSnapshotCompleted(conn *oapi.Client, vmID string) error {
+func WaitUntilSnapshotCompleted(conn *oapi.Client, id string) error {
 	errCh := make(chan error, 1)
-	go waitForState(errCh, "completed", waitUntilSnapshotStateFunc(conn, vmID))
+	go waitForState(errCh, "completed", waitUntilSnapshotStateFunc(conn, id))
+	return <-errCh
+}
+
+func WaitUntilImageAvailable(conn *oapi.Client, imageID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "available", waitUntilImageStateFunc(conn, imageID))
 	return <-errCh
 }
 
@@ -107,6 +113,37 @@ func waitUntilSnapshotStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return resp.OK.Snapshots[0].State, nil
+	}
+}
+
+func waitUntilImageStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if Image with id %s exists", id)
+		resp, err := conn.POST_ReadImages(oapi.ReadImagesRequest{
+			Filters: oapi.FiltersImage{
+				ImageIds: []string{id},
+			},
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		}
+
+		if len(resp.OK.Images) == 0 {
+			return "pending", nil
+		}
+
+		if resp.OK.Images[0].State == "failed" {
+			return resp.OK.Images[0].State, fmt.Errorf("Image (%s) creation is failed", id)
+		}
+
+		return resp.OK.Images[0].State, nil
 	}
 }
 
