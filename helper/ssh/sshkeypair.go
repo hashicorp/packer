@@ -1,7 +1,4 @@
-package common
-
-// TODO: Make this available to other packer APIs.
-//  Perhaps through 'helper/ssh'?
+package ssh
 
 import (
 	"bytes"
@@ -22,55 +19,55 @@ const (
 	// That's a lot of bits.
 	defaultRsaBits = 4096
 
-	// rsaSsh is a SSH key pair of RSA type.
-	rsaSsh sshKeyPairType = "rsa"
+	// RsaSsh is a SSH key pair of RSA type.
+	RsaSsh KeyPairType = "rsa"
 
-	// ecdsaSsh is a SSH key pair of ECDSA type.
-	ecdsaSsh sshKeyPairType = "ecdsa"
+	// EcdsaSsh is a SSH key pair of ECDSA type.
+	EcdsaSsh KeyPairType = "ecdsa"
 )
 
-// sshKeyPairType represents different types of SSH key pairs.
+// KeyPairType represents different types of SSH key pairs.
 // For example, RSA.
-type sshKeyPairType string
+type KeyPairType string
 
-func (o sshKeyPairType) String() string {
+func (o KeyPairType) String() string {
 	return string(o)
 }
 
 const (
-	// unixNewLine is a unix new line.
-	unixNewLine newLineOption = "\n"
+	// UnixNewLine is a unix new line.
+	UnixNewLine NewLineOption = "\n"
 
-	// windowsNewLine is a Windows new line.
-	windowsNewLine newLineOption = "\r\n"
+	// WindowsNewLine is a Windows new line.
+	WindowsNewLine NewLineOption = "\r\n"
 
-	// noNewLine will not append a new line.
-	noNewLine newLineOption = ""
+	// NoNewLine will not append a new line.
+	NoNewLine NewLineOption = ""
 )
 
-// newLineOption specifies the type of new line to append to a string.
+// NewLineOption specifies the type of new line to append to a string.
 // See the 'const' block for choices.
-type newLineOption string
+type NewLineOption string
 
-func (o newLineOption) String() string {
+func (o NewLineOption) String() string {
 	return string(o)
 }
 
-func (o newLineOption) Bytes() []byte {
+func (o NewLineOption) Bytes() []byte {
 	return []byte(o)
 }
 
-// sshKeyPairBuilder builds SSH key pairs.
-type sshKeyPairBuilder interface {
+// KeyPairBuilder builds SSH key pairs.
+type KeyPairBuilder interface {
 	// SetType sets the key pair type.
-	SetType(sshKeyPairType) sshKeyPairBuilder
+	SetType(KeyPairType) KeyPairBuilder
 
 	// SetBits sets the key pair's bits of entropy.
-	SetBits(int) sshKeyPairBuilder
+	SetBits(int) KeyPairBuilder
 
 	// SetName sets the name of the key pair. This is primarily used
 	// to identify the public key in the authorized_keys file.
-	SetName(string) sshKeyPairBuilder
+	SetName(string) KeyPairBuilder
 
 	// Build returns a SSH key pair.
 	//
@@ -80,12 +77,12 @@ type sshKeyPairBuilder interface {
 	//		- RSA: 4096
 	//		- ECDSA: 521
 	// 	Default name: (empty string)
-	Build() (sshKeyPair, error)
+	Build() (KeyPair, error)
 }
 
-type defaultSshKeyPairBuilder struct {
+type defaultKeyPairBuilder struct {
 	// kind describes the resulting key pair's type.
-	kind sshKeyPairType
+	kind KeyPairType
 
 	// bits is the resulting key pair's bits of entropy.
 	bits int
@@ -94,35 +91,34 @@ type defaultSshKeyPairBuilder struct {
 	name string
 }
 
-func (o *defaultSshKeyPairBuilder) SetType(kind sshKeyPairType) sshKeyPairBuilder {
+func (o *defaultKeyPairBuilder) SetType(kind KeyPairType) KeyPairBuilder {
 	o.kind = kind
 	return o
 }
 
-func (o *defaultSshKeyPairBuilder) SetBits(bits int) sshKeyPairBuilder {
+func (o *defaultKeyPairBuilder) SetBits(bits int) KeyPairBuilder {
 	o.bits = bits
 	return o
 }
 
-func (o *defaultSshKeyPairBuilder) SetName(name string) sshKeyPairBuilder {
+func (o *defaultKeyPairBuilder) SetName(name string) KeyPairBuilder {
 	o.name = name
 	return o
 }
 
-func (o *defaultSshKeyPairBuilder) Build() (sshKeyPair, error) {
+func (o *defaultKeyPairBuilder) Build() (KeyPair, error) {
 	switch o.kind {
-	case rsaSsh:
+	case RsaSsh:
 		return o.newRsaSshKeyPair()
-	case ecdsaSsh:
+	case EcdsaSsh:
 		// Default case.
 	}
 
 	return o.newEcdsaSshKeyPair()
 }
 
-// newEcdsaSshKeyPair returns a new ECDSA SSH key pair for the given bits
-// of entropy.
-func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
+// newEcdsaSshKeyPair returns a new ECDSA SSH key pair.
+func (o *defaultKeyPairBuilder) newEcdsaSshKeyPair() (KeyPair, error) {
 	var curve elliptic.Curve
 
 	switch o.bits {
@@ -137,30 +133,30 @@ func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
 		elliptic.P256()
 	case 224:
 		// Not supported by "golang.org/x/crypto/ssh".
-		return &defaultSshKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
+		return &defaultKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
 			strconv.Itoa(o.bits) + " bits")
 	default:
-		return &defaultSshKeyPair{}, errors.New("crypto/elliptic does not support " +
+		return &defaultKeyPair{}, errors.New("crypto/elliptic does not support " +
 			strconv.Itoa(o.bits) + " bits")
 	}
 
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		return &defaultSshKeyPair{}, err
+		return &defaultKeyPair{}, err
 	}
 
 	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		return &defaultSshKeyPair{}, err
+		return &defaultKeyPair{}, err
 	}
 
 	raw, err := x509.MarshalECPrivateKey(privateKey)
 	if err != nil {
-		return &defaultSshKeyPair{}, err
+		return &defaultKeyPair{}, err
 	}
 
-	return &defaultSshKeyPair{
-		kind:               ecdsaSsh,
+	return &defaultKeyPair{
+		kind:               EcdsaSsh,
 		bits:               o.bits,
 		name:               o.name,
 		privateKeyDerBytes: raw,
@@ -168,25 +164,24 @@ func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
 	}, nil
 }
 
-// newRsaSshKeyPair returns a new RSA SSH key pair for the given bits
-// of entropy.
-func (o *defaultSshKeyPairBuilder) newRsaSshKeyPair() (sshKeyPair, error) {
+// newRsaSshKeyPair returns a new RSA SSH key pair.
+func (o *defaultKeyPairBuilder) newRsaSshKeyPair() (KeyPair, error) {
 	if o.bits == 0 {
 		o.bits = defaultRsaBits
 	}
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, o.bits)
 	if err != nil {
-		return &defaultSshKeyPair{}, err
+		return &defaultKeyPair{}, err
 	}
 
 	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		return &defaultSshKeyPair{}, err
+		return &defaultKeyPair{}, err
 	}
 
-	return &defaultSshKeyPair{
-		kind:               rsaSsh,
+	return &defaultKeyPair{
+		kind:               RsaSsh,
 		bits:               o.bits,
 		name:               o.name,
 		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
@@ -194,10 +189,10 @@ func (o *defaultSshKeyPairBuilder) newRsaSshKeyPair() (sshKeyPair, error) {
 	}, nil
 }
 
-// sshKeyPair represents a SSH key pair.
-type sshKeyPair interface {
+// KeyPair represents a SSH key pair.
+type KeyPair interface {
 	// Type returns the key pair's type.
-	Type() sshKeyPairType
+	Type() KeyPairType
 
 	// Bits returns the bits of entropy.
 	Bits() int
@@ -218,12 +213,12 @@ type sshKeyPair interface {
 	// PublicKeyAuthorizedKeysFormat returns a slice of bytes
 	// representing the public key in OpenSSH authorized_keys format
 	// with the specified new line.
-	PublicKeyAuthorizedKeysFormat(newLineOption) []byte
+	PublicKeyAuthorizedKeysFormat(NewLineOption) []byte
 }
 
-type defaultSshKeyPair struct {
+type defaultKeyPair struct {
 	// kind is the key pair's type.
-	kind sshKeyPairType
+	kind KeyPairType
 
 	// bits is the key pair's bits of entropy.
 	bits int
@@ -239,29 +234,29 @@ type defaultSshKeyPair struct {
 	publicKey ssh.PublicKey
 }
 
-func (o defaultSshKeyPair) Type() sshKeyPairType {
+func (o defaultKeyPair) Type() KeyPairType {
 	return o.kind
 }
 
-func (o defaultSshKeyPair) Bits() int {
+func (o defaultKeyPair) Bits() int {
 	return o.bits
 }
 
-func (o defaultSshKeyPair) Name() string {
+func (o defaultKeyPair) Name() string {
 	return o.name
 }
 
-func (o defaultSshKeyPair) Description() string {
+func (o defaultKeyPair) Description() string {
 	return o.kind.String() + " " + strconv.Itoa(o.bits)
 }
 
-func (o defaultSshKeyPair) PrivateKeyPemBlock() []byte {
+func (o defaultKeyPair) PrivateKeyPemBlock() []byte {
 	t := "UNKNOWN PRIVATE KEY"
 
 	switch o.kind {
-	case ecdsaSsh:
+	case EcdsaSsh:
 		t = "EC PRIVATE KEY"
-	case rsaSsh:
+	case RsaSsh:
 		t = "RSA PRIVATE KEY"
 	}
 
@@ -272,36 +267,36 @@ func (o defaultSshKeyPair) PrivateKeyPemBlock() []byte {
 	})
 }
 
-func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat(nl newLineOption) []byte {
+func (o defaultKeyPair) PublicKeyAuthorizedKeysFormat(nl NewLineOption) []byte {
 	result := ssh.MarshalAuthorizedKey(o.publicKey)
 
 	if len(strings.TrimSpace(o.name)) > 0 {
 		// Awful, but the go ssh library automatically appends
 		// a unix new line.
-		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
+		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
 		result = append(result, ' ')
 		result = append(result, o.name...)
 	}
 
 	switch nl {
-	case noNewLine:
-		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
-	case windowsNewLine:
-		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
+	case NoNewLine:
+		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
+	case WindowsNewLine:
+		result = bytes.TrimSuffix(result, UnixNewLine.Bytes())
 		result = append(result, nl.Bytes()...)
-	case unixNewLine:
+	case UnixNewLine:
 		fallthrough
 	default:
 		// This is how all the other "SSH key pair" code works in
 		// the different builders.
-		if !bytes.HasSuffix(result, unixNewLine.Bytes()) {
-			result = append(result, unixNewLine.Bytes()...)
+		if !bytes.HasSuffix(result, UnixNewLine.Bytes()) {
+			result = append(result, UnixNewLine.Bytes()...)
 		}
 	}
 
 	return result
 }
 
-func newSshKeyPairBuilder() sshKeyPairBuilder {
-	return &defaultSshKeyPairBuilder{}
+func NewKeyPairBuilder() KeyPairBuilder {
+	return &defaultKeyPairBuilder{}
 }
