@@ -37,7 +37,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 
 	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
-		ui.Say("Using SSH Agent with key pair in Source AMI")
+		ui.Say("Using SSH Agent with key pair in Source OMI")
 		return multistep.ActionContinue
 	}
 
