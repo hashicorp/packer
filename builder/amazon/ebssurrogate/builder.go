@@ -218,7 +218,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.RunConfig.Comm,
-			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("ec2_%s", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupFilter:    b.config.SecurityGroupFilter,
