@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -90,144 +90,16 @@ func (s *RegionService) AddRegion(p *AddRegionParams) (*AddRegionResponse, error
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type AddRegionResponse struct {
-	Endpoint                 string `json:"endpoint,omitempty"`
-	Gslbserviceenabled       bool   `json:"gslbserviceenabled,omitempty"`
-	Id                       int    `json:"id,omitempty"`
-	Name                     string `json:"name,omitempty"`
-	Portableipserviceenabled bool   `json:"portableipserviceenabled,omitempty"`
-}
-
-type UpdateRegionParams struct {
-	p map[string]interface{}
-}
-
-func (p *UpdateRegionParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["endpoint"]; found {
-		u.Set("endpoint", v.(string))
-	}
-	if v, found := p.p["id"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("id", vv)
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	return u
-}
-
-func (p *UpdateRegionParams) SetEndpoint(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["endpoint"] = v
-	return
-}
-
-func (p *UpdateRegionParams) SetId(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *UpdateRegionParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-// You should always use this function to get a new UpdateRegionParams instance,
-// as then you are sure you have configured all required params
-func (s *RegionService) NewUpdateRegionParams(id int) *UpdateRegionParams {
-	p := &UpdateRegionParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Updates a region
-func (s *RegionService) UpdateRegion(p *UpdateRegionParams) (*UpdateRegionResponse, error) {
-	resp, err := s.cs.newRequest("updateRegion", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r UpdateRegionResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type UpdateRegionResponse struct {
-	Endpoint                 string `json:"endpoint,omitempty"`
-	Gslbserviceenabled       bool   `json:"gslbserviceenabled,omitempty"`
-	Id                       int    `json:"id,omitempty"`
-	Name                     string `json:"name,omitempty"`
-	Portableipserviceenabled bool   `json:"portableipserviceenabled,omitempty"`
-}
-
-type RemoveRegionParams struct {
-	p map[string]interface{}
-}
-
-func (p *RemoveRegionParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("id", vv)
-	}
-	return u
-}
-
-func (p *RemoveRegionParams) SetId(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new RemoveRegionParams instance,
-// as then you are sure you have configured all required params
-func (s *RegionService) NewRemoveRegionParams(id int) *RemoveRegionParams {
-	p := &RemoveRegionParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Removes specified region
-func (s *RegionService) RemoveRegion(p *RemoveRegionParams) (*RemoveRegionResponse, error) {
-	resp, err := s.cs.newRequest("removeRegion", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r RemoveRegionResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type RemoveRegionResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Endpoint                 string `json:"endpoint"`
+	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
+	Id                       int    `json:"id"`
+	Name                     string `json:"name"`
+	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
 }
 
 type ListRegionsParams struct {
@@ -319,6 +191,7 @@ func (s *RegionService) ListRegions(p *ListRegionsParams) (*ListRegionsResponse,
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -328,9 +201,159 @@ type ListRegionsResponse struct {
 }
 
 type Region struct {
-	Endpoint                 string `json:"endpoint,omitempty"`
-	Gslbserviceenabled       bool   `json:"gslbserviceenabled,omitempty"`
-	Id                       int    `json:"id,omitempty"`
-	Name                     string `json:"name,omitempty"`
-	Portableipserviceenabled bool   `json:"portableipserviceenabled,omitempty"`
+	Endpoint                 string `json:"endpoint"`
+	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
+	Id                       int    `json:"id"`
+	Name                     string `json:"name"`
+	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
+}
+
+type RemoveRegionParams struct {
+	p map[string]interface{}
+}
+
+func (p *RemoveRegionParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("id", vv)
+	}
+	return u
+}
+
+func (p *RemoveRegionParams) SetId(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new RemoveRegionParams instance,
+// as then you are sure you have configured all required params
+func (s *RegionService) NewRemoveRegionParams(id int) *RemoveRegionParams {
+	p := &RemoveRegionParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Removes specified region
+func (s *RegionService) RemoveRegion(p *RemoveRegionParams) (*RemoveRegionResponse, error) {
+	resp, err := s.cs.newRequest("removeRegion", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r RemoveRegionResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type RemoveRegionResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *RemoveRegionResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RemoveRegionResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
+type UpdateRegionParams struct {
+	p map[string]interface{}
+}
+
+func (p *UpdateRegionParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["endpoint"]; found {
+		u.Set("endpoint", v.(string))
+	}
+	if v, found := p.p["id"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("id", vv)
+	}
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
+	}
+	return u
+}
+
+func (p *UpdateRegionParams) SetEndpoint(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["endpoint"] = v
+	return
+}
+
+func (p *UpdateRegionParams) SetId(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *UpdateRegionParams) SetName(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["name"] = v
+	return
+}
+
+// You should always use this function to get a new UpdateRegionParams instance,
+// as then you are sure you have configured all required params
+func (s *RegionService) NewUpdateRegionParams(id int) *UpdateRegionParams {
+	p := &UpdateRegionParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Updates a region
+func (s *RegionService) UpdateRegion(p *UpdateRegionParams) (*UpdateRegionResponse, error) {
+	resp, err := s.cs.newRequest("updateRegion", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r UpdateRegionResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type UpdateRegionResponse struct {
+	Endpoint                 string `json:"endpoint"`
+	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
+	Id                       int    `json:"id"`
+	Name                     string `json:"name"`
+	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
 }

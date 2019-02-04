@@ -160,7 +160,7 @@ require (
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.0.0-20180703112113-636d36a76670
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
-	github.com/xanzy/go-cloudstack v2.1.4+incompatible
+	github.com/xanzy/go-cloudstack v2.4.1+incompatible
 	golang.org/x/crypto v0.0.0-20180322175230-88942b9c40a4
 	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
