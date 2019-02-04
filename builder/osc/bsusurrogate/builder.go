@@ -131,7 +131,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	//VMStep
 
 	//omiDevices := b.config.BuildOMIDevices()
-	//launchDevices := b.config.BuildLaunchDevices()
+	launchDevices := b.config.BuildLaunchDevices()
 
 	steps := []multistep.Step{
 		&osccommon.StepPreValidate{
@@ -207,6 +207,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&osccommon.StepStopBSUBackedVm{
 			Skip:          false,
 			DisableStopVm: b.config.DisableStopVm,
+		},
+		&osccommon.StepUpdateBSUBackedVm{
+			EnableAMISriovNetSupport: b.config.OMISriovNetSupport,
+			EnableAMIENASupport:      b.config.OMIENASupport,
+		},
+		&StepSnapshotVolumes{
+			LaunchDevices: launchDevices,
 		},
 	}
 

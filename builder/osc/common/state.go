@@ -36,6 +36,12 @@ func waitUntilVmStopped(conn *oapi.Client, vmID string) error {
 	return <-errCh
 }
 
+func WaitUntilSnapshotCompleted(conn *oapi.Client, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "completed", waitUntilSnapshotStateFunc(conn, vmID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
@@ -74,6 +80,33 @@ func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return resp.OK.Vms[0].State, nil
+	}
+}
+
+func waitUntilSnapshotStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if Snapshot with id %s exists", id)
+		resp, err := conn.POST_ReadSnapshots(oapi.ReadSnapshotsRequest{
+			Filters: oapi.FiltersSnapshot{
+				SnapshotIds: []string{id},
+			},
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		}
+
+		if len(resp.OK.Snapshots) == 0 {
+			return "pending", nil
+		}
+
+		return resp.OK.Snapshots[0].State, nil
 	}
 }
 
