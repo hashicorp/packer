@@ -16,12 +16,19 @@ import (
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/template/interpolate"
+	vaultapi "github.com/hashicorp/vault/api"
 )
 
 type VaultAWSEngineOptions struct {
-	Name    string `mapstructure:"name"`
-	RoleARN string `mapstructure:"role_arn"`
-	TTL     string `mapstructure:"ttl"`
+	Name       string `mapstructure:"name"`
+	RoleARN    string `mapstructure:"role_arn"`
+	TTL        string `mapstructure:"ttl"`
+	EngineName string `mapstructure:"engine_name"`
+}
+
+func (v *VaultAWSEngineOptions) Empty() bool {
+	return len(v.Name) == 0 && len(v.RoleARN) == 0 &&
+		len(v.EngineName) == 0 && len(v.TTL) == 0
 }
 
 // AccessConfig is for common configuration related to AWS access
@@ -130,25 +137,64 @@ func (c *AccessConfig) IsChinaCloud() bool {
 	return strings.HasPrefix(c.SessionRegion(), "cn-")
 }
 
+func (c *AccessConfig) GetCredsFromVault() error {
+	// const EnvVaultAddress = "VAULT_ADDR"
+	// const EnvVaultToken = "VAULT_TOKEN"
+	vaultConfig := vaultapi.DefaultConfig()
+	cli, err := vaultapi.NewClient(vaultConfig)
+	if err != nil {
+		return fmt.Errorf("Error getting Vault client: %s", err)
+	}
+	path := fmt.Sprintf("/%s/creds/%s", c.VaultAWSEngine.EngineName,
+		c.VaultAWSEngine.Name)
+	secret, err := cli.Logical().Read(path)
+	if err != nil {
+		return fmt.Errorf("Error reading vault secret: %s", err)
+	}
+	if secret == nil {
+		return fmt.Errorf("Vault Secret does not exist at the given path.")
+	}
+
+	data, _ := secret.Data["data"]
+	unpacked := data.(map[string]interface{})
+	c.AccessKey = unpacked["access_key"].(string)
+	c.SecretKey = unpacked["secret_key"].(string)
+	c.Token = unpacked["security_token"].(string)
+
+	return nil
+}
+
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 
 	if c.SkipMetadataApiCheck {
 		log.Println("(WARN) skip_metadata_api_check ignored.")
 	}
-	// Either both access and secret key must be set or neither of them should
-	// be.
-	if c.VaultAWSEngine != nil {
+
+	// Make sure it's obvious from the config how we're getting credentials:
+	// Vault, Packer config, or environemnt.
+	if !c.VaultAWSEngine.Empty() {
 		if len(c.AccessKey) > 0 {
 			errs = append(errs,
 				fmt.Errorf("If you have set vault_aws_engine, you must not set"+
 					" the access_key or secret_key."))
 		}
+		// Go ahead and grab those credentials from Vault now, so we can set
+		// the keys and token now.
+		err := c.GetCredsFromVault()
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
+
 	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
 	}
+
+	// abort build early so I can test more quickly
+	errs = append(errs,
+		fmt.Errorf("Megan remove this error to continue with build: \n\nAccess: %s, \n\nSecret: %s, \n\nToken: %s", c.AccessKey, c.SecretKey, c.Token))
 
 	return errs
 }
