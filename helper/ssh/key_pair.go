@@ -109,16 +109,16 @@ func (o *defaultKeyPairBuilder) SetName(name string) KeyPairBuilder {
 func (o *defaultKeyPairBuilder) Build() (KeyPair, error) {
 	switch o.kind {
 	case Rsa:
-		return o.newRsaSshKeyPair()
+		return o.newRsaKeyPair()
 	case Ecdsa:
 		// Default case.
 	}
 
-	return o.newEcdsaSshKeyPair()
+	return o.newEcdsaKeyPair()
 }
 
-// newEcdsaSshKeyPair returns a new ECDSA SSH key pair.
-func (o *defaultKeyPairBuilder) newEcdsaSshKeyPair() (KeyPair, error) {
+// newEcdsaKeyPair returns a new ECDSA SSH key pair.
+func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
 	var curve elliptic.Curve
 
 	switch o.bits {
@@ -164,8 +164,8 @@ func (o *defaultKeyPairBuilder) newEcdsaSshKeyPair() (KeyPair, error) {
 	}, nil
 }
 
-// newRsaSshKeyPair returns a new RSA SSH key pair.
-func (o *defaultKeyPairBuilder) newRsaSshKeyPair() (KeyPair, error) {
+// newRsaKeyPair returns a new RSA SSH key pair.
+func (o *defaultKeyPairBuilder) newRsaKeyPair() (KeyPair, error) {
 	if o.bits == 0 {
 		o.bits = defaultRsaBits
 	}
