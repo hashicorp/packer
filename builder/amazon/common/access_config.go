@@ -18,6 +18,12 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+type VaultAWSEngineOptions struct {
+	Name    string `mapstructure:"name"`
+	RoleARN string `mapstructure:"role_arn"`
+	TTL     string `mapstructure:"ttl"`
+}
+
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	AccessKey             string `mapstructure:"access_key"`
@@ -32,6 +38,7 @@ type AccessConfig struct {
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
 	session               *session.Session
+	VaultAWSEngine        VaultAWSEngineOptions `mapstructure:"vault_aws_engine"`
 
 	getEC2Connection func() ec2iface.EC2API
 }
@@ -44,6 +51,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+
 	staticCreds := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token)
 	if _, err := staticCreds.Get(); err != credentials.ErrStaticCredentialsEmpty {
 		config.WithCredentials(staticCreds)
@@ -130,6 +138,13 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 	// Either both access and secret key must be set or neither of them should
 	// be.
+	if c.VaultAWSEngine != nil {
+		if len(c.AccessKey) > 0 {
+			errs = append(errs,
+				fmt.Errorf("If you have set vault_aws_engine, you must not set"+
+					" the access_key or secret_key."))
+		}
+	}
 	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
