@@ -30,6 +30,12 @@ func waitUntilVmDeleted(conn *oapi.Client, vmID string) error {
 	return <-errCh
 }
 
+func waitUntilVmStopped(conn *oapi.Client, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "stopped", waitUntilVmStateFunc(conn, vmID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
