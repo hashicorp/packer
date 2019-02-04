@@ -13,6 +13,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"strconv"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -67,6 +68,10 @@ type sshKeyPairBuilder interface {
 	// SetBits sets the key pair's bits of entropy.
 	SetBits(int) sshKeyPairBuilder
 
+	// SetName sets the name of the key pair. This is primarily used
+	// to identify the public key in the authorized_keys file.
+	SetName(string) sshKeyPairBuilder
+
 	// Build returns a SSH key pair.
 	//
 	// The following defaults are used if not specified:
@@ -74,6 +79,7 @@ type sshKeyPairBuilder interface {
 	//	Default bits of entropy:
 	//		- RSA: 4096
 	//		- ECDSA: 521
+	// 	Default name: (empty string)
 	Build() (sshKeyPair, error)
 }
 
@@ -83,6 +89,9 @@ type defaultSshKeyPairBuilder struct {
 
 	// bits is the resulting key pair's bits of entropy.
 	bits int
+
+	// name is the resulting key pair's name.
+	name string
 }
 
 func (o *defaultSshKeyPairBuilder) SetType(kind sshKeyPairType) sshKeyPairBuilder {
@@ -95,15 +104,20 @@ func (o *defaultSshKeyPairBuilder) SetBits(bits int) sshKeyPairBuilder {
 	return o
 }
 
+func (o *defaultSshKeyPairBuilder) SetName(name string) sshKeyPairBuilder {
+	o.name = name
+	return o
+}
+
 func (o *defaultSshKeyPairBuilder) Build() (sshKeyPair, error) {
 	switch o.kind {
 	case rsaSsh:
-		return newRsaSshKeyPair(o.bits)
+		return o.newRsaSshKeyPair()
 	case ecdsaSsh:
 		// Default case.
 	}
 
-	return newEcdsaSshKeyPair(o.bits)
+	return o.newEcdsaSshKeyPair()
 }
 
 // sshKeyPair represents a SSH key pair.
@@ -113,6 +127,10 @@ type sshKeyPair interface {
 
 	// Bits returns the bits of entropy.
 	Bits() int
+
+	// Name returns the key pair's name. An empty string is
+	// returned is no name was specified.
+	Name() string
 
 	// Description returns a brief description of the key pair that
 	// is suitable for log messages or printing.
@@ -136,6 +154,9 @@ type defaultSshKeyPair struct {
 	// bits is the key pair's bits of entropy.
 	bits int
 
+	// name is the key pair's name.
+	name string
+
 	// privateKeyDerBytes is the private key's bytes
 	// in ASN.1 DER format
 	privateKeyDerBytes []byte
@@ -150,6 +171,10 @@ func (o defaultSshKeyPair) Type() sshKeyPairType {
 
 func (o defaultSshKeyPair) Bits() int {
 	return o.bits
+}
+
+func (o defaultSshKeyPair) Name() string {
+	return o.name
 }
 
 func (o defaultSshKeyPair) Description() string {
@@ -176,6 +201,14 @@ func (o defaultSshKeyPair) PrivateKeyPemBlock() []byte {
 func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat(nl newLineOption) []byte {
 	result := ssh.MarshalAuthorizedKey(o.publicKey)
 
+	if len(strings.TrimSpace(o.name)) > 0 {
+		// Awful, but the go ssh library automatically appends
+		// a unix new line.
+		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
+		result = append(result, ' ')
+		result = append(result, o.name...)
+	}
+
 	switch nl {
 	case noNewLine:
 		result = bytes.TrimSuffix(result, unixNewLine.Bytes())
@@ -197,12 +230,12 @@ func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat(nl newLineOption) []byt
 
 // newEcdsaSshKeyPair returns a new ECDSA SSH key pair for the given bits
 // of entropy.
-func newEcdsaSshKeyPair(bits int) (sshKeyPair, error) {
+func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
 	var curve elliptic.Curve
 
-	switch bits {
+	switch o.bits {
 	case 0:
-		bits = 521
+		o.bits = 521
 		fallthrough
 	case 521:
 		curve = elliptic.P521()
@@ -213,10 +246,10 @@ func newEcdsaSshKeyPair(bits int) (sshKeyPair, error) {
 	case 224:
 		// Not supported by "golang.org/x/crypto/ssh".
 		return &defaultSshKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
-				strconv.Itoa(bits) + " bits")
+				strconv.Itoa(o.bits) + " bits")
 	default:
 		return &defaultSshKeyPair{}, errors.New("crypto/elliptic does not support " +
-			strconv.Itoa(bits) + " bits")
+			strconv.Itoa(o.bits) + " bits")
 	}
 
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
@@ -236,7 +269,8 @@ func newEcdsaSshKeyPair(bits int) (sshKeyPair, error) {
 
 	return &defaultSshKeyPair{
 		kind:               ecdsaSsh,
-		bits:               bits,
+		bits:               o.bits,
+		name:               o.name,
 		privateKeyDerBytes: raw,
 		publicKey:          sshPublicKey,
 	}, nil
@@ -244,12 +278,12 @@ func newEcdsaSshKeyPair(bits int) (sshKeyPair, error) {
 
 // newRsaSshKeyPair returns a new RSA SSH key pair for the given bits
 // of entropy.
-func newRsaSshKeyPair(bits int) (sshKeyPair, error) {
-	if bits == 0 {
-		bits = defaultRsaBits
+func (o *defaultSshKeyPairBuilder) newRsaSshKeyPair() (sshKeyPair, error) {
+	if o.bits == 0 {
+		o.bits = defaultRsaBits
 	}
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	privateKey, err := rsa.GenerateKey(rand.Reader, o.bits)
 	if err != nil {
 		return &defaultSshKeyPair{}, err
 	}
@@ -261,7 +295,8 @@ func newRsaSshKeyPair(bits int) (sshKeyPair, error) {
 
 	return &defaultSshKeyPair{
 		kind:               rsaSsh,
-		bits:               bits,
+		bits:               o.bits,
+		name:               o.name,
 		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
 		publicKey:          sshPublicKey,
 	}, nil
