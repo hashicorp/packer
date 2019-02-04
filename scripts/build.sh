@@ -12,8 +12,11 @@ set -e
 function validateToolPresence
 {
     local TOOLNAME=$1
-    which ${TOOLNAME} >/dev/null || echo "${TOOLNAME} is not on the path. Exiting..."
-    exit 1
+    which ${TOOLNAME} >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "${TOOLNAME} is not on the path. Exiting..."
+        exit 1
+    fi
 }
 
 # Validates that all used tools are present; exits when any is not found
@@ -84,6 +87,7 @@ function convertPathOnCygwin() {
     esac
 }
 
+validatePreconditions
 enterPackerSourceDir
 ensureOutputStructure
 cleanOutputDirs
