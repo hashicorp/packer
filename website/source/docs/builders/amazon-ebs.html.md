@@ -507,7 +507,7 @@ builder.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
 
-- `use_vault_aws_engine` (bool) - Get credentials from Hashicorp Vault's aws
+- `vault_aws_engine` (object) - Get credentials from Hashicorp Vault's aws
   secrets engine. You must already have created a role to use. For more
   information about generating credentials via the Vault engine, see the
   [Vault docs.]
@@ -533,6 +533,16 @@ builder.
       Please note that because credentials that are not supported by an STS
       token are eventually consistent, Packer will pause for ten seconds after
       retrieving the credentials before continuing with the build.
+
+    ``` json
+    {
+        "vault_aws_engine": {
+            "name": "myrole"
+            "role_arn": "myarn"
+            "ttl": "3600s"
+        }
+    }
+    ```
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
     in order to create a temporary security group within the VPC. Requires
