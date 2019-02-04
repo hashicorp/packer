@@ -120,6 +120,80 @@ func (o *defaultSshKeyPairBuilder) Build() (sshKeyPair, error) {
 	return o.newEcdsaSshKeyPair()
 }
 
+// newEcdsaSshKeyPair returns a new ECDSA SSH key pair for the given bits
+// of entropy.
+func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
+	var curve elliptic.Curve
+
+	switch o.bits {
+	case 0:
+		o.bits = 521
+		fallthrough
+	case 521:
+		curve = elliptic.P521()
+	case 384:
+		elliptic.P384()
+	case 256:
+		elliptic.P256()
+	case 224:
+		// Not supported by "golang.org/x/crypto/ssh".
+		return &defaultSshKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
+			strconv.Itoa(o.bits) + " bits")
+	default:
+		return &defaultSshKeyPair{}, errors.New("crypto/elliptic does not support " +
+			strconv.Itoa(o.bits) + " bits")
+	}
+
+	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
+	if err != nil {
+		return &defaultSshKeyPair{}, err
+	}
+
+	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return &defaultSshKeyPair{}, err
+	}
+
+	raw, err := x509.MarshalECPrivateKey(privateKey)
+	if err != nil {
+		return &defaultSshKeyPair{}, err
+	}
+
+	return &defaultSshKeyPair{
+		kind:               ecdsaSsh,
+		bits:               o.bits,
+		name:               o.name,
+		privateKeyDerBytes: raw,
+		publicKey:          sshPublicKey,
+	}, nil
+}
+
+// newRsaSshKeyPair returns a new RSA SSH key pair for the given bits
+// of entropy.
+func (o *defaultSshKeyPairBuilder) newRsaSshKeyPair() (sshKeyPair, error) {
+	if o.bits == 0 {
+		o.bits = defaultRsaBits
+	}
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, o.bits)
+	if err != nil {
+		return &defaultSshKeyPair{}, err
+	}
+
+	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return &defaultSshKeyPair{}, err
+	}
+
+	return &defaultSshKeyPair{
+		kind:               rsaSsh,
+		bits:               o.bits,
+		name:               o.name,
+		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
+		publicKey:          sshPublicKey,
+	}, nil
+}
+
 // sshKeyPair represents a SSH key pair.
 type sshKeyPair interface {
 	// Type returns the key pair's type.
@@ -226,80 +300,6 @@ func (o defaultSshKeyPair) PublicKeyAuthorizedKeysFormat(nl newLineOption) []byt
 	}
 
 	return result
-}
-
-// newEcdsaSshKeyPair returns a new ECDSA SSH key pair for the given bits
-// of entropy.
-func (o *defaultSshKeyPairBuilder) newEcdsaSshKeyPair() (sshKeyPair, error) {
-	var curve elliptic.Curve
-
-	switch o.bits {
-	case 0:
-		o.bits = 521
-		fallthrough
-	case 521:
-		curve = elliptic.P521()
-	case 384:
-		elliptic.P384()
-	case 256:
-		elliptic.P256()
-	case 224:
-		// Not supported by "golang.org/x/crypto/ssh".
-		return &defaultSshKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
-				strconv.Itoa(o.bits) + " bits")
-	default:
-		return &defaultSshKeyPair{}, errors.New("crypto/elliptic does not support " +
-			strconv.Itoa(o.bits) + " bits")
-	}
-
-	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
-	if err != nil {
-		return &defaultSshKeyPair{}, err
-	}
-
-	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
-	if err != nil {
-		return &defaultSshKeyPair{}, err
-	}
-
-	raw, err := x509.MarshalECPrivateKey(privateKey)
-	if err != nil {
-		return &defaultSshKeyPair{}, err
-	}
-
-	return &defaultSshKeyPair{
-		kind:               ecdsaSsh,
-		bits:               o.bits,
-		name:               o.name,
-		privateKeyDerBytes: raw,
-		publicKey:          sshPublicKey,
-	}, nil
-}
-
-// newRsaSshKeyPair returns a new RSA SSH key pair for the given bits
-// of entropy.
-func (o *defaultSshKeyPairBuilder) newRsaSshKeyPair() (sshKeyPair, error) {
-	if o.bits == 0 {
-		o.bits = defaultRsaBits
-	}
-
-	privateKey, err := rsa.GenerateKey(rand.Reader, o.bits)
-	if err != nil {
-		return &defaultSshKeyPair{}, err
-	}
-
-	sshPublicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
-	if err != nil {
-		return &defaultSshKeyPair{}, err
-	}
-
-	return &defaultSshKeyPair{
-		kind:               rsaSsh,
-		bits:               o.bits,
-		name:               o.name,
-		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
-		publicKey:          sshPublicKey,
-	}, nil
 }
 
 func newSshKeyPairBuilder() sshKeyPairBuilder {
