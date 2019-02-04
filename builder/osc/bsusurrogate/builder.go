@@ -164,6 +164,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:            &b.config.RunConfig.Comm,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
+		&osccommon.StepCleanupVolumes{
+			BlockDevices: b.config.BlockDevices,
+		},
+		&osccommon.StepRunSourceVm{
+			AssociatePublicIpAddress:    b.config.AssociatePublicIpAddress,
+			BlockDevices:                b.config.BlockDevices,
+			Comm:                        &b.config.RunConfig.Comm,
+			Ctx:                         b.config.ctx,
+			Debug:                       b.config.PackerDebug,
+			BsuOptimized:                b.config.BsuOptimized,
+			EnableT2Unlimited:           b.config.EnableT2Unlimited,
+			ExpectedRootDevice:          "ebs", // should it be bsu
+			IamVmProfile:                b.config.IamVmProfile,
+			VmInitiatedShutdownBehavior: b.config.VmInitiatedShutdownBehavior,
+			VmType:                      b.config.VmType,
+			IsRestricted:                false,
+			SourceOMI:                   b.config.SourceOmi,
+			Tags:                        b.config.RunTags,
+			UserData:                    b.config.UserData,
+			UserDataFile:                b.config.UserDataFile,
+			VolumeTags:                  b.config.VolumeRunTags,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
