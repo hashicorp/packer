@@ -186,6 +186,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserDataFile:                b.config.UserDataFile,
 			VolumeTags:                  b.config.VolumeRunTags,
 		},
+		&osccommon.StepGetPassword{
+			Debug:     b.config.PackerDebug,
+			Comm:      &b.config.RunConfig.Comm,
+			Timeout:   b.config.WindowsPasswordTimeout,
+			BuildName: b.config.PackerBuildName,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
