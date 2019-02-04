@@ -46,7 +46,8 @@ builder.
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this](amazon.html#specifying-amazon-credentials)
+    how to set this](amazon.html#specifying-amazon-credentials). This is not
+    required if you are using `use_vault_aws_engine` for authentication instead.
 
 -   `ami_name` (string) - The name of the resulting AMI that will appear when
     managing AMIs in the AWS console or via APIs. This must be unique. To help
@@ -60,7 +61,8 @@ builder.
     to launch the EC2 instance to create the AMI.
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this](amazon.html#specifying-amazon-credentials)
+    how to set this](amazon.html#specifying-amazon-credentials). This is not
+    required if you are using `use_vault_aws_engine` for authentication instead.
 
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine. `source_ami_filter` may be used instead to populate this
@@ -504,6 +506,33 @@ builder.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
+
+- `use_vault_aws_engine` (bool) - Get credentials from Hashicorp Vault's aws
+  secrets engine. You must already have created a role to use. For more
+  information about generating credentials via the Vault engine, see the
+  [Vault docs.]
+  (https://www.vaultproject.io/api/secret/aws/index.html#generate-credentials)
+  If you set this
+  flag, you must also set the below options:
+  -   `name` (string) - Required. Specifies the name of the role to generate
+      credentials against. This is part of the request URL.
+  -   `role_arn` (string)- The ARN of the role to assume if credential_type on
+      the Vault role is assumed_role. Must match one of the allowed role ARNs
+      in the Vault role. Optional if the Vault role only allows a single AWS
+      role ARN; required otherwise.
+  -   `ttl` (string) -  Specifies the TTL for the use of the STS token. This is
+      specified as a string with a duration suffix. Valid only when
+      credential_type is assumed_role or federation_token. When not specified,
+      the default_sts_ttl set for the role will be used. If that is also not
+      set, then the default value of 3600s will be used. AWS places limits on
+      the maximum TTL allowed. See the AWS documentation on the DurationSeconds
+      parameter for AssumeRole (for assumed_role credential types) and
+      GetFederationToken (for federation_token credential types) for more
+      details.
+
+      Please note that because credentials that are not supported by an STS
+      token are eventually consistent, Packer will pause for ten seconds after
+      retrieving the credentials before continuing with the build.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
     in order to create a temporary security group within the VPC. Requires
