@@ -119,7 +119,8 @@ type sshKeyPair interface {
 	Description() string
 
 	// PrivateKeyPemBlock returns a slice of bytes representing
-	// the private key in ASN.1, DER format in a PEM block.
+	// the private key in ASN.1 Distinguished Encoding Rules (DER)
+	// format in a Privacy-Enhanced Mail (PEM) block.
 	PrivateKeyPemBlock() []byte
 
 	// PublicKeyAuthorizedKeysFormat returns a slice of bytes
