@@ -10,9 +10,9 @@ import (
 )
 
 type TagMap map[string]string
-type OAPI []*oapi.ResourceTag
+type OAPITags []oapi.ResourceTag
 
-func (t OAPI) Report(ui packer.Ui) {
+func (t OAPITags) Report(ui packer.Ui) {
 	for _, tag := range t {
 		ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"",
 			tag.Key, tag.Value))
@@ -23,8 +23,8 @@ func (t TagMap) IsSet() bool {
 	return len(t) > 0
 }
 
-func (t TagMap) OAPI(ctx interpolate.Context, region string, state multistep.StateBag) (OAPI, error) {
-	var oapiTags []*oapi.ResourceTag
+func (t TagMap) OAPITags(ctx interpolate.Context, region string, state multistep.StateBag) (OAPITags, error) {
+	var oapiTags []oapi.ResourceTag
 	ctx.Data = extractBuildInfo(region, state)
 
 	for key, value := range t {
@@ -36,7 +36,7 @@ func (t TagMap) OAPI(ctx interpolate.Context, region string, state multistep.Sta
 		if err != nil {
 			return nil, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
 		}
-		oapiTags = append(oapiTags, &oapi.ResourceTag{
+		oapiTags = append(oapiTags, oapi.ResourceTag{
 			Key:   interpolatedKey,
 			Value: interpolatedValue,
 		})

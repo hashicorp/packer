@@ -17,6 +17,19 @@ func waitForSecurityGroup(conn *oapi.Client, securityGroupID string) error {
 	return err
 }
 
+func waitUntilForVmRunning(conn *oapi.Client, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "running", waitUntilVmStateFunc(conn, vmID))
+	err := <-errCh
+	return err
+}
+
+func waitUntilVmDeleted(conn *oapi.Client, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "terminated", waitUntilVmStateFunc(conn, vmID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
@@ -29,6 +42,33 @@ func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) e
 	})
 	errCh <- err
 	return err
+}
+
+func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if SG with id %s exists", id)
+		resp, err := conn.POST_ReadVms(oapi.ReadVmsRequest{
+			Filters: oapi.FiltersVm{
+				VmIds: []string{id},
+			},
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		}
+
+		if len(resp.OK.Vms) == 0 {
+			return "pending", nil
+		}
+
+		return resp.OK.Vms[0].State, nil
+	}
 }
 
 func securityGroupWaitFunc(conn *oapi.Client, id string) stateRefreshFunc {

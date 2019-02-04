@@ -59,10 +59,10 @@ func (d *SecurityGroupFilterOptions) Empty() bool {
 // AMI and details on how to access that launched image.
 type RunConfig struct {
 	AssociatePublicIpAddress    bool                       `mapstructure:"associate_public_ip_address"`
-	Subregion                   string                     `mapstructure:"availability_zone"`
+	Subregion                   string                     `mapstructure:"subregion_name"`
 	BlockDurationMinutes        int64                      `mapstructure:"block_duration_minutes"`
 	DisableStopVm               bool                       `mapstructure:"disable_stop_vm"`
-	BsuOptimized                bool                       `mapstructure:"ebs_optimized"`
+	BsuOptimized                bool                       `mapstructure:"bsu_optimized"`
 	EnableT2Unlimited           bool                       `mapstructure:"enable_t2_unlimited"`
 	IamVmProfile                string                     `mapstructure:"iam_vm_profile"`
 	VmInitiatedShutdownBehavior string                     `mapstructure:"shutdown_behavior"`
