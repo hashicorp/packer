@@ -204,6 +204,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.RunConfig.Comm,
 		},
+		&osccommon.StepStopBSUBackedVm{
+			Skip:          false,
+			DisableStopVm: b.config.DisableStopVm,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
