@@ -29,10 +29,10 @@ is optional.
 
 -   `repository` (string) - The repository of the imported image.
 
+### Optional:
+
 -   `tag` (string) - The tag for the imported image. By default this is not
     set.
-
-### Optional:
 
 -   `changes` (array of strings) - Dockerfile instructions to add to the
     commit. Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and
