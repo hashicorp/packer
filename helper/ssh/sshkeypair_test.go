@@ -1,4 +1,4 @@
-package common
+package ssh
 
 import (
 	"bytes"
@@ -13,14 +13,14 @@ import (
 
 // expected contains the data that the key pair should contain.
 type expected struct {
-	kind sshKeyPairType
+	kind KeyPairType
 	bits int
 	desc string
 	name string
 	data []byte
 }
 
-func (o expected) matches(kp sshKeyPair) error {
+func (o expected) matches(kp KeyPair) error {
 	if o.kind.String() == "" {
 		return errors.New("expected kind's value cannot be empty")
 	}
@@ -63,7 +63,7 @@ func (o expected) matches(kp sshKeyPair) error {
 		return err
 	}
 
-	err = o.verifySshKeyPair(kp)
+	err = o.verifyKeyPair(kp)
 	if err != nil {
 		return err
 	}
@@ -71,11 +71,11 @@ func (o expected) matches(kp sshKeyPair) error {
 	return nil
 }
 
-func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp sshKeyPair) error {
-	newLines := []newLineOption{
-		unixNewLine,
-		noNewLine,
-		windowsNewLine,
+func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp KeyPair) error {
+	newLines := []NewLineOption{
+		UnixNewLine,
+		NoNewLine,
+		WindowsNewLine,
 	}
 
 	for _, nl := range newLines {
@@ -86,19 +86,19 @@ func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp sshKeyPair) error {
 		}
 
 		switch nl {
-		case noNewLine:
+		case NoNewLine:
 			if publicKeyAk[len(publicKeyAk) - 1] == '\n' {
 				return errors.New("public key in authorized keys format has trailing new line when none was specified")
 			}
-		case unixNewLine:
+		case UnixNewLine:
 			if publicKeyAk[len(publicKeyAk) - 1] != '\n' {
 				return errors.New("public key in authorized keys format does not have unix new line when unix was specified")
 			}
-			if string(publicKeyAk[len(publicKeyAk) - 2:]) == windowsNewLine.String() {
+			if string(publicKeyAk[len(publicKeyAk) - 2:]) == WindowsNewLine.String() {
 				return errors.New("public key in authorized keys format has windows new line when unix was specified")
 			}
-		case windowsNewLine:
-			if string(publicKeyAk[len(publicKeyAk) - 2:]) != windowsNewLine.String() {
+		case WindowsNewLine:
+			if string(publicKeyAk[len(publicKeyAk) - 2:]) != WindowsNewLine.String() {
 				return errors.New("public key in authorized keys format does not have windows new line when windows was specified")
 			}
 		}
@@ -121,7 +121,7 @@ func (o expected) verifyPublicKeyAuthorizedKeysFormat(kp sshKeyPair) error {
 	return nil
 }
 
-func (o expected) verifySshKeyPair(kp sshKeyPair) error {
+func (o expected) verifyKeyPair(kp KeyPair) error {
 	signer, err := ssh.ParsePrivateKey(kp.PrivateKeyPemBlock())
 	if err != nil {
 		return errors.New("failed to parse private key during verification - " + err.Error())
@@ -140,14 +140,14 @@ func (o expected) verifySshKeyPair(kp sshKeyPair) error {
 	return nil
 }
 
-func TestDefaultSshKeyPairBuilder_Build_Default(t *testing.T) {
-	kp, err := newSshKeyPairBuilder().Build()
+func TestDefaultKeyPairBuilder_Build_Default(t *testing.T) {
+	kp, err := NewKeyPairBuilder().Build()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	err = expected{
-		kind: ecdsaSsh,
+		kind: EcdsaSsh,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -157,16 +157,16 @@ func TestDefaultSshKeyPairBuilder_Build_Default(t *testing.T) {
 	}
 }
 
-func TestDefaultSshKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
-	kp, err := newSshKeyPairBuilder().
-		SetType(ecdsaSsh).
+func TestDefaultKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
+	kp, err := NewKeyPairBuilder().
+		SetType(EcdsaSsh).
 		Build()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	err = expected{
-		kind: ecdsaSsh,
+		kind: EcdsaSsh,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -176,16 +176,16 @@ func TestDefaultSshKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
 	}
 }
 
-func TestDefaultSshKeyPairBuilder_Build_RsaDefault(t *testing.T) {
-	kp, err := newSshKeyPairBuilder().
-		SetType(rsaSsh).
+func TestDefaultKeyPairBuilder_Build_RsaDefault(t *testing.T) {
+	kp, err := NewKeyPairBuilder().
+		SetType(RsaSsh).
 		Build()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	err = expected{
-		kind: rsaSsh,
+		kind: RsaSsh,
 		bits: 4096,
 		desc: "rsa 4096",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -195,11 +195,11 @@ func TestDefaultSshKeyPairBuilder_Build_RsaDefault(t *testing.T) {
 	}
 }
 
-func TestDefaultSshKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
+func TestDefaultKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 
-	kp, err := newSshKeyPairBuilder().
-		SetType(ecdsaSsh).
+	kp, err := NewKeyPairBuilder().
+		SetType(EcdsaSsh).
 		SetName(name).
 		Build()
 	if err != nil {
@@ -207,7 +207,7 @@ func TestDefaultSshKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	}
 
 	err = expected{
-		kind: ecdsaSsh,
+		kind: EcdsaSsh,
 		bits: 521,
 		desc: "ecdsa 521",
 		data: []byte(uuid.TimeOrderedUUID()),
@@ -218,11 +218,11 @@ func TestDefaultSshKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	}
 }
 
-func TestDefaultSshKeyPairBuilder_Build_NamedRsa(t *testing.T) {
+func TestDefaultKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 
-	kp, err := newSshKeyPairBuilder().
-		SetType(rsaSsh).
+	kp, err := NewKeyPairBuilder().
+		SetType(RsaSsh).
 		SetName(name).
 		Build()
 	if err != nil {
@@ -230,7 +230,7 @@ func TestDefaultSshKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 	}
 
 	err = expected{
-		kind: rsaSsh,
+		kind: RsaSsh,
 		bits: 4096,
 		desc: "rsa 4096",
 		data: []byte(uuid.TimeOrderedUUID()),
