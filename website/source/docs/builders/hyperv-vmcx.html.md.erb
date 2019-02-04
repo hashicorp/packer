@@ -116,7 +116,7 @@ builder.
     This setting only has an effect if using `clone_from_vm_name` and is
     ignored otherwise.
 
--   `copy_in_compare` - (bool) When cloning a vm to build from, we run a powershell
+-   `copy_in_compare` (boolean) - When cloning a vm to build from, we run a powershell
     Compare-VM command, which, depending on your version of Windows, may need
     the "Copy" flag to be set to true or false. Defaults to "false". Command:
 
@@ -125,7 +125,7 @@ builder.
     Where $copy is replaced with either true or false depending on the value of
     "copy_in_compare".
 
--   `configuration_version` - This allows you to set the vm version when
+-   `configuration_version` (string) - This allows you to set the vm version when
      calling New-VM to generate the vm.
 
 -   `cpu` (number) - The number of CPUs the virtual machine should use. If
