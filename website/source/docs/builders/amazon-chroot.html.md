@@ -362,6 +362,43 @@ each category, the available configuration keys are alphabetized.
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
 
+- `vault_aws_engine` (object) - Get credentials from Hashicorp Vault's aws
+  secrets engine. You must already have created a role to use. For more
+  information about generating credentials via the Vault engine, see the
+  [Vault docs.]
+  (https://www.vaultproject.io/api/secret/aws/index.html#generate-credentials)
+  If you set this
+  flag, you must also set the below options:
+  -   `name` (string) - Required. Specifies the name of the role to generate
+      credentials against. This is part of the request URL.
+  -   `engine_name` (string) - The name of the aws secrets engine. In the Vault
+      docs, this is normally referred to as "aws", and Packer will default to
+      "aws" if `engine_name` is not set.
+  -   `role_arn` (string)- The ARN of the role to assume if credential_type on
+      the Vault role is assumed_role. Must match one of the allowed role ARNs
+      in the Vault role. Optional if the Vault role only allows a single AWS
+      role ARN; required otherwise.
+  -   `ttl` (string) -  Specifies the TTL for the use of the STS token. This is
+      specified as a string with a duration suffix. Valid only when
+      credential_type is assumed_role or federation_token. When not specified,
+      the default_sts_ttl set for the role will be used. If that is also not
+      set, then the default value of 3600s will be used. AWS places limits on
+      the maximum TTL allowed. See the AWS documentation on the DurationSeconds
+      parameter for AssumeRole (for assumed_role credential types) and
+      GetFederationToken (for federation_token credential types) for more
+      details.
+
+      Example:
+    ``` json
+    {
+        "vault_aws_engine": {
+            "name": "myrole",
+            "role_arn": "myarn",
+            "ttl": "3600s"
+        }
+    }
+    ```
+
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:

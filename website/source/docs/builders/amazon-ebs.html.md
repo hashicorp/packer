@@ -533,15 +533,11 @@ builder.
       GetFederationToken (for federation_token credential types) for more
       details.
 
-      Please note that because credentials that are not supported by an STS
-      token are eventually consistent, Packer will pause for ten seconds after
-      retrieving the credentials before continuing with the build.
-
     ``` json
     {
         "vault_aws_engine": {
-            "name": "myrole"
-            "role_arn": "myarn"
+            "name": "myrole",
+            "role_arn": "myarn",
             "ttl": "3600s"
         }
     }
