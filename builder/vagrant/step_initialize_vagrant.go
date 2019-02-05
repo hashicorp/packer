@@ -36,10 +36,9 @@ type VagrantfileOptions struct {
 	BoxName      string
 }
 
-func (s *StepInitializeVagrant) createInitializeCommand() (string, error) {
+func (s *StepInitializeVagrant) getVagrantfileTemplate() (string, error) {
 	tplPath := filepath.Join(s.OutputDir, "packer-vagrantfile-template.erb")
 	templateFile, err := os.Create(tplPath)
-	templateFile.Chmod(0777)
 	if err != nil {
 		retErr := fmt.Errorf("Error creating vagrantfile %s", err.Error())
 		return "", retErr
@@ -93,7 +92,7 @@ func (s *StepInitializeVagrant) prepInitArgs() ([]string, error) {
 		initArgs = append(initArgs, "-m")
 	}
 
-	tplPath, err := s.createInitializeCommand()
+	tplPath, err := s.getVagrantfileTemplate()
 	if err != nil {
 		return initArgs, err
 	}
