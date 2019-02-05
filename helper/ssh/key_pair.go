@@ -20,10 +20,10 @@ const (
 	defaultRsaBits = 4096
 
 	// Rsa is a SSH key pair of RSA type.
-	Rsa KeyPairType = "rsa"
+	Rsa KeyPairType = "RSA"
 
 	// Ecdsa is a SSH key pair of ECDSA type.
-	Ecdsa KeyPairType = "ecdsa"
+	Ecdsa KeyPairType = "ECDSA"
 )
 
 // KeyPairType represents different types of SSH key pairs.
@@ -248,10 +248,20 @@ func rawPemBlock(block *pem.Block) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// TODO: Key pair name.
 // description returns a string describing a key pair.
 func description(kp KeyPair) string {
-	return kp.Type().String() + " " + strconv.Itoa(kp.Bits())
+	buffer := bytes.NewBuffer(nil)
+
+	buffer.WriteString(strconv.Itoa(kp.Bits()))
+	buffer.WriteString(" bit ")
+	buffer.WriteString(kp.Type().String())
+
+	if len(kp.Name()) > 0 {
+		buffer.WriteString(" named ")
+		buffer.WriteString(kp.Name())
+	}
+
+	return buffer.String()
 }
 
 // publicKeyAuthorizedKeysLine returns a slice of bytes representing a SSH
