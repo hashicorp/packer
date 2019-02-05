@@ -157,7 +157,7 @@ func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
 
 	return &defaultKeyPair{
 		kind:               Ecdsa,
-		bits:               o.bits,
+		bits:               privateKey.Curve.Params().BitSize,
 		name:               o.name,
 		privateKeyDerBytes: raw,
 		publicKey:          sshPublicKey,
@@ -182,7 +182,7 @@ func (o *defaultKeyPairBuilder) newRsaKeyPair() (KeyPair, error) {
 
 	return &defaultKeyPair{
 		kind:               Rsa,
-		bits:               o.bits,
+		bits:               privateKey.N.BitLen(),
 		name:               o.name,
 		privateKeyDerBytes: x509.MarshalPKCS1PrivateKey(privateKey),
 		publicKey:          sshPublicKey,
