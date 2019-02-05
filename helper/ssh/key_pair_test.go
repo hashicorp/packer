@@ -52,10 +52,9 @@ func (o expected) matches(kp KeyPair) error {
 			"' - got '" + kp.Name() + "'")
 	}
 
-	expDescription := kp.Type().String() + " " + strconv.Itoa(o.bits)
-	if kp.Description() != expDescription {
+	if kp.Description() != o.desc {
 		return errors.New("key pair description should be '" +
-			expDescription + "' - got '" + kp.Description() + "'")
+			o.desc + "' - got '" + kp.Description() + "'")
 	}
 
 	err := o.verifyPublicKeyAuthorizedKeysFormat(kp)
@@ -149,7 +148,7 @@ func TestDefaultKeyPairBuilder_Build_Default(t *testing.T) {
 	err = expected{
 		kind: Ecdsa,
 		bits: 521,
-		desc: "ecdsa 521",
+		desc: "521 bit ECDSA",
 		data: []byte(uuid.TimeOrderedUUID()),
 	}.matches(kp)
 	if err != nil {
@@ -168,7 +167,7 @@ func TestDefaultKeyPairBuilder_Build_EcdsaDefault(t *testing.T) {
 	err = expected{
 		kind: Ecdsa,
 		bits: 521,
-		desc: "ecdsa 521",
+		desc: "521 bit ECDSA",
 		data: []byte(uuid.TimeOrderedUUID()),
 	}.matches(kp)
 	if err != nil {
@@ -195,7 +194,7 @@ func TestDefaultKeyPairBuilder_Build_EcdsaSupportedCurves(t *testing.T) {
 		err = expected{
 			kind: Ecdsa,
 			bits: bits,
-			desc: "ecdsa " + strconv.Itoa(bits),
+			desc: strconv.Itoa(bits) + " bit ECDSA",
 			data: []byte(uuid.TimeOrderedUUID()),
 		}.matches(kp)
 		if err != nil {
@@ -215,7 +214,7 @@ func TestDefaultKeyPairBuilder_Build_RsaDefault(t *testing.T) {
 	err = expected{
 		kind: Rsa,
 		bits: 4096,
-		desc: "rsa 4096",
+		desc: "4096 bit RSA",
 		data: []byte(uuid.TimeOrderedUUID()),
 	}.matches(kp)
 	if err != nil {
@@ -237,7 +236,7 @@ func TestDefaultKeyPairBuilder_Build_NamedEcdsa(t *testing.T) {
 	err = expected{
 		kind: Ecdsa,
 		bits: 521,
-		desc: "ecdsa 521",
+		desc: "521 bit ECDSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 		name: name,
 	}.matches(kp)
@@ -260,7 +259,7 @@ func TestDefaultKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 	err = expected{
 		kind: Rsa,
 		bits: 4096,
-		desc: "rsa 4096",
+		desc: "4096 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 		name: name,
 	}.matches(kp)
