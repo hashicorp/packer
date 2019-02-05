@@ -155,8 +155,7 @@ func (c ClientConfig) useDeviceLogin() bool {
 		c.ClientID == "" &&
 		c.ClientSecret == "" &&
 		c.ClientJWT == "" &&
-		c.ClientCertPath == "" &&
-		c.TenantID == ""
+		c.ClientCertPath == ""
 }
 
 func (c ClientConfig) useMSI() bool {
