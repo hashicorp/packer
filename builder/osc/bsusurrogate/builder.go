@@ -248,16 +248,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	//Build the artifact
-	// if omis, ok := state.GetOk("omis"); ok {
-	// 	// Build the artifact and return it
-	// 	artifact := &awscommon.Artifact{
-	// 		Amis:           omis.(map[string]string),
-	// 		BuilderIdValue: BuilderId,
-	// 		Session:        session,
-	// 	}
+	if omis, ok := state.GetOk("omis"); ok {
+		// Build the artifact and return it
+		artifact := &osccommon.Artifact{
+			Amis:           omis.(map[string]string),
+			BuilderIdValue: BuilderId,
+			Config:         clientConfig,
+		}
 
-	// 	return artifact, nil
-	// }
+		return artifact, nil
+	}
 
 	return nil, nil
 }
