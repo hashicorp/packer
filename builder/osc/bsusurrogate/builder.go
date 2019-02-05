@@ -232,6 +232,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SnapshotAccountIds: b.config.SnapshotAccountIDs,
 			Ctx:                b.config.ctx,
 		},
+		&osccommon.StepCreateTags{
+			Tags:         b.config.OMITags,
+			SnapshotTags: b.config.SnapshotTags,
+			Ctx:          b.config.ctx,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
