@@ -211,8 +211,8 @@ type KeyPair interface {
 	PrivateKeyPemBlock() []byte
 
 	// PublicKeyAuthorizedKeysLine returns a slice of bytes
-	// representing the public key in OpenSSH authorized_keys format
-	// with the specified new line.
+	// representing the public key as a line in OpenSSH authorized_keys
+	// format with the specified new line.
 	PublicKeyAuthorizedKeysLine(NewLineOption) []byte
 }
 
