@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,384 +114,15 @@ func (s *UCSService) AddUcsManager(p *AddUcsManagerParams) (*AddUcsManagerRespon
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type AddUcsManagerResponse struct {
-	Id     string `json:"id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Url    string `json:"url,omitempty"`
-	Zoneid string `json:"zoneid,omitempty"`
-}
-
-type ListUcsManagersParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListUcsManagersParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	if v, found := p.p["zoneid"]; found {
-		u.Set("zoneid", v.(string))
-	}
-	return u
-}
-
-func (p *ListUcsManagersParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *ListUcsManagersParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListUcsManagersParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListUcsManagersParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-func (p *ListUcsManagersParams) SetZoneid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["zoneid"] = v
-	return
-}
-
-// You should always use this function to get a new ListUcsManagersParams instance,
-// as then you are sure you have configured all required params
-func (s *UCSService) NewListUcsManagersParams() *ListUcsManagersParams {
-	p := &ListUcsManagersParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *UCSService) GetUcsManagerID(keyword string, opts ...OptionFunc) (string, int, error) {
-	p := &ListUcsManagersParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["keyword"] = keyword
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return "", -1, err
-		}
-	}
-
-	l, err := s.ListUcsManagers(p)
-	if err != nil {
-		return "", -1, err
-	}
-
-	if l.Count == 0 {
-		return "", l.Count, fmt.Errorf("No match found for %s: %+v", keyword, l)
-	}
-
-	if l.Count == 1 {
-		return l.UcsManagers[0].Id, l.Count, nil
-	}
-
-	if l.Count > 1 {
-		for _, v := range l.UcsManagers {
-			if v.Name == keyword {
-				return v.Id, l.Count, nil
-			}
-		}
-	}
-	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", keyword, l)
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *UCSService) GetUcsManagerByName(name string, opts ...OptionFunc) (*UcsManager, int, error) {
-	id, count, err := s.GetUcsManagerID(name, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-
-	r, count, err := s.GetUcsManagerByID(id, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-	return r, count, nil
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *UCSService) GetUcsManagerByID(id string, opts ...OptionFunc) (*UcsManager, int, error) {
-	p := &ListUcsManagersParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["id"] = id
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return nil, -1, err
-		}
-	}
-
-	l, err := s.ListUcsManagers(p)
-	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf(
-			"Invalid parameter id value=%s due to incorrect long value format, "+
-				"or entity does not exist", id)) {
-			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
-		}
-		return nil, -1, err
-	}
-
-	if l.Count == 0 {
-		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
-	}
-
-	if l.Count == 1 {
-		return l.UcsManagers[0], l.Count, nil
-	}
-	return nil, l.Count, fmt.Errorf("There is more then one result for UcsManager UUID: %s!", id)
-}
-
-// List ucs manager
-func (s *UCSService) ListUcsManagers(p *ListUcsManagersParams) (*ListUcsManagersResponse, error) {
-	resp, err := s.cs.newRequest("listUcsManagers", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListUcsManagersResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListUcsManagersResponse struct {
-	Count       int           `json:"count"`
-	UcsManagers []*UcsManager `json:"ucsmanager"`
-}
-
-type UcsManager struct {
-	Id     string `json:"id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Url    string `json:"url,omitempty"`
-	Zoneid string `json:"zoneid,omitempty"`
-}
-
-type ListUcsProfilesParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListUcsProfilesParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	if v, found := p.p["ucsmanagerid"]; found {
-		u.Set("ucsmanagerid", v.(string))
-	}
-	return u
-}
-
-func (p *ListUcsProfilesParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListUcsProfilesParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListUcsProfilesParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-func (p *ListUcsProfilesParams) SetUcsmanagerid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["ucsmanagerid"] = v
-	return
-}
-
-// You should always use this function to get a new ListUcsProfilesParams instance,
-// as then you are sure you have configured all required params
-func (s *UCSService) NewListUcsProfilesParams(ucsmanagerid string) *ListUcsProfilesParams {
-	p := &ListUcsProfilesParams{}
-	p.p = make(map[string]interface{})
-	p.p["ucsmanagerid"] = ucsmanagerid
-	return p
-}
-
-// List profile in ucs manager
-func (s *UCSService) ListUcsProfiles(p *ListUcsProfilesParams) (*ListUcsProfilesResponse, error) {
-	resp, err := s.cs.newRequest("listUcsProfiles", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListUcsProfilesResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListUcsProfilesResponse struct {
-	Count       int           `json:"count"`
-	UcsProfiles []*UcsProfile `json:"ucsprofile"`
-}
-
-type UcsProfile struct {
-	Ucsdn string `json:"ucsdn,omitempty"`
-}
-
-type ListUcsBladesParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListUcsBladesParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	if v, found := p.p["ucsmanagerid"]; found {
-		u.Set("ucsmanagerid", v.(string))
-	}
-	return u
-}
-
-func (p *ListUcsBladesParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListUcsBladesParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListUcsBladesParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-func (p *ListUcsBladesParams) SetUcsmanagerid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["ucsmanagerid"] = v
-	return
-}
-
-// You should always use this function to get a new ListUcsBladesParams instance,
-// as then you are sure you have configured all required params
-func (s *UCSService) NewListUcsBladesParams(ucsmanagerid string) *ListUcsBladesParams {
-	p := &ListUcsBladesParams{}
-	p.p = make(map[string]interface{})
-	p.p["ucsmanagerid"] = ucsmanagerid
-	return p
-}
-
-// List ucs blades
-func (s *UCSService) ListUcsBlades(p *ListUcsBladesParams) (*ListUcsBladesResponse, error) {
-	resp, err := s.cs.newRequest("listUcsBlades", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListUcsBladesResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListUcsBladesResponse struct {
-	Count     int         `json:"count"`
-	UcsBlades []*UcsBlade `json:"ucsblade"`
-}
-
-type UcsBlade struct {
-	Bladedn      string `json:"bladedn,omitempty"`
-	Hostid       string `json:"hostid,omitempty"`
-	Id           string `json:"id,omitempty"`
-	Profiledn    string `json:"profiledn,omitempty"`
-	Ucsmanagerid string `json:"ucsmanagerid,omitempty"`
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Zoneid string `json:"zoneid"`
 }
 
 type AssociateUcsProfileToBladeParams struct {
@@ -581,14 +212,459 @@ func (s *UCSService) AssociateUcsProfileToBlade(p *AssociateUcsProfileToBladePar
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type AssociateUcsProfileToBladeResponse struct {
-	JobID        string `json:"jobid,omitempty"`
-	Bladedn      string `json:"bladedn,omitempty"`
-	Hostid       string `json:"hostid,omitempty"`
-	Id           string `json:"id,omitempty"`
-	Profiledn    string `json:"profiledn,omitempty"`
-	Ucsmanagerid string `json:"ucsmanagerid,omitempty"`
+	JobID        string `json:"jobid"`
+	Bladedn      string `json:"bladedn"`
+	Hostid       string `json:"hostid"`
+	Id           string `json:"id"`
+	Profiledn    string `json:"profiledn"`
+	Ucsmanagerid string `json:"ucsmanagerid"`
+}
+
+type DeleteUcsManagerParams struct {
+	p map[string]interface{}
+}
+
+func (p *DeleteUcsManagerParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["ucsmanagerid"]; found {
+		u.Set("ucsmanagerid", v.(string))
+	}
+	return u
+}
+
+func (p *DeleteUcsManagerParams) SetUcsmanagerid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["ucsmanagerid"] = v
+	return
+}
+
+// You should always use this function to get a new DeleteUcsManagerParams instance,
+// as then you are sure you have configured all required params
+func (s *UCSService) NewDeleteUcsManagerParams(ucsmanagerid string) *DeleteUcsManagerParams {
+	p := &DeleteUcsManagerParams{}
+	p.p = make(map[string]interface{})
+	p.p["ucsmanagerid"] = ucsmanagerid
+	return p
+}
+
+// Delete a Ucs manager
+func (s *UCSService) DeleteUcsManager(p *DeleteUcsManagerParams) (*DeleteUcsManagerResponse, error) {
+	resp, err := s.cs.newRequest("deleteUcsManager", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DeleteUcsManagerResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type DeleteUcsManagerResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteUcsManagerResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteUcsManagerResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
+type ListUcsBladesParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListUcsBladesParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["ucsmanagerid"]; found {
+		u.Set("ucsmanagerid", v.(string))
+	}
+	return u
+}
+
+func (p *ListUcsBladesParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListUcsBladesParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListUcsBladesParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListUcsBladesParams) SetUcsmanagerid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["ucsmanagerid"] = v
+	return
+}
+
+// You should always use this function to get a new ListUcsBladesParams instance,
+// as then you are sure you have configured all required params
+func (s *UCSService) NewListUcsBladesParams(ucsmanagerid string) *ListUcsBladesParams {
+	p := &ListUcsBladesParams{}
+	p.p = make(map[string]interface{})
+	p.p["ucsmanagerid"] = ucsmanagerid
+	return p
+}
+
+// List ucs blades
+func (s *UCSService) ListUcsBlades(p *ListUcsBladesParams) (*ListUcsBladesResponse, error) {
+	resp, err := s.cs.newRequest("listUcsBlades", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListUcsBladesResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListUcsBladesResponse struct {
+	Count     int         `json:"count"`
+	UcsBlades []*UcsBlade `json:"ucsblade"`
+}
+
+type UcsBlade struct {
+	Bladedn      string `json:"bladedn"`
+	Hostid       string `json:"hostid"`
+	Id           string `json:"id"`
+	Profiledn    string `json:"profiledn"`
+	Ucsmanagerid string `json:"ucsmanagerid"`
+}
+
+type ListUcsManagersParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListUcsManagersParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["zoneid"]; found {
+		u.Set("zoneid", v.(string))
+	}
+	return u
+}
+
+func (p *ListUcsManagersParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *ListUcsManagersParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListUcsManagersParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListUcsManagersParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListUcsManagersParams) SetZoneid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["zoneid"] = v
+	return
+}
+
+// You should always use this function to get a new ListUcsManagersParams instance,
+// as then you are sure you have configured all required params
+func (s *UCSService) NewListUcsManagersParams() *ListUcsManagersParams {
+	p := &ListUcsManagersParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *UCSService) GetUcsManagerID(keyword string, opts ...OptionFunc) (string, int, error) {
+	p := &ListUcsManagersParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["keyword"] = keyword
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return "", -1, err
+		}
+	}
+
+	l, err := s.ListUcsManagers(p)
+	if err != nil {
+		return "", -1, err
+	}
+
+	if l.Count == 0 {
+		return "", l.Count, fmt.Errorf("No match found for %s: %+v", keyword, l)
+	}
+
+	if l.Count == 1 {
+		return l.UcsManagers[0].Id, l.Count, nil
+	}
+
+	if l.Count > 1 {
+		for _, v := range l.UcsManagers {
+			if v.Name == keyword {
+				return v.Id, l.Count, nil
+			}
+		}
+	}
+	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", keyword, l)
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *UCSService) GetUcsManagerByName(name string, opts ...OptionFunc) (*UcsManager, int, error) {
+	id, count, err := s.GetUcsManagerID(name, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+
+	r, count, err := s.GetUcsManagerByID(id, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+	return r, count, nil
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *UCSService) GetUcsManagerByID(id string, opts ...OptionFunc) (*UcsManager, int, error) {
+	p := &ListUcsManagersParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["id"] = id
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return nil, -1, err
+		}
+	}
+
+	l, err := s.ListUcsManagers(p)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf(
+			"Invalid parameter id value=%s due to incorrect long value format, "+
+				"or entity does not exist", id)) {
+			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
+		}
+		return nil, -1, err
+	}
+
+	if l.Count == 0 {
+		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
+	}
+
+	if l.Count == 1 {
+		return l.UcsManagers[0], l.Count, nil
+	}
+	return nil, l.Count, fmt.Errorf("There is more then one result for UcsManager UUID: %s!", id)
+}
+
+// List ucs manager
+func (s *UCSService) ListUcsManagers(p *ListUcsManagersParams) (*ListUcsManagersResponse, error) {
+	resp, err := s.cs.newRequest("listUcsManagers", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListUcsManagersResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListUcsManagersResponse struct {
+	Count       int           `json:"count"`
+	UcsManagers []*UcsManager `json:"ucsmanager"`
+}
+
+type UcsManager struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Zoneid string `json:"zoneid"`
+}
+
+type ListUcsProfilesParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListUcsProfilesParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["ucsmanagerid"]; found {
+		u.Set("ucsmanagerid", v.(string))
+	}
+	return u
+}
+
+func (p *ListUcsProfilesParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListUcsProfilesParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListUcsProfilesParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListUcsProfilesParams) SetUcsmanagerid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["ucsmanagerid"] = v
+	return
+}
+
+// You should always use this function to get a new ListUcsProfilesParams instance,
+// as then you are sure you have configured all required params
+func (s *UCSService) NewListUcsProfilesParams(ucsmanagerid string) *ListUcsProfilesParams {
+	p := &ListUcsProfilesParams{}
+	p.p = make(map[string]interface{})
+	p.p["ucsmanagerid"] = ucsmanagerid
+	return p
+}
+
+// List profile in ucs manager
+func (s *UCSService) ListUcsProfiles(p *ListUcsProfilesParams) (*ListUcsProfilesResponse, error) {
+	resp, err := s.cs.newRequest("listUcsProfiles", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListUcsProfilesResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListUcsProfilesResponse struct {
+	Count       int           `json:"count"`
+	UcsProfiles []*UcsProfile `json:"ucsprofile"`
+}
+
+type UcsProfile struct {
+	Ucsdn string `json:"ucsdn"`
 }
