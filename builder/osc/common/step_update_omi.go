@@ -20,7 +20,7 @@ type StepUpdateOMIAttributes struct {
 
 func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	oapiconn := state.Get("oapi").(*oapi.Client)
-	config := state.Get("config").(*oapi.Config)
+	config := state.Get("clientConfig").(*oapi.Config)
 	ui := state.Get("ui").(packer.Ui)
 	omis := state.Get("omis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
