@@ -22,7 +22,7 @@ func TestCreateFile(t *testing.T) {
 		OutputDir: "./",
 		SourceBox: "bananas",
 	}
-	templatePath, err := testy.createInitializeCommand()
+	templatePath, err := testy.getVagrantfileTemplate()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -43,7 +43,7 @@ func TestCreateFile_customSync(t *testing.T) {
 		OutputDir:    "./",
 		SyncedFolder: "myfolder/foldertimes",
 	}
-	templatePath, err := testy.createInitializeCommand()
+	templatePath, err := testy.getVagrantfileTemplate()
 	defer os.Remove(templatePath)
 	if err != nil {
 		t.Fatalf(err.Error())
