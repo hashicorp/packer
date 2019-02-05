@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -100,21 +100,23 @@ func (s *AuthenticationService) Login(p *LoginParams) (*LoginResponse, error) {
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type LoginResponse struct {
-	Account    string `json:"account,omitempty"`
-	Domainid   string `json:"domainid,omitempty"`
-	Firstname  string `json:"firstname,omitempty"`
-	Lastname   string `json:"lastname,omitempty"`
-	Registered string `json:"registered,omitempty"`
-	Sessionkey string `json:"sessionkey,omitempty"`
-	Timeout    int    `json:"timeout,omitempty"`
-	Timezone   string `json:"timezone,omitempty"`
-	Type       string `json:"type,omitempty"`
-	Userid     string `json:"userid,omitempty"`
-	Username   string `json:"username,omitempty"`
+	Account        string `json:"account"`
+	Domainid       string `json:"domainid"`
+	Firstname      string `json:"firstname"`
+	Lastname       string `json:"lastname"`
+	Registered     string `json:"registered"`
+	Sessionkey     string `json:"sessionkey"`
+	Timeout        int    `json:"timeout"`
+	Timezone       string `json:"timezone"`
+	Timezoneoffset string `json:"timezoneoffset"`
+	Type           string `json:"type"`
+	Userid         string `json:"userid"`
+	Username       string `json:"username"`
 }
 
 type LogoutParams struct {
@@ -148,9 +150,10 @@ func (s *AuthenticationService) Logout(p *LogoutParams) (*LogoutResponse, error)
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type LogoutResponse struct {
-	Description string `json:"description,omitempty"`
+	Description string `json:"description"`
 }

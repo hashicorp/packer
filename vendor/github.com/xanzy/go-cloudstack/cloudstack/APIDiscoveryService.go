@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ func (s *APIDiscoveryService) ListApis(p *ListApisParams) (*ListApisResponse, er
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -72,25 +73,29 @@ type ListApisResponse struct {
 }
 
 type Api struct {
-	Description string `json:"description,omitempty"`
-	Isasync     bool   `json:"isasync,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Params      []struct {
-		Description string `json:"description,omitempty"`
-		Length      int    `json:"length,omitempty"`
-		Name        string `json:"name,omitempty"`
-		Related     string `json:"related,omitempty"`
-		Required    bool   `json:"required,omitempty"`
-		Since       string `json:"since,omitempty"`
-		Type        string `json:"type,omitempty"`
-	} `json:"params,omitempty"`
-	Related  string `json:"related,omitempty"`
-	Response []struct {
-		Description string   `json:"description,omitempty"`
-		Name        string   `json:"name,omitempty"`
-		Response    []string `json:"response,omitempty"`
-		Type        string   `json:"type,omitempty"`
-	} `json:"response,omitempty"`
-	Since string `json:"since,omitempty"`
-	Type  string `json:"type,omitempty"`
+	Description string        `json:"description"`
+	Isasync     bool          `json:"isasync"`
+	Name        string        `json:"name"`
+	Params      []ApiParams   `json:"params"`
+	Related     string        `json:"related"`
+	Response    []ApiResponse `json:"response"`
+	Since       string        `json:"since"`
+	Type        string        `json:"type"`
+}
+
+type ApiResponse struct {
+	Description string        `json:"description"`
+	Name        string        `json:"name"`
+	Response    []interface{} `json:"response"`
+	Type        string        `json:"type"`
+}
+
+type ApiParams struct {
+	Description string `json:"description"`
+	Length      int    `json:"length"`
+	Name        string `json:"name"`
+	Related     string `json:"related"`
+	Required    bool   `json:"required"`
+	Since       string `json:"since"`
+	Type        string `json:"type"`
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,204 +23,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type ListAlertsParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListAlertsParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	if v, found := p.p["type"]; found {
-		u.Set("type", v.(string))
-	}
-	return u
-}
-
-func (p *ListAlertsParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *ListAlertsParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListAlertsParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-func (p *ListAlertsParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListAlertsParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-func (p *ListAlertsParams) SetType(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["type"] = v
-	return
-}
-
-// You should always use this function to get a new ListAlertsParams instance,
-// as then you are sure you have configured all required params
-func (s *AlertService) NewListAlertsParams() *ListAlertsParams {
-	p := &ListAlertsParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *AlertService) GetAlertID(name string, opts ...OptionFunc) (string, int, error) {
-	p := &ListAlertsParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["name"] = name
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return "", -1, err
-		}
-	}
-
-	l, err := s.ListAlerts(p)
-	if err != nil {
-		return "", -1, err
-	}
-
-	if l.Count == 0 {
-		return "", l.Count, fmt.Errorf("No match found for %s: %+v", name, l)
-	}
-
-	if l.Count == 1 {
-		return l.Alerts[0].Id, l.Count, nil
-	}
-
-	if l.Count > 1 {
-		for _, v := range l.Alerts {
-			if v.Name == name {
-				return v.Id, l.Count, nil
-			}
-		}
-	}
-	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", name, l)
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *AlertService) GetAlertByName(name string, opts ...OptionFunc) (*Alert, int, error) {
-	id, count, err := s.GetAlertID(name, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-
-	r, count, err := s.GetAlertByID(id, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-	return r, count, nil
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *AlertService) GetAlertByID(id string, opts ...OptionFunc) (*Alert, int, error) {
-	p := &ListAlertsParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["id"] = id
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return nil, -1, err
-		}
-	}
-
-	l, err := s.ListAlerts(p)
-	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf(
-			"Invalid parameter id value=%s due to incorrect long value format, "+
-				"or entity does not exist", id)) {
-			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
-		}
-		return nil, -1, err
-	}
-
-	if l.Count == 0 {
-		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
-	}
-
-	if l.Count == 1 {
-		return l.Alerts[0], l.Count, nil
-	}
-	return nil, l.Count, fmt.Errorf("There is more then one result for Alert UUID: %s!", id)
-}
-
-// Lists all alerts.
-func (s *AlertService) ListAlerts(p *ListAlertsParams) (*ListAlertsResponse, error) {
-	resp, err := s.cs.newRequest("listAlerts", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListAlertsResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListAlertsResponse struct {
-	Count  int      `json:"count"`
-	Alerts []*Alert `json:"alert"`
-}
-
-type Alert struct {
-	Description string `json:"description,omitempty"`
-	Id          string `json:"id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Sent        string `json:"sent,omitempty"`
-	Type        int    `json:"type,omitempty"`
-}
 
 type ArchiveAlertsParams struct {
 	p map[string]interface{}
@@ -298,12 +100,32 @@ func (s *AlertService) ArchiveAlerts(p *ArchiveAlertsParams) (*ArchiveAlertsResp
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type ArchiveAlertsResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *ArchiveAlertsResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias ArchiveAlertsResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type DeleteAlertsParams struct {
@@ -382,12 +204,32 @@ func (s *AlertService) DeleteAlerts(p *DeleteAlertsParams) (*DeleteAlertsRespons
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type DeleteAlertsResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteAlertsResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteAlertsResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type GenerateAlertParams struct {
@@ -495,11 +337,211 @@ func (s *AlertService) GenerateAlert(p *GenerateAlertParams) (*GenerateAlertResp
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type GenerateAlertResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+type ListAlertsParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListAlertsParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["type"]; found {
+		u.Set("type", v.(string))
+	}
+	return u
+}
+
+func (p *ListAlertsParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *ListAlertsParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListAlertsParams) SetName(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["name"] = v
+	return
+}
+
+func (p *ListAlertsParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListAlertsParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListAlertsParams) SetType(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["type"] = v
+	return
+}
+
+// You should always use this function to get a new ListAlertsParams instance,
+// as then you are sure you have configured all required params
+func (s *AlertService) NewListAlertsParams() *ListAlertsParams {
+	p := &ListAlertsParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *AlertService) GetAlertID(name string, opts ...OptionFunc) (string, int, error) {
+	p := &ListAlertsParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["name"] = name
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return "", -1, err
+		}
+	}
+
+	l, err := s.ListAlerts(p)
+	if err != nil {
+		return "", -1, err
+	}
+
+	if l.Count == 0 {
+		return "", l.Count, fmt.Errorf("No match found for %s: %+v", name, l)
+	}
+
+	if l.Count == 1 {
+		return l.Alerts[0].Id, l.Count, nil
+	}
+
+	if l.Count > 1 {
+		for _, v := range l.Alerts {
+			if v.Name == name {
+				return v.Id, l.Count, nil
+			}
+		}
+	}
+	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", name, l)
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *AlertService) GetAlertByName(name string, opts ...OptionFunc) (*Alert, int, error) {
+	id, count, err := s.GetAlertID(name, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+
+	r, count, err := s.GetAlertByID(id, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+	return r, count, nil
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *AlertService) GetAlertByID(id string, opts ...OptionFunc) (*Alert, int, error) {
+	p := &ListAlertsParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["id"] = id
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return nil, -1, err
+		}
+	}
+
+	l, err := s.ListAlerts(p)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf(
+			"Invalid parameter id value=%s due to incorrect long value format, "+
+				"or entity does not exist", id)) {
+			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
+		}
+		return nil, -1, err
+	}
+
+	if l.Count == 0 {
+		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
+	}
+
+	if l.Count == 1 {
+		return l.Alerts[0], l.Count, nil
+	}
+	return nil, l.Count, fmt.Errorf("There is more then one result for Alert UUID: %s!", id)
+}
+
+// Lists all alerts.
+func (s *AlertService) ListAlerts(p *ListAlertsParams) (*ListAlertsResponse, error) {
+	resp, err := s.cs.newRequest("listAlerts", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListAlertsResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListAlertsResponse struct {
+	Count  int      `json:"count"`
+	Alerts []*Alert `json:"alert"`
+}
+
+type Alert struct {
+	Description string `json:"description"`
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Sent        string `json:"sent"`
+	Type        int    `json:"type"`
 }

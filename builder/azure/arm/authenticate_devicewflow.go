@@ -10,7 +10,11 @@ import (
 )
 
 func NewDeviceFlowOAuthTokenProvider(env azure.Environment, say func(string), tenantID string) oAuthTokenProvider {
-	return &deviceflowOauthTokenProvider{}
+	return &deviceflowOauthTokenProvider{
+		env:      env,
+		say:      say,
+		tenantID: tenantID,
+	}
 }
 
 type deviceflowOauthTokenProvider struct {
