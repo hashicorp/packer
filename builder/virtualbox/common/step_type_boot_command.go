@@ -27,8 +27,13 @@ type bootCommandTemplateData struct {
 	// Name is the VM's name.
 	Name string
 
-	// SSHPublicKey is the URL encoded public key in
-	// authorized_keys format.
+	// EncodedSSHPublicKey is the URL encoded SSH public key in
+	// OpenSSH authorized_keys format. This is safe for usage
+	// on the the kernel command line, or other places that split
+	// on whitespace.
+	EncodedSSHPublicKey string
+
+	// SSHPublicKey is the SSH public key in OpenSSH authorized_keys format.
 	SSHPublicKey string
 }
 
@@ -67,10 +72,11 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	hostIP := "10.0.2.2"
 	common.SetHTTPIP(hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
-		HTTPIP:       hostIP,
-		HTTPPort:     httpPort,
-		Name:         s.VMName,
-		SSHPublicKey: s.Comm.SSHPublicKeyUrlEncoded(),
+		HTTPIP:              hostIP,
+		HTTPPort:            httpPort,
+		Name:                s.VMName,
+		EncodedSSHPublicKey: s.Comm.SSHPublicKeyUrlEncoded(),
+		SSHPublicKey:        string(s.Comm.SSHPublicKey),
 	}
 
 	sendCodes := func(codes []string) error {

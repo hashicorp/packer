@@ -66,6 +66,8 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
+	// TODO: It would be better if the file was 'chmod' before writing
+	//  the key to the disk - or if umask was set before creating the file.
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving communicator private key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
