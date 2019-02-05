@@ -516,6 +516,9 @@ builder.
   flag, you must also set the below options:
   -   `name` (string) - Required. Specifies the name of the role to generate
       credentials against. This is part of the request URL.
+  -   `engine_name` (string) - The name of the aws secrets engine. In the Vault
+      docs, this is normally referred to as "aws", and Packer will default to
+      "aws" if `engine_name` is not set.
   -   `role_arn` (string)- The ARN of the role to assume if credential_type on
       the Vault role is assumed_role. Must match one of the allowed role ARNs
       in the Vault role. Optional if the Vault role only allows a single AWS

@@ -145,6 +145,9 @@ func (c *AccessConfig) GetCredsFromVault() error {
 	if err != nil {
 		return fmt.Errorf("Error getting Vault client: %s", err)
 	}
+	if c.VaultAWSEngine.EngineName == "" {
+		c.VaultAWSEngine.EngineName = "aws"
+	}
 	path := fmt.Sprintf("/%s/creds/%s", c.VaultAWSEngine.EngineName,
 		c.VaultAWSEngine.Name)
 	secret, err := cli.Logical().Read(path)
@@ -155,11 +158,14 @@ func (c *AccessConfig) GetCredsFromVault() error {
 		return fmt.Errorf("Vault Secret does not exist at the given path.")
 	}
 
-	data, _ := secret.Data["data"]
-	unpacked := data.(map[string]interface{})
-	c.AccessKey = unpacked["access_key"].(string)
-	c.SecretKey = unpacked["secret_key"].(string)
-	c.Token = unpacked["security_token"].(string)
+	c.AccessKey = secret.Data["access_key"].(string)
+	c.SecretKey = secret.Data["secret_key"].(string)
+	token := secret.Data["security_token"]
+	if token != nil {
+		c.Token = token.(string)
+	} else {
+		c.Token = ""
+	}
 
 	return nil
 }
@@ -191,10 +197,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
 	}
-
-	// abort build early so I can test more quickly
-	errs = append(errs,
-		fmt.Errorf("Megan remove this error to continue with build: \n\nAccess: %s, \n\nSecret: %s, \n\nToken: %s", c.AccessKey, c.SecretKey, c.Token))
 
 	return errs
 }
