@@ -227,6 +227,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			OMIDevices:    omiDevices,
 			LaunchDevices: launchDevices,
 		},
+		&osccommon.StepUpdateOMIAttributes{
+			AccountIds:         b.config.OMIAccountIDs,
+			SnapshotAccountIds: b.config.SnapshotAccountIDs,
+			Ctx:                b.config.ctx,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
