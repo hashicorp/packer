@@ -21,7 +21,7 @@ one, by using `global_id` instead of `source_box`.
 
 Required:
 
--    `source_box` (string) - URL of the vagrant box to use, or the name of the
+-    `source_path` (string) - URL of the vagrant box to use, or the name of the
     vagrant box. `hashicorp/precise64`, `./mylocalbox.box` and
     `https://example.com/my-box.box` are all valid source boxes. If your
     source is a .box file, whether locally or from a URL like the latter example
