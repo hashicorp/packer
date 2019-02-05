@@ -1,7 +1,10 @@
 package hyperone
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -53,4 +56,31 @@ func runCommands(commands []string, ctx interpolate.Context, state multistep.Sta
 		}
 	}
 	return nil
+}
+
+func captureOutput(command string, state multistep.StateBag) (string, error) {
+	comm := state.Get("communicator").(packer.Communicator)
+
+	var stdout bytes.Buffer
+	remoteCmd := &packer.RemoteCmd{
+		Command: command,
+		Stdout:  &stdout,
+	}
+
+	log.Println(fmt.Sprintf("Executing command: %s", command))
+
+	err := comm.Start(remoteCmd)
+	if err != nil {
+		return "", fmt.Errorf("error running remote cmd: %s", err)
+	}
+
+	remoteCmd.Wait()
+	if remoteCmd.ExitStatus != 0 {
+		return "", fmt.Errorf(
+			"received non-zero exit code %d from command: %s",
+			remoteCmd.ExitStatus,
+			command)
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
 }
