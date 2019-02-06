@@ -35,7 +35,6 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
-		ui.Say(string(privateKeyBytes))
 
 		kp, err := ssh.NewKeyPairBuilder().
 			SetPrivateKey(privateKeyBytes).
