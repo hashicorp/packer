@@ -34,10 +34,6 @@ const (
 // See the 'const' block for details.
 type KeyPairType string
 
-// PrivateKeyHeader represents header text in PEM encoded private key files.
-// See the 'const' block for details.
-type PrivateKeyHeader string
-
 func (o KeyPairType) String() string {
 	return string(o)
 }
