@@ -4,7 +4,7 @@ type defaultKeyPair struct {
 }
 
 func (o defaultKeyPair) Type() KeyPairType {
-	return  Default
+	return Default
 }
 
 func (o defaultKeyPair) Bits() int {
