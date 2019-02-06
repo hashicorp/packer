@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"crypto/dsa"
+
 	gossh "golang.org/x/crypto/ssh"
 )
 
