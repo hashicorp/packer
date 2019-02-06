@@ -532,17 +532,17 @@ func TestDefaultKeyPairBuilder_SetPrivateKey_Override(t *testing.T) {
 	}
 
 	supportedKeyTypes := []KeyPairType{Rsa, Dsa}
-	for _, kt := range supportedKeyTypes {
-		for s, l := range pemData {
+	for _, keyType := range supportedKeyTypes {
+		for pemString, expectedResult := range pemData {
 			kp, err := NewKeyPairBuilder().
-				SetPrivateKey([]byte(s)).
+				SetPrivateKey([]byte(pemString)).
 				SetName(name).
-				SetType(kt).
+				SetType(keyType).
 				Build()
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = l.matches(kp)
+			err = expectedResult.matches(kp)
 			if err != nil {
 				t.Fatal(err)
 			}
