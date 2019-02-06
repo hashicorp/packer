@@ -157,7 +157,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&osccommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.RunConfig.Comm,
-			DebugKeyPath: fmt.Sprintf("oapi_%s.pem", b.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("oapi_%s", b.config.PackerBuildName),
 		},
 		&osccommon.StepSecurityGroup{
 			SecurityGroupFilter:   b.config.SecurityGroupFilter,
