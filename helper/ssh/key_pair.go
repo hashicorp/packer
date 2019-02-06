@@ -22,7 +22,7 @@ const (
 	// That's a lot of bits.
 	defaultRsaBits = 4096
 
-	// Markers for various SSH key pair types
+	// Markers for various SSH key pair types.
 	Default KeyPairType = ""
 	Rsa     KeyPairType = "RSA"
 	Ecdsa   KeyPairType = "ECDSA"
