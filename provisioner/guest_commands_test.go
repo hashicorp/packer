@@ -189,7 +189,7 @@ func TestMovePath(t *testing.T) {
 
 	// Windows OS w/ space in path
 	cmd = guestCmd.MovePath("C:\\Temp\\Some Dir", "C:\\Temp\\New Dir")
-	if cmd != "powershell.exe -Command \"mv C:\\Temp\\Some` Dir C:\\Temp\\New` Dir\"" {
+	if cmd != "powershell.exe -Command \"mv C:\\Temp\\Some` Dir C:\\Temp\\New` Dir -force\"" {
 		t.Fatalf("Unexpected Windows remove dir cmd: %s", cmd)
 	}
 }
