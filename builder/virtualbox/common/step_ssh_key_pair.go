@@ -35,8 +35,21 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
+		ui.Say(string(privateKeyBytes))
+
+		kp, err := ssh.NewKeyPairBuilder().
+			SetPrivateKey(privateKeyBytes).
+			SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
+			Build()
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 
 		s.Comm.SSHPrivateKey = privateKeyBytes
+		s.Comm.SSHKeyPairName = kp.Name()
+		s.Comm.SSHTemporaryKeyPairName = kp.Name()
+		s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine(ssh.UnixNewLine)
 
 		return multistep.ActionContinue
 	}
