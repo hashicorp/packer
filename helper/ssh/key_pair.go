@@ -139,7 +139,7 @@ func (o *defaultKeyPairBuilder) Build() (KeyPair, error) {
 		return o.newEcdsaKeyPair()
 	}
 
-	return nil, fmt.Errorf("Unsupported keypair type: %s", o.kind.String())
+	return defaultKeyPair{}, fmt.Errorf("Unsupported keypair type: %s", o.kind.String())
 }
 
 // preallocatedKeyPair returns an SSH key pair based on user
