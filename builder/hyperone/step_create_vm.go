@@ -3,6 +3,7 @@ package hyperone
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -78,7 +79,9 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	for _, hdd := range hdds {
 		if hdd.Disk.Name == chrootDiskName {
 			state.Put("chroot_disk_id", hdd.Disk.Id)
-			state.Put("chroot_disk_location", int(hdd.ControllerLocation))
+			controllerNumber := strings.ToLower(strings.Trim(hdd.ControllerNumber, "{}"))
+			state.Put("chroot_controller_number", controllerNumber)
+			state.Put("chroot_controller_location", int(hdd.ControllerLocation))
 			break
 		}
 	}

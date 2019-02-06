@@ -10,21 +10,22 @@ import (
 )
 
 const (
-	diskByPathPrefix = "/dev/disk/by-path/acpi-VMBUS:01-scsi-0:0:0:"
+	vmBusPath = "/sys/bus/vmbus/devices"
 )
 
 type stepPrepareDevice struct{}
 
 func (s *stepPrepareDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	chrootDiskLocation := state.Get("chroot_disk_location").(int)
+	controllerNumber := state.Get("chroot_controller_number").(string)
+	controllerLocation := state.Get("chroot_controller_location").(int)
 
 	log.Println("Searching for available device...")
 
-	diskByPath := fmt.Sprintf("%s%d", diskByPathPrefix, chrootDiskLocation)
-	cmd := fmt.Sprintf("readlink -f %s", diskByPath)
+	cmd := fmt.Sprintf("find %s/%s/ -path *:%d/block -exec ls {} \\;",
+		vmBusPath, controllerNumber, controllerLocation)
 
-	device, err := captureOutput(cmd, state)
+	block, err := captureOutput(cmd, state)
 	if err != nil {
 		err := fmt.Errorf("error finding available device: %s", err)
 		state.Put("error", err)
@@ -32,7 +33,16 @@ func (s *stepPrepareDevice) Run(_ context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Found device: %s -> %s", diskByPath, device))
+	if block == "" {
+		err := fmt.Errorf("device not found")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	device := fmt.Sprintf("/dev/%s", block)
+
+	ui.Say(fmt.Sprintf("Found device: %s", device))
 	state.Put("device", device)
 	return multistep.ActionContinue
 }
