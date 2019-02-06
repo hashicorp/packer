@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"crypto/rand"
 	"errors"
-	"github.com/hashicorp/packer/common/uuid"
-	gossh "golang.org/x/crypto/ssh"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/packer/common/uuid"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 // expected contains the data that the key pair should contain.
@@ -20,7 +21,7 @@ type expected struct {
 }
 
 const (
-	PemRsa1024 = `-----BEGIN RSA PRIVATE KEY-----
+	pemRsa1024 = `-----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgQDJEMFPpTBiWNDb3qEIPTSeEnIP8FZdBpG8njOrclcMoQQNhzZ+
 4uz37tqtHMp36Z7LB4/+85NN6epNXO+ekyZIHswiyBcJC2sT3KuH7nG1BESOooPY
 DfeCSM+CJT9GDIhy9nUXSsJjrceEyh/B5DjEtIbS0XfcRelrNTJodCmPJwIDAQAB
@@ -36,7 +37,7 @@ Sjvtd6NkMc2oKInwIQJAFZ1xJte0EaQsXaCIoZwHrQJbK1dd5l1xTAzz51voAcKH
 2K23xgx4I+/eam2enjFa7wXLZFoW0xg/51xsaIjnrA==
 -----END RSA PRIVATE KEY-----
 `
-	PemRsa2048 = `-----BEGIN RSA PRIVATE KEY-----
+	pemRsa2048 = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEA/ZPazeRmBapF01gzHXtJGpu0S936xHY+pOrIyIk6lEE06paf
 q5gh6BCuiN/60Keed5Nz+Es4dPGc73mql9pd7N0HOoEc1IQjZzJVqWOy3E55oWbz
 rXr1qbmMjw8bGHalZsVBov1UhyB6f2bKi88fGkThJi9HZ+Dc3Jr87eW+whS4D0bI
@@ -64,7 +65,7 @@ Jzw9+fTLMVFdY+F3ydO6qQFd8wlfov7deyscdoSj8R5gjGKJsarBs+YVdFde2oLG
 gkFsXmbmc2boyqGg51CbAX34VJOhGQKhWgKCWqDGmoYXafmyiZc+
 -----END RSA PRIVATE KEY-----
 `
-	PemOpenSshRsa1024 = `-----BEGIN OPENSSH PRIVATE KEY-----
+	pemOpenSshRsa1024 = `-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn
 NhAAAAAwEAAQAAAIEAzzknaHV741775aJOPacDpd2SiDpIDYmm7/w2sgY8lrinSakfLIVk
 1qn0IBRLNOzMxoF/pvIgGQXS51xvE1vB3QK8L+8vJwH06DuOXPP1WgVoDTU03gGvBJ7MNF
@@ -82,7 +83,7 @@ QQDmQ47VwclxiVn5tVAht/Lk2ZVa7rSjeFlXAkAWZkUAiHboaH8IfW9W4gYV7o2BqJO11L
 
 -----END OPENSSH PRIVATE KEY-----
 `
-	PemOpenSshRsa2048 = `-----BEGIN OPENSSH PRIVATE KEY-----
+	pemOpenSshRsa2048 = `-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
 NhAAAAAwEAAQAAAQEAxWfWNu0i8sbmwPqTUfKSeXOSt/fLMuqucn9KYU7rJ+83trznRhAn
 AHQzKgcSU8PBgkax+PDEUexYUB9gZApNI6K/2twVDYh3Hgwx7EjXf05rji7bQk6TFyKEp4
@@ -111,7 +112,7 @@ exrJE+p69wgRVndoqQAAACJjaHJpc0Bwb2V0YXN0ZXIuY29ycC5tdXR1YWxpbmsubmV0AQ
 IDBAUGBw==
 -----END OPENSSH PRIVATE KEY-----
 `
-	PemDsa = `-----BEGIN DSA PRIVATE KEY-----
+	pemDsa = `-----BEGIN DSA PRIVATE KEY-----
 MIIBuwIBAAKBgQDH/T+IkpbdA9nUM7O4MMRoeS0bn7iXWs63Amo2fsIyJPxDvjjF
 5HZBH5Rq045TFCCWHjymwiYof+wvwUMZIUH++ABTrKzes/r5qG5jXp42pFWf6nTI
 zHwttdjvNiXr+AgreXOrJKhjv6Ga3hq8MNcXMa9xFsIB83EZNMBPxbj0nwIVAJQW
@@ -124,14 +125,14 @@ Ch42nbH2wKnbjk8eDxHdHLHzzOLGgYVMpUuBeuc7G5Q94rM/Z0I8HGQ6mvIkuFyp
 4tGCfnnmWU514A7ZzEKj
 -----END DSA PRIVATE KEY-----
 `
-	PemEcdsa384 = `-----BEGIN EC PRIVATE KEY-----
+	pemEcdsa384 = `-----BEGIN EC PRIVATE KEY-----
 MIGkAgEBBDAjuEIlmFyhGjFtJoAwD420FuPAjIknN3YwDZL4cfMFpB4YAK+7QVLs
 coAJ/ADuT7OgBwYFK4EEACKhZANiAASeXKyBr2prr4f4aOsM4dtVikYOUIL3yYnb
 GFOy7yHmauCnkIB48paXpvRE5m53Q8zgu7vkz/z9tcMBcC0GzpY3Sef37fmgTUuZ
 AJuJp36DMBdQel+j51TcQ79sizxCayg=
 -----END EC PRIVATE KEY-----
 `
-	PemEcdsa521 = `-----BEGIN EC PRIVATE KEY-----
+	pemEcdsa521 = `-----BEGIN EC PRIVATE KEY-----
 MIHcAgEBBEIBVCiwcf/did2vCIu3aMe7OeTD35PULm0hqmfkAK9OKIosi/DjOFfA
 8h99rVNPaf+Cx/JNmEzR4bZNnYDyilSRCr+gBwYFK4EEACOhgYkDgYYABABHBMLP
 XbQoRF31ZGIeUj9jt9GqKES1dLBtGDEQSiiZFouL4tEIW7NfIZDpOIkA0khNcO8N
@@ -139,7 +140,7 @@ xH6eylg0XOgcr01GRwCjY5VOapOahtn63SpajPGeKk+46F2dULIwrov9tWQuYNa3
 P50N8j3rx6fAdgyDENOcCJlfNdNcySvkH4bgL1xcsw==
 -----END EC PRIVATE KEY-----
 `
-	PemOpenSshEd25519 = `-----BEGIN OPENSSH PRIVATE KEY-----
+	pemOpenSshEd25519 = `-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
 QyNTUxOQAAACAUftPhZQN17kAlThiiWJEgJvddm/pUhHvgrHUtpuYFOQAAAKjN+UhDzflI
 QwAAAAtzc2gtZWQyNTUxOQAAACAUftPhZQN17kAlThiiWJEgJvddm/pUhHvgrHUtpuYFOQ
@@ -401,56 +402,56 @@ func TestDefaultKeyPairBuilder_Build_NamedRsa(t *testing.T) {
 func TestDefaultKeyPairBuilder_SetPrivateKey(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 	pemData := make(map[string]expected)
-	pemData[PemRsa1024] = expected{
+	pemData[pemRsa1024] = expected{
 		bits: 1024,
 		kind: Rsa,
 		name: name,
 		desc: "1024 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemRsa2048] = expected{
+	pemData[pemRsa2048] = expected{
 		bits: 2048,
 		kind: Rsa,
 		name: name,
 		desc: "2048 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshRsa1024] = expected{
+	pemData[pemOpenSshRsa1024] = expected{
 		bits: 1024,
 		kind: Rsa,
 		name: name,
 		desc: "1024 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshRsa2048] = expected{
+	pemData[pemOpenSshRsa2048] = expected{
 		bits: 2048,
 		kind: Rsa,
 		name: name,
 		desc: "2048 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemDsa] = expected{
+	pemData[pemDsa] = expected{
 		bits: 1024,
 		kind: Dsa,
 		name: name,
 		desc: "1024 bit DSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemEcdsa384] = expected{
+	pemData[pemEcdsa384] = expected{
 		bits: 384,
 		kind: Ecdsa,
 		name: name,
 		desc: "384 bit ECDSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemEcdsa521] = expected{
+	pemData[pemEcdsa521] = expected{
 		bits: 521,
 		kind: Ecdsa,
 		name: name,
 		desc: "521 bit ECDSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshEd25519] = expected{
+	pemData[pemOpenSshEd25519] = expected{
 		bits: 256,
 		kind: Ed25519,
 		name: name,
@@ -473,56 +474,56 @@ func TestDefaultKeyPairBuilder_SetPrivateKey(t *testing.T) {
 func TestDefaultKeyPairBuilder_SetPrivateKey_Override(t *testing.T) {
 	name := uuid.TimeOrderedUUID()
 	pemData := make(map[string]expected)
-	pemData[PemRsa1024] = expected{
+	pemData[pemRsa1024] = expected{
 		bits: 1024,
 		kind: Rsa,
 		name: name,
 		desc: "1024 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemRsa2048] = expected{
+	pemData[pemRsa2048] = expected{
 		bits: 2048,
 		kind: Rsa,
 		name: name,
 		desc: "2048 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshRsa1024] = expected{
+	pemData[pemOpenSshRsa1024] = expected{
 		bits: 1024,
 		kind: Rsa,
 		name: name,
 		desc: "1024 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshRsa2048] = expected{
+	pemData[pemOpenSshRsa2048] = expected{
 		bits: 2048,
 		kind: Rsa,
 		name: name,
 		desc: "2048 bit RSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemDsa] = expected{
+	pemData[pemDsa] = expected{
 		bits: 1024,
 		kind: Dsa,
 		name: name,
 		desc: "1024 bit DSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemEcdsa384] = expected{
+	pemData[pemEcdsa384] = expected{
 		bits: 384,
 		kind: Ecdsa,
 		name: name,
 		desc: "384 bit ECDSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemEcdsa521] = expected{
+	pemData[pemEcdsa521] = expected{
 		bits: 521,
 		kind: Ecdsa,
 		name: name,
 		desc: "521 bit ECDSA named " + name,
 		data: []byte(uuid.TimeOrderedUUID()),
 	}
-	pemData[PemOpenSshEd25519] = expected{
+	pemData[pemOpenSshEd25519] = expected{
 		bits: 256,
 		kind: Ed25519,
 		name: name,
