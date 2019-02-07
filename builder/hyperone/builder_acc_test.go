@@ -34,7 +34,7 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 		"vm_type": "a1.nano",
-		"source_image": "5c3fef425ceadc3d412beee5",
+		"source_image": "ubuntu",
 		"disk_size": 10
 	}]
 }
@@ -44,7 +44,7 @@ const testBuilderAccChroot = `
 {
 	"builders": [{
 		"type": "test",
-		"source_image": "5c3fef425ceadc3d412beee5",
+		"source_image": "ubuntu",
 		"disk_size": 10,
 		"vm_type": "a1.nano",
 		"chroot_disk": true,
