@@ -15,7 +15,7 @@ import (
 // Artifact is an artifact implementation that contains built OMIs.
 type Artifact struct {
 	// A map of regions to OMI IDs.
-	Amis map[string]string
+	Omis map[string]string
 
 	// BuilderId is the unique ID for the builder that created this OMI
 	BuilderIdValue string
@@ -34,8 +34,8 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	parts := make([]string, 0, len(a.Amis))
-	for region, amiId := range a.Amis {
+	parts := make([]string, 0, len(a.Omis))
+	for region, amiId := range a.Omis {
 		parts = append(parts, fmt.Sprintf("%s:%s", region, amiId))
 	}
 
@@ -44,8 +44,8 @@ func (a *Artifact) Id() string {
 }
 
 func (a *Artifact) String() string {
-	amiStrings := make([]string, 0, len(a.Amis))
-	for region, id := range a.Amis {
+	amiStrings := make([]string, 0, len(a.Omis))
+	for region, id := range a.Omis {
 		single := fmt.Sprintf("%s: %s", region, id)
 		amiStrings = append(amiStrings, single)
 	}
@@ -66,7 +66,7 @@ func (a *Artifact) State(name string) interface{} {
 func (a *Artifact) Destroy() error {
 	errors := make([]error, 0)
 
-	for region, imageId := range a.Amis {
+	for region, imageId := range a.Omis {
 		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
 
 		newConfig := &oapi.Config{
@@ -123,7 +123,7 @@ func (a *Artifact) Destroy() error {
 
 func (a *Artifact) stateAtlasMetadata() interface{} {
 	metadata := make(map[string]string)
-	for region, imageId := range a.Amis {
+	for region, imageId := range a.Omis {
 		k := fmt.Sprintf("region.%s", region)
 		metadata[k] = imageId
 	}
