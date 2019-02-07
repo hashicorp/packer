@@ -268,11 +268,18 @@ func getCloud() *azure.Environment {
 // tests for assertRequiredParametersSet
 
 func Test_ClientConfig_CanUseDeviceCode(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	// TenantID is optional
-
-	assertValid(t, cfg)
+	// TenantID is optional, but Builder will look up tenant ID before requesting
+	t.Run("without TenantID", func(t *testing.T) {
+		cfg := emptyClientConfig()
+		cfg.SubscriptionID = "12345"
+		assertValid(t, cfg)
+	})
+	t.Run("with TenantID", func(t *testing.T) {
+		cfg := emptyClientConfig()
+		cfg.SubscriptionID = "12345"
+		cfg.TenantID = "12345"
+		assertValid(t, cfg)
+	})
 }
 
 func assertValid(t *testing.T, cfg ClientConfig) {

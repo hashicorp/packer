@@ -38,11 +38,12 @@ post-processors such as Docker and Artifice.
     to `packer-manifest.json`.
 -   `strip_path` (boolean) Write only filename without the path to the manifest
     file. This defaults to false.
+-   `custom_data` (map of strings) Arbitrary data to add to the manifest.
 
 ### Example Configuration
 
 You can simply add `{"type":"manifest"}` to your post-processor section. Below
-is a more verbose example:
+is a more complete example:
 
 ``` json
 {
@@ -50,7 +51,10 @@ is a more verbose example:
     {
       "type": "manifest",
       "output": "manifest.json",
-      "strip_path": true
+      "strip_path": true,
+      "custom_data": {
+        "my_custom_data": "example"
+      }
     }
   ]
 }
@@ -72,7 +76,10 @@ An example manifest file looks like:
         }
       ],
       "artifact_id": "Container",
-      "packer_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
+      "packer_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f",
+      "custom_data": {
+        "my_custom_data": "example"
+      }
     }
   ],
   "last_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
@@ -114,7 +121,10 @@ The above manifest was generated with this packer.json:
     {
       "type": "manifest",
       "output": "manifest.json",
-      "strip_path": true
+      "strip_path": true,
+      "custom_data": {
+        "my_custom_data": "example"
+      }
     }
   ]
 }

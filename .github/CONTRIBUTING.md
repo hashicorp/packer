@@ -129,8 +129,13 @@ to use `git push ...`.
   we want to understand your thought process.
 
 4. If we have requested changes, you can either make those changes or, if you
-  disagree with the suggested changes, we can have a conversation about our reasoning and agree on a path forward. This may be a multi-step process. Our view is that pull requests are a chance to collaborate, and we welcome
-  conversations about how to do things better.
+  disagree with the suggested changes, we can have a conversation about our
+  reasoning and agree on a path forward. This may be a multi-step process. Our
+  view is that pull requests are a chance to collaborate, and we welcome
+  conversations about how to do things better. It is the contributor's
+  responsibility to address any changes requested. While reviewers are happy to
+  give guidance, it is unsustainable for us to perform the coding work necessary
+  to get a PR into a mergeable state.
 
 5. Once all outstanding comments and checklist items have been addressed, your
   contribution will be merged! Merged PRs will be included in the next

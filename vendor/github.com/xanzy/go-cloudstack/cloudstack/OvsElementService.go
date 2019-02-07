@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,13 +70,13 @@ func (s *OvsElementService) NewConfigureOvsElementParams(enabled bool, id string
 }
 
 // Configures an ovs element.
-func (s *OvsElementService) ConfigureOvsElement(p *ConfigureOvsElementParams) (*ConfigureOvsElementResponse, error) {
+func (s *OvsElementService) ConfigureOvsElement(p *ConfigureOvsElementParams) (*OvsElementResponse, error) {
 	resp, err := s.cs.newRequest("configureOvsElement", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r ConfigureOvsElementResponse
+	var r OvsElementResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
@@ -100,19 +100,20 @@ func (s *OvsElementService) ConfigureOvsElement(p *ConfigureOvsElementParams) (*
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
-type ConfigureOvsElementResponse struct {
-	JobID     string `json:"jobid,omitempty"`
-	Account   string `json:"account,omitempty"`
-	Domain    string `json:"domain,omitempty"`
-	Domainid  string `json:"domainid,omitempty"`
-	Enabled   bool   `json:"enabled,omitempty"`
-	Id        string `json:"id,omitempty"`
-	Nspid     string `json:"nspid,omitempty"`
-	Project   string `json:"project,omitempty"`
-	Projectid string `json:"projectid,omitempty"`
+type OvsElementResponse struct {
+	JobID     string `json:"jobid"`
+	Account   string `json:"account"`
+	Domain    string `json:"domain"`
+	Domainid  string `json:"domainid"`
+	Enabled   bool   `json:"enabled"`
+	Id        string `json:"id"`
+	Nspid     string `json:"nspid"`
+	Project   string `json:"project"`
+	Projectid string `json:"projectid"`
 }
 
 type ListOvsElementsParams struct {
@@ -211,7 +212,7 @@ func (s *OvsElementService) GetOvsElementByID(id string, opts ...OptionFunc) (*O
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -248,6 +249,7 @@ func (s *OvsElementService) ListOvsElements(p *ListOvsElementsParams) (*ListOvsE
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -257,12 +259,12 @@ type ListOvsElementsResponse struct {
 }
 
 type OvsElement struct {
-	Account   string `json:"account,omitempty"`
-	Domain    string `json:"domain,omitempty"`
-	Domainid  string `json:"domainid,omitempty"`
-	Enabled   bool   `json:"enabled,omitempty"`
-	Id        string `json:"id,omitempty"`
-	Nspid     string `json:"nspid,omitempty"`
-	Project   string `json:"project,omitempty"`
-	Projectid string `json:"projectid,omitempty"`
+	Account   string `json:"account"`
+	Domain    string `json:"domain"`
+	Domainid  string `json:"domainid"`
+	Enabled   bool   `json:"enabled"`
+	Id        string `json:"id"`
+	Nspid     string `json:"nspid"`
+	Project   string `json:"project"`
+	Projectid string `json:"projectid"`
 }

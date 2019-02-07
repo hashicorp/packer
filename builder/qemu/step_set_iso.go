@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -28,11 +29,7 @@ func (s *stepSetISO) Run(_ context.Context, state multistep.StateBag) multistep.
 
 		req.Header.Set("User-Agent", "Packer")
 
-		httpClient := &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}
+		httpClient := commonhelper.HttpClientWithEnvironmentProxy()
 
 		res, err := httpClient.Do(req)
 		if err == nil && (res.StatusCode >= 200 && res.StatusCode < 300) {

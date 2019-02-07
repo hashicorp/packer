@@ -51,7 +51,7 @@ type Config struct {
 	EmptyGroups          []string `mapstructure:"empty_groups"`
 	HostAlias            string   `mapstructure:"host_alias"`
 	User                 string   `mapstructure:"user"`
-	LocalPort            string   `mapstructure:"local_port"`
+	LocalPort            uint     `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
@@ -130,12 +130,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_SCP_IF_SSH=True")
 	}
 
-	if len(p.config.LocalPort) > 0 {
-		if _, err := strconv.ParseUint(p.config.LocalPort, 10, 16); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %s must be a valid port", p.config.LocalPort))
-		}
-	} else {
-		p.config.LocalPort = "0"
+	if p.config.LocalPort > 65535 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
 	}
 
 	if len(p.config.InventoryDirectory) > 0 {
@@ -256,11 +252,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	config.AddHostKey(hostSigner)
 
 	localListener, err := func() (net.Listener, error) {
-		port, err := strconv.ParseUint(p.config.LocalPort, 10, 16)
-		if err != nil {
-			return nil, err
-		}
 
+		port := p.config.LocalPort
 		tries := 1
 		if port != 0 {
 			tries = 10
@@ -272,11 +265,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				ui.Say(err.Error())
 				continue
 			}
-			_, p.config.LocalPort, err = net.SplitHostPort(l.Addr().String())
+			_, portStr, err := net.SplitHostPort(l.Addr().String())
 			if err != nil {
 				ui.Say(err.Error())
 				continue
 			}
+			portUint64, err := strconv.ParseUint(portStr, 10, 0)
+			if err != nil {
+				ui.Say(err.Error())
+				continue
+			}
+			p.config.LocalPort = uint(portUint64)
 			return l, nil
 		}
 		return nil, errors.New("Error setting up SSH proxy connection")
@@ -304,10 +303,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		defer os.Remove(tf.Name())
 
-		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%s\n",
+		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%d\n",
 			p.config.HostAlias, p.config.User, p.config.LocalPort)
 		if p.ansibleMajVersion < 2 {
-			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%s\n",
+			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%d\n",
 				p.config.HostAlias, p.config.User, p.config.LocalPort)
 		}
 
