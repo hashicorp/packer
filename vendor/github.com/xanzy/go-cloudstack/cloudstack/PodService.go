@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -137,167 +137,138 @@ func (s *PodService) CreatePod(p *CreatePodParams) (*CreatePodResponse, error) {
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type CreatePodResponse struct {
-	Allocationstate string `json:"allocationstate,omitempty"`
-	Capacity        []struct {
-		Capacitytotal int64  `json:"capacitytotal,omitempty"`
-		Capacityused  int64  `json:"capacityused,omitempty"`
-		Clusterid     string `json:"clusterid,omitempty"`
-		Clustername   string `json:"clustername,omitempty"`
-		Percentused   string `json:"percentused,omitempty"`
-		Podid         string `json:"podid,omitempty"`
-		Podname       string `json:"podname,omitempty"`
-		Type          int    `json:"type,omitempty"`
-		Zoneid        string `json:"zoneid,omitempty"`
-		Zonename      string `json:"zonename,omitempty"`
-	} `json:"capacity,omitempty"`
-	Endip    string `json:"endip,omitempty"`
-	Gateway  string `json:"gateway,omitempty"`
-	Id       string `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Netmask  string `json:"netmask,omitempty"`
-	Startip  string `json:"startip,omitempty"`
-	Zoneid   string `json:"zoneid,omitempty"`
-	Zonename string `json:"zonename,omitempty"`
+	Allocationstate string                      `json:"allocationstate"`
+	Capacity        []CreatePodResponseCapacity `json:"capacity"`
+	Endip           []string                    `json:"endip"`
+	Forsystemvms    []string                    `json:"forsystemvms"`
+	Gateway         string                      `json:"gateway"`
+	Id              string                      `json:"id"`
+	Name            string                      `json:"name"`
+	Netmask         string                      `json:"netmask"`
+	Startip         []string                    `json:"startip"`
+	Vlanid          []string                    `json:"vlanid"`
+	Zoneid          string                      `json:"zoneid"`
+	Zonename        string                      `json:"zonename"`
 }
 
-type UpdatePodParams struct {
+type CreatePodResponseCapacity struct {
+	Capacityallocated int64  `json:"capacityallocated"`
+	Capacitytotal     int64  `json:"capacitytotal"`
+	Capacityused      int64  `json:"capacityused"`
+	Clusterid         string `json:"clusterid"`
+	Clustername       string `json:"clustername"`
+	Name              string `json:"name"`
+	Percentused       string `json:"percentused"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Type              int    `json:"type"`
+	Zoneid            string `json:"zoneid"`
+	Zonename          string `json:"zonename"`
+}
+
+type DedicatePodParams struct {
 	p map[string]interface{}
 }
 
-func (p *UpdatePodParams) toURLValues() url.Values {
+func (p *DedicatePodParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
-	if v, found := p.p["allocationstate"]; found {
-		u.Set("allocationstate", v.(string))
+	if v, found := p.p["account"]; found {
+		u.Set("account", v.(string))
 	}
-	if v, found := p.p["endip"]; found {
-		u.Set("endip", v.(string))
+	if v, found := p.p["domainid"]; found {
+		u.Set("domainid", v.(string))
 	}
-	if v, found := p.p["gateway"]; found {
-		u.Set("gateway", v.(string))
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	if v, found := p.p["netmask"]; found {
-		u.Set("netmask", v.(string))
-	}
-	if v, found := p.p["startip"]; found {
-		u.Set("startip", v.(string))
+	if v, found := p.p["podid"]; found {
+		u.Set("podid", v.(string))
 	}
 	return u
 }
 
-func (p *UpdatePodParams) SetAllocationstate(v string) {
+func (p *DedicatePodParams) SetAccount(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["allocationstate"] = v
+	p.p["account"] = v
 	return
 }
 
-func (p *UpdatePodParams) SetEndip(v string) {
+func (p *DedicatePodParams) SetDomainid(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["endip"] = v
+	p.p["domainid"] = v
 	return
 }
 
-func (p *UpdatePodParams) SetGateway(v string) {
+func (p *DedicatePodParams) SetPodid(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["gateway"] = v
+	p.p["podid"] = v
 	return
 }
 
-func (p *UpdatePodParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *UpdatePodParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-func (p *UpdatePodParams) SetNetmask(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["netmask"] = v
-	return
-}
-
-func (p *UpdatePodParams) SetStartip(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["startip"] = v
-	return
-}
-
-// You should always use this function to get a new UpdatePodParams instance,
+// You should always use this function to get a new DedicatePodParams instance,
 // as then you are sure you have configured all required params
-func (s *PodService) NewUpdatePodParams(id string) *UpdatePodParams {
-	p := &UpdatePodParams{}
+func (s *PodService) NewDedicatePodParams(domainid string, podid string) *DedicatePodParams {
+	p := &DedicatePodParams{}
 	p.p = make(map[string]interface{})
-	p.p["id"] = id
+	p.p["domainid"] = domainid
+	p.p["podid"] = podid
 	return p
 }
 
-// Updates a Pod.
-func (s *PodService) UpdatePod(p *UpdatePodParams) (*UpdatePodResponse, error) {
-	resp, err := s.cs.newRequest("updatePod", p.toURLValues())
+// Dedicates a Pod.
+func (s *PodService) DedicatePod(p *DedicatePodParams) (*DedicatePodResponse, error) {
+	resp, err := s.cs.newRequest("dedicatePod", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r UpdatePodResponse
+	var r DedicatePodResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
 	return &r, nil
 }
 
-type UpdatePodResponse struct {
-	Allocationstate string `json:"allocationstate,omitempty"`
-	Capacity        []struct {
-		Capacitytotal int64  `json:"capacitytotal,omitempty"`
-		Capacityused  int64  `json:"capacityused,omitempty"`
-		Clusterid     string `json:"clusterid,omitempty"`
-		Clustername   string `json:"clustername,omitempty"`
-		Percentused   string `json:"percentused,omitempty"`
-		Podid         string `json:"podid,omitempty"`
-		Podname       string `json:"podname,omitempty"`
-		Type          int    `json:"type,omitempty"`
-		Zoneid        string `json:"zoneid,omitempty"`
-		Zonename      string `json:"zonename,omitempty"`
-	} `json:"capacity,omitempty"`
-	Endip    string `json:"endip,omitempty"`
-	Gateway  string `json:"gateway,omitempty"`
-	Id       string `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Netmask  string `json:"netmask,omitempty"`
-	Startip  string `json:"startip,omitempty"`
-	Zoneid   string `json:"zoneid,omitempty"`
-	Zonename string `json:"zonename,omitempty"`
+type DedicatePodResponse struct {
+	JobID           string `json:"jobid"`
+	Accountid       string `json:"accountid"`
+	Affinitygroupid string `json:"affinitygroupid"`
+	Domainid        string `json:"domainid"`
+	Id              string `json:"id"`
+	Podid           string `json:"podid"`
+	Podname         string `json:"podname"`
 }
 
 type DeletePodParams struct {
@@ -343,12 +314,160 @@ func (s *PodService) DeletePod(p *DeletePodParams) (*DeletePodResponse, error) {
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type DeletePodResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeletePodResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeletePodResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
+type ListDedicatedPodsParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListDedicatedPodsParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["account"]; found {
+		u.Set("account", v.(string))
+	}
+	if v, found := p.p["affinitygroupid"]; found {
+		u.Set("affinitygroupid", v.(string))
+	}
+	if v, found := p.p["domainid"]; found {
+		u.Set("domainid", v.(string))
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["podid"]; found {
+		u.Set("podid", v.(string))
+	}
+	return u
+}
+
+func (p *ListDedicatedPodsParams) SetAccount(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["account"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetAffinitygroupid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["affinitygroupid"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetDomainid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["domainid"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListDedicatedPodsParams) SetPodid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["podid"] = v
+	return
+}
+
+// You should always use this function to get a new ListDedicatedPodsParams instance,
+// as then you are sure you have configured all required params
+func (s *PodService) NewListDedicatedPodsParams() *ListDedicatedPodsParams {
+	p := &ListDedicatedPodsParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// Lists dedicated pods.
+func (s *PodService) ListDedicatedPods(p *ListDedicatedPodsParams) (*ListDedicatedPodsResponse, error) {
+	resp, err := s.cs.newRequest("listDedicatedPods", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListDedicatedPodsResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListDedicatedPodsResponse struct {
+	Count         int             `json:"count"`
+	DedicatedPods []*DedicatedPod `json:"dedicatedpod"`
+}
+
+type DedicatedPod struct {
+	Accountid       string `json:"accountid"`
+	Affinitygroupid string `json:"affinitygroupid"`
+	Domainid        string `json:"domainid"`
+	Id              string `json:"id"`
+	Podid           string `json:"podid"`
+	Podname         string `json:"podname"`
 }
 
 type ListPodsParams struct {
@@ -469,7 +588,7 @@ func (s *PodService) GetPodID(name string, opts ...OptionFunc) (string, int, err
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -519,7 +638,7 @@ func (s *PodService) GetPodByID(id string, opts ...OptionFunc) (*Pod, int, error
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -556,6 +675,7 @@ func (s *PodService) ListPods(p *ListPodsParams) (*ListPodsResponse, error) {
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -565,126 +685,33 @@ type ListPodsResponse struct {
 }
 
 type Pod struct {
-	Allocationstate string `json:"allocationstate,omitempty"`
-	Capacity        []struct {
-		Capacitytotal int64  `json:"capacitytotal,omitempty"`
-		Capacityused  int64  `json:"capacityused,omitempty"`
-		Clusterid     string `json:"clusterid,omitempty"`
-		Clustername   string `json:"clustername,omitempty"`
-		Percentused   string `json:"percentused,omitempty"`
-		Podid         string `json:"podid,omitempty"`
-		Podname       string `json:"podname,omitempty"`
-		Type          int    `json:"type,omitempty"`
-		Zoneid        string `json:"zoneid,omitempty"`
-		Zonename      string `json:"zonename,omitempty"`
-	} `json:"capacity,omitempty"`
-	Endip    string `json:"endip,omitempty"`
-	Gateway  string `json:"gateway,omitempty"`
-	Id       string `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Netmask  string `json:"netmask,omitempty"`
-	Startip  string `json:"startip,omitempty"`
-	Zoneid   string `json:"zoneid,omitempty"`
-	Zonename string `json:"zonename,omitempty"`
+	Allocationstate string        `json:"allocationstate"`
+	Capacity        []PodCapacity `json:"capacity"`
+	Endip           []string      `json:"endip"`
+	Forsystemvms    []string      `json:"forsystemvms"`
+	Gateway         string        `json:"gateway"`
+	Id              string        `json:"id"`
+	Name            string        `json:"name"`
+	Netmask         string        `json:"netmask"`
+	Startip         []string      `json:"startip"`
+	Vlanid          []string      `json:"vlanid"`
+	Zoneid          string        `json:"zoneid"`
+	Zonename        string        `json:"zonename"`
 }
 
-type DedicatePodParams struct {
-	p map[string]interface{}
-}
-
-func (p *DedicatePodParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["account"]; found {
-		u.Set("account", v.(string))
-	}
-	if v, found := p.p["domainid"]; found {
-		u.Set("domainid", v.(string))
-	}
-	if v, found := p.p["podid"]; found {
-		u.Set("podid", v.(string))
-	}
-	return u
-}
-
-func (p *DedicatePodParams) SetAccount(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["account"] = v
-	return
-}
-
-func (p *DedicatePodParams) SetDomainid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["domainid"] = v
-	return
-}
-
-func (p *DedicatePodParams) SetPodid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["podid"] = v
-	return
-}
-
-// You should always use this function to get a new DedicatePodParams instance,
-// as then you are sure you have configured all required params
-func (s *PodService) NewDedicatePodParams(domainid string, podid string) *DedicatePodParams {
-	p := &DedicatePodParams{}
-	p.p = make(map[string]interface{})
-	p.p["domainid"] = domainid
-	p.p["podid"] = podid
-	return p
-}
-
-// Dedicates a Pod.
-func (s *PodService) DedicatePod(p *DedicatePodParams) (*DedicatePodResponse, error) {
-	resp, err := s.cs.newRequest("dedicatePod", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DedicatePodResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type DedicatePodResponse struct {
-	JobID           string `json:"jobid,omitempty"`
-	Accountid       string `json:"accountid,omitempty"`
-	Affinitygroupid string `json:"affinitygroupid,omitempty"`
-	Domainid        string `json:"domainid,omitempty"`
-	Id              string `json:"id,omitempty"`
-	Podid           string `json:"podid,omitempty"`
-	Podname         string `json:"podname,omitempty"`
+type PodCapacity struct {
+	Capacityallocated int64  `json:"capacityallocated"`
+	Capacitytotal     int64  `json:"capacitytotal"`
+	Capacityused      int64  `json:"capacityused"`
+	Clusterid         string `json:"clusterid"`
+	Clustername       string `json:"clustername"`
+	Name              string `json:"name"`
+	Percentused       string `json:"percentused"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Type              int    `json:"type"`
+	Zoneid            string `json:"zoneid"`
+	Zonename          string `json:"zonename"`
 }
 
 type ReleaseDedicatedPodParams struct {
@@ -745,138 +772,155 @@ func (s *PodService) ReleaseDedicatedPod(p *ReleaseDedicatedPodParams) (*Release
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type ReleaseDedicatedPodResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }
 
-type ListDedicatedPodsParams struct {
+type UpdatePodParams struct {
 	p map[string]interface{}
 }
 
-func (p *ListDedicatedPodsParams) toURLValues() url.Values {
+func (p *UpdatePodParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
-	if v, found := p.p["account"]; found {
-		u.Set("account", v.(string))
+	if v, found := p.p["allocationstate"]; found {
+		u.Set("allocationstate", v.(string))
 	}
-	if v, found := p.p["affinitygroupid"]; found {
-		u.Set("affinitygroupid", v.(string))
+	if v, found := p.p["endip"]; found {
+		u.Set("endip", v.(string))
 	}
-	if v, found := p.p["domainid"]; found {
-		u.Set("domainid", v.(string))
+	if v, found := p.p["gateway"]; found {
+		u.Set("gateway", v.(string))
 	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
 	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
 	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
+	if v, found := p.p["netmask"]; found {
+		u.Set("netmask", v.(string))
 	}
-	if v, found := p.p["podid"]; found {
-		u.Set("podid", v.(string))
+	if v, found := p.p["startip"]; found {
+		u.Set("startip", v.(string))
 	}
 	return u
 }
 
-func (p *ListDedicatedPodsParams) SetAccount(v string) {
+func (p *UpdatePodParams) SetAllocationstate(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["account"] = v
+	p.p["allocationstate"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetAffinitygroupid(v string) {
+func (p *UpdatePodParams) SetEndip(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["affinitygroupid"] = v
+	p.p["endip"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetDomainid(v string) {
+func (p *UpdatePodParams) SetGateway(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["domainid"] = v
+	p.p["gateway"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetKeyword(v string) {
+func (p *UpdatePodParams) SetId(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["keyword"] = v
+	p.p["id"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetPage(v int) {
+func (p *UpdatePodParams) SetName(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["page"] = v
+	p.p["name"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetPagesize(v int) {
+func (p *UpdatePodParams) SetNetmask(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["pagesize"] = v
+	p.p["netmask"] = v
 	return
 }
 
-func (p *ListDedicatedPodsParams) SetPodid(v string) {
+func (p *UpdatePodParams) SetStartip(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["podid"] = v
+	p.p["startip"] = v
 	return
 }
 
-// You should always use this function to get a new ListDedicatedPodsParams instance,
+// You should always use this function to get a new UpdatePodParams instance,
 // as then you are sure you have configured all required params
-func (s *PodService) NewListDedicatedPodsParams() *ListDedicatedPodsParams {
-	p := &ListDedicatedPodsParams{}
+func (s *PodService) NewUpdatePodParams(id string) *UpdatePodParams {
+	p := &UpdatePodParams{}
 	p.p = make(map[string]interface{})
+	p.p["id"] = id
 	return p
 }
 
-// Lists dedicated pods.
-func (s *PodService) ListDedicatedPods(p *ListDedicatedPodsParams) (*ListDedicatedPodsResponse, error) {
-	resp, err := s.cs.newRequest("listDedicatedPods", p.toURLValues())
+// Updates a Pod.
+func (s *PodService) UpdatePod(p *UpdatePodParams) (*UpdatePodResponse, error) {
+	resp, err := s.cs.newRequest("updatePod", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r ListDedicatedPodsResponse
+	var r UpdatePodResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
-type ListDedicatedPodsResponse struct {
-	Count         int             `json:"count"`
-	DedicatedPods []*DedicatedPod `json:"dedicatedpod"`
+type UpdatePodResponse struct {
+	Allocationstate string                      `json:"allocationstate"`
+	Capacity        []UpdatePodResponseCapacity `json:"capacity"`
+	Endip           []string                    `json:"endip"`
+	Forsystemvms    []string                    `json:"forsystemvms"`
+	Gateway         string                      `json:"gateway"`
+	Id              string                      `json:"id"`
+	Name            string                      `json:"name"`
+	Netmask         string                      `json:"netmask"`
+	Startip         []string                    `json:"startip"`
+	Vlanid          []string                    `json:"vlanid"`
+	Zoneid          string                      `json:"zoneid"`
+	Zonename        string                      `json:"zonename"`
 }
 
-type DedicatedPod struct {
-	Accountid       string `json:"accountid,omitempty"`
-	Affinitygroupid string `json:"affinitygroupid,omitempty"`
-	Domainid        string `json:"domainid,omitempty"`
-	Id              string `json:"id,omitempty"`
-	Podid           string `json:"podid,omitempty"`
-	Podname         string `json:"podname,omitempty"`
+type UpdatePodResponseCapacity struct {
+	Capacityallocated int64  `json:"capacityallocated"`
+	Capacitytotal     int64  `json:"capacitytotal"`
+	Capacityused      int64  `json:"capacityused"`
+	Clusterid         string `json:"clusterid"`
+	Clustername       string `json:"clustername"`
+	Name              string `json:"name"`
+	Percentused       string `json:"percentused"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Type              int    `json:"type"`
+	Zoneid            string `json:"zoneid"`
+	Zonename          string `json:"zonename"`
 }

@@ -34,6 +34,9 @@ func (c *AccessConfig) ValidateRegion(regions ...string) error {
 
 	var invalidRegions []string
 	for _, region := range regions {
+		if region == "" {
+			continue
+		}
 		found := false
 		for _, validRegion := range validRegions {
 			if region == validRegion {
