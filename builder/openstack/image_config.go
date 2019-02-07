@@ -16,6 +16,7 @@ type ImageConfig struct {
 	ImageMembers    []string                     `mapstructure:"image_members"`
 	ImageDiskFormat string                       `mapstructure:"image_disk_format"`
 	ImageTags       []string                     `mapstructure:"image_tags"`
+	ImageMinDisk    int                          `mapstructure:"image_min_disk"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
@@ -50,6 +51,10 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 		if !valid {
 			errs = append(errs, fmt.Errorf("Unknown visibility value %s", c.ImageVisibility))
 		}
+	}
+
+	if c.ImageMinDisk < 0 {
+		errs = append(errs, fmt.Errorf("An image min disk size must be greater than or equal to 0"))
 	}
 
 	if len(errs) > 0 {
