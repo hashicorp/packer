@@ -89,8 +89,6 @@ func (s *StepCreateVagrantfile) Run(_ context.Context, state multistep.StateBag)
 	}
 	log.Printf("Created vagrantfile at %s", vagrantfilePath)
 
-	os.Chdir(s.OutputDir)
-
 	return multistep.ActionContinue
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -167,7 +168,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // a VirtualBox appliance.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
-	driver, err := NewDriver()
+	VagrantCWD, err := filepath.Abs(b.config.OutputDir)
+	if err != nil {
+		return nil, err
+	}
+	driver, err := NewDriver(VagrantCWD)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
 	}

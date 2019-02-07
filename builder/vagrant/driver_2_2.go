@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -16,6 +17,7 @@ const VAGRANT_MIN_VERSION = ">= 2.0.2"
 
 type Vagrant_2_2_Driver struct {
 	vagrantBinary string
+	VagrantCWD    string
 }
 
 // Calls "vagrant init"
@@ -69,6 +71,7 @@ func (d *Vagrant_2_2_Driver) Destroy(id string) error {
 
 // Calls "vagrant package"
 func (d *Vagrant_2_2_Driver) Package(args []string) error {
+	args = append(args, "--output", filepath.Join(d.VagrantCWD, "package.box"))
 	_, _, err := d.vagrantCmd(append([]string{"package"}, args...)...)
 	return err
 }
@@ -177,6 +180,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 
 	log.Printf("Calling Vagrant CLI: %#v", args)
 	cmd := exec.Command(d.vagrantBinary, args...)
+	cmd.Env = append(os.Environ(), fmt.Sprintf("VAGRANT_CWD=%s", d.VagrantCWD))
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()

@@ -42,7 +42,7 @@ type VagrantDriver interface {
 	Version() (string, error)
 }
 
-func NewDriver() (VagrantDriver, error) {
+func NewDriver(outputDir string) (VagrantDriver, error) {
 	// Hardcode path for now while I'm developing. Obviously this path needs
 	// to be discovered based on OS.
 	vagrantBinary := "vagrant"
@@ -56,6 +56,7 @@ func NewDriver() (VagrantDriver, error) {
 
 	driver := &Vagrant_2_2_Driver{
 		vagrantBinary: vagrantBinary,
+		VagrantCWD:    outputDir,
 	}
 
 	if err := driver.Verify(); err != nil {
