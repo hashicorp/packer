@@ -81,5 +81,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 func (b *Builder) Cancel() {
-	log.Println("[Debug] BSU Builder Run function")
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
 }
