@@ -6,6 +6,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Azure/go-autorest v10.12.0+incompatible
 	github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4 // indirect
+	github.com/Bowery/prompt v0.0.0-20180817134258-8a1d5376df1c // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
 	github.com/Jeffail/gabs v1.1.1 // indirect
@@ -23,7 +24,7 @@ require (
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20160115234725-4239b77079c7 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/aws/aws-sdk-go v1.16.24
+	github.com/aws/aws-sdk-go v1.16.31
 	github.com/bgentry/speakeasy v0.0.0-20150902231413-36e9cfdd6909 // indirect
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/circonus-labs/circonusllhist v0.1.3 // indirect
 	github.com/containerd/continuity v0.0.0-20181203112020-004b46473808 // indirect
 	github.com/creack/goselect v0.0.0-20180210034346-528c74964609 // indirect
+	github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20181014144952-4e0d7dc8888f // indirect
 	github.com/denverdino/aliyungo v0.0.0-20180417075537-ebad04655e03
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -93,6 +95,7 @@ require (
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
 	github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
+	github.com/kardianos/govendor v1.0.9 // indirect
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/keybase/go-crypto v0.0.0-20181127160227-255a5089e85a // indirect
 	github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77 // indirect
@@ -117,11 +120,13 @@ require (
 	github.com/mitchellh/go-homedir v0.0.0-20151025052427-d682a8f0cf13 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v0.4.0 // indirect
 	github.com/mitchellh/iochan v0.0.0-20150529224432-87b45ffd0e95
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
+	github.com/mna/pigeon v1.0.0 // indirect
 	github.com/moul/anonuuid v0.0.0-20160222162117-609b752a95ef // indirect
 	github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215 // indirect
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
@@ -167,6 +172,7 @@ require (
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
+	golang.org/x/tools v0.0.0-20190208222737-3744606dbb67 // indirect
 	google.golang.org/api v0.0.0-20180818000503-e21acd801f91
 	google.golang.org/grpc v1.17.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect

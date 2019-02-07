@@ -2,12 +2,15 @@ package googlecompute
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 	"os"
+
+	"golang.org/x/crypto/ed25519"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -18,6 +21,32 @@ import (
 type StepCreateSSHKey struct {
 	Debug        bool
 	DebugKeyPath string
+}
+
+func createTransientPublicKey(pemBytes []byte) (ssh.PublicKey, error) {
+	privateKey, err := ssh.ParseRawPrivateKey(pemBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	var publicKey interface{}
+	switch key := privateKey.(type) {
+	case *rsa.PrivateKey:
+		publicKey = key.Public()
+	case *ecdsa.PrivateKey:
+		publicKey = key.Public()
+	case *ed25519.PrivateKey:
+		publicKey = key.Public()
+	default:
+		return nil, fmt.Errorf("ssh: unsupported key type")
+	}
+
+	pub, err := ssh.NewPublicKey(publicKey)
+	if err != nil {
+		return nil, fmt.Errorf("unsupported key type detected: %s", err)
+	}
+
+	return pub, nil
 }
 
 // Run executes the Packer build step that generates SSH key pairs.
@@ -34,8 +63,16 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
+		pub, err := createTransientPublicKey(privateKeyBytes)
+		if err != nil {
+			err := fmt.Errorf("Error creating temporary ssh key: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
 		config.Comm.SSHPrivateKey = privateKeyBytes
-		config.Comm.SSHPublicKey = nil
+		config.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 		return multistep.ActionContinue
 	}
