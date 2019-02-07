@@ -153,6 +153,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepUpdateImageTags{},
 		&stepUpdateImageVisibility{},
 		&stepAddImageMembers{},
+		&stepUpdateImageMinDisk{},
 	}
 
 	// Run!
