@@ -26,9 +26,9 @@ func Test_getCreateVMScript(t *testing.T) {
 		t.Fatalf("Error: %s", err.Error())
 	}
 
-	expected := `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhd
-Hyper-V\New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch -Version 5.0`
+	expected := `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhd"
+Hyper-V\New-VHD -Path $vhdPath -ParentPath "C://harddrivepath" -Differencing -BlockSizeBytes 10
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch" -Version 5.0`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -48,9 +48,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("Error: %s", err.Error())
 	}
 
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
-Hyper-V\New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch -Generation 2 -Version 5.0`
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhdx"
+Hyper-V\New-VHD -Path $vhdPath -ParentPath "C://harddrivepath" -Differencing -BlockSizeBytes 10
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch" -Generation 2 -Version 5.0`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -63,9 +63,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("Error: %s", err.Error())
 	}
 
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
-Hyper-V\New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch -Version 5.0`
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhdx"
+Hyper-V\New-VHD -Path $vhdPath -ParentPath "C://harddrivepath" -Differencing -BlockSizeBytes 10
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch" -Version 5.0`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -86,9 +86,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
-Hyper-V\New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch`
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhdx"
+Hyper-V\New-VHD -Path $vhdPath -ParentPath "C://harddrivepath" -Differencing -BlockSizeBytes 10
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch"`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -98,9 +98,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
-Copy-Item -Path C://harddrivepath -Destination $vhdPath
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch`
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhdx"
+Copy-Item -Path "C://harddrivepath" -Destination $vhdPath
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch"`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -110,9 +110,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhdx"
 Hyper-V\New-VHD -Path $vhdPath -SizeBytes 8192 -BlockSizeBytes 10
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch`
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch"`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
@@ -122,9 +122,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
-	expected = `$vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhd
+	expected = `$vhdPath = Join-Path -Path "C://mypath" -ChildPath "myvm.vhd"
 Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes 8192
-Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch`
+Hyper-V\New-VM -Name "myvm" -Path "C://mypath" -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName "hyperv-vmx-switch"`
 	if ok := strings.Compare(scriptString, expected); ok != 0 {
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}

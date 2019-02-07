@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,91 +23,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type EnableStaticNatParams struct {
-	p map[string]interface{}
-}
-
-func (p *EnableStaticNatParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["ipaddressid"]; found {
-		u.Set("ipaddressid", v.(string))
-	}
-	if v, found := p.p["networkid"]; found {
-		u.Set("networkid", v.(string))
-	}
-	if v, found := p.p["virtualmachineid"]; found {
-		u.Set("virtualmachineid", v.(string))
-	}
-	if v, found := p.p["vmguestip"]; found {
-		u.Set("vmguestip", v.(string))
-	}
-	return u
-}
-
-func (p *EnableStaticNatParams) SetIpaddressid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["ipaddressid"] = v
-	return
-}
-
-func (p *EnableStaticNatParams) SetNetworkid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["networkid"] = v
-	return
-}
-
-func (p *EnableStaticNatParams) SetVirtualmachineid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["virtualmachineid"] = v
-	return
-}
-
-func (p *EnableStaticNatParams) SetVmguestip(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["vmguestip"] = v
-	return
-}
-
-// You should always use this function to get a new EnableStaticNatParams instance,
-// as then you are sure you have configured all required params
-func (s *NATService) NewEnableStaticNatParams(ipaddressid string, virtualmachineid string) *EnableStaticNatParams {
-	p := &EnableStaticNatParams{}
-	p.p = make(map[string]interface{})
-	p.p["ipaddressid"] = ipaddressid
-	p.p["virtualmachineid"] = virtualmachineid
-	return p
-}
-
-// Enables static NAT for given IP address
-func (s *NATService) EnableStaticNat(p *EnableStaticNatParams) (*EnableStaticNatResponse, error) {
-	resp, err := s.cs.newRequest("enableStaticNat", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r EnableStaticNatResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type EnableStaticNatResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
-}
 
 type CreateIpForwardingRuleParams struct {
 	p map[string]interface{}
@@ -233,39 +148,29 @@ func (s *NATService) CreateIpForwardingRule(p *CreateIpForwardingRuleParams) (*C
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type CreateIpForwardingRuleResponse struct {
-	JobID          string `json:"jobid,omitempty"`
-	Cidrlist       string `json:"cidrlist,omitempty"`
-	Fordisplay     bool   `json:"fordisplay,omitempty"`
-	Id             string `json:"id,omitempty"`
-	Ipaddress      string `json:"ipaddress,omitempty"`
-	Ipaddressid    string `json:"ipaddressid,omitempty"`
-	Networkid      string `json:"networkid,omitempty"`
-	Privateendport string `json:"privateendport,omitempty"`
-	Privateport    string `json:"privateport,omitempty"`
-	Protocol       string `json:"protocol,omitempty"`
-	Publicendport  string `json:"publicendport,omitempty"`
-	Publicport     string `json:"publicport,omitempty"`
-	State          string `json:"state,omitempty"`
-	Tags           []struct {
-		Account      string `json:"account,omitempty"`
-		Customer     string `json:"customer,omitempty"`
-		Domain       string `json:"domain,omitempty"`
-		Domainid     string `json:"domainid,omitempty"`
-		Key          string `json:"key,omitempty"`
-		Project      string `json:"project,omitempty"`
-		Projectid    string `json:"projectid,omitempty"`
-		Resourceid   string `json:"resourceid,omitempty"`
-		Resourcetype string `json:"resourcetype,omitempty"`
-		Value        string `json:"value,omitempty"`
-	} `json:"tags,omitempty"`
-	Virtualmachinedisplayname string `json:"virtualmachinedisplayname,omitempty"`
-	Virtualmachineid          string `json:"virtualmachineid,omitempty"`
-	Virtualmachinename        string `json:"virtualmachinename,omitempty"`
-	Vmguestip                 string `json:"vmguestip,omitempty"`
+	JobID                     string `json:"jobid"`
+	Cidrlist                  string `json:"cidrlist"`
+	Fordisplay                bool   `json:"fordisplay"`
+	Id                        string `json:"id"`
+	Ipaddress                 string `json:"ipaddress"`
+	Ipaddressid               string `json:"ipaddressid"`
+	Networkid                 string `json:"networkid"`
+	Privateendport            string `json:"privateendport"`
+	Privateport               string `json:"privateport"`
+	Protocol                  string `json:"protocol"`
+	Publicendport             string `json:"publicendport"`
+	Publicport                string `json:"publicport"`
+	State                     string `json:"state"`
+	Tags                      []Tags `json:"tags"`
+	Virtualmachinedisplayname string `json:"virtualmachinedisplayname"`
+	Virtualmachineid          string `json:"virtualmachineid"`
+	Virtualmachinename        string `json:"virtualmachinename"`
+	Vmguestip                 string `json:"vmguestip"`
 }
 
 type DeleteIpForwardingRuleParams struct {
@@ -326,13 +231,187 @@ func (s *NATService) DeleteIpForwardingRule(p *DeleteIpForwardingRuleParams) (*D
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type DeleteIpForwardingRuleResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+type DisableStaticNatParams struct {
+	p map[string]interface{}
+}
+
+func (p *DisableStaticNatParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["ipaddressid"]; found {
+		u.Set("ipaddressid", v.(string))
+	}
+	return u
+}
+
+func (p *DisableStaticNatParams) SetIpaddressid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["ipaddressid"] = v
+	return
+}
+
+// You should always use this function to get a new DisableStaticNatParams instance,
+// as then you are sure you have configured all required params
+func (s *NATService) NewDisableStaticNatParams(ipaddressid string) *DisableStaticNatParams {
+	p := &DisableStaticNatParams{}
+	p.p = make(map[string]interface{})
+	p.p["ipaddressid"] = ipaddressid
+	return p
+}
+
+// Disables static rule for given IP address
+func (s *NATService) DisableStaticNat(p *DisableStaticNatParams) (*DisableStaticNatResponse, error) {
+	resp, err := s.cs.newRequest("disableStaticNat", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DisableStaticNatResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type DisableStaticNatResponse struct {
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+type EnableStaticNatParams struct {
+	p map[string]interface{}
+}
+
+func (p *EnableStaticNatParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["ipaddressid"]; found {
+		u.Set("ipaddressid", v.(string))
+	}
+	if v, found := p.p["networkid"]; found {
+		u.Set("networkid", v.(string))
+	}
+	if v, found := p.p["virtualmachineid"]; found {
+		u.Set("virtualmachineid", v.(string))
+	}
+	if v, found := p.p["vmguestip"]; found {
+		u.Set("vmguestip", v.(string))
+	}
+	return u
+}
+
+func (p *EnableStaticNatParams) SetIpaddressid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["ipaddressid"] = v
+	return
+}
+
+func (p *EnableStaticNatParams) SetNetworkid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["networkid"] = v
+	return
+}
+
+func (p *EnableStaticNatParams) SetVirtualmachineid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["virtualmachineid"] = v
+	return
+}
+
+func (p *EnableStaticNatParams) SetVmguestip(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["vmguestip"] = v
+	return
+}
+
+// You should always use this function to get a new EnableStaticNatParams instance,
+// as then you are sure you have configured all required params
+func (s *NATService) NewEnableStaticNatParams(ipaddressid string, virtualmachineid string) *EnableStaticNatParams {
+	p := &EnableStaticNatParams{}
+	p.p = make(map[string]interface{})
+	p.p["ipaddressid"] = ipaddressid
+	p.p["virtualmachineid"] = virtualmachineid
+	return p
+}
+
+// Enables static NAT for given IP address
+func (s *NATService) EnableStaticNat(p *EnableStaticNatParams) (*EnableStaticNatResponse, error) {
+	resp, err := s.cs.newRequest("enableStaticNat", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r EnableStaticNatResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type EnableStaticNatResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *EnableStaticNatResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias EnableStaticNatResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ListIpForwardingRulesParams struct {
@@ -487,7 +566,7 @@ func (s *NATService) GetIpForwardingRuleByID(id string, opts ...OptionFunc) (*Ip
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -524,6 +603,7 @@ func (s *NATService) ListIpForwardingRules(p *ListIpForwardingRulesParams) (*Lis
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -533,99 +613,21 @@ type ListIpForwardingRulesResponse struct {
 }
 
 type IpForwardingRule struct {
-	Cidrlist       string `json:"cidrlist,omitempty"`
-	Fordisplay     bool   `json:"fordisplay,omitempty"`
-	Id             string `json:"id,omitempty"`
-	Ipaddress      string `json:"ipaddress,omitempty"`
-	Ipaddressid    string `json:"ipaddressid,omitempty"`
-	Networkid      string `json:"networkid,omitempty"`
-	Privateendport string `json:"privateendport,omitempty"`
-	Privateport    string `json:"privateport,omitempty"`
-	Protocol       string `json:"protocol,omitempty"`
-	Publicendport  string `json:"publicendport,omitempty"`
-	Publicport     string `json:"publicport,omitempty"`
-	State          string `json:"state,omitempty"`
-	Tags           []struct {
-		Account      string `json:"account,omitempty"`
-		Customer     string `json:"customer,omitempty"`
-		Domain       string `json:"domain,omitempty"`
-		Domainid     string `json:"domainid,omitempty"`
-		Key          string `json:"key,omitempty"`
-		Project      string `json:"project,omitempty"`
-		Projectid    string `json:"projectid,omitempty"`
-		Resourceid   string `json:"resourceid,omitempty"`
-		Resourcetype string `json:"resourcetype,omitempty"`
-		Value        string `json:"value,omitempty"`
-	} `json:"tags,omitempty"`
-	Virtualmachinedisplayname string `json:"virtualmachinedisplayname,omitempty"`
-	Virtualmachineid          string `json:"virtualmachineid,omitempty"`
-	Virtualmachinename        string `json:"virtualmachinename,omitempty"`
-	Vmguestip                 string `json:"vmguestip,omitempty"`
-}
-
-type DisableStaticNatParams struct {
-	p map[string]interface{}
-}
-
-func (p *DisableStaticNatParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["ipaddressid"]; found {
-		u.Set("ipaddressid", v.(string))
-	}
-	return u
-}
-
-func (p *DisableStaticNatParams) SetIpaddressid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["ipaddressid"] = v
-	return
-}
-
-// You should always use this function to get a new DisableStaticNatParams instance,
-// as then you are sure you have configured all required params
-func (s *NATService) NewDisableStaticNatParams(ipaddressid string) *DisableStaticNatParams {
-	p := &DisableStaticNatParams{}
-	p.p = make(map[string]interface{})
-	p.p["ipaddressid"] = ipaddressid
-	return p
-}
-
-// Disables static rule for given IP address
-func (s *NATService) DisableStaticNat(p *DisableStaticNatParams) (*DisableStaticNatResponse, error) {
-	resp, err := s.cs.newRequest("disableStaticNat", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DisableStaticNatResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type DisableStaticNatResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	Cidrlist                  string `json:"cidrlist"`
+	Fordisplay                bool   `json:"fordisplay"`
+	Id                        string `json:"id"`
+	Ipaddress                 string `json:"ipaddress"`
+	Ipaddressid               string `json:"ipaddressid"`
+	Networkid                 string `json:"networkid"`
+	Privateendport            string `json:"privateendport"`
+	Privateport               string `json:"privateport"`
+	Protocol                  string `json:"protocol"`
+	Publicendport             string `json:"publicendport"`
+	Publicport                string `json:"publicport"`
+	State                     string `json:"state"`
+	Tags                      []Tags `json:"tags"`
+	Virtualmachinedisplayname string `json:"virtualmachinedisplayname"`
+	Virtualmachineid          string `json:"virtualmachineid"`
+	Virtualmachinename        string `json:"virtualmachinename"`
+	Vmguestip                 string `json:"vmguestip"`
 }

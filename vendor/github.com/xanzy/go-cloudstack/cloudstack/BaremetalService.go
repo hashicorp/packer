@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,130 @@ import (
 	"net/url"
 	"strconv"
 )
+
+type AddBaremetalDhcpParams struct {
+	p map[string]interface{}
+}
+
+func (p *AddBaremetalDhcpParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["dhcpservertype"]; found {
+		u.Set("dhcpservertype", v.(string))
+	}
+	if v, found := p.p["password"]; found {
+		u.Set("password", v.(string))
+	}
+	if v, found := p.p["physicalnetworkid"]; found {
+		u.Set("physicalnetworkid", v.(string))
+	}
+	if v, found := p.p["url"]; found {
+		u.Set("url", v.(string))
+	}
+	if v, found := p.p["username"]; found {
+		u.Set("username", v.(string))
+	}
+	return u
+}
+
+func (p *AddBaremetalDhcpParams) SetDhcpservertype(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["dhcpservertype"] = v
+	return
+}
+
+func (p *AddBaremetalDhcpParams) SetPassword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["password"] = v
+	return
+}
+
+func (p *AddBaremetalDhcpParams) SetPhysicalnetworkid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["physicalnetworkid"] = v
+	return
+}
+
+func (p *AddBaremetalDhcpParams) SetUrl(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["url"] = v
+	return
+}
+
+func (p *AddBaremetalDhcpParams) SetUsername(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["username"] = v
+	return
+}
+
+// You should always use this function to get a new AddBaremetalDhcpParams instance,
+// as then you are sure you have configured all required params
+func (s *BaremetalService) NewAddBaremetalDhcpParams(dhcpservertype string, password string, physicalnetworkid string, url string, username string) *AddBaremetalDhcpParams {
+	p := &AddBaremetalDhcpParams{}
+	p.p = make(map[string]interface{})
+	p.p["dhcpservertype"] = dhcpservertype
+	p.p["password"] = password
+	p.p["physicalnetworkid"] = physicalnetworkid
+	p.p["url"] = url
+	p.p["username"] = username
+	return p
+}
+
+// adds a baremetal dhcp server
+func (s *BaremetalService) AddBaremetalDhcp(p *AddBaremetalDhcpParams) (*AddBaremetalDhcpResponse, error) {
+	resp, err := s.cs.newRequest("addBaremetalDhcp", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r AddBaremetalDhcpResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type AddBaremetalDhcpResponse struct {
+	JobID             string `json:"jobid"`
+	Dhcpservertype    string `json:"dhcpservertype"`
+	Id                string `json:"id"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Provider          string `json:"provider"`
+	Url               string `json:"url"`
+}
 
 type AddBaremetalPxeKickStartServerParams struct {
 	p map[string]interface{}
@@ -156,12 +280,13 @@ func (s *BaremetalService) AddBaremetalPxeKickStartServer(p *AddBaremetalPxeKick
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type AddBaremetalPxeKickStartServerResponse struct {
-	JobID   string `json:"jobid,omitempty"`
-	Tftpdir string `json:"tftpdir,omitempty"`
+	JobID   string `json:"jobid"`
+	Tftpdir string `json:"tftpdir"`
 }
 
 type AddBaremetalPxePingServerParams struct {
@@ -344,104 +469,57 @@ func (s *BaremetalService) AddBaremetalPxePingServer(p *AddBaremetalPxePingServe
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type AddBaremetalPxePingServerResponse struct {
-	JobID               string `json:"jobid,omitempty"`
-	Pingdir             string `json:"pingdir,omitempty"`
-	Pingstorageserverip string `json:"pingstorageserverip,omitempty"`
-	Tftpdir             string `json:"tftpdir,omitempty"`
+	JobID               string `json:"jobid"`
+	Pingdir             string `json:"pingdir"`
+	Pingstorageserverip string `json:"pingstorageserverip"`
+	Tftpdir             string `json:"tftpdir"`
 }
 
-type AddBaremetalDhcpParams struct {
+type AddBaremetalRctParams struct {
 	p map[string]interface{}
 }
 
-func (p *AddBaremetalDhcpParams) toURLValues() url.Values {
+func (p *AddBaremetalRctParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
-	if v, found := p.p["dhcpservertype"]; found {
-		u.Set("dhcpservertype", v.(string))
-	}
-	if v, found := p.p["password"]; found {
-		u.Set("password", v.(string))
-	}
-	if v, found := p.p["physicalnetworkid"]; found {
-		u.Set("physicalnetworkid", v.(string))
-	}
-	if v, found := p.p["url"]; found {
-		u.Set("url", v.(string))
-	}
-	if v, found := p.p["username"]; found {
-		u.Set("username", v.(string))
+	if v, found := p.p["baremetalrcturl"]; found {
+		u.Set("baremetalrcturl", v.(string))
 	}
 	return u
 }
 
-func (p *AddBaremetalDhcpParams) SetDhcpservertype(v string) {
+func (p *AddBaremetalRctParams) SetBaremetalrcturl(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["dhcpservertype"] = v
+	p.p["baremetalrcturl"] = v
 	return
 }
 
-func (p *AddBaremetalDhcpParams) SetPassword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["password"] = v
-	return
-}
-
-func (p *AddBaremetalDhcpParams) SetPhysicalnetworkid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["physicalnetworkid"] = v
-	return
-}
-
-func (p *AddBaremetalDhcpParams) SetUrl(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["url"] = v
-	return
-}
-
-func (p *AddBaremetalDhcpParams) SetUsername(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["username"] = v
-	return
-}
-
-// You should always use this function to get a new AddBaremetalDhcpParams instance,
+// You should always use this function to get a new AddBaremetalRctParams instance,
 // as then you are sure you have configured all required params
-func (s *BaremetalService) NewAddBaremetalDhcpParams(dhcpservertype string, password string, physicalnetworkid string, url string, username string) *AddBaremetalDhcpParams {
-	p := &AddBaremetalDhcpParams{}
+func (s *BaremetalService) NewAddBaremetalRctParams(baremetalrcturl string) *AddBaremetalRctParams {
+	p := &AddBaremetalRctParams{}
 	p.p = make(map[string]interface{})
-	p.p["dhcpservertype"] = dhcpservertype
-	p.p["password"] = password
-	p.p["physicalnetworkid"] = physicalnetworkid
-	p.p["url"] = url
-	p.p["username"] = username
+	p.p["baremetalrcturl"] = baremetalrcturl
 	return p
 }
 
-// adds a baremetal dhcp server
-func (s *BaremetalService) AddBaremetalDhcp(p *AddBaremetalDhcpParams) (*AddBaremetalDhcpResponse, error) {
-	resp, err := s.cs.newRequest("addBaremetalDhcp", p.toURLValues())
+// adds baremetal rack configuration text
+func (s *BaremetalService) AddBaremetalRct(p *AddBaremetalRctParams) (*AddBaremetalRctResponse, error) {
+	resp, err := s.cs.newRequest("addBaremetalRct", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r AddBaremetalDhcpResponse
+	var r AddBaremetalRctResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
@@ -465,16 +543,82 @@ func (s *BaremetalService) AddBaremetalDhcp(p *AddBaremetalDhcpParams) (*AddBare
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
-type AddBaremetalDhcpResponse struct {
-	JobID             string `json:"jobid,omitempty"`
-	Dhcpservertype    string `json:"dhcpservertype,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Physicalnetworkid string `json:"physicalnetworkid,omitempty"`
-	Provider          string `json:"provider,omitempty"`
-	Url               string `json:"url,omitempty"`
+type AddBaremetalRctResponse struct {
+	JobID string `json:"jobid"`
+	Id    string `json:"id"`
+	Url   string `json:"url"`
+}
+
+type DeleteBaremetalRctParams struct {
+	p map[string]interface{}
+}
+
+func (p *DeleteBaremetalRctParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *DeleteBaremetalRctParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new DeleteBaremetalRctParams instance,
+// as then you are sure you have configured all required params
+func (s *BaremetalService) NewDeleteBaremetalRctParams(id string) *DeleteBaremetalRctParams {
+	p := &DeleteBaremetalRctParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// deletes baremetal rack configuration text
+func (s *BaremetalService) DeleteBaremetalRct(p *DeleteBaremetalRctParams) (*DeleteBaremetalRctResponse, error) {
+	resp, err := s.cs.newRequest("deleteBaremetalRct", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DeleteBaremetalRctResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type DeleteBaremetalRctResponse struct {
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }
 
 type ListBaremetalDhcpParams struct {
@@ -578,6 +722,7 @@ func (s *BaremetalService) ListBaremetalDhcp(p *ListBaremetalDhcpParams) (*ListB
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -587,11 +732,11 @@ type ListBaremetalDhcpResponse struct {
 }
 
 type BaremetalDhcp struct {
-	Dhcpservertype    string `json:"dhcpservertype,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Physicalnetworkid string `json:"physicalnetworkid,omitempty"`
-	Provider          string `json:"provider,omitempty"`
-	Url               string `json:"url,omitempty"`
+	Dhcpservertype    string `json:"dhcpservertype"`
+	Id                string `json:"id"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Provider          string `json:"provider"`
+	Url               string `json:"url"`
 }
 
 type ListBaremetalPxeServersParams struct {
@@ -684,6 +829,7 @@ func (s *BaremetalService) ListBaremetalPxeServers(p *ListBaremetalPxeServersPar
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -693,149 +839,10 @@ type ListBaremetalPxeServersResponse struct {
 }
 
 type BaremetalPxeServer struct {
-	Id                string `json:"id,omitempty"`
-	Physicalnetworkid string `json:"physicalnetworkid,omitempty"`
-	Provider          string `json:"provider,omitempty"`
-	Url               string `json:"url,omitempty"`
-}
-
-type AddBaremetalRctParams struct {
-	p map[string]interface{}
-}
-
-func (p *AddBaremetalRctParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["baremetalrcturl"]; found {
-		u.Set("baremetalrcturl", v.(string))
-	}
-	return u
-}
-
-func (p *AddBaremetalRctParams) SetBaremetalrcturl(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["baremetalrcturl"] = v
-	return
-}
-
-// You should always use this function to get a new AddBaremetalRctParams instance,
-// as then you are sure you have configured all required params
-func (s *BaremetalService) NewAddBaremetalRctParams(baremetalrcturl string) *AddBaremetalRctParams {
-	p := &AddBaremetalRctParams{}
-	p.p = make(map[string]interface{})
-	p.p["baremetalrcturl"] = baremetalrcturl
-	return p
-}
-
-// adds baremetal rack configuration text
-func (s *BaremetalService) AddBaremetalRct(p *AddBaremetalRctParams) (*AddBaremetalRctResponse, error) {
-	resp, err := s.cs.newRequest("addBaremetalRct", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r AddBaremetalRctResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type AddBaremetalRctResponse struct {
-	JobID string `json:"jobid,omitempty"`
-	Id    string `json:"id,omitempty"`
-	Url   string `json:"url,omitempty"`
-}
-
-type DeleteBaremetalRctParams struct {
-	p map[string]interface{}
-}
-
-func (p *DeleteBaremetalRctParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *DeleteBaremetalRctParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new DeleteBaremetalRctParams instance,
-// as then you are sure you have configured all required params
-func (s *BaremetalService) NewDeleteBaremetalRctParams(id string) *DeleteBaremetalRctParams {
-	p := &DeleteBaremetalRctParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// deletes baremetal rack configuration text
-func (s *BaremetalService) DeleteBaremetalRct(p *DeleteBaremetalRctParams) (*DeleteBaremetalRctResponse, error) {
-	resp, err := s.cs.newRequest("deleteBaremetalRct", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DeleteBaremetalRctResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type DeleteBaremetalRctResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	Id                string `json:"id"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Provider          string `json:"provider"`
+	Url               string `json:"url"`
 }
 
 type ListBaremetalRctParams struct {
@@ -904,6 +911,7 @@ func (s *BaremetalService) ListBaremetalRct(p *ListBaremetalRctParams) (*ListBar
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -913,6 +921,74 @@ type ListBaremetalRctResponse struct {
 }
 
 type BaremetalRct struct {
-	Id  string `json:"id,omitempty"`
-	Url string `json:"url,omitempty"`
+	Id  string `json:"id"`
+	Url string `json:"url"`
+}
+
+type NotifyBaremetalProvisionDoneParams struct {
+	p map[string]interface{}
+}
+
+func (p *NotifyBaremetalProvisionDoneParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["mac"]; found {
+		u.Set("mac", v.(string))
+	}
+	return u
+}
+
+func (p *NotifyBaremetalProvisionDoneParams) SetMac(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["mac"] = v
+	return
+}
+
+// You should always use this function to get a new NotifyBaremetalProvisionDoneParams instance,
+// as then you are sure you have configured all required params
+func (s *BaremetalService) NewNotifyBaremetalProvisionDoneParams(mac string) *NotifyBaremetalProvisionDoneParams {
+	p := &NotifyBaremetalProvisionDoneParams{}
+	p.p = make(map[string]interface{})
+	p.p["mac"] = mac
+	return p
+}
+
+// Notify provision has been done on a host. This api is for baremetal virtual router service, not for end user
+func (s *BaremetalService) NotifyBaremetalProvisionDone(p *NotifyBaremetalProvisionDoneParams) (*NotifyBaremetalProvisionDoneResponse, error) {
+	resp, err := s.cs.newRequest("notifyBaremetalProvisionDone", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r NotifyBaremetalProvisionDoneResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type NotifyBaremetalProvisionDoneResponse struct {
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }

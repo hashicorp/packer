@@ -1,4 +1,6 @@
-## 1.3.4 (upcoming)
+## 1.3.5 (upcoming)
+
+## 1.3.4 (January 30, 2019)
 ### IMPROVEMENTS:
 * builder/alicloud: delete copied image and snapshots if corresponding options
     are specified [GH-7050]
@@ -8,24 +10,69 @@
     per builder [GH-7080]
 * builder/amazon: don't Cleanup Temp Keys when there is no communicator to
     avoid a panic [GH-7100] [GH-7095]
-* builder/azure: allow to configure disk caching [GH-7061]
+* builder/amazon: Don't try to guess region from metadata if not set & update
+    aws-sdk-go [GH-7230]
+* builder/amazon: Import error messages should now contain reason for failure
+    [GH-7207]
 * builder/azure: add certificate authentication [GH-7189]
+* builder/azure: allow to configure disk caching [GH-7061]
 * builder/azure: use deallocate instead of just power-off [GH-7203]
+* builder/hyperv: Add support for legacy network adapters on Hyper-V. [GH-7128]
+* builder/hyperv: Allow user to set `version` option in the New-VM command.
+    [GH-7136]
+* builder/openstack: Add `volume_size` option [GH-7130]
 * builder/openstack: Don't require network v2 [GH-6933]
 * builder/openstack: Support for tagging new images [GH-7037]
+* builder/qemu: Add configuration options to specify cpu count and memory size
+    [GH-7156]
+* builder/qemu: Add support for whpx accelerator to qemu builder [GH-7151]
+* builder/vmware: Escape query as suggested in issue #7200 [GH-7223]
 * core/shell: Add env vars "PACKER_HTTP_IP" and "PACKER_HTTP_PORT" to shell
     provisioners [GH-7075]
+* core: allow to use `-except` on post-processors [GH-7183]
+* core: Clean up internal handling and creation of temporary directories
+    [GH-7102]
 * core: Deprecate mitchellh/go-homedir package in favor of os/user [GH-7062]
+* core: Download checksum match failures will now log the received checksum.
+    [GH-7210]
+* core: Explicitly set ProxyFromEnvironment in httpclients when creating an aws
+    session [GH-7226]
 * core: make packer inspect not print sensitive variables [GH-7084]
+* post-processor/google: Add new `guest-os-features` option. [GH-7218]
+* postprocessor/docker-import: Added `change` support [GH-7127]
 * provisioner/ansible-remote: add `-o IdentitiesOnly=yes`as a default flag
     [GH-7115]
+* provisioner/chef-client: Elevated support for chef-client provisioner
+    [GH-7078]
+* provisioner/puppet: Elevated support for puppet-* provisioner [GH-7078]
 * provisioner/windows-restart: wait for already-scheduled reboot [GH-7056] and
     ignore reboot specific errors [GH-7071]
 
+
 ### BUG FIXES:
+* builder/azure: Ensure the Windows Guest Agent is fully functional before
+    Sysprep is executed. [GH-7176]
+* builder/azure: Fix snapshot regression [GH-7111]
+* builder/docker: Ensure that entrypoint and arguments get passed to docker,
+    not the image. [GH-7091]
 * builder/hcloud: fix go mod dependency [GH-7099]
 * builder/hcloud: prevent panic when ssh key was not passed [GH-7118]
+* builder/hyperv: Fix the Hyper-V gen 1 guest boot order. [GH-7147]
+* builder/hyperv: hyper-v builder no longer ignores `ssh_host` option.
+    [GH-7154]
+* builder/oracle-oci: Fix crash that occurs when image is nil [GH-7126]
+* builder/parallels: Fix attaching prl tools [GH-7158]
+* builder/virtualbox: Fix handling of portcount argument for version 6 beta
+    [GH-7174] [GH-7094]
+* builder/vmware: Fix bug caused by 'nil' dir field in artifact struct when
+    building locally [GH-7116]
+* communicator/docker: Fix docker file provisioner on Windows [GH-7163]
+* core: prioritize AppData over default user directory ( UserProfile )
+    [GH-7166]
 * core: removed a flaky race condition in tests [GH-7119]
+* postprocessor/vsphere: Stop setting HDDOrder, since it was breaking uploads
+    [GH-7108]
+
 
 ## 1.3.3 (December 5, 2018)
 ### IMPROVEMENTS:

@@ -24,7 +24,7 @@ require (
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20160115234725-4239b77079c7 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/aws/aws-sdk-go v1.15.54
+	github.com/aws/aws-sdk-go v1.16.24
 	github.com/bgentry/speakeasy v0.0.0-20150902231413-36e9cfdd6909 // indirect
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
@@ -141,7 +141,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pierrec/lz4 v0.0.0-20160112163551-383c0d87b5dd
 	github.com/pierrec/xxHash v0.0.0-20160112165351-5a004441f897 // indirect
-	github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e // indirect
+	github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v0.0.0-20170908125245-88e59760adad
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
@@ -162,7 +162,7 @@ require (
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.0.0-20180703112113-636d36a76670
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
-	github.com/xanzy/go-cloudstack v2.1.4+incompatible
+	github.com/xanzy/go-cloudstack v2.4.1+incompatible
 	golang.org/x/crypto v0.0.0-20180322175230-88942b9c40a4
 	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be

@@ -242,13 +242,13 @@ func getCreateVMScript(opts *scriptOptions) (string, error) {
 	}
 
 	var tpl = template.Must(template.New("createVM").Parse(`
-$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}
+$vhdPath = Join-Path -Path "{{ .Path }}" -ChildPath "{{ .VHDX }}"
 
 {{ if ne .HardDrivePath "" -}}
     {{- if .DiffDisks -}}
-    Hyper-V\New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+    Hyper-V\New-VHD -Path $vhdPath -ParentPath "{{ .HardDrivePath }}" -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
     {{- else -}}
-    Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
+    Copy-Item -Path "{{ .HardDrivePath }}" -Destination $vhdPath
     {{- end -}}
 {{- else -}}
     {{- if .FixedVHD -}}
@@ -258,7 +258,7 @@ $vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}
     {{- end -}}
 {{- end }}
 
-Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}
+Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName "{{ .SwitchName }}"
 {{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
 {{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
 `))

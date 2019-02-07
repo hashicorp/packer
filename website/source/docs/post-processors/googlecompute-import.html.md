@@ -61,6 +61,11 @@ for details.
 -   `image_labels` (object of key/value strings) - Key/value pair labels to
     apply to the created image.
 
+-   `image_guest_os_features` (array of strings) - A list of features to enable
+    on the guest operating system. Applicable only for bootable images. Valid
+    values are `MULTI_IP_SUBNET`, `SECURE_BOOT`, `UEFI_COMPATIBLE`,
+    `VIRTIO_SCSI_MULTIQUEUE` and `WINDOWS` currently.
+
 -   `keep_input_artifact` (boolean) - if true, do not delete the compressed RAW
     disk image. Defaults to false.
 
