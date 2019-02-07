@@ -10,6 +10,7 @@ import (
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -35,7 +36,42 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	log.Println("[Debug] BSU Builder Prerare function")
+	b.config.ctx.Funcs = osccommon.TemplateFuncs
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"omi_description",
+				"run_tags",
+				"run_volume_tags",
+				"spot_tags",
+				"snapshot_tags",
+				"tags",
+			},
+		},
+	}, raws...)
+	if err != nil {
+		return nil, err
+	}
+
+	if b.config.PackerConfig.PackerForce {
+		b.config.OMIForceDeregister = true
+	}
+
+	// Accumulate any errors
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.OMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, errs
+	}
+
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 	return nil, nil
 }
 
