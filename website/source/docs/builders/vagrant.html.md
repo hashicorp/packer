@@ -58,11 +58,11 @@ Optional:
     not recommended since OVA files can be very large and corruption does happen
     from time to time.
 
--   `vagrantfile_template` (string) - a path to an ERB template to use for the
-    vagrantfile when calling `vagrant init`. See the blog post
-    [here](https://www.hashicorp.com/blog/hashicorp-vagrant-2-0-2#customized-vagrantfile-templates)
-    for some more details on how this works. Available variables are `box_name`,
-    `box_url`, and `box_version`.
+-   `vagrantfile_template` (string) - a path to a golang template for a
+    vagrantfile. Our default template can be found
+    [here](https://github.com/hashicorp/packer/tree/master/builder/vagrant/step_initialize_vagrant.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
+    {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
+    `synced_folder`
 
 -   `skip_add` (string) - Don't call "vagrant add" to add the box to your local
     environment; this is necesasry if you want to launch a box that is already
@@ -72,10 +72,6 @@ Optional:
     the build has completed. Defaults to "halt"
 
 -   `box_version` (string) - What box version to use when initializing Vagrant.
-
--   `init_minimal` (bool) - If true, will add the --minimal flag to the Vagrant
-    init command, creating a minimal vagrantfile instead of one filled with helpful
-    comments.
 
 -   `add_cacert` (string) - Equivalent to setting the
     [`--cacert`](https://www.vagrantup.com/docs/cli/box.html#cacert-certfile)

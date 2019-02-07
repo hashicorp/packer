@@ -3,6 +3,7 @@ package vagrant
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -11,10 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type StepInitializeVagrant struct {
-	BoxName      string
-	BoxVersion   string
-	Minimal      bool
+type StepCreateVagrantfile struct {
 	Template     string
 	SourceBox    string
 	OutputDir    string
@@ -36,8 +34,8 @@ type VagrantfileOptions struct {
 	BoxName      string
 }
 
-func (s *StepInitializeVagrant) getVagrantfileTemplate() (string, error) {
-	tplPath := filepath.Join(s.OutputDir, "packer-vagrantfile-template.erb")
+func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
+	tplPath := filepath.Join(s.OutputDir, "Vagrantfile")
 	templateFile, err := os.Create(tplPath)
 	if err != nil {
 		retErr := fmt.Errorf("Error creating vagrantfile %s", err.Error())
@@ -74,36 +72,7 @@ func (s *StepInitializeVagrant) getVagrantfileTemplate() (string, error) {
 	return abspath, nil
 }
 
-func (s *StepInitializeVagrant) prepInitArgs() ([]string, error) {
-	// Prepare arguments
-	initArgs := []string{}
-
-	if s.BoxName != "" {
-		initArgs = append(initArgs, s.BoxName)
-	}
-
-	initArgs = append(initArgs, s.SourceBox)
-
-	if s.BoxVersion != "" {
-		initArgs = append(initArgs, "--box-version", s.BoxVersion)
-	}
-
-	if s.Minimal {
-		initArgs = append(initArgs, "-m")
-	}
-
-	tplPath, err := s.getVagrantfileTemplate()
-	if err != nil {
-		return initArgs, err
-	}
-
-	initArgs = append(initArgs, "--template", tplPath)
-
-	return initArgs, nil
-}
-
-func (s *StepInitializeVagrant) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(VagrantDriver)
+func (s *StepCreateVagrantfile) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip the initialize step if we're trying to launch from a global ID.
@@ -112,24 +81,18 @@ func (s *StepInitializeVagrant) Run(_ context.Context, state multistep.StateBag)
 		return multistep.ActionContinue
 	}
 
-	ui.Say("Initializing Vagrant in build directory...")
-
-	initArgs, err := s.prepInitArgs()
+	ui.Say("Creating a Vagrantfile in the build directory...")
+	vagrantfilePath, err := s.createVagrantfile()
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+	log.Printf("Created vagrantfile at %s", vagrantfilePath)
 
 	os.Chdir(s.OutputDir)
-	// Call vagrant using prepared arguments
-	err = driver.Init(initArgs)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
 
 	return multistep.ActionContinue
 }
 
-func (s *StepInitializeVagrant) Cleanup(state multistep.StateBag) {
+func (s *StepCreateVagrantfile) Cleanup(state multistep.StateBag) {
 }

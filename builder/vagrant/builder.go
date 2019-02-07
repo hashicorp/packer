@@ -56,7 +56,6 @@ type Config struct {
 
 	// Options for the "vagrant init" command
 	BoxVersion   string `mapstructure:"box_version"`
-	Minimal      bool   `mapstructure:"init_minimal"`
 	Template     string `mapstructure:"template"`
 	SyncedFolder string `mapstructure:"synced_folder"`
 
@@ -200,14 +199,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-		&StepInitializeVagrant{
-			BoxVersion: b.config.BoxVersion,
-			Minimal:    b.config.Minimal,
-			Template:   b.config.Template,
-			SourceBox:  b.config.SourceBox,
-			OutputDir:  b.config.OutputDir,
-			BoxName:    b.config.BoxName,
-			GlobalID:   b.config.GlobalID,
+		&StepCreateVagrantfile{
+			Template:     b.config.Template,
+			SyncedFolder: b.config.SyncedFolder,
+			SourceBox:    b.config.SourceBox,
+			OutputDir:    b.config.OutputDir,
+			GlobalID:     b.config.GlobalID,
 		},
 		&StepAddBox{
 			BoxVersion:   b.config.BoxVersion,
