@@ -19,7 +19,7 @@ import (
 	"github.com/outscale/osc-go/oapi"
 )
 
-const BuilderId = "digitalonus.osc.bsusurrogate"
+const BuilderId = "oapi.outscale.bsusurrogate"
 
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
@@ -251,7 +251,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if omis, ok := state.GetOk("omis"); ok {
 		// Build the artifact and return it
 		artifact := &osccommon.Artifact{
-			Amis:           omis.(map[string]string),
+			Omis:           omis.(map[string]string),
 			BuilderIdValue: BuilderId,
 			Config:         clientConfig,
 		}
