@@ -5,6 +5,7 @@
 # be sure any test cases set this.
 
 load test_helper
+verify_aws_cli
 fixtures provisioner-file
 
 setup() {
