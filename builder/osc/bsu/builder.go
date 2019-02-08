@@ -6,7 +6,9 @@
 package bsu
 
 import (
+	"crypto/tls"
 	"log"
+	"net/http"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
@@ -14,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/outscale/osc-go/oapi"
 )
 
 // The unique ID for this builder
@@ -76,7 +79,42 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	log.Println("[Debug] BSU Builder Run function")
+	clientConfig, err := b.config.Config()
+	if err != nil {
+		return nil, err
+	}
+
+	skipClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	oapiconn := oapi.NewClient(clientConfig, skipClient)
+
+	// Setup the state bag and initial state for the steps
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &b.config)
+	state.Put("oapi", oapiconn)
+	state.Put("clientConfig", clientConfig)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+
+	steps := []multistep.Step{
+		&osccommon.StepPreValidate{
+			DestOmiName:     b.config.OMIName,
+			ForceDeregister: b.config.OMIForceDeregister,
+		},
+	}
+
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner.Run(state)
+
+	// If there was an error, return that
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
+	}
+
 	return nil, nil
 }
 
