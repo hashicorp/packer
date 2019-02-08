@@ -1,4 +1,4 @@
-Gpackage ovf
+package ovf
 
 import (
 	"fmt"
@@ -73,8 +73,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.GuestAdditionsPath == "" {
 		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
 	}
-	if b.config.GuestAdditionsInterface == "" {
-		b.config.GuestAdditionsInterface = "ide"
+	if c.GuestAdditionsInterface == "" {
+		c.GuestAdditionsInterface = "ide"
 	}
 
 	if c.VMName == "" {
