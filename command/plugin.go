@@ -14,22 +14,41 @@ import (
 	"github.com/hashicorp/packer/packer/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
+	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 	amazonebssurrogatebuilder "github.com/hashicorp/packer/builder/amazon/ebssurrogate"
 	amazonebsvolumebuilder "github.com/hashicorp/packer/builder/amazon/ebsvolume"
+	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	amazoninstancebuilder "github.com/hashicorp/packer/builder/amazon/instance"
+	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
+	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
+	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
+	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
+	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
+	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
+	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
+	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
+	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	dockerbuilder "github.com/hashicorp/packer/builder/docker"
+	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
+	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
+	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
+	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
 	filebuilder "github.com/hashicorp/packer/builder/file"
+	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
+	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
+	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
+	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	ncloudbuilder "github.com/hashicorp/packer/builder/ncloud"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
@@ -38,47 +57,29 @@ import (
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
+	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
+	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
+	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer/builder/qemu"
+	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
+	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
+	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
+	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
+	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
+	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
-	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
-	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
-	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
-	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
-	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
-	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
-	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
-	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
-	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
-	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
-	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
-	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
-	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
-	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
-	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
-	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
-	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
-	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
-	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
-	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
-	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
-	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
-	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
-	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
-	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
-	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
-	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
+
 )
 
 type PluginCommand struct {
@@ -86,79 +87,82 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
-	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
-	"amazon-chroot":       new(amazonchrootbuilder.Builder),
-	"amazon-ebs":          new(amazonebsbuilder.Builder),
-	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
-	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
-	"amazon-instance":     new(amazoninstancebuilder.Builder),
-	"azure-arm":           new(azurearmbuilder.Builder),
-	"cloudstack":          new(cloudstackbuilder.Builder),
-	"digitalocean":        new(digitaloceanbuilder.Builder),
-	"docker":              new(dockerbuilder.Builder),
-	"file":                new(filebuilder.Builder),
-	"googlecompute":       new(googlecomputebuilder.Builder),
-	"hcloud":              new(hcloudbuilder.Builder),
-	"hyperv-iso":          new(hypervisobuilder.Builder),
-	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
-	"lxc":                 new(lxcbuilder.Builder),
-	"lxd":                 new(lxdbuilder.Builder),
-	"ncloud":              new(ncloudbuilder.Builder),
-	"null":                new(nullbuilder.Builder),
-	"oneandone":           new(oneandonebuilder.Builder),
-	"openstack":           new(openstackbuilder.Builder),
-	"oracle-classic":      new(oracleclassicbuilder.Builder),
-	"oracle-oci":          new(oracleocibuilder.Builder),
-	"parallels-iso":       new(parallelsisobuilder.Builder),
-	"parallels-pvm":       new(parallelspvmbuilder.Builder),
-	"profitbricks":        new(profitbricksbuilder.Builder),
-	"qemu":                new(qemubuilder.Builder),
-	"scaleway":            new(scalewaybuilder.Builder),
-	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
-	"triton":              new(tritonbuilder.Builder),
-	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
-	"vmware-iso":          new(vmwareisobuilder.Builder),
-	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
+	"alicloud-ecs":   new(alicloudecsbuilder.Builder),
+	"amazon-chroot":   new(amazonchrootbuilder.Builder),
+	"amazon-ebs":   new(amazonebsbuilder.Builder),
+	"amazon-ebssurrogate":   new(amazonebssurrogatebuilder.Builder),
+	"amazon-ebsvolume":   new(amazonebsvolumebuilder.Builder),
+	"amazon-instance":   new(amazoninstancebuilder.Builder),
+	"azure-arm":   new(azurearmbuilder.Builder),
+	"cloudstack":   new(cloudstackbuilder.Builder),
+	"digitalocean":   new(digitaloceanbuilder.Builder),
+	"docker":   new(dockerbuilder.Builder),
+	"file":   new(filebuilder.Builder),
+	"googlecompute":   new(googlecomputebuilder.Builder),
+	"hcloud":   new(hcloudbuilder.Builder),
+	"hyperv-iso":   new(hypervisobuilder.Builder),
+	"hyperv-vmcx":   new(hypervvmcxbuilder.Builder),
+	"lxc":   new(lxcbuilder.Builder),
+	"lxd":   new(lxdbuilder.Builder),
+	"ncloud":   new(ncloudbuilder.Builder),
+	"null":   new(nullbuilder.Builder),
+	"oneandone":   new(oneandonebuilder.Builder),
+	"openstack":   new(openstackbuilder.Builder),
+	"oracle-classic":   new(oracleclassicbuilder.Builder),
+	"oracle-oci":   new(oracleocibuilder.Builder),
+	"parallels-iso":   new(parallelsisobuilder.Builder),
+	"parallels-pvm":   new(parallelspvmbuilder.Builder),
+	"profitbricks":   new(profitbricksbuilder.Builder),
+	"qemu":   new(qemubuilder.Builder),
+	"scaleway":   new(scalewaybuilder.Builder),
+	"tencentcloud-cvm":   new(tencentcloudcvmbuilder.Builder),
+	"triton":   new(tritonbuilder.Builder),
+	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
+	"vmware-iso":   new(vmwareisobuilder.Builder),
+	"vmware-vmx":   new(vmwarevmxbuilder.Builder),
 }
+
 
 var Provisioners = map[string]packer.Provisioner{
-	"ansible":           new(ansibleprovisioner.Provisioner),
-	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
-	"breakpoint":        new(breakpointprovisioner.Provisioner),
-	"chef-client":       new(chefclientprovisioner.Provisioner),
-	"chef-solo":         new(chefsoloprovisioner.Provisioner),
-	"converge":          new(convergeprovisioner.Provisioner),
-	"file":              new(fileprovisioner.Provisioner),
-	"powershell":        new(powershellprovisioner.Provisioner),
-	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
-	"puppet-server":     new(puppetserverprovisioner.Provisioner),
+	"ansible":   new(ansibleprovisioner.Provisioner),
+	"ansible-local":   new(ansiblelocalprovisioner.Provisioner),
+	"breakpoint":   new(breakpointprovisioner.Provisioner),
+	"chef-client":   new(chefclientprovisioner.Provisioner),
+	"chef-solo":   new(chefsoloprovisioner.Provisioner),
+	"converge":   new(convergeprovisioner.Provisioner),
+	"file":   new(fileprovisioner.Provisioner),
+	"powershell":   new(powershellprovisioner.Provisioner),
+	"puppet-masterless":   new(puppetmasterlessprovisioner.Provisioner),
+	"puppet-server":   new(puppetserverprovisioner.Provisioner),
 	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
-	"shell":             new(shellprovisioner.Provisioner),
-	"shell-local":       new(shelllocalprovisioner.Provisioner),
+	"shell":   new(shellprovisioner.Provisioner),
+	"shell-local":   new(shelllocalprovisioner.Provisioner),
 	"windows-restart":   new(windowsrestartprovisioner.Provisioner),
-	"windows-shell":     new(windowsshellprovisioner.Provisioner),
+	"windows-shell":   new(windowsshellprovisioner.Provisioner),
 }
 
+
 var PostProcessors = map[string]packer.PostProcessor{
-	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
-	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
-	"artifice":             new(artificepostprocessor.PostProcessor),
-	"checksum":             new(checksumpostprocessor.PostProcessor),
-	"compress":             new(compresspostprocessor.PostProcessor),
-	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":          new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
-	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
-	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
-	"manifest":             new(manifestpostprocessor.PostProcessor),
-	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
-	"vagrant":              new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
-	"vsphere":              new(vspherepostprocessor.PostProcessor),
-	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
+	"alicloud-import":   new(alicloudimportpostprocessor.PostProcessor),
+	"amazon-import":   new(amazonimportpostprocessor.PostProcessor),
+	"artifice":   new(artificepostprocessor.PostProcessor),
+	"checksum":   new(checksumpostprocessor.PostProcessor),
+	"compress":   new(compresspostprocessor.PostProcessor),
+	"docker-import":   new(dockerimportpostprocessor.PostProcessor),
+	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
+	"docker-save":   new(dockersavepostprocessor.PostProcessor),
+	"docker-tag":   new(dockertagpostprocessor.PostProcessor),
+	"googlecompute-export":   new(googlecomputeexportpostprocessor.PostProcessor),
+	"googlecompute-import":   new(googlecomputeimportpostprocessor.PostProcessor),
+	"manifest":   new(manifestpostprocessor.PostProcessor),
+	"shell-local":   new(shelllocalpostprocessor.PostProcessor),
+	"vagrant":   new(vagrantpostprocessor.PostProcessor),
+	"vagrant-cloud":   new(vagrantcloudpostprocessor.PostProcessor),
+	"vsphere":   new(vspherepostprocessor.PostProcessor),
+	"vsphere-template":   new(vspheretemplatepostprocessor.PostProcessor),
 }
+
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
 
