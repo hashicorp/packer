@@ -1,4 +1,4 @@
-package ovf
+Gpackage ovf
 
 import (
 	"fmt"
@@ -28,19 +28,20 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	Checksum             string   `mapstructure:"checksum"`
-	ChecksumType         string   `mapstructure:"checksum_type"`
-	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath   string   `mapstructure:"guest_additions_path"`
-	GuestAdditionsSHA256 string   `mapstructure:"guest_additions_sha256"`
-	GuestAdditionsURL    string   `mapstructure:"guest_additions_url"`
-	ImportFlags          []string `mapstructure:"import_flags"`
-	ImportOpts           string   `mapstructure:"import_opts"`
-	SourcePath           string   `mapstructure:"source_path"`
-	TargetPath           string   `mapstructure:"target_path"`
-	VMName               string   `mapstructure:"vm_name"`
-	KeepRegistered       bool     `mapstructure:"keep_registered"`
-	SkipExport           bool     `mapstructure:"skip_export"`
+	Checksum                string   `mapstructure:"checksum"`
+	ChecksumType            string   `mapstructure:"checksum_type"`
+	GuestAdditionsMode      string   `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath      string   `mapstructure:"guest_additions_path"`
+	GuestAdditionsInterface string   `mapstructure:"guest_additions_interface"`
+	GuestAdditionsSHA256    string   `mapstructure:"guest_additions_sha256"`
+	GuestAdditionsURL       string   `mapstructure:"guest_additions_url"`
+	ImportFlags             []string `mapstructure:"import_flags"`
+	ImportOpts              string   `mapstructure:"import_opts"`
+	SourcePath              string   `mapstructure:"source_path"`
+	TargetPath              string   `mapstructure:"target_path"`
+	VMName                  string   `mapstructure:"vm_name"`
+	KeepRegistered          bool     `mapstructure:"keep_registered"`
+	SkipExport              bool     `mapstructure:"skip_export"`
 
 	ctx interpolate.Context
 }
@@ -71,6 +72,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.GuestAdditionsPath == "" {
 		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
+	}
+	if b.config.GuestAdditionsInterface == "" {
+		b.config.GuestAdditionsInterface = "ide"
 	}
 
 	if c.VMName == "" {
