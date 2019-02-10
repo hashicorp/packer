@@ -129,6 +129,9 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.DomainID, &ao.DomainID},
 		{&c.DomainName, &ao.DomainName},
 		{&c.Token, &ao.TokenID},
+		{&c.ApplicationCredentialName, &ao.ApplicationCredentialName},
+		{&c.ApplicationCredentialID, &ao.ApplicationCredentialID},
+		{&c.ApplicationCredentialSecret, &ao.ApplicationCredentialSecret},
 	}
 	for _, s := range overrides {
 		if *s.From != "" {
