@@ -61,6 +61,15 @@ type AuthInfo struct {
 	// Password is the password of the user.
 	Password string `yaml:"password"`
 
+	// Application Credential ID to login with.
+	ApplicationCredentialID string `yaml:"application_credential_id"`
+
+	// Application Credential name to login with.
+	ApplicationCredentialName string `yaml:"application_credential_name"`
+
+	// Application Credential secret to login with.
+	ApplicationCredentialSecret string `yaml:"application_credential_secret"`
+
 	// ProjectName is the common/human-readable name of a project.
 	// Users can be scoped to a project.
 	// ProjectName on its own is not enough to ensure a unique scope. It must

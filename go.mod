@@ -62,7 +62,7 @@ require (
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gophercloud/gophercloud v0.0.0-20180903124057-ea7289ebdf06
-	github.com/gophercloud/utils v0.0.0-20180806215700-d6e28a8b3199
+	github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect

@@ -961,10 +961,16 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
-			"checksumSHA1": "BYHuEArNKnTCbp/LTCwQSlaIY4Y=",
+			"checksumSHA1": "df+06zNEC3V7qgnTaVLtH0uktmI=",
+			"path": "github.com/gophercloud/utils",
+			"revision": "a5c25e7a53a63b89622852e35d7200c85f7cbe56",
+			"revisionTime": "2019-01-24T19:20:22Z"
+		},
+		{
+			"checksumSHA1": "+lG+bluykADYk0Zzq8sdh7KIyxY=",
 			"path": "github.com/gophercloud/utils/openstack/clientconfig",
-			"revision": "d6e28a8b3199a79da5e74e3dde1eb878ff525f1a",
-			"revisionTime": "2018-08-06T21:57:00Z"
+			"revision": "a5c25e7a53a63b89622852e35d7200c85f7cbe56",
+			"revisionTime": "2019-01-24T19:20:22Z"
 		},
 		{
 			"checksumSHA1": "xSmii71kfQASGNG2C8ttmHx9KTE=",

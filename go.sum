@@ -135,8 +135,8 @@ github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d h1:rXQlD9GXkjA/PQZhmEa
 github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gophercloud/gophercloud v0.0.0-20180903124057-ea7289ebdf06 h1:m7Rt/8En7PLrM7PQpykdZBPKUdgZWN6MwiA/ChVIoxs=
 github.com/gophercloud/gophercloud v0.0.0-20180903124057-ea7289ebdf06/go.mod h1:3WdhXV3rUYy9p6AUW8d94kr+HS62Y4VL9mBnFxsD8q4=
-github.com/gophercloud/utils v0.0.0-20180806215700-d6e28a8b3199 h1:mmwryCmmFkCxL3t5r6syrbk1eyP6tP9q/whDdAiM9Mw=
-github.com/gophercloud/utils v0.0.0-20180806215700-d6e28a8b3199/go.mod h1:wjDF8z83zTeg5eMLml5EBSlAhbF7G8DobyI1YsMuyzw=
+github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6 h1:Cw/B8Bu7Rryomxf7bjc8zNfIyLgjxsDd91n0eGRWpuo=
+github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6/go.mod h1:wjDF8z83zTeg5eMLml5EBSlAhbF7G8DobyI1YsMuyzw=
 github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e h1:JKmoR8x90Iww1ks85zJ1lfDGgIiMDuIptTOhJq+zKyg=
 github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 h1:JIM+OacoOJRU30xpjMf8sulYqjr0ViA3WDrTX6j/yDI=
