@@ -33,3 +33,9 @@ teardown() {
     [ "$status" -eq 0 ]
     [ "$(hyperone_has_image "packerbats-minimal")" -eq 1 ]
 }
+
+@test "hyperone: build chroot.json" {
+    run packer build ${USER_VARS} $FIXTURE_ROOT/chroot.json
+    [ "$status" -eq 0 ]
+    [ "$(hyperone_has_image "packerbats-chroot")" -eq 1 ]
+}
