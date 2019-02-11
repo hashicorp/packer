@@ -24,7 +24,7 @@ builder is able to build an EBS-backed AMI without launching a new EC2
 instance. This can dramatically speed up AMI builds for organizations who need
 the extra fast build.
 
-~&gt; **This is an advanced builder** If you're just getting started with
+\~&gt; **This is an advanced builder** If you're just getting started with
 Packer, we recommend starting with the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 
@@ -154,8 +154,8 @@ each category, the available configuration keys are alphabetized.
     associated with AMIs, which have been deregistered by `force_deregister`.
     Default `false`.
 
--   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
-    the AWS EC2 endpoint. The default is `false`.
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+    verification of the AWS EC2 endpoint. The default is `false`.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot
     volume encryption. This only applies to the main `region`, other regions
@@ -362,42 +362,33 @@ each category, the available configuration keys are alphabetized.
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
 
-- `vault_aws_engine` (object) - Get credentials from Hashicorp Vault's aws
-  secrets engine. You must already have created a role to use. For more
-  information about generating credentials via the Vault engine, see the
-  [Vault docs.]
-  (https://www.vaultproject.io/api/secret/aws/index.html#generate-credentials)
-  If you set this
-  flag, you must also set the below options:
-  -   `name` (string) - Required. Specifies the name of the role to generate
-      credentials against. This is part of the request URL.
-  -   `engine_name` (string) - The name of the aws secrets engine. In the Vault
-      docs, this is normally referred to as "aws", and Packer will default to
-      "aws" if `engine_name` is not set.
-  -   `role_arn` (string)- The ARN of the role to assume if credential_type on
-      the Vault role is assumed_role. Must match one of the allowed role ARNs
-      in the Vault role. Optional if the Vault role only allows a single AWS
-      role ARN; required otherwise.
-  -   `ttl` (string) -  Specifies the TTL for the use of the STS token. This is
-      specified as a string with a duration suffix. Valid only when
-      credential_type is assumed_role or federation_token. When not specified,
-      the default_sts_ttl set for the role will be used. If that is also not
-      set, then the default value of 3600s will be used. AWS places limits on
-      the maximum TTL allowed. See the AWS documentation on the DurationSeconds
-      parameter for AssumeRole (for assumed_role credential types) and
-      GetFederationToken (for federation_token credential types) for more
-      details.
+-   `vault_aws_engine` (object) - Get credentials from Hashicorp Vault's aws
+    secrets engine. You must already have created a role to use. For more
+    information about generating credentials via the Vault engine, see the
+    [Vault
+    docs.](https://www.vaultproject.io/api/secret/aws/index.html#generate-credentials)
+    If you set this flag, you must also set the below options:
+    -   `name` (string) - Required. Specifies the name of the role to generate
+        credentials against. This is part of the request URL.
+    -   `engine_name` (string) - The name of the aws secrets engine. In the
+        Vault docs, this is normally referred to as "aws", and Packer will
+        default to "aws" if `engine_name` is not set.
+    -   `role_arn` (string)- The ARN of the role to assume if credential\_type
+        on the Vault role is assumed\_role. Must match one of the allowed role
+        ARNs in the Vault role. Optional if the Vault role only allows a single
+        AWS role ARN; required otherwise.
+    -   `ttl` (string) - Specifies the TTL for the use of the STS token. This
+        is specified as a string with a duration suffix. Valid only when
+        credential\_type is assumed\_role or federation\_token. When not
+        specified, the default\_sts\_ttl set for the role will be used. If that
+        is also not set, then the default value of 3600s will be used. AWS
+        places limits on the maximum TTL allowed. See the AWS documentation on
+        the DurationSeconds parameter for AssumeRole (for assumed\_role
+        credential types) and GetFederationToken (for federation\_token
+        credential types) for more details.
 
-      Example:
-    ``` json
-    {
-        "vault_aws_engine": {
-            "name": "myrole",
-            "role_arn": "myarn",
-            "ttl": "3600s"
-        }
-    }
-    ```
+        Example:
+        `json   {   "vault_aws_engine": {       "name": "myrole",       "role_arn": "myarn",       "ttl": "3600s"   }   }`
 
 ## Basic Example
 
@@ -494,8 +485,8 @@ services:
 
 ### Ansible provisioner
 
-Running ansible against `amazon-chroot` requires changing the Ansible connection
-to chroot and running Ansible as root/sudo.
+Running ansible against `amazon-chroot` requires changing the Ansible
+connection to chroot and running Ansible as root/sudo.
 
 ### Using Instances with NVMe block devices.
 
