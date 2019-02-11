@@ -209,6 +209,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	//Build the artifact
+	if omis, ok := state.GetOk("omis"); !ok {
+		// Build the artifact and return it
+		artifact := &osccommon.Artifact{
+			Omis:           omis.(map[string]string),
+			BuilderIdValue: BuilderId,
+			Config:         clientConfig,
+		}
+
+		return artifact, nil
+	}
+
 	return nil, nil
 }
 
