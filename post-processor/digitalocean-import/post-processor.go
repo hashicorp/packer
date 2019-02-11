@@ -81,11 +81,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.SpacesKey == "" {
-		p.config.SpacesKey = os.Getenv("SPACES_ACCESS_KEY")
+		p.config.SpacesKey = os.Getenv("DIGITALOCEAN_SPACES_ACCESS_KEY")
 	}
 
 	if p.config.SpacesSecret == "" {
-		p.config.SpacesSecret = os.Getenv("SPACES_SECRET_KEY")
+		p.config.SpacesSecret = os.Getenv("DIGITALOCEAN_SPACES_SECRET_KEY")
 	}
 
 	if p.config.APIToken == "" {
