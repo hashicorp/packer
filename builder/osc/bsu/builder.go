@@ -7,11 +7,13 @@ package bsu
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -104,6 +106,87 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&osccommon.StepPreValidate{
 			DestOmiName:     b.config.OMIName,
 			ForceDeregister: b.config.OMIForceDeregister,
+		},
+		&osccommon.StepSourceOMIInfo{
+			SourceOmi:                b.config.SourceOmi,
+			EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
+			EnableOMIENASupport:      b.config.OMIENASupport,
+			OmiFilters:               b.config.SourceOmiFilter,
+			OMIVirtType:              b.config.OMIVirtType, //TODO: Remove if it is not used
+		},
+		&osccommon.StepNetworkInfo{
+			NetId:               b.config.NetId,
+			NetFilter:           b.config.NetFilter,
+			SecurityGroupIds:    b.config.SecurityGroupIds,
+			SecurityGroupFilter: b.config.SecurityGroupFilter,
+			SubnetId:            b.config.SubnetId,
+			SubnetFilter:        b.config.SubnetFilter,
+			SubregionName:       b.config.Subregion,
+		},
+		&osccommon.StepKeyPair{
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.RunConfig.Comm,
+			DebugKeyPath: fmt.Sprintf("oapi_%s", b.config.PackerBuildName),
+		},
+		&osccommon.StepSecurityGroup{
+			SecurityGroupFilter:   b.config.SecurityGroupFilter,
+			SecurityGroupIds:      b.config.SecurityGroupIds,
+			CommConfig:            &b.config.RunConfig.Comm,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
+		},
+		&osccommon.StepCleanupVolumes{
+			BlockDevices: b.config.BlockDevices,
+		},
+		&osccommon.StepRunSourceVm{
+			AssociatePublicIpAddress:    b.config.AssociatePublicIpAddress,
+			BlockDevices:                b.config.BlockDevices,
+			Comm:                        &b.config.RunConfig.Comm,
+			Ctx:                         b.config.ctx,
+			Debug:                       b.config.PackerDebug,
+			BsuOptimized:                b.config.BsuOptimized,
+			EnableT2Unlimited:           b.config.EnableT2Unlimited,
+			ExpectedRootDevice:          "ebs", // should it be bsu
+			IamVmProfile:                b.config.IamVmProfile,
+			VmInitiatedShutdownBehavior: b.config.VmInitiatedShutdownBehavior,
+			VmType:                      b.config.VmType,
+			IsRestricted:                false,
+			SourceOMI:                   b.config.SourceOmi,
+			Tags:                        b.config.RunTags,
+			UserData:                    b.config.UserData,
+			UserDataFile:                b.config.UserDataFile,
+			VolumeTags:                  b.config.VolumeRunTags,
+		},
+		&osccommon.StepGetPassword{
+			Debug:     b.config.PackerDebug,
+			Comm:      &b.config.RunConfig.Comm,
+			Timeout:   b.config.WindowsPasswordTimeout,
+			BuildName: b.config.PackerBuildName,
+		},
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: osccommon.SSHHost(
+				oapiconn,
+				b.config.Comm.SSHInterface),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
+		},
+		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.RunConfig.Comm,
+		},
+		&osccommon.StepStopBSUBackedVm{
+			Skip:          false,
+			DisableStopVm: b.config.DisableStopVm,
+		},
+		&osccommon.StepUpdateBSUBackedVm{
+			EnableAMISriovNetSupport: b.config.OMISriovNetSupport,
+			EnableAMIENASupport:      b.config.OMIENASupport,
+		},
+		&osccommon.StepDeregisterOMI{
+			AccessConfig:        &b.config.AccessConfig,
+			ForceDeregister:     b.config.OMIForceDeregister,
+			ForceDeleteSnapshot: b.config.OMIForceDeleteSnapshot,
+			OMIName:             b.config.OMIName,
+			Regions:             b.config.OMIRegions,
 		},
 	}
 
