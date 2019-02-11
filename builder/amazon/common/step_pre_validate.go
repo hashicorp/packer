@@ -44,11 +44,8 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 						return false, nil
 					}
 					return true, err
-				} else {
-					return true, nil
 				}
-
-				return true, err
+				return true, nil
 			})
 
 			if err != nil {
