@@ -41,20 +41,21 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.VBoxBundleConfig     `mapstructure:",squash"`
 
-	DiskSize               uint   `mapstructure:"disk_size"`
-	GuestAdditionsMode     string `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath     string `mapstructure:"guest_additions_path"`
-	GuestAdditionsSHA256   string `mapstructure:"guest_additions_sha256"`
-	GuestAdditionsURL      string `mapstructure:"guest_additions_url"`
-	GuestOSType            string `mapstructure:"guest_os_type"`
-	HardDriveDiscard       bool   `mapstructure:"hard_drive_discard"`
-	HardDriveInterface     string `mapstructure:"hard_drive_interface"`
-	SATAPortCount          int    `mapstructure:"sata_port_count"`
-	HardDriveNonrotational bool   `mapstructure:"hard_drive_nonrotational"`
-	ISOInterface           string `mapstructure:"iso_interface"`
-	KeepRegistered         bool   `mapstructure:"keep_registered"`
-	SkipExport             bool   `mapstructure:"skip_export"`
-	VMName                 string `mapstructure:"vm_name"`
+	DiskSize                uint   `mapstructure:"disk_size"`
+	GuestAdditionsMode      string `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath      string `mapstructure:"guest_additions_path"`
+	GuestAdditionsSHA256    string `mapstructure:"guest_additions_sha256"`
+	GuestAdditionsURL       string `mapstructure:"guest_additions_url"`
+	GuestAdditionsInterface string `mapstructure:"guest_additions_interface"`
+	GuestOSType             string `mapstructure:"guest_os_type"`
+	HardDriveDiscard        bool   `mapstructure:"hard_drive_discard"`
+	HardDriveInterface      string `mapstructure:"hard_drive_interface"`
+	SATAPortCount           int    `mapstructure:"sata_port_count"`
+	HardDriveNonrotational  bool   `mapstructure:"hard_drive_nonrotational"`
+	ISOInterface            string `mapstructure:"iso_interface"`
+	KeepRegistered          bool   `mapstructure:"keep_registered"`
+	SkipExport              bool   `mapstructure:"skip_export"`
+	VMName                  string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
@@ -123,6 +124,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.ISOInterface == "" {
 		b.config.ISOInterface = "ide"
+	}
+
+	if b.config.GuestAdditionsInterface == "" {
+		b.config.GuestAdditionsInterface = b.config.ISOInterface
 	}
 
 	if b.config.VMName == "" {
@@ -227,7 +232,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCreateDisk),
 		new(stepAttachISO),
 		&vboxcommon.StepAttachGuestAdditions{
-			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsMode:      b.config.GuestAdditionsMode,
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
 		&vboxcommon.StepConfigureVRDP{
 			VRDPBindAddress: b.config.VRDPBindAddress,
@@ -280,7 +286,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Delay:   b.config.PostShutdownDelay,
 		},
 		&vboxcommon.StepRemoveDevices{
-			Bundling: b.config.VBoxBundleConfig,
+			Bundling:                b.config.VBoxBundleConfig,
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
