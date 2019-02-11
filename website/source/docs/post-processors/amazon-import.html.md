@@ -185,6 +185,22 @@ using ovftool.
   ]
 ```
 
+## Amazon Permissions
+
+You'll need at least the following permissions in the policy for your IAM user
+in order to successfully upload an image via the amazon-import post-processor.
+``` json
+        "ec2:CancelImportTask",
+        "ec2:CopyImage",
+        "ec2:CreateTags",
+        "ec2:DescribeImages",
+        "ec2:DescribeImportImageTasks",
+        "ec2:ImportImage",
+        "ec2:ModifyImageAttribute"
+        "ec2:DeregisterImage"
+```
+
+
 ## Troubleshooting Timeouts
 
 The amazon-import feature can take a long time to upload and convert your OVAs
