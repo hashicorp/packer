@@ -84,11 +84,13 @@ access tokens:
 
 ``` json
 {
-  "type": "hcloud",
-  "token": "YOUR API KEY",
-  "image": "ubuntu-18.04",
-  "location": "nbg1",
-  "server_type": "cx11",
-  "ssh_username": "root"
+  "builders": [{
+    "type": "hcloud",
+    "token": "YOUR API KEY",
+    "image": "ubuntu-18.04",
+    "location": "nbg1",
+    "server_type": "cx11",
+    "ssh_username": "root"
+   }]
 }
 ```
