@@ -189,6 +189,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Regions:             b.config.OMIRegions,
 		},
 		&stepCreateOMI{},
+		&osccommon.StepUpdateOMIAttributes{
+			AccountIds:         b.config.OMIAccountIDs,
+			SnapshotAccountIds: b.config.SnapshotAccountIDs,
+			Ctx:                b.config.ctx,
+		},
+		&osccommon.StepCreateTags{
+			Tags:         b.config.OMITags,
+			SnapshotTags: b.config.SnapshotTags,
+			Ctx:          b.config.ctx,
+		},
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
