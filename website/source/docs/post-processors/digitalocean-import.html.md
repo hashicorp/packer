@@ -31,11 +31,16 @@ There are some configuration options available for the post-processor.
 Required:
 
 -   `api_token` (string) - A personal access token used to communicate with
-    the DigitalOcean v2 API.
+    the DigitalOcean v2 API. This may also be set using the
+    `DIGITALOCEAN_API_TOKEN` environmental variable.
 
 -   `spaces_key` (string) - The access key used to communicate with Spaces.
+    This may also be set using the `DIGITALOCEAN_SPACES_ACCESS_KEY`
+    environmental variable.
 
 -   `spaces_secret` (string) - The secret key used to communicate with Spaces.
+    This may also be set using the `DIGITALOCEAN_SPACES_SECRET_KEY`
+    environmental variable.
 
 -   `spaces_region` (string) - The name of the region, such as `nyc3`, in which
     to upload the image to Spaces.
@@ -56,7 +61,7 @@ Optional:
 -   `image_description` (string) - The description to set for the resulting
     imported image.
 
--   `image_distribution` (string) - The name of the distribution to set for 
+-   `image_distribution` (string) - The name of the distribution to set for
     the resulting imported image.
 
 -   `image_tags` (array of strings) - A list of tags to apply to the resulting
