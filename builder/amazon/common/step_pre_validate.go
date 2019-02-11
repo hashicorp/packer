@@ -43,6 +43,7 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 							" to pass authentication... trying again.")
 						return false, nil
 					}
+					return true, err
 				} else {
 					return true, nil
 				}
