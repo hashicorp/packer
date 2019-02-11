@@ -63,7 +63,7 @@ func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 		params.Filters.AccountIds = s.OmiFilters.Owners
 	}
 
-	log.Printf("Using OMI Filters %v", params)
+	log.Printf("Using OMI Filters %#v", params)
 	imageResp, err := oapiconn.POST_ReadImages(params)
 	if err != nil {
 		err := fmt.Errorf("Error querying OMI: %s", err)
@@ -73,7 +73,7 @@ func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 	}
 
 	if len(imageResp.OK.Images) == 0 {
-		err := fmt.Errorf("No OMI was found matching filters: %v", params)
+		err := fmt.Errorf("No OMI was found matching filters: %#v", params)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
