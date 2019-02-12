@@ -45,7 +45,7 @@ Replace the mock `api_token` value with your own.
 
 Required Parameters:
 
--   `profile` - The profile to be executed by InSpec.
+-   `profile` (string) - The profile to be executed by InSpec.
 
 Optional Parameters:
 
@@ -53,9 +53,7 @@ Optional Parameters:
     running InSpec. Usage example:
 
     ``` json
-    {
       "inspec_env_vars": [ "FOO=bar" ]
-    }
     ```
 
 -   `command` (string) - The command to invoke InSpec. Defaults to `inspec`.
@@ -65,9 +63,7 @@ Optional Parameters:
     not be quoted. Usage example:
 
     ``` json
-    {
       "extra_arguments": [ "--sudo", "--reporter", "json" ]
-    }
     ```
 
 -   `attributes` (array of strings) - Attribute Files used by InSpec which will
@@ -89,7 +85,7 @@ Optional Parameters:
 -   `host` (string) - Host used for by InSpec for connection. Defaults to
     localhost.
 
--   `local_port` (string) - The port on which to attempt to listen for SSH
+-   `local_port` (uint) - The port on which to attempt to listen for SSH
     connections. This value is a starting point. The provisioner will attempt to
     listen for SSH connections on the first available of ten ports, starting at
     `local_port`. A system-chosen port is used when `local_port` is missing or
