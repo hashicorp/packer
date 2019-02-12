@@ -24,7 +24,7 @@ func (s *stepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 	// Create the image
 	omiName := config.OMIName
 
-	ui.Say(fmt.Sprintf("Creating unencrypted OMI %s from vm %s", omiName, vm.VmId))
+	ui.Say(fmt.Sprintf("Creating OMI %s from vm %s", omiName, vm.VmId))
 	createOpts := oapi.CreateImageRequest{
 		VmId:                vm.VmId,
 		ImageName:           omiName,
