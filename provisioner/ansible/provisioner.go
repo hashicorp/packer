@@ -26,6 +26,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/adapter"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -63,7 +64,7 @@ type Config struct {
 
 type Provisioner struct {
 	config            Config
-	adapter           *adapter
+	adapter           *adapter.Adapter
 	done              chan struct{}
 	ansibleVersion    string
 	ansibleMajVersion uint
@@ -286,7 +287,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui = newUi(ui)
-	p.adapter = newAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
+	p.adapter = adapter.NewAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
 	defer func() {
 		log.Print("shutting down the SSH proxy")
