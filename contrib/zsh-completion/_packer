@@ -14,7 +14,7 @@ _packer () {
     '-force[Force a build to continue if artifacts exist, deletes existing artifacts.]'
     '-machine-readable[Produce machine-readable output.]'
     '-color=[(false) Disable color output. (Default: color)]'
-    '-except=[(foo,bar,baz) Build all builds other than these.]'
+    '-except=[(foo,bar,baz) Run all builds and post-procesors other than these.]'
     '-on-error=[(cleanup,abort,ask) If the build fails do: clean up (default), abort, or ask.]'
     '-only=[(foo,bar,baz) Only build the given builds by name.]'
     '-parallel=[(false) Disable parallelization. (Default: parallel)]'

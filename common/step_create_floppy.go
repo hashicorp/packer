@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
 )
@@ -39,7 +39,7 @@ func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) mult
 	ui.Say("Creating floppy disk...")
 
 	// Create a temporary file to be our floppy drive
-	floppyF, err := ioutil.TempFile("", "packer")
+	floppyF, err := tmp.File("packer")
 	if err != nil {
 		state.Put("error",
 			fmt.Errorf("Error creating temporary file for floppy: %s", err))

@@ -1,6 +1,6 @@
 package googlecomputeexport
 
-var StartupScript string = `#!/bin/sh
+var StartupScript string = `#!/bin/bash
 
 GetMetadata () {
   echo "$(curl -f -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/attributes/$1 2> /dev/null)"
@@ -8,11 +8,11 @@ GetMetadata () {
 IMAGENAME=$(GetMetadata image_name)
 NAME=$(GetMetadata name)
 DISKNAME=${NAME}-toexport
-PATHS=$(GetMetadata paths)
+PATHS=($(GetMetadata paths))
 ZONE=$(GetMetadata zone)
 
 Exit () {
-  for i in ${PATHS}; do
+  for i in ${PATHS[@]}; do
     LOGDEST="${i}.exporter.log"
     echo "Uploading exporter log to ${LOGDEST}..."
     gsutil -h "Content-Type:text/plain" cp /var/log/daemon.log ${LOGDEST}
@@ -40,17 +40,15 @@ if ! gcloud compute instances attach-disk ${NAME} --disk ${DISKNAME} --device-na
   Exit 1
 fi
 
-echo "Dumping disk..."
-if ! dd if=/dev/disk/by-id/google-toexport of=disk.raw bs=4096 conv=sparse; then
-  echo "Failed to dump disk to image."
+echo "GCEExport: Running export tool."
+gce_export -gcs_path "${PATHS[0]}" -disk /dev/disk/by-id/google-toexport -y
+if [ $? -ne 0 ]; then
+  echo "ExportFailed: Failed to export disk source to ${PATHS[0]}."
   Exit 1
 fi
 
-echo "Compressing and tar'ing disk image..."
-if ! tar -czf root.tar.gz disk.raw; then
-  echo "Failed to tar disk image."
-  Exit 1
-fi
+echo "ExportSuccess"
+sync
 
 echo "Detaching disk..."
 if ! gcloud compute instances detach-disk ${NAME} --disk ${DISKNAME} --zone ${ZONE}; then
@@ -64,10 +62,10 @@ if ! gcloud compute disks delete ${DISKNAME} --zone ${ZONE}; then
   FAIL=1
 fi
 
-for i in ${PATHS}; do
-  echo "Uploading tar'ed disk image to ${i}..."
-  if ! gsutil -o GSUtil:parallel_composite_upload_threshold=100M cp root.tar.gz ${i}; then
-    echo "Failed to upload image to ${i}."
+for i in ${PATHS[@]:1}; do
+  echo "Copying archive image to ${i}..."
+  if ! gsutil -o GSUtil:parallel_composite_upload_threshold=100M cp ${PATHS[0]} ${i}; then
+    echo "Failed to copy image to ${i}."
     FAIL=1
   fi
 done

@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,11 +64,12 @@ func (s *CloudIdentifierService) GetCloudIdentifier(p *GetCloudIdentifierParams)
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type GetCloudIdentifierResponse struct {
-	Cloudidentifier string `json:"cloudidentifier,omitempty"`
-	Signature       string `json:"signature,omitempty"`
-	Userid          string `json:"userid,omitempty"`
+	Cloudidentifier string `json:"cloudidentifier"`
+	Signature       string `json:"signature"`
+	Userid          string `json:"userid"`
 }

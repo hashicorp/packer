@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/go-version"
+	multierror "github.com/hashicorp/go-multierror"
+	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -20,6 +20,9 @@ type Core struct {
 	builds     map[string]*template.Builder
 	version    string
 	secrets    []string
+
+	except []string
+	only   []string
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
@@ -30,6 +33,10 @@ type CoreConfig struct {
 	Variables          map[string]string
 	SensitiveVariables []string
 	Version            string
+
+	// These are set by command-line flags
+	Except []string
+	Only   []string
 }
 
 // The function type used to lookup Builder implementations.
@@ -61,6 +68,8 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		components: c.Components,
 		variables:  c.Variables,
 		version:    c.Version,
+		only:       c.Only,
+		except:     c.Except,
 	}
 
 	if err := result.validate(); err != nil {
@@ -126,7 +135,7 @@ func (c *Core) Build(n string) (Build, error) {
 	provisioners := make([]coreBuildProvisioner, 0, len(c.Template.Provisioners))
 	for _, rawP := range c.Template.Provisioners {
 		// If we're skipping this, then ignore it
-		if rawP.Skip(rawName) {
+		if rawP.OnlyExcept.Skip(rawName) {
 			continue
 		}
 
@@ -171,8 +180,17 @@ func (c *Core) Build(n string) (Build, error) {
 	for _, rawPs := range c.Template.PostProcessors {
 		current := make([]coreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
-			// If we skip, ignore
 			if rawP.Skip(rawName) {
+				continue
+			}
+			// -except skips post-processor & build
+			foundExcept := false
+			for _, except := range c.except {
+				if except == rawP.Name {
+					foundExcept = true
+				}
+			}
+			if foundExcept {
 				continue
 			}
 

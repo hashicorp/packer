@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,76 +22,6 @@ import (
 	"strconv"
 	"time"
 )
-
-type QueryAsyncJobResultParams struct {
-	p map[string]interface{}
-}
-
-func (p *QueryAsyncJobResultParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["jobid"]; found {
-		u.Set("jobid", v.(string))
-	}
-	return u
-}
-
-func (p *QueryAsyncJobResultParams) SetJobid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["jobid"] = v
-	return
-}
-
-// You should always use this function to get a new QueryAsyncJobResultParams instance,
-// as then you are sure you have configured all required params
-func (s *AsyncjobService) NewQueryAsyncJobResultParams(jobid string) *QueryAsyncJobResultParams {
-	p := &QueryAsyncJobResultParams{}
-	p.p = make(map[string]interface{})
-	p.p["jobid"] = jobid
-	return p
-}
-
-// Retrieves the current status of asynchronous job.
-func (s *AsyncjobService) QueryAsyncJobResult(p *QueryAsyncJobResultParams) (*QueryAsyncJobResultResponse, error) {
-	var resp json.RawMessage
-	var err error
-
-	// We should be able to retry on failure as this call is idempotent
-	for i := 0; i < 3; i++ {
-		resp, err = s.cs.newRequest("queryAsyncJobResult", p.toURLValues())
-		if err == nil {
-			break
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var r QueryAsyncJobResultResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type QueryAsyncJobResultResponse struct {
-	Accountid       string          `json:"accountid,omitempty"`
-	Cmd             string          `json:"cmd,omitempty"`
-	Created         string          `json:"created,omitempty"`
-	Jobinstanceid   string          `json:"jobinstanceid,omitempty"`
-	Jobinstancetype string          `json:"jobinstancetype,omitempty"`
-	Jobprocstatus   int             `json:"jobprocstatus,omitempty"`
-	Jobresult       json.RawMessage `json:"jobresult,omitempty"`
-	Jobresultcode   int             `json:"jobresultcode,omitempty"`
-	Jobresulttype   string          `json:"jobresulttype,omitempty"`
-	Jobstatus       int             `json:"jobstatus,omitempty"`
-	Userid          string          `json:"userid,omitempty"`
-}
 
 type ListAsyncJobsParams struct {
 	p map[string]interface{}
@@ -216,6 +146,7 @@ func (s *AsyncjobService) ListAsyncJobs(p *ListAsyncJobsParams) (*ListAsyncJobsR
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -225,15 +156,86 @@ type ListAsyncJobsResponse struct {
 }
 
 type AsyncJob struct {
-	Accountid       string          `json:"accountid,omitempty"`
-	Cmd             string          `json:"cmd,omitempty"`
-	Created         string          `json:"created,omitempty"`
-	Jobinstanceid   string          `json:"jobinstanceid,omitempty"`
-	Jobinstancetype string          `json:"jobinstancetype,omitempty"`
-	Jobprocstatus   int             `json:"jobprocstatus,omitempty"`
-	Jobresult       json.RawMessage `json:"jobresult,omitempty"`
-	Jobresultcode   int             `json:"jobresultcode,omitempty"`
-	Jobresulttype   string          `json:"jobresulttype,omitempty"`
-	Jobstatus       int             `json:"jobstatus,omitempty"`
-	Userid          string          `json:"userid,omitempty"`
+	Accountid       string          `json:"accountid"`
+	Cmd             string          `json:"cmd"`
+	Created         string          `json:"created"`
+	Jobinstanceid   string          `json:"jobinstanceid"`
+	Jobinstancetype string          `json:"jobinstancetype"`
+	Jobprocstatus   int             `json:"jobprocstatus"`
+	Jobresult       json.RawMessage `json:"jobresult"`
+	Jobresultcode   int             `json:"jobresultcode"`
+	Jobresulttype   string          `json:"jobresulttype"`
+	Jobstatus       int             `json:"jobstatus"`
+	Userid          string          `json:"userid"`
+}
+
+type QueryAsyncJobResultParams struct {
+	p map[string]interface{}
+}
+
+func (p *QueryAsyncJobResultParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["jobid"]; found {
+		u.Set("jobid", v.(string))
+	}
+	return u
+}
+
+func (p *QueryAsyncJobResultParams) SetJobID(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["jobid"] = v
+	return
+}
+
+// You should always use this function to get a new QueryAsyncJobResultParams instance,
+// as then you are sure you have configured all required params
+func (s *AsyncjobService) NewQueryAsyncJobResultParams(jobid string) *QueryAsyncJobResultParams {
+	p := &QueryAsyncJobResultParams{}
+	p.p = make(map[string]interface{})
+	p.p["jobid"] = jobid
+	return p
+}
+
+// Retrieves the current status of asynchronous job.
+func (s *AsyncjobService) QueryAsyncJobResult(p *QueryAsyncJobResultParams) (*QueryAsyncJobResultResponse, error) {
+	var resp json.RawMessage
+	var err error
+
+	// We should be able to retry on failure as this call is idempotent
+	for i := 0; i < 3; i++ {
+		resp, err = s.cs.newRequest("queryAsyncJobResult", p.toURLValues())
+		if err == nil {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var r QueryAsyncJobResultResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type QueryAsyncJobResultResponse struct {
+	Accountid       string          `json:"accountid"`
+	Cmd             string          `json:"cmd"`
+	Created         string          `json:"created"`
+	Jobinstanceid   string          `json:"jobinstanceid"`
+	Jobinstancetype string          `json:"jobinstancetype"`
+	Jobprocstatus   int             `json:"jobprocstatus"`
+	Jobresult       json.RawMessage `json:"jobresult"`
+	Jobresultcode   int             `json:"jobresultcode"`
+	Jobresulttype   string          `json:"jobresulttype"`
+	Jobstatus       int             `json:"jobstatus"`
+	Userid          string          `json:"userid"`
 }

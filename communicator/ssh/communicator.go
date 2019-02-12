@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -793,7 +794,7 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 	} else {
 		// Create a temporary file where we can copy the contents of the src
 		// so that we can determine the length, since SCP is length-prefixed.
-		tf, err := ioutil.TempFile("", "packer-upload")
+		tf, err := tmp.File("packer-upload")
 		if err != nil {
 			return fmt.Errorf("Error creating temporary file for upload: %s", err)
 		}

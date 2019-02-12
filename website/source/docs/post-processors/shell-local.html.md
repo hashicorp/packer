@@ -60,6 +60,14 @@ Optional parameters:
     Packer injects some environmental variables by default into the
     environment, as well, which are covered in the section below.
 
+-   `env_var_format` (string) - When we parse the environment_vars that you
+    provide, this gives us a string template to use in order to make sure that
+    we are setting the environment vars correctly. By default on Windows hosts
+    this format is `set %s=%s && ` and on Unix, it is `%s='%s' `.  You probably
+    won't need to change this format, but you can see usage examples for where
+    it is necessary below.
+
+
 -   `execute_command` (array of strings) - The command used to execute the
     script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows. This is
@@ -242,8 +250,10 @@ are cleaned up.
 For a shell script, that means the script **must** exit with a zero code. You
 *must* be extra careful to `exit 0` when necessary.
 
+
 ## Usage Examples:
 
+### Windows Host
 Example of running a .cmd file on windows:
 
           {
@@ -306,7 +316,8 @@ customizations: env\_var\_format, tempfile\_extension, and execute\_command
               "inline": ["write-output $env:SHELLLOCALTEST"]
           }
 
-Example of running a bash script on linux:
+### Unix Host
+Example of running a bash script on unix:
 
           {
               "type": "shell-local",
@@ -314,7 +325,7 @@ Example of running a bash script on linux:
               "scripts": ["./scripts/example_bash.sh"]
           }
 
-Example of running a bash "inline" on linux:
+Example of running a bash "inline" on unix:
 
           {
               "type": "shell-local",
@@ -322,3 +333,22 @@ Example of running a bash "inline" on linux:
               "inline": ["echo hello",
                          "echo $PROVISIONERTEST"]
           }
+
+Example of running a python script on unix:
+
+```
+      {
+          "type": "shell-local",
+          "script": "hello.py",
+          "environment_vars": ["HELLO_USER=packeruser"],
+          "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
+      }
+```
+
+Where "hello.py" contains:
+
+```
+import os
+
+print('Hello, %s!' % os.getenv("HELLO_USER"))
+```
