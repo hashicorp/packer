@@ -25,6 +25,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/adapter"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -58,7 +59,7 @@ type Config struct {
 
 type Provisioner struct {
 	config           Config
-	adapter          *adapter
+	adapter          *adapter.Adapter
 	done             chan struct{}
 	inspecVersion    string
 	inspecMajVersion uint
@@ -275,7 +276,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui = newUi(ui)
-	p.adapter = newAdapter(p.done, localListener, config, ui, comm)
+	p.adapter = adapter.NewAdapter(p.done, localListener, config, "", ui, comm)
 
 	defer func() {
 		log.Print("shutting down the SSH proxy")
