@@ -15,6 +15,7 @@ import (
 
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // Parallels9Driver is a base type for Parallels builders.
@@ -153,6 +154,7 @@ func (d *Parallels9Driver) DeviceAddCDROM(name string, image string) (string, er
 		"set", name,
 		"--device-add", "cdrom",
 		"--image", image,
+		"--enable", "--connect",
 	}
 
 	out, err := exec.Command(d.PrlctlPath, command...).Output()
@@ -288,7 +290,7 @@ func (d *Parallels9Driver) SendKeyScanCodes(vmName string, codes ...string) erro
 		return nil
 	}
 
-	f, err := ioutil.TempFile("", "prltype")
+	f, err := tmp.File("prltype")
 	if err != nil {
 		return err
 	}

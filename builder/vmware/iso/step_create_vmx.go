@@ -12,6 +12,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -410,7 +411,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	if config.RemoteType != "" {
 		// For remote builds, we just put the VMX in a temporary
 		// directory since it just gets uploaded anyways.
-		vmxDir, err = ioutil.TempDir("", "packer-vmx")
+		vmxDir, err = tmp.Dir("vmw-iso")
 		if err != nil {
 			err := fmt.Errorf("Error preparing VMX template: %s", err)
 			state.Put("error", err)
@@ -422,10 +423,17 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		s.tempDir = vmxDir
 	}
 
-	/// Now to handle options that will modify the template
+	/// Now to handle options that will modify the template without using "vmxTemplateData"
 	vmxData := vmwcommon.ParseVMX(vmxContents)
+
+	// If no cpus were specified, then remove the entry to use the default
 	if vmxData["numvcpus"] == "" {
 		delete(vmxData, "numvcpus")
+	}
+
+	// If some number of cores were specified, then update "cpuid.coresPerSocket" with the requested value
+	if config.HWConfig.CoreCount > 0 {
+		vmxData["cpuid.corespersocket"] = strconv.Itoa(config.HWConfig.CoreCount)
 	}
 
 	/// Write the vmxData to the vmxPath

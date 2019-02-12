@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 type LxcAttachCommunicator struct {
@@ -60,7 +61,7 @@ func (c *LxcAttachCommunicator) Start(cmd *packer.RemoteCmd) error {
 
 func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	log.Printf("Uploading to rootfs: %s", dst)
-	tf, err := ioutil.TempFile("", "packer-lxc-attach")
+	tf, err := tmp.File("packer-lxc-attach")
 	if err != nil {
 		return fmt.Errorf("Error uploading file to rootfs: %s", err)
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -169,7 +170,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Call EC2 image import process
 	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 
-	ec2conn := ec2.New(session)
+	ec2conn := ec2.New(session, &aws.Config{
+		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+	})
 	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
@@ -203,7 +206,20 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 	err = awscommon.WaitUntilImageImported(aws.BackgroundContext(), ec2conn, *import_start.ImportTaskId)
 	if err != nil {
-		return nil, false, fmt.Errorf("Import task %s failed with error: %s", *import_start.ImportTaskId, err)
+
+		// Retrieve the status message
+		import_result, err2 := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
+			ImportTaskIds: []*string{
+				import_start.ImportTaskId,
+			},
+		})
+
+		statusMessage := "Error retrieving status message"
+
+		if err2 == nil {
+			statusMessage = *import_result.ImportImageTasks[0].StatusMessage
+		}
+		return nil, false, fmt.Errorf("Import task %s failed with status message: %s, error: %s", *import_start.ImportTaskId, statusMessage, err)
 	}
 
 	// Retrieve what the outcome was for the import task
@@ -216,7 +232,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to find import task %s: %s", *import_start.ImportTaskId, err)
 	}
-
 	// Check it was actually completed
 	if *import_result.ImportImageTasks[0].Status != "completed" {
 		// The most useful error message is from the job itself

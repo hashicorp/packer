@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,122 +23,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type ListStorageTagsParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListStorageTagsParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	return u
-}
-
-func (p *ListStorageTagsParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListStorageTagsParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListStorageTagsParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-// You should always use this function to get a new ListStorageTagsParams instance,
-// as then you are sure you have configured all required params
-func (s *ResourcetagsService) NewListStorageTagsParams() *ListStorageTagsParams {
-	p := &ListStorageTagsParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *ResourcetagsService) GetStorageTagID(keyword string, opts ...OptionFunc) (string, int, error) {
-	p := &ListStorageTagsParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["keyword"] = keyword
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return "", -1, err
-		}
-	}
-
-	l, err := s.ListStorageTags(p)
-	if err != nil {
-		return "", -1, err
-	}
-
-	if l.Count == 0 {
-		return "", l.Count, fmt.Errorf("No match found for %s: %+v", keyword, l)
-	}
-
-	if l.Count == 1 {
-		return l.StorageTags[0].Id, l.Count, nil
-	}
-
-	if l.Count > 1 {
-		for _, v := range l.StorageTags {
-			if v.Name == keyword {
-				return v.Id, l.Count, nil
-			}
-		}
-	}
-	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", keyword, l)
-}
-
-// Lists storage tags
-func (s *ResourcetagsService) ListStorageTags(p *ListStorageTagsParams) (*ListStorageTagsResponse, error) {
-	resp, err := s.cs.newRequest("listStorageTags", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListStorageTagsResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListStorageTagsResponse struct {
-	Count       int           `json:"count"`
-	StorageTags []*StorageTag `json:"storagetag"`
-}
-
-type StorageTag struct {
-	Id     string `json:"id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Poolid int64  `json:"poolid,omitempty"`
-}
 
 type CreateTagsParams struct {
 	p map[string]interface{}
@@ -239,13 +123,14 @@ func (s *ResourcetagsService) CreateTags(p *CreateTagsParams) (*CreateTagsRespon
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type CreateTagsResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }
 
 type DeleteTagsParams struct {
@@ -335,13 +220,131 @@ func (s *ResourcetagsService) DeleteTags(p *DeleteTagsParams) (*DeleteTagsRespon
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type DeleteTagsResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+type ListStorageTagsParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListStorageTagsParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	return u
+}
+
+func (p *ListStorageTagsParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListStorageTagsParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListStorageTagsParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+// You should always use this function to get a new ListStorageTagsParams instance,
+// as then you are sure you have configured all required params
+func (s *ResourcetagsService) NewListStorageTagsParams() *ListStorageTagsParams {
+	p := &ListStorageTagsParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *ResourcetagsService) GetStorageTagID(keyword string, opts ...OptionFunc) (string, int, error) {
+	p := &ListStorageTagsParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["keyword"] = keyword
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return "", -1, err
+		}
+	}
+
+	l, err := s.ListStorageTags(p)
+	if err != nil {
+		return "", -1, err
+	}
+
+	if l.Count == 0 {
+		return "", l.Count, fmt.Errorf("No match found for %s: %+v", keyword, l)
+	}
+
+	if l.Count == 1 {
+		return l.StorageTags[0].Id, l.Count, nil
+	}
+
+	if l.Count > 1 {
+		for _, v := range l.StorageTags {
+			if v.Name == keyword {
+				return v.Id, l.Count, nil
+			}
+		}
+	}
+	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", keyword, l)
+}
+
+// Lists storage tags
+func (s *ResourcetagsService) ListStorageTags(p *ListStorageTagsParams) (*ListStorageTagsResponse, error) {
+	resp, err := s.cs.newRequest("listStorageTags", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListStorageTagsResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListStorageTagsResponse struct {
+	Count       int           `json:"count"`
+	StorageTags []*StorageTag `json:"storagetag"`
+}
+
+type StorageTag struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Poolid int64  `json:"poolid"`
 }
 
 type ListTagsParams struct {
@@ -522,6 +525,7 @@ func (s *ResourcetagsService) ListTags(p *ListTagsParams) (*ListTagsResponse, er
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -531,14 +535,14 @@ type ListTagsResponse struct {
 }
 
 type Tag struct {
-	Account      string `json:"account,omitempty"`
-	Customer     string `json:"customer,omitempty"`
-	Domain       string `json:"domain,omitempty"`
-	Domainid     string `json:"domainid,omitempty"`
-	Key          string `json:"key,omitempty"`
-	Project      string `json:"project,omitempty"`
-	Projectid    string `json:"projectid,omitempty"`
-	Resourceid   string `json:"resourceid,omitempty"`
-	Resourcetype string `json:"resourcetype,omitempty"`
-	Value        string `json:"value,omitempty"`
+	Account      string `json:"account"`
+	Customer     string `json:"customer"`
+	Domain       string `json:"domain"`
+	Domainid     string `json:"domainid"`
+	Key          string `json:"key"`
+	Project      string `json:"project"`
+	Projectid    string `json:"projectid"`
+	Resourceid   string `json:"resourceid"`
+	Resourcetype string `json:"resourcetype"`
+	Value        string `json:"value"`
 }

@@ -95,7 +95,7 @@ Otherwise, Packer is installed and you're ready to go!
 
 ## Alternative Installation Methods
 
-While the binary packages is the only official method of installation, there are
+While the binary packages are the only official method of installation, there are
 alternatives available.
 
 ### Homebrew
@@ -130,3 +130,5 @@ On *Arch* Linux there is a package named `packer` in the main
 repository and in the AUR. The package `packer` in the AUR is an old
 name for a package management tool for Arch, it's not Hashicorp
 Packer.
+
+[Continue to building an image](./build-image.html)

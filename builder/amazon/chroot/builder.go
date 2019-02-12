@@ -9,9 +9,11 @@ import (
 	"log"
 	"runtime"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -190,7 +192,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err != nil {
 		return nil, err
 	}
-	ec2conn := ec2.New(session)
+	ec2conn := ec2.New(session, &aws.Config{
+		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+	})
 
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx
@@ -201,6 +205,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
+	state.Put("access_config", &b.config.AccessConfig)
+	state.Put("ami_config", &b.config.AMIConfig)
 	state.Put("ec2", ec2conn)
 	state.Put("awsSession", session)
 	state.Put("hook", hook)

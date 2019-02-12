@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ func (p *AddImageStoreParams) toURLValues() url.Values {
 	if v, found := p.p["details"]; found {
 		i := 0
 		for k, vv := range v.(map[string]string) {
-			u.Set(fmt.Sprintf("details[%d].key", i), k)
-			u.Set(fmt.Sprintf("details[%d].value", i), vv)
+			u.Set(fmt.Sprintf("details[%d].%s", i, k), vv)
 			i++
 		}
 	}
@@ -116,19 +115,19 @@ func (s *ImageStoreService) AddImageStore(p *AddImageStoreParams) (*AddImageStor
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type AddImageStoreResponse struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
 }
 
 type AddImageStoreS3Params struct {
@@ -293,19 +292,267 @@ func (s *ImageStoreService) AddImageStoreS3(p *AddImageStoreS3Params) (*AddImage
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type AddImageStoreS3Response struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
+}
+
+type CreateSecondaryStagingStoreParams struct {
+	p map[string]interface{}
+}
+
+func (p *CreateSecondaryStagingStoreParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["details"]; found {
+		i := 0
+		for k, vv := range v.(map[string]string) {
+			u.Set(fmt.Sprintf("details[%d].%s", i, k), vv)
+			i++
+		}
+	}
+	if v, found := p.p["provider"]; found {
+		u.Set("provider", v.(string))
+	}
+	if v, found := p.p["scope"]; found {
+		u.Set("scope", v.(string))
+	}
+	if v, found := p.p["url"]; found {
+		u.Set("url", v.(string))
+	}
+	if v, found := p.p["zoneid"]; found {
+		u.Set("zoneid", v.(string))
+	}
+	return u
+}
+
+func (p *CreateSecondaryStagingStoreParams) SetDetails(v map[string]string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["details"] = v
+	return
+}
+
+func (p *CreateSecondaryStagingStoreParams) SetProvider(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["provider"] = v
+	return
+}
+
+func (p *CreateSecondaryStagingStoreParams) SetScope(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["scope"] = v
+	return
+}
+
+func (p *CreateSecondaryStagingStoreParams) SetUrl(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["url"] = v
+	return
+}
+
+func (p *CreateSecondaryStagingStoreParams) SetZoneid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["zoneid"] = v
+	return
+}
+
+// You should always use this function to get a new CreateSecondaryStagingStoreParams instance,
+// as then you are sure you have configured all required params
+func (s *ImageStoreService) NewCreateSecondaryStagingStoreParams(url string) *CreateSecondaryStagingStoreParams {
+	p := &CreateSecondaryStagingStoreParams{}
+	p.p = make(map[string]interface{})
+	p.p["url"] = url
+	return p
+}
+
+// create secondary staging store.
+func (s *ImageStoreService) CreateSecondaryStagingStore(p *CreateSecondaryStagingStoreParams) (*CreateSecondaryStagingStoreResponse, error) {
+	resp, err := s.cs.newRequest("createSecondaryStagingStore", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r CreateSecondaryStagingStoreResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type CreateSecondaryStagingStoreResponse struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
+}
+
+type DeleteImageStoreParams struct {
+	p map[string]interface{}
+}
+
+func (p *DeleteImageStoreParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *DeleteImageStoreParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new DeleteImageStoreParams instance,
+// as then you are sure you have configured all required params
+func (s *ImageStoreService) NewDeleteImageStoreParams(id string) *DeleteImageStoreParams {
+	p := &DeleteImageStoreParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Deletes an image store or Secondary Storage.
+func (s *ImageStoreService) DeleteImageStore(p *DeleteImageStoreParams) (*DeleteImageStoreResponse, error) {
+	resp, err := s.cs.newRequest("deleteImageStore", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DeleteImageStoreResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type DeleteImageStoreResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteImageStoreResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteImageStoreResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
+type DeleteSecondaryStagingStoreParams struct {
+	p map[string]interface{}
+}
+
+func (p *DeleteSecondaryStagingStoreParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *DeleteSecondaryStagingStoreParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new DeleteSecondaryStagingStoreParams instance,
+// as then you are sure you have configured all required params
+func (s *ImageStoreService) NewDeleteSecondaryStagingStoreParams(id string) *DeleteSecondaryStagingStoreParams {
+	p := &DeleteSecondaryStagingStoreParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Deletes a secondary staging store .
+func (s *ImageStoreService) DeleteSecondaryStagingStore(p *DeleteSecondaryStagingStoreParams) (*DeleteSecondaryStagingStoreResponse, error) {
+	resp, err := s.cs.newRequest("deleteSecondaryStagingStore", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DeleteSecondaryStagingStoreResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type DeleteSecondaryStagingStoreResponse struct {
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteSecondaryStagingStoreResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteSecondaryStagingStoreResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ListImageStoresParams struct {
@@ -425,7 +672,7 @@ func (s *ImageStoreService) GetImageStoreID(name string, opts ...OptionFunc) (st
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -475,7 +722,7 @@ func (s *ImageStoreService) GetImageStoreByID(id string, opts ...OptionFunc) (*I
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -512,6 +759,7 @@ func (s *ImageStoreService) ListImageStores(p *ListImageStoresParams) (*ListImag
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -521,173 +769,14 @@ type ListImageStoresResponse struct {
 }
 
 type ImageStore struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
-}
-
-type DeleteImageStoreParams struct {
-	p map[string]interface{}
-}
-
-func (p *DeleteImageStoreParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *DeleteImageStoreParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new DeleteImageStoreParams instance,
-// as then you are sure you have configured all required params
-func (s *ImageStoreService) NewDeleteImageStoreParams(id string) *DeleteImageStoreParams {
-	p := &DeleteImageStoreParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Deletes an image store or Secondary Storage.
-func (s *ImageStoreService) DeleteImageStore(p *DeleteImageStoreParams) (*DeleteImageStoreResponse, error) {
-	resp, err := s.cs.newRequest("deleteImageStore", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DeleteImageStoreResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type DeleteImageStoreResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
-}
-
-type CreateSecondaryStagingStoreParams struct {
-	p map[string]interface{}
-}
-
-func (p *CreateSecondaryStagingStoreParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["details"]; found {
-		i := 0
-		for k, vv := range v.(map[string]string) {
-			u.Set(fmt.Sprintf("details[%d].key", i), k)
-			u.Set(fmt.Sprintf("details[%d].value", i), vv)
-			i++
-		}
-	}
-	if v, found := p.p["provider"]; found {
-		u.Set("provider", v.(string))
-	}
-	if v, found := p.p["scope"]; found {
-		u.Set("scope", v.(string))
-	}
-	if v, found := p.p["url"]; found {
-		u.Set("url", v.(string))
-	}
-	if v, found := p.p["zoneid"]; found {
-		u.Set("zoneid", v.(string))
-	}
-	return u
-}
-
-func (p *CreateSecondaryStagingStoreParams) SetDetails(v map[string]string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["details"] = v
-	return
-}
-
-func (p *CreateSecondaryStagingStoreParams) SetProvider(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["provider"] = v
-	return
-}
-
-func (p *CreateSecondaryStagingStoreParams) SetScope(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["scope"] = v
-	return
-}
-
-func (p *CreateSecondaryStagingStoreParams) SetUrl(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["url"] = v
-	return
-}
-
-func (p *CreateSecondaryStagingStoreParams) SetZoneid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["zoneid"] = v
-	return
-}
-
-// You should always use this function to get a new CreateSecondaryStagingStoreParams instance,
-// as then you are sure you have configured all required params
-func (s *ImageStoreService) NewCreateSecondaryStagingStoreParams(url string) *CreateSecondaryStagingStoreParams {
-	p := &CreateSecondaryStagingStoreParams{}
-	p.p = make(map[string]interface{})
-	p.p["url"] = url
-	return p
-}
-
-// create secondary staging store.
-func (s *ImageStoreService) CreateSecondaryStagingStore(p *CreateSecondaryStagingStoreParams) (*CreateSecondaryStagingStoreResponse, error) {
-	resp, err := s.cs.newRequest("createSecondaryStagingStore", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r CreateSecondaryStagingStoreResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type CreateSecondaryStagingStoreResponse struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
 }
 
 type ListSecondaryStagingStoresParams struct {
@@ -807,7 +896,7 @@ func (s *ImageStoreService) GetSecondaryStagingStoreID(name string, opts ...Opti
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -857,7 +946,7 @@ func (s *ImageStoreService) GetSecondaryStagingStoreByID(id string, opts ...Opti
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -894,6 +983,7 @@ func (s *ImageStoreService) ListSecondaryStagingStores(p *ListSecondaryStagingSt
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -903,66 +993,14 @@ type ListSecondaryStagingStoresResponse struct {
 }
 
 type SecondaryStagingStore struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
-}
-
-type DeleteSecondaryStagingStoreParams struct {
-	p map[string]interface{}
-}
-
-func (p *DeleteSecondaryStagingStoreParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *DeleteSecondaryStagingStoreParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new DeleteSecondaryStagingStoreParams instance,
-// as then you are sure you have configured all required params
-func (s *ImageStoreService) NewDeleteSecondaryStagingStoreParams(id string) *DeleteSecondaryStagingStoreParams {
-	p := &DeleteSecondaryStagingStoreParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Deletes a secondary staging store .
-func (s *ImageStoreService) DeleteSecondaryStagingStore(p *DeleteSecondaryStagingStoreParams) (*DeleteSecondaryStagingStoreResponse, error) {
-	resp, err := s.cs.newRequest("deleteSecondaryStagingStore", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DeleteSecondaryStagingStoreResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type DeleteSecondaryStagingStoreResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
 }
 
 type UpdateCloudToUseObjectStoreParams struct {
@@ -977,8 +1015,7 @@ func (p *UpdateCloudToUseObjectStoreParams) toURLValues() url.Values {
 	if v, found := p.p["details"]; found {
 		i := 0
 		for k, vv := range v.(map[string]string) {
-			u.Set(fmt.Sprintf("details[%d].key", i), k)
-			u.Set(fmt.Sprintf("details[%d].value", i), vv)
+			u.Set(fmt.Sprintf("details[%d].%s", i, k), vv)
 			i++
 		}
 	}
@@ -1046,17 +1083,17 @@ func (s *ImageStoreService) UpdateCloudToUseObjectStore(p *UpdateCloudToUseObjec
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type UpdateCloudToUseObjectStoreResponse struct {
-	Details      []string `json:"details,omitempty"`
-	Id           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Protocol     string   `json:"protocol,omitempty"`
-	Providername string   `json:"providername,omitempty"`
-	Scope        string   `json:"scope,omitempty"`
-	Url          string   `json:"url,omitempty"`
-	Zoneid       string   `json:"zoneid,omitempty"`
-	Zonename     string   `json:"zonename,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Protocol     string `json:"protocol"`
+	Providername string `json:"providername"`
+	Scope        string `json:"scope"`
+	Url          string `json:"url"`
+	Zoneid       string `json:"zoneid"`
+	Zonename     string `json:"zonename"`
 }

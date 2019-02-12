@@ -101,3 +101,5 @@ saves tons of time later as you launch these images since everything is
 pre-installed. Additionally, since everything is pre-installed, you can test the
 images as they're built and know that when they go into production, they'll be
 functional.
+
+[Continue to parallel builds](./parallel-builds.html)

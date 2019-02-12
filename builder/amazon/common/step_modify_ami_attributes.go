@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -145,7 +146,8 @@ func (s *StepModifyAMIAttributes) Run(_ context.Context, state multistep.StateBa
 	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Modifying attributes on AMI (%s)...", ami))
 		regionConn := ec2.New(session, &aws.Config{
-			Region: aws.String(region),
+			Region:     aws.String(region),
+			HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
 		})
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
@@ -165,7 +167,8 @@ func (s *StepModifyAMIAttributes) Run(_ context.Context, state multistep.StateBa
 		for _, snapshot := range region_snapshots {
 			ui.Say(fmt.Sprintf("Modifying attributes on snapshot (%s)...", snapshot))
 			regionConn := ec2.New(session, &aws.Config{
-				Region: aws.String(region),
+				Region:     aws.String(region),
+				HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
 			})
 			for name, input := range snapshotOptions {
 				ui.Message(fmt.Sprintf("Modifying: %s", name))

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Template represents the parsed template that is used to configure
@@ -40,6 +40,7 @@ type Builder struct {
 type PostProcessor struct {
 	OnlyExcept `mapstructure:",squash"`
 
+	Name              string
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	Config            map[string]interface{}

@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -100,171 +100,56 @@ func (s *DomainService) CreateDomain(p *CreateDomainParams) (*CreateDomainRespon
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type CreateDomainResponse struct {
-	Cpuavailable              string `json:"cpuavailable,omitempty"`
-	Cpulimit                  string `json:"cpulimit,omitempty"`
-	Cputotal                  int64  `json:"cputotal,omitempty"`
-	Haschild                  bool   `json:"haschild,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Ipavailable               string `json:"ipavailable,omitempty"`
-	Iplimit                   string `json:"iplimit,omitempty"`
-	Iptotal                   int64  `json:"iptotal,omitempty"`
-	Level                     int    `json:"level,omitempty"`
-	Memoryavailable           string `json:"memoryavailable,omitempty"`
-	Memorylimit               string `json:"memorylimit,omitempty"`
-	Memorytotal               int64  `json:"memorytotal,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Networkavailable          string `json:"networkavailable,omitempty"`
-	Networkdomain             string `json:"networkdomain,omitempty"`
-	Networklimit              string `json:"networklimit,omitempty"`
-	Networktotal              int64  `json:"networktotal,omitempty"`
-	Parentdomainid            string `json:"parentdomainid,omitempty"`
-	Parentdomainname          string `json:"parentdomainname,omitempty"`
-	Path                      string `json:"path,omitempty"`
-	Primarystorageavailable   string `json:"primarystorageavailable,omitempty"`
-	Primarystoragelimit       string `json:"primarystoragelimit,omitempty"`
-	Primarystoragetotal       int64  `json:"primarystoragetotal,omitempty"`
-	Projectavailable          string `json:"projectavailable,omitempty"`
-	Projectlimit              string `json:"projectlimit,omitempty"`
-	Projecttotal              int64  `json:"projecttotal,omitempty"`
-	Secondarystorageavailable string `json:"secondarystorageavailable,omitempty"`
-	Secondarystoragelimit     string `json:"secondarystoragelimit,omitempty"`
-	Secondarystoragetotal     int64  `json:"secondarystoragetotal,omitempty"`
-	Snapshotavailable         string `json:"snapshotavailable,omitempty"`
-	Snapshotlimit             string `json:"snapshotlimit,omitempty"`
-	Snapshottotal             int64  `json:"snapshottotal,omitempty"`
-	State                     string `json:"state,omitempty"`
-	Templateavailable         string `json:"templateavailable,omitempty"`
-	Templatelimit             string `json:"templatelimit,omitempty"`
-	Templatetotal             int64  `json:"templatetotal,omitempty"`
-	Vmavailable               string `json:"vmavailable,omitempty"`
-	Vmlimit                   string `json:"vmlimit,omitempty"`
-	Vmtotal                   int64  `json:"vmtotal,omitempty"`
-	Volumeavailable           string `json:"volumeavailable,omitempty"`
-	Volumelimit               string `json:"volumelimit,omitempty"`
-	Volumetotal               int64  `json:"volumetotal,omitempty"`
-	Vpcavailable              string `json:"vpcavailable,omitempty"`
-	Vpclimit                  string `json:"vpclimit,omitempty"`
-	Vpctotal                  int64  `json:"vpctotal,omitempty"`
-}
-
-type UpdateDomainParams struct {
-	p map[string]interface{}
-}
-
-func (p *UpdateDomainParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	if v, found := p.p["networkdomain"]; found {
-		u.Set("networkdomain", v.(string))
-	}
-	return u
-}
-
-func (p *UpdateDomainParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *UpdateDomainParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-func (p *UpdateDomainParams) SetNetworkdomain(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["networkdomain"] = v
-	return
-}
-
-// You should always use this function to get a new UpdateDomainParams instance,
-// as then you are sure you have configured all required params
-func (s *DomainService) NewUpdateDomainParams(id string) *UpdateDomainParams {
-	p := &UpdateDomainParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Updates a domain with a new name
-func (s *DomainService) UpdateDomain(p *UpdateDomainParams) (*UpdateDomainResponse, error) {
-	resp, err := s.cs.newRequest("updateDomain", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r UpdateDomainResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type UpdateDomainResponse struct {
-	Cpuavailable              string `json:"cpuavailable,omitempty"`
-	Cpulimit                  string `json:"cpulimit,omitempty"`
-	Cputotal                  int64  `json:"cputotal,omitempty"`
-	Haschild                  bool   `json:"haschild,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Ipavailable               string `json:"ipavailable,omitempty"`
-	Iplimit                   string `json:"iplimit,omitempty"`
-	Iptotal                   int64  `json:"iptotal,omitempty"`
-	Level                     int    `json:"level,omitempty"`
-	Memoryavailable           string `json:"memoryavailable,omitempty"`
-	Memorylimit               string `json:"memorylimit,omitempty"`
-	Memorytotal               int64  `json:"memorytotal,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Networkavailable          string `json:"networkavailable,omitempty"`
-	Networkdomain             string `json:"networkdomain,omitempty"`
-	Networklimit              string `json:"networklimit,omitempty"`
-	Networktotal              int64  `json:"networktotal,omitempty"`
-	Parentdomainid            string `json:"parentdomainid,omitempty"`
-	Parentdomainname          string `json:"parentdomainname,omitempty"`
-	Path                      string `json:"path,omitempty"`
-	Primarystorageavailable   string `json:"primarystorageavailable,omitempty"`
-	Primarystoragelimit       string `json:"primarystoragelimit,omitempty"`
-	Primarystoragetotal       int64  `json:"primarystoragetotal,omitempty"`
-	Projectavailable          string `json:"projectavailable,omitempty"`
-	Projectlimit              string `json:"projectlimit,omitempty"`
-	Projecttotal              int64  `json:"projecttotal,omitempty"`
-	Secondarystorageavailable string `json:"secondarystorageavailable,omitempty"`
-	Secondarystoragelimit     string `json:"secondarystoragelimit,omitempty"`
-	Secondarystoragetotal     int64  `json:"secondarystoragetotal,omitempty"`
-	Snapshotavailable         string `json:"snapshotavailable,omitempty"`
-	Snapshotlimit             string `json:"snapshotlimit,omitempty"`
-	Snapshottotal             int64  `json:"snapshottotal,omitempty"`
-	State                     string `json:"state,omitempty"`
-	Templateavailable         string `json:"templateavailable,omitempty"`
-	Templatelimit             string `json:"templatelimit,omitempty"`
-	Templatetotal             int64  `json:"templatetotal,omitempty"`
-	Vmavailable               string `json:"vmavailable,omitempty"`
-	Vmlimit                   string `json:"vmlimit,omitempty"`
-	Vmtotal                   int64  `json:"vmtotal,omitempty"`
-	Volumeavailable           string `json:"volumeavailable,omitempty"`
-	Volumelimit               string `json:"volumelimit,omitempty"`
-	Volumetotal               int64  `json:"volumetotal,omitempty"`
-	Vpcavailable              string `json:"vpcavailable,omitempty"`
-	Vpclimit                  string `json:"vpclimit,omitempty"`
-	Vpctotal                  int64  `json:"vpctotal,omitempty"`
+	Cpuavailable              string  `json:"cpuavailable"`
+	Cpulimit                  string  `json:"cpulimit"`
+	Cputotal                  int64   `json:"cputotal"`
+	Haschild                  bool    `json:"haschild"`
+	Id                        string  `json:"id"`
+	Ipavailable               string  `json:"ipavailable"`
+	Iplimit                   string  `json:"iplimit"`
+	Iptotal                   int64   `json:"iptotal"`
+	Level                     int     `json:"level"`
+	Memoryavailable           string  `json:"memoryavailable"`
+	Memorylimit               string  `json:"memorylimit"`
+	Memorytotal               int64   `json:"memorytotal"`
+	Name                      string  `json:"name"`
+	Networkavailable          string  `json:"networkavailable"`
+	Networkdomain             string  `json:"networkdomain"`
+	Networklimit              string  `json:"networklimit"`
+	Networktotal              int64   `json:"networktotal"`
+	Parentdomainid            string  `json:"parentdomainid"`
+	Parentdomainname          string  `json:"parentdomainname"`
+	Path                      string  `json:"path"`
+	Primarystorageavailable   string  `json:"primarystorageavailable"`
+	Primarystoragelimit       string  `json:"primarystoragelimit"`
+	Primarystoragetotal       int64   `json:"primarystoragetotal"`
+	Projectavailable          string  `json:"projectavailable"`
+	Projectlimit              string  `json:"projectlimit"`
+	Projecttotal              int64   `json:"projecttotal"`
+	Secondarystorageavailable string  `json:"secondarystorageavailable"`
+	Secondarystoragelimit     string  `json:"secondarystoragelimit"`
+	Secondarystoragetotal     float64 `json:"secondarystoragetotal"`
+	Snapshotavailable         string  `json:"snapshotavailable"`
+	Snapshotlimit             string  `json:"snapshotlimit"`
+	Snapshottotal             int64   `json:"snapshottotal"`
+	State                     string  `json:"state"`
+	Templateavailable         string  `json:"templateavailable"`
+	Templatelimit             string  `json:"templatelimit"`
+	Templatetotal             int64   `json:"templatetotal"`
+	Vmavailable               string  `json:"vmavailable"`
+	Vmlimit                   string  `json:"vmlimit"`
+	Vmtotal                   int64   `json:"vmtotal"`
+	Volumeavailable           string  `json:"volumeavailable"`
+	Volumelimit               string  `json:"volumelimit"`
+	Volumetotal               int64   `json:"volumetotal"`
+	Vpcavailable              string  `json:"vpcavailable"`
+	Vpclimit                  string  `json:"vpclimit"`
+	Vpctotal                  int64   `json:"vpctotal"`
 }
 
 type DeleteDomainParams struct {
@@ -337,264 +222,14 @@ func (s *DomainService) DeleteDomain(p *DeleteDomainParams) (*DeleteDomainRespon
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type DeleteDomainResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
-}
-
-type ListDomainsParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListDomainsParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["level"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("level", vv)
-	}
-	if v, found := p.p["listall"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("listall", vv)
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	return u
-}
-
-func (p *ListDomainsParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetLevel(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["level"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetListall(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["listall"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListDomainsParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-// You should always use this function to get a new ListDomainsParams instance,
-// as then you are sure you have configured all required params
-func (s *DomainService) NewListDomainsParams() *ListDomainsParams {
-	p := &ListDomainsParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *DomainService) GetDomainID(name string, opts ...OptionFunc) (string, int, error) {
-	p := &ListDomainsParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["name"] = name
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return "", -1, err
-		}
-	}
-
-	l, err := s.ListDomains(p)
-	if err != nil {
-		return "", -1, err
-	}
-
-	if l.Count == 0 {
-		return "", l.Count, fmt.Errorf("No match found for %s: %+v", name, l)
-	}
-
-	if l.Count == 1 {
-		return l.Domains[0].Id, l.Count, nil
-	}
-
-	if l.Count > 1 {
-		for _, v := range l.Domains {
-			if v.Name == name {
-				return v.Id, l.Count, nil
-			}
-		}
-	}
-	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", name, l)
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *DomainService) GetDomainByName(name string, opts ...OptionFunc) (*Domain, int, error) {
-	id, count, err := s.GetDomainID(name, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-
-	r, count, err := s.GetDomainByID(id, opts...)
-	if err != nil {
-		return nil, count, err
-	}
-	return r, count, nil
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *DomainService) GetDomainByID(id string, opts ...OptionFunc) (*Domain, int, error) {
-	p := &ListDomainsParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["id"] = id
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return nil, -1, err
-		}
-	}
-
-	l, err := s.ListDomains(p)
-	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf(
-			"Invalid parameter id value=%s due to incorrect long value format, "+
-				"or entity does not exist", id)) {
-			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
-		}
-		return nil, -1, err
-	}
-
-	if l.Count == 0 {
-		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
-	}
-
-	if l.Count == 1 {
-		return l.Domains[0], l.Count, nil
-	}
-	return nil, l.Count, fmt.Errorf("There is more then one result for Domain UUID: %s!", id)
-}
-
-// Lists domains and provides detailed information for listed domains
-func (s *DomainService) ListDomains(p *ListDomainsParams) (*ListDomainsResponse, error) {
-	resp, err := s.cs.newRequest("listDomains", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListDomainsResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListDomainsResponse struct {
-	Count   int       `json:"count"`
-	Domains []*Domain `json:"domain"`
-}
-
-type Domain struct {
-	Cpuavailable              string `json:"cpuavailable,omitempty"`
-	Cpulimit                  string `json:"cpulimit,omitempty"`
-	Cputotal                  int64  `json:"cputotal,omitempty"`
-	Haschild                  bool   `json:"haschild,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Ipavailable               string `json:"ipavailable,omitempty"`
-	Iplimit                   string `json:"iplimit,omitempty"`
-	Iptotal                   int64  `json:"iptotal,omitempty"`
-	Level                     int    `json:"level,omitempty"`
-	Memoryavailable           string `json:"memoryavailable,omitempty"`
-	Memorylimit               string `json:"memorylimit,omitempty"`
-	Memorytotal               int64  `json:"memorytotal,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Networkavailable          string `json:"networkavailable,omitempty"`
-	Networkdomain             string `json:"networkdomain,omitempty"`
-	Networklimit              string `json:"networklimit,omitempty"`
-	Networktotal              int64  `json:"networktotal,omitempty"`
-	Parentdomainid            string `json:"parentdomainid,omitempty"`
-	Parentdomainname          string `json:"parentdomainname,omitempty"`
-	Path                      string `json:"path,omitempty"`
-	Primarystorageavailable   string `json:"primarystorageavailable,omitempty"`
-	Primarystoragelimit       string `json:"primarystoragelimit,omitempty"`
-	Primarystoragetotal       int64  `json:"primarystoragetotal,omitempty"`
-	Projectavailable          string `json:"projectavailable,omitempty"`
-	Projectlimit              string `json:"projectlimit,omitempty"`
-	Projecttotal              int64  `json:"projecttotal,omitempty"`
-	Secondarystorageavailable string `json:"secondarystorageavailable,omitempty"`
-	Secondarystoragelimit     string `json:"secondarystoragelimit,omitempty"`
-	Secondarystoragetotal     int64  `json:"secondarystoragetotal,omitempty"`
-	Snapshotavailable         string `json:"snapshotavailable,omitempty"`
-	Snapshotlimit             string `json:"snapshotlimit,omitempty"`
-	Snapshottotal             int64  `json:"snapshottotal,omitempty"`
-	State                     string `json:"state,omitempty"`
-	Templateavailable         string `json:"templateavailable,omitempty"`
-	Templatelimit             string `json:"templatelimit,omitempty"`
-	Templatetotal             int64  `json:"templatetotal,omitempty"`
-	Vmavailable               string `json:"vmavailable,omitempty"`
-	Vmlimit                   string `json:"vmlimit,omitempty"`
-	Vmtotal                   int64  `json:"vmtotal,omitempty"`
-	Volumeavailable           string `json:"volumeavailable,omitempty"`
-	Volumelimit               string `json:"volumelimit,omitempty"`
-	Volumetotal               int64  `json:"volumetotal,omitempty"`
-	Vpcavailable              string `json:"vpcavailable,omitempty"`
-	Vpclimit                  string `json:"vpclimit,omitempty"`
-	Vpctotal                  int64  `json:"vpctotal,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }
 
 type ListDomainChildrenParams struct {
@@ -705,7 +340,7 @@ func (s *DomainService) GetDomainChildrenID(name string, opts ...OptionFunc) (st
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -755,7 +390,7 @@ func (s *DomainService) GetDomainChildrenByID(id string, opts ...OptionFunc) (*D
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -792,6 +427,7 @@ func (s *DomainService) ListDomainChildren(p *ListDomainChildrenParams) (*ListDo
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -801,106 +437,135 @@ type ListDomainChildrenResponse struct {
 }
 
 type DomainChildren struct {
-	Cpuavailable              string `json:"cpuavailable,omitempty"`
-	Cpulimit                  string `json:"cpulimit,omitempty"`
-	Cputotal                  int64  `json:"cputotal,omitempty"`
-	Haschild                  bool   `json:"haschild,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Ipavailable               string `json:"ipavailable,omitempty"`
-	Iplimit                   string `json:"iplimit,omitempty"`
-	Iptotal                   int64  `json:"iptotal,omitempty"`
-	Level                     int    `json:"level,omitempty"`
-	Memoryavailable           string `json:"memoryavailable,omitempty"`
-	Memorylimit               string `json:"memorylimit,omitempty"`
-	Memorytotal               int64  `json:"memorytotal,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Networkavailable          string `json:"networkavailable,omitempty"`
-	Networkdomain             string `json:"networkdomain,omitempty"`
-	Networklimit              string `json:"networklimit,omitempty"`
-	Networktotal              int64  `json:"networktotal,omitempty"`
-	Parentdomainid            string `json:"parentdomainid,omitempty"`
-	Parentdomainname          string `json:"parentdomainname,omitempty"`
-	Path                      string `json:"path,omitempty"`
-	Primarystorageavailable   string `json:"primarystorageavailable,omitempty"`
-	Primarystoragelimit       string `json:"primarystoragelimit,omitempty"`
-	Primarystoragetotal       int64  `json:"primarystoragetotal,omitempty"`
-	Projectavailable          string `json:"projectavailable,omitempty"`
-	Projectlimit              string `json:"projectlimit,omitempty"`
-	Projecttotal              int64  `json:"projecttotal,omitempty"`
-	Secondarystorageavailable string `json:"secondarystorageavailable,omitempty"`
-	Secondarystoragelimit     string `json:"secondarystoragelimit,omitempty"`
-	Secondarystoragetotal     int64  `json:"secondarystoragetotal,omitempty"`
-	Snapshotavailable         string `json:"snapshotavailable,omitempty"`
-	Snapshotlimit             string `json:"snapshotlimit,omitempty"`
-	Snapshottotal             int64  `json:"snapshottotal,omitempty"`
-	State                     string `json:"state,omitempty"`
-	Templateavailable         string `json:"templateavailable,omitempty"`
-	Templatelimit             string `json:"templatelimit,omitempty"`
-	Templatetotal             int64  `json:"templatetotal,omitempty"`
-	Vmavailable               string `json:"vmavailable,omitempty"`
-	Vmlimit                   string `json:"vmlimit,omitempty"`
-	Vmtotal                   int64  `json:"vmtotal,omitempty"`
-	Volumeavailable           string `json:"volumeavailable,omitempty"`
-	Volumelimit               string `json:"volumelimit,omitempty"`
-	Volumetotal               int64  `json:"volumetotal,omitempty"`
-	Vpcavailable              string `json:"vpcavailable,omitempty"`
-	Vpclimit                  string `json:"vpclimit,omitempty"`
-	Vpctotal                  int64  `json:"vpctotal,omitempty"`
+	Cpuavailable              string  `json:"cpuavailable"`
+	Cpulimit                  string  `json:"cpulimit"`
+	Cputotal                  int64   `json:"cputotal"`
+	Haschild                  bool    `json:"haschild"`
+	Id                        string  `json:"id"`
+	Ipavailable               string  `json:"ipavailable"`
+	Iplimit                   string  `json:"iplimit"`
+	Iptotal                   int64   `json:"iptotal"`
+	Level                     int     `json:"level"`
+	Memoryavailable           string  `json:"memoryavailable"`
+	Memorylimit               string  `json:"memorylimit"`
+	Memorytotal               int64   `json:"memorytotal"`
+	Name                      string  `json:"name"`
+	Networkavailable          string  `json:"networkavailable"`
+	Networkdomain             string  `json:"networkdomain"`
+	Networklimit              string  `json:"networklimit"`
+	Networktotal              int64   `json:"networktotal"`
+	Parentdomainid            string  `json:"parentdomainid"`
+	Parentdomainname          string  `json:"parentdomainname"`
+	Path                      string  `json:"path"`
+	Primarystorageavailable   string  `json:"primarystorageavailable"`
+	Primarystoragelimit       string  `json:"primarystoragelimit"`
+	Primarystoragetotal       int64   `json:"primarystoragetotal"`
+	Projectavailable          string  `json:"projectavailable"`
+	Projectlimit              string  `json:"projectlimit"`
+	Projecttotal              int64   `json:"projecttotal"`
+	Secondarystorageavailable string  `json:"secondarystorageavailable"`
+	Secondarystoragelimit     string  `json:"secondarystoragelimit"`
+	Secondarystoragetotal     float64 `json:"secondarystoragetotal"`
+	Snapshotavailable         string  `json:"snapshotavailable"`
+	Snapshotlimit             string  `json:"snapshotlimit"`
+	Snapshottotal             int64   `json:"snapshottotal"`
+	State                     string  `json:"state"`
+	Templateavailable         string  `json:"templateavailable"`
+	Templatelimit             string  `json:"templatelimit"`
+	Templatetotal             int64   `json:"templatetotal"`
+	Vmavailable               string  `json:"vmavailable"`
+	Vmlimit                   string  `json:"vmlimit"`
+	Vmtotal                   int64   `json:"vmtotal"`
+	Volumeavailable           string  `json:"volumeavailable"`
+	Volumelimit               string  `json:"volumelimit"`
+	Volumetotal               int64   `json:"volumetotal"`
+	Vpcavailable              string  `json:"vpcavailable"`
+	Vpclimit                  string  `json:"vpclimit"`
+	Vpctotal                  int64   `json:"vpctotal"`
 }
 
-type LinkDomainToLdapParams struct {
+type ListDomainsParams struct {
 	p map[string]interface{}
 }
 
-func (p *LinkDomainToLdapParams) toURLValues() url.Values {
+func (p *ListDomainsParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
-	if v, found := p.p["accounttype"]; found {
+	if v, found := p.p["details"]; found {
+		vv := strings.Join(v.([]string), ",")
+		u.Set("details", vv)
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["level"]; found {
 		vv := strconv.Itoa(v.(int))
-		u.Set("accounttype", vv)
+		u.Set("level", vv)
 	}
-	if v, found := p.p["admin"]; found {
-		u.Set("admin", v.(string))
-	}
-	if v, found := p.p["domainid"]; found {
-		u.Set("domainid", v.(string))
+	if v, found := p.p["listall"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("listall", vv)
 	}
 	if v, found := p.p["name"]; found {
 		u.Set("name", v.(string))
 	}
-	if v, found := p.p["type"]; found {
-		u.Set("type", v.(string))
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
 	}
 	return u
 }
 
-func (p *LinkDomainToLdapParams) SetAccounttype(v int) {
+func (p *ListDomainsParams) SetDetails(v []string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["accounttype"] = v
+	p.p["details"] = v
 	return
 }
 
-func (p *LinkDomainToLdapParams) SetAdmin(v string) {
+func (p *ListDomainsParams) SetId(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["admin"] = v
+	p.p["id"] = v
 	return
 }
 
-func (p *LinkDomainToLdapParams) SetDomainid(v string) {
+func (p *ListDomainsParams) SetKeyword(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["domainid"] = v
+	p.p["keyword"] = v
 	return
 }
 
-func (p *LinkDomainToLdapParams) SetName(v string) {
+func (p *ListDomainsParams) SetLevel(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["level"] = v
+	return
+}
+
+func (p *ListDomainsParams) SetListall(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["listall"] = v
+	return
+}
+
+func (p *ListDomainsParams) SetName(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
@@ -908,44 +573,294 @@ func (p *LinkDomainToLdapParams) SetName(v string) {
 	return
 }
 
-func (p *LinkDomainToLdapParams) SetType(v string) {
+func (p *ListDomainsParams) SetPage(v int) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
-	p.p["type"] = v
+	p.p["page"] = v
 	return
 }
 
-// You should always use this function to get a new LinkDomainToLdapParams instance,
+func (p *ListDomainsParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+// You should always use this function to get a new ListDomainsParams instance,
 // as then you are sure you have configured all required params
-func (s *DomainService) NewLinkDomainToLdapParams(accounttype int, domainid string, name string, domainType string) *LinkDomainToLdapParams {
-	p := &LinkDomainToLdapParams{}
+func (s *DomainService) NewListDomainsParams() *ListDomainsParams {
+	p := &ListDomainsParams{}
 	p.p = make(map[string]interface{})
-	p.p["accounttype"] = accounttype
-	p.p["domainid"] = domainid
-	p.p["name"] = name
-	p.p["type"] = domainType
 	return p
 }
 
-// link an existing cloudstack domain to group or OU in ldap
-func (s *DomainService) LinkDomainToLdap(p *LinkDomainToLdapParams) (*LinkDomainToLdapResponse, error) {
-	resp, err := s.cs.newRequest("linkDomainToLdap", p.toURLValues())
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *DomainService) GetDomainID(name string, opts ...OptionFunc) (string, int, error) {
+	p := &ListDomainsParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["name"] = name
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return "", -1, err
+		}
+	}
+
+	l, err := s.ListDomains(p)
+	if err != nil {
+		return "", -1, err
+	}
+
+	if l.Count == 0 {
+		return "", l.Count, fmt.Errorf("No match found for %s: %+v", name, l)
+	}
+
+	if l.Count == 1 {
+		return l.Domains[0].Id, l.Count, nil
+	}
+
+	if l.Count > 1 {
+		for _, v := range l.Domains {
+			if v.Name == name {
+				return v.Id, l.Count, nil
+			}
+		}
+	}
+	return "", l.Count, fmt.Errorf("Could not find an exact match for %s: %+v", name, l)
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *DomainService) GetDomainByName(name string, opts ...OptionFunc) (*Domain, int, error) {
+	id, count, err := s.GetDomainID(name, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+
+	r, count, err := s.GetDomainByID(id, opts...)
+	if err != nil {
+		return nil, count, err
+	}
+	return r, count, nil
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *DomainService) GetDomainByID(id string, opts ...OptionFunc) (*Domain, int, error) {
+	p := &ListDomainsParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["id"] = id
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return nil, -1, err
+		}
+	}
+
+	l, err := s.ListDomains(p)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf(
+			"Invalid parameter id value=%s due to incorrect long value format, "+
+				"or entity does not exist", id)) {
+			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
+		}
+		return nil, -1, err
+	}
+
+	if l.Count == 0 {
+		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
+	}
+
+	if l.Count == 1 {
+		return l.Domains[0], l.Count, nil
+	}
+	return nil, l.Count, fmt.Errorf("There is more then one result for Domain UUID: %s!", id)
+}
+
+// Lists domains and provides detailed information for listed domains
+func (s *DomainService) ListDomains(p *ListDomainsParams) (*ListDomainsResponse, error) {
+	resp, err := s.cs.newRequest("listDomains", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r LinkDomainToLdapResponse
+	var r ListDomainsResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
-type LinkDomainToLdapResponse struct {
-	Accountid   string `json:"accountid,omitempty"`
-	Accounttype int    `json:"accounttype,omitempty"`
-	Domainid    int64  `json:"domainid,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Type        string `json:"type,omitempty"`
+type ListDomainsResponse struct {
+	Count   int       `json:"count"`
+	Domains []*Domain `json:"domain"`
+}
+
+type Domain struct {
+	Cpuavailable              string  `json:"cpuavailable"`
+	Cpulimit                  string  `json:"cpulimit"`
+	Cputotal                  int64   `json:"cputotal"`
+	Haschild                  bool    `json:"haschild"`
+	Id                        string  `json:"id"`
+	Ipavailable               string  `json:"ipavailable"`
+	Iplimit                   string  `json:"iplimit"`
+	Iptotal                   int64   `json:"iptotal"`
+	Level                     int     `json:"level"`
+	Memoryavailable           string  `json:"memoryavailable"`
+	Memorylimit               string  `json:"memorylimit"`
+	Memorytotal               int64   `json:"memorytotal"`
+	Name                      string  `json:"name"`
+	Networkavailable          string  `json:"networkavailable"`
+	Networkdomain             string  `json:"networkdomain"`
+	Networklimit              string  `json:"networklimit"`
+	Networktotal              int64   `json:"networktotal"`
+	Parentdomainid            string  `json:"parentdomainid"`
+	Parentdomainname          string  `json:"parentdomainname"`
+	Path                      string  `json:"path"`
+	Primarystorageavailable   string  `json:"primarystorageavailable"`
+	Primarystoragelimit       string  `json:"primarystoragelimit"`
+	Primarystoragetotal       int64   `json:"primarystoragetotal"`
+	Projectavailable          string  `json:"projectavailable"`
+	Projectlimit              string  `json:"projectlimit"`
+	Projecttotal              int64   `json:"projecttotal"`
+	Secondarystorageavailable string  `json:"secondarystorageavailable"`
+	Secondarystoragelimit     string  `json:"secondarystoragelimit"`
+	Secondarystoragetotal     float64 `json:"secondarystoragetotal"`
+	Snapshotavailable         string  `json:"snapshotavailable"`
+	Snapshotlimit             string  `json:"snapshotlimit"`
+	Snapshottotal             int64   `json:"snapshottotal"`
+	State                     string  `json:"state"`
+	Templateavailable         string  `json:"templateavailable"`
+	Templatelimit             string  `json:"templatelimit"`
+	Templatetotal             int64   `json:"templatetotal"`
+	Vmavailable               string  `json:"vmavailable"`
+	Vmlimit                   string  `json:"vmlimit"`
+	Vmtotal                   int64   `json:"vmtotal"`
+	Volumeavailable           string  `json:"volumeavailable"`
+	Volumelimit               string  `json:"volumelimit"`
+	Volumetotal               int64   `json:"volumetotal"`
+	Vpcavailable              string  `json:"vpcavailable"`
+	Vpclimit                  string  `json:"vpclimit"`
+	Vpctotal                  int64   `json:"vpctotal"`
+}
+
+type UpdateDomainParams struct {
+	p map[string]interface{}
+}
+
+func (p *UpdateDomainParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
+	}
+	if v, found := p.p["networkdomain"]; found {
+		u.Set("networkdomain", v.(string))
+	}
+	return u
+}
+
+func (p *UpdateDomainParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *UpdateDomainParams) SetName(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["name"] = v
+	return
+}
+
+func (p *UpdateDomainParams) SetNetworkdomain(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["networkdomain"] = v
+	return
+}
+
+// You should always use this function to get a new UpdateDomainParams instance,
+// as then you are sure you have configured all required params
+func (s *DomainService) NewUpdateDomainParams(id string) *UpdateDomainParams {
+	p := &UpdateDomainParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Updates a domain with a new name
+func (s *DomainService) UpdateDomain(p *UpdateDomainParams) (*UpdateDomainResponse, error) {
+	resp, err := s.cs.newRequest("updateDomain", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r UpdateDomainResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type UpdateDomainResponse struct {
+	Cpuavailable              string  `json:"cpuavailable"`
+	Cpulimit                  string  `json:"cpulimit"`
+	Cputotal                  int64   `json:"cputotal"`
+	Haschild                  bool    `json:"haschild"`
+	Id                        string  `json:"id"`
+	Ipavailable               string  `json:"ipavailable"`
+	Iplimit                   string  `json:"iplimit"`
+	Iptotal                   int64   `json:"iptotal"`
+	Level                     int     `json:"level"`
+	Memoryavailable           string  `json:"memoryavailable"`
+	Memorylimit               string  `json:"memorylimit"`
+	Memorytotal               int64   `json:"memorytotal"`
+	Name                      string  `json:"name"`
+	Networkavailable          string  `json:"networkavailable"`
+	Networkdomain             string  `json:"networkdomain"`
+	Networklimit              string  `json:"networklimit"`
+	Networktotal              int64   `json:"networktotal"`
+	Parentdomainid            string  `json:"parentdomainid"`
+	Parentdomainname          string  `json:"parentdomainname"`
+	Path                      string  `json:"path"`
+	Primarystorageavailable   string  `json:"primarystorageavailable"`
+	Primarystoragelimit       string  `json:"primarystoragelimit"`
+	Primarystoragetotal       int64   `json:"primarystoragetotal"`
+	Projectavailable          string  `json:"projectavailable"`
+	Projectlimit              string  `json:"projectlimit"`
+	Projecttotal              int64   `json:"projecttotal"`
+	Secondarystorageavailable string  `json:"secondarystorageavailable"`
+	Secondarystoragelimit     string  `json:"secondarystoragelimit"`
+	Secondarystoragetotal     float64 `json:"secondarystoragetotal"`
+	Snapshotavailable         string  `json:"snapshotavailable"`
+	Snapshotlimit             string  `json:"snapshotlimit"`
+	Snapshottotal             int64   `json:"snapshottotal"`
+	State                     string  `json:"state"`
+	Templateavailable         string  `json:"templateavailable"`
+	Templatelimit             string  `json:"templatelimit"`
+	Templatetotal             int64   `json:"templatetotal"`
+	Vmavailable               string  `json:"vmavailable"`
+	Vmlimit                   string  `json:"vmlimit"`
+	Vmtotal                   int64   `json:"vmtotal"`
+	Volumeavailable           string  `json:"volumeavailable"`
+	Volumelimit               string  `json:"volumelimit"`
+	Volumetotal               int64   `json:"volumetotal"`
+	Vpcavailable              string  `json:"vpcavailable"`
+	Vpclimit                  string  `json:"vpclimit"`
+	Vpctotal                  int64   `json:"vpctotal"`
 }

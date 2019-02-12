@@ -202,8 +202,7 @@ func Validate(config *Config) error {
 					"the Script or Scripts options instead"))
 		}
 	}
-	// This is currently undocumented and not a feature users are expected to
-	// interact with.
+
 	if config.EnvVarFormat == "" {
 		if (runtime.GOOS == "windows") && !config.UseLinuxPathing {
 			config.EnvVarFormat = "set %s=%s && "
