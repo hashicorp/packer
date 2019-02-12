@@ -297,7 +297,7 @@ type KeyPair interface {
 	Bits() int
 
 	// Name returns the key pair's name. An empty string is
-	// returned is no name was specified.
+	// returned if no name was specified.
 	Name() string
 
 	// Description returns a brief description of the key pair that
