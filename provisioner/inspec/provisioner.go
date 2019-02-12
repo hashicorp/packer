@@ -118,6 +118,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: %s must be a valid backend", p.config.Backend))
 	}
 
+	if p.config.Backend == "docker" && p.config.Host == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: host must be specified for docker backend"))
+	}
+
 	if p.config.Host == "" {
 		p.config.Host = "127.0.0.1"
 	}
