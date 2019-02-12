@@ -176,7 +176,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:                       b.config.PackerDebug,
 			BsuOptimized:                b.config.BsuOptimized,
 			EnableT2Unlimited:           b.config.EnableT2Unlimited,
-			ExpectedRootDevice:          "ebs", // should it be bsu
+			ExpectedRootDevice:          osccommon.RunSourceVmBSUExpectedRootDevice,
 			IamVmProfile:                b.config.IamVmProfile,
 			VmInitiatedShutdownBehavior: b.config.VmInitiatedShutdownBehavior,
 			VmType:                      b.config.VmType,
