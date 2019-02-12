@@ -18,6 +18,10 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+const (
+	RunSourceVmBSUExpectedRootDevice = "ebs"
+)
+
 type StepRunSourceVm struct {
 	AssociatePublicIpAddress    bool
 	BlockDevices                BlockDevices
