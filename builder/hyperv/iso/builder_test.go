@@ -5,11 +5,10 @@ package iso
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
-
-	"os"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/helper/multistep"

@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ func (p *CreateVlanIpRangeParams) toURLValues() url.Values {
 	}
 	if v, found := p.p["endipv6"]; found {
 		u.Set("endipv6", v.(string))
+	}
+	if v, found := p.p["forsystemvms"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("forsystemvms", vv)
 	}
 	if v, found := p.p["forvirtualnetwork"]; found {
 		vv := strconv.FormatBool(v.(bool))
@@ -117,6 +121,14 @@ func (p *CreateVlanIpRangeParams) SetEndipv6(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["endipv6"] = v
+	return
+}
+
+func (p *CreateVlanIpRangeParams) SetForsystemvms(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["forsystemvms"] = v
 	return
 }
 
@@ -243,32 +255,138 @@ func (s *VLANService) CreateVlanIpRange(p *CreateVlanIpRangeParams) (*CreateVlan
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type CreateVlanIpRangeResponse struct {
-	Account           string `json:"account,omitempty"`
-	Description       string `json:"description,omitempty"`
-	Domain            string `json:"domain,omitempty"`
-	Domainid          string `json:"domainid,omitempty"`
-	Endip             string `json:"endip,omitempty"`
-	Endipv6           string `json:"endipv6,omitempty"`
-	Forvirtualnetwork bool   `json:"forvirtualnetwork,omitempty"`
-	Gateway           string `json:"gateway,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Ip6cidr           string `json:"ip6cidr,omitempty"`
-	Ip6gateway        string `json:"ip6gateway,omitempty"`
-	Netmask           string `json:"netmask,omitempty"`
-	Networkid         string `json:"networkid,omitempty"`
-	Physicalnetworkid string `json:"physicalnetworkid,omitempty"`
-	Podid             string `json:"podid,omitempty"`
-	Podname           string `json:"podname,omitempty"`
-	Project           string `json:"project,omitempty"`
-	Projectid         string `json:"projectid,omitempty"`
-	Startip           string `json:"startip,omitempty"`
-	Startipv6         string `json:"startipv6,omitempty"`
-	Vlan              string `json:"vlan,omitempty"`
-	Zoneid            string `json:"zoneid,omitempty"`
+	Account           string `json:"account"`
+	Description       string `json:"description"`
+	Domain            string `json:"domain"`
+	Domainid          string `json:"domainid"`
+	Endip             string `json:"endip"`
+	Endipv6           string `json:"endipv6"`
+	Forsystemvms      bool   `json:"forsystemvms"`
+	Forvirtualnetwork bool   `json:"forvirtualnetwork"`
+	Gateway           string `json:"gateway"`
+	Id                string `json:"id"`
+	Ip6cidr           string `json:"ip6cidr"`
+	Ip6gateway        string `json:"ip6gateway"`
+	Netmask           string `json:"netmask"`
+	Networkid         string `json:"networkid"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Project           string `json:"project"`
+	Projectid         string `json:"projectid"`
+	Startip           string `json:"startip"`
+	Startipv6         string `json:"startipv6"`
+	Vlan              string `json:"vlan"`
+	Zoneid            string `json:"zoneid"`
+}
+
+type DedicateGuestVlanRangeParams struct {
+	p map[string]interface{}
+}
+
+func (p *DedicateGuestVlanRangeParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["account"]; found {
+		u.Set("account", v.(string))
+	}
+	if v, found := p.p["domainid"]; found {
+		u.Set("domainid", v.(string))
+	}
+	if v, found := p.p["physicalnetworkid"]; found {
+		u.Set("physicalnetworkid", v.(string))
+	}
+	if v, found := p.p["projectid"]; found {
+		u.Set("projectid", v.(string))
+	}
+	if v, found := p.p["vlanrange"]; found {
+		u.Set("vlanrange", v.(string))
+	}
+	return u
+}
+
+func (p *DedicateGuestVlanRangeParams) SetAccount(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["account"] = v
+	return
+}
+
+func (p *DedicateGuestVlanRangeParams) SetDomainid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["domainid"] = v
+	return
+}
+
+func (p *DedicateGuestVlanRangeParams) SetPhysicalnetworkid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["physicalnetworkid"] = v
+	return
+}
+
+func (p *DedicateGuestVlanRangeParams) SetProjectid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["projectid"] = v
+	return
+}
+
+func (p *DedicateGuestVlanRangeParams) SetVlanrange(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["vlanrange"] = v
+	return
+}
+
+// You should always use this function to get a new DedicateGuestVlanRangeParams instance,
+// as then you are sure you have configured all required params
+func (s *VLANService) NewDedicateGuestVlanRangeParams(physicalnetworkid string, vlanrange string) *DedicateGuestVlanRangeParams {
+	p := &DedicateGuestVlanRangeParams{}
+	p.p = make(map[string]interface{})
+	p.p["physicalnetworkid"] = physicalnetworkid
+	p.p["vlanrange"] = vlanrange
+	return p
+}
+
+// Dedicates a guest vlan range to an account
+func (s *VLANService) DedicateGuestVlanRange(p *DedicateGuestVlanRangeParams) (*DedicateGuestVlanRangeResponse, error) {
+	resp, err := s.cs.newRequest("dedicateGuestVlanRange", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r DedicateGuestVlanRangeResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type DedicateGuestVlanRangeResponse struct {
+	Account           string `json:"account"`
+	Domain            string `json:"domain"`
+	Domainid          string `json:"domainid"`
+	Guestvlanrange    string `json:"guestvlanrange"`
+	Id                string `json:"id"`
+	Physicalnetworkid int64  `json:"physicalnetworkid"`
+	Project           string `json:"project"`
+	Projectid         string `json:"projectid"`
+	Zoneid            int64  `json:"zoneid"`
 }
 
 type DeleteVlanIpRangeParams struct {
@@ -314,12 +432,229 @@ func (s *VLANService) DeleteVlanIpRange(p *DeleteVlanIpRangeParams) (*DeleteVlan
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type DeleteVlanIpRangeResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteVlanIpRangeResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteVlanIpRangeResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
+type ListDedicatedGuestVlanRangesParams struct {
+	p map[string]interface{}
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["account"]; found {
+		u.Set("account", v.(string))
+	}
+	if v, found := p.p["domainid"]; found {
+		u.Set("domainid", v.(string))
+	}
+	if v, found := p.p["guestvlanrange"]; found {
+		u.Set("guestvlanrange", v.(string))
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["keyword"]; found {
+		u.Set("keyword", v.(string))
+	}
+	if v, found := p.p["page"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("page", vv)
+	}
+	if v, found := p.p["pagesize"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("pagesize", vv)
+	}
+	if v, found := p.p["physicalnetworkid"]; found {
+		u.Set("physicalnetworkid", v.(string))
+	}
+	if v, found := p.p["projectid"]; found {
+		u.Set("projectid", v.(string))
+	}
+	if v, found := p.p["zoneid"]; found {
+		u.Set("zoneid", v.(string))
+	}
+	return u
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetAccount(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["account"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetDomainid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["domainid"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetGuestvlanrange(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["guestvlanrange"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetKeyword(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["keyword"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetPage(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["page"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetPagesize(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["pagesize"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetPhysicalnetworkid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["physicalnetworkid"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetProjectid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["projectid"] = v
+	return
+}
+
+func (p *ListDedicatedGuestVlanRangesParams) SetZoneid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["zoneid"] = v
+	return
+}
+
+// You should always use this function to get a new ListDedicatedGuestVlanRangesParams instance,
+// as then you are sure you have configured all required params
+func (s *VLANService) NewListDedicatedGuestVlanRangesParams() *ListDedicatedGuestVlanRangesParams {
+	p := &ListDedicatedGuestVlanRangesParams{}
+	p.p = make(map[string]interface{})
+	return p
+}
+
+// This is a courtesy helper function, which in some cases may not work as expected!
+func (s *VLANService) GetDedicatedGuestVlanRangeByID(id string, opts ...OptionFunc) (*DedicatedGuestVlanRange, int, error) {
+	p := &ListDedicatedGuestVlanRangesParams{}
+	p.p = make(map[string]interface{})
+
+	p.p["id"] = id
+
+	for _, fn := range append(s.cs.options, opts...) {
+		if err := fn(s.cs, p); err != nil {
+			return nil, -1, err
+		}
+	}
+
+	l, err := s.ListDedicatedGuestVlanRanges(p)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf(
+			"Invalid parameter id value=%s due to incorrect long value format, "+
+				"or entity does not exist", id)) {
+			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
+		}
+		return nil, -1, err
+	}
+
+	if l.Count == 0 {
+		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
+	}
+
+	if l.Count == 1 {
+		return l.DedicatedGuestVlanRanges[0], l.Count, nil
+	}
+	return nil, l.Count, fmt.Errorf("There is more then one result for DedicatedGuestVlanRange UUID: %s!", id)
+}
+
+// Lists dedicated guest vlan ranges
+func (s *VLANService) ListDedicatedGuestVlanRanges(p *ListDedicatedGuestVlanRangesParams) (*ListDedicatedGuestVlanRangesResponse, error) {
+	resp, err := s.cs.newRequest("listDedicatedGuestVlanRanges", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r ListDedicatedGuestVlanRangesResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type ListDedicatedGuestVlanRangesResponse struct {
+	Count                    int                        `json:"count"`
+	DedicatedGuestVlanRanges []*DedicatedGuestVlanRange `json:"dedicatedguestvlanrange"`
+}
+
+type DedicatedGuestVlanRange struct {
+	Account           string `json:"account"`
+	Domain            string `json:"domain"`
+	Domainid          string `json:"domainid"`
+	Guestvlanrange    string `json:"guestvlanrange"`
+	Id                string `json:"id"`
+	Physicalnetworkid int64  `json:"physicalnetworkid"`
+	Project           string `json:"project"`
+	Projectid         string `json:"projectid"`
+	Zoneid            int64  `json:"zoneid"`
 }
 
 type ListVlanIpRangesParams struct {
@@ -495,7 +830,7 @@ func (s *VLANService) GetVlanIpRangeByID(id string, opts ...OptionFunc) (*VlanIp
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -532,6 +867,7 @@ func (s *VLANService) ListVlanIpRanges(p *ListVlanIpRangesParams) (*ListVlanIpRa
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -541,133 +877,29 @@ type ListVlanIpRangesResponse struct {
 }
 
 type VlanIpRange struct {
-	Account           string `json:"account,omitempty"`
-	Description       string `json:"description,omitempty"`
-	Domain            string `json:"domain,omitempty"`
-	Domainid          string `json:"domainid,omitempty"`
-	Endip             string `json:"endip,omitempty"`
-	Endipv6           string `json:"endipv6,omitempty"`
-	Forvirtualnetwork bool   `json:"forvirtualnetwork,omitempty"`
-	Gateway           string `json:"gateway,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Ip6cidr           string `json:"ip6cidr,omitempty"`
-	Ip6gateway        string `json:"ip6gateway,omitempty"`
-	Netmask           string `json:"netmask,omitempty"`
-	Networkid         string `json:"networkid,omitempty"`
-	Physicalnetworkid string `json:"physicalnetworkid,omitempty"`
-	Podid             string `json:"podid,omitempty"`
-	Podname           string `json:"podname,omitempty"`
-	Project           string `json:"project,omitempty"`
-	Projectid         string `json:"projectid,omitempty"`
-	Startip           string `json:"startip,omitempty"`
-	Startipv6         string `json:"startipv6,omitempty"`
-	Vlan              string `json:"vlan,omitempty"`
-	Zoneid            string `json:"zoneid,omitempty"`
-}
-
-type DedicateGuestVlanRangeParams struct {
-	p map[string]interface{}
-}
-
-func (p *DedicateGuestVlanRangeParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["account"]; found {
-		u.Set("account", v.(string))
-	}
-	if v, found := p.p["domainid"]; found {
-		u.Set("domainid", v.(string))
-	}
-	if v, found := p.p["physicalnetworkid"]; found {
-		u.Set("physicalnetworkid", v.(string))
-	}
-	if v, found := p.p["projectid"]; found {
-		u.Set("projectid", v.(string))
-	}
-	if v, found := p.p["vlanrange"]; found {
-		u.Set("vlanrange", v.(string))
-	}
-	return u
-}
-
-func (p *DedicateGuestVlanRangeParams) SetAccount(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["account"] = v
-	return
-}
-
-func (p *DedicateGuestVlanRangeParams) SetDomainid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["domainid"] = v
-	return
-}
-
-func (p *DedicateGuestVlanRangeParams) SetPhysicalnetworkid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["physicalnetworkid"] = v
-	return
-}
-
-func (p *DedicateGuestVlanRangeParams) SetProjectid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["projectid"] = v
-	return
-}
-
-func (p *DedicateGuestVlanRangeParams) SetVlanrange(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["vlanrange"] = v
-	return
-}
-
-// You should always use this function to get a new DedicateGuestVlanRangeParams instance,
-// as then you are sure you have configured all required params
-func (s *VLANService) NewDedicateGuestVlanRangeParams(account string, domainid string, physicalnetworkid string, vlanrange string) *DedicateGuestVlanRangeParams {
-	p := &DedicateGuestVlanRangeParams{}
-	p.p = make(map[string]interface{})
-	p.p["account"] = account
-	p.p["domainid"] = domainid
-	p.p["physicalnetworkid"] = physicalnetworkid
-	p.p["vlanrange"] = vlanrange
-	return p
-}
-
-// Dedicates a guest vlan range to an account
-func (s *VLANService) DedicateGuestVlanRange(p *DedicateGuestVlanRangeParams) (*DedicateGuestVlanRangeResponse, error) {
-	resp, err := s.cs.newRequest("dedicateGuestVlanRange", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r DedicateGuestVlanRangeResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type DedicateGuestVlanRangeResponse struct {
-	Account           string `json:"account,omitempty"`
-	Domain            string `json:"domain,omitempty"`
-	Domainid          string `json:"domainid,omitempty"`
-	Guestvlanrange    string `json:"guestvlanrange,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Physicalnetworkid int64  `json:"physicalnetworkid,omitempty"`
-	Project           string `json:"project,omitempty"`
-	Projectid         string `json:"projectid,omitempty"`
-	Zoneid            int64  `json:"zoneid,omitempty"`
+	Account           string `json:"account"`
+	Description       string `json:"description"`
+	Domain            string `json:"domain"`
+	Domainid          string `json:"domainid"`
+	Endip             string `json:"endip"`
+	Endipv6           string `json:"endipv6"`
+	Forsystemvms      bool   `json:"forsystemvms"`
+	Forvirtualnetwork bool   `json:"forvirtualnetwork"`
+	Gateway           string `json:"gateway"`
+	Id                string `json:"id"`
+	Ip6cidr           string `json:"ip6cidr"`
+	Ip6gateway        string `json:"ip6gateway"`
+	Netmask           string `json:"netmask"`
+	Networkid         string `json:"networkid"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Podid             string `json:"podid"`
+	Podname           string `json:"podname"`
+	Project           string `json:"project"`
+	Projectid         string `json:"projectid"`
+	Startip           string `json:"startip"`
+	Startipv6         string `json:"startipv6"`
+	Vlan              string `json:"vlan"`
+	Zoneid            string `json:"zoneid"`
 }
 
 type ReleaseDedicatedGuestVlanRangeParams struct {
@@ -728,207 +960,12 @@ func (s *VLANService) ReleaseDedicatedGuestVlanRange(p *ReleaseDedicatedGuestVla
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type ReleaseDedicatedGuestVlanRangeResponse struct {
-	JobID       string `json:"jobid,omitempty"`
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     bool   `json:"success,omitempty"`
-}
-
-type ListDedicatedGuestVlanRangesParams struct {
-	p map[string]interface{}
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["account"]; found {
-		u.Set("account", v.(string))
-	}
-	if v, found := p.p["domainid"]; found {
-		u.Set("domainid", v.(string))
-	}
-	if v, found := p.p["guestvlanrange"]; found {
-		u.Set("guestvlanrange", v.(string))
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["keyword"]; found {
-		u.Set("keyword", v.(string))
-	}
-	if v, found := p.p["page"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("page", vv)
-	}
-	if v, found := p.p["pagesize"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("pagesize", vv)
-	}
-	if v, found := p.p["physicalnetworkid"]; found {
-		u.Set("physicalnetworkid", v.(string))
-	}
-	if v, found := p.p["projectid"]; found {
-		u.Set("projectid", v.(string))
-	}
-	if v, found := p.p["zoneid"]; found {
-		u.Set("zoneid", v.(string))
-	}
-	return u
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetAccount(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["account"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetDomainid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["domainid"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetGuestvlanrange(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["guestvlanrange"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetKeyword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["keyword"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetPage(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["page"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetPagesize(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["pagesize"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetPhysicalnetworkid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["physicalnetworkid"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetProjectid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["projectid"] = v
-	return
-}
-
-func (p *ListDedicatedGuestVlanRangesParams) SetZoneid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["zoneid"] = v
-	return
-}
-
-// You should always use this function to get a new ListDedicatedGuestVlanRangesParams instance,
-// as then you are sure you have configured all required params
-func (s *VLANService) NewListDedicatedGuestVlanRangesParams() *ListDedicatedGuestVlanRangesParams {
-	p := &ListDedicatedGuestVlanRangesParams{}
-	p.p = make(map[string]interface{})
-	return p
-}
-
-// This is a courtesy helper function, which in some cases may not work as expected!
-func (s *VLANService) GetDedicatedGuestVlanRangeByID(id string, opts ...OptionFunc) (*DedicatedGuestVlanRange, int, error) {
-	p := &ListDedicatedGuestVlanRangesParams{}
-	p.p = make(map[string]interface{})
-
-	p.p["id"] = id
-
-	for _, fn := range opts {
-		if err := fn(s.cs, p); err != nil {
-			return nil, -1, err
-		}
-	}
-
-	l, err := s.ListDedicatedGuestVlanRanges(p)
-	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf(
-			"Invalid parameter id value=%s due to incorrect long value format, "+
-				"or entity does not exist", id)) {
-			return nil, 0, fmt.Errorf("No match found for %s: %+v", id, l)
-		}
-		return nil, -1, err
-	}
-
-	if l.Count == 0 {
-		return nil, l.Count, fmt.Errorf("No match found for %s: %+v", id, l)
-	}
-
-	if l.Count == 1 {
-		return l.DedicatedGuestVlanRanges[0], l.Count, nil
-	}
-	return nil, l.Count, fmt.Errorf("There is more then one result for DedicatedGuestVlanRange UUID: %s!", id)
-}
-
-// Lists dedicated guest vlan ranges
-func (s *VLANService) ListDedicatedGuestVlanRanges(p *ListDedicatedGuestVlanRangesParams) (*ListDedicatedGuestVlanRangesResponse, error) {
-	resp, err := s.cs.newRequest("listDedicatedGuestVlanRanges", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r ListDedicatedGuestVlanRangesResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type ListDedicatedGuestVlanRangesResponse struct {
-	Count                    int                        `json:"count"`
-	DedicatedGuestVlanRanges []*DedicatedGuestVlanRange `json:"dedicatedguestvlanrange"`
-}
-
-type DedicatedGuestVlanRange struct {
-	Account           string `json:"account,omitempty"`
-	Domain            string `json:"domain,omitempty"`
-	Domainid          string `json:"domainid,omitempty"`
-	Guestvlanrange    string `json:"guestvlanrange,omitempty"`
-	Id                string `json:"id,omitempty"`
-	Physicalnetworkid int64  `json:"physicalnetworkid,omitempty"`
-	Project           string `json:"project,omitempty"`
-	Projectid         string `json:"projectid,omitempty"`
-	Zoneid            int64  `json:"zoneid,omitempty"`
+	JobID       string `json:"jobid"`
+	Displaytext string `json:"displaytext"`
+	Success     bool   `json:"success"`
 }

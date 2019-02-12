@@ -3,8 +3,8 @@ description: |
     The `tencentcloud-cvm` Packer builder plugin provide the capability to build
     customized images based on an existing base images.
 layout: docs
-page_title: Tencentcloud Image Builder
-sidebar_current: 'docs-builders-tencentcloud-ecs'
+page_title: 'Tencentcloud Image Builder'
+sidebar_current: 'docs-builders-tencentcloud-cvm'
 ---
 
 # Tencentcloud Image Builder
@@ -88,16 +88,16 @@ builder.
     -  LOCAL_BASIC: 50
     -  Other: 50 ~ 1000 (need whitelist if > 50)
 
--   `vpc_id` - Specify vpc your cvm will be launched by.
+-   `vpc_id` (string) - Specify vpc your cvm will be launched by.
 
--   `vpc_name` - Specify vpc name you will create. if `vpc_id` is not set, packer will
+-   `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, packer will
     create a vpc for you named this parameter.
 
 -   `cidr_block` (boolean) - Specify cider block of the vpc you will create if `vpc_id` not set
 
--   `subnet_id` - Specify subnet your cvm will be launched by.
+-   `subnet_id` (string) - Specify subnet your cvm will be launched by.
 
--   'subnet_name' - Specify subnet name you will create. if `subnet_id` is not set, packer will
+-   `subnet_name` (string) - Specify subnet name you will create. if `subnet_id` is not set, packer will
     create a subnet for you named this parameter.
 
 -   `subnect_cidr_block` (boolean) - Specify cider block of the subnet you will create if
@@ -106,15 +106,15 @@ builder.
 -   `internet_max_bandwidth_out` (number) - Max bandwidth out your cvm will be launched by(in MB).
     values can be set between 1 ~ 100.
 
--   `security_group_id` - Specify security group your cvm will be launched by.
+-   `security_group_id` (string) - Specify security group your cvm will be launched by.
 
--   `security_group_name` - Specify security name you will create if `security_group_id` not set.
+-   `security_group_name` (string) - Specify security name you will create if `security_group_id` not set.
 
--   `user_data` - userdata.
+-   `user_data` (string) - userdata.
 
--   `user_data_file` - userdata file.
+-   `user_data_file` (string) - userdata file.
 
--   `host_name` - host name.
+-   `host_name` (string) - host name.
 
 ## Basic Example
 

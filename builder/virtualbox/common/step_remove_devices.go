@@ -20,7 +20,8 @@ import (
 //
 // Produces:
 type StepRemoveDevices struct {
-	Bundling VBoxBundleConfig
+	Bundling                VBoxBundleConfig
+	GuestAdditionsInterface string
 }
 
 func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -100,11 +101,19 @@ func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) mul
 
 	if _, ok := state.GetOk("guest_additions_attached"); ok {
 		ui.Message("Removing guest additions drive...")
+		controllerName := "IDE Controller"
+		port := "1"
+		device := "0"
+		if s.GuestAdditionsInterface == "sata" {
+			controllerName = "SATA Controller"
+			port = "2"
+			device = "0"
+		}
 		command := []string{
 			"storageattach", vmName,
-			"--storagectl", "IDE Controller",
-			"--port", "1",
-			"--device", "0",
+			"--storagectl", controllerName,
+			"--port", port,
+			"--device", device,
 			"--medium", "none",
 		}
 		if err := driver.VBoxManage(command...); err != nil {

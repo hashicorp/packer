@@ -20,6 +20,7 @@ import (
 	"runtime"
 	"strings"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -191,8 +192,9 @@ func (d *DownloadClient) Get() (string, error) {
 			}
 
 			err = fmt.Errorf(
-				"checksums didn't match expected: %s",
-				hex.EncodeToString(d.config.Checksum))
+				"checksums didn't match. expected %s and got %s",
+				hex.EncodeToString(d.config.Checksum),
+				hex.EncodeToString(d.config.Hash.Sum(nil)))
 		}
 	}
 
@@ -256,11 +258,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		req.Header.Set("User-Agent", d.userAgent)
 	}
 
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
-	}
+	httpClient := commonhelper.HttpClientWithEnvironmentProxy()
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp == nil {

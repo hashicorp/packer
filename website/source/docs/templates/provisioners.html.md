@@ -81,6 +81,7 @@ The values within `only` or `except` are *build names*, not builder types. If
 you recall, build names by default are just their builder type, but if you
 specify a custom `name` parameter, then you should use that as the value
 instead of the type.
+Values within `except` could also be a *post-processor* name.
 
 ## Build-Specific Overrides
 

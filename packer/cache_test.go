@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 type TestCache struct{}
@@ -30,7 +32,7 @@ func TestFileCache_Implements(t *testing.T) {
 }
 
 func TestFileCache(t *testing.T) {
-	cacheDir, err := ioutil.TempDir("", "packer")
+	cacheDir, err := tmp.Dir("packer")
 	if err != nil {
 		t.Fatalf("error creating temporary dir: %s", err)
 	}

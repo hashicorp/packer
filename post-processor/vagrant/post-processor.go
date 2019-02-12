@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 )
@@ -95,7 +96,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
-	dir, err := ioutil.TempDir("", "packer")
+	dir, err := tmp.Dir("packer")
 	if err != nil {
 		return nil, false, err
 	}

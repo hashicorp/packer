@@ -6,18 +6,30 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/go-cleanhttp"
+	cleanhttp "github.com/hashicorp/go-cleanhttp"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/template/interpolate"
+	vaultapi "github.com/hashicorp/vault/api"
 )
+
+type VaultAWSEngineOptions struct {
+	Name       string `mapstructure:"name"`
+	RoleARN    string `mapstructure:"role_arn"`
+	TTL        string `mapstructure:"ttl"`
+	EngineName string `mapstructure:"engine_name"`
+}
+
+func (v *VaultAWSEngineOptions) Empty() bool {
+	return len(v.Name) == 0 && len(v.RoleARN) == 0 &&
+		len(v.EngineName) == 0 && len(v.TTL) == 0
+}
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
@@ -33,6 +45,7 @@ type AccessConfig struct {
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
 	session               *session.Session
+	VaultAWSEngine        VaultAWSEngineOptions `mapstructure:"vault_aws_engine"`
 
 	getEC2Connection func() ec2iface.EC2API
 }
@@ -45,21 +58,15 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+
 	staticCreds := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token)
 	if _, err := staticCreds.Get(); err != credentials.ErrStaticCredentialsEmpty {
 		config.WithCredentials(staticCreds)
 	}
 
-	// default is 3, and when it was causing failures for users being throttled
-	// retries are exponentially backed off.
-	config = config.WithMaxRetries(8)
-
-	region, err := c.region()
-	if err != nil {
-		return nil, fmt.Errorf("Could not get region, "+
-			"probably because it's not set or we're not running on AWS. %s", err)
+	if c.RawRegion != "" {
+		config = config.WithRegion(c.RawRegion)
 	}
-	config = config.WithRegion(region)
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -88,24 +95,24 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		}
 	}
 
-	if sess, err := session.NewSessionWithOptions(opts); err != nil {
+	sess, err := session.NewSessionWithOptions(opts)
+	if err != nil {
 		return nil, err
-	} else {
-		log.Printf("Found region %s", *sess.Config.Region)
-		c.session = sess
-
-		cp, err := c.session.Config.Credentials.Get()
-		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-				return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
-					"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
-					"for more information on providing credentials for the AWS Builder.")
-			} else {
-				return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
-			}
-		}
-		log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 	}
+	log.Printf("Found region %s", *sess.Config.Region)
+	c.session = sess
+
+	cp, err := c.session.Config.Credentials.Get()
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+			return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
+				"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
+				"for more information on providing credentials for the AWS Builder.")
+		} else {
+			return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+		}
+	}
+	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 
 	if c.DecodeAuthZMessages {
 		DecodeAuthZMessages(c.session)
@@ -130,24 +137,37 @@ func (c *AccessConfig) IsChinaCloud() bool {
 	return strings.HasPrefix(c.SessionRegion(), "cn-")
 }
 
-// metadataRegion returns the region from the metadata service
-func (c *AccessConfig) metadataRegion() (string, error) {
-
-	client := cleanhttp.DefaultClient()
-
-	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
-	client.Timeout = 100 * time.Millisecond
-	ec2meta := ec2metadata.New(session.New(), &aws.Config{
-		HTTPClient: client,
-	})
-	return ec2meta.Region()
-}
-
-func (c *AccessConfig) region() (string, error) {
-	if c.RawRegion != "" {
-		return c.RawRegion, nil
+func (c *AccessConfig) GetCredsFromVault() error {
+	// const EnvVaultAddress = "VAULT_ADDR"
+	// const EnvVaultToken = "VAULT_TOKEN"
+	vaultConfig := vaultapi.DefaultConfig()
+	cli, err := vaultapi.NewClient(vaultConfig)
+	if err != nil {
+		return fmt.Errorf("Error getting Vault client: %s", err)
 	}
-	return c.metadataRegion()
+	if c.VaultAWSEngine.EngineName == "" {
+		c.VaultAWSEngine.EngineName = "aws"
+	}
+	path := fmt.Sprintf("/%s/creds/%s", c.VaultAWSEngine.EngineName,
+		c.VaultAWSEngine.Name)
+	secret, err := cli.Logical().Read(path)
+	if err != nil {
+		return fmt.Errorf("Error reading vault secret: %s", err)
+	}
+	if secret == nil {
+		return fmt.Errorf("Vault Secret does not exist at the given path.")
+	}
+
+	c.AccessKey = secret.Data["access_key"].(string)
+	c.SecretKey = secret.Data["secret_key"].(string)
+	token := secret.Data["security_token"]
+	if token != nil {
+		c.Token = token.(string)
+	} else {
+		c.Token = ""
+	}
+
+	return nil
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
@@ -156,8 +176,23 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.SkipMetadataApiCheck {
 		log.Println("(WARN) skip_metadata_api_check ignored.")
 	}
-	// Either both access and secret key must be set or neither of them should
-	// be.
+
+	// Make sure it's obvious from the config how we're getting credentials:
+	// Vault, Packer config, or environemnt.
+	if !c.VaultAWSEngine.Empty() {
+		if len(c.AccessKey) > 0 {
+			errs = append(errs,
+				fmt.Errorf("If you have set vault_aws_engine, you must not set"+
+					" the access_key or secret_key."))
+		}
+		// Go ahead and grab those credentials from Vault now, so we can set
+		// the keys and token now.
+		err := c.GetCredsFromVault()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
@@ -174,5 +209,10 @@ func (c *AccessConfig) NewEC2Connection() (ec2iface.EC2API, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ec2.New(sess), nil
+
+	ec2conn := ec2.New(sess, &aws.Config{
+		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+	})
+
+	return ec2conn, nil
 }

@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	commonhelper "github.com/hashicorp/packer/helper/common"
 )
 
 type VagrantCloudClient struct {
@@ -37,11 +39,7 @@ func (v VagrantCloudErrors) FormatErrors() string {
 
 func (v VagrantCloudClient) New(baseUrl string, token string) (*VagrantCloudClient, error) {
 	c := &VagrantCloudClient{
-		client: &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		},
+		client:      commonhelper.HttpClientWithEnvironmentProxy(),
 		BaseURL:     baseUrl,
 		AccessToken: token,
 	}

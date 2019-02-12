@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,13 +70,13 @@ func (s *InternalLBService) NewConfigureInternalLoadBalancerElementParams(enable
 }
 
 // Configures an Internal Load Balancer element.
-func (s *InternalLBService) ConfigureInternalLoadBalancerElement(p *ConfigureInternalLoadBalancerElementParams) (*ConfigureInternalLoadBalancerElementResponse, error) {
+func (s *InternalLBService) ConfigureInternalLoadBalancerElement(p *ConfigureInternalLoadBalancerElementParams) (*InternalLoadBalancerElementResponse, error) {
 	resp, err := s.cs.newRequest("configureInternalLoadBalancerElement", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r ConfigureInternalLoadBalancerElementResponse
+	var r InternalLoadBalancerElementResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
@@ -100,14 +100,15 @@ func (s *InternalLBService) ConfigureInternalLoadBalancerElement(p *ConfigureInt
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
-type ConfigureInternalLoadBalancerElementResponse struct {
-	JobID   string `json:"jobid,omitempty"`
-	Enabled bool   `json:"enabled,omitempty"`
-	Id      string `json:"id,omitempty"`
-	Nspid   string `json:"nspid,omitempty"`
+type InternalLoadBalancerElementResponse struct {
+	JobID   string `json:"jobid"`
+	Enabled bool   `json:"enabled"`
+	Id      string `json:"id"`
+	Nspid   string `json:"nspid"`
 }
 
 type CreateInternalLoadBalancerElementParams struct {
@@ -173,14 +174,15 @@ func (s *InternalLBService) CreateInternalLoadBalancerElement(p *CreateInternalL
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type CreateInternalLoadBalancerElementResponse struct {
-	JobID   string `json:"jobid,omitempty"`
-	Enabled bool   `json:"enabled,omitempty"`
-	Id      string `json:"id,omitempty"`
-	Nspid   string `json:"nspid,omitempty"`
+	JobID   string `json:"jobid"`
+	Enabled bool   `json:"enabled"`
+	Id      string `json:"id"`
+	Nspid   string `json:"nspid"`
 }
 
 type ListInternalLoadBalancerElementsParams struct {
@@ -279,7 +281,7 @@ func (s *InternalLBService) GetInternalLoadBalancerElementByID(id string, opts .
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -316,6 +318,7 @@ func (s *InternalLBService) ListInternalLoadBalancerElements(p *ListInternalLoad
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -325,297 +328,9 @@ type ListInternalLoadBalancerElementsResponse struct {
 }
 
 type InternalLoadBalancerElement struct {
-	Enabled bool   `json:"enabled,omitempty"`
-	Id      string `json:"id,omitempty"`
-	Nspid   string `json:"nspid,omitempty"`
-}
-
-type StopInternalLoadBalancerVMParams struct {
-	p map[string]interface{}
-}
-
-func (p *StopInternalLoadBalancerVMParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["forced"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("forced", vv)
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *StopInternalLoadBalancerVMParams) SetForced(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["forced"] = v
-	return
-}
-
-func (p *StopInternalLoadBalancerVMParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new StopInternalLoadBalancerVMParams instance,
-// as then you are sure you have configured all required params
-func (s *InternalLBService) NewStopInternalLoadBalancerVMParams(id string) *StopInternalLoadBalancerVMParams {
-	p := &StopInternalLoadBalancerVMParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Stops an Internal LB vm.
-func (s *InternalLBService) StopInternalLoadBalancerVM(p *StopInternalLoadBalancerVMParams) (*StopInternalLoadBalancerVMResponse, error) {
-	resp, err := s.cs.newRequest("stopInternalLoadBalancerVM", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r StopInternalLoadBalancerVMResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type StopInternalLoadBalancerVMResponse struct {
-	JobID               string `json:"jobid,omitempty"`
-	Account             string `json:"account,omitempty"`
-	Created             string `json:"created,omitempty"`
-	Dns1                string `json:"dns1,omitempty"`
-	Dns2                string `json:"dns2,omitempty"`
-	Domain              string `json:"domain,omitempty"`
-	Domainid            string `json:"domainid,omitempty"`
-	Gateway             string `json:"gateway,omitempty"`
-	Guestipaddress      string `json:"guestipaddress,omitempty"`
-	Guestmacaddress     string `json:"guestmacaddress,omitempty"`
-	Guestnetmask        string `json:"guestnetmask,omitempty"`
-	Guestnetworkid      string `json:"guestnetworkid,omitempty"`
-	Guestnetworkname    string `json:"guestnetworkname,omitempty"`
-	Hostid              string `json:"hostid,omitempty"`
-	Hostname            string `json:"hostname,omitempty"`
-	Hypervisor          string `json:"hypervisor,omitempty"`
-	Id                  string `json:"id,omitempty"`
-	Ip6dns1             string `json:"ip6dns1,omitempty"`
-	Ip6dns2             string `json:"ip6dns2,omitempty"`
-	Isredundantrouter   bool   `json:"isredundantrouter,omitempty"`
-	Linklocalip         string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask    string `json:"linklocalnetmask,omitempty"`
-	Linklocalnetworkid  string `json:"linklocalnetworkid,omitempty"`
-	Name                string `json:"name,omitempty"`
-	Networkdomain       string `json:"networkdomain,omitempty"`
-	Nic                 []struct {
-		Broadcasturi string `json:"broadcasturi,omitempty"`
-		Deviceid     string `json:"deviceid,omitempty"`
-		Gateway      string `json:"gateway,omitempty"`
-		Id           string `json:"id,omitempty"`
-		Ip6address   string `json:"ip6address,omitempty"`
-		Ip6cidr      string `json:"ip6cidr,omitempty"`
-		Ip6gateway   string `json:"ip6gateway,omitempty"`
-		Ipaddress    string `json:"ipaddress,omitempty"`
-		Isdefault    bool   `json:"isdefault,omitempty"`
-		Isolationuri string `json:"isolationuri,omitempty"`
-		Macaddress   string `json:"macaddress,omitempty"`
-		Netmask      string `json:"netmask,omitempty"`
-		Networkid    string `json:"networkid,omitempty"`
-		Networkname  string `json:"networkname,omitempty"`
-		Secondaryip  []struct {
-			Id        string `json:"id,omitempty"`
-			Ipaddress string `json:"ipaddress,omitempty"`
-		} `json:"secondaryip,omitempty"`
-		Traffictype      string `json:"traffictype,omitempty"`
-		Type             string `json:"type,omitempty"`
-		Virtualmachineid string `json:"virtualmachineid,omitempty"`
-	} `json:"nic,omitempty"`
-	Podid               string `json:"podid,omitempty"`
-	Project             string `json:"project,omitempty"`
-	Projectid           string `json:"projectid,omitempty"`
-	Publicip            string `json:"publicip,omitempty"`
-	Publicmacaddress    string `json:"publicmacaddress,omitempty"`
-	Publicnetmask       string `json:"publicnetmask,omitempty"`
-	Publicnetworkid     string `json:"publicnetworkid,omitempty"`
-	Redundantstate      string `json:"redundantstate,omitempty"`
-	Requiresupgrade     bool   `json:"requiresupgrade,omitempty"`
-	Role                string `json:"role,omitempty"`
-	Scriptsversion      string `json:"scriptsversion,omitempty"`
-	Serviceofferingid   string `json:"serviceofferingid,omitempty"`
-	Serviceofferingname string `json:"serviceofferingname,omitempty"`
-	State               string `json:"state,omitempty"`
-	Templateid          string `json:"templateid,omitempty"`
-	Version             string `json:"version,omitempty"`
-	Vpcid               string `json:"vpcid,omitempty"`
-	Vpcname             string `json:"vpcname,omitempty"`
-	Zoneid              string `json:"zoneid,omitempty"`
-	Zonename            string `json:"zonename,omitempty"`
-}
-
-type StartInternalLoadBalancerVMParams struct {
-	p map[string]interface{}
-}
-
-func (p *StartInternalLoadBalancerVMParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *StartInternalLoadBalancerVMParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new StartInternalLoadBalancerVMParams instance,
-// as then you are sure you have configured all required params
-func (s *InternalLBService) NewStartInternalLoadBalancerVMParams(id string) *StartInternalLoadBalancerVMParams {
-	p := &StartInternalLoadBalancerVMParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Starts an existing internal lb vm.
-func (s *InternalLBService) StartInternalLoadBalancerVM(p *StartInternalLoadBalancerVMParams) (*StartInternalLoadBalancerVMResponse, error) {
-	resp, err := s.cs.newRequest("startInternalLoadBalancerVM", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r StartInternalLoadBalancerVMResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type StartInternalLoadBalancerVMResponse struct {
-	JobID               string `json:"jobid,omitempty"`
-	Account             string `json:"account,omitempty"`
-	Created             string `json:"created,omitempty"`
-	Dns1                string `json:"dns1,omitempty"`
-	Dns2                string `json:"dns2,omitempty"`
-	Domain              string `json:"domain,omitempty"`
-	Domainid            string `json:"domainid,omitempty"`
-	Gateway             string `json:"gateway,omitempty"`
-	Guestipaddress      string `json:"guestipaddress,omitempty"`
-	Guestmacaddress     string `json:"guestmacaddress,omitempty"`
-	Guestnetmask        string `json:"guestnetmask,omitempty"`
-	Guestnetworkid      string `json:"guestnetworkid,omitempty"`
-	Guestnetworkname    string `json:"guestnetworkname,omitempty"`
-	Hostid              string `json:"hostid,omitempty"`
-	Hostname            string `json:"hostname,omitempty"`
-	Hypervisor          string `json:"hypervisor,omitempty"`
-	Id                  string `json:"id,omitempty"`
-	Ip6dns1             string `json:"ip6dns1,omitempty"`
-	Ip6dns2             string `json:"ip6dns2,omitempty"`
-	Isredundantrouter   bool   `json:"isredundantrouter,omitempty"`
-	Linklocalip         string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask    string `json:"linklocalnetmask,omitempty"`
-	Linklocalnetworkid  string `json:"linklocalnetworkid,omitempty"`
-	Name                string `json:"name,omitempty"`
-	Networkdomain       string `json:"networkdomain,omitempty"`
-	Nic                 []struct {
-		Broadcasturi string `json:"broadcasturi,omitempty"`
-		Deviceid     string `json:"deviceid,omitempty"`
-		Gateway      string `json:"gateway,omitempty"`
-		Id           string `json:"id,omitempty"`
-		Ip6address   string `json:"ip6address,omitempty"`
-		Ip6cidr      string `json:"ip6cidr,omitempty"`
-		Ip6gateway   string `json:"ip6gateway,omitempty"`
-		Ipaddress    string `json:"ipaddress,omitempty"`
-		Isdefault    bool   `json:"isdefault,omitempty"`
-		Isolationuri string `json:"isolationuri,omitempty"`
-		Macaddress   string `json:"macaddress,omitempty"`
-		Netmask      string `json:"netmask,omitempty"`
-		Networkid    string `json:"networkid,omitempty"`
-		Networkname  string `json:"networkname,omitempty"`
-		Secondaryip  []struct {
-			Id        string `json:"id,omitempty"`
-			Ipaddress string `json:"ipaddress,omitempty"`
-		} `json:"secondaryip,omitempty"`
-		Traffictype      string `json:"traffictype,omitempty"`
-		Type             string `json:"type,omitempty"`
-		Virtualmachineid string `json:"virtualmachineid,omitempty"`
-	} `json:"nic,omitempty"`
-	Podid               string `json:"podid,omitempty"`
-	Project             string `json:"project,omitempty"`
-	Projectid           string `json:"projectid,omitempty"`
-	Publicip            string `json:"publicip,omitempty"`
-	Publicmacaddress    string `json:"publicmacaddress,omitempty"`
-	Publicnetmask       string `json:"publicnetmask,omitempty"`
-	Publicnetworkid     string `json:"publicnetworkid,omitempty"`
-	Redundantstate      string `json:"redundantstate,omitempty"`
-	Requiresupgrade     bool   `json:"requiresupgrade,omitempty"`
-	Role                string `json:"role,omitempty"`
-	Scriptsversion      string `json:"scriptsversion,omitempty"`
-	Serviceofferingid   string `json:"serviceofferingid,omitempty"`
-	Serviceofferingname string `json:"serviceofferingname,omitempty"`
-	State               string `json:"state,omitempty"`
-	Templateid          string `json:"templateid,omitempty"`
-	Version             string `json:"version,omitempty"`
-	Vpcid               string `json:"vpcid,omitempty"`
-	Vpcname             string `json:"vpcname,omitempty"`
-	Zoneid              string `json:"zoneid,omitempty"`
-	Zonename            string `json:"zonename,omitempty"`
+	Enabled bool   `json:"enabled"`
+	Id      string `json:"id"`
+	Nspid   string `json:"nspid"`
 }
 
 type ListInternalLoadBalancerVMsParams struct {
@@ -837,7 +552,7 @@ func (s *InternalLBService) GetInternalLoadBalancerVMID(name string, opts ...Opt
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -887,7 +602,7 @@ func (s *InternalLBService) GetInternalLoadBalancerVMByID(id string, opts ...Opt
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -924,6 +639,7 @@ func (s *InternalLBService) ListInternalLoadBalancerVMs(p *ListInternalLoadBalan
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -933,72 +649,296 @@ type ListInternalLoadBalancerVMsResponse struct {
 }
 
 type InternalLoadBalancerVM struct {
-	Account             string `json:"account,omitempty"`
-	Created             string `json:"created,omitempty"`
-	Dns1                string `json:"dns1,omitempty"`
-	Dns2                string `json:"dns2,omitempty"`
-	Domain              string `json:"domain,omitempty"`
-	Domainid            string `json:"domainid,omitempty"`
-	Gateway             string `json:"gateway,omitempty"`
-	Guestipaddress      string `json:"guestipaddress,omitempty"`
-	Guestmacaddress     string `json:"guestmacaddress,omitempty"`
-	Guestnetmask        string `json:"guestnetmask,omitempty"`
-	Guestnetworkid      string `json:"guestnetworkid,omitempty"`
-	Guestnetworkname    string `json:"guestnetworkname,omitempty"`
-	Hostid              string `json:"hostid,omitempty"`
-	Hostname            string `json:"hostname,omitempty"`
-	Hypervisor          string `json:"hypervisor,omitempty"`
-	Id                  string `json:"id,omitempty"`
-	Ip6dns1             string `json:"ip6dns1,omitempty"`
-	Ip6dns2             string `json:"ip6dns2,omitempty"`
-	Isredundantrouter   bool   `json:"isredundantrouter,omitempty"`
-	Linklocalip         string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask    string `json:"linklocalnetmask,omitempty"`
-	Linklocalnetworkid  string `json:"linklocalnetworkid,omitempty"`
-	Name                string `json:"name,omitempty"`
-	Networkdomain       string `json:"networkdomain,omitempty"`
-	Nic                 []struct {
-		Broadcasturi string `json:"broadcasturi,omitempty"`
-		Deviceid     string `json:"deviceid,omitempty"`
-		Gateway      string `json:"gateway,omitempty"`
-		Id           string `json:"id,omitempty"`
-		Ip6address   string `json:"ip6address,omitempty"`
-		Ip6cidr      string `json:"ip6cidr,omitempty"`
-		Ip6gateway   string `json:"ip6gateway,omitempty"`
-		Ipaddress    string `json:"ipaddress,omitempty"`
-		Isdefault    bool   `json:"isdefault,omitempty"`
-		Isolationuri string `json:"isolationuri,omitempty"`
-		Macaddress   string `json:"macaddress,omitempty"`
-		Netmask      string `json:"netmask,omitempty"`
-		Networkid    string `json:"networkid,omitempty"`
-		Networkname  string `json:"networkname,omitempty"`
-		Secondaryip  []struct {
-			Id        string `json:"id,omitempty"`
-			Ipaddress string `json:"ipaddress,omitempty"`
-		} `json:"secondaryip,omitempty"`
-		Traffictype      string `json:"traffictype,omitempty"`
-		Type             string `json:"type,omitempty"`
-		Virtualmachineid string `json:"virtualmachineid,omitempty"`
-	} `json:"nic,omitempty"`
-	Podid               string `json:"podid,omitempty"`
-	Project             string `json:"project,omitempty"`
-	Projectid           string `json:"projectid,omitempty"`
-	Publicip            string `json:"publicip,omitempty"`
-	Publicmacaddress    string `json:"publicmacaddress,omitempty"`
-	Publicnetmask       string `json:"publicnetmask,omitempty"`
-	Publicnetworkid     string `json:"publicnetworkid,omitempty"`
-	Redundantstate      string `json:"redundantstate,omitempty"`
-	Requiresupgrade     bool   `json:"requiresupgrade,omitempty"`
-	Role                string `json:"role,omitempty"`
-	Scriptsversion      string `json:"scriptsversion,omitempty"`
-	Serviceofferingid   string `json:"serviceofferingid,omitempty"`
-	Serviceofferingname string `json:"serviceofferingname,omitempty"`
-	State               string `json:"state,omitempty"`
-	Templateid          string `json:"templateid,omitempty"`
-	Version             string `json:"version,omitempty"`
-	Vpcid               string `json:"vpcid,omitempty"`
-	Vpcname             string `json:"vpcname,omitempty"`
-	Zoneid              string `json:"zoneid,omitempty"`
-	Zonename            string `json:"zonename,omitempty"`
+	Account             string `json:"account"`
+	Created             string `json:"created"`
+	Dns1                string `json:"dns1"`
+	Dns2                string `json:"dns2"`
+	Domain              string `json:"domain"`
+	Domainid            string `json:"domainid"`
+	Gateway             string `json:"gateway"`
+	Guestipaddress      string `json:"guestipaddress"`
+	Guestmacaddress     string `json:"guestmacaddress"`
+	Guestnetmask        string `json:"guestnetmask"`
+	Guestnetworkid      string `json:"guestnetworkid"`
+	Guestnetworkname    string `json:"guestnetworkname"`
+	Hostid              string `json:"hostid"`
+	Hostname            string `json:"hostname"`
+	Hypervisor          string `json:"hypervisor"`
+	Id                  string `json:"id"`
+	Ip6dns1             string `json:"ip6dns1"`
+	Ip6dns2             string `json:"ip6dns2"`
+	Isredundantrouter   bool   `json:"isredundantrouter"`
+	Linklocalip         string `json:"linklocalip"`
+	Linklocalmacaddress string `json:"linklocalmacaddress"`
+	Linklocalnetmask    string `json:"linklocalnetmask"`
+	Linklocalnetworkid  string `json:"linklocalnetworkid"`
+	Name                string `json:"name"`
+	Networkdomain       string `json:"networkdomain"`
+	Nic                 []Nic  `json:"nic"`
+	Podid               string `json:"podid"`
+	Project             string `json:"project"`
+	Projectid           string `json:"projectid"`
+	Publicip            string `json:"publicip"`
+	Publicmacaddress    string `json:"publicmacaddress"`
+	Publicnetmask       string `json:"publicnetmask"`
+	Publicnetworkid     string `json:"publicnetworkid"`
+	Redundantstate      string `json:"redundantstate"`
+	Requiresupgrade     bool   `json:"requiresupgrade"`
+	Role                string `json:"role"`
+	Scriptsversion      string `json:"scriptsversion"`
+	Serviceofferingid   string `json:"serviceofferingid"`
+	Serviceofferingname string `json:"serviceofferingname"`
+	State               string `json:"state"`
+	Templateid          string `json:"templateid"`
+	Version             string `json:"version"`
+	Vpcid               string `json:"vpcid"`
+	Vpcname             string `json:"vpcname"`
+	Zoneid              string `json:"zoneid"`
+	Zonename            string `json:"zonename"`
+}
+
+type StartInternalLoadBalancerVMParams struct {
+	p map[string]interface{}
+}
+
+func (p *StartInternalLoadBalancerVMParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *StartInternalLoadBalancerVMParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new StartInternalLoadBalancerVMParams instance,
+// as then you are sure you have configured all required params
+func (s *InternalLBService) NewStartInternalLoadBalancerVMParams(id string) *StartInternalLoadBalancerVMParams {
+	p := &StartInternalLoadBalancerVMParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Starts an existing internal lb vm.
+func (s *InternalLBService) StartInternalLoadBalancerVM(p *StartInternalLoadBalancerVMParams) (*StartInternalLoadBalancerVMResponse, error) {
+	resp, err := s.cs.newRequest("startInternalLoadBalancerVM", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r StartInternalLoadBalancerVMResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type StartInternalLoadBalancerVMResponse struct {
+	JobID               string `json:"jobid"`
+	Account             string `json:"account"`
+	Created             string `json:"created"`
+	Dns1                string `json:"dns1"`
+	Dns2                string `json:"dns2"`
+	Domain              string `json:"domain"`
+	Domainid            string `json:"domainid"`
+	Gateway             string `json:"gateway"`
+	Guestipaddress      string `json:"guestipaddress"`
+	Guestmacaddress     string `json:"guestmacaddress"`
+	Guestnetmask        string `json:"guestnetmask"`
+	Guestnetworkid      string `json:"guestnetworkid"`
+	Guestnetworkname    string `json:"guestnetworkname"`
+	Hostid              string `json:"hostid"`
+	Hostname            string `json:"hostname"`
+	Hypervisor          string `json:"hypervisor"`
+	Id                  string `json:"id"`
+	Ip6dns1             string `json:"ip6dns1"`
+	Ip6dns2             string `json:"ip6dns2"`
+	Isredundantrouter   bool   `json:"isredundantrouter"`
+	Linklocalip         string `json:"linklocalip"`
+	Linklocalmacaddress string `json:"linklocalmacaddress"`
+	Linklocalnetmask    string `json:"linklocalnetmask"`
+	Linklocalnetworkid  string `json:"linklocalnetworkid"`
+	Name                string `json:"name"`
+	Networkdomain       string `json:"networkdomain"`
+	Nic                 []Nic  `json:"nic"`
+	Podid               string `json:"podid"`
+	Project             string `json:"project"`
+	Projectid           string `json:"projectid"`
+	Publicip            string `json:"publicip"`
+	Publicmacaddress    string `json:"publicmacaddress"`
+	Publicnetmask       string `json:"publicnetmask"`
+	Publicnetworkid     string `json:"publicnetworkid"`
+	Redundantstate      string `json:"redundantstate"`
+	Requiresupgrade     bool   `json:"requiresupgrade"`
+	Role                string `json:"role"`
+	Scriptsversion      string `json:"scriptsversion"`
+	Serviceofferingid   string `json:"serviceofferingid"`
+	Serviceofferingname string `json:"serviceofferingname"`
+	State               string `json:"state"`
+	Templateid          string `json:"templateid"`
+	Version             string `json:"version"`
+	Vpcid               string `json:"vpcid"`
+	Vpcname             string `json:"vpcname"`
+	Zoneid              string `json:"zoneid"`
+	Zonename            string `json:"zonename"`
+}
+
+type StopInternalLoadBalancerVMParams struct {
+	p map[string]interface{}
+}
+
+func (p *StopInternalLoadBalancerVMParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["forced"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("forced", vv)
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *StopInternalLoadBalancerVMParams) SetForced(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["forced"] = v
+	return
+}
+
+func (p *StopInternalLoadBalancerVMParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new StopInternalLoadBalancerVMParams instance,
+// as then you are sure you have configured all required params
+func (s *InternalLBService) NewStopInternalLoadBalancerVMParams(id string) *StopInternalLoadBalancerVMParams {
+	p := &StopInternalLoadBalancerVMParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Stops an Internal LB vm.
+func (s *InternalLBService) StopInternalLoadBalancerVM(p *StopInternalLoadBalancerVMParams) (*StopInternalLoadBalancerVMResponse, error) {
+	resp, err := s.cs.newRequest("stopInternalLoadBalancerVM", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r StopInternalLoadBalancerVMResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type StopInternalLoadBalancerVMResponse struct {
+	JobID               string `json:"jobid"`
+	Account             string `json:"account"`
+	Created             string `json:"created"`
+	Dns1                string `json:"dns1"`
+	Dns2                string `json:"dns2"`
+	Domain              string `json:"domain"`
+	Domainid            string `json:"domainid"`
+	Gateway             string `json:"gateway"`
+	Guestipaddress      string `json:"guestipaddress"`
+	Guestmacaddress     string `json:"guestmacaddress"`
+	Guestnetmask        string `json:"guestnetmask"`
+	Guestnetworkid      string `json:"guestnetworkid"`
+	Guestnetworkname    string `json:"guestnetworkname"`
+	Hostid              string `json:"hostid"`
+	Hostname            string `json:"hostname"`
+	Hypervisor          string `json:"hypervisor"`
+	Id                  string `json:"id"`
+	Ip6dns1             string `json:"ip6dns1"`
+	Ip6dns2             string `json:"ip6dns2"`
+	Isredundantrouter   bool   `json:"isredundantrouter"`
+	Linklocalip         string `json:"linklocalip"`
+	Linklocalmacaddress string `json:"linklocalmacaddress"`
+	Linklocalnetmask    string `json:"linklocalnetmask"`
+	Linklocalnetworkid  string `json:"linklocalnetworkid"`
+	Name                string `json:"name"`
+	Networkdomain       string `json:"networkdomain"`
+	Nic                 []Nic  `json:"nic"`
+	Podid               string `json:"podid"`
+	Project             string `json:"project"`
+	Projectid           string `json:"projectid"`
+	Publicip            string `json:"publicip"`
+	Publicmacaddress    string `json:"publicmacaddress"`
+	Publicnetmask       string `json:"publicnetmask"`
+	Publicnetworkid     string `json:"publicnetworkid"`
+	Redundantstate      string `json:"redundantstate"`
+	Requiresupgrade     bool   `json:"requiresupgrade"`
+	Role                string `json:"role"`
+	Scriptsversion      string `json:"scriptsversion"`
+	Serviceofferingid   string `json:"serviceofferingid"`
+	Serviceofferingname string `json:"serviceofferingname"`
+	State               string `json:"state"`
+	Templateid          string `json:"templateid"`
+	Version             string `json:"version"`
+	Vpcid               string `json:"vpcid"`
+	Vpcname             string `json:"vpcname"`
+	Zoneid              string `json:"zoneid"`
+	Zonename            string `json:"zonename"`
 }
