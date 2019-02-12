@@ -51,7 +51,7 @@ type Config struct {
 	Backend              string   `mapstructure:"backend"`
 	User                 string   `mapstructure:"user"`
 	Host                 string   `mapstructure:"host"`
-	LocalPort            string   `mapstructure:"local_port"`
+	LocalPort            uint     `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 }
@@ -109,24 +109,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if _, ok := SupportedBackends[p.config.Backend]; !ok {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: %s must be a valid backend", p.config.Backend))
-	}
-
 	if p.config.Backend == "" {
 		p.config.Backend = "ssh"
+	}
+
+	if _, ok := SupportedBackends[p.config.Backend]; !ok {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: %s must be a valid backend", p.config.Backend))
 	}
 
 	if p.config.Host == "" {
 		p.config.Host = "127.0.0.1"
 	}
 
-	if len(p.config.LocalPort) > 0 {
-		if _, err := strconv.ParseUint(p.config.LocalPort, 10, 16); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %s must be a valid port", p.config.LocalPort))
-		}
-	} else {
-		p.config.LocalPort = "0"
+	if p.config.LocalPort > 65535 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
 	}
 
 	if len(p.config.AttributesDirectory) > 0 {
@@ -245,11 +241,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	config.AddHostKey(hostSigner)
 
 	localListener, err := func() (net.Listener, error) {
-		port, err := strconv.ParseUint(p.config.LocalPort, 10, 16)
-		if err != nil {
-			return nil, err
-		}
 
+		port := p.config.LocalPort
 		tries := 1
 		if port != 0 {
 			tries = 10
@@ -261,11 +254,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				ui.Say(err.Error())
 				continue
 			}
-			_, p.config.LocalPort, err = net.SplitHostPort(l.Addr().String())
+			_, portStr, err := net.SplitHostPort(l.Addr().String())
 			if err != nil {
 				ui.Say(err.Error())
 				continue
 			}
+			portUint64, err := strconv.ParseUint(portStr, 10, 0)
+			if err != nil {
+				ui.Say(err.Error())
+				continue
+			}
+			p.config.LocalPort = uint(portUint64)
 			return l, nil
 		}
 		return nil, errors.New("Error setting up SSH proxy connection")
@@ -331,7 +330,7 @@ func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, priv
 			args = append(args, "--key-files", privKeyFile)
 		}
 		args = append(args, "--user", p.config.User)
-		args = append(args, "--port", p.config.LocalPort)
+		args = append(args, "--port", strconv.FormatUint(uint64(p.config.LocalPort), 10))
 	}
 
 	args = append(args, "--attrs")
