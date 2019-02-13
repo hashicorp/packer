@@ -1,4 +1,4 @@
-package ansible
+package adapter
 
 import (
 	"errors"
@@ -26,7 +26,7 @@ func TestAdapter_Serve(t *testing.T) {
 
 	ui := new(packer.NoopUi)
 
-	sut := newAdapter(done, &l, config, "", newUi(ui), communicator{})
+	sut := NewAdapter(done, &l, config, "", ui, communicator{})
 	go func() {
 		i := 0
 		for range acceptC {
