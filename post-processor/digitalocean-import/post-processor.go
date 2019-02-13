@@ -111,7 +111,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("Error parsing space_object_name template: %s", err))
 	}
 
-	templates := map[string]*string{
+	requiredArgs := map[string]*string{
 		"api_token":     &p.config.APIToken,
 		"spaces_key":    &p.config.SpacesKey,
 		"spaces_secret": &p.config.SpacesSecret,
@@ -120,7 +120,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"image_name":    &p.config.Name,
 		"image_regions": &p.config.ImageRegions[0],
 	}
-	for key, ptr := range templates {
+	for key, ptr := range requiredArgs {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
