@@ -145,20 +145,26 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 	log.Printf("Rendered space_object_name as %s", p.config.ObjectName)
 
-	log.Println("Looking for image in artifact")
 	source := ""
-	validSuffix := []string{"raw", "img", "qcow2", "vhdx", "vdi", "vmdk", "bz2", "tar.xz", "tar.gz"}
-	for _, path := range artifact.Files() {
-		for _, suffix := range validSuffix {
-			if strings.HasSuffix(path, suffix) {
-				source = path
+	artifacts := artifact.Files()
+	log.Println("Looking for image in artifact")
+	if len(artifacts) > 1 {
+		validSuffix := []string{"raw", "img", "qcow2", "vhdx", "vdi", "vmdk", "tar.bz2", "tar.xz", "tar.gz"}
+		for _, path := range artifact.Files() {
+			for _, suffix := range validSuffix {
+				if strings.HasSuffix(path, suffix) {
+					source = path
+					break
+				}
+			}
+			if source != "" {
 				break
 			}
 		}
-		if source != "" {
-			break
-		}
+	} else {
+		source = artifact.Files()[0]
 	}
+
 	if source == "" {
 		return nil, false, fmt.Errorf("Image file not found")
 	}
