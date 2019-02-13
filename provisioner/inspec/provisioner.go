@@ -279,7 +279,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	ui = newUi(ui)
+	ui = &packer.SafeUi{
+		Sem: make(chan int, 1),
+		Ui:  ui,
+	}
 	p.adapter = adapter.NewAdapter(p.done, localListener, config, "", ui, comm)
 
 	defer func() {
@@ -518,50 +521,4 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
-}
-
-// Ui provides concurrency-safe access to packer.Ui.
-type Ui struct {
-	sem chan int
-	ui  packer.Ui
-}
-
-func newUi(ui packer.Ui) packer.Ui {
-	return &Ui{sem: make(chan int, 1), ui: ui}
-}
-
-func (ui *Ui) Ask(s string) (string, error) {
-	ui.sem <- 1
-	ret, err := ui.ui.Ask(s)
-	<-ui.sem
-
-	return ret, err
-}
-
-func (ui *Ui) Say(s string) {
-	ui.sem <- 1
-	ui.ui.Say(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Message(s string) {
-	ui.sem <- 1
-	ui.ui.Message(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Error(s string) {
-	ui.sem <- 1
-	ui.ui.Error(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Machine(t string, args ...string) {
-	ui.sem <- 1
-	ui.ui.Machine(t, args...)
-	<-ui.sem
-}
-
-func (ui *Ui) ProgressBar() packer.ProgressBar {
-	return new(packer.NoopProgressBar)
 }
