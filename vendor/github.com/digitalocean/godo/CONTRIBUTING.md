@@ -12,6 +12,7 @@ Assuming your `$GOPATH` is set up according to your desires, run:
 
 ```sh
 go get github.com/digitalocean/godo
+go get -u github.com/stretchr/testify/assert
 ```
 
 ## Running tests

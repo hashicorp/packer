@@ -12,16 +12,16 @@ import (
 
 type Artifact struct {
 	// The name of the snapshot
-	snapshotName string
+	SnapshotName string
 
 	// The ID of the image
-	snapshotId int
+	SnapshotId int
 
 	// The name of the region
-	regionNames []string
+	RegionNames []string
 
 	// The client for making API calls
-	client *godo.Client
+	Client *godo.Client
 }
 
 func (*Artifact) BuilderId() string {
@@ -34,11 +34,11 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return fmt.Sprintf("%s:%s", strings.Join(a.regionNames[:], ","), strconv.FormatUint(uint64(a.snapshotId), 10))
+	return fmt.Sprintf("%s:%s", strings.Join(a.RegionNames[:], ","), strconv.FormatUint(uint64(a.SnapshotId), 10))
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created: '%v' (ID: %v) in regions '%v'", a.snapshotName, a.snapshotId, strings.Join(a.regionNames[:], ","))
+	return fmt.Sprintf("A snapshot was created: '%v' (ID: %v) in regions '%v'", a.SnapshotName, a.SnapshotId, strings.Join(a.RegionNames[:], ","))
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -46,7 +46,7 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	log.Printf("Destroying image: %d (%s)", a.snapshotId, a.snapshotName)
-	_, err := a.client.Images.Delete(context.TODO(), a.snapshotId)
+	log.Printf("Destroying image: %d (%s)", a.SnapshotId, a.SnapshotName)
+	_, err := a.Client.Images.Delete(context.TODO(), a.SnapshotId)
 	return err
 }
