@@ -21,10 +21,10 @@ type StepAddBox struct {
 	SourceBox    string
 	BoxName      string
 	GlobalID     string
+	SkipAdd      bool
 }
 
 func (s *StepAddBox) generateAddArgs() []string {
-
 	addArgs := []string{}
 
 	if strings.HasSuffix(s.SourceBox, ".box") {
@@ -71,6 +71,11 @@ func (s *StepAddBox) generateAddArgs() []string {
 func (s *StepAddBox) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.SkipAdd {
+		ui.Say("skip_add was set so we assume the box is already in Vagrant...")
+		return multistep.ActionContinue
+	}
 
 	if s.GlobalID != "" {
 		ui.Say("Using a global-id; skipping Vagrant add command...")

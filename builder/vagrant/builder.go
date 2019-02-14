@@ -223,6 +223,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceBox:    b.config.SourceBox,
 			BoxName:      b.config.BoxName,
 			GlobalID:     b.config.GlobalID,
+			SkipAdd:      b.config.SkipAdd,
 		},
 		&StepUp{
 			TeardownMethod: b.config.TeardownMethod,
