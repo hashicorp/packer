@@ -151,6 +151,7 @@ for Packer to work:
         "ec2:DescribeImageAttribute",
         "ec2:DescribeImages",
         "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
         "ec2:DescribeRegions",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSnapshots",
