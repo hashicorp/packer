@@ -3,6 +3,7 @@ package godo
 import (
 	"context"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -60,13 +61,13 @@ func (s *ActionsServiceOp) List(ctx context.Context, opt *ListOptions) ([]Action
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(actionsRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -84,13 +85,13 @@ func (s *ActionsServiceOp) Get(ctx context.Context, id int) (*Action, *Response,
 	}
 
 	path := fmt.Sprintf("%s/%d", actionsBasePath, id)
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(actionRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}

@@ -3,6 +3,7 @@ package godo
 import (
 	"context"
 	"fmt"
+	"net/http"
 )
 
 const snapshotBasePath = "v2/snapshots"
@@ -81,12 +82,12 @@ func (s *SnapshotsServiceOp) Get(ctx context.Context, snapshotID string) (*Snaps
 func (s *SnapshotsServiceOp) Delete(ctx context.Context, snapshotID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", snapshotBasePath, snapshotID)
 
-	req, err := s.client.NewRequest(ctx, "DELETE", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodDelete, path, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := s.client.Do(req, nil)
+	resp, err := s.client.Do(ctx, req, nil)
 
 	return resp, err
 }
@@ -95,13 +96,13 @@ func (s *SnapshotsServiceOp) Delete(ctx context.Context, snapshotID string) (*Re
 func (s *SnapshotsServiceOp) get(ctx context.Context, ID string) (*Snapshot, *Response, error) {
 	path := fmt.Sprintf("%s/%s", snapshotBasePath, ID)
 
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(snapshotRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -121,13 +122,13 @@ func (s *SnapshotsServiceOp) list(ctx context.Context, opt *ListOptions, listOpt
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(snapshotsRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
