@@ -141,9 +141,10 @@ If this is set, a few more options become available.
 -   `builder_communicator` (communicator) - This represents an
     [`ssh communicator`](/docs/templates/communicator.html#ssh-communicator),
     and can be configured as such. If you use a different builder image, you
-    may need to change the `ssh_username`, for example. That might look like this:
+    may need to change the `ssh_username`, for example. That might look like
+    this:
 
-    ```json
+    ``` json
     {
         "builders": [
             {
@@ -170,7 +171,7 @@ If this is set, a few more options become available.
     amount of memory, and other resources allocated to the builder instance.
     Default: `oc3`.
 
-*   `builder_upload_image_command` (string) - The command to run to upload the
+-   `builder_upload_image_command` (string) - The command to run to upload the
     image to Object Storage Classic. This is for advanced users only, and you
     should consult the default in code to decide on the changes to make. For
     most users the default should suffice.
@@ -272,7 +273,7 @@ attributes file:
 Here is an example using a persistent volume. Note the `persistent_volume_size`
 setting.
 
-```json
+``` json
 {
     "variables": {
         "opc_username": "{{ env `OPC_USERNAME`}}",

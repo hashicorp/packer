@@ -14,7 +14,7 @@ Type: `amazon-import`
 The Packer Amazon Import post-processor takes an OVA artifact from various
 builders and imports it to an AMI available to Amazon Web Services EC2.
 
-~&gt; This post-processor is for advanced users. It depends on specific IAM
+\~&gt; This post-processor is for advanced users. It depends on specific IAM
 roles inside AWS and is best used with images that operate with the EC2
 configuration model (eg, cloud-init for Linux systems). Please ensure you read
 the [prerequisites for
@@ -85,12 +85,13 @@ Optional:
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
--   `format` (string) - One of: `ova`, `raw`, `vhd`, `vhdx`, or `vmdk`. This specifies
-    the format of the source virtual machine image. The resulting artifact from the builder
-    is assumed to have a file extension matching the format. This defaults to `ova`.
+-   `format` (string) - One of: `ova`, `raw`, `vhd`, `vhdx`, or `vmdk`. This
+    specifies the format of the source virtual machine image. The resulting
+    artifact from the builder is assumed to have a file extension matching the
+    format. This defaults to `ova`.
 
--   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
-    the AWS EC2 endpoint. The default is `false`.
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+    verification of the AWS EC2 endpoint. The default is `false`.
 
 -   `license_type` (string) - The license type to be used for the Amazon
     Machine Image (AMI) after importing. Valid values: `AWS` or `BYOL`

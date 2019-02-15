@@ -43,6 +43,7 @@ import (
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
+	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
@@ -118,6 +119,7 @@ var Builders = map[string]packer.Builder{
 	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
+	"vagrant":             new(vagrantbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),

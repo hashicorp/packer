@@ -147,28 +147,30 @@ builder.
 
         Snapshots from on or before July 15, 2013 cannot be used to create a
         disk.
-        
--   `image_ignore_data_disks`(boolean) - If this value is true, the image created 
-    will not include any snapshot of data disks. This option would be useful for 
-    any circumstance that default data disks with instance types are not concerned. 
-    The default value is false.
 
--   `wait_snapshot_ready_timeout`(number) - Timeout of creating snapshot(s). The 
-    default timeout is 3600 seconds if this option is not set or is set to 0. For 
-    those disks containing lots of data, it may require a higher timeout value.
+-   `image_ignore_data_disks`(boolean) - If this value is true, the image
+    created will not include any snapshot of data disks. This option would be
+    useful for any circumstance that default data disks with instance types are
+    not concerned. The default value is false.
+
+-   `wait_snapshot_ready_timeout`(number) - Timeout of creating snapshot(s).
+    The default timeout is 3600 seconds if this option is not set or is set
+    to 0. For those disks containing lots of data, it may require a higher
+    timeout value.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
-    image names including those copied are duplicated with existing images, 
-    it will delete the existing images and then create the target images, 
-    otherwise, the creation will fail. The default value is false. Check 
-    `image_name` and `image_copy_names` options for names of target images.
-    If [-force](https://packer.io/docs/commands/build.html#force) option is provided
-    in `build` command, this option can be omitted and taken as true.
+    image names including those copied are duplicated with existing images, it
+    will delete the existing images and then create the target images,
+    otherwise, the creation will fail. The default value is false. Check
+    `image_name` and `image_copy_names` options for names of target images. If
+    [-force](https://packer.io/docs/commands/build.html#force) option is
+    provided in `build` command, this option can be omitted and taken as true.
 
 -   `image_force_delete_snapshots` (boolean) - If this value is true, when
     delete the duplicated existing images, the source snapshots of those images
-    will be delete either. If [-force](https://packer.io/docs/commands/build.html#force) 
-    option is provided in `build` command, this option can be omitted and taken as true.
+    will be delete either. If
+    [-force](https://packer.io/docs/commands/build.html#force) option is
+    provided in `build` command, this option can be omitted and taken as true.
 
 -   `image_share_account` (array of string) - The IDs of to-be-added Aliyun
     accounts to which the image is shared. The number of accounts is 1 to 10.
@@ -299,10 +301,13 @@ Here is a basic example for Alicloud.
 \~&gt; Note: Images can become deprecated after a while; run
 `aliyun ecs DescribeImages` to find one that exists.
 
-\~&gt; Note: Since WinRM is closed by default in the system image. If you are planning 
-to use Windows as the base image, you need enable it by userdata in order to connect to 
-the instance, check [alicloud_windows.json](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/alicloud_windows.json) 
-and [winrm_enable_userdata.ps1](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/winrm_enable_userdata.ps1) for details.
+\~&gt; Note: Since WinRM is closed by default in the system image. If you are
+planning to use Windows as the base image, you need enable it by userdata in
+order to connect to the instance, check
+[alicloud\_windows.json](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/alicloud_windows.json)
+and
+[winrm\_enable\_userdata.ps1](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/winrm_enable_userdata.ps1)
+for details.
 
 See the
 [examples/alicloud](https://github.com/hashicorp/packer/tree/master/examples/alicloud)
