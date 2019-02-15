@@ -73,7 +73,8 @@ Optional parameters:
         ]
 
 -   `facter` (object of key:value strings) - Additional
-    [facts](https://docs.puppet.com/facter/) to make available to the Puppet run.
+    [facts](https://docs.puppet.com/facter/) to make available to the Puppet
+    run.
 
 -   `guest_os_type` (string) - The remote host's OS type ('windows' or 'unix')
     to tailor command-line and path separators. (default: unix).
@@ -88,9 +89,9 @@ Optional parameters:
     This is useful if your main manifest uses imports, but the directory might
     not contain the `manifest_file` itself.
 
-~&gt; `manifest_dir` is passed to Puppet as `--manifestdir` option. This option
-was deprecated in puppet 3.6, and removed in puppet 4.0. If you have multiple
-manifests you should use `manifest_file` instead.
+\~&gt; `manifest_dir` is passed to Puppet as `--manifestdir` option. This
+option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
+multiple manifests you should use `manifest_file` instead.
 
 -   `module_paths` (array of strings) - Array of local module directories to be
     uploaded.

@@ -144,5 +144,5 @@ The following Docker input artifacts are supported:
 
 ### QEMU/libvirt
 
-The `libvirt` provider supports QEMU artifacts built using any these accelerators: none,
-kvm, tcg, or hvf.
+The `libvirt` provider supports QEMU artifacts built using any these
+accelerators: none, kvm, tcg, or hvf.
