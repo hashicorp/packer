@@ -26,6 +26,24 @@ type Config struct {
 	osccommon.OMIConfig       `mapstructure:",squash"`
 	osccommon.AccessConfig    `mapstructure:",squash"`
 
+	ChrootMounts      [][]string                 `mapstructure:"chroot_mounts"`
+	CommandWrapper    string                     `mapstructure:"command_wrapper"`
+	CopyFiles         []string                   `mapstructure:"copy_files"`
+	DevicePath        string                     `mapstructure:"device_path"`
+	NVMEDevicePath    string                     `mapstructure:"nvme_device_path"`
+	FromScratch       bool                       `mapstructure:"from_scratch"`
+	MountOptions      []string                   `mapstructure:"mount_options"`
+	MountPartition    string                     `mapstructure:"mount_partition"`
+	MountPath         string                     `mapstructure:"mount_path"`
+	PostMountCommands []string                   `mapstructure:"post_mount_commands"`
+	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
+	RootDeviceName    string                     `mapstructure:"root_device_name"`
+	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
+	RootVolumeType    string                     `mapstructure:"root_volume_type"`
+	SourceOMI         string                     `mapstructure:"source_omi"`
+	SourceOMIFilter   osccommon.OmiFilterOptions `mapstructure:"source_omi_filter"`
+	RootVolumeTags    osccommon.TagMap           `mapstructure:"root_volume_tags"`
+
 	ctx interpolate.Context
 }
 
