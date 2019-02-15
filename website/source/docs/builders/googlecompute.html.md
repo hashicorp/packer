@@ -18,9 +18,8 @@ based on existing images.
 
 It is possible to build images from scratch, but not with the `googlecompute`
 Packer builder. The process is recommended only for advanced users, please see
-\[Building GCE Images from Scratch\]
-(<https://cloud.google.com/compute/docs/tutorials/building-images>) and the
-[Google Compute Import
+[Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images)
+and the [Google Compute Import
 Post-Processor](/docs/post-processors/googlecompute-import.html) for more
 information.
 
@@ -139,7 +138,7 @@ using the gcloud command.
     gcloud compute firewall-rules create allow-winrm --allow tcp:5986
 
 Or alternatively by navigating to
-<https://console.cloud.google.com/networking/firewalls/list>.
+<a href="https://console.cloud.google.com/networking/firewalls/list" class="uri">https://console.cloud.google.com/networking/firewalls/list</a>.
 
 Once this is set up, the following is a complete working packer config after
 setting a valid `account_file` and `project_id`:

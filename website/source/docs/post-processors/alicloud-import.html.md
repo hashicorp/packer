@@ -42,7 +42,7 @@ are two categories: required and optional parameters.
 -   `image_name` (string) - The name of the user-defined image, \[2, 128\]
     English or Chinese characters. It must begin with an uppercase/lowercase
     letter or a Chinese character, and may contain numbers, `_` or `-`. It
-    cannot begin with <http://> or <https://>.
+    cannot begin with `http://` or `https://`
 
 -   `oss_bucket_name` (string) - The name of the OSS bucket where the RAW or
     VHD file will be copied to for import. If the Bucket isn't exist,
@@ -52,8 +52,8 @@ are two categories: required and optional parameters.
 
 -   `image_platform` (string) - platform such `CentOS`
 
--   `image_architecture` (string) - Platform type of the image system:i386 \|
-    x86\_64
+-   `image_architecture` (string) - Platform type of the image system: `i386` or
+    `x86_64`
 
 -   `format` (string) - The format of the image for import, now alicloud only
     support RAW and VHD.
@@ -70,7 +70,7 @@ are two categories: required and optional parameters.
 
 -   `image_description` (string) - The description of the image, with a length
     limit of 0 to 256 characters. Leaving it blank means null, which is the
-    default value. It cannot begin with <http://> or <https://>.
+    default value. It cannot begin with `http://` or `https://`.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
     image name is duplicated with an existing image, it will delete the
@@ -79,9 +79,9 @@ are two categories: required and optional parameters.
 
 -   `image_system_size` (number) - Size of the system disk, in GB, values
     range:
-    -   cloud - 5 ~ 2000
-    -   cloud\_efficiency - 20 ~ 2048
-    -   cloud\_ssd - 20 ~ 2048
+    -   cloud - 5 \~ 2000
+    -   cloud\_efficiency - 20 \~ 2048
+    -   cloud\_ssd - 20 \~ 2048
 
 ## Basic Example
 
