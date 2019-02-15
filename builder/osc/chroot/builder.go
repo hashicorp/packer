@@ -11,6 +11,7 @@ import (
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -58,7 +59,125 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	return nil, nil
+	b.config.ctx.Funcs = osccommon.TemplateFuncs
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"omi_description",
+				"snapshot_tags",
+				"tags",
+				"root_volume_tags",
+				"command_wrapper",
+				"post_mount_commands",
+				"pre_mount_commands",
+				"mount_path",
+			},
+		},
+	}, raws...)
+	if err != nil {
+		return nil, err
+	}
+
+	if b.config.PackerConfig.PackerForce {
+		b.config.OMIForceDeregister = true
+	}
+
+	// Defaults
+	if b.config.ChrootMounts == nil {
+		b.config.ChrootMounts = make([][]string, 0)
+	}
+
+	if len(b.config.ChrootMounts) == 0 {
+		b.config.ChrootMounts = [][]string{
+			{"proc", "proc", "/proc"},
+			{"sysfs", "sysfs", "/sys"},
+			{"bind", "/dev", "/dev"},
+			{"devpts", "devpts", "/dev/pts"},
+			{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
+		}
+	}
+
+	// set default copy file if we're not giving our own
+	if b.config.CopyFiles == nil {
+		b.config.CopyFiles = make([]string, 0)
+		if !b.config.FromScratch {
+			b.config.CopyFiles = []string{"/etc/resolv.conf"}
+		}
+	}
+
+	if b.config.CommandWrapper == "" {
+		b.config.CommandWrapper = "{{.Command}}"
+	}
+
+	if b.config.MountPath == "" {
+		b.config.MountPath = "/mnt/packer-outscale-chroot-volumes/{{.Device}}"
+	}
+
+	if b.config.MountPartition == "" {
+		b.config.MountPartition = "1"
+	}
+
+	// Accumulate any errors or warnings
+	var errs *packer.MultiError
+	var warns []string
+
+	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.OMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
+
+	for _, mounts := range b.config.ChrootMounts {
+		if len(mounts) != 3 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("Each chroot_mounts entry should be three elements."))
+			break
+		}
+	}
+
+	if b.config.FromScratch {
+		if b.config.SourceOMI != "" || !b.config.SourceOMIFilter.Empty() {
+			warns = append(warns, "source_omi and source_omi_filter are unused when from_scratch is true")
+		}
+		if b.config.RootVolumeSize == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("root_volume_size is required with from_scratch."))
+		}
+		if len(b.config.PreMountCommands) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("pre_mount_commands is required with from_scratch."))
+		}
+		if b.config.OMIVirtType == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("omi_virtualization_type is required with from_scratch."))
+		}
+		if b.config.RootDeviceName == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("root_device_name is required with from_scratch."))
+		}
+		if len(b.config.OMIMappings) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("omi_block_device_mappings is required with from_scratch."))
+		}
+	} else {
+		if b.config.SourceOMI == "" && b.config.SourceOMIFilter.Empty() {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("source_omi or source_omi_filter is required."))
+		}
+		if len(b.config.OMIMappings) != 0 {
+			warns = append(warns, "omi_block_device_mappings are unused when from_scratch is false")
+		}
+		if b.config.RootDeviceName != "" {
+			warns = append(warns, "root_device_name is unused when from_scratch is false")
+		}
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return warns, errs
+	}
+
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
+	return warns, nil
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
