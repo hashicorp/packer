@@ -6,6 +6,7 @@ package chroot
 
 import (
 	"errors"
+	"log"
 	"runtime"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -68,4 +69,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
 }
