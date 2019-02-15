@@ -725,3 +725,23 @@ func isValidAzureName(re *regexp.Regexp, rgn string) bool {
 		!strings.HasSuffix(rgn, ".") &&
 		!strings.HasSuffix(rgn, "-")
 }
+
+func (c *Config) validateLocationZoneResiliency(say func(s string)) {
+	// Docs on regions that support Availibility Zones:
+	//   https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#regions-that-support-availability-zones
+	// Query technical names for locations:
+	//   az account list-locations --query '[].name' -o tsv
+
+	var zones = make(map[string]struct{})
+	zones["westeurope"] = struct{}{}
+	zones["centralus"] = struct{}{}
+	zones["eastus2"] = struct{}{}
+	zones["francecentral"] = struct{}{}
+	zones["northeurope"] = struct{}{}
+	zones["southeastasia"] = struct{}{}
+	zones["westus2"] = struct{}{}
+
+	if _, ok := zones[c.Location]; !ok {
+		say(fmt.Sprintf("WARNING: Zone resiliency may not be supported in %s, checkout the docs at https://docs.microsoft.com/en-us/azure/availability-zones/", c.Location))
+	}
+}

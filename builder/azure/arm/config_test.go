@@ -1681,7 +1681,42 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 	if err != nil {
 		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err)
 	}
+}
 
+func Test_GivenZoneNotSupportingResiliency_ConfigValidate_ShouldWarn(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+	builderValues["managed_image_zone_resilient"] = "true"
+	builderValues["location"] = "ukwest"
+
+	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	var m = ""
+	c.validateLocationZoneResiliency(func(s string) { m = s })
+
+	if m != "WARNING: Zone resiliency may not be supported in ukwest, checkout the docs at https://docs.microsoft.com/en-us/azure/availability-zones/" {
+		t.Errorf("warning message not as expected: %s", m)
+	}
+}
+
+func Test_GivenZoneSupportingResiliency_ConfigValidate_ShouldNotWarn(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+	builderValues["managed_image_zone_resilient"] = "true"
+	builderValues["location"] = "westeurope"
+
+	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	var m = ""
+	c.validateLocationZoneResiliency(func(s string) { m = s })
+
+	if m != "" {
+		t.Errorf("warning message not as expected: %s", m)
+	}
 }
 
 func getArmBuilderConfiguration() map[string]string {

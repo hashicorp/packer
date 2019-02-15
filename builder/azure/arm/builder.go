@@ -139,6 +139,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.Location = *group.Location
 	}
 
+	b.config.validateLocationZoneResiliency(ui.Say)
+
 	if b.config.StorageAccount != "" {
 		account, err := b.getBlobAccount(ctx, azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
 		if err != nil {
