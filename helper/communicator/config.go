@@ -66,6 +66,9 @@ type Config struct {
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
 	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
+
+	// Delay
+	PauseBeforeConnect time.Duration `mapstructure:"pause_before_connecting"`
 }
 
 // ReadSSHPrivateKeyFile returns the SSH private key bytes
