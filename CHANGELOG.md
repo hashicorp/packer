@@ -1,5 +1,31 @@
 ## 1.3.5 (upcoming)
 
+### IMPROVEMENTS:
+* builder/amazon: AWS users can now use the Vault AWS engine to generate temporary credentials. [GH-7282]
+* builder/virtualbox: New "guest_additions_interface" option to enable attaching via a SATA interface. [GH-7298]
+* bulder/openstac: Deprecated compute/v2/images API [GH-7268]
+* post-processor/manifest: Add "custom_data" key to packer manifest post-processor [GH-7248]
+* builder/vmware: Add `cores` option for specifying the number of cores per socket. [GH-7191]
+* post-processor/googlecompute-export: Extend auth for the GCE-post-processors to act like the GCE builder. [GH-7222]
+* post-processor/googlecompute-import: Extend auth for the GCE-post-processors to act like the GCE builder. [GH-7222]
+
+### BUG FIXES:
+* provisioner/salt: Force powershell to overwrite duplicate files [GH-7281]
+* builder/vmware-esxi: Should properly strip whitespace from end of names of files stored on esxi. [GH-7310]
+* builder/hyper-v: Fix regression where we improperly handled spaces in switch names [GH-7266]
+* core: clean up Makefile [GH-7254][GH-7265]
+* builder/cloudstack: Updated sdk version; can now use ostype name in template_os option.  [GH-7264]
+* builder/azure: Fixed Azure interactive authentication [GH-7276]
+* builder/hyper-v: Fix integer overflows in 32-bit builds [GH-7251]
+* builder/google: Change metadata url to use a FQDN fixing bug stemming from differing DNS/search domains. [GH-7260]
+* core: Fixes mismatches in checksums for dependencies for Go 1.11.4+ [GH-7261]
+* core: make sure 'only' option is completely ignored by post-processors [GH-7262]
+
+### Features:
+**new provisioner**`inspec` Added inspec.io provisioner #[GH-7180]
+**new post-processor** `digitalocean-import`Add digitalocean-import post-processor. [GH-7060]
+**new builder** `vagrant` allows users to call vagrant to provision starting from vagrant boxes and save them as new vagrant boxes. [GH-7221]
+
 ## 1.3.4 (January 30, 2019)
 ### IMPROVEMENTS:
 * builder/alicloud: delete copied image and snapshots if corresponding options
