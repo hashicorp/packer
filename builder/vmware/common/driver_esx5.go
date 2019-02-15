@@ -47,7 +47,7 @@ type ESX5Driver struct {
 
 func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 
-	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
+	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\r\n"), "\n") }
 
 	d.SetOutputDir(path.Dir(filepath.ToSlash(dst)))
 	srcVmx := d.datastorePath(src)
