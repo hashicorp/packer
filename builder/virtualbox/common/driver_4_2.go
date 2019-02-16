@@ -239,3 +239,95 @@ func (d *VBox42Driver) Version() (string, error) {
 	log.Printf("VirtualBox version: %s", matches[0][1])
 	return matches[0][1], nil
 }
+
+func (d *VBox42Driver) CreateSnapshot(vmname string, snapshotName string) error {
+	return d.VBoxManage("snapshot", vmname, "take", snapshotName)
+}
+
+func (d *VBox42Driver) HasSnapshots(vmname string) (bool, error) {
+	var stdout, stderr bytes.Buffer
+	var hasSnapshots = false
+
+	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	stdoutString := strings.TrimSpace(stdout.String())
+	stderrString := strings.TrimSpace(stderr.String())
+
+	if _, ok := err.(*exec.ExitError); ok {
+		if stdoutString != "This machine does not have any snapshots" {
+			err = fmt.Errorf("VBoxManage error: %s", stderrString)
+		}
+	} else {
+		hasSnapshots = true
+	}
+
+	return hasSnapshots, err
+}
+
+func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (string, error) {
+	var stdout, stderr bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	stdoutString := strings.TrimSpace(stdout.String())
+	stderrString := strings.TrimSpace(stderr.String())
+
+	if _, ok := err.(*exec.ExitError); ok {
+		if stdoutString == "This machine does not have any snapshots" {
+			return "", nil
+		} else {
+			return "", (fmt.Errorf("VBoxManage error: %s", stderrString))
+		}
+	}
+
+	CurrentSnapshotNameRe := regexp.MustCompile("CurrentSnapshotName=\"(?P<snapshotName>[^\"]*)\"")
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		result := CurrentSnapshotNameRe.FindStringSubmatch(line)
+		if len(result) > 1 {
+			return result[1], nil
+		}
+	}
+
+	return "", (fmt.Errorf("VBoxManage unable to find current snapshot name"))
+}
+
+func (d *VBox42Driver) SetSnapshot(vmname string, snapshotName string) error {
+	var err error
+	if snapshotName == "" {
+		err = d.VBoxManage("snapshot", vmname, "restorecurrent")
+	} else {
+		err = d.VBoxManage("snapshot", vmname, "restore", snapshotName)
+	}
+	return err
+}
+
+func (d *VBox42Driver) DeleteSnapshot(vmname string, snapshotName string) error {
+	return d.VBoxManage("snapshot", vmname, "delete", snapshotName)
+}
+
+func (d *VBox42Driver) SnapshotExists(vmname string, snapshotName string) (bool, error) {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return false, err
+	}
+
+	SnapshotNameRe := regexp.MustCompile(fmt.Sprintf("SnapshotName[^=]*=[^\"]*\"%s\"", snapshotName))
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		if SnapshotNameRe.MatchString(line) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
