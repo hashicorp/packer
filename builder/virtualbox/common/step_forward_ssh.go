@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -70,10 +71,12 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
 		}
 		if err := driver.VBoxManage(command...); err != nil {
-			err := fmt.Errorf("Error creating port forwarding rule: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
+			if !strings.Contains(err.Error(), "A NAT rule of this name already exists") {
+				err := fmt.Errorf("Error creating port forwarding rule: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 

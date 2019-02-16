@@ -51,6 +51,24 @@ type Driver interface {
 
 	// Version reads the version of VirtualBox that is installed.
 	Version() (string, error)
+
+	//
+	CreateSnapshot(string, string) error
+
+	//
+	HasSnapshots(string) (bool, error)
+
+	//
+	GetCurrentSnapshot(string) (string, error)
+
+	//
+	SetSnapshot(string, string) error
+
+	//
+	DeleteSnapshot(string, string) error
+
+	//
+	SnapshotExists(string, string) (bool, error)
 }
 
 func NewDriver() (Driver, error) {
