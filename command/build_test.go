@@ -102,6 +102,30 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 }
 
+func TestBuildEverything(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		`-except=""`,
+		filepath.Join(testFixture("build-only"), "template.json"),
+	}
+
+	defer cleanup()
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
+		"apple.txt", "cherry.txt", "pear.txt", "peach.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+}
+
 func TestBuildExceptFileCommaFlags(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
