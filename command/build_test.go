@@ -89,7 +89,7 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"vanilla.txt"} {
+	for _, f := range []string{"vanilla.txt", "tomato.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
