@@ -4,10 +4,11 @@ package template
 
 import (
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParse(t *testing.T) {
@@ -321,7 +322,7 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		path, _ := filepath.Abs(fixtureDir(tc.File))
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
@@ -334,8 +335,8 @@ func TestParse(t *testing.T) {
 		if tpl != nil {
 			tpl.RawContents = nil
 		}
-		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
+		if diff := cmp.Diff(tpl, tc.Result); diff != "" {
+			t.Fatalf("[%d]bad: %v", i, diff)
 		}
 	}
 }
