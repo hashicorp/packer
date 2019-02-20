@@ -346,7 +346,7 @@ func TestParse(t *testing.T) {
 			tpl.RawContents = nil
 		}
 		if diff := cmp.Diff(tpl, tc.Result); diff != "" {
-			t.Fatalf("[%d]bad: %v", i, diff)
+			t.Fatalf("[%d]bad: %s\n%v", i, tc.File, diff)
 		}
 	}
 }
