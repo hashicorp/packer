@@ -267,14 +267,16 @@ builder.
     image and relevant snapshots.
 
 ### Service endpoints:
-
--   [Endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) - Due to the demonstration of different geographical access, it is recommended to set the [endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) according to the actual situation.
-The [endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) is set into the environment variable:
+      
+Considering network connectivities amond different countries, it's highly recommended to set the service endponit to the corresponding one described in our [official website](https://www.alibabacloud.com/help/doc-detail/25489.htm). Default `endpoint` is `https://ecs-cn-hangzhou.aliyuncs.com.`
 
 Usage:
 
       $ export ECS_ENDPOINT="endpoint"
 
+Otherwise, you may encouter the following errors due to the network issue from other countries to the default endpoint.
+
+`Code: AliyunGoClientFailure Message: Get https://ecs-cn-hangzhou.aliyuncs.com?xx: net/http: TLS handshake timeout`
 
 ## Basic Example
 
