@@ -266,6 +266,16 @@ builder.
 -   `tags` (object of key/value strings) - Tags applied to the destination
     image and relevant snapshots.
 
+### Service endpoints:
+
+-   [Endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) - Due to the demonstration of different geographical access, it is recommended to set the [endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) according to the actual situation.
+The [endpoint](https://www.alibabacloud.com/help/doc-detail/25489.htm) is set into the environment variable:
+
+Usage:
+
+      $ export ECS_ENDPOINT="endpoint"
+
+
 ## Basic Example
 
 Here is a basic example for Alicloud.
