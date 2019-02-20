@@ -186,7 +186,7 @@ func (c *Core) Build(n string) (Build, error) {
 			// -except skips post-processor & build
 			foundExcept := false
 			for _, except := range c.except {
-				if except == rawP.Name {
+				if except != "" && except == rawP.Name {
 					foundExcept = true
 				}
 			}
