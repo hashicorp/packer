@@ -152,6 +152,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							Config: map[string]interface{}{
 								"foo": "bar",
@@ -169,6 +170,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name:              "foo",
 							Type:              "foo",
 							KeepInputArtifact: true,
 						},
@@ -184,6 +186,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							OnlyExcept: OnlyExcept{
 								Only: []string{"bar"},
@@ -201,6 +204,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							OnlyExcept: OnlyExcept{
 								Except: []string{"bar"},
@@ -218,6 +222,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
@@ -232,6 +237,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
@@ -246,11 +252,13 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
 					{
 						{
+							Name: "bar",
 							Type: "bar",
 						},
 					},
@@ -265,9 +273,11 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 						{
+							Name: "bar",
 							Type: "bar",
 						},
 					},
