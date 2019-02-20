@@ -148,12 +148,13 @@ effectively the same. `only` and `except` can only be specified on "detailed"
 fields. If you have a sequence of post-processors to run, `only` and `except`
 will affect that post-processor and stop the sequence.
 
-The `-except` option can specifically skip a named post processor.
+The `-except` option can specifically skip a named post processor. The `-only`
+option *ignores* post-processors.
 
 ``` json
 [
   {
-    // can also be skipped when running `packer build -except vbox`
+    // can be skipped when running `packer build -except vbox`
     "name": "vbox",
     "type": "vagrant",
     "only": ["virtualbox-iso"]
