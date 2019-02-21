@@ -64,6 +64,7 @@ github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/aws/aws-sdk-go v1.15.78/go.mod h1:E3/ieXAlvM0XWO57iftYVDLLvQ824smPP3ATZkfNZeM=
+github.com/aws/aws-sdk-go v1.16.22/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.16.24 h1:I/A3Hwbgs3IEAP6v1bFpHKXiT7wZDoToX9cb00nxZnM=
 github.com/aws/aws-sdk-go v1.16.24/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -348,6 +349,8 @@ github.com/openzipkin/zipkin-go v0.1.1/go.mod h1:NtoC/o8u3JlF1lSlyPNswIbeQH9bJTm
 github.com/openzipkin/zipkin-go v0.1.6/go.mod h1:QgAqvLzwWbR/WpD4A3cGpPtJrZXNIiJc5AZX7/PBEpw=
 github.com/oracle/oci-go-sdk v1.8.0 h1:4SO45bKV0I3/Mn1os3ANDZmV0eSE5z5CLdSUIkxtyzs=
 github.com/oracle/oci-go-sdk v1.8.0/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
+github.com/outscale/osc-go v0.0.1 h1:hvBtORyu7sWSKW1norGlfIP8C7c2aegI2Vkq75SRPCE=
+github.com/outscale/osc-go v0.0.1/go.mod h1:hJLmXzqU/t07qQYh90I0TqZzu9s85Zs6FMrxk3ukiFM=
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a h1:A3QMuteviunoaY/8ex+RKFqwhcZJ/Cf3fCW3IwL2wx4=
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a/go.mod h1:f6Izs6JvFTdnRbziASagjZ2vmf55NSIkC/weStxCHqk=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c h1:Lgl0gzECD8GnQ5QCWA8o6BtfL6mDH5rQgM4/fX3avOs=
