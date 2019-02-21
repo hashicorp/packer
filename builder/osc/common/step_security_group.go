@@ -121,7 +121,7 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		SecurityGroupId: groupResp.OK.SecurityGroup.SecurityGroupId,
 		Flow:            "Inbound",
 		Rules: []oapi.SecurityGroupRule{
-			oapi.SecurityGroupRule{
+			{
 				FromPortRange: int64(port),
 				ToPortRange:   int64(port),
 				IpRanges:      []string{s.TemporarySGSourceCidr},
