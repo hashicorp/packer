@@ -8,8 +8,8 @@ import (
 	"github.com/outscale/osc-go/oapi"
 )
 
-func testImage() *oapi.Image {
-	return &oapi.Image{
+func testImage() oapi.Image {
+	return oapi.Image{
 		ImageId:   "ami-abcd1234",
 		ImageName: "ami_test_name",
 		Tags: []oapi.ResourceTag{
