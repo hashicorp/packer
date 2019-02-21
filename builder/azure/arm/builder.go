@@ -59,8 +59,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.ctxCancel = cancel
 	defer cancel()
 
-	if err := newConfigRetriever().FillParameters(b.config); err != nil {
-		return nil, err
+	if !b.config.useMSI() {
+		if err := newConfigRetriever().FillParameters(b.config); err != nil {
+			return nil, err
+		}
 	}
 
 	log.Print(":: Configuration")
@@ -72,6 +74,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	spnCloud, spnKeyVault, err := b.getServicePrincipalTokens(ui.Say)
 	if err != nil {
 		return nil, err
+	}
+
+	if b.config.useMSI() {
+		if err := newConfigRetriever().FillParameters(b.config); err != nil {
+			return nil, err
+		}
 	}
 
 	ui.Message("Creating Azure Resource Manager (ARM) client ...")
