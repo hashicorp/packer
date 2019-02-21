@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/packer/communicator/none"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -44,8 +45,27 @@ type StepConnect struct {
 	substep multistep.Step
 }
 
+func (s *StepConnect) pause(pauseLen time.Duration, ctx context.Context) bool {
+	// Use a select to determine if we get cancelled during the wait
+	log.Printf("Pausing before connecting...")
+	select {
+	case <-ctx.Done():
+		return true
+	case <-time.After(pauseLen):
+	}
+	log.Printf("Pause over; connecting...")
+	return false
+}
+
 func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.Config.PauseBeforeConnect > 0 {
+		cancelled := s.pause(s.Config.PauseBeforeConnect, ctx)
+		if cancelled {
+			return multistep.ActionHalt
+		}
+	}
 
 	typeMap := map[string]multistep.Step{
 		"none": nil,
