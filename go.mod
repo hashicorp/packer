@@ -97,6 +97,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/openzipkin/zipkin-go v0.1.6 // indirect
 	github.com/oracle/oci-go-sdk v1.8.0
+	github.com/outscale/osc-go v0.0.1
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.8.0
