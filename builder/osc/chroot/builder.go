@@ -5,8 +5,10 @@
 package chroot
 
 import (
+	"crypto/tls"
 	"errors"
 	"log"
+	"net/http"
 	"runtime"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -15,6 +17,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/outscale/osc-go/oapi"
 )
 
 // The unique ID for this builder
@@ -184,6 +187,48 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The outscale-chroot builder only works on Linux environments.")
 	}
+
+	clientConfig, err := b.config.Config()
+	if err != nil {
+		return nil, err
+	}
+
+	skipClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	oapiconn := oapi.NewClient(clientConfig, skipClient)
+
+	wrappedCommand := func(command string) (string, error) {
+		ctx := b.config.ctx
+		ctx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ctx)
+	}
+
+	// Setup the state bag and initial state for the steps
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &b.config)
+	state.Put("oapi", oapiconn)
+	state.Put("clientConfig", clientConfig)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
+
+	// Build the steps
+	steps := []multistep.Step{
+		&osccommon.StepPreValidate{
+			DestOmiName:     b.config.OMIName,
+			ForceDeregister: b.config.OMIForceDeregister,
+		},
+		&StepVmInfo{},
+	}
+
+	// Run!
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner.Run(state)
+
 	return nil, nil
 }
 
