@@ -198,3 +198,22 @@ The WinRM communicator has the following options.
 -   `winrm_use_ssl` (boolean) - If `true`, use HTTPS for WinRM.
 
 -   `winrm_username` (string) - The username to use to connect to WinRM.
+
+## Pausing Before Connecting
+We recommend that you enable SSH or WinRM as the very last step in your
+guest's bootstrap script, but sometimes you may have a race condition where
+you need Packer to wait before attempting to connect to your guest.
+
+If you end up in this situation, you can use the template option
+`pause_before_connecting`. By default, there is no pause. For example:
+
+{
+  "communicator": "ssh"
+  "ssh_username": "myuser",
+  "pause_before_connecting": "10m"
+}
+
+In this example, Packer will wait 10 minutes before attempting to connect to
+the guest.
+
+
