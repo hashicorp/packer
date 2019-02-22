@@ -54,7 +54,6 @@ func (FixerAmazonPrivateIP) Fix(input map[string]interface{}) (map[string]interf
 			privateIP, err = strconv.ParseBool(privateIPi.(string))
 			if err != nil {
 				return nil, fmt.Errorf("ssh_private_ip is not a boolean")
-				continue
 			}
 		}
 
