@@ -225,6 +225,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepVmInfo{},
 	}
 
+	if !b.config.FromScratch {
+		steps = append(steps,
+			&osccommon.StepSourceOMIInfo{
+				SourceOmi:                b.config.SourceOMI,
+				EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
+				EnableOMIENASupport:      b.config.OMIENASupport,
+				OmiFilters:               b.config.SourceOMIFilter,
+				OMIVirtType:              b.config.OMIVirtType,
+			},
+			&StepCheckRootDevice{},
+		)
+	}
+
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
