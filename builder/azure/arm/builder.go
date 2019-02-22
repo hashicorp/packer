@@ -59,6 +59,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.ctxCancel = cancel
 	defer cancel()
 
+	// User's intent to use MSI is indicated with empty subscription id, tenant, client id, client cert, client secret and jwt.
+	// FillParameters function will set subscription and tenant id here. Therefore getServicePrincipalTokens won't select right auth type.
+	// If we run this after getServicePrincipalTokens call then getServicePrincipalTokens won't have tenant id.
 	if !b.config.useMSI() {
 		if err := newConfigRetriever().FillParameters(b.config); err != nil {
 			return nil, err
@@ -76,6 +79,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
+	// We need subscription id and tenant id for arm operations. Users hasn't specified one so we try to detect them here.
 	if b.config.useMSI() {
 		if err := newConfigRetriever().FillParameters(b.config); err != nil {
 			return nil, err
