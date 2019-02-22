@@ -238,9 +238,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		)
 	}
 
+	steps = append(steps,
+		&StepFlock{},
+		&StepPrepareDevice{},
+	)
+
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
+
+	// If there was an error, return that
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
+	}
 
 	return nil, nil
 }
