@@ -268,7 +268,7 @@ builder.
 
 ### Service endpoints:
       
-Considering network connectivities amond different countries, it's highly recommended to set the service endponit to the corresponding one described in our [official website](https://www.alibabacloud.com/help/doc-detail/25489.htm). Default `endpoint` is `https://ecs-cn-hangzhou.aliyuncs.com.`
+Considering network connectivities among different countries, it's highly recommended to set the service endpoint to the corresponding one described in our [official website](https://www.alibabacloud.com/help/doc-detail/25489.htm). Default `endpoint` is `https://ecs-cn-hangzhou.aliyuncs.com.`
 
 Usage:
 
