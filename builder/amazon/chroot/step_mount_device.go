@@ -42,7 +42,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	var virtualizationType string
-	if config.FromScratch {
+	if config.FromScratch || config.AMIVirtType != "" {
 		virtualizationType = config.AMIVirtType
 	} else {
 		image := state.Get("source_image").(*ec2.Image)
