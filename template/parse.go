@@ -23,11 +23,11 @@ type rawTemplate struct {
 	MinVersion  string `mapstructure:"min_packer_version"`
 	Description string
 
-	Builders           []map[string]interface{}
-	Comments           map[string]string
+	Builders           []interface{} `mapstructure:"builders"`
+	Comments           []map[string]string
 	Push               map[string]interface{}
 	PostProcessors     []interface{} `mapstructure:"post-processors"`
-	Provisioners       []map[string]interface{}
+	Provisioners       []interface{}
 	Variables          map[string]interface{}
 	SensitiveVariables []string `mapstructure:"sensitive-variables"`
 
@@ -49,8 +49,10 @@ func (r *rawTemplate) Template() (*Template, error) {
 	if len(r.Comments) > 0 {
 		result.Comments = make(map[string]string, len(r.Comments))
 
-		for k, v := range r.Comments {
-			result.Comments[k] = v
+		for _, c := range r.Comments {
+			for k, v := range c {
+				result.Comments[k] = v
+			}
 		}
 	}
 
@@ -94,9 +96,11 @@ func (r *rawTemplate) Template() (*Template, error) {
 		}
 
 		// Set the raw configuration and delete any special keys
-		b.Config = rawB
+		b.Config = rawB.(map[string]interface{})
+
 		delete(b.Config, "name")
 		delete(b.Config, "type")
+
 		if len(b.Config) == 0 {
 			b.Config = nil
 		}
@@ -155,14 +159,17 @@ func (r *rawTemplate) Template() (*Template, error) {
 				continue
 			}
 
-			// Set the configuration
-			delete(c, "except")
-			delete(c, "only")
-			delete(c, "keep_input_artifact")
-			delete(c, "type")
-			delete(c, "name")
-			if len(c) > 0 {
-				pp.Config = c
+			// Set the raw configuration and delete any special keys
+			pp.Config = c
+
+			delete(pp.Config, "except")
+			delete(pp.Config, "only")
+			delete(pp.Config, "keep_input_artifact")
+			delete(pp.Config, "type")
+			delete(pp.Config, "name")
+
+			if len(pp.Config) == 0 {
+				pp.Config = nil
 			}
 
 			pps = append(pps, &pp)
@@ -190,17 +197,19 @@ func (r *rawTemplate) Template() (*Template, error) {
 			continue
 		}
 
-		// Copy the configuration
-		delete(v, "except")
-		delete(v, "only")
-		delete(v, "override")
-		delete(v, "pause_before")
-		delete(v, "type")
-		if len(v) > 0 {
-			p.Config = v
+		// Set the raw configuration and delete any special keys
+		p.Config = v.(map[string]interface{})
+
+		delete(p.Config, "except")
+		delete(p.Config, "only")
+		delete(p.Config, "override")
+		delete(p.Config, "pause_before")
+		delete(p.Config, "type")
+
+		if len(p.Config) == 0 {
+			p.Config = nil
 		}
 
-		// TODO: stuff
 		result.Provisioners = append(result.Provisioners, &p)
 	}
 
@@ -324,13 +333,16 @@ func Parse(r io.Reader) (*Template, error) {
 		for _, unused := range md.Unused {
 			// Ignore keys starting with '_' as comments
 			if unused[0] == '_' {
-				if rawTpl.Comments == nil {
-					rawTpl.Comments = make(map[string]string)
-				}
-				rawTpl.Comments[unused], ok = unusedMap[unused].(string)
+				commentVal, ok := unusedMap[unused].(string)
 				if !ok {
-					return nil, fmt.Errorf("Failed to cast root level comment key to string")
+					return nil, fmt.Errorf("Failed to cast root level comment value to string")
 				}
+
+				comment := map[string]string{
+					unused: commentVal,
+				}
+
+				rawTpl.Comments = append(rawTpl.Comments, comment)
 				continue
 			}
 
