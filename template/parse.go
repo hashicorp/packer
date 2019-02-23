@@ -20,18 +20,40 @@ import (
 // This is what is decoded directly from the file, and then it is turned
 // into a Template object thereafter.
 type rawTemplate struct {
-	MinVersion  string `mapstructure:"min_packer_version"`
-	Description string
+	MinVersion  string `mapstructure:"min_packer_version" json:"min_packer_version,omitempty"`
+	Description string `json:"description,omitempty"`
 
-	Builders           []interface{} `mapstructure:"builders"`
-	Comments           []map[string]string
-	Push               map[string]interface{}
-	PostProcessors     []interface{} `mapstructure:"post-processors"`
-	Provisioners       []interface{}
-	Variables          map[string]interface{}
-	SensitiveVariables []string `mapstructure:"sensitive-variables"`
+	Builders           []interface{}          `mapstructure:"builders" json:"builders,omitempty"`
+	Comments           []map[string]string    `json:"comments,omitempty"`
+	Push               map[string]interface{} `json:"push,omitempty"`
+	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
+	Provisioners       []interface{}          `json:"provisioners,omitempty"`
+	Variables          map[string]interface{} `json:"variables,omitempty"`
+	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
-	RawContents []byte
+	RawContents []byte `json:"-"`
+}
+
+// MarshalJSON conducts the necessary flattening of the rawTemplate struct
+// to provide valid Packer template JSON
+func (r *rawTemplate) MarshalJSON() ([]byte, error) {
+	// Avoid recursion
+	type rawTemplate_ rawTemplate
+	out, _ := json.Marshal(rawTemplate_(*r))
+
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(out, &m)
+
+	// Flatten Comments
+	delete(m, "comments")
+	for _, comment := range r.Comments {
+		for k, v := range comment {
+			out, _ = json.Marshal(v)
+			m[k] = out
+		}
+	}
+
+	return json.Marshal(m)
 }
 
 // Template returns the actual Template object built from this raw
@@ -60,6 +82,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 	if len(r.Variables) > 0 {
 		result.Variables = make(map[string]*Variable, len(r.Variables))
 	}
+
 	for k, rawV := range r.Variables {
 		var v Variable
 		v.Key = k
@@ -331,7 +354,6 @@ func Parse(r io.Reader) (*Template, error) {
 		}
 
 		for _, unused := range md.Unused {
-			// Ignore keys starting with '_' as comments
 			if unused[0] == '_' {
 				commentVal, ok := unusedMap[unused].(string)
 				if !ok {
