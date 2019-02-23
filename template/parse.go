@@ -24,6 +24,7 @@ type rawTemplate struct {
 	Description string
 
 	Builders           []map[string]interface{}
+	Comments           map[string]string
 	Push               map[string]interface{}
 	PostProcessors     []interface{} `mapstructure:"post-processors"`
 	Provisioners       []map[string]interface{}
@@ -43,6 +44,15 @@ func (r *rawTemplate) Template() (*Template, error) {
 	result.Description = r.Description
 	result.MinVersion = r.MinVersion
 	result.RawContents = r.RawContents
+
+	// Gather the comments
+	if len(r.Comments) > 0 {
+		result.Comments = make(map[string]string, len(r.Comments))
+
+		for k, v := range r.Comments {
+			result.Comments[k] = v
+		}
+	}
 
 	// Gather the variables
 	if len(r.Variables) > 0 {
@@ -304,9 +314,22 @@ func Parse(r io.Reader) (*Template, error) {
 	// Build an error if there are unused root level keys
 	if len(md.Unused) > 0 {
 		sort.Strings(md.Unused)
+
+		unusedMap, ok := raw.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Failed to convert unused root level keys to map")
+		}
+
 		for _, unused := range md.Unused {
 			// Ignore keys starting with '_' as comments
 			if unused[0] == '_' {
+				if rawTpl.Comments == nil {
+					rawTpl.Comments = make(map[string]string)
+				}
+				rawTpl.Comments[unused], ok = unusedMap[unused].(string)
+				if !ok {
+					return nil, fmt.Errorf("Failed to cast root level comment key to string")
+				}
 				continue
 			}
 

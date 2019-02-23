@@ -18,6 +18,7 @@ type Template struct {
 	Description string
 	MinVersion  string
 
+	Comments           map[string]string
 	Variables          map[string]*Variable
 	SensitiveVariables []*Variable
 	Builders           map[string]*Builder

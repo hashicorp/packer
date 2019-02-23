@@ -316,6 +316,9 @@ func TestParse(t *testing.T) {
 						Type: "something",
 					},
 				},
+				Comments: map[string]string{
+					"_info": "foo",
+				},
 			},
 			false,
 		},
