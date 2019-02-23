@@ -70,6 +70,7 @@ type Push struct {
 
 // Variable represents a variable within the template
 type Variable struct {
+	Key      string
 	Default  string
 	Required bool
 }
