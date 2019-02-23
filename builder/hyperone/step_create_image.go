@@ -9,7 +9,9 @@ import (
 	"github.com/hyperonecom/h1-client-go"
 )
 
-type stepCreateImage struct{}
+type stepCreateImage struct {
+	imageID string
+}
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*openapi.APIClient)
@@ -33,10 +35,31 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
+	s.imageID = image.Id
+
 	state.Put("image_id", image.Id)
 	state.Put("image_name", image.Name)
 
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateImage) Cleanup(state multistep.StateBag) {}
+func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
+	if s.imageID == "" {
+		return
+	}
+
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
+		return
+	}
+
+	client := state.Get("client").(*openapi.APIClient)
+	ui := state.Get("ui").(packer.Ui)
+
+	_, err := client.ImageApi.ImageDelete(context.TODO(), s.imageID)
+	if err != nil {
+		ui.Error(fmt.Sprintf("error deleting image '%s' - consider deleting it manually: %s",
+			s.imageID, formatOpenAPIError(err)))
+	}
+}
