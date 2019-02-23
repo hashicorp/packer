@@ -60,6 +60,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 	}
 	for k, rawV := range r.Variables {
 		var v Variable
+		v.Key = k
 
 		// Variable is required if the value is exactly nil
 		v.Required = rawV == nil
