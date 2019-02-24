@@ -241,6 +241,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		&StepFlock{},
 		&StepPrepareDevice{},
+		&StepCreateVolume{
+			RootVolumeType: b.config.RootVolumeType,
+			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeTags: b.config.RootVolumeTags,
+			Ctx:            b.config.ctx,
+		},
 	)
 
 	// Run!
