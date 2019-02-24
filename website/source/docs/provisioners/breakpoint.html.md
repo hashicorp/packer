@@ -1,8 +1,8 @@
 ---
 description: |
-    The breakpoint provisioner will pause until the user presses "enter" to
-    resume the build. This is intended for debugging purposes, and allows you
-    to halt at a particular part of the provisioning process.
+    The breakpoint provisioner will pause until the user presses "enter" to resume
+    the build. This is intended for debugging purposes, and allows you to halt at a
+    particular part of the provisioning process.
 layout: docs
 page_title: 'breakpoint - Provisioners'
 sidebar_current: 'docs-provisioners-breakpoint'
@@ -12,9 +12,9 @@ sidebar_current: 'docs-provisioners-breakpoint'
 
 Type: `breakpoint`
 
-The breakpoint provisioner will pause until the user presses "enter" to
-resume the build. This is intended for debugging purposes, and allows you
-to halt at a particular part of the provisioning process.
+The breakpoint provisioner will pause until the user presses "enter" to resume
+the build. This is intended for debugging purposes, and allows you to halt at a
+particular part of the provisioning process.
 
 This is independent of the `-debug` flag, which will instead halt at every step
 and between every provisioner.
@@ -33,8 +33,8 @@ and between every provisioner.
 ### Optional
 
 -   `disable` (boolean) - If `true`, skip the breakpoint. Useful for when you
-    have set multiple breakpoints and want to toggle them off or on.
-    Default: `false`
+    have set multiple breakpoints and want to toggle them off or on. Default:
+    `false`
 
 -   `note` (string) - a string to include explaining the purpose or location of
     the breakpoint. For example, you may find it useful to number your
@@ -48,10 +48,8 @@ output prompting you to press "enter" to continue the build when you are ready.
 
 For example:
 
-```
-==> docker: Pausing at breakpoint provisioner with note "foo bar baz".
-==> docker: Press enter to continue.
-```
+    ==> docker: Pausing at breakpoint provisioner with note "foo bar baz".
+    ==> docker: Press enter to continue.
 
 Once you press enter, the build will resume and run normally until it either
 completes or errors.

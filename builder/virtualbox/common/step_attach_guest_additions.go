@@ -21,8 +21,9 @@ import (
 //
 // Produces:
 type StepAttachGuestAdditions struct {
-	attachedPath       string
-	GuestAdditionsMode string
+	attachedPath            string
+	GuestAdditionsMode      string
+	GuestAdditionsInterface string
 }
 
 func (s *StepAttachGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -40,12 +41,22 @@ func (s *StepAttachGuestAdditions) Run(_ context.Context, state multistep.StateB
 	guestAdditionsPath := state.Get("guest_additions_path").(string)
 
 	// Attach the guest additions to the computer
+
+	controllerName := "IDE Controller"
+	port := "1"
+	device := "0"
+	if s.GuestAdditionsInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "2"
+		device = "0"
+	}
+
 	log.Println("Attaching guest additions ISO onto IDE controller...")
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "1",
-		"--device", "0",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--type", "dvddrive",
 		"--medium", guestAdditionsPath,
 	}
@@ -71,11 +82,20 @@ func (s *StepAttachGuestAdditions) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 
+	controllerName := "IDE Controller"
+	port := "1"
+	device := "0"
+	if s.GuestAdditionsInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "2"
+		device = "0"
+	}
+
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "1",
-		"--device", "0",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--medium", "none",
 	}
 

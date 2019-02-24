@@ -47,7 +47,7 @@ Below is a fully functioning example.
     container. This can be a (local or remote) image (name or fingerprint).
     E.G. `my-base-image`, `ubuntu-daily:x`, `08fababf6f27`, ...
 
-    ~&gt; Note: The builder may appear to pause if required to download a
+    \~&gt; Note: The builder may appear to pause if required to download a
     remote image, as they are usually 100-200MB. `/var/log/lxd/lxd.log` will
     mention starting such downloads.
 
@@ -68,8 +68,8 @@ Below is a fully functioning example.
 -   `publish_properties` (map\[string\]string) - Pass key values to the publish
     step to be set as properties on the output image. This is most helpful to
     set the description, but can be used to set anything needed. See
-    <https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/> for more
-    properties.
+    <a href="https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/" class="uri">https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/</a>
+    for more properties.
 
 -   `launch_config` (map\[string\]string) - List of key/value pairs you wish to
     pass to `lxc launch` via `--config`. Defaults to empty.

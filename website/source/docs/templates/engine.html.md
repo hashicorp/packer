@@ -44,7 +44,8 @@ Here is a full list of the available functions for reference.
     reference](/docs/templates/engine.html#isotime-function-format-reference).
 -   `lower` - Lowercases the string.
 -   `pwd` - The working directory while executing Packer.
--   `sed` - Use [a golang implementation of sed](https://github.com/rwtodd/Go.Sed) to parse an input string.
+-   `sed` - Use [a golang implementation of
+    sed](https://github.com/rwtodd/Go.Sed) to parse an input string.
 -   `split` - Split an input string using separator and return the requested
     substring.
 -   `template_dir` - The directory to the template for the build.
@@ -227,6 +228,7 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
     </td>
   </tr>
 </table>
+
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
 Note that "-0700" is always formatted into "+0000" because `isotime` is always
@@ -272,10 +274,10 @@ builder in this example.
 The function `split` takes an input string, a seperator string, and a numeric
 component value and returns the requested substring.
 
-Please note that you cannot use the `split` function on user variables,
-because we can't nest the functions currently. This function is indended to
-be used on builder variables like build_name. If you need a split user
-variable, the best way to do it is to create a separate variable.
+Please note that you cannot use the `split` function on user variables, because
+we can't nest the functions currently. This function is indended to be used on
+builder variables like build\_name. If you need a split user variable, the best
+way to do it is to create a separate variable.
 
 Here are some examples using the above options:
 
@@ -310,16 +312,15 @@ this case, on the `fixed-string` value):
 
 # sed Function Format Reference
 
-See the library documentation https://github.com/rwtodd/Go.Sed for notes about
-the difference between this golang implementation of sed and the regexes you may
-be used to. A very simple example of this functionality:
+See the library documentation
+<a href="https://github.com/rwtodd/Go.Sed" class="uri">https://github.com/rwtodd/Go.Sed</a>
+for notes about the difference between this golang implementation of sed and
+the regexes you may be used to. A very simple example of this functionality:
 
-```
-    "provisioners": [
-      {
-          "type": "shell-local",
-          "environment_vars": ["EXAMPLE={{ sed \"s/null/awesome/\" build_type}}"],
-          "inline": ["echo build_type is $EXAMPLE\n"]
-      }
-    ]
-```
+        "provisioners": [
+          {
+              "type": "shell-local",
+              "environment_vars": ["EXAMPLE={{ sed \"s/null/awesome/\" build_type}}"],
+              "inline": ["echo build_type is $EXAMPLE\n"]
+          }
+        ]

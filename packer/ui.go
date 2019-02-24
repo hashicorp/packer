@@ -343,7 +343,7 @@ func (u *MachineReadableUi) ProgressBar() ProgressBar {
 	return new(NoopProgressBar)
 }
 
-// TimestampedUi is a UI that wraps another UI implementation and prefixes
+// TimestampedUi is a UI that wraps another UI implementation and
 // prefixes each message with an RFC3339 timestamp
 type TimestampedUi struct {
 	Ui Ui
@@ -375,4 +375,49 @@ func (u *TimestampedUi) ProgressBar() ProgressBar { return u.Ui.ProgressBar() }
 
 func (u *TimestampedUi) timestampLine(string string) string {
 	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
+}
+
+// Safe is a UI that wraps another UI implementation and
+// provides concurrency-safe access
+type SafeUi struct {
+	Sem chan int
+	Ui  Ui
+}
+
+var _ Ui = new(SafeUi)
+
+func (u *SafeUi) Ask(s string) (string, error) {
+	u.Sem <- 1
+	ret, err := u.Ui.Ask(s)
+	<-u.Sem
+
+	return ret, err
+}
+
+func (u *SafeUi) Say(s string) {
+	u.Sem <- 1
+	u.Ui.Say(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Message(s string) {
+	u.Sem <- 1
+	u.Ui.Message(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Error(s string) {
+	u.Sem <- 1
+	u.Ui.Error(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Machine(t string, args ...string) {
+	u.Sem <- 1
+	u.Ui.Machine(t, args...)
+	<-u.Sem
+}
+
+func (u *SafeUi) ProgressBar() ProgressBar {
+	return new(NoopProgressBar)
 }

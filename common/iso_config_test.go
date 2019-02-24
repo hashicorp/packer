@@ -239,6 +239,16 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	if i.ISOChecksum != "bar0" {
 		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
 	}
+
+	// Test that we won't try to read an iso into memory because of a user
+	// error
+	i = testISOConfig()
+	i.ISOChecksumURL = "file:///not_read.iso"
+	i.ISOChecksum = ""
+	warns, err = i.Prepare(nil)
+	if err == nil {
+		t.Fatalf("should have error because iso is bad filetype: %s", err)
+	}
 }
 
 func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {
