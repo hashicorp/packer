@@ -48,6 +48,12 @@ func WaitUntilImageAvailable(conn *oapi.Client, imageID string) error {
 	return <-errCh
 }
 
+func WaitUntilVolumeAvailable(conn *oapi.Client, volumeID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "available", volumeWaitFunc(conn, volumeID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
@@ -171,5 +177,36 @@ func securityGroupWaitFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return "exists", nil
+	}
+}
+
+func volumeWaitFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if SvolumeG with id %s exists", id)
+		resp, err := conn.POST_ReadVolumes(oapi.ReadVolumesRequest{
+			Filters: oapi.FiltersVolume{
+				VolumeIds: []string{id},
+			},
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Volume with ID %s. Not Found", id)
+		}
+
+		if len(resp.OK.Volumes) == 0 {
+			return "waiting", nil
+		}
+
+		if resp.OK.Volumes[0].State == "error" {
+			return resp.OK.Volumes[0].State, fmt.Errorf("Volume (%s) creation is failed", id)
+		}
+
+		return resp.OK.Volumes[0].State, nil
 	}
 }
