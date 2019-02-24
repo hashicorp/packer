@@ -1,4 +1,4 @@
-package ansible
+package adapter
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ import (
 
 // An adapter satisfies SSH requests (from an Ansible client) by delegating SSH
 // exec and subsystem commands to a packer.Communicator.
-type adapter struct {
+type Adapter struct {
 	done    <-chan struct{}
 	l       net.Listener
 	config  *ssh.ServerConfig
@@ -26,8 +26,8 @@ type adapter struct {
 	comm    packer.Communicator
 }
 
-func newAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, sftpCmd string, ui packer.Ui, comm packer.Communicator) *adapter {
-	return &adapter{
+func NewAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, sftpCmd string, ui packer.Ui, comm packer.Communicator) *Adapter {
+	return &Adapter{
 		done:    done,
 		l:       l,
 		config:  config,
@@ -37,7 +37,7 @@ func newAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, 
 	}
 }
 
-func (c *adapter) Serve() {
+func (c *Adapter) Serve() {
 	log.Printf("SSH proxy: serving on %s", c.l.Addr())
 
 	for {
@@ -62,7 +62,7 @@ func (c *adapter) Serve() {
 	}
 }
 
-func (c *adapter) Handle(conn net.Conn, ui packer.Ui) error {
+func (c *Adapter) Handle(conn net.Conn, ui packer.Ui) error {
 	log.Print("SSH proxy: accepted connection")
 	_, chans, reqs, err := ssh.NewServerConn(conn, c.config)
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *adapter) Handle(conn net.Conn, ui packer.Ui) error {
 	return nil
 }
 
-func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
+func (c *Adapter) handleSession(newChannel ssh.NewChannel) error {
 	channel, requests, err := newChannel.Accept()
 	if err != nil {
 		return err
@@ -182,11 +182,11 @@ func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
 	return nil
 }
 
-func (c *adapter) Shutdown() {
+func (c *Adapter) Shutdown() {
 	c.l.Close()
 }
 
-func (c *adapter) exec(command string, in io.Reader, out io.Writer, err io.Writer) int {
+func (c *Adapter) exec(command string, in io.Reader, out io.Writer, err io.Writer) int {
 	var exitStatus int
 	switch {
 	case strings.HasPrefix(command, "scp ") && serveSCP(command[4:]):
@@ -206,7 +206,7 @@ func serveSCP(args string) bool {
 	return bytes.IndexAny(opts, "tf") >= 0
 }
 
-func (c *adapter) scpExec(args string, in io.Reader, out io.Writer) error {
+func (c *Adapter) scpExec(args string, in io.Reader, out io.Writer) error {
 	opts, rest := scpOptions(args)
 
 	// remove the quoting that ansible added to rest for shell safety.
@@ -226,7 +226,7 @@ func (c *adapter) scpExec(args string, in io.Reader, out io.Writer) error {
 	return errors.New("no scp mode specified")
 }
 
-func (c *adapter) remoteExec(command string, in io.Reader, out io.Writer, err io.Writer) int {
+func (c *Adapter) remoteExec(command string, in io.Reader, out io.Writer, err io.Writer) int {
 	cmd := &packer.RemoteCmd{
 		Stdin:   in,
 		Stdout:  out,

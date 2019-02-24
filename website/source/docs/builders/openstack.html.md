@@ -278,8 +278,8 @@ builder.
     isn't specified, the default enforced by your OpenStack cluster will be
     used.
 
--   `volume_size` (int) - Size of the Block Storage service volume in GB. If this
-    isn't specified, it is set to source image min disk value (if set) or
+-   `volume_size` (int) - Size of the Block Storage service volume in GB. If
+    this isn't specified, it is set to source image min disk value (if set) or
     calculated from the source image bytes size. Note that in some cases this
     needs to be specified, if `use_blockstorage_volume` is true.
 

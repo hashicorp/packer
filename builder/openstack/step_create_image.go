@@ -9,8 +9,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -25,9 +25,17 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
-	client, err := config.computeV2Client()
+	computeClient, err := config.computeV2Client()
 	if err != nil {
 		err = fmt.Errorf("Error initializing compute client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	// We need the v2 image client
+	imageClient, err := config.imageV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing image service client: %s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -58,7 +66,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		}
 		imageId = image.ImageID
 	} else {
-		imageId, err = servers.CreateImage(client, server.ID, servers.CreateImageOpts{
+		imageId, err = servers.CreateImage(computeClient, server.ID, servers.CreateImageOpts{
 			Name:     config.ImageName,
 			Metadata: config.ImageMetadata,
 		}).ExtractImageID()
@@ -76,7 +84,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	// Wait for the image to become ready
 	ui.Say(fmt.Sprintf("Waiting for image %s (image id: %s) to become ready...", config.ImageName, imageId))
-	if err := WaitForImage(client, imageId); err != nil {
+	if err := WaitForImage(imageClient, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -113,11 +121,11 @@ func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
 			return err
 		}
 
-		if image.Status == "ACTIVE" {
+		if image.Status == "active" {
 			return nil
 		}
 
-		log.Printf("Waiting for image creation status: %s (%d%%)", image.Status, image.Progress)
+		log.Printf("Waiting for image creation status: %s", image.Status)
 		time.Sleep(2 * time.Second)
 	}
 }

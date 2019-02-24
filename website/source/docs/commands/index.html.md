@@ -58,7 +58,7 @@ The format will be covered in more detail later. But as you can see, the output
 immediately becomes machine-friendly. Try some other commands with the
 `-machine-readable` flag to see!
 
-~&gt; The `-machine-readable` flag is designed for automated environments and
+\~&gt; The `-machine-readable` flag is designed for automated environments and
 is mutually-exclusive with the `-debug` flag, which is designed for interactive
 environments.
 

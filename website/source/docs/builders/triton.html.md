@@ -30,7 +30,7 @@ This reusable image can then be used to launch new machines.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
-~&gt; **Private installations of Triton must have custom images enabled!** To
+\~&gt; **Private installations of Triton must have custom images enabled!** To
 use the Triton builder with a private/on-prem installation of Joyent's Triton
 software, you'll need an operator to manually [enable custom
 images](https://docs.joyent.com/private-cloud/install/image-management) after

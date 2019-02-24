@@ -25,6 +25,7 @@ still distributed with Packer.
 ## Provisioners
 
 - File
+- InSpec
 - PowerShell
 - Shell
 - Windows Restart

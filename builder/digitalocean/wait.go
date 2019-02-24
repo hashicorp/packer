@@ -158,9 +158,9 @@ func waitForActionState(
 	}
 }
 
-// waitForImageState simply blocks until the image action is in
+// WaitForImageState simply blocks until the image action is in
 // a state we expect, while eventually timing out.
-func waitForImageState(
+func WaitForImageState(
 	desiredState string, imageId, actionId int,
 	client *godo.Client, timeout time.Duration) error {
 	done := make(chan struct{})

@@ -58,6 +58,11 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 
 				// If iso_checksum has no value use iso_checksum_url instead.
 				if c.ISOChecksum == "" {
+					if strings.HasSuffix(strings.ToLower(c.ISOChecksumURL), ".iso") {
+						errs = append(errs, fmt.Errorf("Error parsing checksum:"+
+							" .iso is not a valid checksum extension"))
+						return warnings, errs
+					}
 					u, err := url.Parse(c.ISOChecksumURL)
 					if err != nil {
 						errs = append(errs,

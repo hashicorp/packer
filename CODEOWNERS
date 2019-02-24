@@ -5,7 +5,7 @@
 /builder/alicloud/                      @chhaj5236
 /builder/amazon/ebssurrogate/           @jen20
 /builder/amazon/ebsvolume/              @jen20
-/builder/azure/                         @boumenot
+/builder/azure/                         @paulmey
 /builder/hyperv/                        @taliesins
 /builder/lxc/                           @ChrisLundquist
 /builder/lxd/                           @ChrisLundquist

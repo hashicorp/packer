@@ -68,6 +68,7 @@ Optional:
     example:
 
 <!-- -->
+
     "extra_arguments": [ "--extra-vars \"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
 
 -   `inventory_groups` (string) - A comma-separated list of groups to which

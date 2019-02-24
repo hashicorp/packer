@@ -38,7 +38,6 @@ is optional.
     commit. Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and
     `EXPOSE`. Example: `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
 
-
 ## Example
 
 An example is shown below, showing only the post-processor configuration:
@@ -61,9 +60,9 @@ to a registry, if you want.
 ## Changing Metadata
 
 Below is an example using the changes argument of the post-processor. This
-feature allows the tarball metadata to be changed when imported into the
-Docker environment. It is derived from the `docker import --change` command
-line [option to
+feature allows the tarball metadata to be changed when imported into the Docker
+environment. It is derived from the `docker import --change` command line
+[option to
 Docker](https://docs.docker.com/engine/reference/commandline/import/).
 
 Example uses of all of the options, assuming one is building an NGINX image

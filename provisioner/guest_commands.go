@@ -30,7 +30,7 @@ var guestOSTypeCommands = map[string]guestOSTypeCommand{
 		mkdir:     "powershell.exe -Command \"New-Item -ItemType directory -Force -ErrorAction SilentlyContinue -Path %s\"",
 		removeDir: "powershell.exe -Command \"rm %s -recurse -force\"",
 		statPath:  "powershell.exe -Command { if (test-path %s) { exit 0 } else { exit 1 } }",
-		mv:        "powershell.exe -Command \"mv %s %s\"",
+		mv:        "powershell.exe -Command \"mv %s %s -force\"",
 	},
 }
 

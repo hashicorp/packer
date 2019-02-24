@@ -164,6 +164,12 @@ builder.
 -   `format` (string) - Either `ovf` or `ova`, this specifies the output format
     of the exported virtual machine. This defaults to `ovf`.
 
+-   `guest_additions_interface` (string) - The interface type to use to mount
+    guest additions when `guest_additions_mode` is set to `attach`. Will
+    default to the value set in `iso_interface`, if `iso_interface` is set.
+    Will default to "ide", if `iso_interface` is not set. Options are "ide" and
+    "sata".
+
 -   `guest_additions_mode` (string) - The method by which guest additions are
     made available to the guest for installation. Valid options are `upload`,
     `attach`, or `disable`. If the mode is `attach` the guest additions ISO will
