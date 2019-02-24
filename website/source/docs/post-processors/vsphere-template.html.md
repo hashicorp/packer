@@ -60,16 +60,16 @@ Optional:
 
 -   `insecure` (boolean) - If it's true skip verification of server
     certificate. Default is false
-    
--   `snapshot_enable` (boolean) - Create a snapshot before marking as a 
+
+-   `snapshot_enable` (boolean) - Create a snapshot before marking as a
     template. Default is false
-    
--   `snapshot_name` (string) - Name for the snapshot. 
-    Required when `snapshot_enable` is `true`
-    
--   `snapshot_description` (string) - Description for the snapshot. 
-    Required when `snapshot_enable` is `true`
-    
+
+-   `snapshot_name` (string) - Name for the snapshot. Required when
+    `snapshot_enable` is `true`
+
+-   `snapshot_description` (string) - Description for the snapshot. Required
+    when `snapshot_enable` is `true`
+
 ## Using the vSphere Template with local builders
 
 Once the [vSphere](/docs/post-processors/vsphere.html) takes an artifact from
@@ -91,7 +91,11 @@ for more information):
         "type": "vsphere-template",
          ...
       }
-    ]
+    ],
+    {
+      "type": "...",
+      ...
+    }
   ]
 }
 ```
@@ -100,4 +104,5 @@ In the example above, the result of each builder is passed through the defined
 sequence of post-processors starting with the `vsphere` post-processor which
 will upload the artifact to a vSphere endpoint. The resulting artifact is then
 passed on to the `vsphere-template` post-processor which handles marking a VM
-as a template.
+as a template. Note that the `vsphere` and `vsphere-template` post-processors
+are paired together in their own JSON array.

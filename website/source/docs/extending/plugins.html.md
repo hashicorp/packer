@@ -56,7 +56,8 @@ later, it will take precedence over one found earlier.
 
 3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
 
-4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined (windows)
+4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+    (windows)
 
 5.  The current working directory.
 
@@ -83,7 +84,7 @@ assumed that you're familiar with the language. This page will not be a Go
 language tutorial. Thankfully, if you are familiar with Go, the Go toolchain
 provides many conveniences to help to develop Packer plugins.
 
-~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
+\~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
 
 ### Plugin System Architecture
@@ -159,7 +160,7 @@ using standard installation procedures.
 The specifics of how to implement each type of interface are covered in the
 relevant subsections available in the navigation to the left.
 
-~&gt; **Lock your dependencies!** Using `govendor` is highly recommended since
+\~&gt; **Lock your dependencies!** Using `govendor` is highly recommended since
 the Packer codebase will continue to improve, potentially breaking APIs along
 the way until there is a stable release. By locking your dependencies, your
 plugins will continue to work with the version of Packer you lock to.

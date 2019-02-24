@@ -44,6 +44,7 @@ import (
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
+	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
@@ -53,6 +54,7 @@ import (
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
+	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
@@ -72,6 +74,7 @@ import (
 	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
 	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
+	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
@@ -118,6 +121,7 @@ var Builders = map[string]packer.Builder{
 	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
+	"vagrant":             new(vagrantbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
@@ -132,6 +136,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
 	"converge":          new(convergeprovisioner.Provisioner),
 	"file":              new(fileprovisioner.Provisioner),
+	"inspec":            new(inspecprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
 	"puppet-server":     new(puppetserverprovisioner.Provisioner),
@@ -148,6 +153,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
+	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),

@@ -206,8 +206,8 @@ Providing `temp_resource_group_name` or `location` in combination with
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB
     (gigabytes). Values of zero or less than zero are ignored.
 
--   `disk_caching_type` (string) Specify the disk caching type. Valid values are None, ReadOnly,
-     and ReadWrite. The default value is ReadWrite.
+-   `disk_caching_type` (string) Specify the disk caching type. Valid values
+    are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
 
 -   `disk_additional_size` (array of integers) - The size(s) of any additional
     hard disks for the VM in gigabytes. If this is not specified then the VM
@@ -325,13 +325,14 @@ Providing `temp_resource_group_name` or `location` in combination with
     value and defaults to false. **Important** Setting this true means that
     your builds are faster, however any failed deletes are not reported.
 
--   `managed_image_os_disk_snapshot_name` (string) If managed\_image\_os\_disk\_snapshot\_name 
-    is set, a snapshot of the OS disk is created with the same name as this value before the 
-    VM is captured.
+-   `managed_image_os_disk_snapshot_name` (string) If
+    managed\_image\_os\_disk\_snapshot\_name is set, a snapshot of the OS disk
+    is created with the same name as this value before the VM is captured.
 
--   `managed_image_data_disk_snapshot_prefix` (string)  If managed\_image\_data\_disk\_snapshot\_prefix 
-    is set, snapshot of the data disk(s) is created with the same prefix as this value before the VM 
-    is captured.
+-   `managed_image_data_disk_snapshot_prefix` (string) If
+    managed\_image\_data\_disk\_snapshot\_prefix is set, snapshot of the data
+    disk(s) is created with the same prefix as this value before the VM is
+    captured.
 
 ## Basic Example
 
@@ -403,14 +404,14 @@ here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 }
 ```
 
-The Windows Guest Agent participates in the Sysprep process.  The
-agent must be fully installed before the VM can be sysprep'ed.  To
-ensure this is true all agent services must be running before
-executing sysprep.exe. The above JSON snippet shows one way to do this
-in the PowerShell provisioner. This snippet is **only** required if
-the VM is configured to install the agent, which is the default.  To
-learn more about disabling the Windows Guest Agent please see [Install the VM Agent](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/agent-windows#install-the-vm-agent).
-
+The Windows Guest Agent participates in the Sysprep process. The agent must be
+fully installed before the VM can be sysprep'ed. To ensure this is true all
+agent services must be running before executing sysprep.exe. The above JSON
+snippet shows one way to do this in the PowerShell provisioner. This snippet is
+**only** required if the VM is configured to install the agent, which is the
+default. To learn more about disabling the Windows Guest Agent please see
+[Install the VM
+Agent](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/agent-windows#install-the-vm-agent).
 
 ### Linux
 

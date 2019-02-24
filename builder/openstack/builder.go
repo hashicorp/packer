@@ -71,6 +71,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Error initializing compute client: %s", err)
 	}
 
+	imageClient, err := b.config.imageV2Client()
+	if err != nil {
+		return nil, fmt.Errorf("Error initializing image client: %s", err)
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
@@ -165,7 +170,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
-		Client:         computeClient,
+		Client:         imageClient,
 	}
 
 	return artifact, nil

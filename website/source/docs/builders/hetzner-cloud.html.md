@@ -75,7 +75,9 @@ builder.
 -   `ssh_keys` (array of strings) - List of SSH keys by name or id to be added
     to image on launch.
 
--   `rescue` (string) - Enable and boot in to the specified rescue system. This enables simple installation of custom operating systems. `linux64` `linux32` or `freebsd64`    
+-   `rescue` (string) - Enable and boot in to the specified rescue system. This
+    enables simple installation of custom operating systems. `linux64`
+    `linux32` or `freebsd64`
 
 ## Basic Example
 
@@ -84,11 +86,13 @@ access tokens:
 
 ``` json
 {
-  "type": "hcloud",
-  "token": "YOUR API KEY",
-  "image": "ubuntu-18.04",
-  "location": "nbg1",
-  "server_type": "cx11",
-  "ssh_username": "root"
+  "builders": [{
+    "type": "hcloud",
+    "token": "YOUR API KEY",
+    "image": "ubuntu-18.04",
+    "location": "nbg1",
+    "server_type": "cx11",
+    "ssh_username": "root"
+   }]
 }
 ```

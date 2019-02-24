@@ -84,7 +84,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ImportFlags: b.config.ImportFlags,
 		},
 		&vboxcommon.StepAttachGuestAdditions{
-			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsMode:      b.config.GuestAdditionsMode,
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
 		&vboxcommon.StepConfigureVRDP{
 			VRDPBindAddress: b.config.VRDPBindAddress,
@@ -136,7 +137,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Timeout: b.config.ShutdownTimeout,
 			Delay:   b.config.PostShutdownDelay,
 		},
-		new(vboxcommon.StepRemoveDevices),
+		&vboxcommon.StepRemoveDevices{
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
+		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
 			Ctx:      b.config.ctx,
