@@ -54,6 +54,18 @@ func WaitUntilVolumeAvailable(conn *oapi.Client, volumeID string) error {
 	return <-errCh
 }
 
+func WaitUntilVolumeIsLinked(conn *oapi.Client, volumeID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "attached", waitUntilVolumeLinkedStateFunc(conn, volumeID))
+	return <-errCh
+}
+
+func WaitUntilVolumeIsUnlinked(conn *oapi.Client, volumeID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "dettached", waitUntilVolumeUnLinkedStateFunc(conn, volumeID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
@@ -92,6 +104,68 @@ func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return resp.OK.Vms[0].State, nil
+	}
+}
+
+func waitUntilVolumeLinkedStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if volume with id %s exists", id)
+		resp, err := conn.POST_ReadVolumes(oapi.ReadVolumesRequest{
+			Filters: oapi.FiltersVolume{
+				VolumeIds: []string{id},
+			},
+		})
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		}
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if len(resp.OK.Volumes) == 0 {
+			return "pending", nil
+		}
+
+		if len(resp.OK.Volumes[0].LinkedVolumes) == 0 {
+			return "pending", nil
+		}
+
+		return resp.OK.Volumes[0].LinkedVolumes[0].State, nil
+	}
+}
+
+func waitUntilVolumeUnLinkedStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if volume with id %s exists", id)
+		resp, err := conn.POST_ReadVolumes(oapi.ReadVolumesRequest{
+			Filters: oapi.FiltersVolume{
+				VolumeIds: []string{id},
+			},
+		})
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		}
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if len(resp.OK.Volumes) == 0 {
+			return "pending", nil
+		}
+
+		if len(resp.OK.Volumes[0].LinkedVolumes) == 0 {
+			return "dettached", nil
+		}
+
+		return "failed", nil
 	}
 }
 
