@@ -247,6 +247,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RootVolumeTags: b.config.RootVolumeTags,
 			Ctx:            b.config.ctx,
 		},
+		&StepLinkVolume{},
 	)
 
 	// Run!
