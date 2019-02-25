@@ -19,7 +19,7 @@ type stepCreateImage struct {
 	UseBlockStorageVolume bool
 }
 
-func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
@@ -84,7 +84,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	// Wait for the image to become ready
 	ui.Say(fmt.Sprintf("Waiting for image %s (image id: %s) to become ready...", config.ImageName, imageId))
-	if err := WaitForImage(imageClient, imageId); err != nil {
+	if err := WaitForImage(ctx, imageClient, imageId); err != nil {
 		err := fmt.Errorf("Error waiting for image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -99,11 +99,14 @@ func (s *stepCreateImage) Cleanup(multistep.StateBag) {
 }
 
 // WaitForImage waits for the given Image ID to become ready.
-func WaitForImage(client *gophercloud.ServiceClient, imageId string) error {
+func WaitForImage(ctx context.Context, client *gophercloud.ServiceClient, imageId string) error {
 	maxNumErrors := 10
 	numErrors := 0
 
 	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		image, err := images.Get(client, imageId).Extract()
 		if err != nil {
 			errCode, ok := err.(*gophercloud.ErrUnexpectedResponseCode)
