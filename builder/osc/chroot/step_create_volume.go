@@ -79,7 +79,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 		var rootDevice *oapi.BlockDeviceMappingImage
 		for _, device := range image.BlockDeviceMappings {
 			if device.DeviceName == image.RootDeviceName {
-				*rootDevice = device
+				rootDevice = &device
 				break
 			}
 		}
@@ -143,9 +143,12 @@ func (s *StepCreateVolume) buildCreateVolumeInput(suregionName string, rootDevic
 	if rootDevice == nil {
 		return nil, fmt.Errorf("Couldn't find root device!")
 	}
+
+	//FIX: Temporary fix
+	gibSize := rootDevice.Bsu.VolumeSize / (1024 * 1024 * 1024)
 	createVolumeInput := &oapi.CreateVolumeRequest{
 		SubregionName: suregionName,
-		Size:          rootDevice.Bsu.VolumeSize,
+		Size:          gibSize,
 		SnapshotId:    rootDevice.Bsu.SnapshotId,
 		VolumeType:    rootDevice.Bsu.VolumeType,
 		Iops:          rootDevice.Bsu.Iops,
