@@ -80,7 +80,7 @@ func TestFixerAmazonPrivateIPNonBoolean(t *testing.T) {
 	var f FixerAmazonPrivateIP
 
 	input := map[string]interface{}{
-		"builders": []map[string]interface{}{map[string]interface{}{
+		"builders": []map[string]interface{}{{
 			"type":           "amazon-ebs",
 			"ssh_private_ip": "not-a-boolean-value",
 		}},
