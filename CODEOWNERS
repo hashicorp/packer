@@ -16,6 +16,7 @@
 /builder/ncloud/                        @YuSungDuk
 /builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
 /builder/hcloud/                        @LKaemmerling
+/builder/hyperone                       @m110 @gregorybrzeski @ad-m
 
 # provisioners
 
