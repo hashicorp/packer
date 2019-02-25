@@ -36,19 +36,19 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 			return multistep.ActionHalt
 		}
 
-		kp, err := ssh.NewKeyPairBuilder().
-			SetPrivateKey(privateKeyBytes).
-			SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
-			Build()
+		kp, err := ssh.KeyPairFromPrivateKey(ssh.FromPrivateKeyConfig{
+			RawPrivateKeyPemBlock: privateKeyBytes,
+			Name:                  fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
+		})
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
 		s.Comm.SSHPrivateKey = privateKeyBytes
-		s.Comm.SSHKeyPairName = kp.Name()
-		s.Comm.SSHTemporaryKeyPairName = kp.Name()
-		s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine(ssh.UnixNewLine)
+		s.Comm.SSHKeyPairName = kp.Name
+		s.Comm.SSHTemporaryKeyPairName = kp.Name
+		s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 
 		return multistep.ActionContinue
 	}
@@ -60,21 +60,21 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 	ui.Say("Creating ephemeral key pair for SSH communicator...")
 
-	kp, err := ssh.NewKeyPairBuilder().
-		SetName(fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())).
-		Build()
+	kp, err := ssh.NewKeyPair(ssh.CreateKeyPairConfig{
+		Name: fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
+	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
-	s.Comm.SSHKeyPairName = kp.Name()
-	s.Comm.SSHTemporaryKeyPairName = kp.Name()
-	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock()
-	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine(ssh.UnixNewLine)
+	s.Comm.SSHKeyPairName = kp.Name
+	s.Comm.SSHTemporaryKeyPairName = kp.Name
+	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock
+	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 	s.Comm.SSHClearAuthorizedKeys = true
 
-	ui.Say(fmt.Sprintf("Created ephemeral SSH key pair of type %s", kp.Description()))
+	ui.Say("Created ephemeral SSH key pair for communicator")
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -90,7 +90,7 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 		defer f.Close()
 
 		// Write the key out
-		if _, err := f.Write(kp.PrivateKeyPemBlock()); err != nil {
+		if _, err := f.Write(kp.PrivateKeyPemBlock); err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
