@@ -22,9 +22,10 @@
 * core: make sure 'only' option is completely ignored by post-processors [GH-7262]
 
 ### Features:
-**new provisioner**`inspec` Added inspec.io provisioner #[GH-7180]
-**new post-processor** `digitalocean-import`Add digitalocean-import post-processor. [GH-7060]
-**new builder** `vagrant` allows users to call vagrant to provision starting from vagrant boxes and save them as new vagrant boxes. [GH-7221]
+* **new provisioner**`inspec` Added inspec.io provisioner [GH-7180]
+* **new post-processor** `digitalocean-import`Add digitalocean-import post-processor. [GH-7060]
+* **new builder** `vagrant` allows users to call vagrant to provision starting from vagrant boxes and save them as new vagrant boxes. [GH-7221]
+* **new builder:** `hyperone` for building new images on HyperOne Platform on top of existing image or from the scratch with the use of chroot. [GH-7294]
 
 ## 1.3.4 (January 30, 2019)
 ### IMPROVEMENTS:
