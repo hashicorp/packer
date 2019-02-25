@@ -80,7 +80,8 @@ func buildBaseRegisterOpts(config *Config, sourceImage *ec2.Image, rootVolumeSiz
 		rootDeviceName string
 	)
 
-	if config.FromScratch {
+	generatingNewBlockDeviceMappings := config.FromScratch || len(config.AMIMappings) > 0
+	if generatingNewBlockDeviceMappings {
 		mappings = config.AMIBlockDevices.BuildAMIDevices()
 		rootDeviceName = config.RootDeviceName
 	} else {
@@ -99,7 +100,7 @@ func buildBaseRegisterOpts(config *Config, sourceImage *ec2.Image, rootVolumeSiz
 				newDevice.Ebs = &ec2.EbsBlockDevice{SnapshotId: aws.String(snapshotID)}
 			}
 
-			if config.FromScratch || rootVolumeSize > *newDevice.Ebs.VolumeSize {
+			if generatingNewBlockDeviceMappings || rootVolumeSize > *newDevice.Ebs.VolumeSize {
 				newDevice.Ebs.VolumeSize = aws.Int64(rootVolumeSize)
 			}
 		}
@@ -123,14 +124,14 @@ func buildBaseRegisterOpts(config *Config, sourceImage *ec2.Image, rootVolumeSiz
 		}
 	}
 
-	return buildRegisterOpts(config, sourceImage, newMappings)
+	return buildRegisterOptsFromExistingImage(config, sourceImage, newMappings, rootDeviceName)
 }
 
-func buildRegisterOpts(config *Config, image *ec2.Image, mappings []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
+func buildRegisterOptsFromExistingImage(config *Config, image *ec2.Image, mappings []*ec2.BlockDeviceMapping, rootDeviceName string) *ec2.RegisterImageInput {
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
 		Architecture:        image.Architecture,
-		RootDeviceName:      image.RootDeviceName,
+		RootDeviceName:      &rootDeviceName,
 		BlockDeviceMappings: mappings,
 		VirtualizationType:  image.VirtualizationType,
 	}

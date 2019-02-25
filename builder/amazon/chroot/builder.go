@@ -167,11 +167,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("source_ami or source_ami_filter is required."))
 		}
-		if len(b.config.AMIMappings) != 0 {
-			warns = append(warns, "ami_block_device_mappings are unused when from_scratch is false")
-		}
-		if b.config.RootDeviceName != "" {
-			warns = append(warns, "root_device_name is unused when from_scratch is false")
+		if len(b.config.AMIMappings) > 0 && b.config.RootDeviceName != "" {
+			if b.config.RootVolumeSize == 0 {
+				// Although, they can specify the device size in the block device mapping, it's easier to
+				// be specific here.
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("root_volume_size is required if ami_block_device_mappings is specified"))
+			}
+			warns = append(warns, "ami_block_device_mappings from source image will be completely overwritten")
+		} else if len(b.config.AMIMappings) > 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If ami_block_device_mappings is specified, root_device_name must be specified"))
+		} else if b.config.RootDeviceName != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
 	}
 
