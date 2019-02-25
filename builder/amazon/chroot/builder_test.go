@@ -162,3 +162,49 @@ func TestBuilderPrepare_CopyFilesNoDefault(t *testing.T) {
 		t.Errorf("Was expecting no default value for copy_files.")
 	}
 }
+
+func TestBuilderPrepare_RootDeviceNameAndAMIMappings(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["root_device_name"] = "/dev/sda"
+	config["ami_block_device_mappings"] = []interface{}{map[string]string{}}
+	config["root_volume_size"] = 15
+	warnings, err := b.Prepare(config)
+	if len(warnings) == 0 {
+		t.Fatal("Missing warning, stating block device mappings will be overwritten")
+	} else if len(warnings) > 1 {
+		t.Fatalf("excessive warnings: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_AMIMappingsNoRootDeviceName(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["ami_block_device_mappings"] = []interface{}{map[string]string{}}
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+}
+
+func TestBuilderPrepare_RootDeviceNameNoAMIMappings(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["root_device_name"] = "/dev/sda"
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+}
