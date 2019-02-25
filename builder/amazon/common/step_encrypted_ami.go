@@ -17,6 +17,7 @@ type StepCreateEncryptedAMICopy struct {
 	EncryptBootVolume bool
 	Name              string
 	AMIMappings       []BlockDevice
+	ToDelete          []*string
 }
 
 func (s *StepCreateEncryptedAMICopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -107,8 +108,7 @@ func (s *StepCreateEncryptedAMICopy) Run(ctx context.Context, state multistep.St
 		return multistep.ActionHalt
 	}
 
-	// Remove associated unencrypted snapshot(s)
-	ui.Say("Deleting unencrypted snapshots")
+	// Figure out which unencrypted snapshot(s) to delete
 	snapshots := state.Get("snapshots").(map[string][]string)
 
 OuterLoop:
@@ -121,15 +121,7 @@ OuterLoop:
 					continue OuterLoop
 				}
 			}
-
-			ui.Message(fmt.Sprintf("Deleting Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
-			deleteSnapOpts := &ec2.DeleteSnapshotInput{
-				SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
-			}
-			if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
-				ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
-				return multistep.ActionHalt
-			}
+			s.ToDelete = append(s.ToDelete, aws.String(*blockDevice.Ebs.SnapshotId))
 		}
 	}
 
@@ -170,5 +162,17 @@ func (s *StepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return
+	}
+
+	ui.Say("Deleting unencrypted snapshots")
+	for _, snap := range s.ToDelete {
+		ui.Message(fmt.Sprintf("Deleting Snapshot ID: %s", *snap))
+		deleteSnapOpts := &ec2.DeleteSnapshotInput{
+			SnapshotId: snap,
+		}
+		if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
+			ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
+			return
+		}
 	}
 }
