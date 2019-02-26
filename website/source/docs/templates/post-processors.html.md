@@ -38,7 +38,8 @@ defined builders and send it through the post-processors. This means that if
 you have one post-processor defined and two builders defined in a template, the
 post-processor will run twice (once for each builder), by default. There are
 ways, which will be covered later, to control what builders post-processors
-apply to, if you wish.
+apply to, if you wish. It is also possible to prevent a post-processor from
+running.
 
 ## Post-Processor Definition
 
@@ -136,21 +137,41 @@ post-processor requested that the input be kept, so it will keep it around.
 
 ## Run on Specific Builds
 
-You can use the `only` or `except` configurations to run a post-processor only
-with specific builds. These two configurations do what you expect: `only` will
-only run the post-processor on the specified builds and `except` will run the
-post-processor on anything other than the specified builds.
+You can use the `only` or `except` fields to run a post-processor only with
+specific builds. These two fields do what you expect: `only` will only run the
+post-processor on the specified builds and `except` will run the post-processor
+on anything other than the specified builds. A sequence of post-processors will
+execute until a skipped post-processor.
 
 An example of `only` being used is shown below, but the usage of `except` is
 effectively the same. `only` and `except` can only be specified on "detailed"
-configurations. If you have a sequence of post-processors to run, `only` and
-`except` will only affect that single post-processor in the sequence.
+fields. If you have a sequence of post-processors to run, `only` and `except`
+will affect that post-processor and stop the sequence.
+
+The `-except` option can specifically skip a named post processor. The `-only`
+option *ignores* post-processors.
 
 ``` json
-{
-  "type": "vagrant",
-  "only": ["virtualbox-iso"]
-}
+[
+  {
+    // can be skipped when running `packer build -except vbox`
+    "name": "vbox",
+    "type": "vagrant",
+    "only": ["virtualbox-iso"]
+  },
+  {
+    "type": "compress" // will only be executed when vbox is
+  }
+],
+[
+  "compress", // will run even if vbox is skipped, from the same start as vbox.
+  {
+    "type": "upload",
+    "endpoint": "http://example.com"
+  }
+  // this list of post processors will execute
+  // using build, not another post-processor.
+]
 ```
 
 The values within `only` or `except` are *build names*, not builder types. If

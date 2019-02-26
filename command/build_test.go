@@ -28,7 +28,7 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 
 	for _, f := range []string{"chocolate.txt", "vanilla.txt",
-		"apple.txt", "peach.txt", "pear.txt"} {
+		"apple.txt", "peach.txt", "pear.txt", "unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -62,7 +62,8 @@ func TestBuildStdin(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"vanilla.txt", "cherry.txt", "chocolate.txt"} {
+	for _, f := range []string{"vanilla.txt", "cherry.txt", "chocolate.txt",
+		"unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -89,13 +90,37 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"vanilla.txt"} {
+	for _, f := range []string{"vanilla.txt", "tomato.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
 	}
 	for _, f := range []string{"chocolate.txt", "cherry.txt",
-		"apple.txt", "peach.txt", "pear.txt"} {
+		"apple.txt", "peach.txt", "pear.txt", "unnamed.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+}
+
+func TestBuildEverything(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		`-except=`,
+		filepath.Join(testFixture("build-only"), "template.json"),
+	}
+
+	defer cleanup()
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
+		"apple.txt", "cherry.txt", "pear.txt", "peach.txt", "unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -118,7 +143,8 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt"} {
+	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
+		"unnamed.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
@@ -174,4 +200,5 @@ func cleanup() {
 	os.RemoveAll("peach.txt")
 	os.RemoveAll("pear.txt")
 	os.RemoveAll("tomato.txt")
+	os.RemoveAll("unnamed.txt")
 }
