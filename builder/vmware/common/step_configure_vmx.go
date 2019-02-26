@@ -62,9 +62,6 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 		k = strings.ToLower(k)
 		vmxData[k] = v
 	}
-	if _, ok := vmxData["extendedConfigFile"]; !ok {
-		vmxData["extendedConfigFile"] = fmt.Sprintf("%s.vmxf", s.VMName)
-	}
 
 	// Set a floppy disk, but only if we should
 	if !s.SkipFloppy {
@@ -104,6 +101,8 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 			state.Put("display_name", displayName)
 		}
 	}
+
+	vmxData["extendedConfigFile"] = fmt.Sprintf("%s.vmxf", s.DisplayName)
 
 	err = WriteVMX(vmxPath, vmxData)
 
