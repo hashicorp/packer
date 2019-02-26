@@ -24,16 +24,16 @@ var (
 )
 
 func init() {
-	echoLockMutex.Lock()
-	defer echoLockMutex.Unlock()
+	// echoLockMutex.Lock()
+	// defer echoLockMutex.Unlock()
 
-	var err error
-	tty, err = os.Open("/dev/tty")
-	istty = true
-	if err != nil {
-		tty = os.Stdin
-		istty = false
-	}
+	// var err error
+	// tty, err = os.Open("/dev/tty")
+	// istty = true
+	// if err != nil {
+	// 	tty = os.Stdin
+	// 	istty = false
+	// }
 }
 
 // terminalWidth returns width of the terminal.
