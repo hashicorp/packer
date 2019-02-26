@@ -33,10 +33,11 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 -   `-syntax-only` - Only the syntax of the template is checked. The
     configuration is not validated.
 
--   `-except=foo,bar,baz` - Builds all the builds except those with the given
-    comma-separated names. Build names by default are the names of their
-    builders, unless a specific `name` attribute is specified within the
-    configuration.
+-   `-except=foo,bar,baz` - Builds all the builds and post-processors except
+    those with the given comma-separated names. Build and post-processor names
+    by default are the names of their builders, unless a specific `name`
+    attribute is specified within the configuration. A post-processor with an
+    empty name will be ignored.
 
 -   `-only=foo,bar,baz` - Only build the builds with the given comma-separated
     names. Build names by default are the names of their builders, unless a
