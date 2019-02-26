@@ -48,6 +48,15 @@
                 "type": "shell-local",
                 "inline": [ "touch tomato.txt" ]
             }
+        ],
+        [
+            {
+                "only": [
+                    "chocolate"
+                ],
+                "type": "shell-local",
+                "inline": [ "touch unnamed.txt" ]
+            }
         ]
     ]
 }

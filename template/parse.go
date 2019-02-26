@@ -144,6 +144,11 @@ func (r *rawTemplate) Template() (*Template, error) {
 				continue
 			}
 
+			// The name defaults to the type if it isn't set
+			if pp.Name == "" {
+				pp.Name = pp.Type
+			}
+
 			// Set the configuration
 			delete(c, "except")
 			delete(c, "only")
