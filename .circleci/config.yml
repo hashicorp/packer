@@ -5,7 +5,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.12
+      - image: golang:1.12
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
