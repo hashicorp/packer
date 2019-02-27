@@ -8,6 +8,10 @@ package arm
 // 1. TenantID
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/packer/builder/azure/common"
 )
@@ -24,6 +28,14 @@ func newConfigRetriever() configRetriever {
 }
 
 func (cr configRetriever) FillParameters(c *Config) error {
+	if c.SubscriptionID == "" {
+		subscriptionID, err := cr.getSubscriptionFromIMDS()
+		if err != nil {
+			return err
+		}
+		c.SubscriptionID = subscriptionID
+	}
+
 	if c.TenantID == "" {
 		tenantID, err := cr.findTenantID(*c.cloudEnvironment, c.SubscriptionID)
 		if err != nil {
@@ -33,4 +45,31 @@ func (cr configRetriever) FillParameters(c *Config) error {
 	}
 
 	return nil
+}
+
+func (cr configRetriever) getSubscriptionFromIMDS() (string, error) {
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", "http://169.254.169.254/metadata/instance/compute", nil)
+	req.Header.Add("Metadata", "True")
+
+	q := req.URL.Query()
+	q.Add("format", "json")
+	q.Add("api-version", "2017-08-01")
+
+	req.URL.RawQuery = q.Encode()
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+	resp_body, _ := ioutil.ReadAll(resp.Body)
+	result := map[string]string{}
+	err = json.Unmarshal(resp_body, &result)
+	if err != nil {
+		return "", err
+	}
+
+	return result["subscriptionId"], nil
 }
