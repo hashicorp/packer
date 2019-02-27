@@ -151,7 +151,7 @@ func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 func validateKmsKey(kmsKey string) (valid bool) {
 	kmsKeyIdPattern := `[a-f0-9-]+$`
 	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
-	kmsArnStartPattern := `^arn:aws:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
+	kmsArnStartPattern := `^arn:aws(-us-gov)?:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
 	if regexp.MustCompile(fmt.Sprintf("^%s", kmsKeyIdPattern)).MatchString(kmsKey) {
 		return true
 	}

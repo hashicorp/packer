@@ -185,6 +185,11 @@ func (r *rawTemplate) Template() (*Template, error) {
 			// Set the raw configuration and delete any special keys
 			pp.Config = c
 
+			// The name defaults to the type if it isn't set
+			if pp.Name == "" {
+				pp.Name = pp.Type
+			}
+
 			delete(pp.Config, "except")
 			delete(pp.Config, "only")
 			delete(pp.Config, "keep_input_artifact")

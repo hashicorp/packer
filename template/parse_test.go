@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParse(t *testing.T) {
@@ -183,6 +185,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							Config: map[string]interface{}{
 								"foo": "bar",
@@ -200,6 +203,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name:              "foo",
 							Type:              "foo",
 							KeepInputArtifact: true,
 						},
@@ -215,6 +219,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							OnlyExcept: OnlyExcept{
 								Only: []string{"bar"},
@@ -232,6 +237,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 							OnlyExcept: OnlyExcept{
 								Except: []string{"bar"},
@@ -249,6 +255,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
@@ -263,6 +270,7 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
@@ -277,11 +285,13 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 					},
 					{
 						{
+							Name: "bar",
 							Type: "bar",
 						},
 					},
@@ -296,9 +306,11 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "foo",
 							Type: "foo",
 						},
 						{
+							Name: "bar",
 							Type: "bar",
 						},
 					},
@@ -427,9 +439,11 @@ func TestParse(t *testing.T) {
 				PostProcessors: [][]*PostProcessor{
 					{
 						{
+							Name: "compress",
 							Type: "compress",
 						},
 						{
+							Name: "vagrant",
 							Type: "vagrant",
 							OnlyExcept: OnlyExcept{
 								Only: []string{"docker"},
@@ -438,6 +452,7 @@ func TestParse(t *testing.T) {
 					},
 					{
 						{
+							Name: "shell-local",
 							Type: "shell-local",
 							Config: map[string]interface{}{
 								"inline": []interface{}{"echo foo"},
@@ -456,7 +471,7 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		path, _ := filepath.Abs(fixtureDir(tc.File))
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
@@ -469,8 +484,8 @@ func TestParse(t *testing.T) {
 		if tpl != nil {
 			tpl.RawContents = nil
 		}
-		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
+		if diff := cmp.Diff(tpl, tc.Result); diff != "" {
+			t.Fatalf("[%d]bad: %s\n%v", i, tc.File, diff)
 		}
 
 		// Only test template writing if the template is valid
