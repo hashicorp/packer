@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -15,6 +14,8 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	"github.com/mattn/go-tty"
 )
 
 type UiColor uint
@@ -81,7 +82,7 @@ type BasicUi struct {
 	ErrorWriter io.Writer
 	l           sync.Mutex
 	interrupted bool
-	scanner     *bufio.Scanner
+	tty         *tty.TTY
 	StackableProgressBar
 }
 
@@ -209,8 +210,12 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		return "", errors.New("interrupted")
 	}
 
-	if rw.scanner == nil {
-		rw.scanner = bufio.NewScanner(rw.Reader)
+	if rw.tty == nil {
+		var err error
+		rw.tty, err = tty.Open()
+		if err != nil {
+			return "", fmt.Errorf("tty open: %s", err)
+		}
 	}
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
@@ -225,11 +230,8 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 
 	result := make(chan string, 1)
 	go func() {
-		var line string
-		if rw.scanner.Scan() {
-			line = rw.scanner.Text()
-		}
-		if err := rw.scanner.Err(); err != nil {
+		line, err := rw.tty.ReadString()
+		if err != nil {
 			log.Printf("ui: scan err: %s", err)
 			return
 		}
