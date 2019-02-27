@@ -252,6 +252,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
+		&StepMountDevice{
+			MountOptions:   b.config.MountOptions,
+			MountPartition: b.config.MountPartition,
+		},
 	)
 
 	// Run!
