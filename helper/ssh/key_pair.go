@@ -9,9 +9,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/ed25519"
@@ -38,175 +36,130 @@ func (o KeyPairType) String() string {
 	return string(o)
 }
 
-const (
-	// UnixNewLine is a unix new line.
-	UnixNewLine NewLineOption = "\n"
+// CreateKeyPairConfig describes how an SSH key pair should be created.
+type CreateKeyPairConfig struct {
+	// Type describes the key pair's type.
+	Type KeyPairType
 
-	// WindowsNewLine is a Windows new line.
-	WindowsNewLine NewLineOption = "\r\n"
+	// Bits represents the key pair's bits of entropy. E.g., 4096 for
+	// a 4096 bit RSA key pair, or 521 for a ECDSA key pair with a
+	// 521-bit curve.
+	Bits int
 
-	// NoNewLine will not append a new line.
-	NoNewLine NewLineOption = ""
-)
-
-// NewLineOption specifies the type of new line to append to a string.
-// See the 'const' block for choices.
-type NewLineOption string
-
-func (o NewLineOption) String() string {
-	return string(o)
+	// Name is the resulting key pair's name. This is used to identify
+	// the key pair in the SSH server's 'authorized_keys'.
+	Name string
 }
 
-func (o NewLineOption) Bytes() []byte {
-	return []byte(o)
+// FromPrivateKeyConfig describes how an SSH key pair should be loaded from an
+// existing private key.
+type FromPrivateKeyConfig struct {
+	// RawPrivateKeyPemBlock is the raw private key that the key pair
+	// should be loaded from.
+	RawPrivateKeyPemBlock []byte
+
+	// Name is the resulting key pair's name. This is used to identify
+	// the key pair in the SSH server's 'authorized_keys'.
+	Name string
 }
 
-// KeyPairBuilder builds SSH key pairs.
-// It can generate new keys of type RSA and ECDSA.
-// It can parse user supplied keys of type DSA, RSA, ECDSA,
-// and ED25519.
-type KeyPairBuilder interface {
-	// SetType sets the key pair type.
-	SetType(KeyPairType) KeyPairBuilder
+// KeyPair represents an SSH key pair.
+// TODO: Maybe a field for a description? Maybe save the type?
+type KeyPair struct {
+	// PrivateKeyPemBlock represents the key pair's private key in
+	// ASN.1 Distinguished Encoding Rules (DER) format in a
+	// Privacy-Enhanced Mail (PEM) block.
+	PrivateKeyPemBlock []byte
 
-	// SetBits sets the key pair's bits of entropy.
-	SetBits(int) KeyPairBuilder
+	// PublicKeyAuthorizedKeysLine represents the key pair's public key
+	// as a line in OpenSSH authorized_keys.
+	PublicKeyAuthorizedKeysLine []byte
 
-	// SetName sets the name of the key pair. This is primarily
-	// used to identify the public key in the authorized_keys file.
-	SetName(string) KeyPairBuilder
-
-	// SetPrivateKey takes an existing private key in PEM format.
-	// It overrides key generation details specified by SetType()
-	// and SetBits().
-	SetPrivateKey([]byte) KeyPairBuilder
-
-	// Build returns a SSH key pair.
-	//
-	// The following defaults are used if not specified:
-	//	Default type: ECDSA
-	//	Default bits of entropy:
-	//		- RSA: 4096
-	//		- ECDSA: 521
-	// 	Default name: (empty string)
-	Build() (KeyPair, error)
+	// Name is the key pair's name. This is used to identify
+	// the key pair in the SSH server's 'authorized_keys'.
+	Name string
 }
 
-type defaultKeyPairBuilder struct {
-	// kind describes the resulting key pair's type.
-	kind KeyPairType
-
-	// bits is the resulting key pair's bits of entropy.
-	bits int
-
-	// name is the resulting key pair's name.
-	name string
-
-	// privatePemBytes is the supplied key data when the builder
-	// is working from a preallocated key.
-	privatePemBytes []byte
-}
-
-func (o *defaultKeyPairBuilder) SetType(kind KeyPairType) KeyPairBuilder {
-	o.kind = kind
-	return o
-}
-
-func (o *defaultKeyPairBuilder) SetBits(bits int) KeyPairBuilder {
-	o.bits = bits
-	return o
-}
-
-func (o *defaultKeyPairBuilder) SetName(name string) KeyPairBuilder {
-	o.name = name
-	return o
-}
-
-func (o *defaultKeyPairBuilder) SetPrivateKey(privateBytes []byte) KeyPairBuilder {
-	o.privatePemBytes = privateBytes
-	return o
-}
-
-func (o *defaultKeyPairBuilder) Build() (KeyPair, error) {
-	if o.privatePemBytes != nil {
-		return o.preallocatedKeyPair()
-	}
-
-	switch o.kind {
-	case Rsa:
-		return o.newRsaKeyPair()
-	case Ecdsa, Default:
-		return o.newEcdsaKeyPair()
-	}
-
-	return nil, fmt.Errorf("Cannot generate SSH key pair - unsupported key pair type: %s", o.kind.String())
-}
-
-// preallocatedKeyPair returns an SSH key pair based on user
-// supplied PEM data.
-func (o *defaultKeyPairBuilder) preallocatedKeyPair() (KeyPair, error) {
-	privateKey, err := gossh.ParseRawPrivateKey(o.privatePemBytes)
+// KeyPairFromPrivateKey returns a KeyPair loaded from an existing private key.
+//
+// Supported key pair types include:
+// 	- DSA
+// 	- ECDSA
+// 	- ED25519
+// 	- RSA
+func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
+	privateKey, err := gossh.ParseRawPrivateKey(config.RawPrivateKeyPemBlock)
 	if err != nil {
-		return nil, err
+		return KeyPair{}, err
 	}
 
 	switch pk := privateKey.(type) {
 	case *rsa.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
 		if err != nil {
-			return nil, err
+			return KeyPair{}, err
 		}
-		return &rsaKeyPair{
-			privateKey:      pk,
-			publicKey:       publicKey,
-			name:            o.name,
-			privatePemBlock: o.privatePemBytes,
+		return KeyPair{
+			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
 		}, nil
 	case *ecdsa.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
 		if err != nil {
-			return nil, err
+			return KeyPair{}, err
 		}
-		return &ecdsaKeyPair{
-			privateKey:      pk,
-			publicKey:       publicKey,
-			name:            o.name,
-			privatePemBlock: o.privatePemBytes,
+		return KeyPair{
+			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
 		}, nil
 	case *dsa.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
 		if err != nil {
-			return nil, err
+			return KeyPair{}, err
 		}
-		return &dsaKeyPair{
-			privateKey:      pk,
-			publicKey:       publicKey,
-			name:            o.name,
-			privatePemBlock: o.privatePemBytes,
+		return KeyPair{
+			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
 		}, nil
 	case *ed25519.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(pk.Public())
 		if err != nil {
-			return nil, err
+			return KeyPair{}, err
 		}
-		return &ed25519KeyPair{
-			privateKey:      pk,
-			publicKey:       publicKey,
-			name:            o.name,
-			privatePemBlock: o.privatePemBytes,
+		return KeyPair{
+			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
 		}, nil
 	}
 
-	return nil, fmt.Errorf("Cannot parse preallocated key pair - unknown ssh key pair type")
+	return KeyPair{}, fmt.Errorf("Cannot parse existing SSH key pair - unknown key pair type")
+}
+
+// NewKeyPair generates a new SSH key pair using the specified
+// CreateKeyPairConfig.
+func NewKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
+	if config.Type == Default {
+		config.Type = Ecdsa
+	}
+
+	switch config.Type {
+	case Ecdsa:
+		return newEcdsaKeyPair(config)
+	case Rsa:
+		return newRsaKeyPair(config)
+	}
+
+	return KeyPair{}, fmt.Errorf("Unable to generate new key pair, type %s is not supported",
+		config.Type.String())
 }
 
 // newEcdsaKeyPair returns a new ECDSA SSH key pair.
-func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
+func newEcdsaKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
 	var curve elliptic.Curve
 
-	switch o.bits {
+	switch config.Bits {
 	case 0:
-		o.bits = 521
+		config.Bits = 521
 		fallthrough
 	case 521:
 		curve = elliptic.P521()
@@ -216,26 +169,24 @@ func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
 		curve = elliptic.P256()
 	case 224:
 		// Not supported by "golang.org/x/crypto/ssh".
-		return &ecdsaKeyPair{}, errors.New("golang.org/x/crypto/ssh does not support " +
-			strconv.Itoa(o.bits) + " bits")
+		return KeyPair{}, fmt.Errorf("golang.org/x/crypto/ssh does not support %d bits", config.Bits)
 	default:
-		return &ecdsaKeyPair{}, errors.New("crypto/elliptic does not support " +
-			strconv.Itoa(o.bits) + " bits")
+		return KeyPair{}, fmt.Errorf("crypto/elliptic does not support %d bits", config.Bits)
 	}
 
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		return &ecdsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
 	sshPublicKey, err := gossh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		return &ecdsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
 	privateRaw, err := x509.MarshalECPrivateKey(privateKey)
 	if err != nil {
-		return &ecdsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
 	privatePem, err := rawPemBlock(&pem.Block{
@@ -244,31 +195,30 @@ func (o *defaultKeyPairBuilder) newEcdsaKeyPair() (KeyPair, error) {
 		Bytes:   privateRaw,
 	})
 	if err != nil {
-		return &ecdsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
-	return &ecdsaKeyPair{
-		privateKey:      privateKey,
-		publicKey:       sshPublicKey,
-		name:            o.name,
-		privatePemBlock: privatePem,
+	return KeyPair{
+		PrivateKeyPemBlock:          privatePem,
+		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Name),
+		Name:                        config.Name,
 	}, nil
 }
 
 // newRsaKeyPair returns a new RSA SSH key pair.
-func (o *defaultKeyPairBuilder) newRsaKeyPair() (KeyPair, error) {
-	if o.bits == 0 {
-		o.bits = defaultRsaBits
+func newRsaKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
+	if config.Bits == 0 {
+		config.Bits = defaultRsaBits
 	}
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, o.bits)
+	privateKey, err := rsa.GenerateKey(rand.Reader, config.Bits)
 	if err != nil {
-		return &rsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
 	sshPublicKey, err := gossh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		return &rsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
 	privatePemBlock, err := rawPemBlock(&pem.Block{
@@ -277,46 +227,14 @@ func (o *defaultKeyPairBuilder) newRsaKeyPair() (KeyPair, error) {
 		Bytes:   x509.MarshalPKCS1PrivateKey(privateKey),
 	})
 	if err != nil {
-		return &rsaKeyPair{}, err
+		return KeyPair{}, err
 	}
 
-	return &rsaKeyPair{
-		privateKey:      privateKey,
-		publicKey:       sshPublicKey,
-		name:            o.name,
-		privatePemBlock: privatePemBlock,
+	return KeyPair{
+		PrivateKeyPemBlock:          privatePemBlock,
+		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Name),
+		Name:                        config.Name,
 	}, nil
-}
-
-// KeyPair represents a SSH key pair.
-type KeyPair interface {
-	// Type returns the key pair's type.
-	Type() KeyPairType
-
-	// Bits returns the bits of entropy.
-	Bits() int
-
-	// Name returns the key pair's name. An empty string is
-	// returned if no name was specified.
-	Name() string
-
-	// Description returns a brief description of the key pair that
-	// is suitable for log messages or printing.
-	Description() string
-
-	// PrivateKeyPemBlock returns a slice of bytes representing
-	// the private key in ASN.1 Distinguished Encoding Rules (DER)
-	// format in a Privacy-Enhanced Mail (PEM) block.
-	PrivateKeyPemBlock() []byte
-
-	// PublicKeyAuthorizedKeysLine returns a slice of bytes
-	// representing the public key as a line in OpenSSH authorized_keys
-	// format with the specified new line.
-	PublicKeyAuthorizedKeysLine(NewLineOption) []byte
-}
-
-func NewKeyPairBuilder() KeyPairBuilder {
-	return &defaultKeyPairBuilder{}
 }
 
 // rawPemBlock encodes a pem.Block to a slice of bytes.
@@ -331,26 +249,10 @@ func rawPemBlock(block *pem.Block) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// description returns a string describing a key pair.
-func description(kp KeyPair) string {
-	buffer := bytes.NewBuffer(nil)
-
-	buffer.WriteString(strconv.Itoa(kp.Bits()))
-	buffer.WriteString(" bit ")
-	buffer.WriteString(kp.Type().String())
-
-	if len(kp.Name()) > 0 {
-		buffer.WriteString(" named ")
-		buffer.WriteString(kp.Name())
-	}
-
-	return buffer.String()
-}
-
-// publicKeyAuthorizedKeysLine returns a slice of bytes representing a SSH
-// public key as a line in OpenSSH authorized_keys format.
-func publicKeyAuthorizedKeysLine(publicKey gossh.PublicKey, name string, nl NewLineOption) []byte {
-	result := gossh.MarshalAuthorizedKey(publicKey)
+// authorizedKeysLine returns a slice of bytes representing an SSH public key
+// as a line in OpenSSH authorized_keys format. No line break is appended.
+func authorizedKeysLine(sshPublicKey gossh.PublicKey, name string) []byte {
+	result := gossh.MarshalAuthorizedKey(sshPublicKey)
 
 	// Remove the mandatory unix new line.
 	// Awful, but the go ssh library automatically appends
@@ -360,15 +262,6 @@ func publicKeyAuthorizedKeysLine(publicKey gossh.PublicKey, name string, nl NewL
 	if len(strings.TrimSpace(name)) > 0 {
 		result = append(result, ' ')
 		result = append(result, name...)
-	}
-
-	switch nl {
-	case WindowsNewLine:
-		result = append(result, nl.Bytes()...)
-	case UnixNewLine:
-		// This is how all the other "SSH key pair" code works in
-		// the different builders.
-		result = append(result, UnixNewLine.Bytes()...)
 	}
 
 	return result
