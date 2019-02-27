@@ -116,7 +116,7 @@ updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
 
 vet: ## Vet Go code
-	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
+	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
 	fi
