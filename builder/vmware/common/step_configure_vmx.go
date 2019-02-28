@@ -102,6 +102,8 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 		}
 	}
 
+	vmxData["extendedconfigfile"] = fmt.Sprintf("%s.vmxf", s.DisplayName)
+
 	err = WriteVMX(vmxPath, vmxData)
 
 	if err != nil {
