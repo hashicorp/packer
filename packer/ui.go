@@ -82,7 +82,7 @@ type BasicUi struct {
 	ErrorWriter io.Writer
 	l           sync.Mutex
 	interrupted bool
-	tty         *tty.TTY
+	tty         TTY
 	StackableProgressBar
 }
 
@@ -235,7 +235,7 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 			log.Printf("ui: scan err: %s", err)
 			return
 		}
-		result <- line
+		result <- strings.TrimSpace(line)
 	}()
 
 	select {
