@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -78,11 +77,9 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
-	// TODO: It would be better if the file was 'chmod' before writing
-	//  the key to the disk - or if umask was set before creating the file.
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving communicator private key for debug purposes: %s", s.DebugKeyPath))
-		f, err := os.Create(s.DebugKeyPath)
+		f, err := os.OpenFile(s.DebugKeyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
@@ -93,14 +90,6 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 		if _, err := f.Write(kp.PrivateKeyPemBlock); err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
-		}
-
-		// Chmod it so that it is SSH ready
-		if runtime.GOOS != "windows" {
-			if err := f.Chmod(0600); err != nil {
-				state.Put("error", fmt.Errorf("Error setting permissions of debug key: %s", err))
-				return multistep.ActionHalt
-			}
 		}
 	}
 
