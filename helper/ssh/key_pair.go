@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/dsa"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -12,7 +13,6 @@ import (
 	"fmt"
 	"strings"
 
-	"golang.org/x/crypto/ed25519"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -66,17 +66,11 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 	}
 
 	switch pk := privateKey.(type) {
-	case *rsa.PrivateKey:
-		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
-		if err != nil {
-			return KeyPair{}, err
-		}
-		return KeyPair{
-			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
-			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
-		}, nil
-	case *ecdsa.PrivateKey:
-		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
+	case crypto.Signer:
+		// crypto.Signer is implemented by ecdsa.PrivateKey,
+		// ed25519.PrivateKey, and rsa.PrivateKey - separate cases
+		// for each PrivateKey type would be redundant.
+		publicKey, err := gossh.NewPublicKey(pk.Public())
 		if err != nil {
 			return KeyPair{}, err
 		}
@@ -86,15 +80,6 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 		}, nil
 	case *dsa.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
-		if err != nil {
-			return KeyPair{}, err
-		}
-		return KeyPair{
-			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
-			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
-		}, nil
-	case *ed25519.PrivateKey:
-		publicKey, err := gossh.NewPublicKey(pk.Public())
 		if err != nil {
 			return KeyPair{}, err
 		}
