@@ -1,13 +1,10 @@
 ### SSH key pair automation
 
 The VirtualBox builders can inject the current SSH key pair's public key into
-the template using the following variables:
+the template using the following variable:
 
--   `SSHPublicKey` (*VirtualBox builders only*) - The SSH public key as a line
-    in OpenSSH authorized_keys format.
--   `EncodedSSHPublicKey` (*VirtualBox builders only*) - The same as
-    `SSHPublicKey`, except it is URL encoded for usage in places
-    like the kernel command line.
+-   `SSHPublicKey` (*VirtualBox builders only*) - This is the SSH public key
+    as a line in OpenSSH authorized_keys format.
 
 When a private key is provided using `ssh_private_key_file`, the key's
 corresponding public key can be accessed using the above variables.
@@ -16,17 +13,19 @@ If `ssh_password` and `ssh_private_key_file` are not specified, Packer will
 automatically generate en ephemeral key pair. The key pair's public key can
 be accessed using the template variables.
 
-For example, the public key can be provided in the boot command:
+For example, the public key can be provided in the boot command as a URL
+encoded string by appending `| urlquery` to the variable:
 ```json
 {
     "type": "virtualbox-iso",
     "boot_command": [
-      "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg PACKER_USER={{ user `username` }} PACKER_AUTHORIZED_KEY={{ .EncodedSSHPublicKey }}<enter>"
+      "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg PACKER_USER={{ user `username` }} PACKER_AUTHORIZED_KEY={{ .SSHPublicKey | urlquery }}<enter>"
     ]
 }
 ```
 
-The kickstart can then leverage those fields from the kernel command line:
+A kickstart could then leverage those fields from the kernel command line by
+decoding the URL-encoded public key:
 ```
 %post
 
@@ -43,8 +42,8 @@ do
       PACKER_USER="${x#*=}"
       ;;
     PACKER_AUTHORIZED_KEY=*)
-      encoded="${x#*=}"
       # URL decode $encoded into $PACKER_AUTHORIZED_KEY
+      encoded=$(echo "${x#*=}" | tr '+' ' ')
       printf -v PACKER_AUTHORIZED_KEY '%b' "${encoded//%/\\x}"
       ;;
   esac
