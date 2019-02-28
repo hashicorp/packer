@@ -64,7 +64,6 @@ type FromPrivateKeyConfig struct {
 }
 
 // KeyPair represents an SSH key pair.
-// TODO: Maybe a field for a description? Maybe save the type?
 type KeyPair struct {
 	// PrivateKeyPemBlock represents the key pair's private key in
 	// ASN.1 Distinguished Encoding Rules (DER) format in a
