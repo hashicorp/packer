@@ -68,7 +68,7 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 		return fmt.Errorf("Failed to copy the vmx file %s: %s", srcVmx, err)
 	}
 
-	filesToClone, err := d.run(nil, "find", strconv.Quote(srcDir), "! -name '*.vmdk' ! -name '*.vmx' -type f ! -size 0")
+	filesToClone, err := d.run(nil, "find", strconv.Quote(srcDir), "! -name '*.vmdk' ! -name '*.vmx' ! -name '*.vmxf' -type f ! -size 0")
 	if err != nil {
 		return fmt.Errorf("Failed to get the file list to copy: %s", err)
 	}
