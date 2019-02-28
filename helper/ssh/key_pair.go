@@ -248,20 +248,22 @@ func rawPemBlock(block *pem.Block) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// authorizedKeysLine returns a slice of bytes representing an SSH public key
-// as a line in OpenSSH authorized_keys format. No line break is appended.
-func authorizedKeysLine(sshPublicKey gossh.PublicKey, name string) []byte {
-	result := gossh.MarshalAuthorizedKey(sshPublicKey)
+// authorizedKeysLine serializes key for inclusion in an OpenSSH
+// authorized_keys file. The return value ends without newline so
+// a key name can be appended to the end.
+func authorizedKeysLine(key gossh.PublicKey, name string) []byte {
+	marshaledPublicKey := gossh.MarshalAuthorizedKey(key)
 
-	// Remove the mandatory unix new line.
-	// Awful, but the go ssh library automatically appends
-	// a unix new line.
-	result = bytes.TrimSpace(result)
+	// Remove the mandatory unix new line. Awful, but the go
+	// ssh library automatically appends a unix new line.
+	// We remove it so a key name can be safely appended to the
+	// end of the string.
+	marshaledPublicKey = bytes.TrimSpace(marshaledPublicKey)
 
 	if len(strings.TrimSpace(name)) > 0 {
-		result = append(result, ' ')
-		result = append(result, name...)
+		marshaledPublicKey = append(marshaledPublicKey, ' ')
+		marshaledPublicKey = append(marshaledPublicKey, name...)
 	}
 
-	return result
+	return marshaledPublicKey
 }
