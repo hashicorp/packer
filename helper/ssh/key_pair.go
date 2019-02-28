@@ -51,18 +51,6 @@ type CreateKeyPairConfig struct {
 	Name string
 }
 
-// FromPrivateKeyConfig describes how an SSH key pair should be loaded from an
-// existing private key.
-type FromPrivateKeyConfig struct {
-	// RawPrivateKeyPemBlock is the raw private key that the key pair
-	// should be loaded from.
-	RawPrivateKeyPemBlock []byte
-
-	// Name is the resulting key pair's name. This is used to identify
-	// the key pair in the SSH server's 'authorized_keys'.
-	Name string
-}
-
 // KeyPair represents an SSH key pair.
 type KeyPair struct {
 	// PrivateKeyPemBlock represents the key pair's private key in
@@ -132,6 +120,18 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 	}
 
 	return KeyPair{}, fmt.Errorf("Cannot parse existing SSH key pair - unknown key pair type")
+}
+
+// FromPrivateKeyConfig describes how an SSH key pair should be loaded from an
+// existing private key.
+type FromPrivateKeyConfig struct {
+	// RawPrivateKeyPemBlock is the raw private key that the key pair
+	// should be loaded from.
+	RawPrivateKeyPemBlock []byte
+
+	// Name is the resulting key pair's name. This is used to identify
+	// the key pair in the SSH server's 'authorized_keys'.
+	Name string
 }
 
 // NewKeyPair generates a new SSH key pair using the specified
