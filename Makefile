@@ -101,7 +101,7 @@ generate: deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
-test: fmt-check mode-check vet ## Run unit tests
+test: fmt-check mode-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 
 # testacc runs acceptance tests
