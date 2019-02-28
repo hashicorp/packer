@@ -171,6 +171,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 
 	// Good
 	config["remote_type"] = ""
+	config["format"] = ""
 	config["remote_host"] = ""
 	config["remote_password"] = ""
 	config["remote_private_key_file"] = ""
@@ -245,6 +246,11 @@ func TestBuilderPrepare_Format(t *testing.T) {
 	for _, format := range goodFormats {
 		// Good
 		config["format"] = format
+		config["remote_type"] = "esx5"
+		config["remote_host"] = "hosty.hostface"
+		config["remote_password"] = "password"
+		config["skip_validate_credentials"] = true
+
 		b = Builder{}
 		warns, err = b.Prepare(config)
 		if len(warns) > 0 {
