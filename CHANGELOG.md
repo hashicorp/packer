@@ -1,4 +1,4 @@
-## 1.3.5 (upcoming)
+## 1.3.5 (February 28, 2019)
 
 ### IMPROVEMENTS:
 * builder/alicloud: Update aliyun sdk to support eu-west-1 region [GH-7338]
