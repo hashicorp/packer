@@ -249,11 +249,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
-		&awscommon.StepCreateEncryptedAMICopy{
-			KeyID:             b.config.AMIKmsKeyId,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
 			Regions:           b.config.AMIRegions,
