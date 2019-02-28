@@ -35,7 +35,7 @@
     names [GH-7266]
 * builder/openstack: Pass context So we know to cancel during WaitForImage
     [GH-7341]
-* builder/vmware-esxi: Should properly strip whitespace from end of names of
+* builder/vmware-esxi: Strip \r\n whitespace from end of names of
     files stored on esxi. [GH-7310]
 * builder/vmware: Add "--noSSLVerify" to args in ovftool Validation [GH-7314]
 * core: clean up Makefile [GH-7254][GH-7265]
