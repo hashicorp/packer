@@ -23,7 +23,7 @@ type AMIConfig struct {
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
-	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
+	AMIEncryptBootVolume    *bool             `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
@@ -59,7 +59,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	errs = append(errs, c.prepareRegions(accessConfig)...)
 
-	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
+	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
 	}
 
@@ -81,7 +81,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	if len(c.SnapshotUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {

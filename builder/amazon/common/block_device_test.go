@@ -71,7 +71,7 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           true,
+				Encrypted:           aws.Bool(true),
 			},
 
 			Result: &ec2.BlockDeviceMapping{
@@ -90,7 +90,7 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           true,
+				Encrypted:           aws.Bool(true),
 				KmsKeyId:            "2Fa48a521f-3aff-4b34-a159-376ac5d37812",
 			},
 
