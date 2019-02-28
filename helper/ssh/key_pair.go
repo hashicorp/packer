@@ -36,21 +36,6 @@ func (o KeyPairType) String() string {
 	return string(o)
 }
 
-// CreateKeyPairConfig describes how an SSH key pair should be created.
-type CreateKeyPairConfig struct {
-	// Type describes the key pair's type.
-	Type KeyPairType
-
-	// Bits represents the key pair's bits of entropy. E.g., 4096 for
-	// a 4096 bit RSA key pair, or 521 for a ECDSA key pair with a
-	// 521-bit curve.
-	Bits int
-
-	// Name is the resulting key pair's name. This is used to identify
-	// the key pair in the SSH server's 'authorized_keys'.
-	Name string
-}
-
 // KeyPair represents an SSH key pair.
 type KeyPair struct {
 	// PrivateKeyPemBlock represents the key pair's private key in
@@ -234,6 +219,21 @@ func newRsaKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
 		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Name),
 		Name:                        config.Name,
 	}, nil
+}
+
+// CreateKeyPairConfig describes how an SSH key pair should be created.
+type CreateKeyPairConfig struct {
+	// Type describes the key pair's type.
+	Type KeyPairType
+
+	// Bits represents the key pair's bits of entropy. E.g., 4096 for
+	// a 4096 bit RSA key pair, or 521 for a ECDSA key pair with a
+	// 521-bit curve.
+	Bits int
+
+	// Name is the resulting key pair's name. This is used to identify
+	// the key pair in the SSH server's 'authorized_keys'.
+	Name string
 }
 
 // rawPemBlock encodes a pem.Block to a slice of bytes.
