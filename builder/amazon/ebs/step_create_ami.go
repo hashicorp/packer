@@ -24,13 +24,13 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Create the image
 	amiName := config.AMIName
-	if config.AMIEncryptBootVolume {
-		// to avoid having a temporary unencrypted
-		// image named config.AMIName
+	if config.AMIEncryptBootVolume != nil {
+		// encrypt_boot was set, so we will create a temporary image
+		// and then create a copy of it with the correct encrypt_boot
 		amiName = random.AlphaNum(7)
 	}
 
-	ui.Say(fmt.Sprintf("Creating unencrypted AMI %s from instance %s", amiName, *instance.InstanceId))
+	ui.Say(fmt.Sprintf("Creating AMI %s from instance %s", amiName, *instance.InstanceId))
 	createOpts := &ec2.CreateImageInput{
 		InstanceId:          instance.InstanceId,
 		Name:                &amiName,
@@ -94,17 +94,19 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	if s.image == nil {
 		return
 	}
+	config := state.Get("config").(*Config)
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
+	encryptBootSet := config.AMIEncryptBootVolume != nil
+	if !cancelled && !halted && !encryptBootSet {
 		return
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancellation or error...")
+	ui.Say("Deregistering the AMI because cancellation, error or it was temporary (encrypt_boot was set)...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
