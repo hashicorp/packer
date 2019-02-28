@@ -66,6 +66,12 @@ func WaitUntilVolumeIsUnlinked(conn *oapi.Client, volumeID string) error {
 	return <-errCh
 }
 
+func WaitUntilSnapshotDone(conn *oapi.Client, snapshotID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "completed", waitUntilSnapshotDoneStateFunc(conn, snapshotID))
+	return <-errCh
+}
+
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
@@ -251,6 +257,37 @@ func securityGroupWaitFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return "exists", nil
+	}
+}
+
+func waitUntilSnapshotDoneStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if Snapshot with id %s exists", id)
+		resp, err := conn.POST_ReadSnapshots(oapi.ReadSnapshotsRequest{
+			Filters: oapi.FiltersSnapshot{
+				SnapshotIds: []string{id},
+			},
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp.OK)
+
+		if err != nil {
+			return "", err
+		}
+
+		if resp.OK == nil {
+			return "", fmt.Errorf("Snapshot with ID %s. Not Found", id)
+		}
+
+		if len(resp.OK.Snapshots) == 0 {
+			return "", fmt.Errorf("Snapshot with ID %s. Not Found", id)
+		}
+
+		if resp.OK.Snapshots[0].State == "error" {
+			return resp.OK.Snapshots[0].State, fmt.Errorf("Snapshot (%s) creation is failed", id)
+		}
+
+		return resp.OK.Snapshots[0].State, nil
 	}
 }
 
