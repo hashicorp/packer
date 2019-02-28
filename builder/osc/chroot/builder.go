@@ -256,6 +256,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
 		},
+		&StepPostMountCommands{
+			Commands: b.config.PostMountCommands,
+		},
 	)
 
 	// Run!
