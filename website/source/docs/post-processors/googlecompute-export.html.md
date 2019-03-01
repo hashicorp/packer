@@ -54,7 +54,7 @@ permissions to the GCS `paths`.
 -   `network` (string) - The Google Compute network id or URL to use for the
     export instance. Defaults to `"default"`. If the value is not a URL, it
     will be interpolated to
-    `projects/((network_project_id))/global/networks/((network))`. This value
+    `projects/((builder_project_id))/global/networks/((network))`. This value
     is not required if a `subnet` is specified.
 
 -   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
@@ -62,7 +62,7 @@ permissions to the GCS `paths`.
     custom subnetting. Note, the region of the subnetwork must match the
     `zone` in which the VM is launched. If the value is not a URL,
     it will be interpolated to
-    `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
+    `projects/((builder_project_id))/regions/((region))/subnetworks/((subnetwork))`
 
 -   `zone` (string) - The zone in which to launch the export instance. Defaults
     to `googlecompute` builder zone. Example: `"us-central1-a"`
