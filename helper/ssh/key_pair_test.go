@@ -177,9 +177,9 @@ func TestNewKeyPair_ECDSA_Default(t *testing.T) {
 func TestNewKeyPair_ECDSA_Positive(t *testing.T) {
 	for _, bits := range []int{521, 384, 256} {
 		config := CreateKeyPairConfig{
-			Type: Ecdsa,
-			Bits: bits,
-			Name: uuid.TimeOrderedUUID(),
+			Type:    Ecdsa,
+			Bits:    bits,
+			Comment: uuid.TimeOrderedUUID(),
 		}
 
 		kp, err := NewKeyPair(config)
@@ -188,8 +188,8 @@ func TestNewKeyPair_ECDSA_Positive(t *testing.T) {
 		}
 
 		err = verifyEcdsaKeyPair(kp, expectedData{
-			bits: bits,
-			name: config.Name,
+			bits:    bits,
+			comment: config.Comment,
 		})
 		if err != nil {
 			t.Fatal(err.Error())
@@ -212,9 +212,9 @@ func TestNewKeyPair_ECDSA_Negative(t *testing.T) {
 func TestNewKeyPair_RSA_Positive(t *testing.T) {
 	for _, bits := range []int{4096, 2048} {
 		config := CreateKeyPairConfig{
-			Type: Rsa,
-			Bits: bits,
-			Name: uuid.TimeOrderedUUID(),
+			Type:    Rsa,
+			Bits:    bits,
+			Comment: uuid.TimeOrderedUUID(),
 		}
 
 		kp, err := NewKeyPair(config)
@@ -223,8 +223,8 @@ func TestNewKeyPair_RSA_Positive(t *testing.T) {
 		}
 
 		err = verifyRsaKeyPair(kp, expectedData{
-			bits: config.Bits,
-			name: config.Name,
+			bits:    config.Bits,
+			comment: config.Comment,
 		})
 		if err != nil {
 			t.Fatal(err.Error())
@@ -316,8 +316,8 @@ type fromPrivateExpectedData struct {
 }
 
 type expectedData struct {
-	bits int
-	name string
+	bits    int
+	comment string
 }
 
 func verifyEcdsaKeyPair(kp KeyPair, e expectedData) error {
@@ -341,9 +341,9 @@ func verifyEcdsaKeyPair(kp KeyPair, e expectedData) error {
 	}
 
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
-	if len(e.name) > 0 {
+	if len(e.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
-		expectedBytes = append(expectedBytes, e.name...)
+		expectedBytes = append(expectedBytes, e.comment...)
 	}
 
 	if !bytes.Equal(expectedBytes, kp.PublicKeyAuthorizedKeysLine) {
@@ -375,9 +375,9 @@ func verifyRsaKeyPair(kp KeyPair, e expectedData) error {
 	}
 
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
-	if len(e.name) > 0 {
+	if len(e.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
-		expectedBytes = append(expectedBytes, e.name...)
+		expectedBytes = append(expectedBytes, e.comment...)
 	}
 
 	if !bytes.Equal(expectedBytes, kp.PublicKeyAuthorizedKeysLine) {
@@ -405,9 +405,9 @@ func verifyDsaKeyPair(kp KeyPair, e fromPrivateExpectedData) error {
 	}
 
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
-	if len(e.d.name) > 0 {
+	if len(e.d.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
-		expectedBytes = append(expectedBytes, e.d.name...)
+		expectedBytes = append(expectedBytes, e.d.comment...)
 	}
 
 	if !bytes.Equal(expectedBytes, kp.PublicKeyAuthorizedKeysLine) {
@@ -435,9 +435,9 @@ func verifyEd25519KeyPair(kp KeyPair, e fromPrivateExpectedData) error {
 	}
 
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
-	if len(e.d.name) > 0 {
+	if len(e.d.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
-		expectedBytes = append(expectedBytes, e.d.name...)
+		expectedBytes = append(expectedBytes, e.d.comment...)
 	}
 
 	if !bytes.Equal(expectedBytes, kp.PublicKeyAuthorizedKeysLine) {

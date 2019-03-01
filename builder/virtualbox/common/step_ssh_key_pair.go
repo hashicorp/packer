@@ -37,7 +37,7 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 
 		kp, err := ssh.KeyPairFromPrivateKey(ssh.FromPrivateKeyConfig{
 			RawPrivateKeyPemBlock: privateKeyBytes,
-			Name:                  fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
+			Comment:               fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
 		})
 		if err != nil {
 			state.Put("error", err)
@@ -45,8 +45,8 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 		}
 
 		s.Comm.SSHPrivateKey = privateKeyBytes
-		s.Comm.SSHKeyPairName = kp.Name
-		s.Comm.SSHTemporaryKeyPairName = kp.Name
+		s.Comm.SSHKeyPairName = kp.Comment
+		s.Comm.SSHTemporaryKeyPairName = kp.Comment
 		s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 
 		return multistep.ActionContinue
@@ -60,15 +60,15 @@ func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multis
 	ui.Say("Creating ephemeral key pair for SSH communicator...")
 
 	kp, err := ssh.NewKeyPair(ssh.CreateKeyPairConfig{
-		Name: fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
+		Comment: fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()),
 	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
 	}
 
-	s.Comm.SSHKeyPairName = kp.Name
-	s.Comm.SSHTemporaryKeyPairName = kp.Name
+	s.Comm.SSHKeyPairName = kp.Comment
+	s.Comm.SSHTemporaryKeyPairName = kp.Comment
 	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock
 	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 	s.Comm.SSHClearAuthorizedKeys = true
