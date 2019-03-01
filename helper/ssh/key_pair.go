@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	// That's a lot of bits.
+	// defaultRsaBits is the default bits of entropy for a new RSA
+	// key pair. That's a lot of bits.
 	defaultRsaBits = 4096
 
 	// Markers for various SSH key pair types.
