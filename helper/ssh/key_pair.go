@@ -47,9 +47,10 @@ type KeyPair struct {
 	// as a line in OpenSSH authorized_keys.
 	PublicKeyAuthorizedKeysLine []byte
 
-	// Name is the key pair's name. This is used to identify
-	// the key pair in the SSH server's 'authorized_keys'.
-	Name string
+	// Comment is the key pair's comment. This is typically used
+	// to identify the key pair's owner in the SSH user's
+	// 'authorized_keys' file.
+	Comment string
 }
 
 // KeyPairFromPrivateKey returns a KeyPair loaded from an existing private key.
@@ -76,7 +77,7 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 		}
 		return KeyPair{
 			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
-			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Comment),
 		}, nil
 	case *dsa.PrivateKey:
 		publicKey, err := gossh.NewPublicKey(&pk.PublicKey)
@@ -85,7 +86,7 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 		}
 		return KeyPair{
 			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
-			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Name),
+			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Comment),
 		}, nil
 	}
 
@@ -99,9 +100,10 @@ type FromPrivateKeyConfig struct {
 	// should be loaded from.
 	RawPrivateKeyPemBlock []byte
 
-	// Name is the resulting key pair's name. This is used to identify
-	// the key pair in the SSH server's 'authorized_keys'.
-	Name string
+	// Comment is the key pair's comment. This is typically used
+	// to identify the key pair's owner in the SSH user's
+	// 'authorized_keys' file.
+	Comment string
 }
 
 // NewKeyPair generates a new SSH key pair using the specified
@@ -169,8 +171,8 @@ func newEcdsaKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
 
 	return KeyPair{
 		PrivateKeyPemBlock:          privatePem,
-		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Name),
-		Name:                        config.Name,
+		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Comment),
+		Comment:                     config.Comment,
 	}, nil
 }
 
@@ -201,8 +203,8 @@ func newRsaKeyPair(config CreateKeyPairConfig) (KeyPair, error) {
 
 	return KeyPair{
 		PrivateKeyPemBlock:          privatePemBlock,
-		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Name),
-		Name:                        config.Name,
+		PublicKeyAuthorizedKeysLine: authorizedKeysLine(sshPublicKey, config.Comment),
+		Comment:                     config.Comment,
 	}, nil
 }
 
@@ -216,9 +218,10 @@ type CreateKeyPairConfig struct {
 	// 521-bit curve.
 	Bits int
 
-	// Name is the resulting key pair's name. This is used to identify
-	// the key pair in the SSH server's 'authorized_keys'.
-	Name string
+	// Comment is the resulting key pair's comment. This is typically
+	// used to identify the key pair's owner in the SSH user's
+	// 'authorized_keys' file.
+	Comment string
 }
 
 // rawPemBlock encodes a pem.Block to a slice of bytes.
@@ -235,19 +238,19 @@ func rawPemBlock(block *pem.Block) ([]byte, error) {
 
 // authorizedKeysLine serializes key for inclusion in an OpenSSH
 // authorized_keys file. The return value ends without newline so
-// a key name can be appended to the end.
-func authorizedKeysLine(key gossh.PublicKey, name string) []byte {
+// a comment can be appended to the end.
+func authorizedKeysLine(key gossh.PublicKey, comment string) []byte {
 	marshaledPublicKey := gossh.MarshalAuthorizedKey(key)
 
 	// Remove the mandatory unix new line. Awful, but the go
 	// ssh library automatically appends a unix new line.
-	// We remove it so a key name can be safely appended to the
+	// We remove it so a key comment can be safely appended to the
 	// end of the string.
 	marshaledPublicKey = bytes.TrimSpace(marshaledPublicKey)
 
-	if len(strings.TrimSpace(name)) > 0 {
+	if len(strings.TrimSpace(comment)) > 0 {
 		marshaledPublicKey = append(marshaledPublicKey, ' ')
-		marshaledPublicKey = append(marshaledPublicKey, name...)
+		marshaledPublicKey = append(marshaledPublicKey, comment...)
 	}
 
 	return marshaledPublicKey
