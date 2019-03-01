@@ -125,6 +125,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		MachineType:          p.config.MachineType,
 		Metadata:             exporterMetadata,
 		Network:              p.config.Network,
+		NetworkProjectId:     builderProjectId,
 		RawStateTimeout:      "5m",
 		SourceImageFamily:    "debian-9-worker",
 		SourceImageProjectId: "compute-image-tools",
