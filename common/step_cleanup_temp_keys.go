@@ -38,13 +38,29 @@ func (s *StepCleanupTempKeys) Run(_ context.Context, state multistep.StateBag) m
 
 	ui.Say("Trying to remove ephemeral keys from authorized_keys files")
 
-	cmd.Command = fmt.Sprintf("sed -i.bak '/ssh-rsa.*%s$/d' ~/.ssh/authorized_keys; rm ~/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
+	// Per the OpenSSH manual (https://man.openbsd.org/sshd.8), a typical
+	// line in the 'authorized_keys' file contains several fields that
+	// are delimited by spaces. Here is an (abbreviated) example of a line:
+	// 	ssh-rsa AAAAB3Nza...LiPk== user@example.net
+	//
+	// In the above example, 'ssh-rsa' is the key pair type,
+	// 'AAAAB3Nza...LiPk==' is the base64 encoded public key,
+	// and 'user@example.net' is a comment (in this case, describing
+	// who the key belongs to).
+	//
+	// In the following 'sed' calls, the comment field will be equal to
+	// the value of communicator.Config.SSHTemporaryKeyPairName.
+	// We can remove an authorized public key using 'sed' by looking
+	// for a line ending in ' packer-key-pair-comment' (note the
+	// leading space).
+	//
+	// TODO: Why create a backup file if you are going to remove it?
+	cmd.Command = fmt.Sprintf("sed -i.bak '/ %s$/d' ~/.ssh/authorized_keys; rm ~/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		log.Printf("Error cleaning up ~/.ssh/authorized_keys; please clean up keys manually: %s", err)
 	}
 	cmd = new(packer.RemoteCmd)
-	cmd.Command = fmt.Sprintf("sudo sed -i.bak '/ssh-rsa.*%s$/d' /root/.ssh/authorized_keys; sudo rm /root/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
-
+	cmd.Command = fmt.Sprintf("sudo sed -i.bak '/ %s$/d' /root/.ssh/authorized_keys; sudo rm /root/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		log.Printf("Error cleaning up /root/.ssh/authorized_keys; please clean up keys manually: %s", err)
 	}
