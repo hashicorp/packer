@@ -11,7 +11,7 @@ sudo: false
 language: go
 
 go:
-  - 1.11.x
+  - 1.12.x
   - master
 
 before_install:

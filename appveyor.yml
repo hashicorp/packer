@@ -16,7 +16,6 @@ environment:
 clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
-  - set GO15VENDOREXPERIMENT=1
   - echo %Path%
   - go version
   - go env
