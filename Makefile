@@ -1,5 +1,5 @@
-TEST?=$(shell go list ./... | grep -v vendor)
-VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
+TEST?=$(shell go list ./...)
+VET?=$(shell go list ./...)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
@@ -101,7 +101,7 @@ generate: deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
-test: fmt-check mode-check ## Run unit tests
+test: fmt-check mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 
 # testacc runs acceptance tests
@@ -116,7 +116,7 @@ updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
 
 vet: ## Vet Go code
-	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
+	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
 	fi
