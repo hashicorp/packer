@@ -264,6 +264,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepChrootProvision{},
 		&StepEarlyCleanup{},
 		&StepSnapshot{},
+		&osccommon.StepDeregisterOMI{
+			AccessConfig:        &b.config.AccessConfig,
+			ForceDeregister:     b.config.OMIForceDeregister,
+			ForceDeleteSnapshot: b.config.OMIForceDeleteSnapshot,
+			OMIName:             b.config.OMIName,
+			Regions:             b.config.OMIRegions,
+		},
+		&StepCreateOMI{
+			RootVolumeSize: b.config.RootVolumeSize,
+		},
 	)
 
 	// Run!
