@@ -220,7 +220,7 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 		args = append(args, p.config.Options...)
 	}
 
-	args = append(args, fmt.Sprintf(`%s`, source))
+	args = append(args, fmt.Sprintf(`%s`, strings.Replace(source, `\`, `\\`, -1)))
 	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
 
 	return args, nil
