@@ -25,12 +25,12 @@ func (s *StepCleanupVolumes) Run(_ context.Context, state multistep.StateBag) mu
 func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	oapiconn := state.Get("oapi").(*oapi.Client)
 	vmRaw := state.Get("vm")
-	var vm *oapi.Vm
+	var vm oapi.Vm
 	if vmRaw != nil {
-		vm = vmRaw.(*oapi.Vm)
+		vm = vmRaw.(oapi.Vm)
 	}
 	ui := state.Get("ui").(packer.Ui)
-	if vm == nil {
+	if vm.VmId == "" {
 		ui.Say("No volumes to clean up, skipping")
 		return
 	}

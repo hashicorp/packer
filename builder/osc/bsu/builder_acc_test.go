@@ -46,9 +46,9 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 		"region": "eu-west-2",
-		"vm_type": "m3.medium",
+		"vm_type": "t2.micro",
 		"source_omi": "ami-46260446",
-		"ssh_username": "ubuntu",
+		"ssh_username": "outscale",
 		"omi_name": "packer-test {{timestamp}}"
 	}]
 }

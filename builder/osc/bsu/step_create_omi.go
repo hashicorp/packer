@@ -18,7 +18,7 @@ type stepCreateOMI struct {
 func (s *stepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	oapiconn := state.Get("oapi").(*oapi.Client)
-	vm := state.Get("vm").(*oapi.Vm)
+	vm := state.Get("vm").(oapi.Vm)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Create the image

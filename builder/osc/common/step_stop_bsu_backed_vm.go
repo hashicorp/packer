@@ -18,7 +18,7 @@ type StepStopBSUBackedVm struct {
 
 func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	oapiconn := state.Get("oapi").(*oapi.Client)
-	vm := state.Get("vm").(*oapi.Vm)
+	vm := state.Get("vm").(oapi.Vm)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip when it is a spot vm
