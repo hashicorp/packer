@@ -63,7 +63,7 @@ func TestPostProcessor_Insecure_Ssl(t *testing.T) {
 	config["vagrant_cloud_url"] = server.URL
 	config["insecure_skip_tls_verify"] = true
 	if err := p.Configure(config); err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Expected TLS to skip certificate validation: %s", err)
 	}
 }
 
