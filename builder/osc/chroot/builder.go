@@ -274,6 +274,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateOMI{
 			RootVolumeSize: b.config.RootVolumeSize,
 		},
+		&osccommon.StepUpdateOMIAttributes{
+			AccountIds:         b.config.OMIAccountIDs,
+			SnapshotAccountIds: b.config.SnapshotAccountIDs,
+			Ctx:                b.config.ctx,
+		},
+		&osccommon.StepCreateTags{
+			Tags:         b.config.OMITags,
+			SnapshotTags: b.config.SnapshotTags,
+			Ctx:          b.config.ctx,
+		},
 	)
 
 	// Run!
@@ -285,7 +295,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	return nil, nil
+	// If there are no OMIs, then just return
+	if _, ok := state.GetOk("omis"); !ok {
+		return nil, nil
+	}
+
+	// Build the artifact and return it
+	artifact := &osccommon.Artifact{
+		Omis:           state.Get("omis").(map[string]string),
+		BuilderIdValue: BuilderId,
+		Config:         clientConfig,
+	}
+
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {
