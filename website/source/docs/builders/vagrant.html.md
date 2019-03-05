@@ -1,3 +1,14 @@
+---
+description: |
+    The Vagrant builder is intended for building new boxes from already-existing
+    boxes.
+layout: docs
+page_title: 'Vagrant - Builders'
+sidebar_current: 'docs-builders-vagrant'
+---
+
+# Vagrant Builder
+
 The Vagrant builder is intended for building new boxes from already-existing
 boxes. Your source should be a URL or path to a .box file or a Vagrant Cloud
 box name such as `hashicorp/precise64`.
