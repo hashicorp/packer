@@ -303,7 +303,7 @@ Options:
 
   -color=false                  Disable color output. (Default: color)
   -debug                        Debug mode enabled for builds.
-  -except=foo,bar,baz           Build all builds other than these.
+  -except=foo,bar,baz           Run all builds and post-procesors other than these.
   -only=foo,bar,baz             Build only the specified builds.
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
