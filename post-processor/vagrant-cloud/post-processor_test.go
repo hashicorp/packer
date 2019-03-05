@@ -41,6 +41,32 @@ func newSecureServer(token string, handler http.HandlerFunc) *httptest.Server {
 	}))
 }
 
+func newSelfSignedSslServer(token string, handler http.HandlerFunc) *httptest.Server {
+	token = fmt.Sprintf("Bearer %s", token)
+	return httptest.NewTLSServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("authorization") != token {
+			http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		if handler != nil {
+			handler(rw, req)
+		}
+	}))
+}
+
+func TestPostProcessor_Insecure_Ssl(t *testing.T) {
+	var p PostProcessor
+	server := newSelfSignedSslServer("foo", nil)
+	defer server.Close()
+
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["insecure_skip_tls_verify"] = true
+	if err := p.Configure(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestPostProcessor_Configure_fromVagrantEnv(t *testing.T) {
 	var p PostProcessor
 	config := testGoodConfig()
