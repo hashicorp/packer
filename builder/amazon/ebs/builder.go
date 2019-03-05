@@ -93,9 +93,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	ec2conn := ec2.New(session, &aws.Config{
-		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
-	})
+	ec2conn := ec2.New(session)
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
