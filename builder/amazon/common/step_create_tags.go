@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	retry "github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -36,8 +35,7 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
 
 		regionConn := ec2.New(session, &aws.Config{
-			HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
-			Region:     aws.String(region),
+			Region: aws.String(region),
 		})
 
 		// Retrieve image list for given AMI
