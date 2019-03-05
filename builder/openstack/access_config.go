@@ -16,22 +16,25 @@ import (
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Username         string `mapstructure:"username"`
-	UserID           string `mapstructure:"user_id"`
-	Password         string `mapstructure:"password"`
-	IdentityEndpoint string `mapstructure:"identity_endpoint"`
-	TenantID         string `mapstructure:"tenant_id"`
-	TenantName       string `mapstructure:"tenant_name"`
-	DomainID         string `mapstructure:"domain_id"`
-	DomainName       string `mapstructure:"domain_name"`
-	Insecure         bool   `mapstructure:"insecure"`
-	Region           string `mapstructure:"region"`
-	EndpointType     string `mapstructure:"endpoint_type"`
-	CACertFile       string `mapstructure:"cacert"`
-	ClientCertFile   string `mapstructure:"cert"`
-	ClientKeyFile    string `mapstructure:"key"`
-	Token            string `mapstructure:"token"`
-	Cloud            string `mapstructure:"cloud"`
+	Username                    string `mapstructure:"username"`
+	UserID                      string `mapstructure:"user_id"`
+	Password                    string `mapstructure:"password"`
+	IdentityEndpoint            string `mapstructure:"identity_endpoint"`
+	TenantID                    string `mapstructure:"tenant_id"`
+	TenantName                  string `mapstructure:"tenant_name"`
+	DomainID                    string `mapstructure:"domain_id"`
+	DomainName                  string `mapstructure:"domain_name"`
+	Insecure                    bool   `mapstructure:"insecure"`
+	Region                      string `mapstructure:"region"`
+	EndpointType                string `mapstructure:"endpoint_type"`
+	CACertFile                  string `mapstructure:"cacert"`
+	ClientCertFile              string `mapstructure:"cert"`
+	ClientKeyFile               string `mapstructure:"key"`
+	Token                       string `mapstructure:"token"`
+	ApplicationCredentialName   string `mapstructure:"application_credential_name"`
+	ApplicationCredentialID     string `mapstructure:"application_credential_id"`
+	ApplicationCredentialSecret string `mapstructure:"application_credential_secret"`
+	Cloud                       string `mapstructure:"cloud"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -126,6 +129,9 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.DomainID, &ao.DomainID},
 		{&c.DomainName, &ao.DomainName},
 		{&c.Token, &ao.TokenID},
+		{&c.ApplicationCredentialName, &ao.ApplicationCredentialName},
+		{&c.ApplicationCredentialID, &ao.ApplicationCredentialID},
+		{&c.ApplicationCredentialSecret, &ao.ApplicationCredentialSecret},
 	}
 	for _, s := range overrides {
 		if *s.From != "" {
