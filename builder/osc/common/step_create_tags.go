@@ -24,14 +24,14 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 	oapiconn := state.Get("oapi").(*oapi.Client)
 	config := state.Get("clientConfig").(*oapi.Config)
 	ui := state.Get("ui").(packer.Ui)
-	amis := state.Get("amis").(map[string]string)
+	omis := state.Get("omis").(map[string]string)
 
 	if !s.Tags.IsSet() && !s.SnapshotTags.IsSet() {
 		return multistep.ActionContinue
 	}
 
 	// Adds tags to OMIs and snapshots
-	for region, ami := range amis {
+	for region, ami := range omis {
 		ui.Say(fmt.Sprintf("Adding tags to OMI (%s)...", ami))
 
 		newConfig := &oapi.Config{
