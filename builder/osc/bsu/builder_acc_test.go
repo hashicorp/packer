@@ -1,7 +1,4 @@
-/*
-Deregister the test image with
-aws oapi deregister-image --image-id $(aws oapi describe-images --output text --filters "Name=name,Values=packer-test-packer-test-dereg" --query 'Images[*].{ID:ImageId}')
-*/
+//TODO: explain how to delete the image.
 package bsu
 
 import (
@@ -16,9 +13,10 @@ import (
 
 func TestBuilderAcc_basic(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Builder:  &Builder{},
-		Template: testBuilderAccBasic,
+		PreCheck:             func() { testAccPreCheck(t) },
+		Builder:              &Builder{},
+		Template:             testBuilderAccBasic,
+		SkipArtifactTeardown: true,
 	})
 }
 
@@ -47,7 +45,7 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "eu-west-2",
 		"vm_type": "t2.micro",
-		"source_omi": "ami-46260446",
+		"source_omi": "ami-65efcc11",
 		"ssh_username": "outscale",
 		"omi_name": "packer-test {{timestamp}}"
 	}]
