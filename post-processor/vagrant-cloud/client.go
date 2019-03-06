@@ -2,6 +2,7 @@ package vagrantcloud
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,11 +38,18 @@ func (v VagrantCloudErrors) FormatErrors() string {
 	return strings.Join(errs, ". ")
 }
 
-func (v VagrantCloudClient) New(baseUrl string, token string) (*VagrantCloudClient, error) {
+func (v VagrantCloudClient) New(baseUrl string, token string, InsecureSkipTLSVerify bool) (*VagrantCloudClient, error) {
 	c := &VagrantCloudClient{
 		client:      commonhelper.HttpClientWithEnvironmentProxy(),
 		BaseURL:     baseUrl,
 		AccessToken: token,
+	}
+
+	if InsecureSkipTLSVerify {
+		transport := c.client.Transport.(*http.Transport)
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	return c, c.ValidateAuthentication()
