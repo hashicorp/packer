@@ -34,7 +34,7 @@ func testUi() *BasicUi {
 		Reader:      new(bytes.Buffer),
 		Writer:      new(bytes.Buffer),
 		ErrorWriter: new(bytes.Buffer),
-		tty:         new(testTTY),
+		TTY:         new(testTTY),
 	}
 }
 
@@ -42,8 +42,8 @@ type testTTY struct {
 	say string
 }
 
-func (tttyy *testTTY) ReadString() (string, error) {
-	return tttyy.say, nil
+func (tty *testTTY) ReadString() (string, error) {
+	return tty.say, nil
 }
 
 func TestColoredUi(t *testing.T) {
@@ -226,7 +226,7 @@ func TestBasicUi_Ask(t *testing.T) {
 	for _, testCase := range testCases {
 		// Because of the internal bufio we can't easily reset the input, so create a new one each time
 		bufferUi := testUi()
-		bufferUi.tty = &testTTY{testCase.Input}
+		bufferUi.TTY = &testTTY{testCase.Input}
 
 		actual, err = bufferUi.Ask(testCase.Prompt)
 		if err != nil {
