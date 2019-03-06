@@ -43,3 +43,14 @@ func (t TagMap) OAPITags(ctx interpolate.Context, region string, state multistep
 	}
 	return oapiTags, nil
 }
+
+func CreateTags(conn *oapi.Client, resourceID string, ui packer.Ui, tags OAPITags) error {
+	tags.Report(ui)
+
+	_, err := conn.POST_CreateTags(oapi.CreateTagsRequest{
+		ResourceIds: []string{resourceID},
+		Tags:        tags,
+	})
+
+	return err
+}
