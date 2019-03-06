@@ -31,7 +31,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 			state.Put("error", fmt.Errorf("Problem reading user data file: %s", err))
 			return multistep.ActionHalt
 		}
-		
+
 		userData = string(contents)
 	}
 
