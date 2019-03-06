@@ -34,26 +34,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	var err error
 
-	//TODO: Add tags
-	// volTags, err := s.RootVolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
-	// if err != nil {
-	// 	err := fmt.Errorf("Error tagging volumes: %s", err)
-	// 	state.Put("error", err)
-	// 	ui.Error(err.Error())
-	// 	return multistep.ActionHalt
-	// }
-
-	// // Collect tags for tagging on resource creation
-	// var tagSpecs []oapi.ResourceTag
-
-	// if len(volTags) > 0 {
-	// 	runVolTags := &oapi.Resou rceTag{
-	// 		ResourceType: "volume",
-	// 		Tags:         volTags,
-	// 	}
-
-	// 	tagSpecs = append(tagSpecs, runVolTags)
-	// }
+	volTags, err := s.RootVolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
 
 	var createVolume *oapi.CreateVolumeRequest
 	if config.FromScratch {
@@ -92,11 +73,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 			return multistep.ActionHalt
 		}
 	}
-	//TODO: ADD TAGS
-	// if len(tagSpecs) > 0 {
-	// 	createVolume.SetTagSpecifications(tagSpecs)
-	// 	volTags.Report(ui)
-	// }
+
 	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := oapiconn.POST_CreateVolume(*createVolume)
@@ -110,6 +87,11 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	// Set the volume ID so we remember to delete it later
 	s.volumeId = createVolumeResp.OK.Volume.VolumeId
 	log.Printf("Volume ID: %s", s.volumeId)
+
+	//Create tags for volume
+	if len(volTags) > 0 {
+		osccommon.CreateTags(oapiconn, s.volumeId, ui, volTags)
+	}
 
 	// Wait for the volume to become ready
 	err = osccommon.WaitUntilVolumeAvailable(oapiconn, s.volumeId)
