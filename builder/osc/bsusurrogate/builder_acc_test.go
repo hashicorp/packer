@@ -39,8 +39,7 @@ const testBuilderAccBasic = `
 			"device_name" : "/dev/xvdf",
 			"delete_on_vm_deletion" : false,
 			"volume_size" : 10,
-			"iops": 300,
-			"no_device": 0
+			"iops": 300
 			}
 		],
 		"omi_root_device":{
