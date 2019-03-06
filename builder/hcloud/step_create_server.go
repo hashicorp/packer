@@ -31,7 +31,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 			state.Put("error", fmt.Errorf("Problem reading user data file: %s", err))
 			return multistep.ActionHalt
 		}
-
+		
 		userData = string(contents)
 	}
 
@@ -87,11 +87,17 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	if c.RescueMode != "" {
-		if err := setRescue(context.TODO(), client, serverCreateResult.Server, c.RescueMode, sshKeys); err != nil {
+		rootPassword, err := setRescue(context.TODO(), client, serverCreateResult.Server, c.RescueMode, sshKeys)
+		if err != nil {
 			err := fmt.Errorf("Error enabling rescue mode: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+		if c.RescueMode == "freebsd64" {
+			// We will set this only on freebsd
+			ui.Say("Using Root Password instead of SSH Keys...")
+			c.Comm.SSHPassword = rootPassword
 		}
 	}
 
@@ -116,41 +122,45 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func setRescue(ctx context.Context, client *hcloud.Client, server *hcloud.Server, rescue string, sshKeys []*hcloud.SSHKey) error {
+func setRescue(ctx context.Context, client *hcloud.Client, server *hcloud.Server, rescue string, sshKeys []*hcloud.SSHKey) (string, error) {
 	rescueChanged := false
 	if server.RescueEnabled {
 		rescueChanged = true
 		action, _, err := client.Server.DisableRescue(ctx, server)
 		if err != nil {
-			return err
+			return "", err
 		}
 		if err := waitForAction(ctx, client, action); err != nil {
-			return err
+			return "", err
 		}
 	}
 	if rescue != "" {
 		rescueChanged = true
+		if rescue == "freebsd64" {
+			sshKeys = nil // freebsd64 doesn't allow ssh keys so we will remove them here
+		}
 		res, _, err := client.Server.EnableRescue(ctx, server, hcloud.ServerEnableRescueOpts{
 			Type:    hcloud.ServerRescueType(rescue),
 			SSHKeys: sshKeys,
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 		if err := waitForAction(ctx, client, res.Action); err != nil {
-			return err
+			return "", err
 		}
+		return res.RootPassword, nil
 	}
 	if rescueChanged {
 		action, _, err := client.Server.Reset(ctx, server)
 		if err != nil {
-			return err
+			return "", err
 		}
 		if err := waitForAction(ctx, client, action); err != nil {
-			return err
+			return "", err
 		}
 	}
-	return nil
+	return "", nil
 }
 
 func waitForAction(ctx context.Context, client *hcloud.Client, action *hcloud.Action) error {
