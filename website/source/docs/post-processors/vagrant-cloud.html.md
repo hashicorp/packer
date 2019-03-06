@@ -80,7 +80,9 @@ on Vagrant Cloud, as well as authentication and version information.
 
 -   `insecure_skip_tls_verify` (boolean) - If set to true *and* `vagrant_cloud_url`
     is set to something different than its default, it will set TLS InsecureSkipVerify
-    to true. In other words, this will disable security checks of SSL.
+    to true. In other words, this will disable security checks of SSL. You may need
+    to set this option to true if your host at vagrant_cloud_url is using a
+    self-signed certificate.
 
 -   `version_description` (string) - Optionally markdown text used as a
     full-length and in-depth description of the version, typically for denoting
