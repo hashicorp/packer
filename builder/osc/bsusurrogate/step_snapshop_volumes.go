@@ -25,7 +25,7 @@ type StepSnapshotVolumes struct {
 func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName string, state multistep.StateBag) error {
 	oapiconn := state.Get("oapi").(*oapi.Client)
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*oapi.Vm)
+	vm := state.Get("vm").(oapi.Vm)
 
 	var volumeId string
 	for _, volume := range vm.BlockDeviceMappings {
