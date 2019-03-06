@@ -27,8 +27,9 @@ type Config struct {
 	VersionDescription string `mapstructure:"version_description"`
 	NoRelease          bool   `mapstructure:"no_release"`
 
-	AccessToken     string `mapstructure:"access_token"`
-	VagrantCloudUrl string `mapstructure:"vagrant_cloud_url"`
+	AccessToken           string `mapstructure:"access_token"`
+	VagrantCloudUrl       string `mapstructure:"vagrant_cloud_url"`
+	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
 
 	BoxDownloadUrl string `mapstructure:"box_download_url"`
 
@@ -41,10 +42,11 @@ type boxDownloadUrlTemplate struct {
 }
 
 type PostProcessor struct {
-	config         Config
-	client         *VagrantCloudClient
-	runner         multistep.Runner
-	warnAtlasToken bool
+	config                Config
+	client                *VagrantCloudClient
+	runner                multistep.Runner
+	warnAtlasToken        bool
+	insecureSkipTLSVerify bool
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -65,6 +67,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.VagrantCloudUrl == "" {
 		p.config.VagrantCloudUrl = VAGRANT_CLOUD_URL
 	}
+
+	p.insecureSkipTLSVerify = p.config.InsecureSkipTLSVerify == true && p.config.VagrantCloudUrl != VAGRANT_CLOUD_URL
 
 	if p.config.AccessToken == "" {
 		envToken := os.Getenv("VAGRANT_CLOUD_TOKEN")
@@ -95,7 +99,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// create the HTTP client
-	p.client, err = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken)
+	p.client, err = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken, p.insecureSkipTLSVerify)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Failed to verify authentication token: %v", err))
