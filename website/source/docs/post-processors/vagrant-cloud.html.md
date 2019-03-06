@@ -78,6 +78,10 @@ on Vagrant Cloud, as well as authentication and version information.
     This is useful if you're using Vagrant Private Cloud in your own network.
     Defaults to `https://vagrantcloud.com/api/v1`
 
+-   `insecure_skip_tls_verify` (boolean) - If set to true *and* `vagrant_cloud_url`
+    is set to something different than its default, it will set TLS InsecureSkipVerify
+    to true. In other words, this will disable security checks of SSL.
+
 -   `version_description` (string) - Optionally markdown text used as a
     full-length and in-depth description of the version, typically for denoting
     changes introduced
