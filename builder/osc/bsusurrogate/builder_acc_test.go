@@ -12,9 +12,10 @@ import (
 
 func TestBuilderAcc_basic(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Builder:  &Builder{},
-		Template: testBuilderAccBasic,
+		PreCheck:             func() { testAccPreCheck(t) },
+		Builder:              &Builder{},
+		Template:             testBuilderAccBasic,
+		SkipArtifactTeardown: true,
 	})
 }
 
@@ -26,9 +27,9 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 		"region": "eu-west-2",
-		"vm_type": "c4.large",
-		"source_omi": "ami-46260446",
-		"ssh_username": "ubuntu",
+		"vm_type": "t2.micro",
+		"source_omi": "ami-65efcc11",
+		"ssh_username": "outscale",
 		"omi_name": "packer-test {{timestamp}}",
 		"omi_virtualization_type": "hvm",
 		"subregion_name": "eu-west-2a",
@@ -38,7 +39,8 @@ const testBuilderAccBasic = `
 			"device_name" : "/dev/xvdf",
 			"delete_on_vm_deletion" : false,
 			"volume_size" : 10,
-			"iops": 300
+			"iops": 300,
+			"no_device": 0
 			}
 		],
 		"omi_root_device":{

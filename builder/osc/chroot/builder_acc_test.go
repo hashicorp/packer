@@ -23,19 +23,11 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 		"region": "eu-west-2",
-		"source_omi": "ami-99466096",
+		"source_omi": "ami-65efcc11",
 		"omi_name": "packer-test-{{timestamp}}",
 		"omi_virtualization_type": "hvm",
 		"device_path": "/dev/xvdf",
 		"mount_partition": "0"
-	}],
-	"provisioners": [
-        {
-            "type": "shell",
-            "inline": [
-                "echo Packer-test | tee /tmp/test.txt"
-            ]
-        }
-    ]
+	}]
 }
 `
