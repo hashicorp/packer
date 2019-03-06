@@ -71,11 +71,14 @@ func (a *Artifact) Destroy() error {
 
 		newConfig := &oapi.Config{
 			UserAgent: a.Config.UserAgent,
+			AccessKey: a.Config.AccessKey,
 			SecretKey: a.Config.SecretKey,
 			Service:   a.Config.Service,
 			Region:    region, //New region
 			URL:       a.Config.URL,
 		}
+
+		log.Printf("[DEBUG] New Client config %+v", newConfig)
 
 		skipClient := &http.Client{
 			Transport: &http.Transport{
