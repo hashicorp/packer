@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/version"
+	"github.com/mattn/go-tty"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
@@ -185,11 +186,17 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
+	tty, err := tty.Open()
+	if err != nil {
+		log.Printf("running packer without a tty: %s", err)
+	}
+
 	// Setup the UI if we're being machine-readable
 	var ui packer.Ui = &packer.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stdout,
+		TTY:         tty,
 	}
 	if machineReadable {
 		ui = &packer.MachineReadableUi{

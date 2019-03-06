@@ -14,8 +14,6 @@ import (
 	"syscall"
 	"time"
 	"unicode"
-
-	"github.com/mattn/go-tty"
 )
 
 type UiColor uint
@@ -82,7 +80,7 @@ type BasicUi struct {
 	ErrorWriter io.Writer
 	l           sync.Mutex
 	interrupted bool
-	tty         TTY
+	TTY         TTY
 	StackableProgressBar
 }
 
@@ -210,12 +208,8 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		return "", errors.New("interrupted")
 	}
 
-	if rw.tty == nil {
-		var err error
-		rw.tty, err = tty.Open()
-		if err != nil {
-			return "", fmt.Errorf("tty open: %s", err)
-		}
+	if rw.TTY == nil {
+		return "", errors.New("no available tty")
 	}
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
@@ -230,7 +224,7 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 
 	result := make(chan string, 1)
 	go func() {
-		line, err := rw.tty.ReadString()
+		line, err := rw.TTY.ReadString()
 		if err != nil {
 			log.Printf("ui: scan err: %s", err)
 			return
