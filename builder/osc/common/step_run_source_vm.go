@@ -98,13 +98,13 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	// volTags, err := s.VolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
-	// if err != nil {
-	// 	err := fmt.Errorf("Error tagging volumes: %s", err)
-	// 	state.Put("error", err)
-	// 	ui.Error(err.Error())
-	// 	return multistep.ActionHalt
-	// }
+	volTags, err := s.VolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error tagging volumes: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	subregion := state.Get("subregion_name").(string)
 	runOpts := oapi.CreateVmsRequest{
@@ -125,7 +125,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 	// }
 
 	// Collect tags for tagging on resource creation
-	// var tagSpecs []oapi.ResourceTag
+	//	var tagSpecs []oapi.ResourceTag
 
 	// if len(oapiTags) > 0 {
 	// 	runTags := &oapi.ResourceTag{
@@ -185,6 +185,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 	vmId = runResp.OK.Vms[0].VmId
+	volumeId := runResp.OK.Vms[0].BlockDeviceMappings[0].Bsu.VolumeId
 
 	// Set the vm ID so that the cleanup works properly
 	s.vmId = vmId
@@ -204,7 +205,25 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	//TODO:Set Vm and Volume Tags,
+	//Set Vm tags and vollume tags
+	if len(oapiTags) > 0 {
+		if err := CreateTags(oapiconn, s.vmId, ui, oapiTags); err != nil {
+			err := fmt.Errorf("Error creating tags for vm (%s): %s", s.vmId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	if len(volTags) > 0 {
+		if err := CreateTags(oapiconn, volumeId, ui, volTags); err != nil {
+			err := fmt.Errorf("Error creating tags for volume (%s): %s", volumeId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	//TODO: LinkPublicIp i
 
 	resp, err := oapiconn.POST_ReadVms(request)
