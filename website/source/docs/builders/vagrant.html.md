@@ -106,7 +106,7 @@ one, by using `global_id` instead of `source_box`.
     `vagrant add`; defaults to unset.
 
 -   `add_insecure` (bool) - Equivalent to setting the
-    [`--force`](https://www.vagrantup.com/docs/cli/box.html#insecure) flag in
+    [`--insecure`](https://www.vagrantup.com/docs/cli/box.html#insecure) flag in
     `vagrant add`; defaults to unset.
 
 -   `skip_package` (bool) - if true, Packer will not call `vagrant package` to
