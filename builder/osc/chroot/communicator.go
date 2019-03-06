@@ -67,7 +67,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
-	tf, err := tmp.File("packer-amazon-chroot")
+	tf, err := tmp.File("packer-outscale-chroot")
 	if err != nil {
 		return fmt.Errorf("Error preparing shell script: %s", err)
 	}
@@ -122,7 +122,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 }
 
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
-	return fmt.Errorf("DownloadDir is not implemented for amazon-chroot")
+	return fmt.Errorf("DownloadDir is not implemented for outscale-chroot")
 }
 
 func (c *Communicator) Download(src string, w io.Writer) error {
