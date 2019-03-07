@@ -182,6 +182,7 @@ func wrappedMain() int {
 
 	var ui packer.Ui
 	if machineReadable {
+		// Setup the UI as we're being machine-readable
 		ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
@@ -201,7 +202,6 @@ func wrappedMain() int {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			}
 		}
-		// Setup the UI if we're being machine-readable
 		ui = &packer.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
