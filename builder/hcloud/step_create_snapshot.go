@@ -11,7 +11,7 @@ import (
 
 type stepCreateSnapshot struct{}
 
-func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("hcloudClient").(*hcloud.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -19,7 +19,7 @@ func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 
 	ui.Say("Creating snapshot ...")
 	ui.Say("This can take some time")
-	result, _, err := client.Server.CreateImage(context.TODO(), &hcloud.Server{ID: serverID}, &hcloud.ServerCreateImageOpts{
+	result, _, err := client.Server.CreateImage(ctx, &hcloud.Server{ID: serverID}, &hcloud.ServerCreateImageOpts{
 		Type:        hcloud.ImageTypeSnapshot,
 		Labels:      c.SnapshotLabels,
 		Description: hcloud.String(c.SnapshotName),
@@ -32,7 +32,7 @@ func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	}
 	state.Put("snapshot_id", result.Image.ID)
 	state.Put("snapshot_name", c.SnapshotName)
-	_, errCh := client.Action.WatchProgress(context.TODO(), result.Action)
+	_, errCh := client.Action.WatchProgress(ctx, result.Action)
 	for {
 		select {
 		case err1 := <-errCh:
