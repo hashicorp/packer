@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/outscale/osc-go/oapi"
 )
@@ -52,7 +53,7 @@ func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
 			}
 		} else {
 			bsu := oapi.Bsu{}
-			bsu.DeleteOnVmDeletion = &blockDevice.DeleteOnVmDeletion
+			bsu.DeleteOnVmDeletion = aws.Bool(blockDevice.DeleteOnVmDeletion)
 
 			if blockDevice.VolumeType != "" {
 				bsu.VolumeType = blockDevice.VolumeType
@@ -97,7 +98,7 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 			}
 		} else {
 			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: &blockDevice.DeleteOnVmDeletion,
+				DeleteOnVmDeletion: aws.Bool(blockDevice.DeleteOnVmDeletion),
 			}
 
 			if blockDevice.VolumeType != "" {
@@ -143,7 +144,7 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 			}
 		} else {
 			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: &blockDevice.DeleteOnVmDeletion,
+				DeleteOnVmDeletion: aws.Bool(blockDevice.DeleteOnVmDeletion),
 			}
 
 			if blockDevice.VolumeType != "" {
