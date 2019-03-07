@@ -40,6 +40,7 @@ import (
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	oscbsubuilder "github.com/hashicorp/packer/builder/osc/bsu"
 	oscbsusurrogatebuilder "github.com/hashicorp/packer/builder/osc/bsusurrogate"
+	oscbsuvolumebuilder "github.com/hashicorp/packer/builder/osc/bsuvolume"
 	oscchrootbuilder "github.com/hashicorp/packer/builder/osc/chroot"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
@@ -126,6 +127,7 @@ var Builders = map[string]packer.Builder{
 	"oracle-oci":          new(oracleocibuilder.Builder),
 	"osc-bsu":             new(oscbsubuilder.Builder),
 	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
+	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
 	"osc-chroot":          new(oscchrootbuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
