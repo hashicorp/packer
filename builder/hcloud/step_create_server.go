@@ -87,9 +87,24 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	if c.RescueMode != "" {
+		ui.Say("Enabling Rescue Mode...")
 		rootPassword, err := setRescue(context.TODO(), client, serverCreateResult.Server, c.RescueMode, sshKeys)
 		if err != nil {
 			err := fmt.Errorf("Error enabling rescue mode: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		ui.Say("Reboot server...")
+		action, _, err := client.Server.Reset(context.TODO(), serverCreateResult.Server)
+		if err != nil {
+			err := fmt.Errorf("Error rebooting server: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		if err := waitForAction(context.TODO(), client, action); err != nil {
+			err := fmt.Errorf("Error rebooting server: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
