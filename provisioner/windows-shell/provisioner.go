@@ -63,6 +63,11 @@ type Config struct {
 	// inside the `ExecuteCommand` template.
 	EnvVarFormat string
 
+	// Valid Exit Codes - 0 is not always the only valid error code!  See
+	// http://www.symantec.com/connect/articles/windows-system-error-codes-exit-codes-description
+	// for examples such as 3010 - "The requested operation is successful.
+	ValidExitCodes []int `mapstructure:"valid_exit_codes"`
+
 	ctx interpolate.Context
 }
 
@@ -115,6 +120,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Vars == nil {
 		p.config.Vars = make([]string, 0)
+	}
+
+	if len(p.config.ValidExitCodes) == 0 {
+		p.config.ValidExitCodes = []int{0}
 	}
 
 	var errs error
@@ -243,8 +252,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Close the original file since we copied it
 		f.Close()
 
-		if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		// Check exit code against allowed codes (likely just 0)
+		validExitCode := false
+		for _, v := range p.config.ValidExitCodes {
+			if cmd.ExitStatus == v {
+				validExitCode = true
+			}
+		}
+		if !validExitCode {
+			return fmt.Errorf(
+				"Script exited with non-zero exit status: %d. Allowed exit codes are: %v",
+				cmd.ExitStatus, p.config.ValidExitCodes)
 		}
 	}
 
