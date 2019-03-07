@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/packer/template/interpolate"
@@ -50,9 +51,8 @@ func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
 				mapping.VirtualDeviceName = blockDevice.VirtualName
 			}
 		} else {
-			bsu := oapi.Bsu{
-				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
-			}
+			bsu := oapi.Bsu{}
+			bsu.DeleteOnVmDeletion = &blockDevice.DeleteOnVmDeletion
 
 			if blockDevice.VolumeType != "" {
 				bsu.VolumeType = blockDevice.VolumeType
@@ -97,7 +97,7 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 			}
 		} else {
 			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+				DeleteOnVmDeletion: &blockDevice.DeleteOnVmDeletion,
 			}
 
 			if blockDevice.VolumeType != "" {
@@ -126,6 +126,8 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 }
 
 func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCreation {
+	log.Printf("[DEBUG] Launch Block Device %#v", b)
+
 	var blockDevices []oapi.BlockDeviceMappingVmCreation
 
 	for _, blockDevice := range b {
@@ -141,7 +143,7 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 			}
 		} else {
 			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+				DeleteOnVmDeletion: &blockDevice.DeleteOnVmDeletion,
 			}
 
 			if blockDevice.VolumeType != "" {
