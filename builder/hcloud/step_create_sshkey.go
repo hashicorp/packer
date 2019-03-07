@@ -25,7 +25,7 @@ type stepCreateSSHKey struct {
 	keyId int
 }
 
-func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("hcloudClient").(*hcloud.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -53,7 +53,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
-	key, _, err := client.SSHKey.Create(context.TODO(), hcloud.SSHKeyCreateOpts{
+	key, _, err := client.SSHKey.Create(ctx, hcloud.SSHKeyCreateOpts{
 		Name:      name,
 		PublicKey: pubSSHFormat,
 	})

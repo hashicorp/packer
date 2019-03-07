@@ -11,14 +11,14 @@ import (
 
 type stepShutdownServer struct{}
 
-func (s *stepShutdownServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdownServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("hcloudClient").(*hcloud.Client)
 	ui := state.Get("ui").(packer.Ui)
 	serverID := state.Get("server_id").(int)
 
 	ui.Say("Shutting down server...")
 
-	action, _, err := client.Server.Shutdown(context.TODO(), &hcloud.Server{ID: serverID})
+	action, _, err := client.Server.Shutdown(ctx, &hcloud.Server{ID: serverID})
 
 	if err != nil {
 		err := fmt.Errorf("Error stopping server: %s", err)
@@ -27,7 +27,7 @@ func (s *stepShutdownServer) Run(_ context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	_, errCh := client.Action.WatchProgress(context.TODO(), action)
+	_, errCh := client.Action.WatchProgress(ctx, action)
 	for {
 		select {
 		case err1 := <-errCh:

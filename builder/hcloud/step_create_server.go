@@ -50,7 +50,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 		sshKeys = append(sshKeys, sshKey)
 	}
 
-	serverCreateResult, _, err := client.Server.Create(context.TODO(), hcloud.ServerCreateOpts{
+	serverCreateResult, _, err := client.Server.Create(ctx, hcloud.ServerCreateOpts{
 		Name:       c.ServerName,
 		ServerType: &hcloud.ServerType{Name: c.ServerType},
 		Image:      &hcloud.Image{Name: c.Image},
@@ -71,14 +71,14 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	// Store the server id for later
 	state.Put("server_id", serverCreateResult.Server.ID)
 
-	if err := waitForAction(context.TODO(), client, serverCreateResult.Action); err != nil {
+	if err := waitForAction(ctx, client, serverCreateResult.Action); err != nil {
 		err := fmt.Errorf("Error creating server: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 	for _, nextAction := range serverCreateResult.NextActions {
-		if err := waitForAction(context.TODO(), client, nextAction); err != nil {
+		if err := waitForAction(ctx, client, nextAction); err != nil {
 			err := fmt.Errorf("Error creating server: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -88,7 +88,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 	if c.RescueMode != "" {
 		ui.Say("Enabling Rescue Mode...")
-		rootPassword, err := setRescue(context.TODO(), client, serverCreateResult.Server, c.RescueMode, sshKeys)
+		rootPassword, err := setRescue(ctx, client, serverCreateResult.Server, c.RescueMode, sshKeys)
 		if err != nil {
 			err := fmt.Errorf("Error enabling rescue mode: %s", err)
 			state.Put("error", err)
@@ -96,14 +96,14 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 			return multistep.ActionHalt
 		}
 		ui.Say("Reboot server...")
-		action, _, err := client.Server.Reset(context.TODO(), serverCreateResult.Server)
+		action, _, err := client.Server.Reset(ctx, serverCreateResult.Server)
 		if err != nil {
 			err := fmt.Errorf("Error rebooting server: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		if err := waitForAction(context.TODO(), client, action); err != nil {
+		if err := waitForAction(ctx, client, action); err != nil {
 			err := fmt.Errorf("Error rebooting server: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
