@@ -75,6 +75,9 @@ Optional parameters:
     exists in order to deal with times when SSH may restart, such as a system
     reboot. Set this to a higher value if reboots take a longer amount of time.
 
+-   `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
+    default this is just 0.
+
 ## Default Environmental Variables
 
 In addition to being able to specify custom environmental variables using the
