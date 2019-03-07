@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -104,8 +103,7 @@ func amiRegionCopy(ctx context.Context, state multistep.StateBag, config *Access
 	}
 
 	regionconn := ec2.New(session.Copy(&aws.Config{
-		Region:     aws.String(target),
-		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+		Region: aws.String(target),
 	}))
 
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
