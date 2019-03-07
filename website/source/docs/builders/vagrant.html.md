@@ -33,7 +33,7 @@ one, by using `global_id` instead of `source_box`.
 ## Configuration Reference
 ### Required:
 
--    `source_path` (string) - URL of the vagrant box to use, or the name of the
+-   `source_path` (string) - URL of the vagrant box to use, or the name of the
     vagrant box. `hashicorp/precise64`, `./mylocalbox.box` and
     `https://example.com/my-box.box` are all valid source boxes. If your
     source is a .box file, whether locally or from a URL like the latter example
@@ -72,7 +72,7 @@ one, by using `global_id` instead of `source_box`.
 
 -   `vagrantfile_template` (string) - a path to a golang template for a
     vagrantfile. Our default template can be found
-    [here](https://github.com/hashicorp/packer/tree/master/builder/vagrant/step_initialize_vagrant.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
+    [here](https://github.com/hashicorp/packer/tree/master/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
     `synced_folder`
 
