@@ -72,7 +72,7 @@ one, by using `global_id` instead of `source_box`.
 
 -   `vagrantfile_template` (string) - a path to a golang template for a
     vagrantfile. Our default template can be found
-    [here](https://github.com/hashicorp/packer/tree/master/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
+    [here](https://github.com/hashicorp/packer/blob/a6d1d852bb0643e3593cc5d3dfe5ed80c4409b65/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
     `synced_folder`
 
