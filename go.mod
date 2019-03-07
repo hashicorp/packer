@@ -115,6 +115,7 @@ require (
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.0-20151211000621-56b76bdf51f7 // indirect
 	github.com/mattn/go-runewidth v0.0.0-20170510074858-97311d9f7767 // indirect
+	github.com/mattn/go-tty v0.0.0-20181127064339-e4f871175a2f
 	github.com/miekg/dns v1.1.1 // indirect
 	github.com/mitchellh/cli v0.0.0-20170908181043-65fcae5817c8
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -175,6 +176,7 @@ require (
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	golang.org/x/tools v0.0.0-20190221204921-83362c3779f5 // indirect
 	google.golang.org/api v0.0.0-20180818000503-e21acd801f91
+	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/grpc v1.17.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
