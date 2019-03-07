@@ -303,7 +303,7 @@ func (c *Core) init() error {
 	// Go through the variables and interpolate the environment variables
 	ctx := c.Context()
 	ctx.EnableEnv = true
-	ctx.UserVariables = nil
+	ctx.UserVariables = make(map[string]string)
 	for k, v := range c.Template.Variables {
 		// Ignore variables that are required
 		if v.Required {
@@ -324,6 +324,7 @@ func (c *Core) init() error {
 		}
 
 		c.variables[k] = def
+		ctx.UserVariables = c.variables
 	}
 
 	for _, v := range c.Template.SensitiveVariables {
