@@ -3,6 +3,7 @@ package packer
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
@@ -300,31 +301,82 @@ func (c *Core) init() error {
 		c.variables = make(map[string]string)
 	}
 
-	// Go through the variables and interpolate the environment variables
+	// Go through the variables and interpolate the environment and
+	// user variables
+
 	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = make(map[string]string)
-	for k, v := range c.Template.Variables {
-		// Ignore variables that are required
-		if v.Required {
-			continue
+	shouldRetry := true
+	tryCount := 0
+	changed := false
+	failedInterpolation := ""
+
+	// Why this giant loop?  User variables can be recursively defined. For
+	// example:
+	// "variables": {
+	//    	"foo":  "bar",
+	//	 	"baz":  "{{user `foo`}}baz",
+	// 		"bang": "bang{{user `baz`}}"
+	// },
+	// In this situation, we cannot guarantee that we've added "foo" to
+	// UserVariables before we try to interpolate "baz" the first time. We need
+	// to have the option to loop back over in order to add the properly
+	// interpolated "baz" to the UserVariables map.
+	// Likewise, we'd need to loop up to two times to properly add "bang",
+	// since that depends on "baz" being set, which depends on "foo" being set.
+
+	// We break out of the while loop either if all our variables have been
+	// interpolated or if after 100 loops we still haven't succeeded in
+	// interpolating them.  Please don't actually nest your variables in 100
+	// layers of other variables. Please.
+
+	for shouldRetry == true {
+		shouldRetry = false
+		for k, v := range c.Template.Variables {
+			// Ignore variables that are required
+			if v.Required {
+				continue
+			}
+
+			// Ignore variables that have a value already
+			if _, ok := c.variables[k]; ok {
+				continue
+			}
+
+			// Interpolate the default
+			def, err := interpolate.Render(v.Default, ctx)
+			if err != nil {
+				if strings.Contains(err.Error(), "error calling user") {
+					shouldRetry = true
+					tryCount++
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v.Default)
+					continue
+				} else {
+					return fmt.Errorf(
+						// unexpected interpolation error: abort the run
+						"error interpolating default value for '%s': %s",
+						k, err)
+				}
+			}
+
+			// We only get here if interpolation has succeeded, so something is
+			// different in this loop than in the last one.
+			changed = true
+			c.variables[k] = def
+			ctx.UserVariables = c.variables
+		}
+		if tryCount >= 100 {
+			break
 		}
 
-		// Ignore variables that have a value
-		if _, ok := c.variables[k]; ok {
-			continue
-		}
+	}
 
-		// Interpolate the default
-		def, err := interpolate.Render(v.Default, ctx)
-		if err != nil {
-			return fmt.Errorf(
-				"error interpolating default value for '%s': %s",
-				k, err)
-		}
-
-		c.variables[k] = def
-		ctx.UserVariables = c.variables
+	if (changed == false) && (shouldRetry == true) {
+		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
+			"the variable you're referencing has been defined; Packer treats "+
+			"all variables used to interpolate other user varaibles as "+
+			"required.", failedInterpolation)
 	}
 
 	for _, v := range c.Template.SensitiveVariables {
