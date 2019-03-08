@@ -163,7 +163,15 @@ func funcGenUser(ctx *Context) interface{} {
 			return "", errors.New("test")
 		}
 
-		return ctx.UserVariables[k], nil
+		val, ok := ctx.UserVariables[k]
+		if ctx.EnableEnv {
+			// error and retry if we're interpolating UserVariables. But if
+			// we're elsewhere in the template, just return the empty string.
+			if !ok {
+				return "", errors.New(fmt.Sprintf("variable %s not set", k))
+			}
+		}
+		return val, nil
 	}
 }
 
