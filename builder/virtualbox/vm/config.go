@@ -131,10 +131,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if c.AttachSnapshot != "" {
 			snapshotExists, err := driver.SnapshotExists(c.VMName, c.AttachSnapshot)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to check for snapshot: %s", err))
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to check for snapshot: %s with VM %s ; Error: %s", c.AttachSnapshot, c.VMName, err))
 			} else {
 				if !snapshotExists {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Snapshot does not exist: %s", c.AttachSnapshot))
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Snapshot %s does not exist on with VM %s", c.AttachSnapshot, c.VMName))
 				}
 			}
 		}
@@ -144,9 +144,34 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to check for snapshot: %s", err))
 			} else {
 				if snapshotExists {
-					warnings = append(warnings, fmt.Sprintf("Target snapshot already exists: %s.", c.TargetSnapshot))
+					parent, err := driver.GetParentSnapshot(c.VMName, c.TargetSnapshot)
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to get parent for snapshot %s: %s", c.TargetSnapshot, err))
+						return nil, warnings, errs
+					} else {
+						var selfSnapshotName string
+						if "" != c.AttachSnapshot {
+							selfSnapshotName = c.AttachSnapshot
+						} else {
+							currentSnapshot, err := driver.GetCurrentSnapshot(c.VMName)
+							if err != nil {
+								errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to get current snapshot for VM %s: %s", c.VMName, err))
+								return nil, warnings, errs
+							}
+							selfSnapshotName = currentSnapshot
+						}
+						selfSnapshotParent, err := driver.GetParentSnapshot(c.VMName, selfSnapshotName)
+						if err != nil {
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to get parent for snapshot %s: %s", selfSnapshotName, err))
+						} else if parent != selfSnapshotName {
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, selfSnapshotParent))
+						}
+					}
 				}
 			}
+		}
+		if c.AttachSnapshot != "" && c.TargetSnapshot != "" && c.AttachSnapshot == c.TargetSnapshot {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Attach snapshot %s and target snapshot %s cannot be the same", c.AttachSnapshot, c.TargetSnapshot))
 		}
 	}
 	// Check for any errors.

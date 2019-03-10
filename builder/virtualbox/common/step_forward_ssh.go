@@ -70,12 +70,28 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 			"--natpf1",
 			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
 		}
+		retried := false
+	retry:
 		if err := driver.VBoxManage(command...); err != nil {
-			if !strings.Contains(err.Error(), "A NAT rule of this name already exists") {
+			if !strings.Contains(err.Error(), "A NAT rule of this name already exists") || retried {
 				err := fmt.Errorf("Error creating port forwarding rule: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
+			} else {
+				log.Printf("A packer NAT rule already exists. Trying to delete ...")
+				delcommand := []string{
+					"modifyvm", vmName,
+					"--natpf1",
+					"delete", "packercomm",
+				}
+				if err := driver.VBoxManage(delcommand...); err != nil {
+					err := fmt.Errorf("Error deleting packer NAT forwarding rule: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
+				goto retry
 			}
 		}
 	}

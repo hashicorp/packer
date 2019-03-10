@@ -12,7 +12,8 @@ import (
 	"time"
 
 	versionUtil "github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/common/retry"
+
+	packer "github.com/hashicorp/packer/common"
 )
 
 type VBox42Driver struct {
@@ -241,10 +242,14 @@ func (d *VBox42Driver) Version() (string, error) {
 }
 
 func (d *VBox42Driver) CreateSnapshot(vmname string, snapshotName string) error {
+	log.Printf("Executing CreateSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
+
 	return d.VBoxManage("snapshot", vmname, "take", snapshotName)
 }
 
 func (d *VBox42Driver) HasSnapshots(vmname string) (bool, error) {
+	log.Printf("Executing HasSnapshots: VM: %s", vmname)
+
 	var stdout, stderr bytes.Buffer
 	var hasSnapshots = false
 
@@ -268,6 +273,8 @@ func (d *VBox42Driver) HasSnapshots(vmname string) (bool, error) {
 }
 
 func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (string, error) {
+	log.Printf("Executing GetCurrentSnapshot: VM: %s", vmname)
+
 	var stdout, stderr bytes.Buffer
 
 	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
@@ -299,6 +306,8 @@ func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (string, error) {
 }
 
 func (d *VBox42Driver) SetSnapshot(vmname string, snapshotName string) error {
+	log.Printf("Executing SetSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
+
 	var err error
 	if snapshotName == "" {
 		err = d.VBoxManage("snapshot", vmname, "restorecurrent")
@@ -313,12 +322,18 @@ func (d *VBox42Driver) DeleteSnapshot(vmname string, snapshotName string) error 
 }
 
 func (d *VBox42Driver) SnapshotExists(vmname string, snapshotName string) (bool, error) {
-	var stdout bytes.Buffer
+	log.Printf("Executing SnapshotExists: VM %s, SnapshotName %s", vmname, snapshotName)
+
+	var stdout, stderr bytes.Buffer
 
 	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
 	cmd.Stdout = &stdout
-	if err := cmd.Run(); err != nil {
-		return false, err
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if _, ok := err.(*exec.ExitError); ok {
+		stderrString := strings.TrimSpace(stderr.String())
+		return false, (fmt.Errorf("VBoxManage error: %s", stderrString))
 	}
 
 	SnapshotNameRe := regexp.MustCompile(fmt.Sprintf("SnapshotName[^=]*=[^\"]*\"%s\"", snapshotName))
@@ -330,4 +345,65 @@ func (d *VBox42Driver) SnapshotExists(vmname string, snapshotName string) (bool,
 	}
 
 	return false, nil
+}
+
+func (d *VBox42Driver) GetParentSnapshot(vmname string, snapshotName string) (string, error) {
+	log.Printf("Executing GetParentSnapshot: VM %s, SnapshotName %s", vmname, snapshotName)
+
+	var stdout, stderr bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if _, ok := err.(*exec.ExitError); ok {
+		stderrString := strings.TrimSpace(stderr.String())
+		return "", (fmt.Errorf("VBoxManage error: %s", stderrString))
+	}
+
+	SnapshotNameRe := regexp.MustCompile(fmt.Sprintf("SnapshotName[^=]*=[^\"]*\"%s\"", snapshotName))
+
+	var snapshot string
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		if SnapshotNameRe.MatchString(line) {
+			snapshot = line
+			break
+		}
+	}
+
+	if snapshot == "" {
+		return "", (fmt.Errorf("Snapshot %s does not exist", snapshotName))
+	}
+
+	SnapshotNamePartsRe := regexp.MustCompile("SnapshotName(?P<Path>(-[1-9]+)*)")
+	matches := SnapshotNamePartsRe.FindStringSubmatch(snapshot)
+	log.Printf("************ Snapshot %s name parts", snapshot)
+	log.Printf("Matches %#v\n", matches)
+	log.Printf("Node %s\n", matches[0])
+	log.Printf("Path %s\n", matches[1])
+	log.Printf("Leaf %s\n", matches[2])
+	leaf := matches[2]
+	node := matches[0]
+	if node == "" {
+		return "", (fmt.Errorf("Unsupported format for snapshot %s", snapshot))
+	}
+	if leaf != "" && node != "" {
+		SnapshotNodeRe := regexp.MustCompile("^(?P<Node>SnapshotName[^=]*)=[^\"]*\"(?P<Name>[^\"]+)\"")
+		parentNode := node[:len(node)-len(leaf)]
+		log.Printf("Parent node %s\n", parentNode)
+		var parentName string
+		for _, line := range strings.Split(stdout.String(), "\n") {
+			if matches := SnapshotNodeRe.FindStringSubmatch(line); len(matches) > 1 && parentNode == matches[1] {
+				parentName = matches[2]
+				log.Printf("Parent Snapshot name %s\n", parentName)
+				break
+			}
+		}
+		if parentName == "" {
+			return "", (fmt.Errorf("Internal error: Unable to find name for snapshot node %s", parentNode))
+		}
+		return parentName, nil
+	}
+	return "", nil
 }
