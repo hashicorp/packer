@@ -69,6 +69,9 @@ type Driver interface {
 
 	//
 	SnapshotExists(string, string) (bool, error)
+
+	//
+	GetParentSnapshot(string, string) (string, error)
 }
 
 func NewDriver() (Driver, error) {
