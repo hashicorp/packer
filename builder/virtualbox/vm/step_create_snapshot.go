@@ -3,6 +3,7 @@ package vm
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -21,7 +22,23 @@ func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	if s.TargetSnapshot != "" {
 		time.Sleep(10 * time.Second) // Wait after the Vm has been shutdown, otherwise creating the snapshot might make the VM unstartable
 		ui.Say(fmt.Sprintf("Creating snapshot %s on virtual machine %s", s.TargetSnapshot, s.Name))
-		err := driver.CreateSnapshot(s.Name, s.TargetSnapshot)
+		snapshotExists, err := driver.SnapshotExists(s.Name, s.TargetSnapshot)
+		if err != nil {
+			err = fmt.Errorf("Failed to check for snapshot: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		} else if snapshotExists {
+			log.Printf("Deleting existing target snapshot %s", s.TargetSnapshot)
+			err = driver.DeleteSnapshot(s.Name, s.TargetSnapshot)
+			if nil != err {
+				err = fmt.Errorf("Unable to delete snapshot %s from VM %s: %s", s.TargetSnapshot, s.Name, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+		err = driver.CreateSnapshot(s.Name, s.TargetSnapshot)
 		if err != nil {
 			err := fmt.Errorf("Error creating snaphot VM: %s", err)
 			state.Put("error", err)

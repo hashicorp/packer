@@ -50,10 +50,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{
-		&common.StepOutputDir{
-			Force: b.config.PackerForce,
-			Path:  b.config.OutputDir,
-		},
 		new(vboxcommon.StepSuppressMessages),
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
@@ -62,6 +58,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepSetSnapshot{
 			Name:           b.config.VMName,
 			AttachSnapshot: b.config.AttachSnapshot,
+			KeepRegistered: b.config.KeepRegistered,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -105,6 +102,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VMName:        b.config.VMName,
 			Ctx:           b.config.ctx,
 			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -147,6 +145,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 	}
 
+	if !b.config.SkipExport {
+		steps = append(steps, nil)
+		copy(steps[1:], steps)
+		steps[0] = &common.StepOutputDir{
+			Force: b.config.PackerForce,
+			Path:  b.config.OutputDir,
+		}
+	}
 	// Run the steps.
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
@@ -165,7 +171,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	if b.config.SkipExport {
+		return nil, nil
+	} else {
+		return vboxcommon.NewArtifact(b.config.OutputDir)
+	}
 }
 
 // Cancel.
