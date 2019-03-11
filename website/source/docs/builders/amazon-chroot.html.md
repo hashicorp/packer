@@ -173,8 +173,11 @@ each category, the available configuration keys are alphabetized.
     more [block device
     mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. These will be attached when booting a new instance from your
-    AMI. Your options here may vary depending on the type of VM you use. The
-    block device mappings allow for the following configuration:
+    AMI. If this field is populated, and you are building from an existing source image,
+    the block device mappings in the source image will be overwritten. This means you
+    must have a block device mapping entry for your root volume, `root_volume_size `,
+    and `root_device_name`. `Your options here may vary depending on the type of VM
+    you use. The block device mappings allow for the following configuration:
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination. Default `false`. **NOTE**: If this
