@@ -136,6 +136,10 @@ builder.
 -   `floating_ip_pool` (string) - *Deprecated* use `floating_ip_network`
     instead.
 
+-   `force_delete` (boolean) - Whether to force the OpenStack instance to be
+    forcefully deleted. This is useful for environments that have
+    reclaim / soft deletion enabled. By default this is false.
+
 -   `image_members` (array of strings) - List of members to add to the image
     after creation. An image member is usually a project (also called the
     "tenant") with whom the image is shared.
