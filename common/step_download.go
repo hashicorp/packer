@@ -96,7 +96,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 		downloadConfigs[i] = config
 
-		if match, _ := NewDownloadClient(config, ui).VerifyChecksum(config.TargetPath); match {
+		if match, _ := NewDownloadClient(config, ui).VerifyChecksum(ui, config.TargetPath); match {
 			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
 			finalPath = config.TargetPath
 			break
@@ -146,7 +146,7 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
 		var err error
-		path, err = download.Get()
+		path, err = download.Get(ui)
 		downloadCompleteCh <- err
 	}()
 

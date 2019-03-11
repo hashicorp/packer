@@ -18,6 +18,7 @@ import (
 )
 
 func TestDownloadClientVerifyChecksum(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
@@ -40,7 +41,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 	}
 
 	d := NewDownloadClient(config, new(packer.NoopUi))
-	result, err := d.VerifyChecksum(tf.Name())
+	result, err := d.VerifyChecksum(ui, tf.Name())
 	if err != nil {
 		t.Fatalf("Verify err: %s", err)
 	}
@@ -51,6 +52,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 }
 
 func TestDownloadClient_basic(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
 	defer os.Remove(tf.Name())
@@ -64,7 +66,7 @@ func TestDownloadClient_basic(t *testing.T) {
 		CopyFile:   true,
 	}, new(packer.NoopUi))
 
-	path, err := client.Get()
+	path, err := client.Get(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -80,6 +82,7 @@ func TestDownloadClient_basic(t *testing.T) {
 }
 
 func TestDownloadClient_checksumBad(t *testing.T) {
+	ui := packer.TestUi(t)
 	checksum, err := hex.DecodeString("b2946ac92492d2347c6235b4d2611184")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -100,12 +103,13 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		CopyFile:   true,
 	}, new(packer.NoopUi))
 
-	if _, err := client.Get(); err == nil {
+	if _, err := client.Get(ui); err == nil {
 		t.Fatal("should error")
 	}
 }
 
 func TestDownloadClient_checksumGood(t *testing.T) {
+	ui := packer.TestUi(t)
 	checksum, err := hex.DecodeString("b1946ac92492d2347c6235b4d2611184")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -126,7 +130,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		CopyFile:   true,
 	}, new(packer.NoopUi))
 
-	path, err := client.Get()
+	path, err := client.Get(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -142,6 +146,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 }
 
 func TestDownloadClient_checksumNoDownload(t *testing.T) {
+	ui := packer.TestUi(t)
 	checksum, err := hex.DecodeString("3740570a423feec44c2a759225a9fcf9")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -157,7 +162,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		Checksum:   checksum,
 		CopyFile:   true,
 	}, new(packer.NoopUi))
-	path, err := client.Get()
+	path, err := client.Get(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -176,6 +181,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 }
 
 func TestDownloadClient_notFound(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
 	defer os.Remove(tf.Name())
@@ -188,12 +194,13 @@ func TestDownloadClient_notFound(t *testing.T) {
 		TargetPath: tf.Name(),
 	}, new(packer.NoopUi))
 
-	if _, err := client.Get(); err == nil {
+	if _, err := client.Get(ui); err == nil {
 		t.Fatal("should error")
 	}
 }
 
 func TestDownloadClient_resume(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Write([]byte("w"))
 	tf.Close()
@@ -216,7 +223,7 @@ func TestDownloadClient_resume(t *testing.T) {
 		CopyFile:   true,
 	}, new(packer.NoopUi))
 
-	path, err := client.Get()
+	path, err := client.Get(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -232,6 +239,7 @@ func TestDownloadClient_resume(t *testing.T) {
 }
 
 func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
@@ -273,7 +281,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	}
 
 	client := NewDownloadClient(config, new(packer.NoopUi))
-	_, err = client.Get()
+	_, err = client.Get(ui)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -284,6 +292,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 }
 
 func TestDownloadClient_setsUserAgent(t *testing.T) {
+	ui := packer.TestUi(t)
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
@@ -306,7 +315,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 	}
 
 	client := NewDownloadClient(config, new(packer.NoopUi))
-	_, err = client.Get()
+	_, err = client.Get(ui)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -379,6 +388,7 @@ func TestHashForType(t *testing.T) {
 // delete the file if the checksum fails. Instead we'll just error and let the
 // user fix the checksum.
 func TestDownloadFileUrl(t *testing.T) {
+	ui := packer.TestUi(t)
 	cwd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Unable to detect working directory: %s", err)
@@ -407,7 +417,7 @@ func TestDownloadFileUrl(t *testing.T) {
 	client := NewDownloadClient(config, new(packer.NoopUi))
 
 	// Verify that we fail to match the checksum
-	_, err = client.Get()
+	_, err = client.Get(ui)
 	if err.Error() != "checksums didn't match. expected 6e6f7065 and got 606f1945f81a022d0ed0bd99edfd4f99081c1cb1f97fae087291ee14e945e608" {
 		t.Fatalf("Unexpected failure; expected checksum not to match. Error was \"%v\"", err)
 	}
@@ -422,6 +432,7 @@ func TestDownloadFileUrl(t *testing.T) {
 // UNC path info, and then calling stat to ensure the correct file exists.
 //    (used by TestFileUriTransforms)
 func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
+	ui := packer.TestUi(t)
 	// source_path is a file path and source is a network path
 	source := fmt.Sprintf(uri)
 	t.Logf("Trying to download %s", source)
@@ -436,7 +447,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 
 	// go go go
 	client := NewDownloadClient(config, new(packer.NoopUi))
-	path, err := client.Get()
+	path, err := client.Get(ui)
 
 	// ignore any non-important checksum errors if it's not a unc path
 	if !strings.HasPrefix(path, "\\\\") && err.Error() != "checksums didn't match. expected 6e6f7065 and got 606f1945f81a022d0ed0bd99edfd4f99081c1cb1f97fae087291ee14e945e608" {
