@@ -25,17 +25,21 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 
 	// Variables specific to this post processor
-	S3Bucket    string            `mapstructure:"s3_bucket_name"`
-	S3Key       string            `mapstructure:"s3_key_name"`
-	SkipClean   bool              `mapstructure:"skip_clean"`
-	Tags        map[string]string `mapstructure:"tags"`
-	Name        string            `mapstructure:"ami_name"`
-	Description string            `mapstructure:"ami_description"`
-	Users       []string          `mapstructure:"ami_users"`
-	Groups      []string          `mapstructure:"ami_groups"`
-	LicenseType string            `mapstructure:"license_type"`
-	RoleName    string            `mapstructure:"role_name"`
-	Format      string            `mapstructure:"format"`
+	S3Bucket        string            `mapstructure:"s3_bucket_name"`
+	S3Key           string            `mapstructure:"s3_key_name"`
+	S3Encryption    string            `mapstructure:"s3_encryption"`
+	S3EncryptionKey string            `mapstructure:"s3_encryption_key"`
+	SkipClean       bool              `mapstructure:"skip_clean"`
+	Tags            map[string]string `mapstructure:"tags"`
+	Name            string            `mapstructure:"ami_name"`
+	Description     string            `mapstructure:"ami_description"`
+	Users           []string          `mapstructure:"ami_users"`
+	Groups          []string          `mapstructure:"ami_groups"`
+	Encrypt         bool              `mapstructure:"ami_encrypt"`
+	KMSKey          string            `mapstructure:"ami_kms_key"`
+	LicenseType     string            `mapstructure:"license_type"`
+	RoleName        string            `mapstructure:"role_name"`
+	Format          string            `mapstructure:"format"`
 
 	ctx interpolate.Context
 }
@@ -99,6 +103,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("invalid format '%s'. Only 'ova', 'raw', 'vhd', 'vhdx', or 'vmdk' are allowed", p.config.Format))
 	}
 
+	if p.config.S3Encryption != "" && p.config.S3Encryption != "AES256" && p.config.S3Encryption != "aws:kms" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("invalid s3 encryption format '%s'. Only 'AES256' and 'aws:kms' are allowed", p.config.S3Encryption))
+	}
+
 	// Anything which flagged return back up the stack
 	if len(errs.Errors) > 0 {
 		return errs
@@ -141,6 +150,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
 	}
 
+	if p.config.S3Encryption == "AES256" && p.config.S3EncryptionKey != "" {
+		ui.Message(fmt.Sprintf("Ignoring s3_encryption_key because s3_encryption is set to '%s'", p.config.S3Encryption))
+	}
+
 	// open the source file
 	log.Printf("Opening file %s to upload", source)
 	file, err := os.Open(source)
@@ -150,14 +163,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
-	// Copy the image file into the S3 bucket specified
-	uploader := s3manager.NewUploader(session)
-	_, err = uploader.Upload(&s3manager.UploadInput{
+	// Prepare S3 request
+	updata := &s3manager.UploadInput{
 		Body:   file,
 		Bucket: &p.config.S3Bucket,
 		Key:    &p.config.S3Key,
-	})
-	if err != nil {
+	}
+
+	// Add encryption if specified in the config
+	if p.config.S3Encryption != "" {
+		updata.ServerSideEncryption = &p.config.S3Encryption
+		if p.config.S3Encryption == "aws:kms" && p.config.S3EncryptionKey != "" {
+			updata.SSEKMSKeyId = &p.config.S3EncryptionKey
+		}
+	}
+
+	// Copy the image file into the S3 bucket specified
+	uploader := s3manager.NewUploader(session)
+	if _, err = uploader.Upload(updata); err != nil {
 		return nil, false, fmt.Errorf("Failed to upload %s: %s", source, err)
 	}
 
@@ -171,6 +194,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ec2conn := ec2.New(session)
 	params := &ec2.ImportImageInput{
+		Encrypted: &p.config.Encrypt,
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				Format: &p.config.Format,
@@ -180,6 +204,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
+	}
+
+	if p.config.Encrypt && p.config.KMSKey != "" {
+		params.KmsKeyId = &p.config.KMSKey
 	}
 
 	if p.config.RoleName != "" {
