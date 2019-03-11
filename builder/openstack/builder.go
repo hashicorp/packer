@@ -115,6 +115,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ConfigDrive:           b.config.ConfigDrive,
 			InstanceMetadata:      b.config.InstanceMetadata,
 			UseBlockStorageVolume: b.config.UseBlockStorageVolume,
+			ForceDelete:           b.config.ForceDelete,
 		},
 		&StepGetPassword{
 			Debug: b.config.PackerDebug,
