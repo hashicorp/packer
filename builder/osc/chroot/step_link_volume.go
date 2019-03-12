@@ -3,7 +3,6 @@ package chroot
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,7 +29,8 @@ func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) mult
 	volumeId := state.Get("volume_id").(string)
 
 	// For the API call, it expects "sd" prefixed devices.
-	linkVolume := strings.Replace(device, "/xvd", "/sd", 1)
+	//linkVolume := strings.Replace(device, "/xvd", "/sd", 1)
+	linkVolume := device
 
 	ui.Say(fmt.Sprintf("Attaching the root volume to %s", linkVolume))
 	_, err := oapiconn.POST_LinkVolume(oapi.LinkVolumeRequest{
