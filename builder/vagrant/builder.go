@@ -264,7 +264,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return NewArtifact(b.config.OutputDir)
+	return NewArtifact(b.config.Provider, b.config.OutputDir), nil
 }
 
 // Cancel.
