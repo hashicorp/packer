@@ -42,7 +42,7 @@ func AvailableDevice() (string, error) {
 // devicePrefix returns the prefix ("sd" or "xvd" or so on) of the devices
 // on the system. The "vd" prefix appears on outscale images.
 func devicePrefix() (string, error) {
-	available := []string{"sd", "xvd"}
+	available := []string{"sd", "xvd", "vd"}
 
 	f, err := os.Open("/sys/block")
 	if err != nil {
@@ -56,6 +56,10 @@ func devicePrefix() (string, error) {
 			dirBase := filepath.Base(dir)
 			for _, prefix := range available {
 				if strings.HasPrefix(dirBase, prefix) {
+					//for outscale.
+					if prefix != "xvd" {
+						prefix = "xvd"
+					}
 					return prefix, nil
 				}
 			}
