@@ -115,9 +115,9 @@ func (d *DownloadClient) Cancel() {
 	// TODO(mitchellh): Implement
 }
 
-func (d *DownloadClient) Get() (string, error) {
+func (d *DownloadClient) Get(ui packer.Ui) (string, error) {
 	// If we already have the file and it matches, then just return the target path.
-	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
+	if verify, _ := d.VerifyChecksum(ui, d.config.TargetPath); verify {
 		log.Println("[DEBUG] Initial checksum matched, no download needed.")
 		return d.config.TargetPath, nil
 	}
@@ -184,7 +184,7 @@ func (d *DownloadClient) Get() (string, error) {
 
 	if d.config.Hash != nil {
 		var verify bool
-		verify, err = d.VerifyChecksum(finalPath)
+		verify, err = d.VerifyChecksum(ui, finalPath)
 		if err == nil && !verify {
 			// Only delete the file if we made a copy or downloaded it
 			if d.config.CopyFile {
@@ -203,7 +203,7 @@ func (d *DownloadClient) Get() (string, error) {
 
 // VerifyChecksum tests that the path matches the checksum for the
 // download.
-func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
+func (d *DownloadClient) VerifyChecksum(ui packer.Ui, path string) (bool, error) {
 	if d.config.Checksum == nil || d.config.Hash == nil {
 		return false, errors.New("Checksum or Hash isn't set on download.")
 	}
@@ -214,7 +214,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 	}
 	defer f.Close()
 
-	log.Printf("Verifying checksum of %s", path)
+	ui.Message(fmt.Sprintf("Verifying checksum of %s", path))
 	d.config.Hash.Reset()
 	io.Copy(d.config.Hash, f)
 	return bytes.Equal(d.config.Hash.Sum(nil), d.config.Checksum), nil
