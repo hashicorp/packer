@@ -61,6 +61,10 @@ one, by using `global_id` instead of `source_box`.
     to Vagrant, this is the name to give it. If left blank, will default to
     "packer_" plus your buildname.
 
+-   `provider` (string) - The vagrant [provider](docs/post-processors/vagrant.html).
+    This parameter is required to use vagrant builder with the `vagrant-cloud`
+    post-processor. Defaults to unset.
+
 -   `checksum` (string) - The checksum for the .box file. The type of the
     checksum is specified with `checksum_type`, documented below.
 
