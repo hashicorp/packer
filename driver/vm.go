@@ -24,6 +24,7 @@ type CloneConfig struct {
 	ResourcePool string
 	Datastore    string
 	LinkedClone  bool
+	Network      string
 	Annotation   string
 }
 
@@ -222,10 +223,41 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 		cloneSpec.Snapshot = tpl.Snapshot.CurrentSnapshot
 	}
 
+	var configSpec types.VirtualMachineConfigSpec
+	cloneSpec.Config = &configSpec
+
 	if config.Annotation != "" {
-		var configSpec types.VirtualMachineConfigSpec
 		configSpec.Annotation = config.Annotation
-		cloneSpec.Config = &configSpec
+	}
+
+	if config.Network != "" {
+		net, err := template.driver.finder.Network(ctx, config.Network)
+		if err != nil {
+			return nil, err
+		}
+		backing, err := net.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		devices, err := template.vm.Device(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		adapter, err := findNetworkAdapter(devices)
+		if err != nil {
+			return nil, err
+		}
+
+		adapter.GetVirtualEthernetCard().Backing = backing
+
+		config := &types.VirtualDeviceConfigSpec{
+			Device:    adapter.(types.BaseVirtualDevice),
+			Operation: types.VirtualDeviceConfigSpecOperationEdit,
+		}
+
+		configSpec.DeviceChange = append(configSpec.DeviceChange, config)
 	}
 
 	task, err := template.vm.Clone(template.driver.ctx, folder.folder, config.Name, cloneSpec)
@@ -629,4 +661,13 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {
+	c := l.SelectByType((*types.VirtualEthernetCard)(nil))
+	if len(c) == 0 {
+		return nil, errors.New("no network adapter device found")
+	}
+
+	return c[0].(types.BaseVirtualEthernetCard), nil
 }
