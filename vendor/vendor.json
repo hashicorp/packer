@@ -1015,6 +1015,12 @@
 			"revision": "875fb671b3ddc66f8e2f0acc33829c8cb989a38d"
 		},
 		{
+			"checksumSHA1": "QFCuUCYWt0PS9AozJX58VE0DEZU=",
+			"path": "github.com/hashicorp/go-getter",
+			"revision": "90f6e2cd3577ebfd1df3553ac6cfff560a061376",
+			"revisionTime": "2019-01-09T11:19:00Z"
+		},
+		{
 			"checksumSHA1": "y+AeKVZoX0gB+DZW4Arzkb3tTVc=",
 			"path": "github.com/hashicorp/go-immutable-radix",
 			"revision": "7f3cd4390caab3250a57f30efdb2a65dd7649ecf",

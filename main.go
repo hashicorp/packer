@@ -11,7 +11,6 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"syscall"
@@ -160,19 +159,12 @@ func wrappedMain() int {
 		)
 	}
 
-	cacheDir := os.Getenv("PACKER_CACHE_DIR")
-	if cacheDir == "" {
-		cacheDir = "packer_cache"
-	}
-
-	cacheDir, err = filepath.Abs(cacheDir)
+	cacheDir, err := packer.CachePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Setting cache directory: %s", cacheDir)
-	cache := &packer.FileCache{CacheDir: cacheDir}
 
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
@@ -220,8 +212,7 @@ func wrappedMain() int {
 			},
 			Version: version.Version,
 		},
-		Cache: cache,
-		Ui:    ui,
+		Ui: ui,
 	}
 
 	cli := &cli.CLI{

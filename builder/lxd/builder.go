@@ -31,7 +31,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		b.config.ctx.Data = &wrappedCommandTemplate{Command: command}
 		return interpolate.Render(b.config.CommandWrapper, &b.config.ctx)
@@ -46,7 +46,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("cache", cache)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))

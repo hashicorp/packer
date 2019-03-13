@@ -14,6 +14,8 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	getter "github.com/hashicorp/go-getter"
 )
 
 type UiColor uint
@@ -36,10 +38,12 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
-	ProgressBar() ProgressBar
+	getter.ProgressTracker
 }
 
-type NoopUi struct{}
+type NoopUi struct {
+	NoopProgressTracker
+}
 
 var _ Ui = new(NoopUi)
 
@@ -48,55 +52,16 @@ func (*NoopUi) Say(string)                 { return }
 func (*NoopUi) Message(string)             { return }
 func (*NoopUi) Error(string)               { return }
 func (*NoopUi) Machine(string, ...string)  { return }
-func (*NoopUi) ProgressBar() ProgressBar   { return new(NoopProgressBar) }
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
 	Color      UiColor
 	ErrorColor UiColor
 	Ui         Ui
+	*uiProgressBar
 }
 
 var _ Ui = new(ColoredUi)
-
-// TargetedUI is a UI that wraps another UI implementation and modifies
-// the output to indicate a specific target. Specifically, all Say output
-// is prefixed with the target name. Message output is not prefixed but
-// is offset by the length of the target so that output is lined up properly
-// with Say output. Machine-readable output has the proper target set.
-type TargetedUI struct {
-	Target string
-	Ui     Ui
-}
-
-var _ Ui = new(TargetedUI)
-
-// The BasicUI is a UI that reads and writes from a standard Go reader
-// and writer. It is safe to be called from multiple goroutines. Machine
-// readable output is simply logged for this UI.
-type BasicUi struct {
-	Reader      io.Reader
-	Writer      io.Writer
-	ErrorWriter io.Writer
-	l           sync.Mutex
-	interrupted bool
-	TTY         TTY
-	StackableProgressBar
-}
-
-var _ Ui = new(BasicUi)
-
-func (bu *BasicUi) ProgressBar() ProgressBar {
-	return &bu.StackableProgressBar
-}
-
-// MachineReadableUi is a UI that only outputs machine-readable output
-// to the given Writer.
-type MachineReadableUi struct {
-	Writer io.Writer
-}
-
-var _ Ui = new(MachineReadableUi)
 
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
@@ -122,10 +87,6 @@ func (u *ColoredUi) Error(message string) {
 func (u *ColoredUi) Machine(t string, args ...string) {
 	// Don't colorize machine-readable output
 	u.Ui.Machine(t, args...)
-}
-
-func (u *ColoredUi) ProgressBar() ProgressBar {
-	return u.Ui.ProgressBar() //TODO(adrien): color me
 }
 
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
@@ -160,6 +121,19 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
+// TargetedUI is a UI that wraps another UI implementation and modifies
+// the output to indicate a specific target. Specifically, all Say output
+// is prefixed with the target name. Message output is not prefixed but
+// is offset by the length of the target so that output is lined up properly
+// with Say output. Machine-readable output has the proper target set.
+type TargetedUI struct {
+	Target string
+	Ui     Ui
+	*uiProgressBar
+}
+
+var _ Ui = new(TargetedUI)
+
 func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
@@ -181,10 +155,6 @@ func (u *TargetedUI) Machine(t string, args ...string) {
 	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
 }
 
-func (u *TargetedUI) ProgressBar() ProgressBar {
-	return u.Ui.ProgressBar()
-}
-
 func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	arrowText := "==>"
 	if !arrow {
@@ -199,6 +169,21 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
 }
+
+// The BasicUI is a UI that reads and writes from a standard Go reader
+// and writer. It is safe to be called from multiple goroutines. Machine
+// readable output is simply logged for this UI.
+type BasicUi struct {
+	Reader      io.Reader
+	Writer      io.Writer
+	ErrorWriter io.Writer
+	l           sync.Mutex
+	interrupted bool
+	TTY         TTY
+	*uiProgressBar
+}
+
+var _ Ui = new(BasicUi)
 
 func (rw *BasicUi) Ask(query string) (string, error) {
 	rw.l.Lock()
@@ -289,6 +274,15 @@ func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
 }
 
+// MachineReadableUi is a UI that only outputs machine-readable output
+// to the given Writer.
+type MachineReadableUi struct {
+	Writer io.Writer
+	NoopProgressTracker
+}
+
+var _ Ui = new(MachineReadableUi)
+
 func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
 }
@@ -335,14 +329,11 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	}
 }
 
-func (u *MachineReadableUi) ProgressBar() ProgressBar {
-	return new(NoopProgressBar)
-}
-
 // TimestampedUi is a UI that wraps another UI implementation and
 // prefixes each message with an RFC3339 timestamp
 type TimestampedUi struct {
 	Ui Ui
+	*uiProgressBar
 }
 
 var _ Ui = new(TimestampedUi)
@@ -367,8 +358,6 @@ func (u *TimestampedUi) Machine(message string, args ...string) {
 	u.Ui.Machine(message, args...)
 }
 
-func (u *TimestampedUi) ProgressBar() ProgressBar { return u.Ui.ProgressBar() }
-
 func (u *TimestampedUi) timestampLine(string string) string {
 	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
 }
@@ -378,6 +367,7 @@ func (u *TimestampedUi) timestampLine(string string) string {
 type SafeUi struct {
 	Sem chan int
 	Ui  Ui
+	*uiProgressBar
 }
 
 var _ Ui = new(SafeUi)
@@ -412,8 +402,4 @@ func (u *SafeUi) Machine(t string, args ...string) {
 	u.Sem <- 1
 	u.Ui.Machine(t, args...)
 	<-u.Sem
-}
-
-func (u *SafeUi) ProgressBar() ProgressBar {
-	return new(NoopProgressBar)
 }

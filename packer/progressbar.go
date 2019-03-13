@@ -1,170 +1,89 @@
 package packer
 
 import (
-	"fmt"
 	"io"
+	"path/filepath"
 	"sync"
 
-	"github.com/cheggaaa/pb"
+	pb "github.com/cheggaaa/pb"
 )
 
-// ProgressBar allows to graphically display
-// a self refreshing progress bar.
-type ProgressBar interface {
-	Start(total int64)
-	Add(current int64)
-	NewProxyReader(r io.Reader) (proxy io.Reader)
-	Finish()
-}
-
-// StackableProgressBar is a progress bar that
-// allows to track multiple downloads at once.
-// Every call to Start increments a counter that
-// will display the number of current loadings.
-// Every call to Start will add total to an internal
-// total that is the total displayed.
-// First call to Start will start a goroutine
-// that is waiting for every download to be finished.
-// Last call to Finish triggers a cleanup.
-// When all active downloads are finished
-// StackableProgressBar will clean itself to a default
-// state.
-type StackableProgressBar struct {
-	mtx   sync.Mutex // locks in Start, Finish, Add & NewProxyReader
-	Bar   BasicProgressBar
-	items int32
-	total int64
-
-	started             bool
-	ConfigProgressbarFN func(*pb.ProgressBar)
-}
-
-var _ ProgressBar = new(StackableProgressBar)
-
-func defaultProgressbarConfigFn(bar *pb.ProgressBar) {
+func ProgressBarConfig(bar *pb.ProgressBar, prefix string) {
 	bar.SetUnits(pb.U_BYTES)
+	bar.Prefix(prefix)
 }
 
-func (spb *StackableProgressBar) start() {
-	bar := pb.New(0)
-	if spb.ConfigProgressbarFN == nil {
-		spb.ConfigProgressbarFN = defaultProgressbarConfigFn
+var defaultUiProgressBar = &uiProgressBar{}
+
+// uiProgressBar is a self managed progress bar singleton.
+// decorate your struct with a *uiProgressBar to
+// give it TrackProgress capabilities.
+// In TrackProgress if uiProgressBar is nil
+// defaultUiProgressBar will be used as
+// the progress bar.
+type uiProgressBar struct {
+	lock sync.Mutex
+
+	pool *pb.Pool
+
+	pbs int
+}
+
+func (p *uiProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+	if p == nil {
+		return defaultUiProgressBar.TrackProgress(src, currentSize, totalSize, stream)
 	}
-	spb.ConfigProgressbarFN(bar)
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	bar.Start()
-	spb.Bar.ProgressBar = bar
-	spb.started = true
-}
+	newPb := pb.New64(totalSize)
+	newPb.Set64(currentSize)
+	ProgressBarConfig(newPb, filepath.Base(src))
 
-func (spb *StackableProgressBar) Start(total int64) {
-	spb.mtx.Lock()
-
-	spb.total += total
-	spb.items++
-
-	if !spb.started {
-		spb.start()
+	if p.pool == nil {
+		pool := pb.NewPool()
+		err := pool.Start()
+		if err != nil {
+			// here, we probably cannot lock
+			// stdout, so let's just return
+			// stream to avoid any error.
+			return stream
+		}
+		p.pool = pool
 	}
-	spb.Bar.SetTotal64(spb.total)
-	spb.prefix()
-	spb.mtx.Unlock()
-}
+	p.pool.Add(newPb)
+	reader := newPb.NewProxyReader(stream)
 
-func (spb *StackableProgressBar) Add(total int64) {
-	spb.mtx.Lock()
-	defer spb.mtx.Unlock()
-	if spb.Bar.ProgressBar != nil {
-		spb.Bar.Add(total)
-	}
-}
+	p.pbs++
+	return &readCloser{
+		Reader: reader,
+		close: func() error {
+			p.lock.Lock()
+			defer p.lock.Unlock()
 
-func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
-	spb.mtx.Lock()
-	defer spb.mtx.Unlock()
-	return spb.Bar.NewProxyReader(r)
-}
-
-func (spb *StackableProgressBar) prefix() {
-	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", spb.items))
-}
-
-func (spb *StackableProgressBar) Finish() {
-	spb.mtx.Lock()
-	defer spb.mtx.Unlock()
-
-	if spb.items > 0 {
-		spb.items--
-	}
-	if spb.items == 0 && spb.Bar.ProgressBar != nil {
-		// slef cleanup
-		spb.Bar.ProgressBar.Finish()
-		spb.Bar.ProgressBar = nil
-		spb.started = false
-		spb.total = 0
-		return
-	}
-}
-
-// BasicProgressBar is packer's basic progress bar.
-// Current implementation will always try to keep
-// itself at the bottom of a terminal.
-type BasicProgressBar struct {
-	*pb.ProgressBar
-}
-
-var _ ProgressBar = new(BasicProgressBar)
-
-func (bpb *BasicProgressBar) Start(total int64) {
-	bpb.SetTotal64(total)
-	bpb.ProgressBar.Start()
-}
-
-func (bpb *BasicProgressBar) Add(current int64) {
-	bpb.ProgressBar.Add64(current)
-}
-func (bpb *BasicProgressBar) NewProxyReader(r io.Reader) io.Reader {
-	return &ProxyReader{
-		Reader:      r,
-		ProgressBar: bpb,
-	}
-}
-func (bpb *BasicProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser {
-	return &ProxyReader{
-		Reader:      r,
-		ProgressBar: bpb,
+			newPb.Finish()
+			p.pbs--
+			if p.pbs <= 0 {
+				p.pool.Stop()
+				p.pool = nil
+			}
+			return nil
+		},
 	}
 }
 
-// NoopProgressBar is a silent progress bar.
-type NoopProgressBar struct {
-}
-
-var _ ProgressBar = new(NoopProgressBar)
-
-func (npb *NoopProgressBar) Start(int64)                                      {}
-func (npb *NoopProgressBar) Add(int64)                                        {}
-func (npb *NoopProgressBar) Finish()                                          {}
-func (npb *NoopProgressBar) NewProxyReader(r io.Reader) io.Reader             { return r }
-func (npb *NoopProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser { return r }
-
-// ProxyReader implements io.ReadCloser but sends
-// count of read bytes to a progress bar
-type ProxyReader struct {
+type readCloser struct {
 	io.Reader
-	ProgressBar
+	close func() error
 }
 
-func (r *ProxyReader) Read(p []byte) (n int, err error) {
-	n, err = r.Reader.Read(p)
-	r.ProgressBar.Add(int64(n))
-	return
-}
+func (c *readCloser) Close() error { return c.close() }
 
-// Close the reader if it implements io.Closer
-func (r *ProxyReader) Close() (err error) {
-	if closer, ok := r.Reader.(io.Closer); ok {
-		return closer.Close()
-	}
-	return
+// NoopProgressTracker is a progress tracker
+// that displays nothing.
+type NoopProgressTracker struct{}
+
+// TrackProgress returns stream
+func (*NoopProgressTracker) TrackProgress(_ string, _, _ int64, stream io.ReadCloser) io.ReadCloser {
+	return stream
 }
