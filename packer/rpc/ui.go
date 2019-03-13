@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"io"
 	"log"
 	"net/rpc"
 
@@ -64,31 +63,6 @@ func (u *Ui) Say(message string) {
 	}
 }
 
-func (u *Ui) ProgressBar() packer.ProgressBar {
-	if err := u.client.Call("Ui.ProgressBar", new(interface{}), new(interface{})); err != nil {
-		log.Printf("Error in Ui.ProgressBar RPC call: %s", err)
-	}
-	return u // Ui is also a progress bar !!
-}
-
-var _ packer.ProgressBar = new(Ui)
-
-func (pb *Ui) Start(total int64) {
-	pb.client.Call("Ui.Start", total, new(interface{}))
-}
-
-func (pb *Ui) Add(current int64) {
-	pb.client.Call("Ui.Add", current, new(interface{}))
-}
-
-func (pb *Ui) Finish() {
-	pb.client.Call("Ui.Finish", nil, new(interface{}))
-}
-
-func (pb *Ui) NewProxyReader(r io.Reader) io.Reader {
-	return &packer.ProxyReader{Reader: r, ProgressBar: pb}
-}
-
 func (u *UiServer) Ask(query string, reply *string) (err error) {
 	*reply, err = u.ui.Ask(query)
 	return
@@ -118,28 +92,5 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	u.ui.Say(*message)
 
 	*reply = nil
-	return nil
-}
-
-func (u *UiServer) ProgressBar(_ *string, reply *interface{}) error {
-	// No-op for now, this function might be
-	// used in the future if we want to use
-	// different progress bars with identifiers.
-	u.ui.ProgressBar()
-	return nil
-}
-
-func (pb *UiServer) Finish(_ string, _ *interface{}) error {
-	pb.ui.ProgressBar().Finish()
-	return nil
-}
-
-func (pb *UiServer) Start(total int64, _ *interface{}) error {
-	pb.ui.ProgressBar().Start(total)
-	return nil
-}
-
-func (pb *UiServer) Add(current int64, _ *interface{}) error {
-	pb.ui.ProgressBar().Add(current)
 	return nil
 }

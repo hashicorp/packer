@@ -172,12 +172,11 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 }
 
 func TestBuild_Run(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	build := testBuild()
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	artifacts, err := build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -218,7 +217,6 @@ func TestBuild_Run(t *testing.T) {
 }
 
 func TestBuild_Run_Artifacts(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	// Test case: Test that with no post-processors, we only get the
@@ -227,7 +225,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	artifacts, err := build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -252,7 +250,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -280,7 +278,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -310,7 +308,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -337,7 +335,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -365,7 +363,7 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		}
 	}()
 
-	testBuild().Run(testUi(), &TestCache{})
+	testBuild().Run(testUi())
 }
 
 func TestBuild_Cancel(t *testing.T) {
