@@ -126,11 +126,6 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 		}
 		defer f.Close()
 
-		// Get a default progress bar
-		pb := packer.NoopProgressBar{}
-		pb.Start(0) // TODO: find size ? Remove ?
-		defer pb.Finish()
-
 		// Create MultiWriter for the current progress
 		pf := io.MultiWriter(f)
 
@@ -175,13 +170,8 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 			dst = dst + filepath.Base(src)
 		}
 
-		// Get a default progress bar
-		bar := ui.ProgressBar()
-		bar.Start(info.Size())
-		defer bar.Finish()
-
-		// Create ProxyReader for the current progress
-		pf := bar.NewProxyReader(f)
+		pf := ui.TrackProgress(filepath.Base(src), 0, info.Size(), f)
+		defer pf.Close()
 
 		// Upload the file
 		if err = comm.Upload(dst, pf, &fi); err != nil {

@@ -53,7 +53,7 @@ type Build interface {
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
-	Run(Ui, Cache) ([]Artifact, error)
+	Run(Ui) ([]Artifact, error)
 
 	// Cancel will cancel a running build. This will block until the build
 	// is actually completely canceled.
@@ -180,7 +180,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
+func (b *coreBuild) Run(originalUi Ui) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -235,7 +235,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 
 	log.Printf("Running builder: %s", b.builderType)
 	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
-	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
+	builderArtifact, err := b.builder.Run(builderUi, hook)
 	ts.End(err)
 	if err != nil {
 		return nil, err

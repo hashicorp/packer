@@ -35,7 +35,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
 		AccessToken: b.config.APIToken,
 	}))

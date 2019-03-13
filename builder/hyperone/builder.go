@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/hyperonecom/h1-client-go"
+	openapi "github.com/hyperonecom/h1-client-go"
 )
 
 const BuilderID = "hyperone.builder"
@@ -50,7 +50,7 @@ type wrappedCommandTemplate struct {
 	Command string
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx
 		ctx.Data = &wrappedCommandTemplate{Command: command}

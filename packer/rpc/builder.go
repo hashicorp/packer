@@ -44,10 +44,9 @@ func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 	return resp.Warnings, err
 }
 
-func (b *builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
-	server.RegisterCache(cache)
 	server.RegisterHook(hook)
 	server.RegisterUi(ui)
 	go server.Serve()
@@ -91,7 +90,7 @@ func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
 	}
 	defer client.Close()
 
-	artifact, err := b.builder.Run(client.Ui(), client.Hook(), client.Cache())
+	artifact, err := b.builder.Run(client.Ui(), client.Hook())
 	if err != nil {
 		return NewBasicError(err)
 	}

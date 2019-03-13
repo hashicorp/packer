@@ -1,7 +1,5 @@
 # Terminal progress bar for Go  
 
-[![Join the chat at https://gitter.im/cheggaaa/pb](https://badges.gitter.im/cheggaaa/pb.svg)](https://gitter.im/cheggaaa/pb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Simple progress bar for console programs.    
    
 Please check the new version https://github.com/cheggaaa/pb/tree/v2 (currently, it's beta)

@@ -78,12 +78,6 @@ func (s *Server) RegisterBuilder(b packer.Builder) {
 	})
 }
 
-func (s *Server) RegisterCache(c packer.Cache) {
-	s.server.RegisterName(DefaultCacheEndpoint, &CacheServer{
-		cache: c,
-	})
-}
-
 func (s *Server) RegisterCommunicator(c packer.Communicator) {
 	s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c:   c,

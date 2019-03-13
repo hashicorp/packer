@@ -328,7 +328,6 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(templateString))
 	if err != nil {
@@ -375,7 +374,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
