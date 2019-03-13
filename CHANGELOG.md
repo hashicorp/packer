@@ -1,3 +1,27 @@
+## 1.4.0 (Upcoming)
+
+### IMPROVEMENTS:
+* post-processor/googlecompute-export: Set network project id to builder [GH-7359]
+* builder/virtualbox: create ephemeral SSH key pair for build process [GH-7287]
+* builder/OpenStack: Support Application Credential Authentication [GH-7300]
+* post-processor/Vagrant: Option to ignore SSL verification when using on-premise vagrant cloud [GH-7377]
+* core: Print VerifyChecksum log for the download as ui.Message output [GH-7387]
+* builder/amazon-chroot: Allow users to specify custom block device mapping [GH-7370]
+
+
+### BUG FIXES:
+* builder/amazon-chroot: Fix building PV images and where mount_partition is set [GH-7337]
+* builder/vmware-esxi: properly copy .vmxf files in remote vmx builds [GH-7357]
+* builder/alibaba: Update to latest Alibaba Cloud official image to fix acceptance tests [GH-7375]
+* builder/hcloud: Fix usage of freebsd64 rescue image [GH-7381]
+* builder/amazon: Fix http_proxy env var regression [GH-7361]
+* core: fix bug where Packer didn't pause in debug on certain linux platforms. [GH-7352]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: If users do not pass any encrypt setting, retain any initial encryption setting of the AMI. [GH-6787]
+* builder/scaleway: Renamed attribute api_access_key to organization_id. [GH-6983]
+* builder/docker: Update docker's default config to use /bin/sh instead of /bin/bash [GH-7106]
+
 ## 1.3.5 (February 28, 2019)
 
 ### IMPROVEMENTS:
