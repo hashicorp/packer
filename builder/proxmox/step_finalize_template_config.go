@@ -15,9 +15,14 @@ import (
 // unmounting the installation ISO.
 type stepFinalizeTemplateConfig struct{}
 
+type templateFinalizer interface {
+	GetVmConfig(*proxmox.VmRef) (map[string]interface{}, error)
+	SetVmConfig(*proxmox.VmRef, map[string]interface{}) (string, error)
+}
+
 func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(templateFinalizer)
 	c := state.Get("config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
