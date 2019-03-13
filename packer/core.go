@@ -3,7 +3,8 @@ package packer
 import (
 	"fmt"
 	"sort"
-	"strings"
+
+	ttmp "text/template"
 
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
@@ -346,25 +347,29 @@ func (c *Core) init() error {
 
 			// Interpolate the default
 			def, err := interpolate.Render(v.Default, ctx)
-			if err != nil {
-				if strings.Contains(err.Error(), "error calling user") {
-					shouldRetry = true
-					tryCount++
-					failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v.Default)
-					continue
-				} else {
-					return fmt.Errorf(
-						// unexpected interpolation error: abort the run
-						"error interpolating default value for '%s': %s",
-						k, err)
-				}
-			}
+			switch err.(type) {
+			case nil:
+				// We only get here if interpolation has succeeded, so something is
+				// different in this loop than in the last one.
+				changed = true
+				c.variables[k] = def
+				ctx.UserVariables = c.variables
+			case ttmp.ExecError:
+				shouldRetry = true
+				tryCount++
+				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v.Default)
+				continue
 
-			// We only get here if interpolation has succeeded, so something is
-			// different in this loop than in the last one.
-			changed = true
-			c.variables[k] = def
-			ctx.UserVariables = c.variables
+				return fmt.Errorf(
+					// unexpected interpolation error: abort the run
+					"error interpolating default value for '%s': %s",
+					k, err)
+			default:
+				return fmt.Errorf(
+					// unexpected interpolation error: abort the run
+					"error interpolating default value for '%s': %s",
+					k, err)
+			}
 		}
 		if tryCount >= 100 {
 			break
