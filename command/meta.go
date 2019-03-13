@@ -26,7 +26,6 @@ const (
 // Packer command inherits.
 type Meta struct {
 	CoreConfig *packer.CoreConfig
-	Cache      packer.Cache
 	Ui         packer.Ui
 	Version    string
 

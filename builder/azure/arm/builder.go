@@ -51,7 +51,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, errs
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	ui.Say("Running builder ...")
 

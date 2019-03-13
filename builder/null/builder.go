@@ -26,7 +26,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	steps := []multistep.Step{}
 
 	if b.config.CommConfig.Type != "none" {

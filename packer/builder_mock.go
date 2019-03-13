@@ -16,7 +16,6 @@ type MockBuilder struct {
 	PrepareCalled bool
 	PrepareConfig []interface{}
 	RunCalled     bool
-	RunCache      Cache
 	RunHook       Hook
 	RunUi         Ui
 	CancelCalled  bool
@@ -28,11 +27,10 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
 	return tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
+func (tb *MockBuilder) Run(ui Ui, h Hook) (Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
-	tb.RunCache = c
 
 	if tb.RunErrResult {
 		return nil, errors.New("foo")

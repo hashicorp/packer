@@ -2,6 +2,7 @@ package ovf
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -102,17 +103,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
-	} else {
-		c.SourcePath, err = common.ValidatedURL(c.SourcePath)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
-		}
-		fileOK := common.FileExistsLocally(c.SourcePath)
-		if !fileOK {
-			packer.MultiErrorAppend(errs,
-				fmt.Errorf("Source file '%s' needs to exist at time of config validation!", c.SourcePath))
-		}
+	}
 
+	if _, err := os.Stat(c.SourcePath); err != nil {
+		packer.MultiErrorAppend(errs,
+			fmt.Errorf("Source file '%s' needs to exist at time of config validation! %v", c.SourcePath, err))
 	}
 
 	validMode := false
