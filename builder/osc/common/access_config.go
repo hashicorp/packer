@@ -14,8 +14,7 @@ import (
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	AccessKey             string `mapstructure:"access_key"`
-	CustomEndpoint        string `mapstructure:"custom_endpoint"`
-	DecodeAuthZMessages   bool   `mapstructure:"decode_authorization_messages"`
+	CustomEndpointOAPI    string `mapstructure:"custom_endpoint_oapi"`
 	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
 	MFACode               string `mapstructure:"mfa_code"`
 	ProfileName           string `mapstructure:"profile"`
@@ -50,15 +49,19 @@ func (c *AccessConfig) Config() (*oapi.Config, error) {
 		c.RawRegion = os.Getenv("OUTSCALE_REGION")
 	}
 
-	if c.CustomEndpoint == "" {
-		c.CustomEndpoint = os.Getenv("OUTSCALE_OAPI_URL")
+	if c.CustomEndpointOAPI == "" {
+		c.CustomEndpointOAPI = os.Getenv("OUTSCALE_OAPI_URL")
+	}
+
+	if c.CustomEndpointOAPI == "" {
+		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
 	}
 
 	config := &oapi.Config{
 		AccessKey: c.AccessKey,
 		SecretKey: c.SecretKey,
 		Region:    c.RawRegion,
-		URL:       c.CustomEndpoint,
+		URL:       c.CustomEndpointOAPI,
 		Service:   "api",
 	}
 
@@ -77,7 +80,7 @@ func (c *AccessConfig) NewOAPIConnection() (oapi.OAPIClient, error) {
 
 	skipClient := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipTLSVerify},
 		},
 	}
 
