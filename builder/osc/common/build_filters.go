@@ -65,27 +65,27 @@ func buildOMIFilters(input map[string]string) oapi.FiltersImage {
 		filterValue := []string{v}
 
 		switch name := k; name {
-		case "account-aliases":
+		case "account-alias":
 			filters.AccountAliases = filterValue
-		case "account-ids":
+		case "account-id":
 			filters.AccountIds = filterValue
-		case "architectures":
+		case "architecture":
 			filters.Architectures = filterValue
-		case "image-ids":
+		case "image-id":
 			filters.ImageIds = filterValue
-		case "image-names":
+		case "image-name":
 			filters.ImageNames = filterValue
-		case "image-types":
+		case "image-type":
 			filters.ImageTypes = filterValue
-		case "virtualization-types":
+		case "virtualization-type":
 			filters.VirtualizationTypes = filterValue
-		case "root-device-types":
+		case "root-device-type":
 			filters.RootDeviceTypes = filterValue
 		case "block-device-mapping-volume-type":
 			filters.BlockDeviceMappingVolumeType = filterValue
 		//Some params are missing.
 		default:
-			log.Printf("[Debug] Unknown Filter Name: %s.", name)
+			log.Printf("[WARN] Unknown Filter Name: %s.", name)
 		}
 	}
 	return filters
