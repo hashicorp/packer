@@ -28,7 +28,7 @@ type Builder interface {
 	Prepare(...interface{}) ([]string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
-	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
+	Run(ui Ui, hook Hook) (Artifact, error)
 
 	// Cancel cancels a possibly running Builder. This should block until
 	// the builder actually cancels and cleans up after itself.

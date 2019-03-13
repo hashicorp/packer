@@ -1,11 +1,11 @@
 package rpc
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
 	"reflect"
 	"testing"
-
-	"github.com/hashicorp/packer/packer"
 )
 
 type testUi struct {
@@ -21,11 +21,9 @@ type testUi struct {
 	sayCalled      bool
 	sayMessage     string
 
-	progressBarCalled               bool
-	progressBarStartCalled          bool
-	progressBarAddCalled            bool
-	progressBarFinishCalled         bool
-	progressBarNewProxyReaderCalled bool
+	trackProgressCalled    bool
+	progressBarAddCalled   bool
+	progressBarCloseCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -55,27 +53,28 @@ func (u *testUi) Say(message string) {
 	u.sayMessage = message
 }
 
-func (u *testUi) ProgressBar() packer.ProgressBar {
-	u.progressBarCalled = true
-	return u
+func (u *testUi) TrackProgress(_ string, _, _ int64, stream io.ReadCloser) (body io.ReadCloser) {
+	u.trackProgressCalled = true
+
+	return &readCloser{
+		read: func(p []byte) (int, error) {
+			u.progressBarAddCalled = true
+			return stream.Read(p)
+		},
+		close: func() error {
+			u.progressBarCloseCalled = true
+			return stream.Close()
+		},
+	}
 }
 
-func (u *testUi) Start(int64) {
-	u.progressBarStartCalled = true
+type readCloser struct {
+	read  func([]byte) (int, error)
+	close func() error
 }
 
-func (u *testUi) Add(int64) {
-	u.progressBarAddCalled = true
-}
-
-func (u *testUi) Finish() {
-	u.progressBarFinishCalled = true
-}
-
-func (u *testUi) NewProxyReader(r io.Reader) io.Reader {
-	u.progressBarNewProxyReaderCalled = true
-	return r
-}
+func (c *readCloser) Close() error               { return c.close() }
+func (c *readCloser) Read(p []byte) (int, error) { return c.read(p) }
 
 func TestUiRPC(t *testing.T) {
 	// Create the UI to test
@@ -119,24 +118,23 @@ func TestUiRPC(t *testing.T) {
 		t.Fatalf("bad: %#v", ui.errorMessage)
 	}
 
-	bar := uiClient.ProgressBar()
-	if ui.progressBarCalled != true {
-		t.Errorf("ProgressBar not called.")
+	ctt := []byte("foo bar baz !!!")
+	rc := ioutil.NopCloser(bytes.NewReader(ctt))
+
+	stream := uiClient.TrackProgress("stuff.txt", 0, int64(len(ctt)), rc)
+	if ui.trackProgressCalled != true {
+		t.Errorf("ProgressBastream not called.")
 	}
 
-	bar.Start(100)
-	if ui.progressBarStartCalled != true {
-		t.Errorf("progressBar.Start not called.")
-	}
-
-	bar.Add(1)
+	b := []byte{0}
+	stream.Read(b) // output ignored
 	if ui.progressBarAddCalled != true {
-		t.Errorf("progressBar.Add not called.")
+		t.Errorf("Add not called.")
 	}
 
-	bar.Finish()
-	if ui.progressBarFinishCalled != true {
-		t.Errorf("progressBar.Finish not called.")
+	stream.Close()
+	if ui.progressBarCloseCalled != true {
+		t.Errorf("close not called.")
 	}
 
 	uiClient.Machine("foo", "bar", "baz")

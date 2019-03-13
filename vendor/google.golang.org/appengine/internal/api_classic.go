@@ -8,6 +8,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -21,14 +22,20 @@ import (
 
 var contextKey = "holds an appengine.Context"
 
+// fromContext returns the App Engine context or nil if ctx is not
+// derived from an App Engine context.
 func fromContext(ctx netcontext.Context) appengine.Context {
 	c, _ := ctx.Value(&contextKey).(appengine.Context)
 	return c
 }
 
 // This is only for classic App Engine adapters.
-func ClassicContextFromContext(ctx netcontext.Context) appengine.Context {
-	return fromContext(ctx)
+func ClassicContextFromContext(ctx netcontext.Context) (appengine.Context, error) {
+	c := fromContext(ctx)
+	if c == nil {
+		return nil, errNotAppEngineContext
+	}
+	return c, nil
 }
 
 func withContext(parent netcontext.Context, c appengine.Context) netcontext.Context {
@@ -52,12 +59,41 @@ func IncomingHeaders(ctx netcontext.Context) http.Header {
 	return nil
 }
 
+func ReqContext(req *http.Request) netcontext.Context {
+	return WithContext(netcontext.Background(), req)
+}
+
 func WithContext(parent netcontext.Context, req *http.Request) netcontext.Context {
 	c := appengine.NewContext(req)
 	return withContext(parent, c)
 }
 
+type testingContext struct {
+	appengine.Context
+
+	req *http.Request
+}
+
+func (t *testingContext) FullyQualifiedAppID() string { return "dev~testcontext" }
+func (t *testingContext) Call(service, method string, _, _ appengine_internal.ProtoMessage, _ *appengine_internal.CallOptions) error {
+	if service == "__go__" && method == "GetNamespace" {
+		return nil
+	}
+	return fmt.Errorf("testingContext: unsupported Call")
+}
+func (t *testingContext) Request() interface{} { return t.req }
+
+func ContextForTesting(req *http.Request) netcontext.Context {
+	return withContext(netcontext.Background(), &testingContext{req: req})
+}
+
 func Call(ctx netcontext.Context, service, method string, in, out proto.Message) error {
+	if ns := NamespaceFromContext(ctx); ns != "" {
+		if fn, ok := NamespaceMods[service]; ok {
+			fn(in, ns)
+		}
+	}
+
 	if f, ctx, ok := callOverrideFromContext(ctx); ok {
 		return f(ctx, service, method, in, out)
 	}
@@ -72,7 +108,7 @@ func Call(ctx netcontext.Context, service, method string, in, out proto.Message)
 	c := fromContext(ctx)
 	if c == nil {
 		// Give a good error message rather than a panic lower down.
-		return errors.New("not an App Engine context")
+		return errNotAppEngineContext
 	}
 
 	// Apply transaction modifications if we're in a transaction.

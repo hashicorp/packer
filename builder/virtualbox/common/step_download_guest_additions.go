@@ -121,15 +121,6 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 		}
 	}
 
-	// Convert the file/url to an actual URL for step_download to process.
-	url, err = common.ValidatedURL(url)
-	if err != nil {
-		err := fmt.Errorf("Error preparing guest additions url: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	log.Printf("Guest additions URL: %s", url)
 
 	// We're good, so let's go ahead and download this thing..
@@ -139,6 +130,7 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 		Description:  "Guest additions",
 		ResultKey:    "guest_additions_path",
 		Url:          []string{url},
+		Extension:    "iso",
 	}
 
 	return downStep.Run(ctx, state)

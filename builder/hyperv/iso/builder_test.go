@@ -5,7 +5,6 @@ package iso
 import (
 	"context"
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -287,9 +286,6 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ISOChecksum != "foo" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
-	}
 }
 
 func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
@@ -302,8 +298,8 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatal("should have error")
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Test good
@@ -329,7 +325,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 		t.Fatalf("bad: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("should have error")
+		t.Log("should error in prepare but go-getter doesn't let us validate yet. This will fail before dl.")
 	}
 
 	// Test none
@@ -606,13 +602,11 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 	hook := &packer.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
 	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)

@@ -45,7 +45,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, errs.ErrorOrNil()
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	config := b.config
 
 	driver, err := NewDriverTriton(ui, config)

@@ -15,7 +15,6 @@ type testBuild struct {
 	prepareCalled    bool
 	prepareWarnings  []string
 	runCalled        bool
-	runCache         packer.Cache
 	runUi            packer.Ui
 	setDebugCalled   bool
 	setForceCalled   bool
@@ -35,9 +34,8 @@ func (b *testBuild) Prepare() ([]string, error) {
 	return b.prepareWarnings, nil
 }
 
-func (b *testBuild) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
+func (b *testBuild) Run(ui packer.Ui) ([]packer.Artifact, error) {
 	b.runCalled = true
-	b.runCache = cache
 	b.runUi = ui
 
 	if b.errRunResult {
@@ -84,9 +82,8 @@ func TestBuild(t *testing.T) {
 	}
 
 	// Test Run
-	cache := new(testCache)
 	ui := new(testUi)
-	artifacts, err := bClient.Run(ui, cache)
+	artifacts, err := bClient.Run(ui)
 	if !b.runCalled {
 		t.Fatal("run should be called")
 	}
@@ -105,7 +102,7 @@ func TestBuild(t *testing.T) {
 
 	// Test run with an error
 	b.errRunResult = true
-	_, err = bClient.Run(ui, cache)
+	_, err = bClient.Run(ui)
 	if err == nil {
 		t.Fatal("should error")
 	}

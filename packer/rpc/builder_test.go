@@ -67,10 +67,9 @@ func TestBuilderRun(t *testing.T) {
 	bClient := client.Builder()
 
 	// Test Run
-	cache := new(testCache)
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook, cache)
+	artifact, err := bClient.Run(ui, hook)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -94,10 +93,9 @@ func TestBuilderRun_nilResult(t *testing.T) {
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	cache := new(testCache)
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook, cache)
+	artifact, err := bClient.Run(ui, hook)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
@@ -116,10 +114,9 @@ func TestBuilderRun_ErrResult(t *testing.T) {
 
 	b.RunErrResult = true
 
-	cache := new(testCache)
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook, cache)
+	artifact, err := bClient.Run(ui, hook)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
