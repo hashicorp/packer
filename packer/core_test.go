@@ -67,7 +67,7 @@ func TestCoreBuild_basic(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -97,7 +97,7 @@ func TestCoreBuild_basicInterpolated(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -230,7 +230,7 @@ func TestCoreBuild_prov(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -264,7 +264,7 @@ func TestCoreBuild_provSkip(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -298,7 +298,7 @@ func TestCoreBuild_provSkipInclude(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -332,7 +332,7 @@ func TestCoreBuild_provOverride(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -381,7 +381,7 @@ func TestCoreBuild_postProcess(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(ui, nil)
+	artifact, err := build.Run(ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

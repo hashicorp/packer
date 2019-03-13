@@ -31,7 +31,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	opts := []hcloud.ClientOption{
 		hcloud.WithToken(b.config.HCloudToken),
 		hcloud.WithEndpoint(b.config.Endpoint),

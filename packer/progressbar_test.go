@@ -1,71 +1,58 @@
 package packer
 
 import (
-	"sync"
+	"bytes"
+	"io/ioutil"
 	"testing"
-	"time"
 
-	"github.com/cheggaaa/pb"
+	"golang.org/x/sync/errgroup"
 )
 
-func speedyProgressBar(bar *pb.ProgressBar) {
-	bar.SetUnits(pb.U_BYTES)
-	bar.SetRefreshRate(1 * time.Millisecond)
-	bar.NotPrint = true
-	bar.Format("[\x00=\x00>\x00-\x00]")
+// The following tests rarelly just happen. So we run them 100 times.
+
+func TestProgressTracking_open_close(t *testing.T) {
+	var bar *uiProgressBar
+
+	tracker := bar.TrackProgress("1,", 1, 42, ioutil.NopCloser(nil))
+	tracker.Close()
+
+	tracker = bar.TrackProgress("2,", 1, 42, ioutil.NopCloser(nil))
+	tracker.Close()
 }
 
-func TestStackableProgressBar_race(t *testing.T) {
-	bar := &StackableProgressBar{
-		ConfigProgressbarFN: speedyProgressBar,
-	}
+func TestProgressTracking_multi_open_close(t *testing.T) {
+	var bar *uiProgressBar
+	g := errgroup.Group{}
 
-	start42Fn := func() { bar.Start(42) }
-	finishFn := func() { bar.Finish() }
-	add21 := func() { bar.Add(21) }
-	// prefix := func() { bar.prefix() }
-
-	type fields struct {
-		pre   func()
-		calls []func()
-		post  func()
+	for i := 0; i < 100; i++ {
+		g.Go(func() error {
+			tracker := bar.TrackProgress("file,", 1, 42, ioutil.NopCloser(nil))
+			return tracker.Close()
+		})
 	}
-	tests := []struct {
-		name       string
-		fields     fields
-		iterations int
-	}{
-		{"all public", fields{nil, []func(){start42Fn, finishFn, add21, add21}, finishFn}, 300},
-		{"add", fields{start42Fn, []func(){add21}, finishFn}, 300},
-		{"add start", fields{start42Fn, []func(){start42Fn, add21}, finishFn}, 300},
+	if err := g.Wait(); err != nil {
+		t.Fatal(err)
 	}
+}
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			for i := 0; i < tt.iterations; i++ {
-				if tt.fields.pre != nil {
-					tt.fields.pre()
-				}
-				var startWg, endWg sync.WaitGroup
-				startWg.Add(1)
-				endWg.Add(len(tt.fields.calls))
-				for _, call := range tt.fields.calls {
-					call := call
-					go func() {
-						defer endWg.Done()
-						startWg.Wait()
-						call()
-					}()
-				}
-				startWg.Done() // everyone is initialized, let's unlock everyone at the same time.
-				// ....
-				endWg.Wait() // wait for all calls to return.
-				if tt.fields.post != nil {
-					tt.fields.post()
-				}
+func TestProgressTracking_races(t *testing.T) {
+	var bar *uiProgressBar
+	g := errgroup.Group{}
+
+	for i := 0; i < 100; i++ {
+		g.Go(func() error {
+			txt := []byte("foobarbaz dolores")
+			b := bytes.NewReader(txt)
+			tracker := bar.TrackProgress("file,", 1, 42, ioutil.NopCloser(b))
+
+			for i := 0; i < 42; i++ {
+				tracker.Read([]byte("i"))
 			}
+			return tracker.Close()
 		})
 	}
 
+	if err := g.Wait(); err != nil {
+		t.Fatal(err)
+	}
 }

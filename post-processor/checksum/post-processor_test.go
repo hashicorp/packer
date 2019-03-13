@@ -46,7 +46,6 @@ func TestChecksumSHA1(t *testing.T) {
 func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	// Create fake UI and Cache
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	// Create config for file builder
 	const fileConfig = `{"builders":[{"type":"file","target":"package.txt","content":"Hello world!"}]}`
@@ -68,7 +67,7 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	}
 
 	// Run the file builder
-	artifact, err := builder.Run(ui, nil, cache)
+	artifact, err := builder.Run(ui, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to build artifact: %s", err)
 	}

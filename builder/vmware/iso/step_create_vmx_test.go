@@ -174,8 +174,7 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	// and then finally build it
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
-	artifacts, err := b.Run(ui, cache)
+	artifacts, err := b.Run(ui)
 	if err != nil {
 		t.Fatalf("Failed to build artifact: %s", err)
 	}

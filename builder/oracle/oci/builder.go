@@ -36,7 +36,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverOCI(b.config)
 	if err != nil {
 		return nil, err

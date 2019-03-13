@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -123,14 +124,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You may either set global_id or source_path but not both"))
 		}
 		if strings.HasSuffix(b.config.SourceBox, ".box") {
-			b.config.SourceBox, err = common.ValidatedURL(b.config.SourceBox)
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
-			}
-			fileOK := common.FileExistsLocally(b.config.SourceBox)
-			if !fileOK {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Source file '%s' needs to exist at time of config validation!", b.config.SourceBox))
+			if _, err := os.Stat(b.config.SourceBox); err != nil {
+				packer.MultiErrorAppend(errs,
+					fmt.Errorf("Source box '%s' needs to exist at time of config validation! %v", b.config.SourceBox, err))
 			}
 		}
 	}
@@ -166,7 +162,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VirtualBox appliance.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	VagrantCWD, err := filepath.Abs(b.config.OutputDir)
 	if err != nil {
@@ -182,7 +178,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("config", b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
-	state.Put("cache", cache)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 

@@ -65,7 +65,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	computeClient, err := b.config.computeV2Client()
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing compute client: %s", err)

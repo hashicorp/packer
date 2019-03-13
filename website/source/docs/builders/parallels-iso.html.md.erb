@@ -35,7 +35,6 @@ self-install. Still, the example serves to show the basic configuration:
   "guest_os_type": "ubuntu",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
   "iso_checksum": "2cbe868812a871242cdcdd8f2fd6feb9",
-  "iso_checksum_type": "md5",
   "parallels_tools_flavor": "lin",
   "ssh_username": "packer",
   "ssh_password": "packer",
@@ -58,29 +57,9 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
+<%= partial "partials/builders/iso-config" %>
+
 ### Required:
-
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to
-    booting a virtual machine with the ISO attached. The type of the checksum is
-    specified with `iso_checksum_type`, documented below. At least one of
-    `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
-    over `iso_checksum_url` type.
-
--   `iso_checksum_type` (string) - The type of the checksum specified in
-    `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
-    "sha512" currently. While "none" will skip checksumming, this is not
-    recommended since ISO files are generally large and corruption does happen
-    from time to time.
-
--   `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
-    containing a checksum for the OS ISO file. At least one of `iso_checksum`
-    and `iso_checksum_url` must be defined. This will be ignored if
-    `iso_checksum` is non empty.
-
--   `iso_url` (string) - A URL to the ISO containing the installation image.
-    This URL can be either an HTTP URL or a file URL (or path to a file). If
-    this is an HTTP URL, Packer will download it and cache it between runs.
 
 -   `parallels_tools_flavor` (string) - The flavor of the Parallels Tools ISO to
     install into the VM. Valid values are "win", "lin", "mac", "os2"
@@ -162,19 +141,6 @@ builder.
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
-
--   `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to "iso".
-
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
-    original filename as its name.
-
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
-    Packer will try these in order. If anything goes wrong attempting to
-    download or while downloading a single URL, it will move on to the next. All
-    URLs must point to the same file (same checksum). By default this is empty
-    and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
 -   `memory` (number) - The amount of memory to use for building the VM in
     megabytes. Defaults to `512` megabytes.
