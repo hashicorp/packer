@@ -335,10 +335,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				return fmt.Errorf("Script disconnected unexpectedly. " +
 					"If you expected your script to disconnect, i.e. from a " +
 					"restart, you can try adding `\"expect_disconnect\": true` " +
-					"to the shell provisioner parameters.")
+					"or `\"valid_exit_codes\": [0, 2300218]` to the shell " +
+					"provisioner parameters.")
 			}
-		} else if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		} else if err := p.config.ValidExitCode(cmd.ExitStatus); err != nil {
+			return err
 		}
 
 		if !p.config.SkipClean {
