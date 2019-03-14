@@ -359,11 +359,6 @@ func (c *Core) init() error {
 				tryCount++
 				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v.Default)
 				continue
-
-				return fmt.Errorf(
-					// unexpected interpolation error: abort the run
-					"error interpolating default value for '%s': %s",
-					k, err)
 			default:
 				return fmt.Errorf(
 					// unexpected interpolation error: abort the run
