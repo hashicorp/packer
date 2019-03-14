@@ -15,9 +15,14 @@ import (
 // It sets the template_id state which is used for Artifact lookup.
 type stepConvertToTemplate struct{}
 
+type templateConverter interface {
+	ShutdownVm(*proxmox.VmRef) (string, error)
+	CreateTemplate(*proxmox.VmRef) error
+}
+
 func (s *stepConvertToTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(templateConverter)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
 	ui.Say("Stopping VM")
