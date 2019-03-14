@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -22,28 +23,10 @@ import (
 )
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// If true, the script contains binary and line endings will not be
-	// converted from Windows to Unix-style.
-	Binary bool
-
-	// An inline script to execute. Multiple strings are all executed
-	// in the context of a single shell.
-	Inline []string
+	shell.Provisioner `mapstructure:",squash"`
 
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
-
-	// The local path of the shell script to upload and execute.
-	Script string
-
-	// An array of multiple scripts to run.
-	Scripts []string
-
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	Vars []string `mapstructure:"environment_vars"`
 
 	// A duration of how long to pause after the provisioner
 	RawPauseAfter string `mapstructure:"pause_after"`
@@ -61,16 +44,6 @@ type Config struct {
 	// The remote file name of the local shell script.
 	// This defaults to script_nnn.sh
 	RemoteFile string `mapstructure:"remote_file"`
-
-	// The remote path where the local shell script will be uploaded to.
-	// This should be set to a writable file that is in a pre-existing directory.
-	// This defaults to remote_folder/remote_file
-	RemotePath string `mapstructure:"remote_path"`
-
-	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes, {{ .Vars }}
-	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand string `mapstructure:"execute_command"`
 
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
