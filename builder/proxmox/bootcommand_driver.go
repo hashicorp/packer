@@ -2,7 +2,6 @@ package proxmox
 
 import (
 	"fmt"
-	"strings"
 	"time"
 	"unicode"
 
@@ -83,14 +82,9 @@ func (p *proxmoxDriver) SendKey(key rune, action bootcommand.KeyAction) error {
 		return p.send(special)
 	}
 
-	const shiftFormat = "shift-%c"
-	const shiftedChars = "~!@#$%^&*()_+{}|:\"<>?" // Copied from bootcommand/driver.go
-
-	keyShift := unicode.IsUpper(key) || strings.ContainsRune(shiftedChars, key)
-
 	var keys string
-	if keyShift {
-		keys = fmt.Sprintf(shiftFormat, unicode.ToLower(key))
+	if unicode.IsUpper(key) {
+		keys = fmt.Sprintf("shift-%c", unicode.ToLower(key))
 	} else {
 		keys = fmt.Sprintf("%c", key)
 	}
