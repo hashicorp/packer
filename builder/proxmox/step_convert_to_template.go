@@ -20,6 +20,8 @@ type templateConverter interface {
 	CreateTemplate(*proxmox.VmRef) error
 }
 
+var _ templateConverter = &proxmox.Client{}
+
 func (s *stepConvertToTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("proxmoxClient").(templateConverter)

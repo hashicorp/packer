@@ -20,6 +20,8 @@ func (m commandTyperMock) MonitorCmd(ref *proxmox.VmRef, cmd string) (map[string
 	return m.monitorCmd(ref, cmd)
 }
 
+var _ commandTyper = commandTyperMock{}
+
 func TestTypeBootCommand(t *testing.T) {
 	cs := []struct {
 		name                 string
