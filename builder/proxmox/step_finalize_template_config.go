@@ -45,7 +45,7 @@ func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.St
 			return multistep.ActionHalt
 		}
 
-		if !strings.HasSuffix(vmParams["ide2"].(string), "media=cdrom") {
+		if vmParams["ide2"] == nil || !strings.HasSuffix(vmParams["ide2"].(string), "media=cdrom") {
 			err := fmt.Errorf("Cannot eject ISO from cdrom drive, ide2 is not present, or not a cdrom media")
 			state.Put("error", err)
 			ui.Error(err.Error())
