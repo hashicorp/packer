@@ -4,7 +4,7 @@ description: |
     multiple builders depending on the strategy you want to use to build the OMI.
 layout: docs
 page_title: 'Outscale OMI - Builders'
-sidebar_current: 'docs-builders-outscale'
+sidebar_current: 'docs-builders-osc'
 ---
 
 # Outscale OMI Builder
