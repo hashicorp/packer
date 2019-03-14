@@ -87,18 +87,6 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ElevatedExecuteCommand)
 	}
 
-	if p.config.ValidExitCodes == nil {
-		t.Fatalf("ValidExitCodes should not be nil")
-	}
-	if p.config.ValidExitCodes != nil {
-		expCodes := []int{0}
-		for i, v := range p.config.ValidExitCodes {
-			if v != expCodes[i] {
-				t.Fatalf("Expected ValidExitCodes don't match actual")
-			}
-		}
-	}
-
 	if p.config.ElevatedEnvVarFormat != `$env:%s="%s"; ` {
 		t.Fatalf(`Default command should be powershell '$env:%%s="%%s"; ', but got %s`, p.config.ElevatedEnvVarFormat)
 	}
