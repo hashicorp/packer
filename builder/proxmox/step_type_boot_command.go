@@ -28,10 +28,14 @@ type bootCommandTemplateData struct {
 	HTTPPort uint
 }
 
+type commandTyper interface {
+	MonitorCmd(*proxmox.VmRef, string) (map[string]interface{}, error)
+}
+
 func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(commandTyper)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
 	if len(s.BootCommand) == 0 {
