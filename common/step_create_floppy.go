@@ -301,7 +301,10 @@ func (s *StepCreateFloppy) Add(dircache directoryCache, src string) error {
 func (s *StepCreateFloppy) Cleanup(multistep.StateBag) {
 	if s.floppyPath != "" {
 		log.Printf("Deleting floppy disk: %s", s.floppyPath)
-		os.Remove(s.floppyPath)
+		err := os.Remove(s.floppyPath)
+		if err != nil {
+			log.Printf("Failed to delete floppy disk: %v", err)
+		}
 	}
 }
 
