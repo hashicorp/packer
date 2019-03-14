@@ -96,10 +96,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Vars = make([]string, 0)
 	}
 
-	if len(p.config.ValidExitCodes) == 0 {
-		p.config.ValidExitCodes = []int{0}
-	}
-
 	var errs error
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
 		errs = packer.MultiErrorAppend(errs,
@@ -226,17 +222,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Close the original file since we copied it
 		f.Close()
 
-		// Check exit code against allowed codes (likely just 0)
-		validExitCode := false
-		for _, v := range p.config.ValidExitCodes {
-			if cmd.ExitStatus == v {
-				validExitCode = true
-			}
-		}
-		if !validExitCode {
-			return fmt.Errorf(
-				"Script exited with non-zero exit status: %d. Allowed exit codes are: %v",
-				cmd.ExitStatus, p.config.ValidExitCodes)
+		if err := p.config.ValidExitCode(cmd.ExitStatus); err != nil {
+			return err
 		}
 	}
 
