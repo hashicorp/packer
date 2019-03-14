@@ -170,7 +170,7 @@ builder.
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
 
-- `source_omi_filter` (object) - Filters used to populate the `source_ami` field.
+- `source_omi_filter` (object) - Filters used to populate the `source_omi` field.
   - `filters` (map of strings) - filters used to select a `source_omi`.
   - `owners` (array of strings) - Filters the images by their owner. You may specify one or more Outscale account IDs, "self" (which will use the   account whose credentials you are using to run Packer). This option is required for security reasons.
   
