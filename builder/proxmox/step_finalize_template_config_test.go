@@ -18,9 +18,11 @@ type finalizerMock struct {
 func (m finalizerMock) GetVmConfig(*proxmox.VmRef) (map[string]interface{}, error) {
 	return m.getConfig()
 }
-func (m finalizerMock) SetVmConfig(vmref *proxmox.VmRef, c map[string]interface{}) (string, error) {
+func (m finalizerMock) SetVmConfig(vmref *proxmox.VmRef, c map[string]interface{}) (interface{}, error) {
 	return m.setConfig(c)
 }
+
+var _ templateFinalizer = finalizerMock{}
 
 func TestTemplateFinalize(t *testing.T) {
 	cs := []struct {

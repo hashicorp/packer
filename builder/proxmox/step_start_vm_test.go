@@ -14,14 +14,14 @@ type startedVMCleanerMock struct {
 	deleteVm func() (string, error)
 }
 
-var _ startedVMCleaner = &startedVMCleanerMock{}
-
 func (m startedVMCleanerMock) StopVm(*proxmox.VmRef) (string, error) {
 	return m.stopVm()
 }
 func (m startedVMCleanerMock) DeleteVm(*proxmox.VmRef) (string, error) {
 	return m.deleteVm()
 }
+
+var _ startedVMCleaner = &startedVMCleanerMock{}
 
 func TestCleanupStartVM(t *testing.T) {
 	cs := []struct {
