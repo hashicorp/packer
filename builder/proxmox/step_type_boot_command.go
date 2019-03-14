@@ -32,6 +32,8 @@ type commandTyper interface {
 	MonitorCmd(*proxmox.VmRef, string) (map[string]interface{}, error)
 }
 
+var _ commandTyper = &proxmox.Client{}
+
 func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)

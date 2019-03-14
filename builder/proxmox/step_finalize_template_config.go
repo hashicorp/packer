@@ -17,8 +17,10 @@ type stepFinalizeTemplateConfig struct{}
 
 type templateFinalizer interface {
 	GetVmConfig(*proxmox.VmRef) (map[string]interface{}, error)
-	SetVmConfig(*proxmox.VmRef, map[string]interface{}) (string, error)
+	SetVmConfig(*proxmox.VmRef, map[string]interface{}) (interface{}, error)
 }
+
+var _ templateFinalizer = &proxmox.Client{}
 
 func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)

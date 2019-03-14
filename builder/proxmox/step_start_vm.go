@@ -114,6 +114,8 @@ type startedVMCleaner interface {
 	DeleteVm(*proxmox.VmRef) (string, error)
 }
 
+var _ startedVMCleaner = &proxmox.Client{}
+
 func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 	vmRefUntyped, ok := state.GetOk("vmRef")
 	// If not ok, we probably errored out before creating the VM

@@ -22,6 +22,8 @@ func (m converterMock) CreateTemplate(r *proxmox.VmRef) error {
 	return m.createTemplate(r)
 }
 
+var _ templateConverter = converterMock{}
+
 func TestConvertToTemplate(t *testing.T) {
 	cs := []struct {
 		name                     string
