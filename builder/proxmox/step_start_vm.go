@@ -109,6 +109,11 @@ func setDeviceParamIfDefined(dev proxmox.QemuDevice, key, value string) {
 	}
 }
 
+type startedVMCleaner interface {
+	StopVm(*proxmox.VmRef) (string, error)
+	DeleteVm(*proxmox.VmRef) (string, error)
+}
+
 func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 	vmRefUntyped, ok := state.GetOk("vmRef")
 	// If not ok, we probably errored out before creating the VM
@@ -123,7 +128,7 @@ func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(startedVMCleaner)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Destroy the server we just created
