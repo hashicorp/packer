@@ -1,0 +1,11 @@
+{
+    "variables": {
+    	"foo":  "bar",
+		"bar":  "{{user `foo`}}",
+		"baz":  "{{user `bar`}}baz",
+		"bang": "bang{{user `baz`}}"
+	},
+	"builders": [
+        {"type": "foo"}
+    ]
+}
