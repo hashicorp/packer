@@ -1,4 +1,4 @@
-// Package shell defines conde that is common in shells
+// Package shell defines code that is common in shells
 package shell
 
 import "github.com/hashicorp/packer/common"
