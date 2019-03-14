@@ -11,14 +11,14 @@ import (
 )
 
 type proxmoxDriver struct {
-	client     *proxmox.Client
+	client     commandTyper
 	vmRef      *proxmox.VmRef
 	specialMap map[string]string
 	runeMap    map[rune]string
 	interval   time.Duration
 }
 
-func NewProxmoxDriver(c *proxmox.Client, vmRef *proxmox.VmRef, interval time.Duration) *proxmoxDriver {
+func NewProxmoxDriver(c commandTyper, vmRef *proxmox.VmRef, interval time.Duration) *proxmoxDriver {
 	// Mappings for packer shorthand to qemu qkeycodes
 	sMap := map[string]string{
 		"spacebar": "spc",
@@ -90,7 +90,7 @@ func (p *proxmoxDriver) SendKey(key rune, action bootcommand.KeyAction) error {
 
 	var keys string
 	if keyShift {
-		keys = fmt.Sprintf(shiftFormat, key)
+		keys = fmt.Sprintf(shiftFormat, unicode.ToLower(key))
 	} else {
 		keys = fmt.Sprintf("%c", key)
 	}
