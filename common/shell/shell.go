@@ -3,7 +3,7 @@ package shell
 
 import "github.com/hashicorp/packer/common"
 
-// Provisioner contains common fields to all provisioners
+// Provisioner contains common fields to all shell provisioners
 type Provisioner struct {
 	common.PackerConfig `mapstructure:",squash"`
 
