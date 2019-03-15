@@ -20,13 +20,11 @@ func TestArtifactId(t *testing.T) {
 	a := &artifact{
 		OutputDir: "/my/dir",
 		BoxName:   "package.box",
+		Provider:  "virtualbox",
 	}
 
-	expected := "/my/dir/package.box"
-	if runtime.GOOS == "windows" {
-		expected = strings.Replace(expected, "/", "\\", -1)
-	}
-	if strings.Compare(a.Id(), expected) != 0 {
+	expected := "virtualbox"
+	if a.Id() != expected {
 		t.Fatalf("artifact ID should match: expected: %s received: %s", expected, a.Id())
 	}
 }
@@ -35,8 +33,9 @@ func TestArtifactString(t *testing.T) {
 	a := &artifact{
 		OutputDir: "/my/dir",
 		BoxName:   "package.box",
+		Provider:  "virtualbox",
 	}
-	expected := "Vagrant box is /my/dir/package.box"
+	expected := "Vagrant box 'package.box' for 'virtualbox' provider"
 	if runtime.GOOS == "windows" {
 		expected = strings.Replace(expected, "/", "\\", -1)
 	}
