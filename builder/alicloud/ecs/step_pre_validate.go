@@ -37,7 +37,7 @@ func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	if len(images) > 0 {
-		err := fmt.Errorf("Error: name conflicts with an existing alicloud image: %s", images[0].ImageId)
+		err := fmt.Errorf("Error: Image Name: '%s' is used by an existing alicloud image: %s", images[0].ImageName, images[0].ImageId)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
