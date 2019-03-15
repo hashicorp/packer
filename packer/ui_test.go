@@ -42,6 +42,7 @@ type testTTY struct {
 	say string
 }
 
+func (tty *testTTY) Close() error { return nil }
 func (tty *testTTY) ReadString() (string, error) {
 	return tty.say, nil
 }
