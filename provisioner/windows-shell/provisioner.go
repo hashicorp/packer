@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -25,29 +26,7 @@ const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 var retryableSleep = 2 * time.Second
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// If true, the script contains binary and line endings will not be
-	// converted from Windows to Unix-style.
-	Binary bool
-
-	// An inline script to execute. Multiple strings are all executed
-	// in the context of a single shell.
-	Inline []string
-
-	// The local path of the shell script to upload and execute.
-	Script string
-
-	// An array of multiple scripts to run.
-	Scripts []string
-
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	Vars []string `mapstructure:"environment_vars"`
-
-	// The remote path where the local shell script will be uploaded to.
-	// This should be set to a writable file that is in a pre-existing directory.
-	RemotePath string `mapstructure:"remote_path"`
+	shell.Provisioner `mapstructure:",squash"`
 
 	// The command used to execute the script. The '{{ .Path }}' variable
 	// should be used to specify where the script goes, {{ .Vars }}
@@ -243,8 +222,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Close the original file since we copied it
 		f.Close()
 
-		if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		if err := p.config.ValidExitCode(cmd.ExitStatus); err != nil {
+			return err
 		}
 	}
 
