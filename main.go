@@ -192,6 +192,8 @@ func wrappedMain() int {
 			TTY, err = tty.Open()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+			} else {
+				defer TTY.Close()
 			}
 		}
 		ui = &packer.BasicUi{
