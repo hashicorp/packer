@@ -27,7 +27,7 @@ You can change the behavior so that the builder doesn't destroy the box by
 setting the `teardown_method` option. You can change the behavior so the builder
 doesn't package it (not all provisioners support the `vagrant package` command)
 by setting the `skip package` option. You can also change the behavior so that
-rather than inititalizing a new Vagrant workspace, you use an already defined
+rather than initializing a new Vagrant workspace, you use an already defined
 one, by using `global_id` instead of `source_box`.
 
 ## Configuration Reference
@@ -61,6 +61,10 @@ one, by using `global_id` instead of `source_box`.
     to Vagrant, this is the name to give it. If left blank, will default to
     "packer_" plus your buildname.
 
+-   `provider` (string) - The vagrant [provider](docs/post-processors/vagrant.html).
+    This parameter is required to use vagrant builder with the `vagrant-cloud`
+    post-processor. Defaults to unset.
+
 -   `checksum` (string) - The checksum for the .box file. The type of the
     checksum is specified with `checksum_type`, documented below.
 
@@ -76,8 +80,8 @@ one, by using `global_id` instead of `source_box`.
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
     `synced_folder`
 
--   `skip_add` (string) - Don't call "vagrant add" to add the box to your local
-    environment; this is necesasry if you want to launch a box that is already
+-   `skip_add` (bool) - Don't call "vagrant add" to add the box to your local
+    environment; this is necessary if you want to launch a box that is already
     added to your vagrant environment.
 
 -   `teardown_method` (string) - Whether to halt, suspend, or destroy the box when

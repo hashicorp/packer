@@ -1,7 +1,7 @@
 // vagrant_cloud implements the packer.PostProcessor interface and adds a
 // post-processor that uploads artifacts from the vagrant post-processor
-// to Vagrant Cloud (vagrantcloud.com) or manages self hosted boxes on the
-// Vagrant Cloud
+// and vagrant builder to Vagrant Cloud (vagrantcloud.com) or manages
+// self hosted boxes on the Vagrant Cloud
 package vagrantcloud
 
 import (
@@ -16,6 +16,11 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
+
+var builtins = map[string]string{
+	"mitchellh.post-processor.vagrant": "vagrant",
+	"vagrant":                          "vagrant",
+}
 
 const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
 
@@ -113,16 +118,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	// Only accepts input from the vagrant post-processor
-	if artifact.BuilderId() != "mitchellh.post-processor.vagrant" {
+	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf(
-			"Unknown artifact type, requires box from vagrant post-processor: %s", artifact.BuilderId())
+			"Unknown artifact type, requires box from vagrant post-processor or vagrant builder: %s", artifact.BuilderId())
 	}
 
 	// We assume that there is only one .box file to upload
 	if !strings.HasSuffix(artifact.Files()[0], ".box") {
 		return nil, false, fmt.Errorf(
-			"Unknown files in artifact from vagrant post-processor: %s", artifact.Files())
+			"Unknown files in artifact, vagrant box is required: %s", artifact.Files())
 	}
 
 	if p.warnAtlasToken {
