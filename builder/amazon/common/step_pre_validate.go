@@ -90,7 +90,7 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	if len(resp.Images) > 0 {
-		err := fmt.Errorf("Error: name conflicts with an existing AMI: %s", *resp.Images[0].ImageId)
+		err := fmt.Errorf("Error: AMI Name: '%s' is used by an existing AMI: %s", *resp.Images[0].Name, *resp.Images[0].ImageId)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
