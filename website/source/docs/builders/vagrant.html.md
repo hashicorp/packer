@@ -78,7 +78,17 @@ one, by using `global_id` instead of `source_box`.
     vagrantfile. Our default template can be found
     [here](https://github.com/hashicorp/packer/blob/a6d1d852bb0643e3593cc5d3dfe5ed80c4409b65/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
-    `synced_folder`
+    `synced_folder`.
+
+    You must provide a template if your default vagrant provider is Hyper-V.
+    Below is a Hyper-V compatible template.
+
+    ```ruby
+    Vagrant.configure("2") do |config|
+        config.vm.box = "{{ .BoxName }}"
+        config.vm.network 'public_network', bridge: 'Default Switch'
+    end
+    ```
 
 -   `skip_add` (bool) - Don't call "vagrant add" to add the box to your local
     environment; this is necessary if you want to launch a box that is already
