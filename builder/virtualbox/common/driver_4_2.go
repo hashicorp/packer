@@ -241,6 +241,11 @@ func (d *VBox42Driver) Version() (string, error) {
 	return matches[0][1], nil
 }
 
+// LoadSnapshots load the snapshots for a VM instance
+func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
+	return nil, nil
+}
+
 func (d *VBox42Driver) CreateSnapshot(vmname string, snapshotName string) error {
 	log.Printf("Executing CreateSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
 
