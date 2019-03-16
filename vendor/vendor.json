@@ -231,6 +231,12 @@
 			"revisionTime": "2018-01-10T05:50:12Z"
 		},
 		{
+			"checksumSHA1": "xp5QPaPy/Viwiv5P8lsJVYlaQ+U=",
+			"path": "github.com/Telmate/proxmox-api-go/proxmox",
+			"revision": "7402b5d3034a3e4dea5af6afdfd106a2e353f2da",
+			"revisionTime": "2019-03-16T14:21:38Z"
+		},
+		{
 			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
 			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
 			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
