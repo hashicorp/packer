@@ -120,7 +120,7 @@ func parseSSHConfig(lines []string, value string) string {
 			out = line[index+len(value):]
 		}
 	}
-	return out
+	return strings.Trim(out, "\r\n")
 }
 
 func yesno(yn string) bool {
