@@ -28,6 +28,7 @@ type Config struct {
 	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
+	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
 
 	Checksum                string   `mapstructure:"checksum"`
 	ChecksumType            string   `mapstructure:"checksum_type"`
@@ -97,6 +98,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(&c.ctx)...)
 
 	c.ChecksumType = strings.ToLower(c.ChecksumType)
 	c.Checksum = strings.ToLower(c.Checksum)
