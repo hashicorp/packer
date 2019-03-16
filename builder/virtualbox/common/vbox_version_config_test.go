@@ -62,3 +62,18 @@ func TestVBoxVersionConfigPrepare_empty(t *testing.T) {
 		t.Fatalf("bad value: %s", *c.VBoxVersionFile)
 	}
 }
+
+func TestVBoxVersionConfigPrepare_communicator(t *testing.T) {
+	var c *VBoxVersionConfig
+	var errs []error
+
+	// Test with 'none' communicator and non-empty virtualbox_version_file
+	c = new(VBoxVersionConfig)
+	filename := "test"
+	c.VBoxVersionFile = &filename
+	c.Communicator = "none"
+	errs = c.Prepare(testConfigTemplate(t))
+	if len(errs) == 0 {
+		t.Fatalf("should have an error")
+	}
+}
