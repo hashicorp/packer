@@ -22,15 +22,19 @@ func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	if s.TargetSnapshot != "" {
 		time.Sleep(10 * time.Second) // Wait after the Vm has been shutdown, otherwise creating the snapshot might make the VM unstartable
 		ui.Say(fmt.Sprintf("Creating snapshot %s on virtual machine %s", s.TargetSnapshot, s.Name))
-		snapshotExists, err := driver.SnapshotExists(s.Name, s.TargetSnapshot)
+		snapshotTree, err := driver.LoadSnapshots(s.Name)
 		if err != nil {
-			err = fmt.Errorf("Failed to check for snapshot: %s", err)
+			err = fmt.Errorf("Failed to load snapshots for VM %s: %s", s.Name, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
-		} else if snapshotExists {
+		}
+
+		currentSnapshot := snapshotTree.GetCurrentSnapshot()
+		targetSnapshot := currentSnapshot.GetChildWithName(s.TargetSnapshot)
+		if nil != targetSnapshot {
 			log.Printf("Deleting existing target snapshot %s", s.TargetSnapshot)
-			err = driver.DeleteSnapshot(s.Name, s.TargetSnapshot)
+			err = driver.DeleteSnapshot(s.Name, targetSnapshot)
 			if nil != err {
 				err = fmt.Errorf("Unable to delete snapshot %s from VM %s: %s", s.TargetSnapshot, s.Name, err)
 				state.Put("error", err)
