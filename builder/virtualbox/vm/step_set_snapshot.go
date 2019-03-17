@@ -19,36 +19,43 @@ type StepSetSnapshot struct {
 func (s *StepSetSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-	hasSnapshots, err := driver.HasSnapshots(s.Name)
+	snapshotTree, err := driver.LoadSnapshots(s.Name)
 	if err != nil {
-		err := fmt.Errorf("Error checking for snapshots VM: %s", err)
+		err := fmt.Errorf("Error loading snapshots for VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	} else if hasSnapshots {
-		currentSnapshot, err := driver.GetCurrentSnapshot(s.Name)
-		if err != nil {
-			err := fmt.Errorf("Unable to get current snapshot for VM: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		s.revertToSnapshot = currentSnapshot
 	}
+
 	if s.AttachSnapshot != "" {
-		if !hasSnapshots {
+		if nil == snapshotTree {
 			err := fmt.Errorf("Unable to attach snapshot on VM %s when no snapshots exist", s.Name)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+		currentSnapshot := snapshotTree.GetCurrentSnapshot()
+		s.revertToSnapshot = currentSnapshot.UUID
 		ui.Say(fmt.Sprintf("Attaching snapshot %s on virtual machine %s", s.AttachSnapshot, s.Name))
-		err = driver.SetSnapshot(s.Name, s.AttachSnapshot)
-		if err != nil {
-			err := fmt.Errorf("Unable to set snapshot for VM: %s", err)
+		candidateSnapshots := snapshotTree.GetSnapshotsByName(s.AttachSnapshot)
+		if 0 <= len(candidateSnapshots) {
+			err := fmt.Errorf("Snapshot %s not found on VM %s", s.AttachSnapshot, s.Name)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		} else if 1 > len(candidateSnapshots) {
+			err := fmt.Errorf("More than one Snapshot %s found on VM %s", s.AttachSnapshot, s.Name)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		} else {
+			err = driver.SetSnapshot(s.Name, candidateSnapshots[0])
+			if err != nil {
+				err := fmt.Errorf("Unable to set snapshot for VM: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 	return multistep.ActionContinue
@@ -63,7 +70,15 @@ func (s *StepSetSnapshot) Cleanup(state multistep.StateBag) {
 			return
 		} else {
 			ui.Say(fmt.Sprintf("Reverting to snapshot %s on virtual machine %s", s.revertToSnapshot, s.Name))
-			err := driver.SetSnapshot(s.Name, s.revertToSnapshot)
+			snapshotTree, err := driver.LoadSnapshots(s.Name)
+			revertTo := snapshotTree.GetSnapshotByUUID(s.revertToSnapshot)
+			if nil == revertTo {
+				err := fmt.Errorf("Snapshot with UUID %s not found for VM %s", s.revertToSnapshot, s.Name)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return
+			}
+			err = driver.SetSnapshot(s.Name, revertTo)
 			if err != nil {
 				err := fmt.Errorf("Unable to set snapshot for VM: %s", err)
 				state.Put("error", err)

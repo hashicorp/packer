@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -11,8 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-collections/collections/stack"
 	versionUtil "github.com/hashicorp/go-version"
-
 	packer "github.com/hashicorp/packer/common"
 )
 
@@ -178,6 +179,11 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
+	_, err := d.VBoxManageWithOutput(args...)
+	return err
+}
+
+func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	var stdout, stderr bytes.Buffer
 
 	log.Printf("Executing VBoxManage: %#v", args)
@@ -205,7 +211,7 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
-	return err
+	return stdoutString, err
 }
 
 func (d *VBox42Driver) Verify() error {
@@ -243,89 +249,133 @@ func (d *VBox42Driver) Version() (string, error) {
 
 // LoadSnapshots load the snapshots for a VM instance
 func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
-	return nil, nil
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+	log.Printf("Executing LoadSnapshots: VM: %s", vmName)
+
+	stdoutString, err := d.VBoxManageWithOutput("snapshot", vmName, "list", "--machinereadable")
+	if nil != err {
+		return nil, err
+	}
+
+	var rootNode *VBoxSnapshot
+	if stdoutString != "This machine does not have any snapshots" {
+		scanner := bufio.NewScanner(strings.NewReader(stdoutString))
+		SnapshotNamePartsRe := regexp.MustCompile("Snapshot(?P<Type>Name|UUID)(?P<Path>(-[1-9]+)*)=\"(?P<Value>[^\"]*)\"")
+		var currentIndicator string
+		parentStack := stack.New()
+		var node *VBoxSnapshot
+		for scanner.Scan() {
+			txt := scanner.Text()
+			idx := strings.Index(txt, "=")
+			if idx > 0 {
+				if strings.HasPrefix(txt, "Current") {
+					node.IsCurrent = true
+				} else {
+					matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
+					log.Printf("************ Snapshot %s name parts", txt)
+					log.Printf("Matches %#v\n", matches)
+					log.Printf("Node %s\n", matches[0])
+					log.Printf("Type %s\n", matches[1])
+					log.Printf("Path %s\n", matches[2])
+					log.Printf("Leaf %s\n", matches[3])
+					log.Printf("Value %s\n", matches[4])
+					if matches[1] == "Name" {
+						if nil == rootNode {
+							node = new(VBoxSnapshot)
+							rootNode = node
+							currentIndicator = matches[2]
+						} else {
+							pathLenCur := strings.Count(currentIndicator, "-")
+							pathLen := strings.Count(matches[2], "-")
+							if pathLen > pathLenCur {
+								currentIndicator = matches[2]
+								parentStack.Push(node)
+							} else if pathLen < pathLenCur {
+								for i := 0; i < pathLenCur-1; i++ {
+									parentStack.Pop()
+								}
+							}
+							node = new(VBoxSnapshot)
+							parent := parentStack.Peek().(*VBoxSnapshot)
+							if nil != parent {
+								parent.Children = append(parent.Children, node)
+							}
+						}
+						node.Name = matches[4]
+					} else if matches[1] == "UUID" {
+						node.UUID = matches[4]
+					}
+				}
+			} else {
+				log.Printf("Invalid key,value pair [%s]", txt)
+			}
+		}
+	}
+
+	return rootNode, nil
 }
 
 func (d *VBox42Driver) CreateSnapshot(vmname string, snapshotName string) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
 	log.Printf("Executing CreateSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
 
 	return d.VBoxManage("snapshot", vmname, "take", snapshotName)
 }
 
 func (d *VBox42Driver) HasSnapshots(vmname string) (bool, error) {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
 	log.Printf("Executing HasSnapshots: VM: %s", vmname)
 
-	var stdout, stderr bytes.Buffer
-	var hasSnapshots = false
-
-	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
-
-	if _, ok := err.(*exec.ExitError); ok {
-		if stdoutString != "This machine does not have any snapshots" {
-			err = fmt.Errorf("VBoxManage error: %s", stderrString)
-		}
-	} else {
-		hasSnapshots = true
+	sn, err := d.LoadSnapshots(vmname)
+	if nil != err {
+		return false, err
 	}
-
-	return hasSnapshots, err
+	return nil != sn, nil
 }
 
-func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (string, error) {
+func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (*VBoxSnapshot, error) {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
 	log.Printf("Executing GetCurrentSnapshot: VM: %s", vmname)
 
-	var stdout, stderr bytes.Buffer
-
-	cmd := exec.Command(d.VBoxManagePath, "snapshot", vmname, "list", "--machinereadable")
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
-
-	if _, ok := err.(*exec.ExitError); ok {
-		if stdoutString == "This machine does not have any snapshots" {
-			return "", nil
-		} else {
-			return "", (fmt.Errorf("VBoxManage error: %s", stderrString))
-		}
+	sn, err := d.LoadSnapshots(vmname)
+	if nil != err {
+		return nil, err
 	}
-
-	CurrentSnapshotNameRe := regexp.MustCompile("CurrentSnapshotName=\"(?P<snapshotName>[^\"]*)\"")
-
-	for _, line := range strings.Split(stdout.String(), "\n") {
-		result := CurrentSnapshotNameRe.FindStringSubmatch(line)
-		if len(result) > 1 {
-			return result[1], nil
-		}
-	}
-
-	return "", (fmt.Errorf("VBoxManage unable to find current snapshot name"))
+	return sn.GetCurrentSnapshot(), nil
 }
 
-func (d *VBox42Driver) SetSnapshot(vmname string, snapshotName string) error {
-	log.Printf("Executing SetSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
-
-	var err error
-	if snapshotName == "" {
-		err = d.VBoxManage("snapshot", vmname, "restorecurrent")
-	} else {
-		err = d.VBoxManage("snapshot", vmname, "restore", snapshotName)
+func (d *VBox42Driver) SetSnapshot(vmname string, sn *VBoxSnapshot) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
 	}
-	return err
+	if nil == sn {
+		panic("Argument null exception: sn")
+	}
+	log.Printf("Executing SetSnapshot: VM: %s, SnapshotName %s", vmname, sn.UUID)
+
+	return d.VBoxManage("snapshot", vmname, "restore", sn.UUID)
 }
 
-func (d *VBox42Driver) DeleteSnapshot(vmname string, snapshotName string) error {
-	return d.VBoxManage("snapshot", vmname, "delete", snapshotName)
+func (d *VBox42Driver) DeleteSnapshot(vmname string, sn *VBoxSnapshot) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	if nil == sn {
+		panic("Argument null exception: sn")
+	}
+	log.Printf("Executing DeleteSnapshot: VM: %s, SnapshotName %s", vmname, sn.UUID)
+	return d.VBoxManage("snapshot", vmname, "delete", sn.UUID)
 }
 
+/*
 func (d *VBox42Driver) SnapshotExists(vmname string, snapshotName string) (bool, error) {
 	log.Printf("Executing SnapshotExists: VM %s, SnapshotName %s", vmname, snapshotName)
 
@@ -412,3 +462,4 @@ func (d *VBox42Driver) GetParentSnapshot(vmname string, snapshotName string) (st
 	}
 	return "", nil
 }
+*/

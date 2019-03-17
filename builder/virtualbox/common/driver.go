@@ -42,6 +42,7 @@ type Driver interface {
 	SuppressMessages() error
 
 	// VBoxManage executes the given VBoxManage command
+	// and returns the stdout channel as string
 	VBoxManage(...string) error
 
 	// Verify checks to make sure that this driver should function
@@ -52,26 +53,24 @@ type Driver interface {
 	// Version reads the version of VirtualBox that is installed.
 	Version() (string, error)
 
-	//
+	// LoadSnapshots Loads all defined snapshots for a vm.
+	// if no snapshots are defined nil will be returned
+	LoadSnapshots(string) (*VBoxSnapshot, error)
+
+	// CreateSnapshot Creates a snapshot for a vm with a given name
 	CreateSnapshot(string, string) error
 
-	//
+	// HasSnapshots tests if a vm has snapshots
 	HasSnapshots(string) (bool, error)
 
-	//
-	GetCurrentSnapshot(string) (string, error)
+	// GetCurrentSnapshot Returns the current snapshot for a vm
+	GetCurrentSnapshot(string) (*VBoxSnapshot, error)
 
-	//
-	SetSnapshot(string, string) error
+	// SetSnapshot sets the for a vm
+	SetSnapshot(string, *VBoxSnapshot) error
 
-	//
-	DeleteSnapshot(string, string) error
-
-	//
-	SnapshotExists(string, string) (bool, error)
-
-	//
-	GetParentSnapshot(string, string) (string, error)
+	// DeleteSnapshot deletes the specified snapshot from a vm
+	DeleteSnapshot(string, *VBoxSnapshot) error
 }
 
 func NewDriver() (Driver, error) {
