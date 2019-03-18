@@ -11,8 +11,8 @@ import (
 type SSHConfig struct {
 	Comm communicator.Config `mapstructure:",squash"`
 
-	SSHHostPortMin    int  `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    int  `mapstructure:"ssh_host_port_max"`
+	SSHHostPortMin    uint `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax    uint `mapstructure:"ssh_host_port_max"`
 	SSHSkipNatMapping bool `mapstructure:"ssh_skip_nat_mapping"`
 
 	// These are deprecated, but we keep them around for BC

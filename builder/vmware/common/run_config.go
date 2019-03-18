@@ -10,8 +10,8 @@ type RunConfig struct {
 	Headless bool `mapstructure:"headless"`
 
 	VNCBindAddress     string `mapstructure:"vnc_bind_address"`
-	VNCPortMin         int    `mapstructure:"vnc_port_min"`
-	VNCPortMax         int    `mapstructure:"vnc_port_max"`
+	VNCPortMin         uint   `mapstructure:"vnc_port_min"`
+	VNCPortMax         uint   `mapstructure:"vnc_port_max"`
 	VNCDisablePassword bool   `mapstructure:"vnc_disable_password"`
 }
 

@@ -37,7 +37,7 @@ type Config struct {
 	Network                string   `mapstructure:"network"`
 	Project                string   `mapstructure:"project"`
 	PublicIPAddress        string   `mapstructure:"public_ip_address"`
-	PublicPort             int      `mapstructure:"public_port"`
+	PublicPort             uint     `mapstructure:"public_port"`
 	SecurityGroups         []string `mapstructure:"security_groups"`
 	ServiceOffering        string   `mapstructure:"service_offering"`
 	PreventFirewallChanges bool     `mapstructure:"prevent_firewall_changes"`

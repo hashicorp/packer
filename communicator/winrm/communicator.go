@@ -27,7 +27,7 @@ type Communicator struct {
 func New(config *Config) (*Communicator, error) {
 	endpoint := &winrm.Endpoint{
 		Host:     config.Host,
-		Port:     config.Port,
+		Port:     int(config.Port), // it's a uint
 		HTTPS:    config.Https,
 		Insecure: config.Insecure,
 

@@ -23,8 +23,8 @@ import (
 //   http_port int - The port the HTTP server started on.
 type StepHTTPServer struct {
 	HTTPDir     string
-	HTTPPortMin int
-	HTTPPortMax int
+	HTTPPortMin uint
+	HTTPPortMax uint
 
 	l *net.Listener
 }

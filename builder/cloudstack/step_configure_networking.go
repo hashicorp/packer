@@ -13,8 +13,8 @@ import (
 )
 
 type stepSetupNetworking struct {
-	privatePort int
-	publicPort  int
+	privatePort uint
+	publicPort  uint
 }
 
 func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -36,7 +36,7 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 	} else {
 		// Generate a random public port used to configure our port forward.
 		rand.Seed(time.Now().UnixNano())
-		s.publicPort = 50000 + rand.Intn(10000)
+		s.publicPort = uint(50000 + rand.Intn(10000))
 	}
 	state.Put("commPort", s.publicPort)
 
@@ -99,9 +99,9 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 	ui.Message("Creating port forward...")
 	p := client.Firewall.NewCreatePortForwardingRuleParams(
 		config.PublicIPAddress,
-		s.privatePort,
+		int(s.privatePort),
 		"TCP",
-		s.publicPort,
+		int(s.publicPort),
 		instanceID,
 	)
 
@@ -143,8 +143,8 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 		p.SetAclid(network.Aclid)
 		p.SetAction("allow")
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.privatePort)
-		p.SetEndport(s.privatePort)
+		p.SetStartport(int(s.privatePort))
+		p.SetEndport(int(s.privatePort))
 		p.SetTraffictype("ingress")
 
 		// Create the network ACL rule.
@@ -166,8 +166,8 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 
 		// Configure the firewall rule.
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.publicPort)
-		p.SetEndport(s.publicPort)
+		p.SetStartport(int(s.publicPort))
+		p.SetEndport(int(s.publicPort))
 
 		fwRule, err := client.Firewall.CreateFirewallRule(p)
 		if err != nil {
