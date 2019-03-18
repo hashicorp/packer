@@ -48,6 +48,9 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	}.Listen(ctx)
 
 	if err != nil {
+		err := fmt.Errorf("Error finding port: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
