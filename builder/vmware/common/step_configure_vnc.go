@@ -18,12 +18,12 @@ import (
 //   vmx_path string
 //
 // Produces:
-//   vnc_port int - The port that VNC is configured to listen on.
+//   vnc_port uint - The port that VNC is configured to listen on.
 type StepConfigureVNC struct {
 	Enabled            bool
 	VNCBindAddress     string
-	VNCPortMin         int
-	VNCPortMax         int
+	VNCPortMin         uint
+	VNCPortMax         uint
 	VNCDisablePassword bool
 
 	l *net.Listener
@@ -31,7 +31,7 @@ type StepConfigureVNC struct {
 
 type VNCAddressFinder interface {
 	// UpdateVMX, sets driver specific VNC values to VMX data.
-	UpdateVMX(vncAddress, vncPassword string, vncPort int, vmxData map[string]string)
+	UpdateVMX(vncAddress, vncPassword string, vncPort uint, vmxData map[string]string)
 }
 
 func VNCPassword(skipPassword bool) string {
@@ -105,12 +105,14 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
+	state.Put("vnc_port", s.l.Port)
+	state.Put("vnc_ip", s.l.Address)
 	state.Put("vnc_password", vncPassword)
 
 	return multistep.ActionContinue
 }
 
-func (*StepConfigureVNC) UpdateVMX(address, password string, port int, data map[string]string) {
+func (StepConfigureVNC) UpdateVMX(address, password string, port uint, data map[string]string) {
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)
 	data["remotedisplay.vnc.ip"] = address

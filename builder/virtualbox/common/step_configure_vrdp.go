@@ -22,8 +22,8 @@ import (
 // vrdp_port unit - The port that VRDP is configured to listen on.
 type StepConfigureVRDP struct {
 	VRDPBindAddress string
-	VRDPPortMin     int
-	VRDPPortMax     int
+	VRDPPortMin     uint
+	VRDPPortMax     uint
 
 	l *net.Listener
 }

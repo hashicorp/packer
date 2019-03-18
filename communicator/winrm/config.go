@@ -9,7 +9,7 @@ import (
 // Config is used to configure the WinRM connection
 type Config struct {
 	Host               string
-	Port               int
+	Port               uint
 	Username           string
 	Password           string
 	Timeout            time.Duration
