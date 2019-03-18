@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
-	"net"
 
+	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,9 +18,11 @@ import (
 //
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
-type stepConfigureVNC struct{}
+type stepConfigureVNC struct {
+	l *net.Listener
+}
 
-func (stepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -31,22 +32,22 @@ func (stepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multist
 	msg := fmt.Sprintf("Looking for available port between %d and %d on %s", config.VNCPortMin, config.VNCPortMax, config.VNCBindAddress)
 	ui.Say(msg)
 	log.Print(msg)
-	var vncPort uint
-	portRange := int(config.VNCPortMax - config.VNCPortMin)
-	for {
-		if portRange > 0 {
-			vncPort = uint(rand.Intn(portRange)) + config.VNCPortMin
-		} else {
-			vncPort = config.VNCPortMin
-		}
 
-		log.Printf("Trying port: %d", vncPort)
-		l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.VNCBindAddress, vncPort))
-		if err == nil {
-			defer l.Close()
-			break
-		}
+	var err error
+	s.l, err = net.ListenRangeConfig{
+		Addr:    config.VNCBindAddress,
+		Min:     config.VNCPortMin,
+		Max:     config.VNCPortMax,
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		err := fmt.Errorf("Error finding port: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
+	s.l.Listener.Close() // free port, but don't unlock lock file
+	vncPort := s.l.Port
 
 	log.Printf("Found available VNC port: %d on IP: %s", vncPort, config.VNCBindAddress)
 	state.Put("vnc_port", vncPort)
@@ -55,4 +56,11 @@ func (stepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multist
 	return multistep.ActionContinue
 }
 
-func (stepConfigureVNC) Cleanup(multistep.StateBag) {}
+func (s *stepConfigureVNC) Cleanup(multistep.StateBag) {
+	if s.l != nil {
+		err := s.l.Close()
+		if err != nil {
+			log.Printf("failed to unlock port lockfile: %v", err)
+		}
+	}
+}
