@@ -15,8 +15,8 @@ func commHost(state multistep.StateBag) (string, error) {
 	return ip, nil
 }
 
-func commPort(state multistep.StateBag) (int, error) {
-	commPort, hasPort := state.Get("commPort").(int)
+func commPort(state multistep.StateBag) (uint, error) {
+	commPort, hasPort := state.Get("commPort").(uint)
 	if !hasPort {
 		return 0, fmt.Errorf("Failed to retrieve communication port")
 	}

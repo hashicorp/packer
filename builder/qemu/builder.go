@@ -120,8 +120,8 @@ type Config struct {
 	SSHHostPortMax    uint       `mapstructure:"ssh_host_port_max"`
 	UseDefaultDisplay bool       `mapstructure:"use_default_display"`
 	VNCBindAddress    string     `mapstructure:"vnc_bind_address"`
-	VNCPortMin        int        `mapstructure:"vnc_port_min"`
-	VNCPortMax        int        `mapstructure:"vnc_port_max"`
+	VNCPortMin        uint       `mapstructure:"vnc_port_min"`
+	VNCPortMax        uint       `mapstructure:"vnc_port_max"`
 	VMName            string     `mapstructure:"vm_name"`
 
 	// These are deprecated, but we keep them around for BC

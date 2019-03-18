@@ -54,8 +54,8 @@ func (s *stepCreateSecurityGroup) Run(_ context.Context, state multistep.StateBa
 	i.SetCidrlist(config.CIDRList)
 	i.SetProtocol("TCP")
 	i.SetSecuritygroupid(sg.Id)
-	i.SetStartport(config.Comm.Port())
-	i.SetEndport(config.Comm.Port())
+	i.SetStartport(int(config.Comm.Port()))
+	i.SetEndport(int(config.Comm.Port()))
 	if config.Project != "" {
 		i.SetProjectid(config.Project)
 	}

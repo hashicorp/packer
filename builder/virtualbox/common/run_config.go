@@ -10,8 +10,8 @@ type RunConfig struct {
 	Headless bool `mapstructure:"headless"`
 
 	VRDPBindAddress string `mapstructure:"vrdp_bind_address"`
-	VRDPPortMin     int    `mapstructure:"vrdp_port_min"`
-	VRDPPortMax     int    `mapstructure:"vrdp_port_max"`
+	VRDPPortMin     uint   `mapstructure:"vrdp_port_min"`
+	VRDPPortMax     uint   `mapstructure:"vrdp_port_max"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) (errs []error) {
