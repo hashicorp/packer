@@ -186,7 +186,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			Timeout:                s.Config.SSHReadWriteTimeout,
 		}
 
-		log.Println("[INFO] Attempting SSH connection...")
+		log.Println("[INFO] Attempting SSH connection to %s...", address)
+		log.Println("[DEBUG] Config to %#v...", config)
 		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)
