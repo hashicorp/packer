@@ -31,6 +31,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 	if c.VNCPortMin > c.VNCPortMax {
 		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
+	if c.VNCPortMin < 0 {
+		errs = append(errs, fmt.Errorf("vnc_port_min must be positive"))
+	}
 
 	return
 }
