@@ -17,7 +17,7 @@ import (
 //   ui     packer.Ui
 //
 // Produces:
-//   vnc_port uint - The port that VNC is configured to listen on.
+//   vnc_port int - The port that VNC is configured to listen on.
 type stepConfigureVNC struct {
 	l *net.Listener
 }

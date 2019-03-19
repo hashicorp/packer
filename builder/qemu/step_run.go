@@ -21,11 +21,11 @@ type stepRun struct {
 
 type qemuArgsTemplateData struct {
 	HTTPIP      string
-	HTTPPort    uint
+	HTTPPort    int
 	HTTPDir     string
 	OutputDir   string
 	Name        string
-	SSHHostPort uint
+	SSHHostPort int
 }
 
 func (s *stepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -63,7 +63,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	vncIP := state.Get("vnc_ip").(string)
-	vncPort := state.Get("vnc_port").(uint)
+	vncPort := state.Get("vnc_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 
@@ -74,12 +74,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs := make(map[string]interface{})
 	var deviceArgs []string
 	var driveArgs []string
-	var sshHostPort uint
+	var sshHostPort int
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
 	if config.Comm.Type != "none" {
-		sshHostPort = state.Get("sshHostPort").(uint)
+		sshHostPort = state.Get("sshHostPort").(int)
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
 	} else {
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
@@ -121,7 +121,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 		if vncIpOk && vncPortOk {
 			vncIp := vncIpRaw.(string)
-			vncPort := vncPortRaw.(uint)
+			vncPort := vncPortRaw.(int)
 
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
@@ -175,7 +175,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if len(config.QemuArgs) > 0 {
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
-		httpPort := state.Get("http_port").(uint)
+		httpPort := state.Get("http_port").(int)
 		ctx := config.ctx
 		if config.Comm.Type != "none" {
 			ctx.Data = qemuArgsTemplateData{

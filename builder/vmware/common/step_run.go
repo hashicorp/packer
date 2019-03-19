@@ -43,7 +43,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 		if vncIpOk && vncPortOk && vncPasswordOk {
 			vncIp := vncIpRaw.(string)
-			vncPort := vncPortRaw.(uint)
+			vncPort := vncPortRaw.(int)
 			vncPassword := vncPasswordRaw.(string)
 
 			ui.Message(fmt.Sprintf(
