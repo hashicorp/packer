@@ -2,6 +2,7 @@ package restart
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 
@@ -92,7 +93,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	p.cancelLock.Lock()
 	p.cancel = make(chan struct{})
 	p.cancelLock.Unlock()
@@ -116,10 +117,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Restart script exited with non-zero exit status: %d", cmd.ExitStatus)
 	}
 
-	return waitForRestart(p, comm)
+	return waitForRestart(ctx, p, comm)
 }
 
-var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
+var waitForRestart = func(ctx context.Context, p *Provisioner, comm packer.Communicator) error {
 	ui := p.ui
 	ui.Say("Waiting for machine to restart...")
 	waitDone := make(chan bool, 1)
@@ -165,7 +166,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 
 	go func() {
 		log.Printf("Waiting for machine to become available...")
-		err = waitForCommunicator(p)
+		err = waitForCommunicator(ctx, p)
 		waitDone <- true
 	}()
 
@@ -199,7 +200,7 @@ WaitLoop:
 
 }
 
-var waitForCommunicator = func(p *Provisioner) error {
+var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 	runCustomRestartCheck := true
 	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
 		runCustomRestartCheck = false
@@ -213,7 +214,7 @@ var waitForCommunicator = func(p *Provisioner) error {
 		cmdRestartCheck.Command)
 	for {
 		select {
-		case <-p.cancel:
+		case <-ctx.Done():
 			log.Println("Communicator wait canceled, exiting loop")
 			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
@@ -284,16 +285,6 @@ var waitForCommunicator = func(p *Provisioner) error {
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	log.Printf("Received interrupt Cancel()")
-
-	p.cancelLock.Lock()
-	defer p.cancelLock.Unlock()
-	if p.cancel != nil {
-		close(p.cancel)
-	}
 }
 
 // retryable will retry the given function over and over until a

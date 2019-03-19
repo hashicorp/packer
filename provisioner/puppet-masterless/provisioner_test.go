@@ -1,6 +1,7 @@
 package puppetmasterless
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -493,7 +494,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -513,7 +514,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

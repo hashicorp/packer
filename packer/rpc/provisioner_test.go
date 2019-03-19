@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestProvisionerRPC(t *testing.T) {
 	defer server.Close()
 	server.RegisterProvisioner(p)
 	pClient := client.Provisioner()
-
+	ctx, cancel := context.WithCancel(context.Background())
 	// Test Prepare
 	config := 42
 	pClient.Prepare(config)
@@ -32,13 +33,15 @@ func TestProvisionerRPC(t *testing.T) {
 	// Test Provision
 	ui := &testUi{}
 	comm := &packer.MockCommunicator{}
-	pClient.Provision(ui, comm)
+	if err := pClient.Provision(ctx, ui, comm); err != nil {
+		t.Fatalf("err: %v", err)
+	}
 	if !p.ProvCalled {
 		t.Fatal("should be called")
 	}
 
 	// Test Cancel
-	pClient.Cancel()
+	cancel()
 	if !p.CancelCalled {
 		t.Fatal("cancel should be called")
 	}

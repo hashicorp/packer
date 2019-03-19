@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
@@ -134,7 +135,7 @@ func TestPausedProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(MockCommunicator)
-	prov.Provision(ui, comm)
+	prov.Provision(context.Background(), ui, comm)
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -159,7 +160,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 		return nil
 	}
 
-	go prov.Provision(testUi(), new(MockCommunicator))
+	go prov.Provision(context.Background(), testUi(), new(MockCommunicator))
 
 	select {
 	case <-time.After(10 * time.Millisecond):
@@ -188,7 +189,7 @@ func TestPausedProvisionerCancel(t *testing.T) {
 	}
 
 	// Start provisioning and wait for it to start
-	go prov.Provision(testUi(), new(MockCommunicator))
+	go prov.Provision(context.Background(), testUi(), new(MockCommunicator))
 	<-provCh
 
 	// Cancel it
@@ -226,7 +227,7 @@ func TestDebuggedProvisionerProvision(t *testing.T) {
 	ui := testUi()
 	comm := new(MockCommunicator)
 	writeReader(ui, "\n")
-	prov.Provision(ui, comm)
+	prov.Provision(context.Background(), ui, comm)
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -252,7 +253,7 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 	}
 
 	// Start provisioning and wait for it to start
-	go prov.Provision(testUi(), new(MockCommunicator))
+	go prov.Provision(context.Background(), testUi(), new(MockCommunicator))
 	<-provCh
 
 	// Cancel it
