@@ -30,8 +30,26 @@ type StepConfigureVNC struct {
 }
 
 type VNCAddressFinder interface {
+	VNCAddress(context.Context, string, uint, uint) (string, uint, error)
+
 	// UpdateVMX, sets driver specific VNC values to VMX data.
 	UpdateVMX(vncAddress, vncPassword string, vncPort uint, vmxData map[string]string)
+}
+
+func (s *StepConfigureVNC) VNCAddress(ctx context.Context, vncBindAddress string, portMin, portMax uint) (string, uint, error) {
+	var err error
+	s.l, err = net.ListenRangeConfig{
+		Addr:    s.VNCBindAddress,
+		Min:     s.VNCPortMin,
+		Max:     s.VNCPortMax,
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		return "", 0, err
+	}
+
+	s.l.Listener.Close()
+	return s.l.Address, s.l.Port, nil
 }
 
 func VNCPassword(skipPassword bool) string {
@@ -78,12 +96,7 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	log.Printf("Looking for available port between %d and %d", s.VNCPortMin, s.VNCPortMax)
-	s.l, err = net.ListenRangeConfig{
-		Addr:    s.VNCBindAddress,
-		Min:     s.VNCPortMin,
-		Max:     s.VNCPortMax,
-		Network: "tcp",
-	}.Listen(ctx)
+	vncBindAddress, vncPort, err := vncFinder.VNCAddress(ctx, s.VNCBindAddress, s.VNCPortMin, s.VNCPortMax)
 
 	if err != nil {
 		state.Put("error", err)
@@ -96,7 +109,7 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 
 	log.Printf("Found available VNC port: %v", s.l)
 
-	vncFinder.UpdateVMX(s.l.Address, vncPassword, s.l.Port, vmxData)
+	vncFinder.UpdateVMX(vncBindAddress, vncPassword, vncPort, vmxData)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error writing VMX data: %s", err)
@@ -122,7 +135,9 @@ func (StepConfigureVNC) UpdateVMX(address, password string, port uint, data map[
 }
 
 func (s *StepConfigureVNC) Cleanup(multistep.StateBag) {
-	if err := s.l.Close(); err != nil {
-		log.Printf("failed to unlock port lockfile: %v", err)
+	if s.l != nil {
+		if err := s.l.Close(); err != nil {
+			log.Printf("failed to unlock port lockfile: %v", err)
+		}
 	}
 }
