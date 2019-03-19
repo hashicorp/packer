@@ -3,6 +3,7 @@ package ansible
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -195,7 +196,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
 	// Interpolate env vars to check for .WinRMPassword
 	p.config.ctx.Data = &PassthroughTemplate{

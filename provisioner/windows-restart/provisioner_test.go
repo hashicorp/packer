@@ -2,6 +2,7 @@ package restart
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -97,14 +98,14 @@ func TestProvisionerProvision_Success(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 	waitForCommunicatorOld := waitForCommunicator
-	waitForCommunicator = func(p *Provisioner) error {
+	waitForCommunicator = func(context.Context, *Provisioner) error {
 		return nil
 	}
 	waitForRestartOld := waitForRestart
-	waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
+	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
 		return nil
 	}
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -133,14 +134,14 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 	waitForCommunicatorOld := waitForCommunicator
-	waitForCommunicator = func(p *Provisioner) error {
+	waitForCommunicator = func(context.Context, *Provisioner) error {
 		return nil
 	}
 	waitForRestartOld := waitForRestart
-	waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
+	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
 		return nil
 	}
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -163,7 +164,7 @@ func TestProvisionerProvision_RestartCommandFail(t *testing.T) {
 	comm.StartExitStatus = 1
 
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -179,10 +180,10 @@ func TestProvisionerProvision_WaitForRestartFail(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 	waitForCommunicatorOld := waitForCommunicator
-	waitForCommunicator = func(p *Provisioner) error {
+	waitForCommunicator = func(context.Context, *Provisioner) error {
 		return fmt.Errorf("Machine did not restart properly")
 	}
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -206,7 +207,7 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 	waitContinue := make(chan bool)
 
 	// Block until cancel comes through
-	waitForCommunicator = func(p *Provisioner) error {
+	waitForCommunicator = func(context.Context, *Provisioner) error {
 		for {
 			select {
 			case <-waitDone:
@@ -216,7 +217,7 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 	}
 
 	go func() {
-		err = p.Provision(ui, comm)
+		err = p.Provision(context.Background(), ui, comm)
 		waitDone <- true
 	}()
 	<-waitContinue
@@ -245,7 +246,7 @@ func TestProvision_waitForCommunicator(t *testing.T) {
 	comm.StartStdout = "WIN-V4CEJ7MC5SN restarted."
 	comm.StartExitStatus = 1
 	p.Prepare(config)
-	err := waitForCommunicator(p)
+	err := waitForCommunicator(context.Background(), p)
 
 	if err != nil {
 		t.Fatalf("should not have error, got: %s", err.Error())
@@ -274,6 +275,8 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	p.cancel = make(chan struct{})
 	var err error
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	comm.StartStderr = "WinRM terminated"
 	comm.StartExitStatus = 1 // Always fail
 	p.Prepare(config)
@@ -285,14 +288,14 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	waitDone := make(chan bool)
 	go func() {
 		waitStart <- true
-		err = waitForCommunicator(p)
+		err = waitForCommunicator(ctx, p)
 		waitDone <- true
 	}()
 
 	go func() {
 		time.Sleep(10 * time.Millisecond)
 		<-waitStart
-		p.Cancel()
+		cancel()
 	}()
 	<-waitDone
 
@@ -347,25 +350,27 @@ func TestProvision_Cancel(t *testing.T) {
 	waitDone := make(chan bool)
 
 	// Block until cancel comes through
-	waitForCommunicator = func(p *Provisioner) error {
+	waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 		waitStart <- true
+		panic("this test is incorrect")
 		for {
 			select {
 			case <-p.cancel:
 			}
 		}
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create two go routines to provision and cancel in parallel
 	// Provision will block until cancel happens
 	go func() {
-		err = p.Provision(ui, comm)
+		err = p.Provision(ctx, ui, comm)
 		waitDone <- true
 	}()
 
 	go func() {
 		<-waitStart
-		p.Cancel()
+		cancel()
 	}()
 	<-waitDone
 
