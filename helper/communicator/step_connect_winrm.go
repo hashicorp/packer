@@ -30,7 +30,7 @@ type StepConnectWinRM struct {
 	Config      *Config
 	Host        func(multistep.StateBag) (string, error)
 	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
-	WinRMPort   func(multistep.StateBag) (uint, error)
+	WinRMPort   func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectWinRM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {

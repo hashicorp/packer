@@ -22,8 +22,8 @@ import (
 // Produces:
 type StepForwardSSH struct {
 	CommConfig     *communicator.Config
-	HostPortMin    uint
-	HostPortMax    uint
+	HostPortMin    int
+	HostPortMax    int
 	SkipNatMapping bool
 
 	l *net.Listener
@@ -40,7 +40,7 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionContinue
 	}
 
-	guestPort := uint(s.CommConfig.Port())
+	guestPort := s.CommConfig.Port()
 	sshHostPort := guestPort
 	if !s.SkipNatMapping {
 		log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d",

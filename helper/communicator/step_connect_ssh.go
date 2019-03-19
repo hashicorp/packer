@@ -27,7 +27,7 @@ type StepConnectSSH struct {
 	Config    *Config
 	Host      func(multistep.StateBag) (string, error)
 	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
-	SSHPort   func(multistep.StateBag) (uint, error)
+	SSHPort   func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {

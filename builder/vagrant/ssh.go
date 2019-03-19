@@ -11,8 +11,8 @@ func CommHost() func(multistep.StateBag) (string, error) {
 	}
 }
 
-func SSHPort() func(multistep.StateBag) (uint, error) {
-	return func(state multistep.StateBag) (uint, error) {
+func SSHPort() func(multistep.StateBag) (int, error) {
+	return func(state multistep.StateBag) (int, error) {
 		config := state.Get("config").(*Config)
 		return config.Comm.SSHPort, nil
 	}

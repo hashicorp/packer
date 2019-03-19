@@ -25,7 +25,7 @@ type Config struct {
 
 	// SSH
 	SSHHost                   string        `mapstructure:"ssh_host"`
-	SSHPort                   uint          `mapstructure:"ssh_port"`
+	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
@@ -60,7 +60,7 @@ type Config struct {
 	WinRMUser               string        `mapstructure:"winrm_username"`
 	WinRMPassword           string        `mapstructure:"winrm_password"`
 	WinRMHost               string        `mapstructure:"winrm_host"`
-	WinRMPort               uint          `mapstructure:"winrm_port"`
+	WinRMPort               int           `mapstructure:"winrm_port"`
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
@@ -150,7 +150,7 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 }
 
 // Port returns the port that will be used for access based on config.
-func (c *Config) Port() uint {
+func (c *Config) Port() int {
 	switch c.Type {
 	case "ssh":
 		return c.SSHPort

@@ -24,8 +24,8 @@ const PACKERSPACE = "-PACKERSPACE-"
 type config struct {
 	DisableCheckpoint          bool `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
-	PluginMinPort              uint
-	PluginMaxPort              uint
+	PluginMinPort              int
+	PluginMaxPort              int
 
 	Builders       map[string]string
 	PostProcessors map[string]string `json:"post-processors"`

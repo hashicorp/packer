@@ -31,7 +31,7 @@ type ESX5Driver struct {
 	base VmwareDriver
 
 	Host           string
-	Port           uint
+	Port           int
 	Username       string
 	Password       string
 	PrivateKeyFile string
@@ -360,8 +360,8 @@ func (d *ESX5Driver) GuestAddress(multistep.StateBag) (string, error) {
 	return result, nil
 }
 
-func (d *ESX5Driver) VNCAddress(ctx context.Context, _ string, portMin, portMax uint) (string, uint, error) {
-	var vncPort uint
+func (d *ESX5Driver) VNCAddress(ctx context.Context, _ string, portMin, portMax int) (string, int, error) {
+	var vncPort int
 
 	//Process ports ESXi is listening on to determine which are available
 	//This process does best effort to detect ports that are unavailable,
@@ -427,7 +427,7 @@ func (d *ESX5Driver) VNCAddress(ctx context.Context, _ string, portMin, portMax 
 }
 
 // UpdateVMX, adds the VNC port to the VMX data.
-func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]string) {
+func (ESX5Driver) UpdateVMX(_, password string, port int, data map[string]string) {
 	// Do not set remotedisplay.vnc.ip - this breaks ESXi.
 	data["remotedisplay.vnc.enabled"] = "TRUE"
 	data["remotedisplay.vnc.port"] = fmt.Sprintf("%d", port)

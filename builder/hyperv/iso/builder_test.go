@@ -610,7 +610,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
-	state.Put("http_port", uint(0))
+	state.Put("http_port", 0)
 	state.Put("ui", ui)
 	state.Put("vmName", "packer-foo")
 
