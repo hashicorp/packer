@@ -23,8 +23,8 @@ import (
 //   http_port int - The port the HTTP server started on.
 type StepHTTPServer struct {
 	HTTPDir     string
-	HTTPPortMin uint
-	HTTPPortMax uint
+	HTTPPortMin int
+	HTTPPortMax int
 
 	l *net.Listener
 }
@@ -33,7 +33,7 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.HTTPDir == "" {
-		state.Put("http_port", uint(0))
+		state.Put("http_port", 0)
 		return multistep.ActionContinue
 	}
 

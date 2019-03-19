@@ -28,14 +28,14 @@ type StepConnect struct {
 	// SSHConfig should return the default configuration for
 	// connecting via SSH.
 	SSHConfig func(multistep.StateBag) (*gossh.ClientConfig, error)
-	SSHPort   func(multistep.StateBag) (uint, error)
+	SSHPort   func(multistep.StateBag) (int, error)
 
 	// The fields below are callbacks to assist with connecting to WinRM.
 	//
 	// WinRMConfig should return the default configuration for
 	// connecting via WinRM.
 	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
-	WinRMPort   func(multistep.StateBag) (uint, error)
+	WinRMPort   func(multistep.StateBag) (int, error)
 
 	// CustomConnect can be set to have custom connectors for specific
 	// types. These take highest precedence so you can also override

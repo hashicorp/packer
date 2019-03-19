@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"strconv"
 
 	"github.com/gofrs/flock"
 
@@ -24,7 +25,7 @@ type Listener struct {
 	// Listener can be closed but Port will be file locked by packer until
 	// Close is called.
 	net.Listener
-	Port    uint
+	Port    int
 	Address string
 	lock    *flock.Flock
 }
@@ -43,7 +44,7 @@ type ListenRangeConfig struct {
 	// tcp", "udp"
 	Network  string
 	Addr     string
-	Min, Max uint
+	Min, Max int
 	net.ListenConfig
 }
 
@@ -64,9 +65,9 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			return nil, err
 		}
 
-		port := uint(rand.Intn(portRange)) + lc.Min
+		port := rand.Intn(portRange) + lc.Min
 
-		lockFilePath, err := packer.CachePath("port", fmt.Sprintf("%d", port))
+		lockFilePath, err := packer.CachePath("port", strconv.Itoa(port))
 		if err != nil {
 			return nil, err
 		}

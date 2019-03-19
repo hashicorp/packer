@@ -44,7 +44,7 @@ func (s *StepSSHConfig) Run(_ context.Context, state multistep.StateBag) multist
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	config.Comm.SSHPort = uint(port)
+	config.Comm.SSHPort = port
 
 	return multistep.ActionContinue
 }

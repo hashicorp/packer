@@ -9,8 +9,8 @@ import (
 // HTTPConfig contains configuration for the local HTTP Server
 type HTTPConfig struct {
 	HTTPDir     string `mapstructure:"http_directory"`
-	HTTPPortMin uint   `mapstructure:"http_port_min"`
-	HTTPPortMax uint   `mapstructure:"http_port_max"`
+	HTTPPortMin int    `mapstructure:"http_port_min"`
+	HTTPPortMax int    `mapstructure:"http_port_max"`
 }
 
 func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
