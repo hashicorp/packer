@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -19,7 +20,7 @@ type Provisioner interface {
 	// given to communicate with the user, and a communicator is given that
 	// is guaranteed to be connected to some machine so that provisioning
 	// can be done.
-	Provision(Ui, Communicator) error
+	Provision(context.Context, Ui, Communicator) error
 
 	// Cancel is called to cancel the provisioning. This is usually called
 	// while Provision is still being called. The Provisioner should act
