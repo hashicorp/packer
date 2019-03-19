@@ -3,6 +3,7 @@ package common
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -359,7 +360,7 @@ func (d *ESX5Driver) GuestAddress(multistep.StateBag) (string, error) {
 	return result, nil
 }
 
-func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, error) {
+func (d *ESX5Driver) VNCAddress(ctx context.Context, _ string, portMin, portMax uint) (string, uint, error) {
 	var vncPort uint
 
 	//Process ports ESXi is listening on to determine which are available
