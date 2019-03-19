@@ -5,6 +5,7 @@ package converge
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 
@@ -105,7 +106,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // Provision node somehow. TODO: actual docs
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Converge")
 
 	// bootstrapping

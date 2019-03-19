@@ -1,6 +1,7 @@
 package ansiblelocal
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -185,7 +186,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
 
 	if len(p.config.PlaybookDir) > 0 {
@@ -306,12 +307,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
 }
 
 func (p *Provisioner) provisionPlaybookFiles(ui packer.Ui, comm packer.Communicator) error {

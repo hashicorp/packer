@@ -1,6 +1,7 @@
 package ansiblelocal
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -133,7 +134,7 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(new(packer.NoopUi), comm); err != nil {
+	if err := p.Provision(context.Background(), new(packer.NoopUi), comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -167,7 +168,7 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(new(packer.NoopUi), comm); err != nil {
+	if err := p.Provision(context.Background(), new(packer.NoopUi), comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -374,7 +375,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
-	artifact, err := builder.Run(ui, hook)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}

@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"log"
+	"context"
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
@@ -34,7 +34,7 @@ func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	return
 }
 
-func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)
@@ -44,32 +44,20 @@ func (p *provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return p.client.Call("Provisioner.Provision", nextId, new(interface{}))
 }
 
-func (p *provisioner) Cancel() {
-	err := p.client.Call("Provisioner.Cancel", new(interface{}), new(interface{}))
-	if err != nil {
-		log.Printf("Provisioner.Cancel err: %s", err)
-	}
-}
-
-func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interface{}) error {
+func (p *ProvisionerServer) Prepare(_ context.Context, args *ProvisionerPrepareArgs, reply *interface{}) error {
 	return p.p.Prepare(args.Configs...)
 }
 
-func (p *ProvisionerServer) Provision(streamId uint32, reply *interface{}) error {
+func (p *ProvisionerServer) Provision(ctx context.Context, streamId uint32, reply *interface{}) error {
 	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
-	if err := p.p.Provision(client.Ui(), client.Communicator()); err != nil {
+	if err := p.p.Provision(ctx, client.Ui(), client.Communicator()); err != nil {
 		return NewBasicError(err)
 	}
 
-	return nil
-}
-
-func (p *ProvisionerServer) Cancel(args *interface{}, reply *interface{}) error {
-	p.p.Cancel()
 	return nil
 }
