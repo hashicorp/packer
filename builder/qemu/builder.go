@@ -337,6 +337,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
+	if b.config.SSHHostPortMin < 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ssh_host_port_min must be positive"))
+	}
 
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
