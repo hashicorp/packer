@@ -107,6 +107,7 @@ type Config struct {
 	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
 	manageImageLocation                string
+	ManagedImageZoneResilient          bool `mapstructure:"managed_image_zone_resilient"`
 
 	// Deployment
 	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
@@ -195,6 +196,9 @@ func (c *Config) toImageParameters() *compute.Image {
 		ImageProperties: &compute.ImageProperties{
 			SourceVirtualMachine: &compute.SubResource{
 				ID: to.StringPtr(c.toVMID()),
+			},
+			StorageProfile: &compute.ImageStorageProfile{
+				ZoneResilient: to.BoolPtr(c.ManagedImageZoneResilient),
 			},
 		},
 		Location: to.StringPtr(c.Location),
@@ -720,4 +724,24 @@ func isValidAzureName(re *regexp.Regexp, rgn string) bool {
 	return re.Match([]byte(rgn)) &&
 		!strings.HasSuffix(rgn, ".") &&
 		!strings.HasSuffix(rgn, "-")
+}
+
+func (c *Config) validateLocationZoneResiliency(say func(s string)) {
+	// Docs on regions that support Availibility Zones:
+	//   https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#regions-that-support-availability-zones
+	// Query technical names for locations:
+	//   az account list-locations --query '[].name' -o tsv
+
+	var zones = make(map[string]struct{})
+	zones["westeurope"] = struct{}{}
+	zones["centralus"] = struct{}{}
+	zones["eastus2"] = struct{}{}
+	zones["francecentral"] = struct{}{}
+	zones["northeurope"] = struct{}{}
+	zones["southeastasia"] = struct{}{}
+	zones["westus2"] = struct{}{}
+
+	if _, ok := zones[c.Location]; !ok {
+		say(fmt.Sprintf("WARNING: Zone resiliency may not be supported in %s, checkout the docs at https://docs.microsoft.com/en-us/azure/availability-zones/", c.Location))
+	}
 }
