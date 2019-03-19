@@ -7,6 +7,7 @@
 * post-processor/Vagrant: Option to ignore SSL verification when using on-premise vagrant cloud [GH-7377]
 * core: Print VerifyChecksum log for the download as ui.Message output [GH-7387]
 * builder/amazon-chroot: Allow users to specify custom block device mapping [GH-7370]
+* builder/azure-arm: specify zone resilient image from config [GH-7211]
 
 
 ### BUG FIXES:
