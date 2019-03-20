@@ -49,6 +49,8 @@ power of Packer templates.
 
 - [packerlicious](https://github.com/mayn/packerlicious) - a python library for generating Packer templates
 
+- [packer.py](https://github.com/mayn/packer.py) - a python library for executing Packer CLI commands
+
 ## Other
 
 - [suitcase](https://github.com/tmclaugh/suitcase) - Packer based build system for CentOS OS images
