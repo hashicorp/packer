@@ -3,6 +3,7 @@ package vagrant
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 )
@@ -39,7 +40,7 @@ func (s *StepSSHConfig) Run(_ context.Context, state multistep.StateBag) multist
 	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
 	config.Comm.SSHUsername = sshConfig.User
 	config.Comm.SSHHost = sshConfig.Hostname
-	port, err := strconv.Atoi(sshConfig.Port)
+	port, err := strconv.Atoi(strings.TrimSpace(sshConfig.Port))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
