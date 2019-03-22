@@ -1,10 +1,11 @@
 package cvm
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func testConfig() *TencentCloudRunConfig {

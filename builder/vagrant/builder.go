@@ -1,9 +1,9 @@
 package vagrant
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -162,7 +162,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VirtualBox appliance.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	VagrantCWD, err := filepath.Abs(b.config.OutputDir)
 	if err != nil {
@@ -243,7 +243,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Run the steps.
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// Report any errors.
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -263,9 +263,3 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 }
 
 // Cancel.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}

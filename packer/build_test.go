@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -176,7 +177,8 @@ func TestBuild_Run(t *testing.T) {
 
 	build := testBuild()
 	build.Prepare()
-	artifacts, err := build.Run(ui)
+	ctx := context.Background()
+	artifacts, err := build.Run(ctx, ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -225,7 +227,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
 	build.Prepare()
-	artifacts, err := build.Run(ui)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -250,7 +252,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -278,7 +280,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -308,7 +310,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -335,7 +337,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -363,12 +365,15 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		}
 	}()
 
-	testBuild().Run(testUi())
+	testBuild().Run(context.Background(), testUi())
 }
 
 func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
-	build.Cancel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	build.Run(ctx, nil)
 
 	builder := build.builder.(*MockBuilder)
 	if !builder.CancelCalled {

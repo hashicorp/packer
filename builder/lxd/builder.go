@@ -1,7 +1,7 @@
 package lxd
 
 import (
-	"log"
+	"context"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -31,7 +31,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		b.config.ctx.Data = &wrappedCommandTemplate{Command: command}
 		return interpolate.Render(b.config.CommandWrapper, &b.config.ctx)
@@ -52,7 +52,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Run
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -64,11 +64,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
