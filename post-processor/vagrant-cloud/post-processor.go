@@ -5,8 +5,8 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -117,7 +117,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf(
 			"Unknown artifact type, requires box from vagrant post-processor or vagrant builder: %s", artifact.BuilderId())
@@ -177,7 +177,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Run the steps
 	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
-	p.runner.Run(state)
+	p.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -185,14 +185,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	return NewArtifact(providerName, p.config.Tag), true, nil
-}
-
-// Runs a cleanup if the post processor fails to upload
-func (p *PostProcessor) Cancel() {
-	if p.runner != nil {
-		log.Println("Cancelling the step runner...")
-		p.runner.Cancel()
-	}
 }
 
 // converts a packer builder name to the corresponding vagrant

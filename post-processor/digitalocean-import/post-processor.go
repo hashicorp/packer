@@ -3,11 +3,12 @@ package digitaloceanimport
 import (
 	"context"
 	"fmt"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"golang.org/x/oauth2"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -136,7 +137,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
 	p.config.ObjectName, err = interpolate.Render(p.config.ObjectName, &p.config.ctx)

@@ -91,7 +91,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf("The Packer vSphere Template post-processor "+
 			"can only take an artifact from the VMware-iso builder, built on "+
@@ -133,7 +133,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		NewStepMarkAsTemplate(artifact),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
-	runner.Run(state)
+	runner.Run(ctx, state)
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, rawErr.(error)
 	}
