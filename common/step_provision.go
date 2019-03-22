@@ -22,7 +22,7 @@ type StepProvision struct {
 	Comm packer.Communicator
 }
 
-func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := s.Comm
 	if comm == nil {
 		raw, ok := state.Get("communicator").(packer.Communicator)
@@ -38,7 +38,7 @@ func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multist
 	log.Println("Running the provision hook")
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- hook.Run(packer.HookProvision, ui, comm, nil)
+		errCh <- hook.Run(ctx, packer.HookProvision, ui, comm, nil)
 	}()
 
 	for {
@@ -53,7 +53,6 @@ func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multist
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				log.Println("Cancelling provisioning due to interrupt...")
-				hook.Cancel()
 				return multistep.ActionHalt
 			}
 		}

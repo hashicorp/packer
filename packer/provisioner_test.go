@@ -30,7 +30,7 @@ func TestProvisionHook(t *testing.T) {
 		},
 	}
 
-	hook.Run("foo", ui, comm, data)
+	hook.Run(context.Background(), "foo", ui, comm, data)
 
 	if !pA.ProvCalled {
 		t.Error("provision should be called on pA")
@@ -56,7 +56,7 @@ func TestProvisionHook_nilComm(t *testing.T) {
 		},
 	}
 
-	err := hook.Run("foo", ui, comm, data)
+	err := hook.Run(context.Background(), "foo", ui, comm, data)
 	if err == nil {
 		t.Fatal("should error")
 	}
@@ -83,16 +83,17 @@ func TestProvisionHook_cancel(t *testing.T) {
 			{p, nil, ""},
 		},
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	finished := make(chan struct{})
 	go func() {
-		hook.Run("foo", nil, new(MockCommunicator), nil)
+		hook.Run(ctx, "foo", nil, new(MockCommunicator), nil)
 		close(finished)
 	}()
 
 	// Cancel it while it is running
 	time.Sleep(10 * time.Millisecond)
-	hook.Cancel()
+	cancel()
 	lock.Lock()
 	order = append(order, "cancel")
 	lock.Unlock()
@@ -187,13 +188,15 @@ func TestPausedProvisionerCancel(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		return nil
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Start provisioning and wait for it to start
-	go prov.Provision(context.Background(), testUi(), new(MockCommunicator))
-	<-provCh
+	go func() {
+		<-provCh
+		cancel()
+	}()
 
-	// Cancel it
-	prov.Cancel()
+	prov.Provision(ctx, testUi(), new(MockCommunicator))
 	if !mock.CancelCalled {
 		t.Fatal("cancel should be called")
 	}
@@ -251,13 +254,15 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		return nil
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Start provisioning and wait for it to start
-	go prov.Provision(context.Background(), testUi(), new(MockCommunicator))
-	<-provCh
+	go func() {
+		<-provCh
+		cancel()
+	}()
 
-	// Cancel it
-	prov.Cancel()
+	prov.Provision(ctx, testUi(), new(MockCommunicator))
 	if !mock.CancelCalled {
 		t.Fatal("cancel should be called")
 	}

@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"log"
 	"net/rpc"
 
@@ -27,7 +28,7 @@ type HookRunArgs struct {
 	StreamId uint32
 }
 
-func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
+func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
 	server := newServerWithMux(h.mux, nextId)
 	server.RegisterCommunicator(comm)
@@ -50,22 +51,17 @@ func (h *hook) Cancel() {
 	}
 }
 
-func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
+func (h *HookServer) Run(ctx context.Context, args *HookRunArgs, reply *interface{}) error {
 	client, err := newClientWithMux(h.mux, args.StreamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
-	if err := h.hook.Run(args.Name, client.Ui(), client.Communicator(), args.Data); err != nil {
+	if err := h.hook.Run(ctx, args.Name, client.Ui(), client.Communicator(), args.Data); err != nil {
 		return NewBasicError(err)
 	}
 
 	*reply = nil
-	return nil
-}
-
-func (h *HookServer) Cancel(args *interface{}, reply *interface{}) error {
-	h.hook.Cancel()
 	return nil
 }

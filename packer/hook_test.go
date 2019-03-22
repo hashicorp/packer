@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
@@ -15,7 +16,15 @@ type CancelHook struct {
 	Cancelled bool
 }
 
-func (h *CancelHook) Run(string, Ui, Communicator, interface{}) error {
+func (h *CancelHook) Run(ctx context.Context, _ string, _ Ui, _ Communicator, _ interface{}) error {
+	go func() {
+		select {
+		case <-time.After(2 * time.Minute):
+		case <-ctx.Done():
+			h.cancel()
+		}
+	}()
+
 	h.Lock()
 	h.cancelCh = make(chan struct{})
 	h.doneCh = make(chan struct{})
@@ -32,7 +41,7 @@ func (h *CancelHook) Run(string, Ui, Communicator, interface{}) error {
 	return nil
 }
 
-func (h *CancelHook) Cancel() {
+func (h *CancelHook) cancel() {
 	h.Lock()
 	close(h.cancelCh)
 	h.Unlock()
@@ -47,7 +56,7 @@ func TestDispatchHook_Implements(t *testing.T) {
 func TestDispatchHook_Run_NoHooks(t *testing.T) {
 	// Just make sure nothing blows up
 	dh := &DispatchHook{}
-	dh.Run("foo", nil, nil, nil)
+	dh.Run(context.Background(), "foo", nil, nil, nil)
 }
 
 func TestDispatchHook_Run(t *testing.T) {
@@ -56,7 +65,7 @@ func TestDispatchHook_Run(t *testing.T) {
 	mapping := make(map[string][]Hook)
 	mapping["foo"] = []Hook{hook}
 	dh := &DispatchHook{Mapping: mapping}
-	dh.Run("foo", nil, nil, 42)
+	dh.Run(context.Background(), "foo", nil, nil, 42)
 
 	if !hook.RunCalled {
 		t.Fatal("should be called")
@@ -77,10 +86,10 @@ func TestDispatchHook_cancel(t *testing.T) {
 			"foo": {hook},
 		},
 	}
-
-	go dh.Run("foo", nil, nil, 42)
+	ctx, cancel := context.WithCancel(context.Background())
+	go dh.Run(ctx, "foo", nil, nil, 42)
 	time.Sleep(100 * time.Millisecond)
-	dh.Cancel()
+	cancel()
 
 	if !hook.Cancelled {
 		t.Fatal("hook should've cancelled")
