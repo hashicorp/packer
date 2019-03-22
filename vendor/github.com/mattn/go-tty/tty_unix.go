@@ -105,6 +105,7 @@ func (tty *TTY) raw() (func() error, error) {
 	if err != nil {
 		return nil, err
 	}
+	backup := *termios
 
 	termios.Iflag &^= unix.IGNBRK | unix.BRKINT | unix.PARMRK | unix.ISTRIP | unix.INLCR | unix.IGNCR | unix.ICRNL | unix.IXON
 	termios.Oflag &^= unix.OPOST
@@ -118,7 +119,7 @@ func (tty *TTY) raw() (func() error, error) {
 	}
 
 	return func() error {
-		if err := unix.IoctlSetTermios(int(tty.in.Fd()), ioctlWriteTermios, termios); err != nil {
+		if err := unix.IoctlSetTermios(int(tty.in.Fd()), ioctlWriteTermios, &backup); err != nil {
 			return err
 		}
 		return nil

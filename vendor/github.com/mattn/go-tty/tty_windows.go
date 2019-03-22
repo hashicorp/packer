@@ -178,7 +178,6 @@ func open() (*TTY, error) {
 	st &^= enableWindowInput
 	st &^= enableExtendedFlag
 	st &^= enableQuickEditMode
-	st &^= enableProcessedInput
 
 	// ignore error
 	procSetConsoleMode.Call(h, uintptr(st))
