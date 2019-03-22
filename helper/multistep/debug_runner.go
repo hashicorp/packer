@@ -45,7 +45,7 @@ type DebugRunner struct {
 	runner *BasicRunner
 }
 
-func (r *DebugRunner) Run(state StateBag) {
+func (r *DebugRunner) Run(ctx context.Context, state StateBag) {
 	r.l.Lock()
 	if r.runner != nil {
 		panic("already running")
@@ -78,16 +78,7 @@ func (r *DebugRunner) Run(state StateBag) {
 
 	// Then just use a basic runner to run it
 	r.runner.Steps = steps
-	r.runner.Run(state)
-}
-
-func (r *DebugRunner) Cancel() {
-	r.l.Lock()
-	defer r.l.Unlock()
-
-	if r.runner != nil {
-		r.runner.Cancel()
-	}
+	r.runner.Run(ctx, state)
 }
 
 // DebugPauseDefault is the default pause function when using the
