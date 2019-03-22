@@ -3,6 +3,7 @@ package vagrant
 import (
 	"bytes"
 	"compress/flate"
+	"context"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -151,7 +152,7 @@ func TestPostProcessorPostProcess_badId(t *testing.T) {
 		BuilderIdValue: "invalid.packer",
 	}
 
-	_, _, err := testPP(t).PostProcess(testUi(), artifact)
+	_, _, err := testPP(t).PostProcess(context.Background(), testUi(), artifact)
 	if !strings.Contains(err.Error(), "artifact type") {
 		t.Fatalf("err: %s", err)
 	}
@@ -181,7 +182,7 @@ func TestPostProcessorPostProcess_vagrantfileUserVariable(t *testing.T) {
 	a := &packer.MockArtifact{
 		BuilderIdValue: "packer.parallels",
 	}
-	a2, _, err := p.PostProcess(testUi(), a)
+	a2, _, err := p.PostProcess(context.Background(), testUi(), a)
 	if a2 != nil {
 		for _, fn := range a2.Files() {
 			defer os.Remove(fn)

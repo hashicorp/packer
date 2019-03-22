@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -24,7 +25,7 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppArtifactId = a.Id()
@@ -65,7 +66,7 @@ func TestPostProcessorRPC(t *testing.T) {
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)
-	artifact, _, err := ppClient.PostProcess(ui, a)
+	artifact, _, err := ppClient.PostProcess(context.Background(), ui, a)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

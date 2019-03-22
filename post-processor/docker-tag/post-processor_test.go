@@ -2,11 +2,12 @@ package dockertag
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/docker-import"
+	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 )
 
 func testConfig() map[string]interface{} {
@@ -48,7 +49,7 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 		IdValue:        "1234567890abcdef",
 	}
 
-	result, keep, err := p.PostProcess(testUi(), artifact)
+	result, keep, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
@@ -87,7 +88,7 @@ func TestPostProcessor_PostProcess_Force(t *testing.T) {
 		IdValue:        "1234567890abcdef",
 	}
 
-	result, keep, err := p.PostProcess(testUi(), artifact)
+	result, keep, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}

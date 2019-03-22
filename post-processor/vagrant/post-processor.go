@@ -5,6 +5,7 @@ package vagrant
 
 import (
 	"compress/flate"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -158,7 +159,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 
 	name, ok := builtins[artifact.BuilderId()]
 	if !ok {

@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
@@ -39,7 +40,7 @@ func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	return
 }
 
-func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterArtifact(a)
@@ -72,7 +73,7 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 	return err
 }
 
-func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorProcessResponse) error {
+func (p *PostProcessorServer) PostProcess(ctx context.Context, streamId uint32, reply *PostProcessorProcessResponse) error {
 	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
@@ -80,7 +81,7 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 	defer client.Close()
 
 	streamId = 0
-	artifactResult, keep, err := p.p.PostProcess(client.Ui(), client.Artifact())
+	artifactResult, keep, err := p.p.PostProcess(ctx, client.Ui(), client.Artifact())
 	if err == nil && artifactResult != nil {
 		streamId = p.mux.NextId()
 		server := newServerWithMux(p.mux, streamId)

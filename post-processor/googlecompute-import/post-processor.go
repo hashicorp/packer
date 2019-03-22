@@ -1,6 +1,7 @@
 package googlecomputeimport
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -94,7 +95,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	client, err := googlecompute.NewClientGCE(&p.config.Account)
 	if err != nil {
 		return nil, false, err

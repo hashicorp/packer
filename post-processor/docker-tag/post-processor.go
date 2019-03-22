@@ -1,13 +1,14 @@
 package dockertag
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/docker-import"
+	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -45,7 +46,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if artifact.BuilderId() != BuilderId &&
 		artifact.BuilderId() != dockerimport.BuilderId {
 		err := fmt.Errorf(

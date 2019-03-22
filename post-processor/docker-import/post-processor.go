@@ -1,6 +1,7 @@
 package dockerimport
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/docker"
@@ -43,7 +44,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	switch artifact.BuilderId() {
 	case docker.BuilderId, artifice.BuilderId:
 		break

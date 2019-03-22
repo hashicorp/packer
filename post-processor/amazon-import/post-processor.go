@@ -1,6 +1,7 @@
 package amazonimport
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -119,7 +120,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
 	session, err := p.config.Session()
