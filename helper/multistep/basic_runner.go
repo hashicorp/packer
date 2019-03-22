@@ -26,8 +26,8 @@ type BasicRunner struct {
 	l      sync.Mutex
 }
 
-func (b *BasicRunner) Run(state StateBag) {
-	ctx, cancel := context.WithCancel(context.Background())
+func (b *BasicRunner) Run(ctx context.Context, state StateBag) {
+	ctx, cancel := context.WithCancel(ctx)
 
 	b.l.Lock()
 	if b.state != stateIdle {
@@ -80,25 +80,5 @@ func (b *BasicRunner) Run(state StateBag) {
 			state.Put(StateHalted, true)
 			break
 		}
-	}
-}
-
-func (b *BasicRunner) Cancel() {
-	b.l.Lock()
-	switch b.state {
-	case stateIdle:
-		// Not running, so Cancel is... done.
-		b.l.Unlock()
-		return
-	case stateRunning:
-		// Running, so mark that we cancelled and set the state
-		b.cancel()
-		b.state = stateCancelling
-		fallthrough
-	case stateCancelling:
-		// Already cancelling, so just wait until we're done
-		ch := b.doneCh
-		b.l.Unlock()
-		<-ch
 	}
 }

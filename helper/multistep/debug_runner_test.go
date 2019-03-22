@@ -1,6 +1,7 @@
 package multistep
 
 import (
+	"context"
 	"os"
 	"reflect"
 	"testing"
@@ -39,7 +40,7 @@ func TestDebugRunner_Run(t *testing.T) {
 		PauseFn: pauseFn,
 	}
 
-	r.Run(data)
+	r.Run(context.Background(), data)
 
 	// Test data
 	expected := []string{"a", "TestStepAcc", "b", "TestStepAcc"}
@@ -66,12 +67,12 @@ func TestDebugRunner_Run_Run(t *testing.T) {
 	stepWait := &TestStepWaitForever{}
 	r := &DebugRunner{Steps: []Step{stepInt, stepWait}}
 
-	go r.Run(new(BasicStateBag))
+	go r.Run(context.Background(), new(BasicStateBag))
 	// wait until really running
 	<-ch
 
 	// now try to run aain
-	r.Run(new(BasicStateBag))
+	r.Run(context.Background(), new(BasicStateBag))
 
 	// should not get here in nominal codepath
 	t.Errorf("Was able to run an already running DebugRunner")
@@ -88,10 +89,9 @@ func TestDebugRunner_Cancel(t *testing.T) {
 	r := &DebugRunner{}
 	r.Steps = []Step{stepA, stepB, stepInt, stepC}
 
-	// cancelling an idle Runner is a no-op
-	r.Cancel()
+	ctx, cancel := context.WithCancel(context.Background())
 
-	go r.Run(data)
+	go r.Run(ctx, data)
 
 	// Wait until we reach the sync point
 	responseCh := <-ch
@@ -99,7 +99,7 @@ func TestDebugRunner_Cancel(t *testing.T) {
 	// Cancel then continue chain
 	cancelCh := make(chan bool)
 	go func() {
-		r.Cancel()
+		cancel()
 		cancelCh <- true
 	}()
 
@@ -154,7 +154,7 @@ func TestDebugPauseDefault(t *testing.T) {
 		dr := &DebugRunner{Steps: []Step{
 			&TestStepAcc{Data: "a"},
 		}}
-		dr.Run(new(BasicStateBag))
+		dr.Run(context.Background(), new(BasicStateBag))
 		complete <- true
 	}()
 
