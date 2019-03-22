@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"testing"
@@ -34,7 +35,11 @@ func (b *testBuild) Prepare() ([]string, error) {
 	return b.prepareWarnings, nil
 }
 
-func (b *testBuild) Run(ui packer.Ui) ([]packer.Artifact, error) {
+func (b *testBuild) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
+	go func() {
+		<-ctx.Done()
+		b.cancelCalled = true
+	}()
 	b.runCalled = true
 	b.runUi = ui
 
@@ -69,6 +74,8 @@ func TestBuild(t *testing.T) {
 	server.RegisterBuild(b)
 	bClient := client.Build()
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	// Test Name
 	bClient.Name()
 	if !b.nameCalled {
@@ -83,7 +90,7 @@ func TestBuild(t *testing.T) {
 
 	// Test Run
 	ui := new(testUi)
-	artifacts, err := bClient.Run(ui)
+	artifacts, err := bClient.Run(ctx, ui)
 	if !b.runCalled {
 		t.Fatal("run should be called")
 	}
@@ -102,7 +109,7 @@ func TestBuild(t *testing.T) {
 
 	// Test run with an error
 	b.errRunResult = true
-	_, err = bClient.Run(ui)
+	_, err = bClient.Run(ctx, ui)
 	if err == nil {
 		t.Fatal("should error")
 	}
@@ -126,7 +133,7 @@ func TestBuild(t *testing.T) {
 	}
 
 	// Test Cancel
-	bClient.Cancel()
+	cancel()
 	if !b.cancelCalled {
 		t.Fatal("should be called")
 	}

@@ -1,8 +1,8 @@
 package classic
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/hashicorp/go-cleanhttp"
@@ -41,7 +41,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING") != ""
 	httpClient := cleanhttp.DefaultClient()
 	config := &opc.Config{
@@ -176,7 +176,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -199,9 +199,3 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 }
 
 // Cancel terminates a running build.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}
