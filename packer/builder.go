@@ -1,5 +1,7 @@
 package packer
 
+import "context"
+
 // Implementers of Builder are responsible for actually building images
 // on some platform given some configuration.
 //
@@ -28,9 +30,5 @@ type Builder interface {
 	Prepare(...interface{}) ([]string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
-	Run(ui Ui, hook Hook) (Artifact, error)
-
-	// Cancel cancels a possibly running Builder. This should block until
-	// the builder actually cancels and cleans up after itself.
-	Cancel()
+	Run(context.Context, Ui, Hook) (Artifact, error)
 }

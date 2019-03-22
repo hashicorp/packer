@@ -1,6 +1,9 @@
 package packer
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // MockProvisioner is an implementation of Provisioner that can be
 // used for tests.
@@ -22,6 +25,14 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 }
 
 func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+	go func() {
+		select {
+		case <-time.After(2 * time.Minute):
+		case <-ctx.Done():
+			t.CancelCalled = true
+		}
+	}()
+
 	t.ProvCalled = true
 	t.ProvCommunicator = comm
 	t.ProvUi = ui
@@ -31,10 +42,6 @@ func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicato
 	}
 
 	return t.ProvFunc()
-}
-
-func (t *MockProvisioner) Cancel() {
-	t.CancelCalled = true
 }
 
 func (t *MockProvisioner) Communicator() Communicator {
