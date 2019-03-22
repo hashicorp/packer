@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"crypto/sha256"
 	"io/ioutil"
 	"os"
@@ -75,7 +76,7 @@ func TestUploadDownload(t *testing.T) {
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -164,7 +165,7 @@ func TestLargeDownload(t *testing.T) {
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -272,7 +273,7 @@ func TestFixUploadOwner(t *testing.T) {
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
-	artifact, err := builder.Run(ui, hook)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}

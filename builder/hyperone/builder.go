@@ -1,8 +1,8 @@
 package hyperone
 
 import (
+	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -50,7 +50,7 @@ type wrappedCommandTemplate struct {
 	Command string
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx
 		ctx.Data = &wrappedCommandTemplate{Command: command}
@@ -97,7 +97,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
@@ -110,11 +110,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the runner...")
-		b.runner.Cancel()
-	}
 }

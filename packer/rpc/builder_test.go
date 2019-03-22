@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -69,7 +70,7 @@ func TestBuilderRun(t *testing.T) {
 	// Test Run
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook)
+	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -95,7 +96,7 @@ func TestBuilderRun_nilResult(t *testing.T) {
 
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook)
+	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
@@ -116,7 +117,7 @@ func TestBuilderRun_ErrResult(t *testing.T) {
 
 	hook := &packer.MockHook{}
 	ui := &testUi{}
-	artifact, err := bClient.Run(ui, hook)
+	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if artifact != nil {
 		t.Fatalf("bad: %#v", artifact)
 	}
@@ -133,7 +134,10 @@ func TestBuilderCancel(t *testing.T) {
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	bClient.Cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	bClient.Run(ctx, nil, nil)
+
 	if !b.CancelCalled {
 		t.Fatal("cancel should be called")
 	}

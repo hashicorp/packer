@@ -2,6 +2,7 @@ package iso
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -174,7 +175,7 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	// and then finally build it
-	artifacts, err := b.Run(ui)
+	artifacts, err := b.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("Failed to build artifact: %s", err)
 	}

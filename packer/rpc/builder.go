@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"log"
+	"context"
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
@@ -44,7 +44,7 @@ func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 	return resp.Warnings, err
 }
 
-func (b *builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
 	server.RegisterHook(hook)
@@ -68,12 +68,6 @@ func (b *builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	return client.Artifact(), nil
 }
 
-func (b *builder) Cancel() {
-	if err := b.client.Call("Builder.Cancel", new(interface{}), new(interface{})); err != nil {
-		log.Printf("Error cancelling builder: %s", err)
-	}
-}
-
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareResponse) error {
 	warnings, err := b.builder.Prepare(args.Configs...)
 	*reply = BuilderPrepareResponse{
@@ -83,14 +77,14 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareR
 	return nil
 }
 
-func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
+func (b *BuilderServer) Run(ctx context.Context, streamId uint32, reply *uint32) error {
 	client, err := newClientWithMux(b.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
-	artifact, err := b.builder.Run(client.Ui(), client.Hook())
+	artifact, err := b.builder.Run(ctx, client.Ui(), client.Hook())
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -104,10 +98,5 @@ func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
 		*reply = streamId
 	}
 
-	return nil
-}
-
-func (b *BuilderServer) Cancel(args *interface{}, reply *interface{}) error {
-	b.builder.Cancel()
 	return nil
 }

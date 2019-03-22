@@ -3,7 +3,7 @@ package hyperone
 import (
 	"testing"
 
-	"github.com/hyperonecom/h1-client-go"
+	openapi "github.com/hyperonecom/h1-client-go"
 	"github.com/stretchr/testify/assert"
 )
 

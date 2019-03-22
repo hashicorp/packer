@@ -4,9 +4,9 @@
 package scaleway
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -33,7 +33,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	client, err := api.NewScalewayAPI(b.config.Organization, b.config.Token, b.config.UserAgent, b.config.Region)
 
 	if err != nil {
@@ -69,7 +69,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
@@ -98,11 +98,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

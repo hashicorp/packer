@@ -1,6 +1,7 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/common"
@@ -31,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 // Run implements the packer.Builder interface.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	b.ui = ui
 
 	// Create a CloudStack API client.
@@ -91,7 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Configure the runner and run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -112,12 +113,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return artifact, nil
-}
-
-// Cancel the step runner.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		b.ui.Say("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
