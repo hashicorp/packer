@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"errors"
 )
 
@@ -27,7 +28,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
 	return tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ui Ui, h Hook) (Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
@@ -41,7 +42,7 @@ func (tb *MockBuilder) Run(ui Ui, h Hook) (Artifact, error) {
 	}
 
 	if h != nil {
-		if err := h.Run(HookProvision, ui, new(MockCommunicator), nil); err != nil {
+		if err := h.Run(ctx, HookProvision, ui, new(MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}
@@ -49,8 +50,4 @@ func (tb *MockBuilder) Run(ui Ui, h Hook) (Artifact, error) {
 	return &MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil
-}
-
-func (tb *MockBuilder) Cancel() {
-	tb.CancelCalled = true
 }

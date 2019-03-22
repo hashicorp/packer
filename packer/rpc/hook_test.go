@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"reflect"
 	"sync"
 	"testing"
@@ -12,6 +13,7 @@ import (
 func TestHookRPC(t *testing.T) {
 	// Create the UI to test
 	h := new(packer.MockHook)
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Serve
 	client, server := testClientServer(t)
@@ -22,13 +24,13 @@ func TestHookRPC(t *testing.T) {
 
 	// Test Run
 	ui := &testUi{}
-	hClient.Run("foo", ui, nil, 42)
+	hClient.Run(ctx, "foo", ui, nil, 42)
 	if !h.RunCalled {
 		t.Fatal("should be called")
 	}
 
 	// Test Cancel
-	hClient.Cancel()
+	cancel()
 	if !h.CancelCalled {
 		t.Fatal("should be called")
 	}
@@ -52,6 +54,7 @@ func TestHook_cancelWhileRun(t *testing.T) {
 			return nil
 		},
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Serve
 	client, server := testClientServer(t)
@@ -63,13 +66,13 @@ func TestHook_cancelWhileRun(t *testing.T) {
 	// Start the run
 	finished := make(chan struct{})
 	go func() {
-		hClient.Run("foo", nil, nil, nil)
+		hClient.Run(ctx, "foo", nil, nil, nil)
 		close(finished)
 	}()
 
 	// Cancel it pretty quickly.
 	time.Sleep(10 * time.Millisecond)
-	hClient.Cancel()
+	cancel()
 
 	finishLock.Lock()
 	finishOrder = append(finishOrder, "cancel")

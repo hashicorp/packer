@@ -192,7 +192,7 @@ func TestBuild_Run(t *testing.T) {
 
 	// Verify hooks are dispatchable
 	dispatchHook := builder.RunHook
-	dispatchHook.Run("foo", nil, nil, 42)
+	dispatchHook.Run(ctx, "foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
 	if !hook.RunCalled {
@@ -203,7 +203,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(HookProvision, nil, new(MockCommunicator), 42)
+	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
 	prov := build.provisioners[0].provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")
