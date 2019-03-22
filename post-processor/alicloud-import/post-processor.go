@@ -1,6 +1,7 @@
 package alicloudimport
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -118,7 +119,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
 	// Render this key since we didn't in the configure phase

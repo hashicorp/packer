@@ -1,6 +1,8 @@
 package shell_local
 
 import (
+	"context"
+
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 )
@@ -35,7 +37,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return sl.Validate(&p.config)
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	// this particular post-processor doesn't do anything with the artifact
 	// except to return it.
 

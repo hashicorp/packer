@@ -260,7 +260,7 @@ PostProcessorRunSeqLoop:
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
 			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
-			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			artifact, keep, err := corePP.processor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))

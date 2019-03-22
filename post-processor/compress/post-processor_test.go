@@ -2,6 +2,7 @@ package compress
 
 import (
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -207,7 +208,7 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	}
 
 	// Run the file builder
-	artifact, err := builder.Run(ui, nil)
+	artifact, err := builder.Run(context.Background(), ui, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to build artifact: %s", err)
 	}
@@ -238,7 +239,7 @@ func testArchive(t *testing.T, config string) packer.Artifact {
 	compressor.config.PackerBuildName = "vanilla"
 	compressor.config.PackerBuilderType = "file"
 
-	artifactOut, _, err := compressor.PostProcess(ui, artifact)
+	artifactOut, _, err := compressor.PostProcess(context.Background(), ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to compress artifact: %s", err)
 	}
