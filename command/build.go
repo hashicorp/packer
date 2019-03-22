@@ -159,12 +159,12 @@ func (c *BuildCommand) Run(args []string) int {
 		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		defer signal.Stop(sigCh)
 		go func(b packer.Build) {
-			<-sigCh
+			sig := <-sigCh
 			interruptWg.Add(1)
 			defer interruptWg.Done()
 			interrupted = true
 
-			log.Printf("Stopping build: %s", b.Name())
+			log.Printf("Stopping build: %s after receiving %s", b.Name(), sig)
 			b.Cancel()
 			//cancelCtx()
 			log.Printf("Build cancelled: %s", b.Name())
