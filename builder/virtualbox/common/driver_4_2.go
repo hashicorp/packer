@@ -1,7 +1,6 @@
 package common
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-collections/collections/stack"
 	versionUtil "github.com/hashicorp/go-version"
 	packer "github.com/hashicorp/packer/common"
 )
@@ -261,56 +259,9 @@ func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
 
 	var rootNode *VBoxSnapshot
 	if stdoutString != "This machine does not have any snapshots" {
-		scanner := bufio.NewScanner(strings.NewReader(stdoutString))
-		SnapshotNamePartsRe := regexp.MustCompile("Snapshot(?P<Type>Name|UUID)(?P<Path>(-[1-9]+)*)=\"(?P<Value>[^\"]*)\"")
-		var currentIndicator string
-		parentStack := stack.New()
-		var node *VBoxSnapshot
-		for scanner.Scan() {
-			txt := scanner.Text()
-			idx := strings.Index(txt, "=")
-			if idx > 0 {
-				if strings.HasPrefix(txt, "Current") {
-					node.IsCurrent = true
-				} else {
-					matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
-					log.Printf("************ Snapshot %s name parts", txt)
-					log.Printf("Matches %#v\n", matches)
-					log.Printf("Node %s\n", matches[0])
-					log.Printf("Type %s\n", matches[1])
-					log.Printf("Path %s\n", matches[2])
-					log.Printf("Leaf %s\n", matches[3])
-					log.Printf("Value %s\n", matches[4])
-					if matches[1] == "Name" {
-						if nil == rootNode {
-							node = new(VBoxSnapshot)
-							rootNode = node
-							currentIndicator = matches[2]
-						} else {
-							pathLenCur := strings.Count(currentIndicator, "-")
-							pathLen := strings.Count(matches[2], "-")
-							if pathLen > pathLenCur {
-								currentIndicator = matches[2]
-								parentStack.Push(node)
-							} else if pathLen < pathLenCur {
-								for i := 0; i < pathLenCur-1; i++ {
-									parentStack.Pop()
-								}
-							}
-							node = new(VBoxSnapshot)
-							parent := parentStack.Peek().(*VBoxSnapshot)
-							if nil != parent {
-								parent.Children = append(parent.Children, node)
-							}
-						}
-						node.Name = matches[4]
-					} else if matches[1] == "UUID" {
-						node.UUID = matches[4]
-					}
-				}
-			} else {
-				log.Printf("Invalid key,value pair [%s]", txt)
-			}
+		rootNode, err = ParseSnapshotData(stdoutString)
+		if nil != err {
+			return nil, err
 		}
 	}
 
