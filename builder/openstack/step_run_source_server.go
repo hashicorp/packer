@@ -24,6 +24,7 @@ type StepRunSourceServer struct {
 	ConfigDrive           bool
 	InstanceMetadata      map[string]string
 	UseBlockStorageVolume bool
+	ForceDelete           bool
 	server                *servers.Server
 }
 
@@ -157,9 +158,16 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say(fmt.Sprintf("Terminating the source server: %s ...", s.server.ID))
-	if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
-		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
-		return
+	if config.ForceDelete {
+		if err := servers.ForceDelete(computeClient, s.server.ID).ExtractErr(); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+			return
+		}
+	} else {
+		if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+			return
+		}
 	}
 
 	stateChange := StateChangeConf{
