@@ -10,6 +10,7 @@ require (
 	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
 	github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
