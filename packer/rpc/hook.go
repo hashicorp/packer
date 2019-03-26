@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"context"
-	"log"
-	"net/rpc"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -41,14 +41,7 @@ func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.C
 		StreamId: nextId,
 	}
 
-	return h.client.Call("Hook.Run", &args, new(interface{}))
-}
-
-func (h *hook) Cancel() {
-	err := h.client.Call("Hook.Cancel", new(interface{}), new(interface{}))
-	if err != nil {
-		log.Printf("Hook.Cancel error: %s", err)
-	}
+	return h.client.Call(ctx, "Hook.Run", &args, new(interface{}))
 }
 
 func (h *HookServer) Run(ctx context.Context, args *HookRunArgs, reply *interface{}) error {

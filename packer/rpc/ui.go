@@ -1,8 +1,10 @@
 package rpc
 
 import (
+	"context"
 	"log"
-	"net/rpc"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -30,12 +32,14 @@ type UiMachineArgs struct {
 }
 
 func (u *Ui) Ask(query string) (result string, err error) {
-	err = u.client.Call("Ui.Ask", query, &result)
+	ctx := context.TODO()
+	err = u.client.Call(ctx, "Ui.Ask", query, &result)
 	return
 }
 
 func (u *Ui) Error(message string) {
-	if err := u.client.Call("Ui.Error", message, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := u.client.Call(ctx, "Ui.Error", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui.Error RPC call: %s", err)
 	}
 }
@@ -46,19 +50,22 @@ func (u *Ui) Machine(t string, args ...string) {
 		Args:     args,
 	}
 
-	if err := u.client.Call("Ui.Machine", rpcArgs, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := u.client.Call(ctx, "Ui.Machine", rpcArgs, new(interface{})); err != nil {
 		log.Printf("Error in Ui.Machine RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Message(message string) {
-	if err := u.client.Call("Ui.Message", message, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := u.client.Call(ctx, "Ui.Message", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui.Message RPC call: %s", err)
 	}
 }
 
 func (u *Ui) Say(message string) {
-	if err := u.client.Call("Ui.Say", message, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := u.client.Call(ctx, "Ui.Say", message, new(interface{})); err != nil {
 		log.Printf("Error in Ui.Say RPC call: %s", err)
 	}
 }

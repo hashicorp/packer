@@ -1,12 +1,14 @@
 package rpc
 
 import (
+	"context"
 	"encoding/gob"
 	"io"
 	"log"
-	"net/rpc"
 	"os"
 	"sync"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -122,7 +124,8 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 		cmd.SetExited(finished.ExitStatus)
 	}()
 
-	err = c.client.Call("Communicator.Start", &args, new(interface{}))
+	ctx := context.TODO()
+	err = c.client.Call(ctx, "Communicator.Start", &args, new(interface{}))
 	return
 }
 
@@ -140,8 +143,8 @@ func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err er
 		args.FileInfo = NewFileInfo(*fi)
 	}
 
-	err = c.client.Call("Communicator.Upload", &args, new(interface{}))
-	return
+	ctx := context.TODO()
+	return c.client.Call(ctx, "Communicator.Upload", &args, new(interface{}))
 }
 
 func (c *communicator) UploadDir(dst string, src string, exclude []string) error {
@@ -152,7 +155,8 @@ func (c *communicator) UploadDir(dst string, src string, exclude []string) error
 	}
 
 	var reply error
-	err := c.client.Call("Communicator.UploadDir", args, &reply)
+	ctx := context.TODO()
+	err := c.client.Call(ctx, "Communicator.UploadDir", args, &reply)
 	if err == nil {
 		err = reply
 	}
@@ -168,7 +172,8 @@ func (c *communicator) DownloadDir(src string, dst string, exclude []string) err
 	}
 
 	var reply error
-	err := c.client.Call("Communicator.DownloadDir", args, &reply)
+	ctx := context.TODO()
+	err := c.client.Call(ctx, "Communicator.DownloadDir", args, &reply)
 	if err == nil {
 		err = reply
 	}
@@ -192,7 +197,8 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	}
 
 	// Start sending data to the RPC server
-	err = c.client.Call("Communicator.Download", &args, new(interface{}))
+	ctx := context.TODO()
+	err = c.client.Call(ctx, "Communicator.Download", &args, new(interface{}))
 
 	// Wait for the RPC server to finish receiving the data before we return
 	<-waitServer
