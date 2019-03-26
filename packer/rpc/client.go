@@ -3,12 +3,10 @@ package rpc
 import (
 	"io"
 	"log"
-
-	"github.com/hashicorp/packer/common/net/rpc/codec"
-
-	"github.com/hashicorp/packer/common/net/rpc"
+	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/ugorji/go/codec"
 )
 
 // Client is the client end that communicates with a Packer RPC server.
@@ -43,13 +41,11 @@ func newClientWithMux(mux *muxBroker, streamId uint32) (*Client, error) {
 		return nil, err
 	}
 
-	// h := &codec.MsgpackHandle{
-	// 	RawToString: true,
-	// 	WriteExt:    true,
-	// }
-	var clientCodec rpc.ClientCodec
-
-	clientCodec = codec.MsgpackClientCodec(clientConn)
+	h := &codec.MsgpackHandle{
+		RawToString: true,
+		WriteExt:    true,
+	}
+	clientCodec := codec.GoRpc.ClientCodec(clientConn, h)
 
 	return &Client{
 		mux:      mux,
