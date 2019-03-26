@@ -2,7 +2,8 @@ package rpc
 
 import (
 	"context"
-	"net/rpc"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -27,13 +28,15 @@ type BuildPrepareResponse struct {
 }
 
 func (b *build) Name() (result string) {
-	b.client.Call("Build.Name", new(interface{}), &result)
+	ctx := context.TODO()
+	b.client.Call(ctx, "Build.Name", new(interface{}), &result)
 	return
 }
 
 func (b *build) Prepare() ([]string, error) {
+	ctx := context.TODO()
 	var resp BuildPrepareResponse
-	if cerr := b.client.Call("Build.Prepare", new(interface{}), &resp); cerr != nil {
+	if cerr := b.client.Call(ctx, "Build.Prepare", new(interface{}), &resp); cerr != nil {
 		return nil, cerr
 	}
 	var err error = nil
@@ -51,7 +54,7 @@ func (b *build) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error
 	go server.Serve()
 
 	var result []uint32
-	if err := b.client.Call("Build.Run", nextId, &result); err != nil {
+	if err := b.client.Call(ctx, "Build.Run", nextId, &result); err != nil {
 		return nil, err
 	}
 
@@ -69,25 +72,22 @@ func (b *build) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error
 }
 
 func (b *build) SetDebug(val bool) {
-	if err := b.client.Call("Build.SetDebug", val, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := b.client.Call(ctx, "Build.SetDebug", val, new(interface{})); err != nil {
 		panic(err)
 	}
 }
 
 func (b *build) SetForce(val bool) {
-	if err := b.client.Call("Build.SetForce", val, new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := b.client.Call(ctx, "Build.SetForce", val, new(interface{})); err != nil {
 		panic(err)
 	}
 }
 
 func (b *build) SetOnError(val string) {
-	if err := b.client.Call("Build.SetOnError", val, new(interface{})); err != nil {
-		panic(err)
-	}
-}
-
-func (b *build) Cancel() {
-	if err := b.client.Call("Build.Cancel", new(interface{}), new(interface{})); err != nil {
+	ctx := context.TODO()
+	if err := b.client.Call(ctx, "Build.SetOnError", val, new(interface{})); err != nil {
 		panic(err)
 	}
 }

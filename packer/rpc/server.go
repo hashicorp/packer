@@ -3,10 +3,12 @@ package rpc
 import (
 	"io"
 	"log"
-	"net/rpc"
+
+	"github.com/hashicorp/packer/common/net/rpc/codec"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/ugorji/go/codec"
 )
 
 const (
@@ -125,10 +127,6 @@ func (s *Server) Serve() {
 	}
 	defer stream.Close()
 
-	h := &codec.MsgpackHandle{
-		RawToString: true,
-		WriteExt:    true,
-	}
-	rpcCodec := codec.GoRpc.ServerCodec(stream, h)
+	rpcCodec := codec.MsgpackServerCodec(stream)
 	s.server.ServeCodec(rpcCodec)
 }

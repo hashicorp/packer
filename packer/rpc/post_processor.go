@@ -2,7 +2,8 @@ package rpc
 
 import (
 	"context"
-	"net/rpc"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -33,7 +34,8 @@ type PostProcessorProcessResponse struct {
 
 func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	args := &PostProcessorConfigureArgs{Configs: raw}
-	if cerr := p.client.Call("PostProcessor.Configure", args, new(interface{})); cerr != nil {
+	ctx := context.TODO()
+	if cerr := p.client.Call(ctx, "PostProcessor.Configure", args, new(interface{})); cerr != nil {
 		err = cerr
 	}
 
@@ -48,7 +50,7 @@ func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 	go server.Serve()
 
 	var response PostProcessorProcessResponse
-	if err := p.client.Call("PostProcessor.PostProcess", nextId, &response); err != nil {
+	if err := p.client.Call(ctx, "PostProcessor.PostProcess", nextId, &response); err != nil {
 		return nil, false, err
 	}
 

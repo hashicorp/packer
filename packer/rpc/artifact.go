@@ -1,7 +1,9 @@
 package rpc
 
 import (
-	"net/rpc"
+	"context"
+
+	"github.com/hashicorp/packer/common/net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,33 +22,40 @@ type ArtifactServer struct {
 }
 
 func (a *artifact) BuilderId() (result string) {
-	a.client.Call(a.endpoint+".BuilderId", new(interface{}), &result)
+	ctx := context.TODO()
+	a.client.Call(ctx, a.endpoint+".BuilderId", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) Files() (result []string) {
-	a.client.Call(a.endpoint+".Files", new(interface{}), &result)
+	ctx := context.TODO()
+	a.client.Call(ctx, a.endpoint+".Files", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) Id() (result string) {
-	a.client.Call(a.endpoint+".Id", new(interface{}), &result)
+	ctx := context.TODO()
+	a.client.Call(ctx, a.endpoint+".Id", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) String() (result string) {
-	a.client.Call(a.endpoint+".String", new(interface{}), &result)
+	ctx := context.TODO()
+	a.client.Call(ctx, a.endpoint+".String", new(interface{}), &result)
 	return
 }
 
 func (a *artifact) State(name string) (result interface{}) {
-	a.client.Call(a.endpoint+".State", name, &result)
+	ctx := context.TODO()
+	a.client.Call(ctx, a.endpoint+".State", name, &result)
 	return
 }
 
 func (a *artifact) Destroy() error {
+	ctx := context.TODO()
+
 	var result error
-	if err := a.client.Call(a.endpoint+".Destroy", new(interface{}), &result); err != nil {
+	if err := a.client.Call(ctx, a.endpoint+".Destroy", new(interface{}), &result); err != nil {
 		return err
 	}
 
