@@ -2,8 +2,7 @@ package rpc
 
 import (
 	"context"
-
-	"github.com/hashicorp/packer/common/net/rpc"
+	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -28,8 +27,7 @@ type ProvisionerPrepareArgs struct {
 
 func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 	args := &ProvisionerPrepareArgs{configs}
-	ctx := context.TODO()
-	if cerr := p.client.Call(ctx, "Provisioner.Prepare", args, new(interface{})); cerr != nil {
+	if cerr := p.client.Call("Provisioner.Prepare", args, new(interface{})); cerr != nil {
 		err = cerr
 	}
 
@@ -43,7 +41,7 @@ func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	server.RegisterUi(ui)
 	go server.Serve()
 
-	return p.client.Call(ctx, "Provisioner.Provision", nextId, new(interface{}))
+	return p.client.Call("Provisioner.Provision", nextId, new(interface{}))
 }
 
 func (p *ProvisionerServer) Prepare(_ context.Context, args *ProvisionerPrepareArgs, reply *interface{}) error {
