@@ -48,7 +48,7 @@ func (s *StepConfigureVNC) VNCAddress(ctx context.Context, vncBindAddress string
 		return "", 0, err
 	}
 
-	s.l.Listener.Close()
+	s.l.Listener.Close() // free port, but don't unlock lock file
 	return s.l.Address, s.l.Port, nil
 }
 
@@ -103,7 +103,6 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	s.l.Listener.Close() // free port, but don't unlock lock file
 
 	vncPassword := VNCPassword(s.VNCDisablePassword)
 
