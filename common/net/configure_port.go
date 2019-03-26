@@ -51,9 +51,6 @@ type ListenRangeConfig struct {
 // until ctx is cancelled.
 // Listen uses net.ListenConfig.Listen internally.
 func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
-	if lc.Max < lc.Min {
-		lc.Min, lc.Max = lc.Max, lc.Min
-	}
 	portRange := lc.Max - lc.Min
 	for {
 		if err := ctx.Err(); err != nil {
