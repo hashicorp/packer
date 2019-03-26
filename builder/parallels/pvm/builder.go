@@ -46,7 +46,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("http_port", uint(0))
+	state.Put("http_port", 0)
 
 	// Build the steps.
 	steps := []multistep.Step{

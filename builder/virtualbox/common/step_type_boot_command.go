@@ -22,7 +22,7 @@ type bootCommandTemplateData struct {
 	HTTPIP string
 
 	// HTTPPort is the HTTP server port.
-	HTTPPort uint
+	HTTPPort int
 
 	// Name is the VM's name.
 	Name string
@@ -43,7 +43,7 @@ type StepTypeBootCommand struct {
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
-	httpPort := state.Get("http_port").(uint)
+	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
