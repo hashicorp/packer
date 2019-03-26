@@ -15,7 +15,7 @@ import (
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 	Name     string
 }
 
@@ -29,7 +29,7 @@ type StepTypeBootCommand struct {
 }
 
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	httpPort := state.Get("http_port").(uint)
+	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
