@@ -67,6 +67,8 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 
 		port := rand.Intn(portRange) + lc.Min
 
+		log.Printf("Trying port: %d", port)
+
 		lockFilePath, err := packer.CachePath("port", strconv.Itoa(port))
 		if err != nil {
 			return nil, err
@@ -80,8 +82,6 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 		if !locked {
 			continue // this port seems to be locked by another packer goroutine
 		}
-
-		log.Printf("Trying port: %d", port)
 
 		l, err := lc.ListenConfig.Listen(ctx, lc.Network, fmt.Sprintf("%s:%d", lc.Addr, port))
 		if err != nil {
