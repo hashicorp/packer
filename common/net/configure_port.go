@@ -2,7 +2,6 @@ package net
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -55,17 +54,16 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 	if lc.Max < lc.Min {
 		lc.Min, lc.Max = lc.Max, lc.Min
 	}
-	portRange := int(lc.Max - lc.Min)
-	if portRange == 0 {
-		// Intn will panic if portRange == 0
-		return nil, errors.New("ListenRandomPort: port range is zero")
-	}
+	portRange := lc.Max - lc.Min
 	for {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
 
-		port := rand.Intn(portRange) + lc.Min
+		port := lc.Min
+		if portRange > 0 {
+			port += rand.Intn(portRange)
+		}
 
 		log.Printf("Trying port: %d", port)
 
