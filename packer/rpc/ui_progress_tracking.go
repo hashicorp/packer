@@ -1,11 +1,9 @@
 package rpc
 
 import (
-	"context"
 	"io"
 	"log"
-
-	"github.com/hashicorp/packer/common/net/rpc"
+	"net/rpc"
 
 	"github.com/hashicorp/packer/common/random"
 )
@@ -20,8 +18,7 @@ func (u *Ui) TrackProgress(src string, currentSize, totalSize int64, stream io.R
 		TotalSize:   totalSize,
 	}
 	var trackingID string
-	ctx := context.TODO()
-	if err := u.client.Call(ctx, "Ui.NewTrackProgress", pl, &trackingID); err != nil {
+	if err := u.client.Call("Ui.NewTrackProgress", pl, &trackingID); err != nil {
 		log.Printf("Error in Ui.NewTrackProgress RPC call: %s", err)
 		return stream
 	}
@@ -42,8 +39,7 @@ type ProgressTrackingClient struct {
 // Read will send len(b) over the wire instead of it's content
 func (u *ProgressTrackingClient) Read(b []byte) (read int, err error) {
 	defer func() {
-		ctx := context.TODO()
-		if err := u.client.Call(ctx, "Ui"+u.id+".Add", read, new(interface{})); err != nil {
+		if err := u.client.Call("Ui"+u.id+".Add", read, new(interface{})); err != nil {
 			log.Printf("Error in ProgressTrackingClient.Read RPC call: %s", err)
 		}
 	}()
@@ -52,8 +48,7 @@ func (u *ProgressTrackingClient) Read(b []byte) (read int, err error) {
 
 func (u *ProgressTrackingClient) Close() error {
 	log.Printf("closing")
-	ctx := context.TODO()
-	if err := u.client.Call(ctx, "Ui"+u.id+".Close", nil, new(interface{})); err != nil {
+	if err := u.client.Call("Ui"+u.id+".Close", nil, new(interface{})); err != nil {
 		log.Printf("Error in ProgressTrackingClient.Close RPC call: %s", err)
 	}
 	return u.stream.Close()

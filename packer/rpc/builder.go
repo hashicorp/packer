@@ -2,8 +2,7 @@ package rpc
 
 import (
 	"context"
-
-	"github.com/hashicorp/packer/common/net/rpc"
+	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -33,8 +32,7 @@ type BuilderPrepareResponse struct {
 
 func (b *builder) Prepare(config ...interface{}) ([]string, error) {
 	var resp BuilderPrepareResponse
-	ctx := context.TODO()
-	cerr := b.client.Call(ctx, "Builder.Prepare", &BuilderPrepareArgs{config}, &resp)
+	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &resp)
 	if cerr != nil {
 		return nil, cerr
 	}
@@ -54,7 +52,7 @@ func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	go server.Serve()
 
 	var responseId uint32
-	if err := b.client.Call(ctx, "Builder.Run", nextId, &responseId); err != nil {
+	if err := b.client.Call("Builder.Run", nextId, &responseId); err != nil {
 		return nil, err
 	}
 
