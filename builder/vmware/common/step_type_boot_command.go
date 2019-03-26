@@ -20,7 +20,7 @@ import (
 // Uses:
 //   http_port int
 //   ui     packer.Ui
-//   vnc_port uint
+//   vnc_port int
 //
 // Produces:
 //   <nothing>
@@ -34,7 +34,7 @@ type StepTypeBootCommand struct {
 }
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 	Name     string
 }
 
@@ -46,10 +46,10 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
-	httpPort := state.Get("http_port").(uint)
+	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	vncIp := state.Get("vnc_ip").(string)
-	vncPort := state.Get("vnc_port").(uint)
+	vncPort := state.Get("vnc_port").(int)
 	vncPassword := state.Get("vnc_password")
 
 	// Wait the for the vm to boot.

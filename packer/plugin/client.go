@@ -56,7 +56,7 @@ type ClientConfig struct {
 	// The minimum and maximum port to use for communicating with
 	// the subprocess. If not set, this defaults to 10,000 and 25,000
 	// respectively.
-	MinPort, MaxPort uint
+	MinPort, MaxPort int
 
 	// StartTimeout is the timeout to wait for the plugin to say it
 	// has started successfully.

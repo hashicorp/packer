@@ -50,7 +50,7 @@ func TestESX5Driver_HostIP(t *testing.T) {
 	port := listen.Addr().(*net.TCPAddr).Port
 	defer listen.Close()
 
-	driver := ESX5Driver{Host: "localhost", Port: uint(port)}
+	driver := ESX5Driver{Host: "localhost", Port: port}
 	state := new(multistep.BasicStateBag)
 
 	if host, _ := driver.HostIP(state); host != expected_host {
