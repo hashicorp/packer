@@ -1,15 +1,19 @@
 ## 1.4.0 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/alicloud: Improve error message for conflicting images name [GH-7415]
 * builder/amazon-chroot: Allow users to specify custom block device mapping
     [GH-7370]
 * builder/azure-arm: specify zone resilient image from config [GH-7211]
+* builder/openstack: Expose force_delete for openstack builder [GH-7395]
 * builder/OpenStack: Support Application Credential Authentication [GH-7300]
+* builder/virtualbox: Add validation for 'none' communicator. [GH-7419]
 * builder/virtualbox: create ephemeral SSH key pair for build process [GH-7287]
 * core: Add functionality to marshal a Template to valid Packer JSON [GH-7339]
 * core: Allow user variables to be interpreted within the variables section
     [GH-7390]
 * core: Incorporate the go-getter to handle downloads [GH-6999]
+* core: Lock Packer VNC ports using a lock file to prevent collisions [GH-7422]
 * core: Print VerifyChecksum log for the download as ui.Message output
     [GH-7387]
 * post-processor/googlecompute-export: Set network project id to builder
@@ -17,13 +21,9 @@
 * post-processor/vagrant-cloud: support for the vagrant builder [GH-7397]
 * post-processor/Vagrant: Option to ignore SSL verification when using on-
     premise vagrant cloud [GH-7377]
+* postprocessor/amazon-import: Support S3 and AMI encryption. [GH-7396]
 * provisioner/shell provisioner/windows-shell: allow to specify valid exit
     codes [GH-7385]
-* builder/alicloud: Improve error message for conflicting images name [GH-7415]
-* builder/virtualbox: Add validation for 'none' communicator. [GH-7419]
-* postprocessor/amazon-import: Support S3 and AMI encryption. [GH-7396]
-* builder/openstack: Expose force_delete for openstack builder [GH-7395]
-* core: Lock Packer VNC ports using a lock file to prevent collisions [GH-7423]
 
 ### BUG FIXES:
 * builder/alibaba: Update to latest Alibaba Cloud official image to fix
@@ -38,9 +38,12 @@
     [GH-7352]
 
 ### BACKWARDS INCOMPATIBILITIES:
-* builder/amazon: If users do not pass any encrypt setting, retain any initial encryption setting of the AMI. [GH-6787]
-* builder/scaleway: Renamed attribute api_access_key to organization_id. [GH-6983]
-* builder/docker: Update docker's default config to use /bin/sh instead of /bin/bash [GH-7106]
+* builder/amazon: If users do not pass any encrypt setting, retain any initial
+    encryption setting of the AMI. [GH-6787]
+* builder/docker: Update docker's default config to use /bin/sh instead of
+    /bin/bash [GH-7106]
+* builder/scaleway: Renamed attribute api_access_key to organization_id.
+    [GH-6983]
 
 ## 1.3.5 (February 28, 2019)
 
