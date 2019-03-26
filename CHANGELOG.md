@@ -19,6 +19,11 @@
     premise vagrant cloud [GH-7377]
 * provisioner/shell provisioner/windows-shell: allow to specify valid exit
     codes [GH-7385]
+* builder/alicloud: Improve error message for conflicting images name [GH-7415]
+* builder/virtualbox: Add validation for 'none' communicator. [GH-7419]
+* postprocessor/amazon-import: Support S3 and AMI encryption. [GH-7396]
+* builder/openstack: Expose force_delete for openstack builder [GH-7395]
+* core: Lock Packer VNC ports using a lock file to prevent collisions [GH-7423]
 
 ### BUG FIXES:
 * builder/alibaba: Update to latest Alibaba Cloud official image to fix
