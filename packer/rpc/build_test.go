@@ -15,6 +15,7 @@ type testBuild struct {
 	nameCalled       bool
 	prepareCalled    bool
 	prepareWarnings  []string
+	runFn            func(context.Context)
 	runCalled        bool
 	runUi            packer.Ui
 	setDebugCalled   bool
@@ -36,12 +37,12 @@ func (b *testBuild) Prepare() ([]string, error) {
 }
 
 func (b *testBuild) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
-	go func() {
-		<-ctx.Done()
-		b.cancelCalled = true
-	}()
 	b.runCalled = true
 	b.runUi = ui
+
+	if b.runFn != nil {
+		b.runFn(ctx)
+	}
 
 	if b.errRunResult {
 		return nil, errors.New("foo")
@@ -62,10 +63,6 @@ func (b *testBuild) SetOnError(string) {
 	b.setOnErrorCalled = true
 }
 
-func (b *testBuild) Cancel() {
-	b.cancelCalled = true
-}
-
 func TestBuild(t *testing.T) {
 	b := new(testBuild)
 	client, server := testClientServer(t)
@@ -74,7 +71,7 @@ func TestBuild(t *testing.T) {
 	server.RegisterBuild(b)
 	bClient := client.Build()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx := context.Background()
 
 	// Test Name
 	bClient.Name()
@@ -131,12 +128,33 @@ func TestBuild(t *testing.T) {
 	if !b.setOnErrorCalled {
 		t.Fatal("should be called")
 	}
+}
 
-	// Test Cancel
-	cancel()
-	if !b.cancelCalled {
-		t.Fatal("should be called")
+func TestBuild_cancel(t *testing.T) {
+	topCtx, cancelTopCtx := context.WithCancel(context.Background())
+
+	b := new(testBuild)
+
+	done := make(chan interface{})
+	b.runFn = func(ctx context.Context) {
+		cancelTopCtx()
+		<-ctx.Done()
+		close(done)
 	}
+
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	server.RegisterBuild(b)
+	bClient := client.Build()
+
+	bClient.Prepare()
+
+	ui := new(testUi)
+	bClient.Run(topCtx, ui)
+
+	// if context cancellation is not propagated, this will timeout
+	<-done
 }
 
 func TestBuildPrepare_Warnings(t *testing.T) {

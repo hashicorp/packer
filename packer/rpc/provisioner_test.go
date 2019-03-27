@@ -9,8 +9,15 @@ import (
 )
 
 func TestProvisionerRPC(t *testing.T) {
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
+
 	// Create the interface to test
 	p := new(packer.MockProvisioner)
+	p.ProvFunc = func(ctx context.Context) error {
+		topCtxCancel()
+		<-ctx.Done()
+		return ctx.Err()
+	}
 
 	// Start the server
 	client, server := testClientServer(t)
@@ -18,7 +25,6 @@ func TestProvisionerRPC(t *testing.T) {
 	defer server.Close()
 	server.RegisterProvisioner(p)
 	pClient := client.Provisioner()
-	ctx, cancel := context.WithCancel(context.Background())
 	// Test Prepare
 	config := 42
 	pClient.Prepare(config)
@@ -33,18 +39,13 @@ func TestProvisionerRPC(t *testing.T) {
 	// Test Provision
 	ui := &testUi{}
 	comm := &packer.MockCommunicator{}
-	if err := pClient.Provision(ctx, ui, comm); err != nil {
-		t.Fatalf("err: %v", err)
+	if err := pClient.Provision(topCtx, ui, comm); err == nil {
+		t.Fatalf("Provison should have err")
 	}
 	if !p.ProvCalled {
 		t.Fatal("should be called")
 	}
 
-	// Test Cancel
-	cancel()
-	if !p.CancelCalled {
-		t.Fatal("cancel should be called")
-	}
 }
 
 func TestProvisioner_Implements(t *testing.T) {

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"log"
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
@@ -17,6 +18,9 @@ type builder struct {
 // BuilderServer wraps a packer.Builder implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuilderServer struct {
+	context       context.Context
+	contextCancel func()
+
 	builder packer.Builder
 	mux     *muxBroker
 }
@@ -51,7 +55,21 @@ func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	server.RegisterUi(ui)
 	go server.Serve()
 
+	done := make(chan interface{})
+	defer close(done)
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Printf("Cancelling builder after context cancellation %v", ctx.Err())
+			if err := b.client.Call("Builder.Cancel", new(interface{}), new(interface{})); err != nil {
+				log.Printf("Error cancelling builder: %s", err)
+			}
+		case <-done:
+		}
+	}()
+
 	var responseId uint32
+
 	if err := b.client.Call("Builder.Run", nextId, &responseId); err != nil {
 		return nil, err
 	}
@@ -77,14 +95,18 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareR
 	return nil
 }
 
-func (b *BuilderServer) Run(ctx context.Context, streamId uint32, reply *uint32) error {
+func (b *BuilderServer) Run(streamId uint32, reply *uint32) error {
 	client, err := newClientWithMux(b.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
-	artifact, err := b.builder.Run(ctx, client.Ui(), client.Hook())
+	if b.context == nil {
+		b.context, b.contextCancel = context.WithCancel(context.Background())
+	}
+
+	artifact, err := b.builder.Run(b.context, client.Ui(), client.Hook())
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -92,11 +114,16 @@ func (b *BuilderServer) Run(ctx context.Context, streamId uint32, reply *uint32)
 	*reply = 0
 	if artifact != nil {
 		streamId = b.mux.NextId()
-		server := newServerWithMux(b.mux, streamId)
-		server.RegisterArtifact(artifact)
-		go server.Serve()
+		artifactServer := newServerWithMux(b.mux, streamId)
+		artifactServer.RegisterArtifact(artifact)
+		go artifactServer.Serve()
 		*reply = streamId
 	}
 
+	return nil
+}
+
+func (b *BuilderServer) Cancel(args *interface{}, reply *interface{}) error {
+	b.contextCancel()
 	return nil
 }

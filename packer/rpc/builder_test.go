@@ -127,19 +127,26 @@ func TestBuilderRun_ErrResult(t *testing.T) {
 }
 
 func TestBuilderCancel(t *testing.T) {
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
+	// var runCtx context.Context
+
 	b := new(packer.MockBuilder)
+	cancelled := false
+	b.RunFn = func(ctx context.Context) {
+		topCtxCancel()
+		<-ctx.Done()
+		cancelled = true
+	}
 	client, server := testClientServer(t)
 	defer client.Close()
 	defer server.Close()
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-	bClient.Run(ctx, nil, nil)
+	bClient.Run(topCtx, new(testUi), new(packer.MockHook))
 
-	if !b.CancelCalled {
-		t.Fatal("cancel should be called")
+	if !cancelled {
+		t.Fatal("context should have been cancelled")
 	}
 }
 
