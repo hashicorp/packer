@@ -38,7 +38,7 @@ type Config struct {
 	RunCommand       []string `mapstructure:"run_command"`
 	Volumes          map[string]string
 	FixUploadOwner   bool `mapstructure:"fix_upload_owner"`
-	WindowsContainer bool `windows_container`
+	WindowsContainer bool `mapstructure:"windows_container"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
