@@ -58,7 +58,7 @@ func (s TestStepSync) Run(context.Context, StateBag) StepAction {
 	return ActionContinue
 }
 
-func (s TestStepSync) Cleanup(StateBag) {}
+func (s TestStepSync) Cleanup(StateBag) { close(s.Ch) }
 
 func (s TestStepWaitForever) Run(context.Context, StateBag) StepAction {
 	select {}

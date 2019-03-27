@@ -2,7 +2,6 @@ package packer
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 )
@@ -63,18 +62,13 @@ func TestProvisionHook_nilComm(t *testing.T) {
 }
 
 func TestProvisionHook_cancel(t *testing.T) {
-	var lock sync.Mutex
-	order := make([]string, 0, 2)
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
 	p := &MockProvisioner{
-		ProvFunc: func() error {
-			time.Sleep(100 * time.Millisecond)
-
-			lock.Lock()
-			defer lock.Unlock()
-			order = append(order, "prov")
-
-			return nil
+		ProvFunc: func(ctx context.Context) error {
+			topCtxCancel()
+			<-ctx.Done()
+			return ctx.Err()
 		},
 	}
 
@@ -83,27 +77,10 @@ func TestProvisionHook_cancel(t *testing.T) {
 			{p, nil, ""},
 		},
 	}
-	ctx, cancel := context.WithCancel(context.Background())
 
-	finished := make(chan struct{})
-	go func() {
-		hook.Run(ctx, "foo", nil, new(MockCommunicator), nil)
-		close(finished)
-	}()
-
-	// Cancel it while it is running
-	time.Sleep(10 * time.Millisecond)
-	cancel()
-	lock.Lock()
-	order = append(order, "cancel")
-	lock.Unlock()
-
-	// Wait
-	<-finished
-
-	// Verify order
-	if len(order) != 2 || order[0] != "cancel" || order[1] != "prov" {
-		t.Fatalf("bad: %#v", order)
+	err := hook.Run(topCtx, "foo", nil, new(MockCommunicator), nil)
+	if err == nil {
+		t.Fatal("should have err")
 	}
 }
 
@@ -156,7 +133,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 	}
 
 	dataCh := make(chan struct{})
-	mock.ProvFunc = func() error {
+	mock.ProvFunc = func(context.Context) error {
 		close(dataCh)
 		return nil
 	}
@@ -177,28 +154,22 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 }
 
 func TestPausedProvisionerCancel(t *testing.T) {
+	topCtx, cancelTopCtx := context.WithCancel(context.Background())
+
 	mock := new(MockProvisioner)
 	prov := &PausedProvisioner{
 		Provisioner: mock,
 	}
 
-	provCh := make(chan struct{})
-	mock.ProvFunc = func() error {
-		close(provCh)
-		time.Sleep(10 * time.Millisecond)
-		return nil
+	mock.ProvFunc = func(ctx context.Context) error {
+		cancelTopCtx()
+		<-ctx.Done()
+		return ctx.Err()
 	}
-	ctx, cancel := context.WithCancel(context.Background())
 
-	// Start provisioning and wait for it to start
-	go func() {
-		<-provCh
-		cancel()
-	}()
-
-	prov.Provision(ctx, testUi(), new(MockCommunicator))
-	if !mock.CancelCalled {
-		t.Fatal("cancel should be called")
+	err := prov.Provision(topCtx, testUi(), new(MockCommunicator))
+	if err == nil {
+		t.Fatal("should have err")
 	}
 }
 
@@ -243,27 +214,21 @@ func TestDebuggedProvisionerProvision(t *testing.T) {
 }
 
 func TestDebuggedProvisionerCancel(t *testing.T) {
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
+
 	mock := new(MockProvisioner)
 	prov := &DebuggedProvisioner{
 		Provisioner: mock,
 	}
 
-	provCh := make(chan struct{})
-	mock.ProvFunc = func() error {
-		close(provCh)
-		time.Sleep(10 * time.Millisecond)
-		return nil
+	mock.ProvFunc = func(ctx context.Context) error {
+		topCtxCancel()
+		<-ctx.Done()
+		return ctx.Err()
 	}
-	ctx, cancel := context.WithCancel(context.Background())
 
-	// Start provisioning and wait for it to start
-	go func() {
-		<-provCh
-		cancel()
-	}()
-
-	prov.Provision(ctx, testUi(), new(MockCommunicator))
-	if !mock.CancelCalled {
-		t.Fatal("cancel should be called")
+	err := prov.Provision(topCtx, testUi(), new(MockCommunicator))
+	if err == nil {
+		t.Fatal("should have error")
 	}
 }

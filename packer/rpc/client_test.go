@@ -35,7 +35,7 @@ func testConn(t *testing.T) (net.Conn, net.Conn) {
 func testClientServer(t *testing.T) (*Client, *Server) {
 	clientConn, serverConn := testConn(t)
 
-	server := NewServer(serverConn)
+	server, _ := NewServer(serverConn)
 	go server.Serve()
 
 	client, err := NewClient(clientConn)

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"log"
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
@@ -17,6 +18,9 @@ type postProcessor struct {
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
+	context       context.Context
+	contextCancel func()
+
 	mux *muxBroker
 	p   packer.PostProcessor
 }
@@ -47,6 +51,20 @@ func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 	server.RegisterUi(ui)
 	go server.Serve()
 
+	done := make(chan interface{})
+	defer close(done)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Printf("Cancelling post-processor after context cancellation %v", ctx.Err())
+			if err := p.client.Call("PostProcessor.Cancel", new(interface{}), new(interface{})); err != nil {
+				log.Printf("Error cancelling post-processor: %s", err)
+			}
+		case <-done:
+		}
+	}()
+
 	var response PostProcessorProcessResponse
 	if err := p.client.Call("PostProcessor.PostProcess", nextId, &response); err != nil {
 		return nil, false, err
@@ -73,15 +91,19 @@ func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply 
 	return err
 }
 
-func (p *PostProcessorServer) PostProcess(ctx context.Context, streamId uint32, reply *PostProcessorProcessResponse) error {
+func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorProcessResponse) error {
 	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
+	if p.context == nil {
+		p.context, p.contextCancel = context.WithCancel(context.Background())
+	}
+
 	streamId = 0
-	artifactResult, keep, err := p.p.PostProcess(ctx, client.Ui(), client.Artifact())
+	artifactResult, keep, err := p.p.PostProcess(p.context, client.Ui(), client.Artifact())
 	if err == nil && artifactResult != nil {
 		streamId = p.mux.NextId()
 		server := newServerWithMux(p.mux, streamId)
@@ -95,5 +117,12 @@ func (p *PostProcessorServer) PostProcess(ctx context.Context, streamId uint32, 
 		StreamId: streamId,
 	}
 
+	return nil
+}
+
+func (b *PostProcessorServer) Cancel(args *interface{}, reply *interface{}) error {
+	if b.contextCancel != nil {
+		b.contextCancel()
+	}
 	return nil
 }

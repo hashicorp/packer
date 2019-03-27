@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestBasicRunner_ImplRunner(t *testing.T) {
@@ -99,39 +98,47 @@ func TestBasicRunner_Run_Run(t *testing.T) {
 }
 
 func TestBasicRunner_Cancel(t *testing.T) {
-	ch := make(chan chan bool)
-	data := new(BasicStateBag)
-	stepA := &TestStepAcc{Data: "a"}
-	stepB := &TestStepAcc{Data: "b"}
-	stepInt := &TestStepSync{ch}
-	stepC := &TestStepAcc{Data: "c"}
 
-	r := &BasicRunner{Steps: []Step{stepA, stepB, stepInt, stepC}}
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go r.Run(ctx, data)
-
-	// Wait until we reach the sync point
-	responseCh := <-ch
-
-	// Cancel then continue chain
-	cancelCh := make(chan bool)
-	go func() {
-		cancel()
-		cancelCh <- true
-	}()
-
-	for {
-		if _, ok := data.GetOk(StateCancelled); ok {
-			responseCh <- true
-			break
+	checkCancelled := func(data StateBag) {
+		cancelled := data.Get(StateCancelled).(bool)
+		if !cancelled {
+			t.Fatal("state should be cancelled")
 		}
-
-		time.Sleep(10 * time.Millisecond)
 	}
 
-	<-cancelCh
+	data := new(BasicStateBag)
+	r := &BasicRunner{}
+	r.Steps = []Step{
+		&TestStepAcc{Data: "a"},
+		&TestStepAcc{Data: "b"},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				topCtxCancel()
+				<-ctx.Done()
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(context.Context, StateBag) StepAction {
+				t.Fatal("I should not be called")
+				return ActionContinue
+			},
+			cleanup: func(StateBag) {
+				t.Fatal("I should not be called")
+			},
+		},
+	}
+
+	r.Run(topCtx, data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -148,10 +155,8 @@ func TestBasicRunner_Cancel(t *testing.T) {
 	}
 
 	// Test that it says it is cancelled
-	cancelled := data.Get(StateCancelled).(bool)
-	if !cancelled {
-		t.Errorf("not cancelled")
-	}
+	checkCancelled(data)
+
 }
 
 func TestBasicRunner_Cancel_Special(t *testing.T) {

@@ -32,12 +32,15 @@ type Server struct {
 }
 
 // NewServer returns a new Packer RPC server.
-func NewServer(conn io.ReadWriteCloser) *Server {
-	mux, _ := newMuxBrokerServer(conn)
+func NewServer(conn io.ReadWriteCloser) (*Server, error) {
+	mux, err := newMuxBrokerServer(conn)
+	if err != nil {
+		return nil, err
+	}
 	result := newServerWithMux(mux, 0)
 	result.closeMux = true
 	go mux.Run()
-	return result
+	return result, nil
 }
 
 func newServerWithMux(mux *muxBroker, streamId uint32) *Server {
