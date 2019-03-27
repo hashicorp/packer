@@ -32,16 +32,28 @@ func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Create the communicator that talks to Docker via various
 	// os/exec tricks.
-	comm := &Communicator{
-		ContainerID:   containerId,
-		HostDir:       tempDir,
-		ContainerDir:  config.ContainerDir,
-		Version:       version,
-		Config:        config,
-		ContainerUser: containerUser,
-	}
+	if config.WindowsContainer {
+		comm := &WindowsContainerCommunicator{
+			ContainerID:   containerId,
+			HostDir:       tempDir,
+			ContainerDir:  config.ContainerDir,
+			Version:       version,
+			Config:        config,
+			ContainerUser: containerUser,
+		}
+		state.Put("communicator", comm)
 
-	state.Put("communicator", comm)
+	} else {
+		comm := &Communicator{
+			ContainerID:   containerId,
+			HostDir:       tempDir,
+			ContainerDir:  config.ContainerDir,
+			Version:       version,
+			Config:        config,
+			ContainerUser: containerUser,
+		}
+		state.Put("communicator", comm)
+	}
 	return multistep.ActionContinue
 }
 

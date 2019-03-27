@@ -260,63 +260,6 @@ func (c *WindowsContainerCommunicator) uploadFileOld(dst string, src io.Reader, 
 	return nil
 }
 
-func (c *WindowsContainerCommunicator) UploadDir(dst string, src string, exclude []string) error {
-	/*
-		from https://docs.docker.com/engine/reference/commandline/cp/#extended-description
-		SRC_PATH specifies a directory
-			DEST_PATH does not exist
-				DEST_PATH is created as a directory and the contents of the source directory are copied into this directory
-			DEST_PATH exists and is a file
-				Error condition: cannot copy a directory to a file
-			DEST_PATH exists and is a directory
-				SRC_PATH does not end with /. (that is: slash followed by dot)
-					the source directory is copied into this directory
-				SRC_PATH does end with /. (that is: slash followed by dot)
-					the content of the source directory is copied into this directory
-
-		translating that in to our semantics:
-
-		if source ends in /
-			docker cp src. dest
-		otherwise, cp source dest
-
-	*/
-
-	var dockerSource string
-
-	if src[len(src)-1] == '/' {
-		dockerSource = fmt.Sprintf("%s.", src)
-	} else {
-		dockerSource = fmt.Sprintf("%s", src)
-	}
-
-	// Make the directory, then copy into it
-	localCmd := exec.Command("docker", "cp", dockerSource, fmt.Sprintf("%s:%s", c.ContainerID, dst))
-
-	stderrP, err := localCmd.StderrPipe()
-	if err != nil {
-		return fmt.Errorf("Failed to open pipe: %s", err)
-	}
-	if err := localCmd.Start(); err != nil {
-		return fmt.Errorf("Failed to copy: %s", err)
-	}
-	stderrOut, err := ioutil.ReadAll(stderrP)
-	if err != nil {
-		return err
-	}
-
-	// Wait for the copy to complete
-	if err := localCmd.Wait(); err != nil {
-		return fmt.Errorf("Failed to upload to '%s' in container: %s. %s.", dst, stderrOut, err)
-	}
-
-	if err := c.fixDestinationOwner(dst); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Download pulls a file out of a container using `docker cp`. We have a source
 // path and want to write to an io.Writer, not a file. We use - to make docker
 // cp to write to stdout, and then copy the stream to our destination io.Writer.
