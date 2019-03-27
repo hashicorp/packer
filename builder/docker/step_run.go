@@ -58,7 +58,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	// just mean that the container doesn't exist anymore, which isn't a
 	// big deal.
 	ui.Say(fmt.Sprintf("Killing the container: %s", s.containerId))
-	driver.StopContainer(s.containerId)
+	driver.KillContainer(s.containerId)
 
 	// Reset the container ID so that we're idempotent
 	s.containerId = ""

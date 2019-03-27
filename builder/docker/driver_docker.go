@@ -314,6 +314,13 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 }
 
 func (d *DockerDriver) StopContainer(id string) error {
+	if err := exec.Command("docker", "stop", id).Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DockerDriver) KillContainer(id string) error {
 	if err := exec.Command("docker", "kill", id).Run(); err != nil {
 		return err
 	}
