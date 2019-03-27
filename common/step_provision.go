@@ -50,6 +50,9 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 			}
 
 			return multistep.ActionContinue
+		case <-ctx.Done():
+			log.Printf("Cancelling provisioning due to context cancellation: %s", ctx.Err())
+			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				log.Println("Cancelling provisioning due to interrupt...")

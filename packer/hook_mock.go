@@ -2,30 +2,20 @@ package packer
 
 import (
 	"context"
-	"time"
 )
 
 // MockHook is an implementation of Hook that can be used for tests.
 type MockHook struct {
-	RunFunc func() error
+	RunFunc func(context.Context) error
 
-	RunCalled    bool
-	RunComm      Communicator
-	RunData      interface{}
-	RunName      string
-	RunUi        Ui
-	CancelCalled bool
+	RunCalled bool
+	RunComm   Communicator
+	RunData   interface{}
+	RunName   string
+	RunUi     Ui
 }
 
 func (t *MockHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
-
-	go func() {
-		select {
-		case <-time.After(2 * time.Minute):
-		case <-ctx.Done():
-			t.CancelCalled = true
-		}
-	}()
 
 	t.RunCalled = true
 	t.RunComm = comm
@@ -37,5 +27,5 @@ func (t *MockHook) Run(ctx context.Context, name string, ui Ui, comm Communicato
 		return nil
 	}
 
-	return t.RunFunc()
+	return t.RunFunc(ctx)
 }

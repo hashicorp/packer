@@ -371,12 +371,18 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-	build.Run(ctx, nil)
+	build.Prepare()
+
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
 	builder := build.builder.(*MockBuilder)
-	if !builder.CancelCalled {
-		t.Fatal("cancel should be called")
+
+	builder.RunFn = func(ctx context.Context) {
+		topCtxCancel()
+	}
+
+	_, err := build.Run(topCtx, testUi())
+	if err == nil {
+		t.Fatal("build should err")
 	}
 }

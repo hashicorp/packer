@@ -78,41 +78,64 @@ func TestDebugRunner_Run_Run(t *testing.T) {
 	t.Errorf("Was able to run an already running DebugRunner")
 }
 
+type TestStepFn struct {
+	run     func(context.Context, StateBag) StepAction
+	cleanup func(StateBag)
+}
+
+var _ Step = TestStepFn{}
+
+func (fn TestStepFn) Run(ctx context.Context, sb StateBag) StepAction {
+	return fn.run(ctx, sb)
+}
+
+func (fn TestStepFn) Cleanup(sb StateBag) {
+	if fn.cleanup != nil {
+		fn.cleanup(sb)
+	}
+}
 func TestDebugRunner_Cancel(t *testing.T) {
-	ch := make(chan chan bool)
-	data := new(BasicStateBag)
-	stepA := &TestStepAcc{Data: "a"}
-	stepB := &TestStepAcc{Data: "b"}
-	stepInt := &TestStepSync{ch}
-	stepC := &TestStepAcc{Data: "c"}
 
-	r := &DebugRunner{}
-	r.Steps = []Step{stepA, stepB, stepInt, stepC}
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go r.Run(ctx, data)
-
-	// Wait until we reach the sync point
-	responseCh := <-ch
-
-	// Cancel then continue chain
-	cancelCh := make(chan bool)
-	go func() {
-		cancel()
-		cancelCh <- true
-	}()
-
-	for {
-		if _, ok := data.GetOk(StateCancelled); ok {
-			responseCh <- true
-			break
+	checkCancelled := func(data StateBag) {
+		cancelled := data.Get(StateCancelled).(bool)
+		if !cancelled {
+			t.Fatal("state should be cancelled")
 		}
-
-		time.Sleep(10 * time.Millisecond)
 	}
 
-	<-cancelCh
+	data := new(BasicStateBag)
+	r := &DebugRunner{}
+	r.Steps = []Step{
+		&TestStepAcc{Data: "a"},
+		&TestStepAcc{Data: "b"},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				topCtxCancel()
+				<-ctx.Done()
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(context.Context, StateBag) StepAction {
+				t.Fatal("I should not be called")
+				return ActionContinue
+			},
+			cleanup: func(StateBag) {
+				t.Fatal("I should not be called")
+			},
+		},
+	}
+
+	r.Run(topCtx, data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -129,8 +152,11 @@ func TestDebugRunner_Cancel(t *testing.T) {
 	}
 
 	// Test that it says it is cancelled
-	cancelled := data.Get(StateCancelled).(bool)
-	if !cancelled {
+	cancelled, ok := data.GetOk(StateCancelled)
+	if !ok {
+		t.Fatal("could not get state cancelled")
+	}
+	if !cancelled.(bool) {
 		t.Errorf("not cancelled")
 	}
 }

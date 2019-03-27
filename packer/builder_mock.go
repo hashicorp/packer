@@ -20,6 +20,7 @@ type MockBuilder struct {
 	RunHook       Hook
 	RunUi         Ui
 	CancelCalled  bool
+	RunFn         func(ctx context.Context)
 }
 
 func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
@@ -39,6 +40,9 @@ func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error)
 
 	if tb.RunNilResult {
 		return nil, nil
+	}
+	if tb.RunFn != nil {
+		tb.RunFn(ctx)
 	}
 
 	if h != nil {

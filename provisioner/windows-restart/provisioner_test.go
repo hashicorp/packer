@@ -342,40 +342,27 @@ func TestProvision_Cancel(t *testing.T) {
 	ui := testUi()
 	p := new(Provisioner)
 
-	var err error
-
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	waitStart := make(chan bool)
-	waitDone := make(chan bool)
+	done := make(chan error)
+
+	topCtx, cancelTopCtx := context.WithCancel(context.Background())
 
 	// Block until cancel comes through
 	waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
-		waitStart <- true
-		panic("this test is incorrect")
-		for {
-			select {
-			case <-p.cancel:
-			}
-		}
+		cancelTopCtx()
+		<-ctx.Done()
+		return ctx.Err()
 	}
-	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create two go routines to provision and cancel in parallel
 	// Provision will block until cancel happens
 	go func() {
-		err = p.Provision(ctx, ui, comm)
-		waitDone <- true
+		done <- p.Provision(topCtx, ui, comm)
 	}()
-
-	go func() {
-		<-waitStart
-		cancel()
-	}()
-	<-waitDone
 
 	// Expect interrupt error
-	if err == nil {
+	if err := <-done; err == nil {
 		t.Fatal("should have error")
 	}
 }
