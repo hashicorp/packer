@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
+	// "runtime"
 	"strings"
 	"sync"
 
@@ -270,11 +270,11 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "--privileged")
 	}
 	for host, guest := range config.Volumes {
-		if runtime.GOOS == "windows" {
-			// docker-toolbox can't handle the normal C:\filepath format in CLI
-			host = strings.Replace(host, "\\", "/", -1)
-			host = strings.Replace(host, "C:/", "/c/", 1)
-		}
+		// if runtime.GOOS == "windows" {
+		// 	// docker-toolbox can't handle the normal C:\filepath format in CLI
+		// 	host = strings.Replace(host, "\\", "/", -1)
+		// 	host = strings.Replace(host, "C:/", "/c/", 1)
+		// }
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
 	for _, v := range config.RunCommand {
