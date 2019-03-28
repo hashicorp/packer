@@ -217,6 +217,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     mount into this container. The key of the object is the host path, the
     value is the container path.
 
+-  `windows_container` (bool) - If "true", tells Packer that you are building a
+    Windows container running on a windows host. This is necessary for building
+    Windows containers, because our normal docker bindings do not work for them.
+
 -   `container_dir` (string) - The directory inside container to mount temp
     directory from host server for work [file
     provisioner](/docs/provisioners/file.html). By default this is set to
