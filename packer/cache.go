@@ -22,8 +22,8 @@ var DefaultCacheDir = "packer_cache"
 //   PACKER_CACHE_DIR="/home/there" CacheDir("foo", "bar") => "/home/there/foo/bar
 func CachePath(paths ...string) (path string, err error) {
 	defer func() {
-		// create the dir based on return path it it doesn't exist
-		os.MkdirAll(filepath.Base(path), os.ModePerm)
+		// create the dir based on return path if it doesn't exist
+		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 	}()
 	cacheDir := DefaultCacheDir
 	if cd := os.Getenv("PACKER_CACHE_DIR"); cd != "" {
