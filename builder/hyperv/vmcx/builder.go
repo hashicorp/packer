@@ -576,10 +576,10 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
 	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v",
+		return fmt.Errorf("memory: Virtual machine requires memory size >= %v MB, but defined: %v",
 			MinRamSize, b.config.RamSize)
 	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v",
+		return fmt.Errorf("memory: Virtual machine requires memory size <= %v MB, but defined: %v",
 			MaxRamSize, b.config.RamSize)
 	}
 
