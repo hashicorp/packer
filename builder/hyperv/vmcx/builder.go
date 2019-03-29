@@ -50,7 +50,7 @@ type Config struct {
 
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
+	RamSize uint `mapstructure:"memory"`
 
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
@@ -85,7 +85,7 @@ type Config struct {
 	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
 	MacAddress                     string `mapstructure:"mac_address"`
 	VlanId                         string `mapstructure:"vlan_id"`
-	Cpu                            uint   `mapstructure:"cpu"`
+	Cpu                            uint   `mapstructure:"cpus"`
 	Generation                     uint   `mapstructure:"generation"`
 	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
 	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
