@@ -25,7 +25,7 @@ type StepCreateBuildDir struct {
 
 // Creates the main directory used to house the VMs files and folders
 // during the build
-func (s *StepCreateBuildDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateBuildDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating build directory...")

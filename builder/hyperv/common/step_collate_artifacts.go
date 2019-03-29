@@ -15,7 +15,7 @@ type StepCollateArtifacts struct {
 
 // Runs the step required to collate all build artifacts under the
 // specified output directory
-func (s *StepCollateArtifacts) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCollateArtifacts) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

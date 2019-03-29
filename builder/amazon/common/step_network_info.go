@@ -45,7 +45,7 @@ func mostFreeSubnet(subnets []*ec2.Subnet) *ec2.Subnet {
 	return sortedSubnets[len(sortedSubnets)-1]
 }
 
-func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepNetworkInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 

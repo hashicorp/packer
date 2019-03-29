@@ -22,7 +22,7 @@ type StepUploadVMX struct {
 	RemoteType string
 }
 
-func (c *StepUploadVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (c *StepUploadVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
 	ui := state.Get("ui").(packer.Ui)

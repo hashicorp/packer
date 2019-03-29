@@ -23,7 +23,7 @@ type StepCloneVMX struct {
 	tempDir   string
 }
 
-func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	halt := func(err error) multistep.StepAction {
 		state.Put("error", err)
 		return multistep.ActionHalt

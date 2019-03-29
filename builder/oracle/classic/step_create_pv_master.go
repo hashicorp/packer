@@ -15,7 +15,7 @@ type stepCreatePVMaster struct {
 	SecurityListKey string
 }
 
-func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreatePVMaster) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating master instance...")
 

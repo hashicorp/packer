@@ -51,7 +51,7 @@ func (s *StepStopServerInstance) stopServerInstance(serverInstanceNo string) err
 	return nil
 }
 
-func (s *StepStopServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepStopServerInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Stop Server Instance")
 
 	var serverInstanceNo = state.Get("InstanceNo").(string)

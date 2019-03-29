@@ -28,7 +28,7 @@ type StepVBoxManage struct {
 	Ctx      interpolate.Context
 }
 
-func (s *StepVBoxManage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepVBoxManage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

@@ -14,7 +14,7 @@ type StepUp struct {
 	GlobalID       string
 }
 
-func (s *StepUp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	ui := state.Get("ui").(packer.Ui)
 

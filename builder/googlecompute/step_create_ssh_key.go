@@ -22,7 +22,7 @@ type StepCreateSSHKey struct {
 
 // Run executes the Packer build step that generates SSH key pairs.
 // The key pairs are added to the ssh config
-func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 

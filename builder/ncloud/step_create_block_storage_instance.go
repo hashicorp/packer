@@ -55,7 +55,7 @@ func (s *StepCreateBlockStorageInstance) createBlockStorageInstance(serverInstan
 	return blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceNo, nil
 }
 
-func (s *StepCreateBlockStorageInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateBlockStorageInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Config.BlockStorageSize == 0 {
 		return processStepResult(nil, s.Error, state)
 	}

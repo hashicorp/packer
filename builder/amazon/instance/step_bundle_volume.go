@@ -24,7 +24,7 @@ type StepBundleVolume struct {
 	Debug bool
 }
 
-func (s *StepBundleVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepBundleVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ec2.Instance)

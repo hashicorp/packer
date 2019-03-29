@@ -16,7 +16,7 @@ type stepRegionCopyAlicloudImage struct {
 	RegionId                        string
 }
 
-func (s *stepRegionCopyAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.AlicloudImageDestinationRegions) == 0 {
 		return multistep.ActionContinue
 	}

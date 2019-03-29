@@ -26,7 +26,7 @@ type TestStepWaitForever struct {
 type TestStepInjectCancel struct {
 }
 
-func (s TestStepAcc) Run(_ context.Context, state StateBag) StepAction {
+func (s TestStepAcc) Run(ctx context.Context, state StateBag) StepAction {
 	s.insertData(state, "data")
 
 	if s.Halt {
@@ -66,7 +66,7 @@ func (s TestStepWaitForever) Run(context.Context, StateBag) StepAction {
 
 func (s TestStepWaitForever) Cleanup(StateBag) {}
 
-func (s TestStepInjectCancel) Run(_ context.Context, state StateBag) StepAction {
+func (s TestStepInjectCancel) Run(ctx context.Context, state StateBag) StepAction {
 	r := state.Get("runner").(*BasicRunner)
 	r.state = stateCancelling
 	return ActionContinue

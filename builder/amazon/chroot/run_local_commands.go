@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ctx interpolate.Context, ui packer.Ui) error {
+func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx interpolate.Context, ui packer.Ui) error {
 	for _, rawCmd := range commands {
-		intCmd, err := interpolate.Render(rawCmd, &ctx)
+		intCmd, err := interpolate.Render(rawCmd, &ictx)
 		if err != nil {
 			return fmt.Errorf("Error interpolating: %s", err)
 		}

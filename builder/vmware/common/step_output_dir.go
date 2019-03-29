@@ -19,7 +19,7 @@ type StepOutputDir struct {
 	success bool
 }
 
-func (s *StepOutputDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepOutputDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
 

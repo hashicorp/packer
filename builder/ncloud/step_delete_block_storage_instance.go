@@ -78,7 +78,7 @@ func (s *StepDeleteBlockStorageInstance) deleteBlockStorageInstance(serverInstan
 	return nil
 }
 
-func (s *StepDeleteBlockStorageInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteBlockStorageInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Config.BlockStorageSize == 0 {
 		return processStepResult(nil, s.Error, state)
 	}

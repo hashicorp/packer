@@ -12,7 +12,7 @@ import (
 type stepRunAlicloudInstance struct {
 }
 
-func (s *stepRunAlicloudInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRunAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
