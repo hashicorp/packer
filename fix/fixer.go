@@ -39,6 +39,7 @@ func init() {
 		"powershell-escapes":         new(FixerPowerShellEscapes),
 		"hyperv-deprecations":        new(FixerHypervDeprecations),
 		"hyperv-vmxc-typo":           new(FixerHypervVmxcTypo),
+		"hyperv-cpu-and-ram":         new(FizerHypervCPUandRAM),
 		"vmware-compaction":          new(FixerVMwareCompaction),
 	}
 
@@ -61,5 +62,6 @@ func init() {
 		"docker-email",
 		"powershell-escapes",
 		"vmware-compaction",
+		"hyperv-cpu-and-ram",
 	}
 }
