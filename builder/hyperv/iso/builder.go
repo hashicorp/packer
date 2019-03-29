@@ -68,7 +68,7 @@ type Config struct {
 
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
+	RamSize uint `mapstructure:"memory"`
 
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
@@ -87,7 +87,7 @@ type Config struct {
 	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
 	MacAddress                     string `mapstructure:"mac_address"`
 	VlanId                         string `mapstructure:"vlan_id"`
-	Cpu                            uint   `mapstructure:"cpu"`
+	Cpu                            uint   `mapstructure:"cpus"`
 	Generation                     uint   `mapstructure:"generation"`
 	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
 	UseLegacyNetworkAdapter        bool   `mapstructure:"use_legacy_network_adapter"`
@@ -593,10 +593,10 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
 	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v",
+		return fmt.Errorf("memory: Virtual machine requires memory size >= %v MB, but defined: %v",
 			MinRamSize, b.config.RamSize)
 	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v",
+		return fmt.Errorf("memory: Virtual machine requires memory size <= %v MB, but defined: %v",
 			MaxRamSize, b.config.RamSize)
 	}
 
