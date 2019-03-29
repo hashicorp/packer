@@ -14,7 +14,7 @@ type stepCreateTags struct {
 	Tags map[string]string
 }
 
-func (s *stepCreateTags) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateTags) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)

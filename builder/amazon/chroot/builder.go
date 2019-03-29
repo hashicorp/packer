@@ -202,9 +202,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	ec2conn := ec2.New(session)
 
 	wrappedCommand := func(command string) (string, error) {
-		ctx := b.config.ctx
-		ctx.Data = &wrappedCommandTemplate{Command: command}
-		return interpolate.Render(b.config.CommandWrapper, &ctx)
+		ictx := b.config.ctx
+		ictx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ictx)
 	}
 
 	// Setup the state bag and initial state for the steps

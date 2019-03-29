@@ -13,7 +13,7 @@ import (
 // for it to reach the stopped state.
 type StepStopMachine struct{}
 
-func (s *StepStopMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepStopMachine) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -12,7 +12,7 @@ type StepRun struct {
 	containerId string
 }
 
-func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)

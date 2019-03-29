@@ -26,7 +26,7 @@ type StepAttachGuestAdditions struct {
 	GuestAdditionsInterface string
 }
 
-func (s *StepAttachGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

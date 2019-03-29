@@ -19,7 +19,7 @@ type StepFlock struct {
 	fh *os.File
 }
 
-func (s *StepFlock) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepFlock) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	lockfile := "/var/lock/packer-chroot/lock"

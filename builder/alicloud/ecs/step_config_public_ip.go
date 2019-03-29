@@ -15,7 +15,7 @@ type stepConfigAlicloudPublicIP struct {
 	SSHPrivateIp    bool
 }
 
-func (s *stepConfigAlicloudPublicIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudPublicIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)

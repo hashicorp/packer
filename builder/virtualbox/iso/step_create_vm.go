@@ -19,7 +19,7 @@ type stepCreateVM struct {
 	vmName string
 }
 
-func (s *stepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)

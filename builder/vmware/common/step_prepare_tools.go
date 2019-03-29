@@ -13,7 +13,7 @@ type StepPrepareTools struct {
 	ToolsUploadFlavor string
 }
 
-func (c *StepPrepareTools) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (c *StepPrepareTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
 	if c.RemoteType == "esx5" {

@@ -25,7 +25,7 @@ type StepAttachFloppy struct {
 	floppyPath string
 }
 
-func (s *StepAttachFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
 	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {

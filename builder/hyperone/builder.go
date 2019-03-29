@@ -52,9 +52,9 @@ type wrappedCommandTemplate struct {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
-		ctx := b.config.ctx
-		ctx.Data = &wrappedCommandTemplate{Command: command}
-		return interpolate.Render(b.config.ChrootCommandWrapper, &ctx)
+		ictx := b.config.ctx
+		ictx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.ChrootCommandWrapper, &ictx)
 	}
 
 	state := &multistep.BasicStateBag{}

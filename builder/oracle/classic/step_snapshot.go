@@ -13,7 +13,7 @@ type stepSnapshot struct {
 	cleanupSnap bool
 }
 
-func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Snapshot...")

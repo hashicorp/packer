@@ -18,7 +18,7 @@ type StepPostMountCommands struct {
 	Commands []string
 }
 
-func (s *StepPostMountCommands) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPostMountCommands) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	device := state.Get("device").(string)
 	mountPath := state.Get("mount_path").(string)
@@ -29,14 +29,14 @@ func (s *StepPostMountCommands) Run(_ context.Context, state multistep.StateBag)
 		return multistep.ActionContinue
 	}
 
-	ctx := config.ctx
-	ctx.Data = &postMountCommandsData{
+	ictx := config.ctx
+	ictx.Data = &postMountCommandsData{
 		Device:    device,
 		MountPath: mountPath,
 	}
 
 	ui.Say("Running post-mount commands...")
-	if err := RunLocalCommands(s.Commands, wrappedCommand, ctx, ui); err != nil {
+	if err := RunLocalCommands(s.Commands, wrappedCommand, ictx, ui); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

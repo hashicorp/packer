@@ -13,7 +13,7 @@ type StepCompactDisk struct {
 }
 
 // Run runs a compaction/optimisation process on attached VHD/VHDX disks
-func (s *StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCompactDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

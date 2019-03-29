@@ -21,7 +21,7 @@ type stepConfigAlicloudSecurityGroup struct {
 	isCreate          bool
 }
 
-func (s *stepConfigAlicloudSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	networkType := state.Get("networktype").(InstanceNetWork)

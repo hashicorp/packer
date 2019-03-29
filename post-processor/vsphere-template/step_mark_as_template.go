@@ -36,7 +36,7 @@ func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
 	}
 }
 
-func (s *stepMarkAsTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	folder := state.Get("folder").(*object.Folder)

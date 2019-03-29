@@ -30,7 +30,7 @@ type StepConnectSSH struct {
 	SSHPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator

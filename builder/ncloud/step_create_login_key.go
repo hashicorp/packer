@@ -45,7 +45,7 @@ func (s *StepCreateLoginKey) createLoginKey() (*LoginKey, error) {
 	return &LoginKey{KeyName, privateKey.PrivateKey}, nil
 }
 
-func (s *StepCreateLoginKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateLoginKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Login Key")
 
 	loginKey, err := s.CreateLoginKey()

@@ -14,7 +14,7 @@ type StepCleanupTempKeys struct {
 	Comm *communicator.Config
 }
 
-func (s *StepCleanupTempKeys) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCleanupTempKeys) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// This step is mostly cosmetic; Packer deletes the ephemeral keys anyway
 	// so there's no realistic situation where these keys can cause issues.
 	// However, it's nice to clean up after yourself.

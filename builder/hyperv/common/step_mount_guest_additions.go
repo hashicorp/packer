@@ -15,7 +15,7 @@ type StepMountGuestAdditions struct {
 	Generation         uint
 }
 
-func (s *StepMountGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepMountGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.GuestAdditionsMode != "attach" {

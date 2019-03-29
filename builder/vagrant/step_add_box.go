@@ -68,7 +68,7 @@ func (s *StepAddBox) generateAddArgs() []string {
 	return addArgs
 }
 
-func (s *StepAddBox) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAddBox) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	ui := state.Get("ui").(packer.Ui)
 

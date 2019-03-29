@@ -22,7 +22,7 @@ type StepUploadVersion struct {
 }
 
 // Run uploads a file containing the version of Parallels Desktop.
-func (s *StepUploadVersion) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

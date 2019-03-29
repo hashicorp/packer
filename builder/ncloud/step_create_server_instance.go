@@ -82,7 +82,7 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 	return s.serverInstanceNo, nil
 }
 
-func (s *StepCreateServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateServerInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Instance")
 
 	var loginKey = state.Get("LoginKey").(*LoginKey)

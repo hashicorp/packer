@@ -15,7 +15,7 @@ type stepTagEBSVolumes struct {
 	Ctx           interpolate.Context
 }
 
-func (s *stepTagEBSVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
