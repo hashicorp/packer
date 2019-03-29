@@ -210,8 +210,11 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `run_command` (array of strings) - An array of arguments to pass to
     `docker run` in order to run the container. By default this is set to
-    `["-d", "-i", "-t", "{{.Image}}", "/bin/sh"]`. As you can see, you have a
-    couple template variables to customize, as well.
+    `["-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"]` if you are
+    using a linux container, and
+    `["-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"]` if you
+    are running a windows container. {{.Image}} is a template variable that
+    corresponds to the `image` template option.
 
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
     mount into this container. The key of the object is the host path, the
@@ -337,6 +340,33 @@ nearly-identical sequence definitions, as demonstrated by the example below:
 ```
 
 <span id="amazon-ec2-container-registry"></span>
+
+## Docker For Windows
+
+You should be able to run docker builds against both linux and Windows
+containers. Windows containers use a different communicator than linux
+containers, because Windows containers cannot use `docker cp`.
+
+If you are building a Windows container, you must set the template option
+`"windows_container": true`.  Please note that docker cannot export Windows
+containers, so you must either commit or discard them.
+
+The following is a fully functional template for building a Windows
+container.
+
+``` json
+{
+    "builders": [
+    {
+      "type": "docker",
+      "image": "microsoft/windowsservercore:1709",
+      "container_dir": "c:/app",
+      "windows_container": true,
+      "commit": true
+    }
+  ]
+}
+```
 
 ## Amazon EC2 Container Registry
 
