@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/packer"
@@ -15,52 +14,6 @@ import (
 
 type WindowsContainerCommunicator struct {
 	Communicator
-}
-
-func (c *WindowsContainerCommunicator) Start(remote *packer.RemoteCmd) error {
-	dockerArgs := []string{
-		"exec",
-		"-i",
-		c.ContainerID,
-		"powershell",
-		fmt.Sprintf("(%s)", remote.Command),
-	}
-
-	if c.Config.Pty {
-		dockerArgs = append(dockerArgs[:2], append([]string{"-t"}, dockerArgs[2:]...)...)
-	}
-
-	if c.Config.ExecUser != "" {
-		dockerArgs = append(dockerArgs[:2],
-			append([]string{"-u", c.Config.ExecUser}, dockerArgs[2:]...)...)
-	}
-
-	cmd := exec.Command("docker", dockerArgs...)
-
-	var (
-		stdin_w io.WriteCloser
-		err     error
-	)
-
-	stdin_w, err = cmd.StdinPipe()
-	if err != nil {
-		return err
-	}
-
-	stderr_r, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	stdout_r, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-
-	// Run the actual command in a goroutine so that Start doesn't block
-	go c.run(cmd, remote, stdin_w, stdout_r, stderr_r)
-
-	return nil
 }
 
 // Upload uses docker exec to copy the file from the host to the container
@@ -224,15 +177,4 @@ func (c *WindowsContainerCommunicator) Download(src string, dst io.Writer) error
 	}
 
 	return nil
-}
-
-func (c *WindowsContainerCommunicator) DownloadDir(src string, dst string, exclude []string) error {
-	return fmt.Errorf("DownloadDir is not implemented for docker")
-}
-
-// Runs the given command and blocks until completion
-func (c *WindowsContainerCommunicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin io.WriteCloser, stdout, stderr io.ReadCloser) {
-	// For Docker, remote communication must be serialized since it
-	// only supports single execution.
-	c.Communicator.run(cmd, remote, stdin, stdout, stderr)
 }
