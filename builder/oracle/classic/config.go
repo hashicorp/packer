@@ -75,10 +75,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	if c.SSHSourceList == "" {
 		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
-	// Use default oracle username with sudo privileges
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "opc"
-	}
 
 	if c.SnapshotTimeout == 0 {
 		c.SnapshotTimeout = 20 * time.Minute
