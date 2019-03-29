@@ -40,6 +40,7 @@ func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) mul
 			Version:       version,
 			Config:        config,
 			ContainerUser: containerUser,
+			EntryPoint:    []string{"powershell"},
 		},
 		}
 		state.Put("communicator", comm)
@@ -52,6 +53,7 @@ func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) mul
 			Version:       version,
 			Config:        config,
 			ContainerUser: containerUser,
+			EntryPoint:    []string{"/bin/sh", "-c"},
 		}
 		state.Put("communicator", comm)
 	}
