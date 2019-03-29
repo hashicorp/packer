@@ -12,6 +12,14 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+// Windows containers are a special beast in Docker; you can't use docker cp
+// to move files between the container and host.
+
+// This communicator works around that limitation by reusing all possible
+// methods and fields of the normal Docker Communicator, but we overwrite the
+// Upload, Download, and UploadDir methods to utilize a mounted directory and
+// native powershell commands rather than relying on docker cp.
+
 type WindowsContainerCommunicator struct {
 	Communicator
 }
