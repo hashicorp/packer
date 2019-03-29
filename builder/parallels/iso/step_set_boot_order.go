@@ -19,7 +19,7 @@ import (
 // Produces:
 type stepSetBootOrder struct{}
 
-func (s *stepSetBootOrder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepSetBootOrder) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

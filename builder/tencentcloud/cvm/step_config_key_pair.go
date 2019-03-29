@@ -23,7 +23,7 @@ type stepConfigKeyPair struct {
 	keyID string
 }
 
-func (s *stepConfigKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {

@@ -17,7 +17,7 @@ type StepImport struct {
 	vmName string
 }
 
-func (s *StepImport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepImport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmPath := state.Get("vm_path").(string)

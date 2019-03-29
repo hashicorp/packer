@@ -61,7 +61,7 @@ func (s *StepCreateServerImage) createServerImage(serverInstanceNo string) (*ncl
 	return &serverImage, nil
 }
 
-func (s *StepCreateServerImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateServerImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Image")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

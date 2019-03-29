@@ -15,7 +15,7 @@ type stepPreValidate struct {
 	ForceDelete           bool
 }
 
-func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if s.ForceDelete {
 		ui.Say("Force delete flag found, skipping prevalidating image name.")

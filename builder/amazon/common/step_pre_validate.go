@@ -21,7 +21,7 @@ type StepPreValidate struct {
 	ForceDeregister bool
 }
 
-func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if accessConfig, ok := state.GetOk("access_config"); ok {

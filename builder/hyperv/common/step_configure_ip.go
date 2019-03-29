@@ -14,7 +14,7 @@ import (
 type StepConfigureIp struct {
 }
 
-func (s *StepConfigureIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

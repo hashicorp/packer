@@ -18,7 +18,7 @@ type StepCreateVolume struct {
 	doCleanup              bool
 }
 
-func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Proceed only if block storage volume is required.
 	if !s.UseBlockStorageVolume {
 		return multistep.ActionContinue

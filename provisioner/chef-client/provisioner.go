@@ -383,8 +383,8 @@ func (p *Provisioner) createConfig(
 		tpl = string(tplBytes)
 	}
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:                   nodeName,
 		ServerUrl:                  serverUrl,
 		ClientKey:                  clientKey,
@@ -397,7 +397,7 @@ func (p *Provisioner) createConfig(
 		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}
@@ -416,15 +416,15 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 	// Read the template
 	tpl := DefaultKnifeTemplate
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:        nodeName,
 		ServerUrl:       serverUrl,
 		ClientKey:       clientKey,
 		SslVerifyMode:   sslVerifyMode,
 		TrustedCertsDir: trustedCertsDir,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}

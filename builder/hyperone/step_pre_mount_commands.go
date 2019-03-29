@@ -14,19 +14,19 @@ type preMountCommandsData struct {
 
 type stepPreMountCommands struct{}
 
-func (s *stepPreMountCommands) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPreMountCommands) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	device := state.Get("device").(string)
 
-	ctx := config.ctx
-	ctx.Data = &preMountCommandsData{
+	ictx := config.ctx
+	ictx.Data = &preMountCommandsData{
 		Device:    device,
 		MountPath: config.ChrootMountPath,
 	}
 
 	ui.Say("Running pre-mount commands...")
-	if err := runCommands(config.PreMountCommands, ctx, state); err != nil {
+	if err := runCommands(config.PreMountCommands, ictx, state); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

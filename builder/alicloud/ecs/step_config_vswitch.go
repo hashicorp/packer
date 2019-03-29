@@ -20,7 +20,7 @@ type stepConfigAlicloudVSwitch struct {
 	VSwitchName string
 }
 
-func (s *stepConfigAlicloudVSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudVSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpcid").(string)

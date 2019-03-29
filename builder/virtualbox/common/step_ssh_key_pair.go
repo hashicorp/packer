@@ -20,7 +20,7 @@ type StepSshKeyPair struct {
 	Comm         *communicator.Config
 }
 
-func (s *StepSshKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Comm.SSHPassword != "" {
 		return multistep.ActionContinue
 	}

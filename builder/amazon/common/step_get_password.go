@@ -27,7 +27,7 @@ type StepGetPassword struct {
 	BuildName string
 }
 
-func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm

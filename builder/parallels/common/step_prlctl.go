@@ -29,7 +29,7 @@ type StepPrlctl struct {
 }
 
 // Run executes `prlctl` commands.
-func (s *StepPrlctl) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPrlctl) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

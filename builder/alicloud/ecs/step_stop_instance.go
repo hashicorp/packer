@@ -14,7 +14,7 @@ type stepStopAlicloudInstance struct {
 	DisableStop bool
 }
 
-func (s *stepStopAlicloudInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepStopAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	ui := state.Get("ui").(packer.Ui)
