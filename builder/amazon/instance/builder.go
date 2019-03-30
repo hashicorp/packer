@@ -255,10 +255,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
-			CommConfig:            &b.config.RunConfig.Comm,
-			SecurityGroupFilter:   b.config.SecurityGroupFilter,
-			SecurityGroupIds:      b.config.SecurityGroupIds,
-			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
+			CommConfig:             &b.config.RunConfig.Comm,
+			SecurityGroupFilter:    b.config.SecurityGroupFilter,
+			SecurityGroupIds:       b.config.SecurityGroupIds,
+			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
 		},
 		instanceStep,
 		&awscommon.StepGetPassword{
