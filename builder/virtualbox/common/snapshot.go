@@ -35,13 +35,6 @@ func ParseSnapshotData(snapshotData string) (*VBoxSnapshot, error) {
 				node.IsCurrent = true
 			} else {
 				matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
-				log.Printf("************ Snapshot %s name parts", txt)
-				log.Printf("Matches %#v\n", matches)
-				log.Printf("Node %s\n", matches[0])
-				log.Printf("Type %s\n", matches[1])
-				log.Printf("Path %s\n", matches[2])
-				log.Printf("Leaf %s\n", matches[3])
-				log.Printf("Value %s\n", matches[4])
 				if matches[1] == "Name" {
 					if nil == rootNode {
 						node = new(VBoxSnapshot)

@@ -38,7 +38,7 @@ func (s *StepSetSnapshot) Run(_ context.Context, state multistep.StateBag) multi
 		s.revertToSnapshot = currentSnapshot.UUID
 		ui.Say(fmt.Sprintf("Attaching snapshot %s on virtual machine %s", s.AttachSnapshot, s.Name))
 		candidateSnapshots := snapshotTree.GetSnapshotsByName(s.AttachSnapshot)
-		if 0 <= len(candidateSnapshots) {
+		if 0 >= len(candidateSnapshots) {
 			err := fmt.Errorf("Snapshot %s not found on VM %s", s.AttachSnapshot, s.Name)
 			state.Put("error", err)
 			ui.Error(err.Error())

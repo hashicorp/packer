@@ -129,34 +129,56 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
 	} else {
+		if c.AttachSnapshot != "" && c.TargetSnapshot != "" && c.AttachSnapshot == c.TargetSnapshot {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Attach snapshot %s and target snapshot %s cannot be the same", c.AttachSnapshot, c.TargetSnapshot))
+		}
 		snapshotTree, err := driver.LoadSnapshots(c.VMName)
+		log.Printf("")
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to load snapshots for VM %s: %s", c.VMName, err))
 		} else {
-			if c.AttachSnapshot != "" && c.TargetSnapshot != "" && c.AttachSnapshot == c.TargetSnapshot {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Attach snapshot %s and target snapshot %s cannot be the same", c.AttachSnapshot, c.TargetSnapshot))
+			log.Printf("Snapshots loaded from VM %s", c.VMName)
+
+			var attachSnapshot *vboxcommon.VBoxSnapshot
+			if nil != snapshotTree {
+				attachSnapshot = snapshotTree.GetCurrentSnapshot()
+				log.Printf("VM %s is currently attached to snapshot: %s/%s", c.VMName, attachSnapshot.Name, attachSnapshot.UUID)
 			}
-			attachSnapshot := snapshotTree.GetCurrentSnapshot()
 			if c.AttachSnapshot != "" {
-				snapshots := snapshotTree.GetSnapshotsByName(c.AttachSnapshot)
-				if 0 >= len(snapshots) {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Snapshot %s does not exist on with VM %s", c.AttachSnapshot, c.VMName))
-				} else if 1 < len(snapshots) {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Multiple Snapshots %s exist on with VM %s", c.AttachSnapshot, c.VMName))
+				log.Printf("Checking configuration attach_snapshot [%s]", c.AttachSnapshot)
+				if nil == snapshotTree {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("No snapshots defined on VM %s. Unable to attach to %s", c.VMName, c.AttachSnapshot))
 				} else {
-					attachSnapshot = snapshots[0]
+					snapshots := snapshotTree.GetSnapshotsByName(c.AttachSnapshot)
+					if 0 >= len(snapshots) {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Snapshot %s does not exist on VM %s", c.AttachSnapshot, c.VMName))
+					} else if 1 < len(snapshots) {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Multiple Snapshots with name %s exist on VM %s", c.AttachSnapshot, c.VMName))
+					} else {
+						attachSnapshot = snapshots[0]
+					}
 				}
 			}
 			if c.TargetSnapshot != "" {
-				snapshots := snapshotTree.GetSnapshotsByName(c.TargetSnapshot)
-				if 0 >= len(snapshots) {
-					isChild := false
-					for _, snapshot := range snapshots {
-						log.Printf("Checking if target snaphot %v is child of %s")
-						isChild = nil != snapshot.Parent && snapshot.Parent.UUID == attachSnapshot.UUID
-					}
-					if !isChild {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
+				log.Printf("Checking configuration target_snapshot [%s]", c.TargetSnapshot)
+				if nil == snapshotTree {
+					log.Printf("Currently no snapshots defined in VM %s", c.VMName)
+				} else {
+					snapshots := snapshotTree.GetSnapshotsByName(c.TargetSnapshot)
+					if 0 < len(snapshots) {
+						if nil == attachSnapshot {
+							panic("Internal error. Expecting a handle to a VBoxSnapshot")
+						}
+						isChild := false
+						for _, snapshot := range snapshots {
+							log.Printf("Checking if target snaphot %s/%s is child of %s/%s", snapshot.Name, snapshot.UUID, attachSnapshot.Name, attachSnapshot.UUID)
+							isChild = nil != snapshot.Parent && snapshot.Parent.UUID == attachSnapshot.UUID
+						}
+						if !isChild {
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
+						}
+					} else {
+						log.Printf("No snapshot with name %s defined in VM %s", c.TargetSnapshot, c.VMName)
 					}
 				}
 			}
