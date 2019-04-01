@@ -22,7 +22,7 @@ func testConfig() map[string]interface{} {
 		"shutdown_command":        "yes",
 		"ssh_username":            "foo",
 		"switch_name":             "switch", // to avoid using builder.detectSwitchName which can lock down in travis-ci
-		"ram_size":                64,
+		"memory":                  64,
 		"guest_additions_mode":    "none",
 		"clone_from_vmcx_path":    "generated",
 		packer.BuildNameConfigKey: "foo",
