@@ -48,7 +48,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		networks[i].Port = s.Ports[i]
 	}
 	for ; i < len(networks); i++ {
-		networks[i].UUID = s.Networks[i]
+		networks[i].UUID = s.Networks[i-len(s.Ports)]
 	}
 
 	userData := []byte(s.UserData)
