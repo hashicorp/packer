@@ -87,9 +87,11 @@ builder. This builder currently only works with the SSH communicator.
     list. If you don't provide one, Packer will provide a generic description.
 
 -   `ssh_username` (string) - The username that Packer will use to SSH into the
-    instance; defaults to `opc`, the default oracle user, which has sudo
-    privileges. If you have already configured users on your machine, you may
-    prompt Packer to use one of those instead. For more detail, see the
+    instance; required if using SSH. The default oracle user with sudo
+    privileges is `opc`, so you may set `ssh_username` to `opc` if you have not
+    yet configured users on your machine. If you have already configured users
+    on your machine, you may prompt Packer to use one of those instead. For
+    more detail, see the
     [documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsg/accessing-oracle-linux-instance-using-ssh.html).
 
 -   `image_name` (string) - The name to assign to the resulting custom image.

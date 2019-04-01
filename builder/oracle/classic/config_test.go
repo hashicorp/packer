@@ -42,6 +42,7 @@ func TestConfigValidationCatchesMissing(t *testing.T) {
 		"dest_image_list",
 		"source_image_list",
 		"shape",
+		"ssh_username",
 	}
 	for _, key := range required {
 		tc := testConfig()
@@ -50,15 +51,6 @@ func TestConfigValidationCatchesMissing(t *testing.T) {
 		if err == nil {
 			t.Fatalf("Test should have failed when config lacked %s!", key)
 		}
-	}
-}
-
-func TestValidationsIgnoresOptional(t *testing.T) {
-	tc := testConfig()
-	delete(tc, "ssh_username")
-	_, err := NewConfig(tc)
-	if err != nil {
-		t.Fatalf("Shouldn't care if ssh_username is missing: err: %#v", err.Error())
 	}
 }
 
