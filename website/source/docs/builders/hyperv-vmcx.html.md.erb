@@ -207,7 +207,7 @@ builder.
     created, must be empty prior to running the builder. By default this is
     "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
--   `ram_size` (number) - The amount, in megabytes, of RAM to assign to the
+-   `memory` (number) - The amount, in megabytes, of RAM to assign to the
     VM. By default, this is 1 GB.
 
 -   `secondary_iso_images` (array of strings) - A list of ISO paths to
@@ -393,7 +393,7 @@ Packer config:
       "winrm_password": "vagrant",
       "winrm_timeout" : "4h",
       "shutdown_command": "f:\\run-sysprep.cmd",
-      "ram_size": 4096,
+      "memory": 4096,
       "cpu": 4,
       "generation": 2,
       "switch_name":"LAN",
@@ -902,7 +902,7 @@ virtual switch with an `External` connection type.
   "variables": {
     "vm_name": "ubuntu-xenial",
     "cpu": "2",
-    "ram_size": "1024",
+    "memory": "1024",
     "disk_size": "21440",
     "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
     "iso_checksum_type": "sha1",
@@ -937,7 +937,7 @@ virtual switch with an `External` connection type.
         "boot<enter>"
       ],
       "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
-      "ram_size": "{{user `ram_size`}}",
+      "memory": "{{user `memory`}}",
       "cpu": "{{user `cpu`}}",
       "generation": 2,
       "enable_secure_boot": false
