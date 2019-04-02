@@ -16,13 +16,13 @@ func TestFixerAmazonTemporarySecurityCIDRs(t *testing.T) {
 	}{
 		{
 			Input: map[string]interface{}{
-				"type":                          "amazon-ebs",
-				"temporary_security_group_cidr": "0.0.0.0/0",
+				"type":                                 "amazon-ebs",
+				"temporary_security_group_source_cidr": "0.0.0.0/0",
 			},
 
 			Expected: map[string]interface{}{
-				"type":                           "amazon-ebs",
-				"temporary_security_group_cidrs": []string{"0.0.0.0/0"},
+				"type":                                  "amazon-ebs",
+				"temporary_security_group_source_cidrs": []string{"0.0.0.0/0"},
 			},
 		},
 	}

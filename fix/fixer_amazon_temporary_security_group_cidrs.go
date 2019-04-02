@@ -19,7 +19,7 @@ func (FixerAmazonTemporarySecurityCIDRs) Fix(input map[string]interface{}) (map[
 		return nil, err
 	}
 
-	// Go through each builder and replace the temporary_security_group_cidr if we can
+	// Go through each builder and replace the temporary_security_group_source_cidr if we can
 	for _, builder := range tpl.Builders {
 		builderTypeRaw, ok := builder["type"]
 		if !ok {
@@ -35,13 +35,13 @@ func (FixerAmazonTemporarySecurityCIDRs) Fix(input map[string]interface{}) (map[
 			continue
 		}
 
-		temporarySecurityGroupCIDR, ok := builder["temporary_security_group_cidr"].(string)
+		temporarySecurityGroupCIDR, ok := builder["temporary_security_group_source_cidr"].(string)
 		if !ok {
 			continue
 		}
 
-		delete(builder, "temporary_security_group_cidr")
-		builder["temporary_security_group_cidrs"] = []string{temporarySecurityGroupCIDR}
+		delete(builder, "temporary_security_group_source_cidr")
+		builder["temporary_security_group_source_cidrs"] = []string{temporarySecurityGroupCIDR}
 	}
 
 	input["builders"] = tpl.Builders
@@ -49,5 +49,5 @@ func (FixerAmazonTemporarySecurityCIDRs) Fix(input map[string]interface{}) (map[
 }
 
 func (FixerAmazonTemporarySecurityCIDRs) Synopsis() string {
-	return `Replaces "temporary_security_group_cidr" (string) with "temporary_security_group_cidrs" (list of strings)`
+	return `Replaces "temporary_security_group_source_cidr" (string) with "temporary_security_group_source_cidrs" (list of strings)`
 }
