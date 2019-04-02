@@ -171,10 +171,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
-			SecurityGroupFilter:   b.config.SecurityGroupFilter,
-			SecurityGroupIds:      b.config.SecurityGroupIds,
-			CommConfig:            &b.config.RunConfig.Comm,
-			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
+			SecurityGroupFilter:    b.config.SecurityGroupFilter,
+			SecurityGroupIds:       b.config.SecurityGroupIds,
+			CommConfig:             &b.config.RunConfig.Comm,
+			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
 		},
 		instanceStep,
 		&stepTagEBSVolumes{
