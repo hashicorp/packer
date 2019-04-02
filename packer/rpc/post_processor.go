@@ -25,9 +25,10 @@ type PostProcessorConfigureArgs struct {
 }
 
 type PostProcessorProcessResponse struct {
-	Err      *BasicError
-	Keep     bool
-	StreamId uint32
+	Err           *BasicError
+	Keep          bool
+	ForceOverride bool
+	StreamId      uint32
 }
 
 func (p *postProcessor) Configure(raw ...interface{}) (err error) {
@@ -39,7 +40,7 @@ func (p *postProcessor) Configure(raw ...interface{}) (err error) {
 	return
 }
 
-func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterArtifact(a)
@@ -48,23 +49,23 @@ func (p *postProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Art
 
 	var response PostProcessorProcessResponse
 	if err := p.client.Call("PostProcessor.PostProcess", nextId, &response); err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	if response.Err != nil {
-		return nil, false, response.Err
+		return nil, false, false, response.Err
 	}
 
 	if response.StreamId == 0 {
-		return nil, false, nil
+		return nil, false, false, nil
 	}
 
 	client, err := newClientWithMux(p.mux, response.StreamId)
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
-	return client.Artifact(), response.Keep, nil
+	return client.Artifact(), response.Keep, response.ForceOverride, nil
 }
 
 func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *interface{}) error {
@@ -80,7 +81,7 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 	defer client.Close()
 
 	streamId = 0
-	artifactResult, keep, err := p.p.PostProcess(client.Ui(), client.Artifact())
+	artifactResult, keep, forceOverride, err := p.p.PostProcess(client.Ui(), client.Artifact())
 	if err == nil && artifactResult != nil {
 		streamId = p.mux.NextId()
 		server := newServerWithMux(p.mux, streamId)
@@ -89,9 +90,10 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 	}
 
 	*reply = PostProcessorProcessResponse{
-		Err:      NewBasicError(err),
-		Keep:     keep,
-		StreamId: streamId,
+		Err:           NewBasicError(err),
+		Keep:          keep,
+		ForceOverride: forceOverride,
+		StreamId:      streamId,
 	}
 
 	return nil

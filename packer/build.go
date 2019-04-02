@@ -109,7 +109,7 @@ type coreBuildPostProcessor struct {
 	processor         PostProcessor
 	processorType     string
 	config            map[string]interface{}
-	keepInputArtifact bool
+	keepInputArtifact *bool
 }
 
 // Keeps track of the provisioner and the configuration of the provisioner
@@ -262,7 +262,7 @@ PostProcessorRunSeqLoop:
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
 			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
-			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			artifact, defaultKeep, forceOverride, err := corePP.processor.PostProcess(ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
@@ -274,7 +274,23 @@ PostProcessorRunSeqLoop:
 				continue PostProcessorRunSeqLoop
 			}
 
-			keep = keep || corePP.keepInputArtifact
+			keep := defaultKeep
+			// When nil, go for the default. If overridden by user, use that
+			// instead.
+			// Exception: for postprocessors that will fail/become
+			// useless if keep isn't set, force an override that still uses
+			// post-processor preference instead of user preference.
+			if corePP.keepInputArtifact != nil {
+				if *corePP.keepInputArtifact == false && forceOverride {
+					log.Printf("The %s post-processor forces "+
+						"keep_input_artifact=true to preserve integrity of the"+
+						"build chain. User-set keep_input_artifact=false will be"+
+						"ignored.", corePP.processorType)
+				} else {
+					// User overrides default
+					keep = *corePP.keepInputArtifact
+				}
+			}
 			if i == 0 {
 				// This is the first post-processor. We handle deleting
 				// previous artifacts a bit different because multiple
@@ -314,7 +330,7 @@ PostProcessorRunSeqLoop:
 	} else {
 		log.Printf("Deleting original artifact for build '%s'", b.name)
 		if err := builderArtifact.Destroy(); err != nil {
-			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
+			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s; bad artifact: %#v", err, builderArtifact.Files()))
 		}
 	}
 
