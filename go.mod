@@ -6,6 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
 	github.com/Azure/go-autorest v12.0.0+incompatible
 	github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4 // indirect
+	github.com/Bowery/prompt v0.0.0-20180817134258-8a1d5376df1c // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
 	github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4
@@ -63,6 +64,7 @@ require (
 	github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
+	github.com/kardianos/govendor v1.0.9 // indirect
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77 // indirect
 	github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817 // indirect
