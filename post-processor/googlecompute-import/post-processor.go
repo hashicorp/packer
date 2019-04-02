@@ -94,42 +94,42 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	client, err := googlecompute.NewClientGCE(&p.config.Account)
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	if artifact.BuilderId() != compress.BuilderId {
 		err = fmt.Errorf(
 			"incompatible artifact type: %s\nCan only import from Compress post-processor artifacts",
 			artifact.BuilderId())
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	p.config.GCSObjectName, err = interpolate.Render(p.config.GCSObjectName, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error rendering gcs_object_name template: %s", err)
+		return nil, false, false, fmt.Errorf("Error rendering gcs_object_name template: %s", err)
 	}
 
 	rawImageGcsPath, err := UploadToBucket(client, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
 	if err != nil {
-		return nil, p.config.KeepOriginalImage, err
+		return nil, p.config.KeepOriginalImage, false, err
 	}
 
 	gceImageArtifact, err := CreateGceImage(client, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
 	if err != nil {
-		return nil, p.config.KeepOriginalImage, err
+		return nil, p.config.KeepOriginalImage, false, err
 	}
 
 	if !p.config.SkipClean {
 		err = DeleteFromBucket(client, ui, p.config.Bucket, p.config.GCSObjectName)
 		if err != nil {
-			return nil, p.config.KeepOriginalImage, err
+			return nil, p.config.KeepOriginalImage, false, err
 		}
 	}
 
-	return gceImageArtifact, p.config.KeepOriginalImage, nil
+	return gceImageArtifact, p.config.KeepOriginalImage, false, nil
 }
 
 func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {

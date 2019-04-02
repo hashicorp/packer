@@ -100,7 +100,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 
 	// These are extra variables that will be made available for interpolation.
 	p.config.ctx.Data = map[string]string{
@@ -110,7 +110,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	target, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error interpolating output value: %s", err)
+		return nil, false, false, fmt.Errorf("Error interpolating output value: %s", err)
 	} else {
 		fmt.Println(target)
 	}
@@ -119,12 +119,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	newArtifact := &Artifact{Path: target}
 
 	if err = os.MkdirAll(filepath.Dir(target), os.FileMode(0755)); err != nil {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unable to create dir for archive %s: %s", target, err)
 	}
 	outputFile, err := os.Create(target)
 	if err != nil {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unable to create archive %s: %s", target, err)
 	}
 	defer outputFile.Close()
@@ -168,19 +168,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Say(fmt.Sprintf("Tarring %s with %s", target, compression))
 		err = createTarArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, fmt.Errorf("Error creating tar: %s", err)
+			return nil, keep, false, fmt.Errorf("Error creating tar: %s", err)
 		}
 	case "zip":
 		ui.Say(fmt.Sprintf("Zipping %s", target))
 		err = createZipArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, fmt.Errorf("Error creating zip: %s", err)
+			return nil, keep, false, fmt.Errorf("Error creating zip: %s", err)
 		}
 	default:
 		// Filename indicates no tarball (just compress) so we'll do an io.Copy
 		// into our compressor.
 		if len(artifact.Files()) != 1 {
-			return nil, keep, fmt.Errorf(
+			return nil, keep, false, fmt.Errorf(
 				"Can only have 1 input file when not using tar/zip. Found %d "+
 					"files: %v", len(artifact.Files()), artifact.Files())
 		}
@@ -189,21 +189,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		source, err := os.Open(archiveFile)
 		if err != nil {
-			return nil, keep, fmt.Errorf(
+			return nil, keep, false, fmt.Errorf(
 				"Failed to open source file %s for reading: %s",
 				archiveFile, err)
 		}
 		defer source.Close()
 
 		if _, err = io.Copy(output, source); err != nil {
-			return nil, keep, fmt.Errorf("Failed to compress %s: %s",
+			return nil, keep, false, fmt.Errorf("Failed to compress %s: %s",
 				archiveFile, err)
 		}
 	}
 
 	ui.Say(fmt.Sprintf("Archive %s completed", target))
 
-	return newArtifact, keep, nil
+	return newArtifact, keep, false, nil
 }
 
 func (config *Config) detectFromFilename() {
