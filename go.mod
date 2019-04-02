@@ -106,7 +106,7 @@ require (
 	github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c // indirect
 	github.com/masterzen/simplexml v0.0.0-20140219194429-95ba30457eb1 // indirect
 	github.com/masterzen/winrm v0.0.0-20180224160350-7e40f93ae939
-	github.com/mattn/go-tty v0.0.0-20190322114730-5518497423d1
+	github.com/mattn/go-tty v0.0.0-20190402035014-76a2065f1a95
 	github.com/miekg/dns v1.1.1 // indirect
 	github.com/mitchellh/cli v0.0.0-20170908181043-65fcae5817c8
 	github.com/mitchellh/copystructure v1.0.0 // indirect

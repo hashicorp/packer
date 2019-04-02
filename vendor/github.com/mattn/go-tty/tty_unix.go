@@ -52,6 +52,7 @@ func open() (*TTY, error) {
 	tty.ss = make(chan os.Signal, 1)
 	signal.Notify(tty.ss, syscall.SIGWINCH)
 	go func() {
+		defer close(tty.ws)
 		for sig := range tty.ss {
 			switch sig {
 			case syscall.SIGWINCH:
@@ -78,8 +79,8 @@ func (tty *TTY) readRune() (rune, error) {
 }
 
 func (tty *TTY) close() error {
+	signal.Stop(tty.ss)
 	close(tty.ss)
-	close(tty.ws)
 	_, _, err := syscall.Syscall6(syscall.SYS_IOCTL, uintptr(tty.in.Fd()), ioctlWriteTermios, uintptr(unsafe.Pointer(&tty.termios)), 0, 0, 0)
 	return err
 }
