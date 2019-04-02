@@ -62,8 +62,8 @@ one, by using `global_id` instead of `source_box`.
     "packer_" plus your buildname.
 
 -   `provider` (string) - The vagrant [provider](docs/post-processors/vagrant.html).
-    This parameter is required to use vagrant builder with the `vagrant-cloud`
-    post-processor. Defaults to unset.
+    This parameter is required when `source_path` have more than one provider, 
+    or when using `vagrant-cloud` post-processor. Defaults to unset.
 
 -   `checksum` (string) - The checksum for the .box file. The type of the
     checksum is specified with `checksum_type`, documented below.
@@ -125,3 +125,21 @@ one, by using `global_id` instead of `source_box`.
 
 -   `skip_package` (bool) - if true, Packer will not call `vagrant package` to
     package your base box into its own standalone .box file.
+
+## Example
+
+Sample for `hashicorp/precise64` with virtualbox provider.
+
+```
+{
+  "builders": [
+    {
+      "communicator": "ssh",
+      "source_path": "hashicorp/precise64",
+      "provider": "virtualbox",
+      "add_force": true,
+      "type": "vagrant"
+    }
+  ]
+}
+```
