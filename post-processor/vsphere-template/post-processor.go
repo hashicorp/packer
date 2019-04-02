@@ -91,9 +91,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("The Packer vSphere Template post-processor "+
+		return nil, false, false, fmt.Errorf("The Packer vSphere Template post-processor "+
 			"can only take an artifact from the VMware-iso builder, built on "+
 			"ESXi (i.e. remote) or an artifact from the vSphere post-processor. "+
 			"Artifact type %s does not fit this requirement", artifact.BuilderId())
@@ -104,7 +104,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	s := artifact.State(vmwcommon.ArtifactConfSkipExport)
 
 	if f != "" && k != "true" && s == "false" {
-		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
+		return nil, false, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
 	}
 
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
@@ -113,7 +113,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	time.Sleep(10 * time.Second)
 	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error connecting to vSphere: %s", err)
+		return nil, false, false, fmt.Errorf("Error connecting to vSphere: %s", err)
 	}
 
 	defer c.Logout(context.Background())
@@ -135,7 +135,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)
 	if rawErr, ok := state.GetOk("error"); ok {
-		return nil, false, rawErr.(error)
+		return nil, false, false, rawErr.(error)
 	}
-	return artifact, true, nil
+	return artifact, true, true, nil
 }

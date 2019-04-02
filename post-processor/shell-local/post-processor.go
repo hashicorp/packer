@@ -35,14 +35,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return sl.Validate(&p.config)
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	// this particular post-processor doesn't do anything with the artifact
 	// except to return it.
 
 	retBool, retErr := sl.Run(ui, &p.config)
 	if !retBool {
-		return nil, retBool, retErr
+		return nil, retBool, false, retErr
 	}
 
-	return artifact, retBool, retErr
+	return artifact, retBool, false, retErr
 }

@@ -119,19 +119,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
 
 	session, err := p.config.Session()
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 	config := session.Config
 
 	// Render this key since we didn't in the configure phase
 	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error rendering s3_key_name template: %s", err)
+		return nil, false, false, fmt.Errorf("Error rendering s3_key_name template: %s", err)
 	}
 	log.Printf("Rendered s3_key_name as %s", p.config.S3Key)
 
@@ -147,7 +147,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Hope we found something useful
 	if source == "" {
-		return nil, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
+		return nil, false, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
 	}
 
 	if p.config.S3Encryption == "AES256" && p.config.S3EncryptionKey != "" {
@@ -158,7 +158,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Opening file %s to upload", source)
 	file, err := os.Open(source)
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to open %s: %s", source, err)
+		return nil, false, false, fmt.Errorf("Failed to open %s: %s", source, err)
 	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
@@ -181,7 +181,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Copy the image file into the S3 bucket specified
 	uploader := s3manager.NewUploader(session)
 	if _, err = uploader.Upload(updata); err != nil {
-		return nil, false, fmt.Errorf("Failed to upload %s: %s", source, err)
+		return nil, false, false, fmt.Errorf("Failed to upload %s: %s", source, err)
 	}
 
 	// May as well stop holding this open now
@@ -222,7 +222,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
+		return nil, false, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
 	}
 
 	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
@@ -244,7 +244,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		if err2 == nil {
 			statusMessage = *import_result.ImportImageTasks[0].StatusMessage
 		}
-		return nil, false, fmt.Errorf("Import task %s failed with status message: %s, error: %s", *import_start.ImportTaskId, statusMessage, err)
+		return nil, false, false, fmt.Errorf("Import task %s failed with status message: %s, error: %s", *import_start.ImportTaskId, statusMessage, err)
 	}
 
 	// Retrieve what the outcome was for the import task
@@ -255,12 +255,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	})
 
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to find import task %s: %s", *import_start.ImportTaskId, err)
+		return nil, false, false, fmt.Errorf("Failed to find import task %s: %s", *import_start.ImportTaskId, err)
 	}
 	// Check it was actually completed
 	if *import_result.ImportImageTasks[0].Status != "completed" {
 		// The most useful error message is from the job itself
-		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, *import_result.ImportImageTasks[0].StatusMessage)
+		return nil, false, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, *import_result.ImportImageTasks[0].StatusMessage)
 	}
 
 	ui.Message(fmt.Sprintf("Import task %s complete", *import_start.ImportTaskId))
@@ -279,13 +279,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		})
 
 		if err != nil {
-			return nil, false, fmt.Errorf("Error Copying AMI (%s): %s", createdami, err)
+			return nil, false, false, fmt.Errorf("Error Copying AMI (%s): %s", createdami, err)
 		}
 
 		ui.Message(fmt.Sprintf("Waiting for AMI rename to complete (may take a while)"))
 
 		if err := awscommon.WaitUntilAMIAvailable(aws.BackgroundContext(), ec2conn, *resp.ImageId); err != nil {
-			return nil, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
+			return nil, false, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
 		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
@@ -293,7 +293,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		})
 
 		if err != nil {
-			return nil, false, fmt.Errorf("Error deregistering existing AMI: %s", err)
+			return nil, false, false, fmt.Errorf("Error deregistering existing AMI: %s", err)
 		}
 
 		ui.Message(fmt.Sprintf("AMI rename completed"))
@@ -325,11 +325,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		})
 
 		if err != nil {
-			return nil, false, fmt.Errorf("Failed to retrieve details for AMI %s: %s", createdami, err)
+			return nil, false, false, fmt.Errorf("Failed to retrieve details for AMI %s: %s", createdami, err)
 		}
 
 		if len(imageResp.Images) == 0 {
-			return nil, false, fmt.Errorf("AMI %s has no images", createdami)
+			return nil, false, false, fmt.Errorf("AMI %s has no images", createdami)
 		}
 
 		image := imageResp.Images[0]
@@ -351,7 +351,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		})
 
 		if err != nil {
-			return nil, false, fmt.Errorf("Failed to add tags to resources %#v: %s", resourceIds, err)
+			return nil, false, false, fmt.Errorf("Failed to add tags to resources %#v: %s", resourceIds, err)
 		}
 
 	}
@@ -405,7 +405,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			input.ImageId = &createdami
 			_, err := ec2conn.ModifyImageAttribute(input)
 			if err != nil {
-				return nil, false, fmt.Errorf("Error modifying AMI attributes: %s", err)
+				return nil, false, false, fmt.Errorf("Error modifying AMI attributes: %s", err)
 			}
 		}
 	}
@@ -428,9 +428,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			Key:    &p.config.S3Key,
 		})
 		if err != nil {
-			return nil, false, fmt.Errorf("Failed to delete s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
+			return nil, false, false, fmt.Errorf("Failed to delete s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
 		}
 	}
 
-	return artifact, false, nil
+	return artifact, false, false, nil
 }
