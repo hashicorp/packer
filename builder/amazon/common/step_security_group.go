@@ -17,10 +17,10 @@ import (
 )
 
 type StepSecurityGroup struct {
-	CommConfig            *communicator.Config
-	SecurityGroupFilter   SecurityGroupFilterOptions
-	SecurityGroupIds      []string
-	TemporarySGSourceCidr string
+	CommConfig             *communicator.Config
+	SecurityGroupFilter    SecurityGroupFilterOptions
+	SecurityGroupIds       []string
+	TemporarySGSourceCidrs []string
 
 	createdGroupId string
 }
@@ -119,26 +119,33 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
+	// map the list of temporary security group CIDRs bundled with config to
+	// types expected by EC2.
+	groupIpRanges := []*ec2.IpRange{}
+	for _, cidr := range s.TemporarySGSourceCidrs {
+		ipRange := ec2.IpRange{
+			CidrIp: aws.String(cidr),
+		}
+		groupIpRanges = append(groupIpRanges, &ipRange)
+	}
+
 	// Authorize the SSH access for the security group
 	groupRules := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId: groupResp.GroupId,
 		IpPermissions: []*ec2.IpPermission{
 			{
-				FromPort: aws.Int64(int64(port)),
-				ToPort:   aws.Int64(int64(port)),
-				IpRanges: []*ec2.IpRange{
-					{
-						CidrIp: aws.String(s.TemporarySGSourceCidr),
-					},
-				},
+				FromPort:   aws.Int64(int64(port)),
+				ToPort:     aws.Int64(int64(port)),
+				IpRanges:   groupIpRanges,
 				IpProtocol: aws.String("tcp"),
 			},
 		},
 	}
 
 	ui.Say(fmt.Sprintf(
-		"Authorizing access to port %d from %s in the temporary security group...",
-		port, s.TemporarySGSourceCidr))
+		"Authorizing access to port %d from %v in the temporary security groups...",
+		port, s.TemporarySGSourceCidrs),
+	)
 	_, err = ec2conn.AuthorizeSecurityGroupIngress(groupRules)
 	if err != nil {
 		err := fmt.Errorf("Error authorizing temporary security group: %s", err)

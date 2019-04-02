@@ -79,7 +79,7 @@ type RunConfig struct {
 	SubnetFilter                      SubnetFilterOptions        `mapstructure:"subnet_filter"`
 	SubnetId                          string                     `mapstructure:"subnet_id"`
 	TemporaryKeyPairName              string                     `mapstructure:"temporary_key_pair_name"`
-	TemporarySGSourceCidr             string                     `mapstructure:"temporary_security_group_source_cidr"`
+	TemporarySGSourceCidrs            []string                   `mapstructure:"temporary_security_group_source_cidrs"`
 	UserData                          string                     `mapstructure:"user_data"`
 	UserDataFile                      string                     `mapstructure:"user_data_file"`
 	VpcFilter                         VpcFilterOptions           `mapstructure:"vpc_filter"`
@@ -184,11 +184,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.TemporarySGSourceCidr == "" {
-		c.TemporarySGSourceCidr = "0.0.0.0/0"
+	if len(c.TemporarySGSourceCidrs) == 0 {
+		c.TemporarySGSourceCidrs = []string{"0.0.0.0/0"}
 	} else {
-		if _, _, err := net.ParseCIDR(c.TemporarySGSourceCidr); err != nil {
-			errs = append(errs, fmt.Errorf("Error parsing temporary_security_group_source_cidr: %s", err.Error()))
+		for _, cidr := range c.TemporarySGSourceCidrs {
+			if _, _, err := net.ParseCIDR(cidr); err != nil {
+				errs = append(errs, fmt.Errorf("Error parsing CIDR in temporary_security_group_source_cidrs: %s", err.Error()))
+			}
 		}
 	}
 
