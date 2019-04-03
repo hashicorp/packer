@@ -275,11 +275,13 @@ PostProcessorRunSeqLoop:
 			}
 
 			keep := defaultKeep
-			// When nil, go for the default. If overridden by user, use that
-			// instead.
+			// When user has not set keep_input_artifuact
+			// corePP.keepInputArtifact is nil.
+			// In this case, use the keepDefault provided by the postprocessor.
+			// When user _has_ set keep_input_atifact, go with that instead.
 			// Exception: for postprocessors that will fail/become
-			// useless if keep isn't set, force an override that still uses
-			// post-processor preference instead of user preference.
+			// useless if keep isn't true, heed forceOverride and keep the
+			// input artifact regardless of user preference.
 			if corePP.keepInputArtifact != nil {
 				if defaultKeep && *corePP.keepInputArtifact == false && forceOverride {
 					log.Printf("The %s post-processor forces "+
@@ -287,7 +289,7 @@ PostProcessorRunSeqLoop:
 						"build chain. User-set keep_input_artifact=false will be"+
 						"ignored.", corePP.processorType)
 				} else {
-					// User overrides default
+					// User overrides default.
 					keep = *corePP.keepInputArtifact
 				}
 			}
