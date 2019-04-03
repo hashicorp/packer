@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+func boolPointer(tf bool) *bool {
+	return &tf
+}
+
 func testBuild() *coreBuild {
 	return &coreBuild{
 		name:          "test",
@@ -19,7 +23,7 @@ func testBuild() *coreBuild {
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), boolPointer(true)},
 			},
 		},
 		variables: make(map[string]string),
@@ -245,7 +249,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -270,10 +274,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), boolPointer(true)},
 		},
 	}
 
@@ -298,12 +302,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -329,7 +333,61 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true}, "pp", make(map[string]interface{}), false,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", make(map[string]interface{}), boolPointer(false),
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"b", "pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are discarded if user overrides.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), boolPointer(false),
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are kept if user does not have preference.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), nil,
 			},
 		},
 	}

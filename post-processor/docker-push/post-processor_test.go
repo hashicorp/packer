@@ -41,12 +41,15 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 		IdValue:        "foo/bar",
 	}
 
-	result, keep, err := p.PostProcess(testUi(), artifact)
+	result, keep, forceOverride, err := p.PostProcess(testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
 		t.Fatal("should keep")
+	}
+	if forceOverride {
+		t.Fatal("Should default to keep, but not override user wishes")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -71,12 +74,15 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 		IdValue:        "localhost:5000/foo/bar",
 	}
 
-	result, keep, err := p.PostProcess(testUi(), artifact)
+	result, keep, forceOverride, err := p.PostProcess(testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
 		t.Fatal("should keep")
+	}
+	if forceOverride {
+		t.Fatal("Should default to keep, but not override user wishes")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -101,12 +107,15 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 		IdValue:        "hashicorp/ubuntu:precise",
 	}
 
-	result, keep, err := p.PostProcess(testUi(), artifact)
+	result, keep, forceOverride, err := p.PostProcess(testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
 		t.Fatal("should keep")
+	}
+	if forceOverride {
+		t.Fatal("Should default to keep, but not override user wishes")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)

@@ -24,12 +24,12 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppArtifactId = a.Id()
 	pp.ppUi = ui
-	return testPostProcessorArtifact, false, nil
+	return testPostProcessorArtifact, false, false, nil
 }
 
 func TestPostProcessorRPC(t *testing.T) {
@@ -65,7 +65,7 @@ func TestPostProcessorRPC(t *testing.T) {
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)
-	artifact, _, err := ppClient.PostProcess(ui, a)
+	artifact, _, _, err := ppClient.PostProcess(ui, a)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
