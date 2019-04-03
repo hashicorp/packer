@@ -31,7 +31,6 @@ type Config struct {
 	ImageGuestOsFeatures []string          `mapstructure:"image_guest_os_features"`
 	ImageLabels          map[string]string `mapstructure:"image_labels"`
 	ImageName            string            `mapstructure:"image_name"`
-	KeepOriginalImage    bool              `mapstructure:"keep_input_artifact"`
 	SkipClean            bool              `mapstructure:"skip_clean"`
 
 	Account googlecompute.AccountFile
@@ -114,22 +113,22 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	rawImageGcsPath, err := UploadToBucket(client, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
 	if err != nil {
-		return nil, p.config.KeepOriginalImage, false, err
+		return nil, false, false, err
 	}
 
 	gceImageArtifact, err := CreateGceImage(client, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
 	if err != nil {
-		return nil, p.config.KeepOriginalImage, false, err
+		return nil, false, false, err
 	}
 
 	if !p.config.SkipClean {
 		err = DeleteFromBucket(client, ui, p.config.Bucket, p.config.GCSObjectName)
 		if err != nil {
-			return nil, p.config.KeepOriginalImage, false, err
+			return nil, false, false, err
 		}
 	}
 
-	return gceImageArtifact, p.config.KeepOriginalImage, false, nil
+	return gceImageArtifact, false, false, nil
 }
 
 func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
