@@ -82,7 +82,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	clientConfig, err := b.config.Config()
 	if err != nil {
 		return nil, err
