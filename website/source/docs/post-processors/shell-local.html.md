@@ -101,6 +101,15 @@ Optional parameters:
     like the `-e` flag, otherwise individual steps failing won't fail the
     provisioner.
 
+-   `keep_input_artifact` (boolean) - Unlike most other post-processors, the
+    keep_input_artifact option will have no effect for the shell-local
+    post-processor. Packer will always retain the input artifact for
+    shell-local, since the shell-local post-processor merely passes forward the
+    artifact it receives. If your shell-local post-processor produces a file or
+    files which you would like to have replace the input artifact, you may
+    overwrite the input artifact using the [artifice](./artifice.html)
+    post-processor after your shell-local processor has run.
+
 -   `only_on` (array of strings) - This is an array of [runtime operating
     systems](https://golang.org/doc/install/source#environment) where
     `shell-local` will execute. This allows you to execute `shell-local` *only*
