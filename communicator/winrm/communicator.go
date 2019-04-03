@@ -1,6 +1,7 @@
 package winrm
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -74,7 +75,7 @@ func New(config *Config) (*Communicator, error) {
 }
 
 // Start implementation of communicator.Communicator interface
-func (c *Communicator) Start(rc *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, rc *packer.RemoteCmd) error {
 	shell, err := c.client.CreateShell()
 	if err != nil {
 		return err

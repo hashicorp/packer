@@ -2,9 +2,12 @@ package packer
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestRemoteCmd_StartWithUi(t *testing.T) {
@@ -24,17 +27,19 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 		Command: "test",
 		Stdout:  originalOutput,
 	}
+	ctx := context.TODO()
 
-	err := rc.StartWithUi(testComm, testUi)
+	err := rc.RunWithUi(ctx, testComm, testUi)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	rc.Wait()
+	// sometimes cmd has returned and everything can be printed later on
+	time.Sleep(1 * time.Second)
 
 	expected := strings.TrimSpace(data)
-	if strings.TrimSpace(uiOutput.String()) != expected {
-		t.Fatalf("bad output: '%s'", uiOutput.String())
+	if diff := cmp.Diff(strings.TrimSpace(uiOutput.String()), expected); diff != "" {
+		t.Fatalf("bad output: %s", diff)
 	}
 
 	if originalOutput.String() != expected {

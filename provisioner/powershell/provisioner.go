@@ -262,7 +262,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			}
 
 			cmd = &packer.RemoteCmd{Command: command}
-			return cmd.StartWithUi(comm, ui)
+			return cmd.RunWithUi(ctx, comm, ui)
 		})
 		if err != nil {
 			return err
@@ -271,7 +271,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		// Close the original file since we copied it
 		f.Close()
 
-		if err := p.config.ValidExitCode(cmd.ExitStatus); err != nil {
+		if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
 			return err
 		}
 	}

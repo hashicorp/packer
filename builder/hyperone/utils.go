@@ -2,6 +2,7 @@ package hyperone
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -22,6 +23,7 @@ func formatOpenAPIError(err error) string {
 }
 
 func runCommands(commands []string, ictx interpolate.Context, state multistep.StateBag) error {
+	ctx := context.TODO()
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	comm := state.Get("communicator").(packer.Communicator)
@@ -43,15 +45,15 @@ func runCommands(commands []string, ictx interpolate.Context, state multistep.St
 
 		ui.Say(fmt.Sprintf("Executing command: %s", command))
 
-		err = remoteCmd.StartWithUi(comm, ui)
+		err = remoteCmd.RunWithUi(ctx, comm, ui)
 		if err != nil {
 			return fmt.Errorf("error running remote cmd: %s", err)
 		}
 
-		if remoteCmd.ExitStatus != 0 {
+		if remoteCmd.ExitStatus() != 0 {
 			return fmt.Errorf(
 				"received non-zero exit code %d from command: %s",
-				remoteCmd.ExitStatus,
+				remoteCmd.ExitStatus(),
 				command)
 		}
 	}
@@ -59,6 +61,7 @@ func runCommands(commands []string, ictx interpolate.Context, state multistep.St
 }
 
 func captureOutput(command string, state multistep.StateBag) (string, error) {
+	ctx := context.TODO()
 	comm := state.Get("communicator").(packer.Communicator)
 
 	var stdout bytes.Buffer
@@ -69,16 +72,16 @@ func captureOutput(command string, state multistep.StateBag) (string, error) {
 
 	log.Println(fmt.Sprintf("Executing command: %s", command))
 
-	err := comm.Start(remoteCmd)
+	err := comm.Start(ctx, remoteCmd)
 	if err != nil {
 		return "", fmt.Errorf("error running remote cmd: %s", err)
 	}
 
 	remoteCmd.Wait()
-	if remoteCmd.ExitStatus != 0 {
+	if remoteCmd.ExitStatus() != 0 {
 		return "", fmt.Errorf(
 			"received non-zero exit code %d from command: %s",
-			remoteCmd.ExitStatus,
+			remoteCmd.ExitStatus(),
 			command)
 	}
 
