@@ -31,6 +31,7 @@
 * builder/amazon-chroot: Fix building PV images and where mount_partition is
     set [GH-7337]
 * builder/amazon: Fix http_proxy env var regression [GH-7361]
+* builder/azure: Fix: Power off before taking snapshot (windows) [GH-7464]
 * builder/hcloud: Fix usage of freebsd64 rescue image [GH-7381]
 * builder/vagrant: windows : fix docs and usage [GH-7416] [GH-7417]
 * builder/vmware-esxi: properly copy .vmxf files in remote vmx builds [GH-7357]
