@@ -309,7 +309,8 @@ PostProcessorRunSeqLoop:
 				} else {
 					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
 					if err := priorArtifact.Destroy(); err != nil {
-						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
+						log.Printf("Error is %#v", err)
+						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s; pp is %s", err, corePP.processorType))
 					}
 				}
 			}
