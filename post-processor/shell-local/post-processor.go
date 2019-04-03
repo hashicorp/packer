@@ -39,10 +39,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// this particular post-processor doesn't do anything with the artifact
 	// except to return it.
 
-	retBool, retErr := sl.Run(ui, &p.config)
-	if !retBool {
-		return nil, retBool, false, retErr
+	success, retErr := sl.Run(ui, &p.config)
+	if !success {
+		return nil, false, false, retErr
 	}
 
-	return artifact, retBool, false, retErr
+	// Force shell-local pp to keep the input artifact, because otherwise we'll
+	// lose it instead of being able to pass it through. If oyu want to delete
+	// the input artifact for a shell local pp, use the artifice pp to create a
+	// new artifact
+	return artifact, true, true, retErr
 }
