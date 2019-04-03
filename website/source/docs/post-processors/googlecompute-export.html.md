@@ -45,8 +45,8 @@ permissions to the GCS `paths`.
 -   `disk_type` (string) - Type of disk used to back export instance, like
     `pd-ssd` or `pd-standard`. Defaults to `pd-ssd`.
 
--   `keep_input_artifact` (boolean) - If true, do not delete the Google Compute
-    Engine (GCE) image being exported.
+-   `keep_input_artifact` (boolean) - If `true`, do not delete the Google Compute
+    Engine (GCE) image being exported. defaults to `false`.
 
 -   `machine_type` (string) - The export instance machine type. Defaults
     to `"n1-highcpu-4"`.

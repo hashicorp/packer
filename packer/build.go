@@ -281,7 +281,7 @@ PostProcessorRunSeqLoop:
 			// useless if keep isn't set, force an override that still uses
 			// post-processor preference instead of user preference.
 			if corePP.keepInputArtifact != nil {
-				if *corePP.keepInputArtifact == false && forceOverride {
+				if defaultKeep && *corePP.keepInputArtifact == false && forceOverride {
 					log.Printf("The %s post-processor forces "+
 						"keep_input_artifact=true to preserve integrity of the"+
 						"build chain. User-set keep_input_artifact=false will be"+
