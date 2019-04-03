@@ -2,6 +2,7 @@ package packer
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"os"
 	"sync"
@@ -34,7 +35,7 @@ type MockCommunicator struct {
 	DownloadData   string
 }
 
-func (c *MockCommunicator) Start(rc *RemoteCmd) error {
+func (c *MockCommunicator) Start(ctx context.Context, rc *RemoteCmd) error {
 	c.StartCalled = true
 	c.StartCmd = rc
 

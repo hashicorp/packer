@@ -256,7 +256,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			cmd = &packer.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
 			}
-			if err := comm.Start(cmd); err != nil {
+			if err := comm.Start(ctx, cmd); err != nil {
 				return fmt.Errorf(
 					"Error chmodding script file to 0600 in remote "+
 						"machine: %s", err)
@@ -314,7 +314,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			cmd = &packer.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
-			if err := comm.Start(cmd); err != nil {
+			if err := comm.Start(ctx, cmd); err != nil {
 				return fmt.Errorf(
 					"Error chmodding script file to 0755 in remote "+
 						"machine: %s", err)
@@ -322,7 +322,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			cmd.Wait()
 
 			cmd = &packer.RemoteCmd{Command: command}
-			return cmd.StartWithUi(comm, ui)
+			return cmd.RunWithUi(ctx, comm, ui)
 		})
 
 		if err != nil {
@@ -331,7 +331,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 		// If the exit code indicates a remote disconnect, fail unless
 		// we were expecting it.
-		if cmd.ExitStatus == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packer.CmdDisconnect {
 			if !p.config.ExpectDisconnect {
 				return fmt.Errorf("Script disconnected unexpectedly. " +
 					"If you expected your script to disconnect, i.e. from a " +
@@ -339,7 +339,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 					"or `\"valid_exit_codes\": [0, 2300218]` to the shell " +
 					"provisioner parameters.")
 			}
-		} else if err := p.config.ValidExitCode(cmd.ExitStatus); err != nil {
+		} else if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
 			return err
 		}
 
@@ -371,21 +371,22 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 }
 
 func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) error {
+	ctx := context.TODO()
 	err := p.retryable(func() error {
 		cmd := &packer.RemoteCmd{
 			Command: fmt.Sprintf("rm -f %s", path),
 		}
-		if err := comm.Start(cmd); err != nil {
+		if err := comm.Start(ctx, cmd); err != nil {
 			return fmt.Errorf(
 				"Error removing temporary script at %s: %s",
 				path, err)
 		}
 		cmd.Wait()
 		// treat disconnects as retryable by returning an error
-		if cmd.ExitStatus == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packer.CmdDisconnect {
 			return fmt.Errorf("Disconnect while removing temporary script.")
 		}
-		if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus() != 0 {
 			return fmt.Errorf(
 				"Error removing temporary script at %s!",
 				path)

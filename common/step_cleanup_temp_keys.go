@@ -56,12 +56,12 @@ func (s *StepCleanupTempKeys) Run(ctx context.Context, state multistep.StateBag)
 	//
 	// TODO: Why create a backup file if you are going to remove it?
 	cmd.Command = fmt.Sprintf("sed -i.bak '/ %s$/d' ~/.ssh/authorized_keys; rm ~/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		log.Printf("Error cleaning up ~/.ssh/authorized_keys; please clean up keys manually: %s", err)
 	}
 	cmd = new(packer.RemoteCmd)
 	cmd.Command = fmt.Sprintf("sudo sed -i.bak '/ %s$/d' /root/.ssh/authorized_keys; sudo rm /root/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		log.Printf("Error cleaning up /root/.ssh/authorized_keys; please clean up keys manually: %s", err)
 	}
 
