@@ -27,10 +27,10 @@ The syntax of templates uses the following conventions:
 Functions perform operations on and within strings, for example the
 `{{timestamp}}` function can be used in any string to generate the current
 timestamp. This is useful for configurations that require unique keys, such as
-AMI names. By setting the AMI name to something like
-`My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second.
-If you need greater than one second granularity, you should use `{{uuid}}`, for
-example when you have multiple builders in the same template.
+AMI names. By setting the AMI name to something like `My Packer AMI
+{{timestamp}}`, the AMI name will be unique down to the second. If you need
+greater than one second granularity, you should use `{{uuid}}`, for example
+when you have multiple builders in the same template.
 
 Here is a full list of the available functions for reference.
 
@@ -54,18 +54,41 @@ Here is a full list of the available functions for reference.
 -   `upper` - Uppercases the string.
 -   `user` - Specifies a user variable.
 -   `packer_version` - Returns Packer version.
+-   `clean_resource_name` - Image names can only contain certain characters and
+    have a maximum length, eg 63 on GCE & 80 on Azure. `clean_resource_name`
+    will convert upper cases to lower cases and replace illegal characters with
+    a "-" character.  Example:
+
+   `"mybuild-{{isotime | clean_image_name}}"` will become
+    `mybuild-2017-10-18t02-06-30z`.
+
+    Note: Valid Azure image names must match the regex
+    `^[^_\\W][\\w-._)]{0,79}$`
+
+    Note: Valid GCE image names must match the regex
+    `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+    This engine does not guarantee that the final image name will match the
+    regex; it will not truncate your name if it exceeds the maximum number of
+    allowed characters, and it will not validate that the beginning and end of
+    the engine's output are valid. For example, `"image_name": {{isotime |
+    clean_resource_name}}"` will cause your build to fail because the image
+    name will start with a number, which is why in the above example we prepend
+    the isotime with "mybuild".
 
 #### Specific to Amazon builders:
 
--   `clean_ami_name` - AMI names can only contain certain characters. This
-    function will replace illegal characters with a '-" character. Example
-    usage since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
+-   `clean_ami_name` - DEPRECATED use `clean_resource_name` instead - AMI names
+    can only contain certain characters. This function will replace illegal
+    characters with a '-" character. Example usage since ":" is not a legal AMI
+    name is: `{{isotime | clean_ami_name}}`.
 
 #### Specific to Google Compute builders:
 
--   `clean_image_name` - GCE image names can only contain certain characters
-    and the maximum length is 63. This function will convert upper cases to
-    lower cases and replace illegal characters with a "-" character. Example:
+-   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - GCE
+    image names can only contain certain characters and the maximum length is
+    63. This function will convert upper cases to lower cases and replace
+        illegal characters with a "-" character. Example:
 
     `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
@@ -82,9 +105,10 @@ Here is a full list of the available functions for reference.
 
 #### Specific to Azure builders:
 
--   `clean_image_name` - Azure managed image names can only contain certain
-    characters and the maximum length is 80. This function will replace illegal
-    characters with a "-" character. Example:
+-   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - Azure
+    managed image names can only contain certain characters and the maximum
+    length is 80. This function will replace illegal characters with a "-"
+    character. Example:
 
     `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
@@ -96,9 +120,8 @@ Here is a full list of the available functions for reference.
     regex; it will not truncate your name if it exceeds 80 characters, and it
     will not validate that the beginning and end of the engine's output are
     valid. It will truncate invalid characters from the end of the name when
-    converting illegal characters. For example,
-    `"managed_image_name: "My-Name::"` will be converted to
-    `"managed_image_name: "My-Name"`
+    converting illegal characters. For example, `"managed_image_name:
+    "My-Name::"` will be converted to `"managed_image_name: "My-Name"`
 
 ## Template variables
 

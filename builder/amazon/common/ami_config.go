@@ -101,7 +101,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		errs = append(errs, fmt.Errorf("AMIName should only contain "+
 			"alphanumeric characters, parentheses (()), square brackets ([]), spaces "+
 			"( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs "+
-			"(@), or underscores(_). You can use the `clean_ami_name` template "+
+			"(@), or underscores(_). You can use the `clean_resource_name` template "+
 			"filter to automatically clean your ami name."))
 	}
 
