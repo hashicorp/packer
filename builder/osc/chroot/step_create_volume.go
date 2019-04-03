@@ -36,6 +36,12 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	volTags, err := s.RootVolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
 
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	var createVolume *oapi.CreateVolumeRequest
 	if config.FromScratch {
 		rootVolumeType := osccommon.VolumeTypeGp2
