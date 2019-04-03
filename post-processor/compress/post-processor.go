@@ -37,10 +37,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Fields from config file
-	OutputPath        string `mapstructure:"output"`
-	Format            string `mapstructure:"format"`
-	CompressionLevel  int    `mapstructure:"compression_level"`
-	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
+	OutputPath       string `mapstructure:"output"`
+	Format           string `mapstructure:"format"`
+	CompressionLevel int    `mapstructure:"compression_level"`
 
 	// Derived fields
 	Archive   string
@@ -115,7 +114,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		fmt.Println(target)
 	}
 
-	keep := p.config.KeepInputArtifact
 	newArtifact := &Artifact{Path: target}
 
 	if err = os.MkdirAll(filepath.Dir(target), os.FileMode(0755)); err != nil {
@@ -168,19 +166,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Say(fmt.Sprintf("Tarring %s with %s", target, compression))
 		err = createTarArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, false, fmt.Errorf("Error creating tar: %s", err)
+			return nil, false, false, fmt.Errorf("Error creating tar: %s", err)
 		}
 	case "zip":
 		ui.Say(fmt.Sprintf("Zipping %s", target))
 		err = createZipArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, false, fmt.Errorf("Error creating zip: %s", err)
+			return nil, false, false, fmt.Errorf("Error creating zip: %s", err)
 		}
 	default:
 		// Filename indicates no tarball (just compress) so we'll do an io.Copy
 		// into our compressor.
 		if len(artifact.Files()) != 1 {
-			return nil, keep, false, fmt.Errorf(
+			return nil, false, false, fmt.Errorf(
 				"Can only have 1 input file when not using tar/zip. Found %d "+
 					"files: %v", len(artifact.Files()), artifact.Files())
 		}
@@ -189,21 +187,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		source, err := os.Open(archiveFile)
 		if err != nil {
-			return nil, keep, false, fmt.Errorf(
+			return nil, false, false, fmt.Errorf(
 				"Failed to open source file %s for reading: %s",
 				archiveFile, err)
 		}
 		defer source.Close()
 
 		if _, err = io.Copy(output, source); err != nil {
-			return nil, keep, false, fmt.Errorf("Failed to compress %s: %s",
+			return nil, false, false, fmt.Errorf("Failed to compress %s: %s",
 				archiveFile, err)
 		}
 	}
 
 	ui.Say(fmt.Sprintf("Archive %s completed", target))
 
-	return newArtifact, keep, false, nil
+	return newArtifact, false, false, nil
 }
 
 func (config *Config) detectFromFilename() {
