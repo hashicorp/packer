@@ -19,6 +19,16 @@ func (s *StepCommit) Run(_ context.Context, state multistep.StateBag) multistep.
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
+	if config.WindowsContainer {
+		// docker can't commit a running Windows container
+		err := driver.StopContainer(containerId)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(fmt.Sprintf("Error halting windows container for commit: %s",
+				err.Error()))
+			return multistep.ActionHalt
+		}
+	}
 	ui.Say("Committing the container")
 	imageId, err := driver.Commit(containerId, config.Author, config.Changes, config.Message)
 	if err != nil {
