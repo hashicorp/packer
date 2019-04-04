@@ -23,21 +23,22 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	Author         string
-	Changes        []string
-	Commit         bool
-	ContainerDir   string `mapstructure:"container_dir"`
-	Discard        bool
-	ExecUser       string `mapstructure:"exec_user"`
-	ExportPath     string `mapstructure:"export_path"`
-	Image          string
-	Message        string
-	Privileged     bool `mapstructure:"privileged"`
-	Pty            bool
-	Pull           bool
-	RunCommand     []string `mapstructure:"run_command"`
-	Volumes        map[string]string
-	FixUploadOwner bool `mapstructure:"fix_upload_owner"`
+	Author           string
+	Changes          []string
+	Commit           bool
+	ContainerDir     string `mapstructure:"container_dir"`
+	Discard          bool
+	ExecUser         string `mapstructure:"exec_user"`
+	ExportPath       string `mapstructure:"export_path"`
+	Image            string
+	Message          string
+	Privileged       bool `mapstructure:"privileged"`
+	Pty              bool
+	Pull             bool
+	RunCommand       []string `mapstructure:"run_command"`
+	Volumes          map[string]string
+	FixUploadOwner   bool `mapstructure:"fix_upload_owner"`
+	WindowsContainer bool `mapstructure:"windows_container"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
@@ -74,6 +75,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Defaults
 	if len(c.RunCommand) == 0 {
 		c.RunCommand = []string{"-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"}
+		if c.WindowsContainer {
+			c.RunCommand = []string{"-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"}
+		}
 	}
 
 	// Default Pull if it wasn't set
@@ -92,6 +96,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Default to the normal Docker type
 	if c.Comm.Type == "" {
 		c.Comm.Type = "docker"
+		if c.WindowsContainer {
+			c.Comm.Type = "dockerWindowsContainer"
+		}
 	}
 
 	var errs *packer.MultiError
