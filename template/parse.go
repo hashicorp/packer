@@ -233,6 +233,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 		delete(p.Config, "override")
 		delete(p.Config, "pause_before")
 		delete(p.Config, "type")
+		delete(p.Config, "timeout")
 
 		if len(p.Config) == 0 {
 			p.Config = nil

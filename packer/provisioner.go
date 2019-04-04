@@ -53,8 +53,6 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		defer cancel()
 
 		err := p.Provisioner.Provision(ctx, ui, comm)
 
