@@ -14,7 +14,7 @@ import (
 
 type stepInstanceInfo struct{}
 
-func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -22,8 +22,10 @@ func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) mult
 
 	ui.Say("Waiting for instance to become active...")
 
-	// Set the IP on the state for later
-	instance, err := sdk.Compute().Instance().Get(context.Background(), &compute.GetInstanceRequest{
+	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+	defer cancel()
+
+	instance, err := sdk.Compute().Instance().Get(ctx, &compute.GetInstanceRequest{
 		InstanceId: instanceID,
 		View:       compute.InstanceView_FULL,
 	})

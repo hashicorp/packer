@@ -25,13 +25,12 @@ type stepCreateInstance struct {
 	cleanupSubnetID   string
 }
 
-func createNetwork(c *Config, d Driver) (*vpc.Network, error) {
+func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, error) {
 	req := &vpc.CreateNetworkRequest{
 		FolderId: c.FolderID,
 		Name:     fmt.Sprintf("packer-network-%s", uuid.TimeOrderedUUID()),
 	}
 
-	ctx := context.Background()
 	sdk := d.SDK()
 
 	op, err := sdk.WrapOperation(sdk.VPC().Network().Create(ctx, req))
@@ -56,7 +55,7 @@ func createNetwork(c *Config, d Driver) (*vpc.Network, error) {
 	return network, nil
 }
 
-func createSubnet(c *Config, d Driver, networkID string) (*vpc.Subnet, error) {
+func createSubnet(ctx context.Context, c *Config, d Driver, networkID string) (*vpc.Subnet, error) {
 	req := &vpc.CreateSubnetRequest{
 		FolderId:     c.FolderID,
 		NetworkId:    networkID,
@@ -65,7 +64,6 @@ func createSubnet(c *Config, d Driver, networkID string) (*vpc.Subnet, error) {
 		V4CidrBlocks: []string{"192.168.111.0/24"},
 	}
 
-	ctx := context.Background()
 	sdk := d.SDK()
 
 	op, err := sdk.WrapOperation(sdk.VPC().Subnet().Create(ctx, req))
@@ -90,38 +88,41 @@ func createSubnet(c *Config, d Driver, networkID string) (*vpc.Subnet, error) {
 	return network, nil
 }
 
-func getImage(c *Config, d Driver) (*Image, error) {
+func getImage(ctx context.Context, c *Config, d Driver) (*Image, error) {
 	if c.SourceImageID != "" {
 		return d.GetImage(c.SourceImageID)
 	}
 
 	familyName := c.SourceImageFamily
 	if c.SourceImageFolderID != "" {
-		return d.GetImageFromFolder(c.SourceImageFolderID, familyName)
+		return d.GetImageFromFolder(ctx, c.SourceImageFolderID, familyName)
 	}
-	return d.GetImageFromFolder("standard-images", familyName)
+	return d.GetImageFromFolder(ctx, "standard-images", familyName)
 }
 
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
 
-	// create or reuse Subnet
+	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+	defer cancel()
+
+	// create or reuse network configuration
 	instanceSubnetID := ""
 	if c.SubnetID == "" {
-		// create Network
+		// create Network and Subnet
 		ui.Say("Creating network...")
-		network, err := createNetwork(c, d)
+		network, err := createNetwork(ctx, c, d)
 		if err != nil {
 			return stepHaltWithError(state, fmt.Errorf("Error creating network: %s", err))
 		}
 		state.Put("network_id", network.Id)
 		s.cleanupNetworkID = network.Id
 
-		ui.Say("Creating subnet in zone...")
-		subnet, err := createSubnet(c, d, network.Id)
+		ui.Say(fmt.Sprintf("Creating subnet in zone %q...", c.Zone))
+		subnet, err := createSubnet(ctx, c, d, network.Id)
 		if err != nil {
 			return stepHaltWithError(state, fmt.Errorf("Error creating subnet: %s", err))
 		}
@@ -136,7 +137,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 
 	// Create an instance based on the configuration
 	ui.Say("Creating instance...")
-	sourceImage, err := getImage(c, d)
+	sourceImage, err := getImage(ctx, c, d)
 	if err != nil {
 		return stepHaltWithError(state, fmt.Errorf("Error getting source image for instance creation: %s", err))
 	}
@@ -173,7 +174,7 @@ runcmd:
 		},
 		Metadata: instanceMetadata,
 		BootDiskSpec: &compute.AttachedDiskSpec{
-			AutoDelete: true,
+			AutoDelete: false,
 			Disk: &compute.AttachedDiskSpec_DiskSpec_{
 				DiskSpec: &compute.AttachedDiskSpec_DiskSpec{
 					Name:   c.DiskName,
@@ -205,7 +206,6 @@ runcmd:
 		}
 	}
 
-	ctx := context.Background()
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Create(ctx, req))
 	if err != nil {
 		return stepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
@@ -230,7 +230,7 @@ runcmd:
 	s.cleanupInstanceID = instance.Id
 
 	if s.Debug {
-		ui.Message(fmt.Sprintf("Instance ID %s started. Current status %s", instance.Id, instance.Status))
+		ui.Message(fmt.Sprintf("Instance ID %s started. Current instance status %s", instance.Id, instance.Status))
 	}
 
 	// Store the instance id for later
@@ -246,7 +246,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	sdk := state.Get("sdk").(*ycsdk.SDK)
+	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.SerialLogFile != "" {
@@ -257,26 +257,13 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		}
 	}
 
-	// Destroy the instance we just created
-	ui.Say("Destroying instance...")
-
-	_, err := sdk.Compute().Instance().Delete(context.Background(), &compute.DeleteInstanceRequest{
-		InstanceId: s.cleanupInstanceID,
-	})
-	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error destroying instance (id: %s): %s.\nPlease destroy it manually", s.cleanupInstanceID, err))
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), c.StateTimeout)
+	defer cancel()
 
 	if s.cleanupSubnetID != "" {
-		// some sleep before delete network components
-		time.Sleep(30 * time.Second)
-
 		// Destroy the subnet we just created
 		ui.Say("Destroying subnet...")
-		_, err = sdk.VPC().Subnet().Delete(context.Background(), &vpc.DeleteSubnetRequest{
-			SubnetId: s.cleanupSubnetID,
-		})
+		err := deleteSubnet(ctx, s.cleanupSubnetID, state)
 		if err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error destroying subnet (id: %s). Please destroy it manually: %s", s.cleanupSubnetID, err))
@@ -287,16 +274,79 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 
 		// Destroy the network we just created
 		ui.Say("Destroying network...")
-		_, err = sdk.VPC().Network().Delete(context.Background(), &vpc.DeleteNetworkRequest{
-			NetworkId: s.cleanupNetworkID,
-		})
+		err = deleteNetwork(ctx, s.cleanupNetworkID, state)
 		if err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error destroying network (id: %s). Please destroy it manually: %s", s.cleanupNetworkID, err))
 		}
 	}
 
+	ui.Say("Destroying boot disk...")
+	diskID := state.Get("disk_id").(string)
+	err := deleteDisk(ctx, diskID, state)
+	if err != nil {
+		ui.Error(fmt.Sprintf(
+			"Error destroying boot disk (id: %s). Please destroy it manually: %s", s.cleanupNetworkID, err))
+	}
 }
+
+func deleteSubnet(ctx context.Context, subnetID string, state multistep.StateBag) error {
+	sdk := state.Get("sdk").(*ycsdk.SDK)
+
+	op, err := sdk.WrapOperation(sdk.VPC().Subnet().Delete(ctx, &vpc.DeleteSubnetRequest{
+		SubnetId: subnetID,
+	}))
+	if err != nil {
+		return err
+	}
+
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = op.Response()
+	return err
+}
+
+func deleteNetwork(ctx context.Context, networkID string, state multistep.StateBag) error {
+	sdk := state.Get("sdk").(*ycsdk.SDK)
+
+	op, err := sdk.WrapOperation(sdk.VPC().Network().Delete(ctx, &vpc.DeleteNetworkRequest{
+		NetworkId: networkID,
+	}))
+	if err != nil {
+		return err
+	}
+
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = op.Response()
+	return err
+}
+
+func deleteDisk(ctx context.Context, diskID string, state multistep.StateBag) error {
+	sdk := state.Get("sdk").(*ycsdk.SDK)
+
+	op, err := sdk.WrapOperation(sdk.Compute().Disk().Delete(ctx, &compute.DeleteDiskRequest{
+		DiskId: diskID,
+	}))
+	if err != nil {
+		return err
+	}
+
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = op.Response()
+	return err
+}
+
 func (s *stepCreateInstance) writeSerialLogFile(state multistep.StateBag) error {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)

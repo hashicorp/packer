@@ -17,6 +17,9 @@ import (
 	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
+const defaultEndpoint = "api.cloud.yandex.net:443"
+const defaultZone = "ru-central1-a"
+
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 
 type Config struct {
@@ -52,10 +55,9 @@ type Config struct {
 	UseIPv4Nat          bool              `mapstructure:"use_ipv4_nat"`
 	UseIPv6             bool              `mapstructure:"use_ipv6"`
 
-	RawStepTimeout string `mapstructure:"step_timeout"`
+	StateTimeout time.Duration `mapstructure:"state_timeout"`
 
-	stepTimeout time.Duration
-	ctx         interpolate.Context
+	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -134,10 +136,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.MachineType = "standard-v1"
 	}
 
-	if c.RawStepTimeout == "" {
-		c.RawStepTimeout = "5m"
-	}
-
 	if es := c.Communicator.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -149,25 +147,35 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("a source_image_id or source_image_family must be specified"))
 	}
 
-	err = c.CalcTimeout()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+	if c.Endpoint == "" {
+		c.Endpoint = defaultEndpoint
 	}
 
-	if c.Endpoint == "" {
-		c.Endpoint = "api.cloud.yandex.net:443"
+	if c.Zone == "" {
+		c.Zone = defaultZone
+	}
+
+	// provision config by OS environment variables
+	if c.Token == "" {
+		c.Token = os.Getenv("YC_TOKEN")
+	}
+
+	if c.ServiceAccountKeyFile == "" {
+		c.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
+	}
+
+	if c.FolderID == "" {
+		c.FolderID = os.Getenv("YC_FOLDER_ID")
 	}
 
 	if c.Token == "" && c.ServiceAccountKeyFile == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a token or service account key file must be specified"))
-
 	}
 
 	if c.Token != "" && c.ServiceAccountKeyFile != "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("one of token or service account key file must be specified, not both"))
-
 	}
 
 	if c.Token != "" {
@@ -177,9 +185,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ServiceAccountKeyFile != "" {
 		if _, err := iamkey.ReadFromJSONFile(c.ServiceAccountKeyFile); err != nil {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("fail to parse service account key file: %s", err))
+				errs, fmt.Errorf("fail to read service account key file: %s", err))
 		}
-
 	}
 
 	if c.FolderID == "" {
@@ -187,9 +194,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("a folder_id must be specified"))
 	}
 
-	if c.Zone == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a zone must be specified"))
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	// Check for any errors.
@@ -198,13 +204,4 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	return c, nil, nil
-}
-
-func (c *Config) CalcTimeout() error {
-	stepTimeout, err := time.ParseDuration(c.RawStepTimeout)
-	if err != nil {
-		return fmt.Errorf("Failed parsing step_timeout: %s", err)
-	}
-	c.stepTimeout = stepTimeout
-	return nil
 }
