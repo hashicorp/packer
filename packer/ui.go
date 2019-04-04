@@ -247,6 +247,13 @@ func (rw *BasicUi) Message(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
+
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
 	if err != nil {
@@ -261,6 +268,13 @@ func (rw *BasicUi) Error(message string) {
 	writer := rw.ErrorWriter
 	if writer == nil {
 		writer = rw.Writer
+	}
+
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
 	}
 
 	log.Printf("ui error: %s", message)
