@@ -11,6 +11,7 @@ import (
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -96,7 +97,9 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	return multistep.ActionContinue
 }
 
-func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
+func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {
+	commonhelper.RemoveSharedStateFile("ip", "")
+}
 
 func hostIP() (string, error) {
 	addrs, err := net.InterfaceAddrs()
