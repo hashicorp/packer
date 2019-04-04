@@ -24,19 +24,19 @@
             {
                 "name": "apple",
                 "type": "shell-local",
-                "inline": [ "touch apple.txt" ]
+                "inline": [ "echo apple > apple.txt" ]
             },
             {
                 "name": "peach",
                 "type": "shell-local",
-                "inline": [ "touch peach.txt" ]
+                "inline": [ "echo peach > peach.txt" ]
             }
         ],
         [
             {
                 "name": "pear",
                 "type": "shell-local",
-                "inline": [ "touch pear.txt" ]
+                "inline": [ "echo pear > pear.txt" ]
             }
         ],
         [
@@ -46,7 +46,7 @@
                 ],
                 "name": "tomato",
                 "type": "shell-local",
-                "inline": [ "touch tomato.txt" ]
+                "inline": [ "echo tomato > tomato.txt" ]
             }
         ],
         [
@@ -55,7 +55,7 @@
                     "chocolate"
                 ],
                 "type": "shell-local",
-                "inline": [ "touch unnamed.txt" ]
+                "inline": [ "echo unnamed > unnamed.txt" ]
             }
         ]
     ]
