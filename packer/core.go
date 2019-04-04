@@ -168,6 +168,11 @@ func (c *Core) Build(n string) (Build, error) {
 				PauseBefore: rawP.PauseBefore,
 				Provisioner: provisioner,
 			}
+		} else if rawP.Timeout > 0 {
+			provisioner = &TimeoutProvisioner{
+				Timeout:     rawP.Timeout,
+				Provisioner: provisioner,
+			}
 		}
 
 		provisioners = append(provisioners, coreBuildProvisioner{
