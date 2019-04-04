@@ -115,6 +115,8 @@ func TestTypeBootCommand(t *testing.T) {
 				c.builderConfig.ctx,
 			}
 			action := step.Run(context.TODO(), state)
+			step.Cleanup(state)
+
 			if action != c.expectedAction {
 				t.Errorf("Expected action to be %v, got %v", c.expectedAction, action)
 			}
