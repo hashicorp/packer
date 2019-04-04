@@ -20,7 +20,7 @@ type Driver interface {
 	DeleteImage(id string) error
 	SDK() *ycsdk.SDK
 	GetImage(imageID string) (*Image, error)
-	GetImageFromFolder(folderID string, family string) (*Image, error)
+	GetImageFromFolder(ctx context.Context, folderID string, family string) (*Image, error)
 }
 
 type driverYC struct {
@@ -47,8 +47,8 @@ func (d *driverYC) GetImage(imageID string) (*Image, error) {
 	}, nil
 }
 
-func (d *driverYC) GetImageFromFolder(folderID string, family string) (*Image, error) {
-	image, err := d.sdk.Compute().Image().GetLatestByFamily(context.Background(), &compute.GetImageLatestByFamilyRequest{
+func (d *driverYC) GetImageFromFolder(ctx context.Context, folderID string, family string) (*Image, error) {
+	image, err := d.sdk.Compute().Image().GetLatestByFamily(ctx, &compute.GetImageLatestByFamilyRequest{
 		FolderId: folderID,
 		Family:   family,
 	})

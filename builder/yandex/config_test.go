@@ -33,13 +33,11 @@ func TestConfigPrepare(t *testing.T) {
 			"/tmp/i/should/not/exist",
 			true,
 		},
-
 		{
 			"service_account_key_file",
 			tf.Name(),
 			true,
 		},
-
 		{
 			"service_account_key_file",
 			TestServiceAccountKeyFile,
@@ -82,7 +80,7 @@ func TestConfigPrepare(t *testing.T) {
 		{
 			"zone",
 			nil,
-			true,
+			false,
 		},
 		{
 			"zone",
@@ -101,16 +99,6 @@ func TestConfigPrepare(t *testing.T) {
 			false,
 		},
 
-		{
-			"step_timeout",
-			"SO BAD",
-			true,
-		},
-		{
-			"step_timeout",
-			"5s",
-			false,
-		},
 		{
 			"image_family",
 			nil,
