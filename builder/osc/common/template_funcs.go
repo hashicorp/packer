@@ -18,7 +18,7 @@ func isalphanumeric(b byte) bool {
 	return false
 }
 
-func templateCleanOMIName(s string) string {
+func templateCleanResourceName(s string) string {
 	allowed := []byte{'(', ')', '[', ']', ' ', '.', '/', '-', '\'', '@', '_'}
 	b := []byte(s)
 	newb := make([]byte, len(b))
@@ -33,5 +33,5 @@ func templateCleanOMIName(s string) string {
 }
 
 var TemplateFuncs = template.FuncMap{
-	"clean_omi_name": templateCleanOMIName,
+	"clean_resource_name": templateCleanResourceName,
 }
