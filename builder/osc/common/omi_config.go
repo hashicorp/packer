@@ -19,8 +19,6 @@ type OMIConfig struct {
 	OMIRegions              []string `mapstructure:"omi_regions"`
 	OMISkipRegionValidation bool     `mapstructure:"skip_region_validation"`
 	OMITags                 TagMap   `mapstructure:"tags"`
-	OMIENASupport           *bool    `mapstructure:"ena_support"`
-	OMISriovNetSupport      bool     `mapstructure:"sriov_support"`
 	OMIForceDeregister      bool     `mapstructure:"force_deregister"`
 	OMIForceDeleteSnapshot  bool     `mapstructure:"force_delete_snapshot"`
 	SnapshotTags            TagMap   `mapstructure:"snapshot_tags"`
