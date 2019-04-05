@@ -111,7 +111,7 @@ type PostProcessor struct {
 
 	Name              string                 `json:"name,omitempty"`
 	Type              string                 `json:"type"`
-	KeepInputArtifact bool                   `mapstructure:"keep_input_artifact" json:"keep_input_artifact,omitempty"`
+	KeepInputArtifact *bool                  `mapstructure:"keep_input_artifact" json:"keep_input_artifact,omitempty"`
 	Config            map[string]interface{} `json:"config,omitempty"`
 }
 
@@ -119,7 +119,7 @@ type PostProcessor struct {
 // to provide valid Packer template JSON
 func (p *PostProcessor) MarshalJSON() ([]byte, error) {
 	// Early exit for simple definitions
-	if len(p.Config) == 0 && len(p.OnlyExcept.Only) == 0 && len(p.OnlyExcept.Except) == 0 && !p.KeepInputArtifact {
+	if len(p.Config) == 0 && len(p.OnlyExcept.Only) == 0 && len(p.OnlyExcept.Except) == 0 && p.KeepInputArtifact == nil {
 		return json.Marshal(p.Type)
 	}
 

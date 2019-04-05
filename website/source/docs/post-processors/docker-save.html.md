@@ -24,9 +24,16 @@ familiar with this and vice versa.
 
 ## Configuration
 
+### Required
+
 The configuration for this post-processor only requires one option.
 
 -   `path` (string) - The path to save the image.
+
+### Optional
+
+-   `keep_input_artifact` (boolean) - if true, do not delete the docker
+	container, and only save the .tar created by docker save. Defaults to true.
 
 ## Example
 
