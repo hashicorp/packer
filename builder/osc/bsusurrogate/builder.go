@@ -89,14 +89,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
 	}
 
-	//TODO: Chek if this is necessary
-	if b.config.IsSpotVm() && ((b.config.OMIENASupport != nil && *b.config.OMIENASupport) || b.config.OMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Spot instances do not support modification, which is required "+
-				"when either `ena_support` or `sriov_support` are set. Please ensure "+
-				"you use an OMI that already has either SR-IOV or ENA enabled."))
-	}
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
@@ -139,11 +131,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 			ForceDeregister: b.config.OMIForceDeregister,
 		},
 		&osccommon.StepSourceOMIInfo{
-			SourceOmi:                b.config.SourceOmi,
-			EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
-			EnableOMIENASupport:      b.config.OMIENASupport,
-			OmiFilters:               b.config.SourceOmiFilter,
-			OMIVirtType:              b.config.OMIVirtType, //TODO: Remove if it is not used
+			SourceOmi:   b.config.SourceOmi,
+			OmiFilters:  b.config.SourceOmiFilter,
+			OMIVirtType: b.config.OMIVirtType, //TODO: Remove if it is not used
 		},
 		&osccommon.StepNetworkInfo{
 			NetId:               b.config.NetId,
@@ -207,10 +197,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 		&osccommon.StepStopBSUBackedVm{
 			Skip:          false,
 			DisableStopVm: b.config.DisableStopVm,
-		},
-		&osccommon.StepUpdateBSUBackedVm{
-			EnableAMISriovNetSupport: b.config.OMISriovNetSupport,
-			EnableAMIENASupport:      b.config.OMIENASupport,
 		},
 		&StepSnapshotVolumes{
 			LaunchDevices: launchDevices,

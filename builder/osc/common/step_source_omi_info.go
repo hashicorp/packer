@@ -18,11 +18,9 @@ import (
 // Produces:
 //   source_image *oapi.Image - the source OMI info
 type StepSourceOMIInfo struct {
-	SourceOmi                string
-	EnableOMISriovNetSupport bool
-	EnableOMIENASupport      *bool
-	OMIVirtType              string
-	OmiFilters               OmiFilterOptions
+	SourceOmi   string
+	OMIVirtType string
+	OmiFilters  OmiFilterOptions
 }
 
 type imageSort []oapi.Image

@@ -228,11 +228,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if !b.config.FromScratch {
 		steps = append(steps,
 			&osccommon.StepSourceOMIInfo{
-				SourceOmi:                b.config.SourceOMI,
-				EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
-				EnableOMIENASupport:      b.config.OMIENASupport,
-				OmiFilters:               b.config.SourceOMIFilter,
-				OMIVirtType:              b.config.OMIVirtType,
+				SourceOmi:   b.config.SourceOMI,
+				OmiFilters:  b.config.SourceOMIFilter,
+				OMIVirtType: b.config.OMIVirtType,
 			},
 			&StepCheckRootDevice{},
 		)

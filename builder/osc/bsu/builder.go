@@ -108,11 +108,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 			ForceDeregister: b.config.OMIForceDeregister,
 		},
 		&osccommon.StepSourceOMIInfo{
-			SourceOmi:                b.config.SourceOmi,
-			EnableOMISriovNetSupport: b.config.OMISriovNetSupport,
-			EnableOMIENASupport:      b.config.OMIENASupport,
-			OmiFilters:               b.config.SourceOmiFilter,
-			OMIVirtType:              b.config.OMIVirtType, //TODO: Remove if it is not used
+			SourceOmi:   b.config.SourceOmi,
+			OmiFilters:  b.config.SourceOmiFilter,
+			OMIVirtType: b.config.OMIVirtType, //TODO: Remove if it is not used
 		},
 		&osccommon.StepNetworkInfo{
 			NetId:               b.config.NetId,
@@ -176,10 +174,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 		&osccommon.StepStopBSUBackedVm{
 			Skip:          false,
 			DisableStopVm: b.config.DisableStopVm,
-		},
-		&osccommon.StepUpdateBSUBackedVm{
-			EnableAMISriovNetSupport: b.config.OMISriovNetSupport,
-			EnableAMIENASupport:      b.config.OMIENASupport,
 		},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
