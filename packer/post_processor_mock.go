@@ -3,9 +3,10 @@ package packer
 // MockPostProcessor is an implementation of PostProcessor that can be
 // used for tests.
 type MockPostProcessor struct {
-	ArtifactId string
-	Keep       bool
-	Error      error
+	ArtifactId    string
+	Keep          bool
+	ForceOverride bool
+	Error         error
 
 	ConfigureCalled  bool
 	ConfigureConfigs []interface{}
@@ -22,12 +23,12 @@ func (t *MockPostProcessor) Configure(configs ...interface{}) error {
 	return t.ConfigureError
 }
 
-func (t *MockPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, bool, error) {
+func (t *MockPostProcessor) PostProcess(ui Ui, a Artifact) (Artifact, bool, bool, error) {
 	t.PostProcessCalled = true
 	t.PostProcessArtifact = a
 	t.PostProcessUi = ui
 
 	return &MockArtifact{
 		IdValue: t.ArtifactId,
-	}, t.Keep, t.Error
+	}, t.Keep, t.ForceOverride, t.Error
 }

@@ -42,6 +42,10 @@ This post-processor has only optional configuration:
     the duration of the push. If true `login_server` is required and `login`,
     `login_username`, and `login_password` will be ignored.
 
+-   `keep_input_artifact` (boolean) - if true, do not delete the docker image
+    after pushing it to the cloud. Defaults to true, but can be set to false if
+    you do not need to save your local copy of the docker container.
+
 -   `login` (boolean) - Defaults to false. If true, the post-processor will
     login prior to pushing. For log into ECR see `ecr_login`.
 
