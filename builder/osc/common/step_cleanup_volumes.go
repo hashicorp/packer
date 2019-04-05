@@ -75,7 +75,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	}
 
 	// Filter out any devices created as part of the launch mappings, since
-	// we'll let amazon follow the `delete_on_termination` setting.
+	// we'll let outscale follow the `delete_on_vm_deletion` setting.
 	for _, b := range s.BlockDevices.LaunchMappings {
 		for volKey, volName := range volList {
 			if volName == b.DeviceName {

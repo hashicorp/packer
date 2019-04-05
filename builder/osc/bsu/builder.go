@@ -1,4 +1,4 @@
-// The amazonebs package contains a packer.Builder implementation that
+// The bsu package contains a packer.Builder implementation that
 // builds OMIs for Outscale OAPI.
 //
 // In general, there are two types of OMIs that can be created: ebs-backed or
