@@ -38,6 +38,9 @@ is optional.
     commit. Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and
     `EXPOSE`. Example: `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
 
+-   `keep_input_artifact` (boolean) - if true, do not delete the source tar
+    after importing it to docker. Defaults to false.
+
 ## Example
 
 An example is shown below, showing only the post-processor configuration:

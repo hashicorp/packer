@@ -65,8 +65,12 @@ more details about certain options in following sections.
     Vagrant box (regardless of their paths). They can then be used from the
     Vagrantfile.
 
--   `keep_input_artifact` (boolean) - If set to true, do not delete the
-    `output_directory` on a successful build. Defaults to false.
+-   `keep_input_artifact` (boolean) - When true, preserve the artifact we use to
+    create the vagrant box. Defaults to `false`, except when you set a cloud
+    provider (e.g. aws, azure, google, digitalocean). In these cases deleting
+    the input artifact would render the vagrant box useless, so we always keep
+    these artifacts -- even if you specifically set
+    `"keep_input_artifact":false`
 
 -   `output` (string) - The full path to the box file that will be created by
     this post-processor. This is a [configuration

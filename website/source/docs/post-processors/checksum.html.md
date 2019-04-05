@@ -43,6 +43,11 @@ Optional parameters:
 
 -   `checksum_types` (array of strings) - An array of strings of checksum types
     to compute. Allowed values are md5, sha1, sha224, sha256, sha384, sha512.
+
+-   `keep_input_artifact` (boolean) - Unlike most post-processors, setting
+    `keep_input_artifact` will have no effect; the checksum post-processor
+    always saves the artifact that it is calculating the checksum for.
+
 -   `output` (string) - Specify filename to store checksums. This defaults to
     `packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum`. For
     example, if you had a builder named `database`, you might see the file

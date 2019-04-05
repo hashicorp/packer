@@ -54,6 +54,9 @@ Optional:
 -   `insecure` (boolean) - Whether or not the connection to vSphere can be done
     over an insecure connection. By default this is false.
 
+-   `keep_input_artifact` (boolean) - When `true`, preserve the local VM files,
+    even after importing them to vsphere. Defaults to `false`.
+
 -   `resource_pool` (string) - The resource pool to upload the VM to.
 
 -   `vm_folder` (string) - The folder within the datastore to store the VM.

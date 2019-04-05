@@ -114,9 +114,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
 	source := ""
@@ -128,7 +128,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	if source == "" {
-		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
+		return nil, false, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
 	password := escapeWithSpaces(p.config.Password)
@@ -174,14 +174,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf("Error uploading virtual machine: %s\n%s\n", err, p.filterLog(errOut.String()))
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	ui.Message(p.filterLog(errOut.String()))
 
 	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
 
-	return artifact, false, nil
+	return artifact, false, false, nil
 }
 
 func (p *PostProcessor) filterLog(s string) string {
