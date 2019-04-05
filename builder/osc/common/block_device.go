@@ -37,53 +37,6 @@ type LaunchBlockDevices struct {
 	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
-func buildBlockDevices(b []BlockDevice) []*oapi.BlockDeviceMapping {
-	var blockDevices []*oapi.BlockDeviceMapping
-
-	for _, blockDevice := range b {
-		mapping := &oapi.BlockDeviceMapping{
-			DeviceName: blockDevice.DeviceName,
-		}
-
-		if blockDevice.NoDevice {
-			mapping.NoDevice = ""
-		} else if blockDevice.VirtualName != "" {
-			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
-				mapping.VirtualDeviceName = blockDevice.VirtualName
-			}
-		} else {
-			bsu := oapi.Bsu{}
-			bsu.DeleteOnVmDeletion = aws.Bool(blockDevice.DeleteOnVmDeletion)
-
-			if blockDevice.VolumeType != "" {
-				bsu.VolumeType = blockDevice.VolumeType
-			}
-
-			if blockDevice.VolumeSize > 0 {
-				bsu.VolumeSize = blockDevice.VolumeSize
-			}
-
-			// IOPS is only valid for io1 type
-			if blockDevice.VolumeType == "io1" {
-				bsu.Iops = blockDevice.IOPS
-			}
-
-			if blockDevice.SnapshotId != "" {
-				bsu.SnapshotId = blockDevice.SnapshotId
-			}
-
-			//missing
-			//BlockDevice Encrypted
-			//KmsKeyId
-
-			mapping.Bsu = bsu
-		}
-
-		blockDevices = append(blockDevices, mapping)
-	}
-	return blockDevices
-}
-
 func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 	var blockDevices []oapi.BlockDeviceMappingImage
 
