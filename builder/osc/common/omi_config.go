@@ -50,7 +50,7 @@ func (c *OMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		errs = append(errs, fmt.Errorf("omi_name must be between 3 and 128 characters long"))
 	}
 
-	if c.OMIName != templateCleanOMIName(c.OMIName) {
+	if c.OMIName != templateCleanResourceName(c.OMIName) {
 		errs = append(errs, fmt.Errorf("OMIName should only contain "+
 			"alphanumeric characters, parentheses (()), square brackets ([]), spaces "+
 			"( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs "+
