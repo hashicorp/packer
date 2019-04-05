@@ -42,6 +42,7 @@ func init() {
 		"hyperv-vmxc-typo":           new(FixerHypervVmxcTypo),
 		"hyperv-cpu-and-ram":         new(FizerHypervCPUandRAM),
 		"vmware-compaction":          new(FixerVMwareCompaction),
+		"clean-image-name":           new(FixerCleanImageName),
 	}
 
 	FixerOrder = []string{
@@ -65,5 +66,6 @@ func init() {
 		"powershell-escapes",
 		"vmware-compaction",
 		"hyperv-cpu-and-ram",
+		"clean-image-name",
 	}
 }
