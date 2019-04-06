@@ -52,7 +52,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
       "disks": [
         {
           "type": "scsi",
-          "size": "5G",
+          "disk_size": "5G",
           "storage_pool": "local-lvm",
           "storage_pool_type": "lvm"
         }

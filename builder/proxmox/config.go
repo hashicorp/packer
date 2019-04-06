@@ -61,7 +61,7 @@ type diskConfig struct {
 	Type            string `mapstructure:"type"`
 	StoragePool     string `mapstructure:"storage_pool"`
 	StoragePoolType string `mapstructure:"storage_pool_type"`
-	Size            string `mapstructure:"size"`
+	Size            string `mapstructure:"disk_size"`
 	CacheMode       string `mapstructure:"cache_mode"`
 	DiskFormat      string `mapstructure:"format"`
 }
