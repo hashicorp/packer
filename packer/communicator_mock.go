@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -44,7 +45,7 @@ func (c *MockCommunicator) Start(ctx context.Context, rc *RemoteCmd) error {
 		if rc.Stdout != nil && c.StartStdout != "" {
 			wg.Add(1)
 			go func() {
-				rc.Stdout.Write([]byte(c.StartStdout))
+				io.Copy(rc.Stdout, strings.NewReader(c.StartStdout))
 				wg.Done()
 			}()
 		}
@@ -52,7 +53,7 @@ func (c *MockCommunicator) Start(ctx context.Context, rc *RemoteCmd) error {
 		if rc.Stderr != nil && c.StartStderr != "" {
 			wg.Add(1)
 			go func() {
-				rc.Stderr.Write([]byte(c.StartStderr))
+				io.Copy(rc.Stderr, strings.NewReader(c.StartStderr))
 				wg.Done()
 			}()
 		}
