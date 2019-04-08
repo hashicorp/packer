@@ -46,13 +46,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != dockerimport.BuilderId &&
 		artifact.BuilderId() != dockertag.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only save Docker builder artifacts.",
 			artifact.BuilderId())
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	path := p.config.Path
@@ -61,7 +61,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	f, err := os.Create(path)
 	if err != nil {
 		err := fmt.Errorf("Error creating output file: %s", err)
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	driver := p.Driver
@@ -76,11 +76,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		f.Close()
 		os.Remove(f.Name())
 
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	f.Close()
 	ui.Message("Saved to: " + path)
 
-	return artifact, true, nil
+	return artifact, true, false, nil
 }

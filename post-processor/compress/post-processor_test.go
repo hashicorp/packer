@@ -239,7 +239,7 @@ func testArchive(t *testing.T, config string) packer.Artifact {
 	compressor.config.PackerBuildName = "vanilla"
 	compressor.config.PackerBuilderType = "file"
 
-	artifactOut, _, err := compressor.PostProcess(context.Background(), ui, artifact)
+	artifactOut, _, _, err := compressor.PostProcess(context.Background(), ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to compress artifact: %s", err)
 	}

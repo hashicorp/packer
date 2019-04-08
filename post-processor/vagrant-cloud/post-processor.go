@@ -117,15 +117,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unknown artifact type, requires box from vagrant post-processor or vagrant builder: %s", artifact.BuilderId())
 	}
 
 	// We assume that there is only one .box file to upload
 	if !strings.HasSuffix(artifact.Files()[0], ".box") {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unknown files in artifact, vagrant box is required: %s", artifact.Files())
 	}
 
@@ -142,7 +142,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error processing box_download_url: %s", err)
+		return nil, false, false, fmt.Errorf("Error processing box_download_url: %s", err)
 	}
 
 	// Set up the state
@@ -181,10 +181,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
-		return nil, false, rawErr.(error)
+		return nil, false, false, rawErr.(error)
 	}
 
-	return NewArtifact(providerName, p.config.Tag), true, nil
+	return NewArtifact(providerName, p.config.Tag), true, false, nil
 }
 
 // converts a packer builder name to the corresponding vagrant

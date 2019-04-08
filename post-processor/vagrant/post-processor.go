@@ -159,11 +159,11 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 
 	name, ok := builtins[artifact.BuilderId()]
 	if !ok {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
@@ -173,7 +173,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		panic(fmt.Sprintf("bad provider name: %s", name))
 	}
 
-	return p.PostProcessProvider(name, provider, ui, artifact)
+	artifact, keep, err := p.PostProcessProvider(name, provider, ui, artifact)
+
+	// In some cases, (e.g. AMI), deleting the input artifact would render the
+	// resulting vagrant box useless. Because of these cases, we want to
+	// forcibly set keep_input_artifact.
+
+	// TODO: rework all provisioners to only forcibly keep those where it matters
+	return artifact, keep, true, err
 }
 
 func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {

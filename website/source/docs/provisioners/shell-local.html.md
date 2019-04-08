@@ -51,7 +51,7 @@ Exactly *one* of the following is required:
     they are all executed within the same context. This allows you to change
     directories in one command and use something in the directory in the next
     and so on. Inline scripts are the easiest way to pull off simple tasks
-    within the machine.
+    within the machine in which packer is running.
 
 -   `script` (string) - The path to a script to execute. This path can be
     absolute or relative. If it is relative, it is relative to the working

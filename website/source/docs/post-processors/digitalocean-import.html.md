@@ -67,6 +67,9 @@ Optional:
 -   `image_tags` (array of strings) - A list of tags to apply to the resulting
     imported image.
 
+-   `keep_input_artifact` (boolean) - if true, do not delete the source virtual
+    machine image after importing it to the cloud. Defaults to false.
+
 -   `skip_clean` (boolean) - Whether we should skip removing the image file
     uploaded to Spaces after the import process has completed. "true" means
     that we should leave it in the Space, "false" means to clean it out.

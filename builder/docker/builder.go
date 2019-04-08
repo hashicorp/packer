@@ -51,7 +51,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host:      commHost,
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			CustomConnect: map[string]multistep.Step{
-				"docker": &StepConnectDocker{},
+				"docker":                 &StepConnectDocker{},
+				"dockerWindowsContainer": &StepConnectDocker{},
 			},
 		},
 		&common.StepProvision{},

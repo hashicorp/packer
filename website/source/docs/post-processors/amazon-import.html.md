@@ -101,6 +101,9 @@ Optional:
 -   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
     verification of the AWS EC2 endpoint. The default is `false`.
 
+-   `keep_input_artifact` (boolean) - if true, do not delete the source virtual
+    machine image after importing it to the cloud. Defaults to false.
+
 -   `license_type` (string) - The license type to be used for the Amazon
     Machine Image (AMI) after importing. Valid values: `AWS` or `BYOL`
     (default). For more details regarding licensing, see

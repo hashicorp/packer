@@ -262,8 +262,7 @@ DOCUMENTATION = '''
     connection: packer
     short_description: ssh based connections for powershell via packer
     description:
-        - This connection plugin allows ansible to communicate to the target packer
-        machines via ssh based connections for powershell.
+        - This connection plugin allows ansible to communicate to the target packer machines via ssh based connections for powershell.
     author: Packer
     version_added: na
     options:

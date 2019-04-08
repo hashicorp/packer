@@ -12,7 +12,6 @@ language: go
 
 go:
   - 1.12.x
-  - master
 
 before_install:
   - >
@@ -30,6 +29,5 @@ branches:
 
 matrix:
   allow_failures:
-    - go: master
     - os: windows
   fast_finish: true

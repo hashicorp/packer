@@ -99,7 +99,7 @@ func testChecksum(t *testing.T, config string) packer.Artifact {
 	checksum.config.PackerBuildName = "vanilla"
 	checksum.config.PackerBuilderType = "file"
 
-	artifactOut, _, err := checksum.PostProcess(context.Background(), ui, artifact)
+	artifactOut, _, _, err := checksum.PostProcess(context.Background(), ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to checksum artifact: %s", err)
 	}

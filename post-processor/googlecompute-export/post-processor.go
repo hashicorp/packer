@@ -18,14 +18,13 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 
-	DiskSizeGb        int64    `mapstructure:"disk_size"`
-	DiskType          string   `mapstructure:"disk_type"`
-	KeepOriginalImage bool     `mapstructure:"keep_input_artifact"`
-	MachineType       string   `mapstructure:"machine_type"`
-	Network           string   `mapstructure:"network"`
-	Paths             []string `mapstructure:"paths"`
-	Subnetwork        string   `mapstructure:"subnetwork"`
-	Zone              string   `mapstructure:"zone"`
+	DiskSizeGb  int64    `mapstructure:"disk_size"`
+	DiskType    string   `mapstructure:"disk_type"`
+	MachineType string   `mapstructure:"machine_type"`
+	Network     string   `mapstructure:"network"`
+	Paths       []string `mapstructure:"paths"`
+	Subnetwork  string   `mapstructure:"subnetwork"`
+	Zone        string   `mapstructure:"zone"`
 
 	Account googlecompute.AccountFile
 	ctx     interpolate.Context
@@ -76,12 +75,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != googlecompute.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only export from Google Compute Engine builder artifacts.",
 			artifact.BuilderId())
-		return nil, p.config.KeepOriginalImage, err
+		return nil, false, false, err
 	}
 
 	builderAccountFile := artifact.State("AccountFilePath").(string)
@@ -99,13 +98,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if builderAccountFile != "" {
 		err := googlecompute.ProcessAccountFile(&p.config.Account, builderAccountFile)
 		if err != nil {
-			return nil, p.config.KeepOriginalImage, err
+			return nil, false, false, err
 		}
 	}
 	if p.config.AccountFile != "" {
 		err := googlecompute.ProcessAccountFile(&p.config.Account, p.config.AccountFile)
 		if err != nil {
-			return nil, p.config.KeepOriginalImage, err
+			return nil, false, false, err
 		}
 	}
 
@@ -142,7 +141,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId, &p.config.Account)
 	if err != nil {
-		return nil, p.config.KeepOriginalImage, err
+		return nil, false, false, err
 	}
 
 	// Set up the state.
@@ -170,5 +169,5 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	result := &Artifact{paths: p.config.Paths}
 
-	return result, p.config.KeepOriginalImage, nil
+	return result, false, false, nil
 }

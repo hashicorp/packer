@@ -627,6 +627,9 @@ func TestSensitiveVars(t *testing.T) {
 		if filtered[0] != tc.Expected && len(filtered) != 1 {
 			t.Fatalf("not filtering sensitive vars; filtered is %#v", filtered)
 		}
+
+		// clear filter so it doesn't break other tests
+		LogSecretFilter.s = make(map[string]struct{})
 	}
 }
 

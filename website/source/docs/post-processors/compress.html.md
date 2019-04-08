@@ -38,7 +38,9 @@ you will need to specify the `output` option.
     algorithms that support it, from 1 through 9 inclusive. Typically higher
     compression levels take longer but produce smaller files. Defaults to `6`
 
--   `keep_input_artifact` (boolean) - Keep source files; defaults to `false`
+-   `keep_input_artifact` (boolean) - if `true`, keep both the source files and
+    the compressed file; if `false`, discard the source files. Defaults to
+    `false`
 
 ### Supported Formats
 
