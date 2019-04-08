@@ -4,9 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
-	"strings"
 	"sync"
-	"unicode"
 
 	"golang.org/x/sync/errgroup"
 
@@ -119,9 +117,9 @@ func (r *RemoteCmd) RunWithUi(ctx context.Context, c Communicator, ui Ui) error 
 
 	// Loop and get all our output until done.
 	printFn := func(in io.Reader, out func(string)) error {
-		for output := range iochan.DelimReader(in, '\n') {
+		for output := range iochan.LineReader(in) {
 			if output != "" {
-				out(cleanOutputLine(output))
+				out(output)
 			}
 		}
 		return nil
@@ -175,20 +173,4 @@ func (r *RemoteCmd) initchan() {
 			r.exitCh = make(chan interface{})
 		}
 	})
-}
-
-// cleanOutputLine cleans up a line so that '\r' don't muck up the
-// UI output when we're reading from a remote command.
-func cleanOutputLine(line string) string {
-	// Trim surrounding whitespace
-	line = strings.TrimRightFunc(line, unicode.IsSpace)
-
-	// Trim up to the first carriage return, since that text would be
-	// lost anyways.
-	idx := strings.LastIndex(line, "\r")
-	if idx > -1 {
-		line = line[idx+1:]
-	}
-
-	return line
 }
