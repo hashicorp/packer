@@ -108,7 +108,7 @@ builder.
     [
       {
         "type": "scsi",
-        "size": "5G",
+        "disk_size": "5G",
         "storage_pool": "local-lvm",
         "storage_pool_type": "lvm"
       }
@@ -125,7 +125,7 @@ builder.
     -   `type` (string) - The type of disk. Can be `scsi`, `sata`, `virtio` or
         `ide`. Defaults to `scsi`.
 
-    -   `size` (string) - The size of the disk, including a unit suffix, such
+    -   `disk_size` (string) - The size of the disk, including a unit suffix, such
         as `10G` to indicate 10 gigabytes.
 
     -   `cache_mode` (string) - How to cache operations to the disk. Can be
@@ -175,7 +175,7 @@ manually downloaded.
       "disks": [
         {
           "type": "scsi",
-          "size": "5G",
+          "disk_size": "5G",
           "storage_pool": "local-lvm",
           "storage_pool_type": "lvm"
         }
