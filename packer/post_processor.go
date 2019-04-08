@@ -15,6 +15,11 @@ type PostProcessor interface {
 
 	// PostProcess takes a previously created Artifact and produces another
 	// Artifact. If an error occurs, it should return that error. If `keep`
-	// is to true, then the previous artifact is forcibly kept.
-	PostProcess(context.Context, Ui, Artifact) (a Artifact, keep bool, err error)
+	// is true, then the previous artifact defaults to being kept if
+	// user has not given a value to keep_input_artifact. If forceOverride
+	// is true, then any user input for keep_input_artifact is ignored and
+	// the artifact is either kept or discarded according to the value set in
+	// `keep`.
+	// PostProcess is cancellable using context
+	PostProcess(context.Context, Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
 }

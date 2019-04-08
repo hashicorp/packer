@@ -59,6 +59,11 @@ The configuration allows you to specify which files comprise your artifact.
     packer is complete. These will replace any of the builder's original
     artifacts (such as a VM snapshot).
 
+### Optional:
+
+-   `keep_input_artifact` (boolean) - if true, do not delete the original
+    artifact files after creating your new artifact. Defaults to true.
+
 ### Example Configuration
 
 This minimal example:

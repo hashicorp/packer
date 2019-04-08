@@ -119,13 +119,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
 
 	// Render this key since we didn't in the configure phase
 	p.config.OSSKey, err = interpolate.Render(p.config.OSSKey, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error rendering oss_key_name template: %s", err)
+		return nil, false, false, fmt.Errorf("Error rendering oss_key_name template: %s", err)
 	}
 	if p.config.OSSKey == "" {
 		p.config.OSSKey = "Packer_" + strconv.Itoa(time.Now().Nanosecond())
@@ -144,12 +144,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Hope we found something useful
 	if source == "" {
-		return nil, false, fmt.Errorf("No vhd or raw file found in artifact from builder")
+		return nil, false, false, fmt.Errorf("No vhd or raw file found in artifact from builder")
 	}
 
 	ecsClient, err := p.config.AlicloudAccessConfig.Client()
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to connect alicloud ecs  %s", err)
+		return nil, false, false, fmt.Errorf("Failed to connect alicloud ecs  %s", err)
 	}
 	ecsClient.SetBusinessInfo(BUSINESSINFO)
 
@@ -158,12 +158,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		ImageName: p.config.AlicloudImageName,
 	})
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+		return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 			getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 	}
 
 	if len(images) > 0 && !p.config.AlicloudImageForceDelete {
-		return nil, false, fmt.Errorf("Duplicated image exists, please delete the existing images " +
+		return nil, false, false, fmt.Errorf("Duplicated image exists, please delete the existing images " +
 			"or set the 'image_force_delete' value as true")
 	}
 
@@ -172,25 +172,25 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	client, err := oss.New(getEndPonit(p.config.AlicloudRegion), p.config.AlicloudAccessKey,
 		p.config.AlicloudSecretKey)
 	if err != nil {
-		return nil, false, fmt.Errorf("Creating oss connection failed: %s", err)
+		return nil, false, false, fmt.Errorf("Creating oss connection failed: %s", err)
 	}
 	bucket, err := queryOrCreateBucket(p.config.OSSBucket, client)
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to query or create bucket %s: %s", p.config.OSSBucket, err)
+		return nil, false, false, fmt.Errorf("Failed to query or create bucket %s: %s", p.config.OSSBucket, err)
 	}
 
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to open %s: %s", source, err)
+		return nil, false, false, fmt.Errorf("Failed to open %s: %s", source, err)
 	}
 
 	err = bucket.PutObjectFromFile(p.config.OSSKey, source)
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to upload image %s: %s", source, err)
+		return nil, false, false, fmt.Errorf("Failed to upload image %s: %s", source, err)
 	}
 	if len(images) > 0 && p.config.AlicloudImageForceDelete {
 		if err = ecsClient.DeleteImage(packercommon.Region(p.config.AlicloudRegion),
 			images[0].ImageId); err != nil {
-			return nil, false, fmt.Errorf("Delete duplicated image %s failed", images[0].ImageName)
+			return nil, false, false, fmt.Errorf("Delete duplicated image %s failed", images[0].ImageName)
 		}
 	}
 
@@ -222,7 +222,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 				RoleName: "AliyunECSImageImportDefaultRole",
 			})
 			if err != nil {
-				return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+				return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 					getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 			}
 			if roleResponse.Role.RoleId == "" {
@@ -230,7 +230,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 					RoleName:                 "AliyunECSImageImportDefaultRole",
 					AssumeRolePolicyDocument: AliyunECSImageImportDefaultRolePolicy,
 				}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				if _, err := ramClient.AttachPolicyToRole(ram.AttachPolicyToRoleRequest{
@@ -240,7 +240,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 					},
 					RoleName: "AliyunECSImageImportDefaultRole",
 				}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 			} else {
@@ -248,7 +248,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 					RoleName: "AliyunECSImageImportDefaultRole",
 				})
 				if err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				isAliyunECSImageImportRolePolicyNotExit := true
@@ -267,7 +267,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 						},
 						RoleName: "AliyunECSImageImportDefaultRole",
 					}); err != nil {
-						return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 							getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 					}
 				}
@@ -276,7 +276,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 						RoleName:                    "AliyunECSImageImportDefaultRole",
 						NewAssumeRolePolicyDocument: AliyunECSImageImportDefaultRolePolicy,
 					}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 			}
@@ -291,7 +291,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 						e.Code == "InvalidImageName.Duplicated" {
 						break
 					}
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				break
@@ -299,7 +299,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 		} else {
 
-			return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+			return nil, false, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 				getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 		}
 	}
@@ -320,12 +320,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		ui.Message(fmt.Sprintf("Deleting import source %s/%s/%s",
 			getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey))
 		if err = bucket.DeleteObject(p.config.OSSKey); err != nil {
-			return nil, false, fmt.Errorf("Failed to delete %s/%s/%s: %s",
+			return nil, false, false, fmt.Errorf("Failed to delete %s/%s/%s: %s",
 				getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey, err)
 		}
 	}
 
-	return artifact, false, nil
+	return artifact, false, false, nil
 }
 
 func queryOrCreateBucket(bucketName string, client *oss.Client) (*oss.Bucket, error) {

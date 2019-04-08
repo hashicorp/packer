@@ -60,6 +60,9 @@ are two categories: required and optional parameters.
 
 ### Optional:
 
+-   `keep_input_artifact` (boolean) - if true, do not delete the RAW or VHD
+    disk image after importing it to the cloud. Defaults to false.
+
 -   `oss_key_name` (string) - The name of the object key in `oss_bucket_name`
     where the RAW or VHD file will be copied to for import.
 

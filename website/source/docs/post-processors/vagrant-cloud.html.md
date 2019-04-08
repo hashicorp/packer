@@ -84,6 +84,9 @@ on Vagrant Cloud, as well as authentication and version information.
     to set this option to true if your host at vagrant_cloud_url is using a
     self-signed certificate.
 
+-   `keep_input_artifact` (boolean) - When true, preserve the local box
+    after uploading to Vagrant cloud. Defaults to `true`.
+
 -   `version_description` (string) - Optionally markdown text used as a
     full-length and in-depth description of the version, typically for denoting
     changes introduced

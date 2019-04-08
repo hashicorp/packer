@@ -28,6 +28,10 @@ type MockDriver struct {
 	IPAddressResult string
 	IPAddressErr    error
 
+	KillCalled bool
+	KillID     string
+	KillError  error
+
 	LoginCalled   bool
 	LoginUsername string
 	LoginPassword string
@@ -158,6 +162,12 @@ func (d *MockDriver) StartContainer(config *ContainerConfig) (string, error) {
 	d.StartCalled = true
 	d.StartConfig = config
 	return d.StartID, d.StartError
+}
+
+func (d *MockDriver) KillContainer(id string) error {
+	d.KillCalled = true
+	d.KillID = id
+	return d.KillError
 }
 
 func (d *MockDriver) StopContainer(id string) error {

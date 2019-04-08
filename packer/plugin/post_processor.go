@@ -21,7 +21,7 @@ func (c *cmdPostProcessor) Configure(config ...interface{}) error {
 	return c.p.Configure(config...)
 }
 
-func (c *cmdPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (c *cmdPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

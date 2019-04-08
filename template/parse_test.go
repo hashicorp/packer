@@ -14,6 +14,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func boolPointer(tf bool) *bool {
+	return &tf
+}
+
 func TestParse(t *testing.T) {
 	cases := []struct {
 		File   string
@@ -205,7 +209,7 @@ func TestParse(t *testing.T) {
 						{
 							Name:              "foo",
 							Type:              "foo",
-							KeepInputArtifact: true,
+							KeepInputArtifact: boolPointer(true),
 						},
 					},
 				},

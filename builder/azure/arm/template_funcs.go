@@ -3,6 +3,8 @@ package arm
 import (
 	"bytes"
 	"text/template"
+
+	packertpl "github.com/hashicorp/packer/common/template"
 )
 
 func isValidByteValue(b byte) bool {
@@ -39,5 +41,6 @@ func templateCleanImageName(s string) string {
 }
 
 var TemplateFuncs = template.FuncMap{
-	"clean_image_name": templateCleanImageName,
+	"clean_resource_name": templateCleanImageName,
+	"clean_image_name":    packertpl.DeprecatedTemplateFunc("clean_image_name", "clean_resource_name", templateCleanImageName),
 }

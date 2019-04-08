@@ -41,7 +41,7 @@ type Config struct {
 
 	// This is used in the template generation to format environment variables
 	// inside the `ExecuteCommand` template.
-	EnvVarFormat string
+	EnvVarFormat string `mapstructure:"env_var_format"`
 
 	ctx interpolate.Context
 }

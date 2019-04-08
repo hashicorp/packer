@@ -54,13 +54,15 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		scripts = append(scripts, tempScriptFileName)
 
 		// figure out what extension the file should have, and rename it.
 		if config.TempfileExtension != "" {
 			os.Rename(tempScriptFileName, fmt.Sprintf("%s.%s", tempScriptFileName, config.TempfileExtension))
 			tempScriptFileName = fmt.Sprintf("%s.%s", tempScriptFileName, config.TempfileExtension)
 		}
+
+		scripts = append(scripts, tempScriptFileName)
+
 		defer os.Remove(tempScriptFileName)
 	}
 
