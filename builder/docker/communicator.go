@@ -25,6 +25,7 @@ type Communicator struct {
 	Config        *Config
 	ContainerUser string
 	lock          sync.Mutex
+	EntryPoint    []string
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
@@ -32,10 +33,9 @@ func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 		"exec",
 		"-i",
 		c.ContainerID,
-		"/bin/sh",
-		"-c",
-		fmt.Sprintf("(%s)", remote.Command),
 	}
+	dockerArgs = append(dockerArgs, c.EntryPoint...)
+	dockerArgs = append(dockerArgs, fmt.Sprintf("(%s)", remote.Command))
 
 	if c.Config.Pty {
 		dockerArgs = append(dockerArgs[:2], append([]string{"-t"}, dockerArgs[2:]...)...)

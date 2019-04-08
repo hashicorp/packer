@@ -49,12 +49,15 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 		IdValue:        "1234567890abcdef",
 	}
 
-	result, keep, err := p.PostProcess(context.Background(), testUi(), artifact)
+	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
 		t.Fatal("should keep")
+	}
+	if !forceOverride {
+		t.Fatal("Should force keep no matter what user sets.")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -88,12 +91,15 @@ func TestPostProcessor_PostProcess_Force(t *testing.T) {
 		IdValue:        "1234567890abcdef",
 	}
 
-	result, keep, err := p.PostProcess(context.Background(), testUi(), artifact)
+	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if _, ok := result.(packer.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
 		t.Fatal("should keep")
+	}
+	if !forceOverride {
+		t.Fatal("Should force keep no matter what user sets.")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)

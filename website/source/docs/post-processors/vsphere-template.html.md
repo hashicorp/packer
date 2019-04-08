@@ -61,6 +61,12 @@ Optional:
 -   `insecure` (boolean) - If it's true skip verification of server
     certificate. Default is false
 
+-   `keep_input_artifact` (boolean) - Unlike most post-processors, this option
+    has no effect for vsphere-template. This is because in order for a template
+    to work, you can't delete the vm that you generate the template from. The
+    vsphere template post-processor will therefore always preserve the original
+    vm.
+
 -   `snapshot_enable` (boolean) - Create a snapshot before marking as a
     template. Default is false
 

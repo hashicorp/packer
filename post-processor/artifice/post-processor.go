@@ -49,7 +49,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if len(artifact.Files()) > 0 {
 		ui.Say(fmt.Sprintf("Discarding artifact files: %s", strings.Join(artifact.Files(), ", ")))
 	}
@@ -57,5 +57,5 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	artifact, err := NewArtifact(p.config.Files)
 	ui.Say(fmt.Sprintf("Using these artifact files: %s", strings.Join(artifact.Files(), ", ")))
 
-	return artifact, true, err
+	return artifact, true, false, err
 }

@@ -102,7 +102,7 @@ generate: deps ## Generate dynamically generated code
 	gofmt -w command/plugin.go
 
 test: fmt-check mode-check vet ## Run unit tests
-	@go test $(TEST) $(TESTARGS) -timeout=2m
+	@go test $(TEST) $(TESTARGS) -timeout=3m
 
 # testacc runs acceptance tests
 testacc: deps generate ## Run acceptance tests
@@ -110,7 +110,7 @@ testacc: deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: fmt-check mode-check vet ## Test with race detection enabled
-	@go test -race $(TEST) $(TESTARGS) -timeout=2m -p=8
+	@go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
