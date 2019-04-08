@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -104,7 +105,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 	var cmd *packer.RemoteCmd
 	command := p.config.RestartCommand
-	err := p.retryable(func() error {
+	err := retry.Config{StartTimeout: p.config.RestartTimeout}.Run(ctx, func(context.Context) error {
 		cmd = &packer.RemoteCmd{Command: command}
 		return cmd.RunWithUi(ctx, comm, ui)
 	})
@@ -285,30 +286,4 @@ var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 	}
 
 	return nil
-}
-
-// retryable will retry the given function over and over until a
-// non-error is returned.
-func (p *Provisioner) retryable(f func() error) error {
-	startTimeout := time.After(p.config.RestartTimeout)
-	for {
-		var err error
-		if err = f(); err == nil {
-			return nil
-		}
-
-		// Create an error and log it
-		err = fmt.Errorf("Retryable error: %s", err)
-		log.Print(err.Error())
-
-		// Check if we timed out, otherwise we retry. It is safe to
-		// retry since the only error case above is if the command
-		// failed to START.
-		select {
-		case <-startTimeout:
-			return err
-		default:
-			time.Sleep(retryableSleep)
-		}
-	}
 }

@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
@@ -50,16 +52,18 @@ func (s *stepConvertDisk) Run(ctx context.Context, state multistep.StateBag) mul
 	ui.Say("Converting hard drive...")
 	// Retry the conversion a few times in case it takes the qemu process a
 	// moment to release the lock
-	err := common.Retry(1, 10, 10, func(_ uint) (bool, error) {
-		if err := driver.QemuImg(command...); err != nil {
+	err := retry.Config{
+		Tries: 10,
+		ShouldRetry: func(err error) bool {
 			if strings.Contains(err.Error(), `Failed to get shared "write" lock`) {
 				ui.Say("Error getting file lock for conversion; retrying...")
-				return false, nil
+				return true
 			}
-			err = fmt.Errorf("Error converting hard drive: %s", err)
-			return true, err
-		}
-		return true, nil
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 1 * time.Second, MaxBackoff: 10 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		return driver.QemuImg(command...)
 	})
 
 	if err != nil {
