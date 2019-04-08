@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/common/uuid"
 	commonhelper "github.com/hashicorp/packer/helper/common"
@@ -253,7 +254,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		// that the upload succeeded, a restart is initiated, and then the
 		// command is executed but the file doesn't exist any longer.
 		var cmd *packer.RemoteCmd
-		err = p.retryable(func() error {
+		retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
@@ -283,31 +284,6 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps running
 	// on the other side.
 	os.Exit(0)
-}
-
-// retryable will retry the given function over and over until a non-error is
-// returned.
-func (p *Provisioner) retryable(f func() error) error {
-	startTimeout := time.After(p.config.StartRetryTimeout)
-	for {
-		var err error
-		if err = f(); err == nil {
-			return nil
-		}
-
-		// Create an error and log it
-		err = fmt.Errorf("Retryable error: %s", err)
-		log.Print(err.Error())
-
-		// Check if we timed out, otherwise we retry. It is safe to retry
-		// since the only error case above is if the command failed to START.
-		select {
-		case <-startTimeout:
-			return err
-		default:
-			time.Sleep(retryableSleep)
-		}
-	}
 }
 
 // Environment variables required within the remote environment are uploaded
@@ -387,13 +363,14 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 }
 
 func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
+	ctx := context.TODO()
 	// Upload all env vars to a powershell script on the target build file
 	// system. Do this in the context of a single retryable function so that
 	// we gracefully handle any errors created by transient conditions such as
 	// a system restart
 	envVarReader := strings.NewReader(flattenedEnvVars)
 	log.Printf("Uploading env vars to %s", p.config.RemoteEnvVarPath)
-	err = p.retryable(func() error {
+	err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(context.Context) error {
 		if err := p.communicator.Upload(p.config.RemoteEnvVarPath, envVarReader, nil); err != nil {
 			return fmt.Errorf("Error uploading ps script containing env vars: %s", err)
 		}
