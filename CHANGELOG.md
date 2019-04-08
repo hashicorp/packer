@@ -1,6 +1,8 @@
 ## 1.4.0 (Upcoming)
 
 ### IMPROVEMENTS:
+* **new builder** `proxmox` implements a builder for https://www.proxmox.com/en
+    /proxmox-ve [GH-7391]
 * builder/alicloud: Improve error message for conflicting images name [GH-7415]
 * builder/amazon-chroot: Allow users to specify custom block device mapping
     [GH-7370]
@@ -45,6 +47,7 @@
 * builder/vmware-esxi: properly copy .vmxf files in remote vmx builds [GH-7357]
 * core: fix bug where Packer didn't pause in debug on certain linux platforms.
     [GH-7352]
+* builder/amazon: Fix bug copying encrypted images between regions [GH-7342]
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: Change `temporary_security_group_source_cidr` to
