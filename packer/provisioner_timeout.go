@@ -19,5 +19,25 @@ func (p *TimeoutProvisioner) Provision(ctx context.Context, ui Ui, comm Communic
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Setting a %s timeout for the next provisioner...", p.Timeout))
-	return p.Provisioner.Provision(ctx, ui, comm)
+
+	errC := make(chan interface{})
+
+	go func() {
+		select {
+		case <-errC:
+			// all good
+		case <-ctx.Done():
+			switch ctx.Err() {
+			case context.DeadlineExceeded:
+				ui.Error("Cancelling provisioner after a timeout...")
+			default:
+				// the context also gets cancelled when the provisioner is
+				// successful
+			}
+		}
+	}()
+
+	err := p.Provisioner.Provision(ctx, ui, comm)
+	close(errC)
+	return err
 }
