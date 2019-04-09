@@ -11,9 +11,7 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-type stepTeardownInstance struct {
-	Debug bool
-}
+type stepTeardownInstance struct{}
 
 func (s *stepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)

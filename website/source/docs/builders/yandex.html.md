@@ -76,14 +76,14 @@ can be configured for this builder.
 
 -   `instance_cores` (number) - The number of cores available to the instance. 
 
--   `instance_mem_gb`  (number) - The amount of memory available to the instance, specified in gigabytes.
+-   `instance_mem_gb` (number) - The amount of memory available to the instance, specified in gigabytes.
 
 -   `disk_name` (string) - The name of the disk, if unset the instance name
     will be used.
     
 -   `disk_size_gb` (number) - The size of the disk in GB. This defaults to `10`, which is 10GB.
 
--   `disk_type`  (string) - Specify disk type for the launched instance. Defaults to `network-hdd`.
+-   `disk_type` (string) - Specify disk type for the launched instance. Defaults to `network-hdd`.
 
 -   `image_description` (string) - The description of the resulting image.
 
@@ -97,12 +97,12 @@ can be configured for this builder.
 
 -   `image_product_ids` (list) - License IDs that indicate which licenses are attached to resulting image.
 
--   `instance_name`  (string) - The name assigned to the instance.
+-   `instance_name` (string) - The name assigned to the instance.
                 
 -   `labels` (object of key/value strings) - Key/value pair labels to apply to
     the launched instance.
     
--   `machine_type` (string) - The type of virtual machine to launch. This defaults to 'standard-v1'.
+-   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 
 -   `metadata` (object of key/value strings) - Metadata applied to the launched
     instance.

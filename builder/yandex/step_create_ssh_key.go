@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
@@ -23,11 +22,11 @@ type stepCreateSSHKey struct {
 
 func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(*Config)
+	config := state.Get("config").(*Config)
 
-	if c.Communicator.SSHPrivateKeyFile != "" {
+	if config.Communicator.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := c.Communicator.ReadSSHPrivateKeyFile()
+		privateKeyBytes, err := config.Communicator.ReadSSHPrivateKeyFile()
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -41,8 +40,8 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		c.Communicator.SSHPublicKey = ssh.MarshalAuthorizedKey(key.PublicKey())
-		c.Communicator.SSHPrivateKey = privateKeyBytes
+		config.Communicator.SSHPublicKey = ssh.MarshalAuthorizedKey(key.PublicKey())
+		config.Communicator.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
@@ -63,33 +62,32 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	// Marshal the public key into SSH compatible format
-	// TODO properly handle the public key error
-	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
+	pub, err := ssh.NewPublicKey(&priv.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("Error creating public ssh key: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
 
-	// The name of the public key on DO
-	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	hashMD5 := ssh.FingerprintLegacyMD5(pub)
+	hashSHA256 := ssh.FingerprintSHA256(pub)
 
-	hashMd5 := ssh.FingerprintLegacyMD5(pub)
-	hashSha256 := ssh.FingerprintSHA256(pub)
-
-	log.Printf("[INFO] temporary ssh key name: %s", name)
-	log.Printf("[INFO] md5 hash of ssh pub key: %s", hashMd5)
-	log.Printf("[INFO] sha256 hash of ssh pub key: %s", hashSha256)
+	log.Printf("[INFO] md5 hash of ssh pub key: %s", hashMD5)
+	log.Printf("[INFO] sha256 hash of ssh pub key: %s", hashSHA256)
 
 	// Remember some state for the future
-	//state.Put("ssh_key_id", key.ID)
 	state.Put("ssh_key_public", pubSSHFormat)
-	state.Put("ssh_key_name", name)
 
 	// Set the private key in the config for later
-	c.Communicator.SSHPrivateKey = pem.EncodeToMemory(&privBlk)
-	c.Communicator.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
+	config.Communicator.SSHPrivateKey = pem.EncodeToMemory(&privBlk)
+	config.Communicator.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
-		err := ioutil.WriteFile(s.DebugKeyPath, c.Communicator.SSHPrivateKey, 0600)
+		err := ioutil.WriteFile(s.DebugKeyPath, config.Communicator.SSHPrivateKey, 0600)
 		if err != nil {
 			return stepHaltWithError(state, fmt.Errorf("Error saving debug key: %s", err))
 		}
