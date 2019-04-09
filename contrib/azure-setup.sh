@@ -30,7 +30,7 @@ showhelp() {
     echo "  Note that you must already have an Azure account, username,"
     echo "  password, and subscription. You can create those here:"
     echo ""
-    echo "  - https://account.windowsazure.com/"
+    echo "  - https://azure.microsoft.com/en-us/account/"
     echo ""
     echo "REQUIREMENTS"
     echo ""
