@@ -27,37 +27,36 @@ type Config struct {
 	Communicator        communicator.Config `mapstructure:",squash"`
 
 	Endpoint              string `mapstructure:"endpoint"`
-	Token                 string `mapstructure:"token"`
-	ServiceAccountKeyFile string `mapstructure:"service_account_key_file"`
 	FolderID              string `mapstructure:"folder_id"`
-	Zone                  string `mapstructure:"zone"`
+	ServiceAccountKeyFile string `mapstructure:"service_account_key_file"`
+	Token                 string `mapstructure:"token"`
 
-	SerialLogFile       string            `mapstructure:"serial_log_file"`
-	InstanceCores       int               `mapstructure:"instance_cores"`
-	InstanceMemory      int               `mapstructure:"instance_mem_gb"`
+	DiskName            string            `mapstructure:"disk_name"`
 	DiskSizeGb          int               `mapstructure:"disk_size_gb"`
 	DiskType            string            `mapstructure:"disk_type"`
-	SubnetID            string            `mapstructure:"subnet_id"`
-	ImageName           string            `mapstructure:"image_name"`
-	ImageFamily         string            `mapstructure:"image_family"`
 	ImageDescription    string            `mapstructure:"image_description"`
+	ImageFamily         string            `mapstructure:"image_family"`
 	ImageLabels         map[string]string `mapstructure:"image_labels"`
+	ImageName           string            `mapstructure:"image_name"`
 	ImageProductIDs     []string          `mapstructure:"image_product_ids"`
+	InstanceCores       int               `mapstructure:"instance_cores"`
+	InstanceMemory      int               `mapstructure:"instance_mem_gb"`
 	InstanceName        string            `mapstructure:"instance_name"`
 	Labels              map[string]string `mapstructure:"labels"`
-	DiskName            string            `mapstructure:"disk_name"`
-	MachineType         string            `mapstructure:"machine_type"`
+	PlatformID          string            `mapstructure:"platform_id"`
 	Metadata            map[string]string `mapstructure:"metadata"`
-	SourceImageID       string            `mapstructure:"source_image_id"`
+	SerialLogFile       string            `mapstructure:"serial_log_file"`
 	SourceImageFamily   string            `mapstructure:"source_image_family"`
 	SourceImageFolderID string            `mapstructure:"source_image_folder_id"`
-	UseInternalIP       bool              `mapstructure:"use_internal_ip"`
+	SourceImageID       string            `mapstructure:"source_image_id"`
+	SubnetID            string            `mapstructure:"subnet_id"`
 	UseIPv4Nat          bool              `mapstructure:"use_ipv4_nat"`
 	UseIPv6             bool              `mapstructure:"use_ipv6"`
+	UseInternalIP       bool              `mapstructure:"use_internal_ip"`
+	Zone                string            `mapstructure:"zone"`
 
+	ctx          interpolate.Context
 	StateTimeout time.Duration `mapstructure:"state_timeout"`
-
-	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -132,8 +131,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DiskName = c.InstanceName + "-disk"
 	}
 
-	if c.MachineType == "" {
-		c.MachineType = "standard-v1"
+	if c.PlatformID == "" {
+		c.PlatformID = "standard-v1"
 	}
 
 	if es := c.Communicator.Prepare(&c.ctx); len(es) > 0 {
@@ -141,7 +140,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// Process required parameters.
-
 	if c.SourceImageID == "" && c.SourceImageFamily == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a source_image_id or source_image_family must be specified"))

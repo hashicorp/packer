@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
 
 // The unique ID for this builder.
@@ -30,9 +32,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 // Run executes a yandex Packer build and returns a packer.Artifact
-// representing a Yandex Cloud machine image.
+// representing a Yandex.Cloud compute image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	driver, err := NewDriverYandexCloud(ui, b.config)
+	driver, err := NewDriverYC(ui, b.config)
 
 	if err != nil {
 		return nil, err
@@ -66,9 +68,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.Communicator,
 		},
-		&stepTeardownInstance{
-			Debug: b.config.PackerDebug,
-		},
+		&stepTeardownInstance{},
 		&stepCreateImage{},
 	}
 
@@ -80,16 +80,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
-	if _, ok := state.GetOk("image_id"); !ok {
-		log.Println("Failed to find image_id in state. Bug?")
-		return nil, nil
+
+	image, ok := state.GetOk("image")
+	if !ok {
+		return nil, fmt.Errorf("Failed to find 'image' in state. Bug?")
 	}
 
-	artifact := &ArtifactMini{
-		imageID:     state.Get("image_id").(string),
-		imageName:   state.Get("image_name").(string),
-		imageFamily: state.Get("image_family").(string),
-		config:      b.config,
+	artifact := &Artifact{
+		image:  image.(*compute.Image),
+		config: b.config,
 	}
 	return artifact, nil
 }

@@ -60,10 +60,7 @@ func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multis
 	log.Printf("Image Family: %s", image.Family)
 	log.Printf("Image Description: %s", image.Description)
 	log.Printf("Image Storage size: %d", image.StorageSize)
-	state.Put("image_id", image.Id)
-	state.Put("image_name", c.ImageName)
-	state.Put("image_family", c.ImageFamily)
-	state.Put("image_description", c.ImageDescription)
+	state.Put("image", image)
 
 	return multistep.ActionContinue
 }
