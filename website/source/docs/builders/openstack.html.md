@@ -317,7 +317,7 @@ VM.
 ``` json
 {
   "type": "openstack",
-  "identity_endpoint": "http://<destack-ip>:5000/v3",
+  "identity_endpoint": "http://<devstack-ip>:5000/v3",
   "tenant_name": "admin",
   "domain_name": "Default",
   "username": "admin",
