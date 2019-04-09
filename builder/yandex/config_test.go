@@ -197,7 +197,6 @@ func TestZone(t *testing.T) {
 // Helper stuff below
 
 func testConfig(t *testing.T) (config map[string]interface{}) {
-
 	config = map[string]interface{}{
 		"token":           "test_token",
 		"folder_id":       "hashicorp",
