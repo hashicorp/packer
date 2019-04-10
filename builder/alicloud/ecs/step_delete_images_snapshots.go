@@ -19,7 +19,7 @@ type stepDeleteAlicloudImageSnapshots struct {
 	AlicloudImageDestinationNames     []string
 }
 
-func (s *stepDeleteAlicloudImageSnapshots) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepDeleteAlicloudImageSnapshots) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 
 	// Check for force delete

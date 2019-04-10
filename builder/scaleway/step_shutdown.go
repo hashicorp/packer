@@ -11,7 +11,7 @@ import (
 
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	serverID := state.Get("server_id").(string)

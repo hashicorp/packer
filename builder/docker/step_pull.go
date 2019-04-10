@@ -11,7 +11,7 @@ import (
 
 type StepPull struct{}
 
-func (s *StepPull) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPull) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

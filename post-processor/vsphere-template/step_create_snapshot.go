@@ -37,7 +37,7 @@ func NewStepCreateSnapshot(artifact packer.Artifact, p *PostProcessor) *stepCrea
 	}
 }
 
-func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	dcPath := state.Get("dcPath").(string)

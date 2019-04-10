@@ -16,7 +16,7 @@ type Version struct {
 type stepCreateVersion struct {
 }
 
-func (s *stepCreateVersion) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)

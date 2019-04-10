@@ -5,6 +5,7 @@ package chefclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -233,7 +234,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 
 	p.communicator = comm
 
@@ -336,12 +337,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return nil
 }
 
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
-}
-
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {
 	ui.Message(fmt.Sprintf("Uploading %s...", localPath))
 
@@ -388,8 +383,8 @@ func (p *Provisioner) createConfig(
 		tpl = string(tplBytes)
 	}
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:                   nodeName,
 		ServerUrl:                  serverUrl,
 		ClientKey:                  clientKey,
@@ -402,7 +397,7 @@ func (p *Provisioner) createConfig(
 		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}
@@ -421,15 +416,15 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 	// Read the template
 	tpl := DefaultKnifeTemplate
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:        nodeName,
 		ServerUrl:       serverUrl,
 		ClientKey:       clientKey,
 		SslVerifyMode:   sslVerifyMode,
 		TrustedCertsDir: trustedCertsDir,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}

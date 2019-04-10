@@ -12,7 +12,7 @@ import (
 
 type stepUpdateImageTags struct{}
 
-func (s *stepUpdateImageTags) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepUpdateImageTags) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)

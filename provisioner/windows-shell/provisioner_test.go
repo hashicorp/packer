@@ -2,6 +2,7 @@ package shell
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -294,7 +295,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -313,7 +314,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.bat"
 
 	p.Prepare(config)
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -344,7 +345,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -383,7 +384,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}

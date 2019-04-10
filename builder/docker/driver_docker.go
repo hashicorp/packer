@@ -260,8 +260,8 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
 	tplData.Image = config.Image
-	ctx := *d.Ctx
-	ctx.Data = &tplData
+	ictx := *d.Ctx
+	ictx.Data = &tplData
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
@@ -272,7 +272,7 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
 	for _, v := range config.RunCommand {
-		v, err := interpolate.Render(v, &ctx)
+		v, err := interpolate.Render(v, &ictx)
 		if err != nil {
 			return "", err
 		}

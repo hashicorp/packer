@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -53,11 +54,8 @@ type Build interface {
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
-	Run(Ui) ([]Artifact, error)
-
-	// Cancel will cancel a running build. This will block until the build
-	// is actually completely canceled.
-	Cancel()
+	// Run can be context cancelled.
+	Run(context.Context, Ui) ([]Artifact, error)
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
 	// enabled by adding the additional key "packer_debug" to boolean
@@ -180,7 +178,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(originalUi Ui) ([]Artifact, error) {
+func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -235,7 +233,7 @@ func (b *coreBuild) Run(originalUi Ui) ([]Artifact, error) {
 
 	log.Printf("Running builder: %s", b.builderType)
 	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
-	builderArtifact, err := b.builder.Run(builderUi, hook)
+	builderArtifact, err := b.builder.Run(ctx, builderUi, hook)
 	ts.End(err)
 	if err != nil {
 		return nil, err
@@ -262,7 +260,7 @@ PostProcessorRunSeqLoop:
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
 			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
-			artifact, defaultKeep, forceOverride, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			artifact, defaultKeep, forceOverride, err := corePP.processor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
@@ -366,9 +364,4 @@ func (b *coreBuild) SetOnError(val string) {
 	}
 
 	b.onError = val
-}
-
-// Cancels the build if it is running.
-func (b *coreBuild) Cancel() {
-	b.builder.Cancel()
 }

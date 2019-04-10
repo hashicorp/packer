@@ -15,6 +15,7 @@ import (
 	"github.com/biogo/hts/bgzf"
 	"github.com/klauspost/pgzip"
 	"github.com/pierrec/lz4"
+	"github.com/ulikunitz/xz"
 )
 
 type Compressor struct {

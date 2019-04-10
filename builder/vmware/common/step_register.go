@@ -16,7 +16,7 @@ type StepRegister struct {
 	SkipExport     bool
 }
 
-func (s *StepRegister) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRegister) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

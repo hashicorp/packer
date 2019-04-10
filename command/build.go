@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -152,7 +153,7 @@ func (c *BuildCommand) Run(args []string) int {
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
-		// buildCtx, cancelCtx := ctx.WithCancel()
+		buildCtx, cancelCtx := context.WithCancel(context.Background())
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
@@ -165,8 +166,7 @@ func (c *BuildCommand) Run(args []string) int {
 			interrupted = true
 
 			log.Printf("Stopping build: %s after receiving %s", b.Name(), sig)
-			b.Cancel()
-			//cancelCtx()
+			cancelCtx()
 			log.Printf("Build cancelled: %s", b.Name())
 		}(b)
 
@@ -177,7 +177,7 @@ func (c *BuildCommand) Run(args []string) int {
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
-			runArtifacts, err := b.Run(ui)
+			runArtifacts, err := b.Run(buildCtx, ui)
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))

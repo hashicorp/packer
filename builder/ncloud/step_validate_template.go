@@ -250,7 +250,7 @@ func (s *StepValidateTemplate) validateTemplate() error {
 }
 
 // Run : main function for validation a template
-func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepValidateTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Validating deployment template ...")
 
 	err := s.Validate()

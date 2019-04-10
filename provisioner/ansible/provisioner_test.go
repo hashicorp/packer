@@ -4,6 +4,7 @@ package ansible
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -348,7 +349,7 @@ func TestAnsibleLongMessages(t *testing.T) {
 		Writer: new(bytes.Buffer),
 	}
 
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

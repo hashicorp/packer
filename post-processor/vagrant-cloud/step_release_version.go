@@ -12,7 +12,7 @@ import (
 type stepReleaseVersion struct {
 }
 
-func (s *stepReleaseVersion) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepReleaseVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)

@@ -1,9 +1,10 @@
 package chroot
 
 import (
+	"testing"
+
 	amazon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
-	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"

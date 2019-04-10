@@ -24,7 +24,7 @@ type StepRemoveDevices struct {
 	GuestAdditionsInterface string
 }
 
-func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRemoveDevices) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

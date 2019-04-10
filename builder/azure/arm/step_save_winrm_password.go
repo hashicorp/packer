@@ -13,7 +13,7 @@ type StepSaveWinRMPassword struct {
 	BuildName string
 }
 
-func (s *StepSaveWinRMPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSaveWinRMPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// store so that we can access this later during provisioning
 	commonhelper.SetSharedState("winrm_password", s.Password, s.BuildName)
 	packer.LogSecretFilter.Set(s.Password)

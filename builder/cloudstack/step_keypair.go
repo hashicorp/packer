@@ -18,7 +18,7 @@ type stepKeypair struct {
 	DebugKeyPath string
 }
 
-func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepKeypair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {

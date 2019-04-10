@@ -12,7 +12,7 @@ import (
 // StepCheckRootDevice makes sure the root device on the AMI is EBS-backed.
 type StepCheckRootDevice struct{}
 
-func (s *StepCheckRootDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCheckRootDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	image := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 

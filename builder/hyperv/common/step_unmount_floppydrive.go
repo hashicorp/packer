@@ -12,7 +12,7 @@ type StepUnmountFloppyDrive struct {
 	Generation uint
 }
 
-func (s *StepUnmountFloppyDrive) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUnmountFloppyDrive) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -85,7 +85,7 @@ func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo str
 	return &publicIPInstance, nil
 }
 
-func (s *StepCreatePublicIPInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreatePublicIPInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Public IP Instance")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -180,7 +181,8 @@ func TestBuild_Run(t *testing.T) {
 
 	build := testBuild()
 	build.Prepare()
-	artifacts, err := build.Run(ui)
+	ctx := context.Background()
+	artifacts, err := build.Run(ctx, ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -196,7 +198,7 @@ func TestBuild_Run(t *testing.T) {
 
 	// Verify hooks are dispatchable
 	dispatchHook := builder.RunHook
-	dispatchHook.Run("foo", nil, nil, 42)
+	dispatchHook.Run(ctx, "foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
 	if !hook.RunCalled {
@@ -207,7 +209,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(HookProvision, nil, new(MockCommunicator), 42)
+	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
 	prov := build.provisioners[0].provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")
@@ -229,7 +231,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
 	build.Prepare()
-	artifacts, err := build.Run(ui)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -254,7 +256,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -282,7 +284,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -312,7 +314,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -339,7 +341,8 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -366,7 +369,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -393,7 +396,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -421,15 +424,24 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		}
 	}()
 
-	testBuild().Run(testUi())
+	testBuild().Run(context.Background(), testUi())
 }
 
 func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
-	build.Cancel()
+
+	build.Prepare()
+
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
 	builder := build.builder.(*MockBuilder)
-	if !builder.CancelCalled {
-		t.Fatal("cancel should be called")
+
+	builder.RunFn = func(ctx context.Context) {
+		topCtxCancel()
+	}
+
+	_, err := build.Run(topCtx, testUi())
+	if err == nil {
+		t.Fatal("build should err")
 	}
 }

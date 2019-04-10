@@ -45,7 +45,7 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 	return rootPassword.RootPassword, nil
 }
 
-func (s *StepGetRootPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepGetRootPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Get Root Password")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

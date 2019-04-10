@@ -13,7 +13,7 @@ type stepShareImage struct {
 	ShareAccounts []string
 }
 
-func (s *stepShareImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepShareImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.ShareAccounts) == 0 {
 		return multistep.ActionContinue
 	}

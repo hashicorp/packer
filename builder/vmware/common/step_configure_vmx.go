@@ -26,7 +26,7 @@ type StepConfigureVMX struct {
 	VMName      string
 }
 
-func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	log.Printf("Configuring VMX...\n")
 
 	var err error

@@ -13,7 +13,7 @@ import (
 type stepCreateImage struct {
 }
 
-func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)

@@ -15,7 +15,7 @@ type stepCreateAlicloudSnapshot struct {
 	WaitSnapshotReadyTimeout int
 }
 
-func (s *stepCreateAlicloudSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAlicloudSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)

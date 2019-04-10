@@ -31,7 +31,7 @@ type StepMountDevice struct {
 	mountPath string
 }
 
-func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	device := state.Get("device").(string)
@@ -50,10 +50,10 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		log.Printf("Source image virtualization type is: %s", virtualizationType)
 	}
 
-	ctx := config.ctx
+	ictx := config.ctx
 
-	ctx.Data = &mountPathData{Device: filepath.Base(device)}
-	mountPath, err := interpolate.Render(config.MountPath, &ctx)
+	ictx.Data = &mountPathData{Device: filepath.Base(device)}
+	mountPath, err := interpolate.Render(config.MountPath, &ictx)
 
 	if err != nil {
 		err := fmt.Errorf("Error preparing mount directory: %s", err)
