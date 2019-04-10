@@ -54,7 +54,7 @@ For the [Google Developers Console](https://console.developers.google.com):
 1.  Choose "Show advanced options"
 2.  Tick "Enable Compute Engine service account"
 3.  Choose "Read Write" for Compute
-4.  Chose "Full" for "Storage"
+4.  Choose "Full" for "Storage"
 
 **The service account will be used automatically by Packer as long as there is
 no *account file* specified in the Packer configuration file.**
