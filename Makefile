@@ -111,6 +111,13 @@ testacc: deps generate ## Run acceptance tests
 testrace: fmt-check mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
+check-vendor-vs-mod:
+	@GO111MODULE=on go mod vendor 
+	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
+		echo "ERROR: vendor dir is not on par with go modules definition." && \
+		exit 1; \
+	fi
+
 updatedeps:
 	@echo "INFO: Packer deps are managed by go modules. See .github/CONTRIBUTING.md"
 
