@@ -81,6 +81,9 @@ type VpcSetType struct {
 	Description  string
 	IsDefault    bool
 	CreationTime util.ISO6801Time
+	RouterTableIds struct{
+		RouterTableIds []string
+	}
 }
 
 type DescribeVpcsResponse struct {

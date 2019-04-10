@@ -59,7 +59,7 @@ type DescribeDisksArgs struct {
 	Category           DiskCategory //enum for all(default) | cloud | ephemeral
 	Status             DiskStatus   //enum for In_use | Available | Attaching | Detaching | Creating | ReIniting | All(default)
 	SnapshotId         string
-	Name               string
+	DiskName           string
 	Portable           *bool //optional
 	DeleteWithInstance *bool //optional
 	DeleteAutoSnapshot *bool //optional
@@ -78,6 +78,7 @@ type DiskItemType struct {
 	DiskName           string
 	Description        string
 	Type               DiskType
+	Encrypted          bool
 	Category           DiskCategory
 	Size               int
 	ImageId            string
@@ -242,7 +243,7 @@ func (client *Client) DetachDisk(instanceId string, diskId string) error {
 }
 
 type ResizeDiskArgs struct {
-	DiskId string
+	DiskId  string
 	NewSize int
 }
 
@@ -255,14 +256,13 @@ type ResizeDiskResponse struct {
 // You can read doc at https://help.aliyun.com/document_detail/25522.html
 func (client *Client) ResizeDisk(diskId string, sizeGB int) error {
 	args := ResizeDiskArgs{
-		DiskId:diskId,
-		NewSize:sizeGB,
+		DiskId:  diskId,
+		NewSize: sizeGB,
 	}
 	response := ResizeDiskResponse{}
 	err := client.Invoke("ResizeDisk", &args, &response)
 	return err
 }
-
 
 type ResetDiskArgs struct {
 	DiskId     string
@@ -272,7 +272,6 @@ type ResetDiskArgs struct {
 type ResetDiskResponse struct {
 	common.Response
 }
-
 
 // ResetDisk resets disk to original status
 //

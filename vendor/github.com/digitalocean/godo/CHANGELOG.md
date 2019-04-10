@@ -1,5 +1,53 @@
 # Change Log
 
+## [v1.11.1] - 2019-04-04
+
+- #222 Fix Create Database Pools json fields - @sunny-b
+
+## [v1.11.0] - 2019-04-03
+
+- #220 roll out vpc functionality - @jheimann
+
+## [v1.10.1] - 2019-03-27
+
+- #219 Fix Database Pools json field - @sunny-b
+
+## [v1.10.0] - 2019-03-20
+
+- #215 Add support for Databases - @mikejholly
+
+## [v1.9.0] - 2019-03-18
+
+- #214 add support for enable_proxy_protocol. - @mregmi
+
+## [v1.8.0] - 2019-03-13
+
+- #210 Expose tags on storage volume create/list/get. - @jcodybaker
+
+## [v1.7.5] - 2019-03-04
+
+- #207 Add support for custom subdomains for Spaces CDN [beta] - @xornivore
+
+## [v1.7.4] - 2019-02-08
+
+- #202 Allow tagging volumes - @mchitten
+
+## [v1.7.3] - 2018-12-18
+
+- #196 Expose tag support for creating Load Balancers.
+
+## [v1.7.2] - 2018-12-04
+
+- #192 Exposes more options for Kubernetes clusters.
+
+## [v1.7.1] - 2018-11-27
+
+- #190 Expose constants for the state of Kubernetes clusters.
+
+## [v1.7.0] - 2018-11-13
+
+- #188 Kubernetes support [beta] - @aybabtme
+
 ## [v1.6.0] - 2018-10-16
 
 - #185 Projects support [beta] - @mchitten
