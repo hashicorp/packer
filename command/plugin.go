@@ -82,6 +82,7 @@ import (
 	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
 	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
+	sleepprovisioner "github.com/hashicorp/packer/provisioner/sleep"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
 )
@@ -145,6 +146,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
 	"shell":             new(shellprovisioner.Provisioner),
 	"shell-local":       new(shelllocalprovisioner.Provisioner),
+	"sleep":             new(sleepprovisioner.Provisioner),
 	"windows-restart":   new(windowsrestartprovisioner.Provisioner),
 	"windows-shell":     new(windowsshellprovisioner.Provisioner),
 }

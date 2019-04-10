@@ -1,6 +1,7 @@
 package lxc
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,7 +23,7 @@ type LxcAttachCommunicator struct {
 	CmdWrapper    CommandWrapper
 }
 
-func (c *LxcAttachCommunicator) Start(cmd *packer.RemoteCmd) error {
+func (c *LxcAttachCommunicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
 	localCmd, err := c.Execute(cmd.Command)
 
 	if err != nil {

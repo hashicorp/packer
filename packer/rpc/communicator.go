@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"encoding/gob"
 	"io"
 	"log"
@@ -64,7 +65,7 @@ func Communicator(client *rpc.Client) *communicator {
 	return &communicator{client: client}
 }
 
-func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
+func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
 	var args CommunicatorStartArgs
 	args.Command = cmd.Command
 
@@ -201,6 +202,8 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 }
 
 func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface{}) error {
+	ctx := context.TODO()
+
 	// Build the RemoteCmd on this side so that it all pipes over
 	// to the remote side.
 	var cmd packer.RemoteCmd
@@ -260,7 +263,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 	responseWriter := gob.NewEncoder(responseC)
 
 	// Start the actual command
-	err = c.c.Start(&cmd)
+	err = c.c.Start(ctx, &cmd)
 	if err != nil {
 		close(doneCh)
 		return NewBasicError(err)
@@ -272,8 +275,8 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 		defer close(doneCh)
 		defer responseC.Close()
 		cmd.Wait()
-		log.Printf("[INFO] RPC endpoint: Communicator ended with: %d", cmd.ExitStatus)
-		responseWriter.Encode(&CommandFinished{cmd.ExitStatus})
+		log.Printf("[INFO] RPC endpoint: Communicator ended with: %d", cmd.ExitStatus())
+		responseWriter.Encode(&CommandFinished{cmd.ExitStatus()})
 	}()
 
 	return nil

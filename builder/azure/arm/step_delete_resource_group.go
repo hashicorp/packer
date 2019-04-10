@@ -3,9 +3,10 @@ package arm
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -94,17 +95,18 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 			resourceType,
 			resourceName))
 
-		err := retry.Retry(10, 600, 10, func(attempt uint) (bool, error) {
+		err := retry.Config{
+			Tries:      10,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
 			err := deleteResource(ctx, s.client,
 				resourceType,
 				resourceName,
 				resourceGroupName)
 			if err != nil {
 				s.reportIfError(err, resourceName)
-				return false, nil
 			}
-
-			return true, nil
+			return err
 		})
 
 		if err = deploymentOperations.Next(); err != nil {
