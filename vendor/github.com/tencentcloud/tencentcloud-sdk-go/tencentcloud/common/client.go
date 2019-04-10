@@ -26,6 +26,11 @@ func (c *Client) Send(request tchttp.Request, response tchttp.Response) (err err
 		}
 		request.SetDomain(domain)
 	}
+
+	if request.GetHttpMethod() == "" {
+		request.SetHttpMethod(c.httpProfile.ReqMethod)
+	}
+
 	err = tchttp.ConstructParams(request)
 	if err != nil {
 		return
@@ -66,6 +71,11 @@ func (c *Client) Init(region string) *Client {
 
 func (c *Client) WithSecretId(secretId, secretKey string) *Client {
 	c.credential = NewCredential(secretId, secretKey)
+	return c
+}
+
+func (c *Client) WithCredential(cred *Credential) *Client {
+	c.credential = cred
 	return c
 }
 

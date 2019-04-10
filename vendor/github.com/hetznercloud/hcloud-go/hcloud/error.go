@@ -7,11 +7,19 @@ type ErrorCode string
 
 // Error codes returned from the API.
 const (
-	ErrorCodeServiceError      ErrorCode = "service_error"       // Generic server error
-	ErrorCodeRateLimitExceeded ErrorCode = "rate_limit_exceeded" // Rate limit exceeded
-	ErrorCodeUnknownError      ErrorCode = "unknown_error"       // Unknown error
-	ErrorCodeNotFound          ErrorCode = "not_found"           // Resource not found
-	ErrorCodeInvalidInput      ErrorCode = "invalid_input"       // Validation error
+	ErrorCodeServiceError          ErrorCode = "service_error"           // Generic service error
+	ErrorCodeRateLimitExceeded     ErrorCode = "rate_limit_exceeded"     // Rate limit exceeded
+	ErrorCodeUnknownError          ErrorCode = "unknown_error"           // Unknown error
+	ErrorCodeNotFound              ErrorCode = "not_found"               // Resource not found
+	ErrorCodeInvalidInput          ErrorCode = "invalid_input"           // Validation error
+	ErrorCodeForbidden             ErrorCode = "forbidden"               // Insufficient permissions
+	ErrorCodeJSONError             ErrorCode = "json_error"              // Invalid JSON in request
+	ErrorCodeLocked                ErrorCode = "locked"                  // Item is locked (Another action is running)
+	ErrorCodeResourceLimitExceeded ErrorCode = "resource_limit_exceeded" // Resource limit exceeded
+	ErrorCodeResourceUnavailable   ErrorCode = "resource_unavailable"    // Resource currently unavailable
+	ErrorCodeUniquenessError       ErrorCode = "uniqueness_error"        // One or more fields must be unique
+	ErrorCodeProtected             ErrorCode = "protected"               // The actions you are trying is protected
+	ErrorCodeMaintenance           ErrorCode = "maintenance"             // Cannot perform operation due to maintenance
 
 	// Deprecated error codes
 
