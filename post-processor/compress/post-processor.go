@@ -3,7 +3,6 @@ package compress
 import (
 	"archive/tar"
 	"archive/zip"
-	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -273,8 +272,8 @@ func makeBGZFWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser
 
 func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
 	lzwriter := lz4.NewWriter(output)
-	if compressionLevel > gzip.DefaultCompression {
-		lzwriter.Header.HighCompression = true
+	if compressionLevel > 0 {
+		lzwriter.Header.CompressionLevel = compressionLevel
 	}
 	return lzwriter, nil
 }
