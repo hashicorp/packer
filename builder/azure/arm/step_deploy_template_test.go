@@ -54,7 +54,7 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualDeploymentName string
 
 	var testSubject = &StepDeployTemplate{
-		deploy: func(_ context.Context, resourceGroupName string, deploymentName string) error {
+		deploy: func(ctx context.Context, resourceGroupName string, deploymentName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
 

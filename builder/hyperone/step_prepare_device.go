@@ -15,7 +15,7 @@ const (
 
 type stepPrepareDevice struct{}
 
-func (s *stepPrepareDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPrepareDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	controllerNumber := state.Get("chroot_controller_number").(string)
 	controllerLocation := state.Get("chroot_controller_location").(int)

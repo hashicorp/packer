@@ -28,7 +28,7 @@ type qemuArgsTemplateData struct {
 	SSHHostPort int
 }
 
-func (s *stepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -176,9 +176,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
 		httpPort := state.Get("http_port").(int)
-		ctx := config.ctx
+		ictx := config.ctx
 		if config.Comm.Type != "none" {
-			ctx.Data = qemuArgsTemplateData{
+			ictx.Data = qemuArgsTemplateData{
 				"10.0.2.2",
 				httpPort,
 				config.HTTPDir,
@@ -187,7 +187,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 				sshHostPort,
 			}
 		} else {
-			ctx.Data = qemuArgsTemplateData{
+			ictx.Data = qemuArgsTemplateData{
 				HTTPIP:    "10.0.2.2",
 				HTTPPort:  httpPort,
 				HTTPDir:   config.HTTPDir,
@@ -195,7 +195,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 				Name:      config.VMName,
 			}
 		}
-		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
+		newQemuArgs, err := processArgs(config.QemuArgs, &ictx)
 		if err != nil {
 			return nil, err
 		}

@@ -12,7 +12,7 @@ import (
 
 type stepCreateIPReservation struct{}
 
-func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateIPReservation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	config := state.Get("config").(*Config)

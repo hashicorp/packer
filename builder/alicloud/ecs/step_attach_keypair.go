@@ -15,7 +15,7 @@ import (
 type stepAttachKeyPair struct {
 }
 
-func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(*Config)

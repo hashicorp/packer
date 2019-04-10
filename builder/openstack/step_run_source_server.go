@@ -28,7 +28,7 @@ type StepRunSourceServer struct {
 	server                *servers.Server
 }
 
-func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
 	sourceImage := state.Get("source_image").(string)

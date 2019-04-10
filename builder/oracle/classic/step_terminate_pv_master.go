@@ -12,7 +12,7 @@ import (
 type stepTerminatePVMaster struct {
 }
 
-func (s *stepTerminatePVMaster) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepTerminatePVMaster) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting master Instance...")

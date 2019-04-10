@@ -18,7 +18,7 @@ type stepRemoteUpload struct {
 	DoCleanup bool
 }
 
-func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 

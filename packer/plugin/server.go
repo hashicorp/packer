@@ -101,7 +101,7 @@ func Server() (*packrpc.Server, error) {
 
 	// Serve a single connection
 	log.Println("Serving a plugin connection...")
-	return packrpc.NewServer(conn), nil
+	return packrpc.NewServer(conn)
 }
 
 func serverListener(minPort, maxPort int64) (net.Listener, error) {

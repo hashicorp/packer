@@ -37,7 +37,7 @@ func ConfigTmpDir() (string, error) {
 	return td, nil
 }
 
-func (s *StepTempDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepTempDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating a temporary directory for sharing data...")

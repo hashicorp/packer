@@ -12,7 +12,7 @@ type stepPreValidate struct {
 	ForceDelete   bool
 }
 
-func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("TencentCloud support images with same name, image_name check is not required.")
 	return multistep.ActionContinue

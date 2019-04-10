@@ -20,7 +20,7 @@ type stepConfigSubnet struct {
 	isCreate        bool
 }
 
-func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigSubnet) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpc_id").(string)

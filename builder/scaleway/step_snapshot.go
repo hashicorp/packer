@@ -12,7 +12,7 @@ import (
 
 type stepSnapshot struct{}
 
-func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)

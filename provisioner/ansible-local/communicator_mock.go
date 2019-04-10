@@ -1,9 +1,10 @@
 package ansiblelocal
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type communicatorMock struct {

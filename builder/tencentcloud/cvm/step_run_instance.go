@@ -27,7 +27,7 @@ type stepRunInstance struct {
 	AssociatePublicIpAddress bool
 }
 
-func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("cvm_client").(*cvm.Client)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

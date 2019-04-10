@@ -16,7 +16,7 @@ type stepCreateAlicloudImage struct {
 	image                        *ecs.ImageType
 }
 
-func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAlicloudImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)

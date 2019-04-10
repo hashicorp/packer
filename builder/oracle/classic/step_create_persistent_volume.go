@@ -17,7 +17,7 @@ type stepCreatePersistentVolume struct {
 	ImageListEntry int
 }
 
-func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreatePersistentVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*compute.Client)
 
 	ui := state.Get("ui").(packer.Ui)

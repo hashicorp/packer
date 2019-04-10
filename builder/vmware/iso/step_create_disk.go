@@ -22,7 +22,7 @@ import (
 //   disk_full_paths ([]string) - The full paths to all created disks
 type stepCreateDisk struct{}
 
-func (stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)

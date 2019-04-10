@@ -13,7 +13,7 @@ import (
 // hard drive for the virtual machine.
 type stepCreateDisk struct{}
 
-func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

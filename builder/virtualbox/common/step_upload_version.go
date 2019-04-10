@@ -16,7 +16,7 @@ type StepUploadVersion struct {
 	Path string
 }
 
-func (s *StepUploadVersion) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

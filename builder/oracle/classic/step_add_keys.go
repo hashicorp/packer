@@ -15,7 +15,7 @@ type stepAddKeysToAPI struct {
 	KeyName string
 }
 
-func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepAddKeysToAPI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)

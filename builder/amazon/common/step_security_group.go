@@ -25,7 +25,7 @@ type StepSecurityGroup struct {
 	createdGroupId string
 }
 
-func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpc_id").(string)

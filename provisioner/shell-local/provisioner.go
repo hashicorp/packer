@@ -1,6 +1,8 @@
 package shell
 
 import (
+	"context"
+
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 )
@@ -23,7 +25,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, _ packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Communicator) error {
 	_, retErr := sl.Run(ui, &p.config)
 	if retErr != nil {
 		return retErr

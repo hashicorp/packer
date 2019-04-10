@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hyperonecom/h1-client-go"
+	openapi "github.com/hyperonecom/h1-client-go"
 )
 
 type Artifact struct {

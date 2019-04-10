@@ -1,6 +1,8 @@
 package ncloud
 
 import (
+	"context"
+
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -27,7 +29,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Message("Creating Naver Cloud Platform Connection ...")
 	conn := ncloud.NewConnection(b.config.AccessKey, b.config.SecretKey)
 
@@ -92,7 +94,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Run!
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, b.stateBag)
-	b.runner.Run(b.stateBag)
+	b.runner.Run(ctx, b.stateBag)
 
 	// If there was an error, return that
 	if rawErr, ok := b.stateBag.GetOk("Error"); ok {
@@ -107,8 +109,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	b.runner.Cancel()
 }

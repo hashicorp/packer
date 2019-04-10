@@ -1,6 +1,7 @@
 package googlecomputeexport
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -74,7 +75,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != googlecompute.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only export from Google Compute Engine builder artifacts.",
@@ -164,7 +165,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Run the steps.
 	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
-	p.runner.Run(state)
+	p.runner.Run(ctx, state)
 
 	result := &Artifact{paths: p.config.Paths}
 
