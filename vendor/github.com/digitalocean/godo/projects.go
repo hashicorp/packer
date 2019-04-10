@@ -258,11 +258,11 @@ func (p *ProjectsServiceOp) AssignResources(ctx context.Context, projectID strin
 	}
 
 	for i, resource := range resources {
-		switch resource.(type) {
+		switch resource := resource.(type) {
 		case ResourceWithURN:
-			ar.Resources[i] = resource.(ResourceWithURN).URN()
+			ar.Resources[i] = resource.URN()
 		case string:
-			ar.Resources[i] = resource.(string)
+			ar.Resources[i] = resource
 		default:
 			return nil, nil, fmt.Errorf("%T must either be a string or have a valid URN method", resource)
 		}
