@@ -3,13 +3,14 @@ package common
 import (
 	"bytes"
 	"fmt"
-	versionUtil "github.com/hashicorp/go-version"
 	"log"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	versionUtil "github.com/hashicorp/go-version"
 
 	packer "github.com/hashicorp/packer/common"
 )

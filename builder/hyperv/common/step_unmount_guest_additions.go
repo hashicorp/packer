@@ -11,7 +11,7 @@ import (
 type StepUnmountGuestAdditions struct {
 }
 
-func (s *StepUnmountGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUnmountGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

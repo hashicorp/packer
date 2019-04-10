@@ -75,7 +75,7 @@ type stepCreateVMX struct {
 }
 
 /* regular steps */
-func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -109,11 +109,11 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		vmxTemplate = string(rawBytes)
 	}
 
-	ctx := config.ctx
+	ictx := config.ctx
 
 	if len(config.AdditionalDiskSize) > 0 {
 		for i := range config.AdditionalDiskSize {
-			ctx.Data = &additionalDiskTemplateData{
+			ictx.Data = &additionalDiskTemplateData{
 				DiskNumber: i + 1,
 				DiskName:   config.DiskName,
 			}
@@ -140,7 +140,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 				diskTemplate = string(rawBytes)
 			}
 
-			diskContents, err := interpolate.Render(diskTemplate, &ctx)
+			diskContents, err := interpolate.Render(diskTemplate, &ictx)
 			if err != nil {
 				err := fmt.Errorf("Error preparing VMX template for additional disk: %s", err)
 				state.Put("error", err)
@@ -396,10 +396,10 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		}
 	}
 
-	ctx.Data = &templateData
+	ictx.Data = &templateData
 
 	/// render the .vmx template
-	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
+	vmxContents, err := interpolate.Render(vmxTemplate, &ictx)
 	if err != nil {
 		err := fmt.Errorf("Error processing VMX template: %s", err)
 		state.Put("error", err)

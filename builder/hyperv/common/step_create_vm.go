@@ -37,7 +37,7 @@ type StepCreateVM struct {
 	Version                        string
 }
 
-func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")

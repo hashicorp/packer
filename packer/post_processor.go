@@ -1,5 +1,7 @@
 package packer
 
+import "context"
+
 // A PostProcessor is responsible for taking an artifact of a build
 // and doing some sort of post-processing to turn this into another
 // artifact. An example of a post-processor would be something that takes
@@ -18,5 +20,6 @@ type PostProcessor interface {
 	// is true, then any user input for keep_input_artifact is ignored and
 	// the artifact is either kept or discarded according to the value set in
 	// `keep`.
-	PostProcess(Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
+	// PostProcess is cancellable using context
+	PostProcess(context.Context, Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
 }

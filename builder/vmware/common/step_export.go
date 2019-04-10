@@ -56,7 +56,7 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 	return append(s.OVFToolOptions, args...)
 }
 
-func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("driverConfig").(*DriverConfig)
 	ui := state.Get("ui").(packer.Ui)
 

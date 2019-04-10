@@ -27,7 +27,7 @@ type StepExport struct {
 	SkipExport     bool
 }
 
-func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// If ISO export is configured, ensure this option is propagated to VBoxManage.
 	for _, option := range s.ExportOpts {
 		if option == "--iso" || option == "-I" {

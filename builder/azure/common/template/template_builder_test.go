@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
-	"github.com/approvals/go-approval-tests"
+	approvaltests "github.com/approvals/go-approval-tests"
 )
 
 // Ensure that a Linux template is configured as expected.

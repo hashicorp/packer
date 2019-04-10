@@ -12,7 +12,7 @@ import (
 
 type stepCopyFiles struct{}
 
-func (s *stepCopyFiles) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

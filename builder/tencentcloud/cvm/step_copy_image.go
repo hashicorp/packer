@@ -14,7 +14,7 @@ type stepCopyImage struct {
 	SourceRegion      string
 }
 
-func (s *stepCopyImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCopyImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.DesinationRegions) == 0 || (len(s.DesinationRegions) == 1 && s.DesinationRegions[0] == s.SourceRegion) {
 		return multistep.ActionContinue
 	}

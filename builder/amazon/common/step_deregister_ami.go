@@ -18,7 +18,7 @@ type StepDeregisterAMI struct {
 	Regions             []string
 }
 
-func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDeregisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check for force deregister
 	if !s.ForceDeregister {
 		return multistep.ActionContinue

@@ -10,7 +10,7 @@ import (
 
 type stepMountExtra struct{}
 
-func (s *stepMountExtra) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepMountExtra) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)

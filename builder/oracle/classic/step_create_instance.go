@@ -11,7 +11,7 @@ import (
 
 type stepCreateInstance struct{}
 
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Instance...")

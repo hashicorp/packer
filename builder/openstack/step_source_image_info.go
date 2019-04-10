@@ -18,7 +18,7 @@ type StepSourceImageInfo struct {
 	SourceMostRecent bool
 }
 
-func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

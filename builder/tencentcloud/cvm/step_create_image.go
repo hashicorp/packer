@@ -13,7 +13,7 @@ type stepCreateImage struct {
 	imageId string
 }
 
-func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	client := state.Get("cvm_client").(*cvm.Client)
 	ui := state.Get("ui").(packer.Ui)

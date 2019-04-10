@@ -4,6 +4,7 @@ package shell
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -182,7 +183,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -397,12 +398,6 @@ func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) e
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
 }
 
 // retryable will retry the given function over and over until a

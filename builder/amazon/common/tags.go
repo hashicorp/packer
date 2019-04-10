@@ -24,16 +24,16 @@ func (t TagMap) IsSet() bool {
 	return len(t) > 0
 }
 
-func (t TagMap) EC2Tags(ctx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
+func (t TagMap) EC2Tags(ictx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
 	var ec2Tags []*ec2.Tag
-	ctx.Data = extractBuildInfo(region, state)
+	ictx.Data = extractBuildInfo(region, state)
 
 	for key, value := range t {
-		interpolatedKey, err := interpolate.Render(key, &ctx)
+		interpolatedKey, err := interpolate.Render(key, &ictx)
 		if err != nil {
 			return nil, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
 		}
-		interpolatedValue, err := interpolate.Render(value, &ctx)
+		interpolatedValue, err := interpolate.Render(value, &ictx)
 		if err != nil {
 			return nil, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
 		}

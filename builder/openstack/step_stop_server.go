@@ -12,7 +12,7 @@ import (
 
 type StepStopServer struct{}
 
-func (s *StepStopServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepStopServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)

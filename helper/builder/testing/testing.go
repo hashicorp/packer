@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -150,7 +151,7 @@ func Test(t TestT, c TestCase) {
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,
 	}
-	artifacts, err := build.Run(ui)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Run error:\n\n%s", err))
 		goto TEARDOWN

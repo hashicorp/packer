@@ -19,7 +19,7 @@ type stepConfigVPC struct {
 	isCreate  bool
 }
 
-func (s *stepConfigVPC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigVPC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
 

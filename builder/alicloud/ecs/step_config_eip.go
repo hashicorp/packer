@@ -19,7 +19,7 @@ type stepConfigAlicloudEIP struct {
 	SSHPrivateIp             bool
 }
 
-func (s *stepConfigAlicloudEIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudEIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)

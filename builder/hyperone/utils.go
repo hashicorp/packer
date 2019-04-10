@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/hyperonecom/h1-client-go"
+	openapi "github.com/hyperonecom/h1-client-go"
 )
 
 func formatOpenAPIError(err error) string {
@@ -21,13 +21,13 @@ func formatOpenAPIError(err error) string {
 	return fmt.Sprintf("%s (body: %s)", openAPIError.Error(), openAPIError.Body())
 }
 
-func runCommands(commands []string, ctx interpolate.Context, state multistep.StateBag) error {
+func runCommands(commands []string, ictx interpolate.Context, state multistep.StateBag) error {
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	comm := state.Get("communicator").(packer.Communicator)
 
 	for _, rawCmd := range commands {
-		intCmd, err := interpolate.Render(rawCmd, &ctx)
+		intCmd, err := interpolate.Render(rawCmd, &ictx)
 		if err != nil {
 			return fmt.Errorf("error interpolating: %s", err)
 		}

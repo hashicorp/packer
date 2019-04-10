@@ -21,7 +21,7 @@ type StepCreateExternalSwitch struct {
 // Run runs the step required to create an external switch. Depending on
 // the connectivity of the host machine, the external switch will allow the
 // build VM to connect to the outside world.
-func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateExternalSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

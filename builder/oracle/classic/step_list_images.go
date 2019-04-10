@@ -11,7 +11,7 @@ import (
 
 type stepListImages struct{}
 
-func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepListImages) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)

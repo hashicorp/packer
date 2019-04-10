@@ -18,7 +18,7 @@ const port string = "13000"
 type StepPollingInstallation struct {
 }
 
-func (s *StepPollingInstallation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPollingInstallation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error polling VM: %s"

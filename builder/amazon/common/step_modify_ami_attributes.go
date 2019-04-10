@@ -22,7 +22,7 @@ type StepModifyAMIAttributes struct {
 	Ctx            interpolate.Context
 }
 
-func (s *StepModifyAMIAttributes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)

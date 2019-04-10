@@ -12,7 +12,7 @@ import (
 type stepMountAlicloudDisk struct {
 }
 
-func (s *stepMountAlicloudDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepMountAlicloudDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

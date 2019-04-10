@@ -13,7 +13,7 @@ type StepDetachVolume struct {
 	UseBlockStorageVolume bool
 }
 
-func (s *StepDetachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDetachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Proceed only if block storage volume is used.
 	if !s.UseBlockStorageVolume {
 		return multistep.ActionContinue

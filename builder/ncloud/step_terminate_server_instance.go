@@ -67,7 +67,7 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 	}
 }
 
-func (s *StepTerminateServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepTerminateServerInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Terminate Server Instance")
 
 	var serverInstanceNo = state.Get("InstanceNo").(string)

@@ -13,7 +13,7 @@ import (
 // and waits for it to become available for provisioners.
 type StepCreateSourceMachine struct{}
 
-func (s *StepCreateSourceMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSourceMachine) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
