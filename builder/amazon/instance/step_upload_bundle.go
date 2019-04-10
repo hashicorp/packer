@@ -69,14 +69,14 @@ func (s *StepUploadBundle) Run(ctx context.Context, state multistep.StateBag) mu
 		ui.Say(fmt.Sprintf("Running: %s", config.BundleUploadCommand))
 	}
 
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		state.Put("error", fmt.Errorf("Error uploading volume: %s", err))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
-	if cmd.ExitStatus != 0 {
-		if cmd.ExitStatus == 3 {
+	if cmd.ExitStatus() != 0 {
+		if cmd.ExitStatus() == 3 {
 			ui.Error(fmt.Sprintf("Please check that the bucket `%s` "+
 				"does not exist, or exists and is writable. This error "+
 				"indicates that the bucket may be owned by somebody else.",

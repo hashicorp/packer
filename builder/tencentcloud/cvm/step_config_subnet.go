@@ -3,9 +3,9 @@ package cvm
 import (
 	"context"
 	"fmt"
-	"strings"
+	"time"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
@@ -77,6 +77,7 @@ func (s *stepConfigSubnet) Cleanup(state multistep.StateBag) {
 	if !s.isCreate {
 		return
 	}
+	ctx := context.TODO()
 
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
@@ -84,16 +85,12 @@ func (s *stepConfigSubnet) Cleanup(state multistep.StateBag) {
 	MessageClean(state, "SUBNET")
 	req := vpc.NewDeleteSubnetRequest()
 	req.SubnetId = &s.SubnetId
-	err := common.Retry(5, 5, 60, func(u uint) (bool, error) {
+	err := retry.Config{
+		Tries:      60,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 5 * time.Second, MaxBackoff: 5 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
 		_, err := vpcClient.DeleteSubnet(req)
-		if err == nil {
-			return true, nil
-		}
-		if strings.Index(err.Error(), "ResourceInUse") != -1 {
-			return false, nil
-		} else {
-			return false, err
-		}
+		return err
 	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("delete subnet(%s) failed: %s, you need to delete it by hand",

@@ -4,6 +4,7 @@ package ssh
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 	"testing"
@@ -188,7 +189,8 @@ func TestStart(t *testing.T) {
 		Stdout:  new(bytes.Buffer),
 	}
 
-	client.Start(cmd)
+	ctx := context.Background()
+	client.Start(ctx, cmd)
 }
 
 func TestHandshakeTimeout(t *testing.T) {
