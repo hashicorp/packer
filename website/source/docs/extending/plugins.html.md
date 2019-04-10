@@ -160,7 +160,7 @@ using standard installation procedures.
 The specifics of how to implement each type of interface are covered in the
 relevant subsections available in the navigation to the left.
 
-\~&gt; **Lock your dependencies!** Using `govendor` is highly recommended since
+\~&gt; **Lock your dependencies!** Using `go mod` is highly recommended since
 the Packer codebase will continue to improve, potentially breaking APIs along
 the way until there is a stable release. By locking your dependencies, your
 plugins will continue to work with the version of Packer you lock to.
