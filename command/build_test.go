@@ -205,4 +205,8 @@ func cleanup() {
 	os.RemoveAll("pear.txt")
 	os.RemoveAll("tomato.txt")
 	os.RemoveAll("unnamed.txt")
+	os.RemoveAll("roses.txt")
+	os.RemoveAll("fuchsias.txt")
+	os.RemoveAll("lilas.txt")
+	os.RemoveAll("campanules.txt")
 }

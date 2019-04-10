@@ -3,7 +3,6 @@ package restart
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -302,36 +301,6 @@ func TestProvision_waitForCommunicatorWithCancel(t *testing.T) {
 	// Expect a Cancel error
 	if err == nil {
 		t.Fatalf("Should have err")
-	}
-}
-
-func TestRetryable(t *testing.T) {
-	config := testConfig()
-
-	count := 0
-	retryMe := func() error {
-		t.Logf("RetryMe, attempt number %d", count)
-		if count == 2 {
-			return nil
-		}
-		count++
-		return errors.New(fmt.Sprintf("Still waiting %d more times...", 2-count))
-	}
-	retryableSleep = 50 * time.Millisecond
-	p := new(Provisioner)
-	p.config.RestartTimeout = 155 * time.Millisecond
-	err := p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err != nil {
-		t.Fatalf("should not have error retrying function")
-	}
-
-	count = 0
-	p.config.RestartTimeout = 10 * time.Millisecond
-	err = p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err == nil {
-		t.Fatalf("should have error retrying function")
 	}
 }
 

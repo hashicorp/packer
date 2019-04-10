@@ -94,6 +94,8 @@ The example below is fully functional.
 -   `pause_after` (string) - Wait the amount of time after provisioning a shell
     script, this pause be taken if all previous steps were successful.
 
+<%= partial "partials/provisioners/common-config" %>
+
 ## Execute Command Example
 
 To many new users, the `execute_command` is puzzling. However, it provides an
@@ -180,6 +182,7 @@ executing the next script:
   "type": "shell",
   "script": "script.sh",
   "pause_before": "10s"
+  "timeout": "10s"
 }
 ```
 

@@ -410,21 +410,22 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
+	ctx := context.TODO()
 
 	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
 	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
@@ -447,13 +448,13 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
-
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	ctx := context.TODO()
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+	if cmd.ExitStatus() != 0 {
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus())
 	}
 
 	return nil
@@ -461,6 +462,7 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 
 func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, version string) error {
 	ui.Message("Installing Chef...")
+	ctx := context.TODO()
 
 	p.config.ctx.Data = &InstallChefTemplate{
 		Sudo:    !p.config.PreventSudo,
@@ -472,13 +474,13 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, versio
 	}
 
 	cmd := &packer.RemoteCmd{Command: command}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf(
-			"Install script exited with non-zero exit status %d", cmd.ExitStatus)
+			"Install script exited with non-zero exit status %d", cmd.ExitStatus())
 	}
 
 	return nil
