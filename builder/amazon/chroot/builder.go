@@ -102,7 +102,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// set default copy file if we're not giving our own
 	if b.config.CopyFiles == nil {
-		b.config.CopyFiles = make([]string, 0)
 		if !b.config.FromScratch {
 			b.config.CopyFiles = []string{"/etc/resolv.conf"}
 		}
