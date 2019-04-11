@@ -3,14 +3,11 @@ package powershell
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -640,36 +637,6 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 
 	if comm.UploadCalled != true {
 		t.Fatalf("Failed to upload env var file")
-	}
-}
-
-func TestRetryable(t *testing.T) {
-	config := testConfig()
-
-	count := 0
-	retryMe := func() error {
-		t.Logf("RetryMe, attempt number %d", count)
-		if count == 2 {
-			return nil
-		}
-		count++
-		return errors.New(fmt.Sprintf("Still waiting %d more times...", 2-count))
-	}
-	retryableSleep = 50 * time.Millisecond
-	p := new(Provisioner)
-	p.config.StartRetryTimeout = 155 * time.Millisecond
-	err := p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err != nil {
-		t.Fatalf("should not have error retrying function")
-	}
-
-	count = 0
-	p.config.StartRetryTimeout = 10 * time.Millisecond
-	err = p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err == nil {
-		t.Fatalf("should have error retrying function")
 	}
 }
 

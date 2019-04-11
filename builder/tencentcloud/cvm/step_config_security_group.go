@@ -2,11 +2,11 @@ package cvm
 
 import (
 	"context"
+	"time"
 
 	"fmt"
-	"strings"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
@@ -102,22 +102,19 @@ func (s *stepConfigSecurityGroup) Cleanup(state multistep.StateBag) {
 	if !s.isCreate {
 		return
 	}
+	ctx := context.TODO()
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
 
 	MessageClean(state, "VPC")
 	req := vpc.NewDeleteSecurityGroupRequest()
 	req.SecurityGroupId = &s.SecurityGroupId
-	err := common.Retry(5, 5, 60, func(u uint) (bool, error) {
+	err := retry.Config{
+		Tries:      60,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 5 * time.Second, MaxBackoff: 5 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
 		_, err := vpcClient.DeleteSecurityGroup(req)
-		if err == nil {
-			return true, nil
-		}
-		if strings.Index(err.Error(), "ResourceInUse") != -1 {
-			return false, nil
-		} else {
-			return false, err
-		}
+		return err
 	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("delete security group(%s) failed: %s, you need to delete it by hand",
