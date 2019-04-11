@@ -37,7 +37,7 @@ type PolicyQueryResponse struct {
 	RamCommonResponse
 	IsTruncated bool
 	Marker      string
-	Policies struct {
+	Policies    struct {
 		Policy []Policy
 	}
 }

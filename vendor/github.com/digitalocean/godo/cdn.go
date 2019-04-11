@@ -14,7 +14,8 @@ type CDNService interface {
 	List(context.Context, *ListOptions) ([]CDN, *Response, error)
 	Get(context.Context, string) (*CDN, *Response, error)
 	Create(context.Context, *CDNCreateRequest) (*CDN, *Response, error)
-	UpdateTTL(context.Context, string, *CDNUpdateRequest) (*CDN, *Response, error)
+	UpdateTTL(context.Context, string, *CDNUpdateTTLRequest) (*CDN, *Response, error)
+	UpdateCustomDomain(context.Context, string, *CDNUpdateCustomDomainRequest) (*CDN, *Response, error)
 	FlushCache(context.Context, string, *CDNFlushCacheRequest) (*Response, error)
 	Delete(context.Context, string) (*Response, error)
 }
@@ -29,11 +30,13 @@ var _ CDNService = &CDNServiceOp{}
 
 // CDN represents a DigitalOcean CDN
 type CDN struct {
-	ID        string    `json:"id"`
-	Origin    string    `json:"origin"`
-	Endpoint  string    `json:"endpoint"`
-	CreatedAt time.Time `json:"created_at"`
-	TTL       uint32    `json:"ttl"`
+	ID            string    `json:"id"`
+	Origin        string    `json:"origin"`
+	Endpoint      string    `json:"endpoint"`
+	CreatedAt     time.Time `json:"created_at"`
+	TTL           uint32    `json:"ttl"`
+	CertificateID string    `json:"certificate_id,omitempty"`
+	CustomDomain  string    `json:"custom_domain,omitempty"`
 }
 
 // CDNRoot represents a response from the DigitalOcean API
@@ -48,13 +51,21 @@ type cdnsRoot struct {
 
 // CDNCreateRequest represents a request to create a CDN.
 type CDNCreateRequest struct {
-	Origin string `json:"origin"`
-	TTL    uint32 `json:"ttl"`
+	Origin        string `json:"origin"`
+	TTL           uint32 `json:"ttl"`
+	CustomDomain  string `json:"custom_domain,omitempty"`
+	CertificateID string `json:"certificate_id,omitempty"`
 }
 
-// CDNUpdateRequest represents a request to update the ttl of a CDN.
-type CDNUpdateRequest struct {
+// CDNUpdateTTLRequest represents a request to update the ttl of a CDN.
+type CDNUpdateTTLRequest struct {
 	TTL uint32 `json:"ttl"`
+}
+
+// CDNUpdateCustomDomainRequest represents a request to update the custom domain of a CDN.
+type CDNUpdateCustomDomainRequest struct {
+	CustomDomain  string `json:"custom_domain"`
+	CertificateID string `json:"certificate_id"`
 }
 
 // CDNFlushCacheRequest represents a request to flush cache of a CDN.
@@ -128,8 +139,17 @@ func (c CDNServiceOp) Create(ctx context.Context, createRequest *CDNCreateReques
 	return root.Endpoint, resp, err
 }
 
-// UpdateTTL updates the ttl of individual CDN
-func (c CDNServiceOp) UpdateTTL(ctx context.Context, id string, updateRequest *CDNUpdateRequest) (*CDN, *Response, error) {
+// UpdateTTL updates the ttl of an individual CDN
+func (c CDNServiceOp) UpdateTTL(ctx context.Context, id string, updateRequest *CDNUpdateTTLRequest) (*CDN, *Response, error) {
+	return c.update(ctx, id, updateRequest)
+}
+
+// UpdateCustomDomain sets or removes the custom domain of an individual CDN
+func (c CDNServiceOp) UpdateCustomDomain(ctx context.Context, id string, updateRequest *CDNUpdateCustomDomainRequest) (*CDN, *Response, error) {
+	return c.update(ctx, id, updateRequest)
+}
+
+func (c CDNServiceOp) update(ctx context.Context, id string, updateRequest interface{}) (*CDN, *Response, error) {
 	if updateRequest == nil {
 		return nil, nil, NewArgError("updateRequest", "cannot be nil")
 	}
@@ -137,7 +157,6 @@ func (c CDNServiceOp) UpdateTTL(ctx context.Context, id string, updateRequest *C
 	if len(id) == 0 {
 		return nil, nil, NewArgError("id", "cannot be an empty string")
 	}
-
 	path := fmt.Sprintf("%s/%s", cdnBasePath, id)
 
 	req, err := c.client.NewRequest(ctx, http.MethodPut, path, updateRequest)

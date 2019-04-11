@@ -16,6 +16,7 @@ environment:
 clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
+  - set GO111MODULE=off
   - echo %Path%
   - go version
   - go env
