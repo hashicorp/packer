@@ -12,6 +12,7 @@ import config "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mongodb/v1/c
 import operation "github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 import _ "github.com/yandex-cloud/go-genproto/yandex/cloud/validation"
 import _ "google.golang.org/genproto/googleapis/api/annotations"
+import timeofday "google.golang.org/genproto/googleapis/type/timeofday"
 import field_mask "google.golang.org/genproto/protobuf/field_mask"
 
 import (
@@ -51,7 +52,7 @@ func (x ListClusterLogsRequest_ServiceType) String() string {
 	return proto.EnumName(ListClusterLogsRequest_ServiceType_name, int32(x))
 }
 func (ListClusterLogsRequest_ServiceType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{18, 0}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{20, 0}
 }
 
 type GetClusterRequest struct {
@@ -67,7 +68,7 @@ func (m *GetClusterRequest) Reset()         { *m = GetClusterRequest{} }
 func (m *GetClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*GetClusterRequest) ProtoMessage()    {}
 func (*GetClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{0}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{0}
 }
 func (m *GetClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetClusterRequest.Unmarshal(m, b)
@@ -117,7 +118,7 @@ func (m *ListClustersRequest) Reset()         { *m = ListClustersRequest{} }
 func (m *ListClustersRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClustersRequest) ProtoMessage()    {}
 func (*ListClustersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{1}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{1}
 }
 func (m *ListClustersRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClustersRequest.Unmarshal(m, b)
@@ -182,7 +183,7 @@ func (m *ListClustersResponse) Reset()         { *m = ListClustersResponse{} }
 func (m *ListClustersResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClustersResponse) ProtoMessage()    {}
 func (*ListClustersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{2}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{2}
 }
 func (m *ListClustersResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClustersResponse.Unmarshal(m, b)
@@ -247,7 +248,7 @@ func (m *CreateClusterRequest) Reset()         { *m = CreateClusterRequest{} }
 func (m *CreateClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateClusterRequest) ProtoMessage()    {}
 func (*CreateClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{3}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{3}
 }
 func (m *CreateClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateClusterRequest.Unmarshal(m, b)
@@ -349,7 +350,7 @@ func (m *CreateClusterMetadata) Reset()         { *m = CreateClusterMetadata{} }
 func (m *CreateClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*CreateClusterMetadata) ProtoMessage()    {}
 func (*CreateClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{4}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{4}
 }
 func (m *CreateClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateClusterMetadata.Unmarshal(m, b)
@@ -401,7 +402,7 @@ func (m *UpdateClusterRequest) Reset()         { *m = UpdateClusterRequest{} }
 func (m *UpdateClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateClusterRequest) ProtoMessage()    {}
 func (*UpdateClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{5}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{5}
 }
 func (m *UpdateClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClusterRequest.Unmarshal(m, b)
@@ -468,7 +469,7 @@ func (m *UpdateClusterMetadata) Reset()         { *m = UpdateClusterMetadata{} }
 func (m *UpdateClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*UpdateClusterMetadata) ProtoMessage()    {}
 func (*UpdateClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{6}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{6}
 }
 func (m *UpdateClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClusterMetadata.Unmarshal(m, b)
@@ -508,7 +509,7 @@ func (m *DeleteClusterRequest) Reset()         { *m = DeleteClusterRequest{} }
 func (m *DeleteClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteClusterRequest) ProtoMessage()    {}
 func (*DeleteClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{7}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{7}
 }
 func (m *DeleteClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteClusterRequest.Unmarshal(m, b)
@@ -547,7 +548,7 @@ func (m *DeleteClusterMetadata) Reset()         { *m = DeleteClusterMetadata{} }
 func (m *DeleteClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*DeleteClusterMetadata) ProtoMessage()    {}
 func (*DeleteClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{8}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{8}
 }
 func (m *DeleteClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteClusterMetadata.Unmarshal(m, b)
@@ -586,7 +587,7 @@ func (m *StartClusterRequest) Reset()         { *m = StartClusterRequest{} }
 func (m *StartClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*StartClusterRequest) ProtoMessage()    {}
 func (*StartClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{9}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{9}
 }
 func (m *StartClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StartClusterRequest.Unmarshal(m, b)
@@ -625,7 +626,7 @@ func (m *StartClusterMetadata) Reset()         { *m = StartClusterMetadata{} }
 func (m *StartClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*StartClusterMetadata) ProtoMessage()    {}
 func (*StartClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{10}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{10}
 }
 func (m *StartClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StartClusterMetadata.Unmarshal(m, b)
@@ -664,7 +665,7 @@ func (m *StopClusterRequest) Reset()         { *m = StopClusterRequest{} }
 func (m *StopClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*StopClusterRequest) ProtoMessage()    {}
 func (*StopClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{11}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{11}
 }
 func (m *StopClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StopClusterRequest.Unmarshal(m, b)
@@ -703,7 +704,7 @@ func (m *StopClusterMetadata) Reset()         { *m = StopClusterMetadata{} }
 func (m *StopClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*StopClusterMetadata) ProtoMessage()    {}
 func (*StopClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{12}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{12}
 }
 func (m *StopClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StopClusterMetadata.Unmarshal(m, b)
@@ -730,6 +731,111 @@ func (m *StopClusterMetadata) GetClusterId() string {
 	return ""
 }
 
+type MoveClusterRequest struct {
+	// ID of the MongoDB cluster to move.
+	ClusterId string `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	// ID of the destination folder.
+	DestinationFolderId  string   `protobuf:"bytes,2,opt,name=destination_folder_id,json=destinationFolderId,proto3" json:"destination_folder_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MoveClusterRequest) Reset()         { *m = MoveClusterRequest{} }
+func (m *MoveClusterRequest) String() string { return proto.CompactTextString(m) }
+func (*MoveClusterRequest) ProtoMessage()    {}
+func (*MoveClusterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{13}
+}
+func (m *MoveClusterRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MoveClusterRequest.Unmarshal(m, b)
+}
+func (m *MoveClusterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MoveClusterRequest.Marshal(b, m, deterministic)
+}
+func (dst *MoveClusterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MoveClusterRequest.Merge(dst, src)
+}
+func (m *MoveClusterRequest) XXX_Size() int {
+	return xxx_messageInfo_MoveClusterRequest.Size(m)
+}
+func (m *MoveClusterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MoveClusterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MoveClusterRequest proto.InternalMessageInfo
+
+func (m *MoveClusterRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *MoveClusterRequest) GetDestinationFolderId() string {
+	if m != nil {
+		return m.DestinationFolderId
+	}
+	return ""
+}
+
+type MoveClusterMetadata struct {
+	// ID of the MongoDB cluster being moved.
+	ClusterId string `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	// ID of the source folder.
+	SourceFolderId string `protobuf:"bytes,2,opt,name=source_folder_id,json=sourceFolderId,proto3" json:"source_folder_id,omitempty"`
+	// ID of the destnation folder.
+	DestinationFolderId  string   `protobuf:"bytes,3,opt,name=destination_folder_id,json=destinationFolderId,proto3" json:"destination_folder_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MoveClusterMetadata) Reset()         { *m = MoveClusterMetadata{} }
+func (m *MoveClusterMetadata) String() string { return proto.CompactTextString(m) }
+func (*MoveClusterMetadata) ProtoMessage()    {}
+func (*MoveClusterMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{14}
+}
+func (m *MoveClusterMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MoveClusterMetadata.Unmarshal(m, b)
+}
+func (m *MoveClusterMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MoveClusterMetadata.Marshal(b, m, deterministic)
+}
+func (dst *MoveClusterMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MoveClusterMetadata.Merge(dst, src)
+}
+func (m *MoveClusterMetadata) XXX_Size() int {
+	return xxx_messageInfo_MoveClusterMetadata.Size(m)
+}
+func (m *MoveClusterMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_MoveClusterMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MoveClusterMetadata proto.InternalMessageInfo
+
+func (m *MoveClusterMetadata) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *MoveClusterMetadata) GetSourceFolderId() string {
+	if m != nil {
+		return m.SourceFolderId
+	}
+	return ""
+}
+
+func (m *MoveClusterMetadata) GetDestinationFolderId() string {
+	if m != nil {
+		return m.DestinationFolderId
+	}
+	return ""
+}
+
 type BackupClusterRequest struct {
 	// ID of the MongoDB cluster to back up.
 	// To get the MongoDB cluster ID, use a [ClusterService.List] request.
@@ -743,7 +849,7 @@ func (m *BackupClusterRequest) Reset()         { *m = BackupClusterRequest{} }
 func (m *BackupClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*BackupClusterRequest) ProtoMessage()    {}
 func (*BackupClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{13}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{15}
 }
 func (m *BackupClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BackupClusterRequest.Unmarshal(m, b)
@@ -782,7 +888,7 @@ func (m *BackupClusterMetadata) Reset()         { *m = BackupClusterMetadata{} }
 func (m *BackupClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*BackupClusterMetadata) ProtoMessage()    {}
 func (*BackupClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{14}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{16}
 }
 func (m *BackupClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BackupClusterMetadata.Unmarshal(m, b)
@@ -838,7 +944,7 @@ func (m *RestoreClusterRequest) Reset()         { *m = RestoreClusterRequest{} }
 func (m *RestoreClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*RestoreClusterRequest) ProtoMessage()    {}
 func (*RestoreClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{15}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{17}
 }
 func (m *RestoreClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RestoreClusterRequest.Unmarshal(m, b)
@@ -928,7 +1034,7 @@ func (m *RestoreClusterMetadata) Reset()         { *m = RestoreClusterMetadata{}
 func (m *RestoreClusterMetadata) String() string { return proto.CompactTextString(m) }
 func (*RestoreClusterMetadata) ProtoMessage()    {}
 func (*RestoreClusterMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{16}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{18}
 }
 func (m *RestoreClusterMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RestoreClusterMetadata.Unmarshal(m, b)
@@ -976,7 +1082,7 @@ func (m *LogRecord) Reset()         { *m = LogRecord{} }
 func (m *LogRecord) String() string { return proto.CompactTextString(m) }
 func (*LogRecord) ProtoMessage()    {}
 func (*LogRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{17}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{19}
 }
 func (m *LogRecord) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LogRecord.Unmarshal(m, b)
@@ -1036,7 +1142,7 @@ func (m *ListClusterLogsRequest) Reset()         { *m = ListClusterLogsRequest{}
 func (m *ListClusterLogsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClusterLogsRequest) ProtoMessage()    {}
 func (*ListClusterLogsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{18}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{20}
 }
 func (m *ListClusterLogsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterLogsRequest.Unmarshal(m, b)
@@ -1122,7 +1228,7 @@ func (m *ListClusterLogsResponse) Reset()         { *m = ListClusterLogsResponse
 func (m *ListClusterLogsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClusterLogsResponse) ProtoMessage()    {}
 func (*ListClusterLogsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{19}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{21}
 }
 func (m *ListClusterLogsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterLogsResponse.Unmarshal(m, b)
@@ -1172,7 +1278,7 @@ func (m *ListClusterOperationsRequest) Reset()         { *m = ListClusterOperati
 func (m *ListClusterOperationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClusterOperationsRequest) ProtoMessage()    {}
 func (*ListClusterOperationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{20}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{22}
 }
 func (m *ListClusterOperationsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterOperationsRequest.Unmarshal(m, b)
@@ -1230,7 +1336,7 @@ func (m *ListClusterOperationsResponse) Reset()         { *m = ListClusterOperat
 func (m *ListClusterOperationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClusterOperationsResponse) ProtoMessage()    {}
 func (*ListClusterOperationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{21}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{23}
 }
 func (m *ListClusterOperationsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterOperationsResponse.Unmarshal(m, b)
@@ -1281,7 +1387,7 @@ func (m *ListClusterBackupsRequest) Reset()         { *m = ListClusterBackupsReq
 func (m *ListClusterBackupsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClusterBackupsRequest) ProtoMessage()    {}
 func (*ListClusterBackupsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{22}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{24}
 }
 func (m *ListClusterBackupsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterBackupsRequest.Unmarshal(m, b)
@@ -1339,7 +1445,7 @@ func (m *ListClusterBackupsResponse) Reset()         { *m = ListClusterBackupsRe
 func (m *ListClusterBackupsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClusterBackupsResponse) ProtoMessage()    {}
 func (*ListClusterBackupsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{23}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{25}
 }
 func (m *ListClusterBackupsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterBackupsResponse.Unmarshal(m, b)
@@ -1390,7 +1496,7 @@ func (m *ListClusterHostsRequest) Reset()         { *m = ListClusterHostsRequest
 func (m *ListClusterHostsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClusterHostsRequest) ProtoMessage()    {}
 func (*ListClusterHostsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{24}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{26}
 }
 func (m *ListClusterHostsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterHostsRequest.Unmarshal(m, b)
@@ -1448,7 +1554,7 @@ func (m *ListClusterHostsResponse) Reset()         { *m = ListClusterHostsRespon
 func (m *ListClusterHostsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClusterHostsResponse) ProtoMessage()    {}
 func (*ListClusterHostsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{25}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{27}
 }
 func (m *ListClusterHostsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClusterHostsResponse.Unmarshal(m, b)
@@ -1497,7 +1603,7 @@ func (m *AddClusterHostsRequest) Reset()         { *m = AddClusterHostsRequest{}
 func (m *AddClusterHostsRequest) String() string { return proto.CompactTextString(m) }
 func (*AddClusterHostsRequest) ProtoMessage()    {}
 func (*AddClusterHostsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{26}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{28}
 }
 func (m *AddClusterHostsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddClusterHostsRequest.Unmarshal(m, b)
@@ -1545,7 +1651,7 @@ func (m *AddClusterHostsMetadata) Reset()         { *m = AddClusterHostsMetadata
 func (m *AddClusterHostsMetadata) String() string { return proto.CompactTextString(m) }
 func (*AddClusterHostsMetadata) ProtoMessage()    {}
 func (*AddClusterHostsMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{27}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{29}
 }
 func (m *AddClusterHostsMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddClusterHostsMetadata.Unmarshal(m, b)
@@ -1594,7 +1700,7 @@ func (m *DeleteClusterHostsRequest) Reset()         { *m = DeleteClusterHostsReq
 func (m *DeleteClusterHostsRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteClusterHostsRequest) ProtoMessage()    {}
 func (*DeleteClusterHostsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{28}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{30}
 }
 func (m *DeleteClusterHostsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteClusterHostsRequest.Unmarshal(m, b)
@@ -1642,7 +1748,7 @@ func (m *DeleteClusterHostsMetadata) Reset()         { *m = DeleteClusterHostsMe
 func (m *DeleteClusterHostsMetadata) String() string { return proto.CompactTextString(m) }
 func (*DeleteClusterHostsMetadata) ProtoMessage()    {}
 func (*DeleteClusterHostsMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{29}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{31}
 }
 func (m *DeleteClusterHostsMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteClusterHostsMetadata.Unmarshal(m, b)
@@ -1676,6 +1782,522 @@ func (m *DeleteClusterHostsMetadata) GetHostNames() []string {
 	return nil
 }
 
+type EnableClusterShardingRequest struct {
+	// Required. ID of the MongoDB cluster.
+	ClusterId            string                                 `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	Mongocfg             *EnableClusterShardingRequest_MongoCfg `protobuf:"bytes,2,opt,name=mongocfg,proto3" json:"mongocfg,omitempty"`
+	Mongos               *EnableClusterShardingRequest_Mongos   `protobuf:"bytes,3,opt,name=mongos,proto3" json:"mongos,omitempty"`
+	HostSpecs            []*HostSpec                            `protobuf:"bytes,4,rep,name=host_specs,json=hostSpecs,proto3" json:"host_specs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                               `json:"-"`
+	XXX_unrecognized     []byte                                 `json:"-"`
+	XXX_sizecache        int32                                  `json:"-"`
+}
+
+func (m *EnableClusterShardingRequest) Reset()         { *m = EnableClusterShardingRequest{} }
+func (m *EnableClusterShardingRequest) String() string { return proto.CompactTextString(m) }
+func (*EnableClusterShardingRequest) ProtoMessage()    {}
+func (*EnableClusterShardingRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{32}
+}
+func (m *EnableClusterShardingRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnableClusterShardingRequest.Unmarshal(m, b)
+}
+func (m *EnableClusterShardingRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnableClusterShardingRequest.Marshal(b, m, deterministic)
+}
+func (dst *EnableClusterShardingRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnableClusterShardingRequest.Merge(dst, src)
+}
+func (m *EnableClusterShardingRequest) XXX_Size() int {
+	return xxx_messageInfo_EnableClusterShardingRequest.Size(m)
+}
+func (m *EnableClusterShardingRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnableClusterShardingRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnableClusterShardingRequest proto.InternalMessageInfo
+
+func (m *EnableClusterShardingRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *EnableClusterShardingRequest) GetMongocfg() *EnableClusterShardingRequest_MongoCfg {
+	if m != nil {
+		return m.Mongocfg
+	}
+	return nil
+}
+
+func (m *EnableClusterShardingRequest) GetMongos() *EnableClusterShardingRequest_Mongos {
+	if m != nil {
+		return m.Mongos
+	}
+	return nil
+}
+
+func (m *EnableClusterShardingRequest) GetHostSpecs() []*HostSpec {
+	if m != nil {
+		return m.HostSpecs
+	}
+	return nil
+}
+
+type EnableClusterShardingRequest_MongoCfg struct {
+	Resources            *Resources `protobuf:"bytes,1,opt,name=resources,proto3" json:"resources,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *EnableClusterShardingRequest_MongoCfg) Reset()         { *m = EnableClusterShardingRequest_MongoCfg{} }
+func (m *EnableClusterShardingRequest_MongoCfg) String() string { return proto.CompactTextString(m) }
+func (*EnableClusterShardingRequest_MongoCfg) ProtoMessage()    {}
+func (*EnableClusterShardingRequest_MongoCfg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{32, 0}
+}
+func (m *EnableClusterShardingRequest_MongoCfg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnableClusterShardingRequest_MongoCfg.Unmarshal(m, b)
+}
+func (m *EnableClusterShardingRequest_MongoCfg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnableClusterShardingRequest_MongoCfg.Marshal(b, m, deterministic)
+}
+func (dst *EnableClusterShardingRequest_MongoCfg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnableClusterShardingRequest_MongoCfg.Merge(dst, src)
+}
+func (m *EnableClusterShardingRequest_MongoCfg) XXX_Size() int {
+	return xxx_messageInfo_EnableClusterShardingRequest_MongoCfg.Size(m)
+}
+func (m *EnableClusterShardingRequest_MongoCfg) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnableClusterShardingRequest_MongoCfg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnableClusterShardingRequest_MongoCfg proto.InternalMessageInfo
+
+func (m *EnableClusterShardingRequest_MongoCfg) GetResources() *Resources {
+	if m != nil {
+		return m.Resources
+	}
+	return nil
+}
+
+type EnableClusterShardingRequest_Mongos struct {
+	Resources            *Resources `protobuf:"bytes,1,opt,name=resources,proto3" json:"resources,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *EnableClusterShardingRequest_Mongos) Reset()         { *m = EnableClusterShardingRequest_Mongos{} }
+func (m *EnableClusterShardingRequest_Mongos) String() string { return proto.CompactTextString(m) }
+func (*EnableClusterShardingRequest_Mongos) ProtoMessage()    {}
+func (*EnableClusterShardingRequest_Mongos) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{32, 1}
+}
+func (m *EnableClusterShardingRequest_Mongos) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnableClusterShardingRequest_Mongos.Unmarshal(m, b)
+}
+func (m *EnableClusterShardingRequest_Mongos) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnableClusterShardingRequest_Mongos.Marshal(b, m, deterministic)
+}
+func (dst *EnableClusterShardingRequest_Mongos) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnableClusterShardingRequest_Mongos.Merge(dst, src)
+}
+func (m *EnableClusterShardingRequest_Mongos) XXX_Size() int {
+	return xxx_messageInfo_EnableClusterShardingRequest_Mongos.Size(m)
+}
+func (m *EnableClusterShardingRequest_Mongos) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnableClusterShardingRequest_Mongos.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnableClusterShardingRequest_Mongos proto.InternalMessageInfo
+
+func (m *EnableClusterShardingRequest_Mongos) GetResources() *Resources {
+	if m != nil {
+		return m.Resources
+	}
+	return nil
+}
+
+type EnableClusterShardingMetadata struct {
+	// Required. ID of the MongoDB cluster.
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EnableClusterShardingMetadata) Reset()         { *m = EnableClusterShardingMetadata{} }
+func (m *EnableClusterShardingMetadata) String() string { return proto.CompactTextString(m) }
+func (*EnableClusterShardingMetadata) ProtoMessage()    {}
+func (*EnableClusterShardingMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{33}
+}
+func (m *EnableClusterShardingMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnableClusterShardingMetadata.Unmarshal(m, b)
+}
+func (m *EnableClusterShardingMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnableClusterShardingMetadata.Marshal(b, m, deterministic)
+}
+func (dst *EnableClusterShardingMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnableClusterShardingMetadata.Merge(dst, src)
+}
+func (m *EnableClusterShardingMetadata) XXX_Size() int {
+	return xxx_messageInfo_EnableClusterShardingMetadata.Size(m)
+}
+func (m *EnableClusterShardingMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnableClusterShardingMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnableClusterShardingMetadata proto.InternalMessageInfo
+
+func (m *EnableClusterShardingMetadata) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+type GetClusterShardRequest struct {
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	ShardName            string   `protobuf:"bytes,2,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetClusterShardRequest) Reset()         { *m = GetClusterShardRequest{} }
+func (m *GetClusterShardRequest) String() string { return proto.CompactTextString(m) }
+func (*GetClusterShardRequest) ProtoMessage()    {}
+func (*GetClusterShardRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{34}
+}
+func (m *GetClusterShardRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetClusterShardRequest.Unmarshal(m, b)
+}
+func (m *GetClusterShardRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetClusterShardRequest.Marshal(b, m, deterministic)
+}
+func (dst *GetClusterShardRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetClusterShardRequest.Merge(dst, src)
+}
+func (m *GetClusterShardRequest) XXX_Size() int {
+	return xxx_messageInfo_GetClusterShardRequest.Size(m)
+}
+func (m *GetClusterShardRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetClusterShardRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetClusterShardRequest proto.InternalMessageInfo
+
+func (m *GetClusterShardRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *GetClusterShardRequest) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
+type ListClusterShardsRequest struct {
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	PageSize             int64    `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListClusterShardsRequest) Reset()         { *m = ListClusterShardsRequest{} }
+func (m *ListClusterShardsRequest) String() string { return proto.CompactTextString(m) }
+func (*ListClusterShardsRequest) ProtoMessage()    {}
+func (*ListClusterShardsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{35}
+}
+func (m *ListClusterShardsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListClusterShardsRequest.Unmarshal(m, b)
+}
+func (m *ListClusterShardsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListClusterShardsRequest.Marshal(b, m, deterministic)
+}
+func (dst *ListClusterShardsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListClusterShardsRequest.Merge(dst, src)
+}
+func (m *ListClusterShardsRequest) XXX_Size() int {
+	return xxx_messageInfo_ListClusterShardsRequest.Size(m)
+}
+func (m *ListClusterShardsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListClusterShardsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListClusterShardsRequest proto.InternalMessageInfo
+
+func (m *ListClusterShardsRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *ListClusterShardsRequest) GetPageSize() int64 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListClusterShardsRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+type ListClusterShardsResponse struct {
+	Shards               []*Shard `protobuf:"bytes,1,rep,name=shards,proto3" json:"shards,omitempty"`
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListClusterShardsResponse) Reset()         { *m = ListClusterShardsResponse{} }
+func (m *ListClusterShardsResponse) String() string { return proto.CompactTextString(m) }
+func (*ListClusterShardsResponse) ProtoMessage()    {}
+func (*ListClusterShardsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{36}
+}
+func (m *ListClusterShardsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListClusterShardsResponse.Unmarshal(m, b)
+}
+func (m *ListClusterShardsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListClusterShardsResponse.Marshal(b, m, deterministic)
+}
+func (dst *ListClusterShardsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListClusterShardsResponse.Merge(dst, src)
+}
+func (m *ListClusterShardsResponse) XXX_Size() int {
+	return xxx_messageInfo_ListClusterShardsResponse.Size(m)
+}
+func (m *ListClusterShardsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListClusterShardsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListClusterShardsResponse proto.InternalMessageInfo
+
+func (m *ListClusterShardsResponse) GetShards() []*Shard {
+	if m != nil {
+		return m.Shards
+	}
+	return nil
+}
+
+func (m *ListClusterShardsResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
+type AddClusterShardRequest struct {
+	ClusterId            string      `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	ShardName            string      `protobuf:"bytes,2,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	HostSpecs            []*HostSpec `protobuf:"bytes,3,rep,name=host_specs,json=hostSpecs,proto3" json:"host_specs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *AddClusterShardRequest) Reset()         { *m = AddClusterShardRequest{} }
+func (m *AddClusterShardRequest) String() string { return proto.CompactTextString(m) }
+func (*AddClusterShardRequest) ProtoMessage()    {}
+func (*AddClusterShardRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{37}
+}
+func (m *AddClusterShardRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddClusterShardRequest.Unmarshal(m, b)
+}
+func (m *AddClusterShardRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddClusterShardRequest.Marshal(b, m, deterministic)
+}
+func (dst *AddClusterShardRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddClusterShardRequest.Merge(dst, src)
+}
+func (m *AddClusterShardRequest) XXX_Size() int {
+	return xxx_messageInfo_AddClusterShardRequest.Size(m)
+}
+func (m *AddClusterShardRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddClusterShardRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddClusterShardRequest proto.InternalMessageInfo
+
+func (m *AddClusterShardRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *AddClusterShardRequest) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
+func (m *AddClusterShardRequest) GetHostSpecs() []*HostSpec {
+	if m != nil {
+		return m.HostSpecs
+	}
+	return nil
+}
+
+type AddClusterShardMetadata struct {
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	ShardName            string   `protobuf:"bytes,2,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddClusterShardMetadata) Reset()         { *m = AddClusterShardMetadata{} }
+func (m *AddClusterShardMetadata) String() string { return proto.CompactTextString(m) }
+func (*AddClusterShardMetadata) ProtoMessage()    {}
+func (*AddClusterShardMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{38}
+}
+func (m *AddClusterShardMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddClusterShardMetadata.Unmarshal(m, b)
+}
+func (m *AddClusterShardMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddClusterShardMetadata.Marshal(b, m, deterministic)
+}
+func (dst *AddClusterShardMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddClusterShardMetadata.Merge(dst, src)
+}
+func (m *AddClusterShardMetadata) XXX_Size() int {
+	return xxx_messageInfo_AddClusterShardMetadata.Size(m)
+}
+func (m *AddClusterShardMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddClusterShardMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddClusterShardMetadata proto.InternalMessageInfo
+
+func (m *AddClusterShardMetadata) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *AddClusterShardMetadata) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
+type DeleteClusterShardRequest struct {
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	ShardName            string   `protobuf:"bytes,2,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteClusterShardRequest) Reset()         { *m = DeleteClusterShardRequest{} }
+func (m *DeleteClusterShardRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteClusterShardRequest) ProtoMessage()    {}
+func (*DeleteClusterShardRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{39}
+}
+func (m *DeleteClusterShardRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteClusterShardRequest.Unmarshal(m, b)
+}
+func (m *DeleteClusterShardRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteClusterShardRequest.Marshal(b, m, deterministic)
+}
+func (dst *DeleteClusterShardRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteClusterShardRequest.Merge(dst, src)
+}
+func (m *DeleteClusterShardRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteClusterShardRequest.Size(m)
+}
+func (m *DeleteClusterShardRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteClusterShardRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteClusterShardRequest proto.InternalMessageInfo
+
+func (m *DeleteClusterShardRequest) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *DeleteClusterShardRequest) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
+type DeleteClusterShardMetadata struct {
+	ClusterId            string   `protobuf:"bytes,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
+	ShardName            string   `protobuf:"bytes,2,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteClusterShardMetadata) Reset()         { *m = DeleteClusterShardMetadata{} }
+func (m *DeleteClusterShardMetadata) String() string { return proto.CompactTextString(m) }
+func (*DeleteClusterShardMetadata) ProtoMessage()    {}
+func (*DeleteClusterShardMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{40}
+}
+func (m *DeleteClusterShardMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteClusterShardMetadata.Unmarshal(m, b)
+}
+func (m *DeleteClusterShardMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteClusterShardMetadata.Marshal(b, m, deterministic)
+}
+func (dst *DeleteClusterShardMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteClusterShardMetadata.Merge(dst, src)
+}
+func (m *DeleteClusterShardMetadata) XXX_Size() int {
+	return xxx_messageInfo_DeleteClusterShardMetadata.Size(m)
+}
+func (m *DeleteClusterShardMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteClusterShardMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteClusterShardMetadata proto.InternalMessageInfo
+
+func (m *DeleteClusterShardMetadata) GetClusterId() string {
+	if m != nil {
+		return m.ClusterId
+	}
+	return ""
+}
+
+func (m *DeleteClusterShardMetadata) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
 type HostSpec struct {
 	// ID of the availability zone where the host resides.
 	// To get a list of available zones, use the [yandex.cloud.compute.v1.ZoneService.List] request.
@@ -1692,17 +2314,20 @@ type HostSpec struct {
 	// Possible values:
 	// * false — don't assign a public IP to the host.
 	// * true — the host should have a public IP address.
-	AssignPublicIp       bool     `protobuf:"varint,3,opt,name=assign_public_ip,json=assignPublicIp,proto3" json:"assign_public_ip,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	AssignPublicIp bool `protobuf:"varint,3,opt,name=assign_public_ip,json=assignPublicIp,proto3" json:"assign_public_ip,omitempty"`
+	// Type of the host to be deployed.
+	Type                 Host_Type `protobuf:"varint,4,opt,name=type,proto3,enum=yandex.cloud.mdb.mongodb.v1.Host_Type" json:"type,omitempty"`
+	ShardName            string    `protobuf:"bytes,5,opt,name=shard_name,json=shardName,proto3" json:"shard_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *HostSpec) Reset()         { *m = HostSpec{} }
 func (m *HostSpec) String() string { return proto.CompactTextString(m) }
 func (*HostSpec) ProtoMessage()    {}
 func (*HostSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{30}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{41}
 }
 func (m *HostSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_HostSpec.Unmarshal(m, b)
@@ -1743,9 +2368,27 @@ func (m *HostSpec) GetAssignPublicIp() bool {
 	return false
 }
 
+func (m *HostSpec) GetType() Host_Type {
+	if m != nil {
+		return m.Type
+	}
+	return Host_TYPE_UNSPECIFIED
+}
+
+func (m *HostSpec) GetShardName() string {
+	if m != nil {
+		return m.ShardName
+	}
+	return ""
+}
+
 type MongodbSpec3_6 struct {
 	// Configuration and resource allocation for a mongod host.
-	Mongod               *MongodbSpec3_6_Mongod `protobuf:"bytes,1,opt,name=mongod,proto3" json:"mongod,omitempty"`
+	Mongod *MongodbSpec3_6_Mongod `protobuf:"bytes,1,opt,name=mongod,proto3" json:"mongod,omitempty"`
+	// Configuration and resource allocation for a mongocfg host.
+	Mongocfg *MongodbSpec3_6_MongoCfg `protobuf:"bytes,2,opt,name=mongocfg,proto3" json:"mongocfg,omitempty"`
+	// Configuration and resource allocation for a mongos host.
+	Mongos               *MongodbSpec3_6_Mongos `protobuf:"bytes,3,opt,name=mongos,proto3" json:"mongos,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
 	XXX_sizecache        int32                  `json:"-"`
@@ -1755,7 +2398,7 @@ func (m *MongodbSpec3_6) Reset()         { *m = MongodbSpec3_6{} }
 func (m *MongodbSpec3_6) String() string { return proto.CompactTextString(m) }
 func (*MongodbSpec3_6) ProtoMessage()    {}
 func (*MongodbSpec3_6) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{31}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{42}
 }
 func (m *MongodbSpec3_6) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MongodbSpec3_6.Unmarshal(m, b)
@@ -1782,6 +2425,20 @@ func (m *MongodbSpec3_6) GetMongod() *MongodbSpec3_6_Mongod {
 	return nil
 }
 
+func (m *MongodbSpec3_6) GetMongocfg() *MongodbSpec3_6_MongoCfg {
+	if m != nil {
+		return m.Mongocfg
+	}
+	return nil
+}
+
+func (m *MongodbSpec3_6) GetMongos() *MongodbSpec3_6_Mongos {
+	if m != nil {
+		return m.Mongos
+	}
+	return nil
+}
+
 type MongodbSpec3_6_Mongod struct {
 	// Configuration for a mongod 3.6 host.
 	Config *config.MongodConfig3_6 `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
@@ -1796,7 +2453,7 @@ func (m *MongodbSpec3_6_Mongod) Reset()         { *m = MongodbSpec3_6_Mongod{} }
 func (m *MongodbSpec3_6_Mongod) String() string { return proto.CompactTextString(m) }
 func (*MongodbSpec3_6_Mongod) ProtoMessage()    {}
 func (*MongodbSpec3_6_Mongod) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{31, 0}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{42, 0}
 }
 func (m *MongodbSpec3_6_Mongod) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MongodbSpec3_6_Mongod.Unmarshal(m, b)
@@ -1830,23 +2487,119 @@ func (m *MongodbSpec3_6_Mongod) GetResources() *Resources {
 	return nil
 }
 
+type MongodbSpec3_6_MongoCfg struct {
+	Config *config.MongoCfgConfig3_6 `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	// Resources allocated to mongocfg hosts.
+	Resources            *Resources `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *MongodbSpec3_6_MongoCfg) Reset()         { *m = MongodbSpec3_6_MongoCfg{} }
+func (m *MongodbSpec3_6_MongoCfg) String() string { return proto.CompactTextString(m) }
+func (*MongodbSpec3_6_MongoCfg) ProtoMessage()    {}
+func (*MongodbSpec3_6_MongoCfg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{42, 1}
+}
+func (m *MongodbSpec3_6_MongoCfg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MongodbSpec3_6_MongoCfg.Unmarshal(m, b)
+}
+func (m *MongodbSpec3_6_MongoCfg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MongodbSpec3_6_MongoCfg.Marshal(b, m, deterministic)
+}
+func (dst *MongodbSpec3_6_MongoCfg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MongodbSpec3_6_MongoCfg.Merge(dst, src)
+}
+func (m *MongodbSpec3_6_MongoCfg) XXX_Size() int {
+	return xxx_messageInfo_MongodbSpec3_6_MongoCfg.Size(m)
+}
+func (m *MongodbSpec3_6_MongoCfg) XXX_DiscardUnknown() {
+	xxx_messageInfo_MongodbSpec3_6_MongoCfg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MongodbSpec3_6_MongoCfg proto.InternalMessageInfo
+
+func (m *MongodbSpec3_6_MongoCfg) GetConfig() *config.MongoCfgConfig3_6 {
+	if m != nil {
+		return m.Config
+	}
+	return nil
+}
+
+func (m *MongodbSpec3_6_MongoCfg) GetResources() *Resources {
+	if m != nil {
+		return m.Resources
+	}
+	return nil
+}
+
+type MongodbSpec3_6_Mongos struct {
+	Config *config.MongosConfig3_6 `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	// Resources allocated to mongos hosts.
+	Resources            *Resources `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *MongodbSpec3_6_Mongos) Reset()         { *m = MongodbSpec3_6_Mongos{} }
+func (m *MongodbSpec3_6_Mongos) String() string { return proto.CompactTextString(m) }
+func (*MongodbSpec3_6_Mongos) ProtoMessage()    {}
+func (*MongodbSpec3_6_Mongos) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{42, 2}
+}
+func (m *MongodbSpec3_6_Mongos) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MongodbSpec3_6_Mongos.Unmarshal(m, b)
+}
+func (m *MongodbSpec3_6_Mongos) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MongodbSpec3_6_Mongos.Marshal(b, m, deterministic)
+}
+func (dst *MongodbSpec3_6_Mongos) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MongodbSpec3_6_Mongos.Merge(dst, src)
+}
+func (m *MongodbSpec3_6_Mongos) XXX_Size() int {
+	return xxx_messageInfo_MongodbSpec3_6_Mongos.Size(m)
+}
+func (m *MongodbSpec3_6_Mongos) XXX_DiscardUnknown() {
+	xxx_messageInfo_MongodbSpec3_6_Mongos.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MongodbSpec3_6_Mongos proto.InternalMessageInfo
+
+func (m *MongodbSpec3_6_Mongos) GetConfig() *config.MongosConfig3_6 {
+	if m != nil {
+		return m.Config
+	}
+	return nil
+}
+
+func (m *MongodbSpec3_6_Mongos) GetResources() *Resources {
+	if m != nil {
+		return m.Resources
+	}
+	return nil
+}
+
 type ConfigSpec struct {
 	// Version of MongoDB used in the cluster.
 	// The only valid value: 3.6
 	Version string `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
 	// Types that are valid to be assigned to MongodbSpec:
 	//	*ConfigSpec_MongodbSpec_3_6
-	MongodbSpec          isConfigSpec_MongodbSpec `protobuf_oneof:"mongodb_spec"`
-	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
-	XXX_unrecognized     []byte                   `json:"-"`
-	XXX_sizecache        int32                    `json:"-"`
+	MongodbSpec isConfigSpec_MongodbSpec `protobuf_oneof:"mongodb_spec"`
+	// Start time for the daily backup in UTC timezone
+	BackupWindowStart    *timeofday.TimeOfDay `protobuf:"bytes,3,opt,name=backup_window_start,json=backupWindowStart,proto3" json:"backup_window_start,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
 func (m *ConfigSpec) Reset()         { *m = ConfigSpec{} }
 func (m *ConfigSpec) String() string { return proto.CompactTextString(m) }
 func (*ConfigSpec) ProtoMessage()    {}
 func (*ConfigSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cluster_service_102bf0875d7e349f, []int{32}
+	return fileDescriptor_cluster_service_86bdc30dc8ad0f00, []int{43}
 }
 func (m *ConfigSpec) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfigSpec.Unmarshal(m, b)
@@ -1893,6 +2646,13 @@ func (m *ConfigSpec) GetMongodbSpec() isConfigSpec_MongodbSpec {
 func (m *ConfigSpec) GetMongodbSpec_3_6() *MongodbSpec3_6 {
 	if x, ok := m.GetMongodbSpec().(*ConfigSpec_MongodbSpec_3_6); ok {
 		return x.MongodbSpec_3_6
+	}
+	return nil
+}
+
+func (m *ConfigSpec) GetBackupWindowStart() *timeofday.TimeOfDay {
+	if m != nil {
+		return m.BackupWindowStart
 	}
 	return nil
 }
@@ -1968,6 +2728,8 @@ func init() {
 	proto.RegisterType((*StartClusterMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.StartClusterMetadata")
 	proto.RegisterType((*StopClusterRequest)(nil), "yandex.cloud.mdb.mongodb.v1.StopClusterRequest")
 	proto.RegisterType((*StopClusterMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.StopClusterMetadata")
+	proto.RegisterType((*MoveClusterRequest)(nil), "yandex.cloud.mdb.mongodb.v1.MoveClusterRequest")
+	proto.RegisterType((*MoveClusterMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.MoveClusterMetadata")
 	proto.RegisterType((*BackupClusterRequest)(nil), "yandex.cloud.mdb.mongodb.v1.BackupClusterRequest")
 	proto.RegisterType((*BackupClusterMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.BackupClusterMetadata")
 	proto.RegisterType((*RestoreClusterRequest)(nil), "yandex.cloud.mdb.mongodb.v1.RestoreClusterRequest")
@@ -1987,9 +2749,22 @@ func init() {
 	proto.RegisterType((*AddClusterHostsMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.AddClusterHostsMetadata")
 	proto.RegisterType((*DeleteClusterHostsRequest)(nil), "yandex.cloud.mdb.mongodb.v1.DeleteClusterHostsRequest")
 	proto.RegisterType((*DeleteClusterHostsMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.DeleteClusterHostsMetadata")
+	proto.RegisterType((*EnableClusterShardingRequest)(nil), "yandex.cloud.mdb.mongodb.v1.EnableClusterShardingRequest")
+	proto.RegisterType((*EnableClusterShardingRequest_MongoCfg)(nil), "yandex.cloud.mdb.mongodb.v1.EnableClusterShardingRequest.MongoCfg")
+	proto.RegisterType((*EnableClusterShardingRequest_Mongos)(nil), "yandex.cloud.mdb.mongodb.v1.EnableClusterShardingRequest.Mongos")
+	proto.RegisterType((*EnableClusterShardingMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.EnableClusterShardingMetadata")
+	proto.RegisterType((*GetClusterShardRequest)(nil), "yandex.cloud.mdb.mongodb.v1.GetClusterShardRequest")
+	proto.RegisterType((*ListClusterShardsRequest)(nil), "yandex.cloud.mdb.mongodb.v1.ListClusterShardsRequest")
+	proto.RegisterType((*ListClusterShardsResponse)(nil), "yandex.cloud.mdb.mongodb.v1.ListClusterShardsResponse")
+	proto.RegisterType((*AddClusterShardRequest)(nil), "yandex.cloud.mdb.mongodb.v1.AddClusterShardRequest")
+	proto.RegisterType((*AddClusterShardMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.AddClusterShardMetadata")
+	proto.RegisterType((*DeleteClusterShardRequest)(nil), "yandex.cloud.mdb.mongodb.v1.DeleteClusterShardRequest")
+	proto.RegisterType((*DeleteClusterShardMetadata)(nil), "yandex.cloud.mdb.mongodb.v1.DeleteClusterShardMetadata")
 	proto.RegisterType((*HostSpec)(nil), "yandex.cloud.mdb.mongodb.v1.HostSpec")
 	proto.RegisterType((*MongodbSpec3_6)(nil), "yandex.cloud.mdb.mongodb.v1.MongodbSpec3_6")
 	proto.RegisterType((*MongodbSpec3_6_Mongod)(nil), "yandex.cloud.mdb.mongodb.v1.MongodbSpec3_6.Mongod")
+	proto.RegisterType((*MongodbSpec3_6_MongoCfg)(nil), "yandex.cloud.mdb.mongodb.v1.MongodbSpec3_6.MongoCfg")
+	proto.RegisterType((*MongodbSpec3_6_Mongos)(nil), "yandex.cloud.mdb.mongodb.v1.MongodbSpec3_6.Mongos")
 	proto.RegisterType((*ConfigSpec)(nil), "yandex.cloud.mdb.mongodb.v1.ConfigSpec")
 	proto.RegisterEnum("yandex.cloud.mdb.mongodb.v1.ListClusterLogsRequest_ServiceType", ListClusterLogsRequest_ServiceType_name, ListClusterLogsRequest_ServiceType_value)
 }
@@ -2023,6 +2798,8 @@ type ClusterServiceClient interface {
 	Start(ctx context.Context, in *StartClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Stop the specified MongoDB cluster.
 	Stop(ctx context.Context, in *StopClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Moves the specified MongoDB cluster to the specified folder.
+	Move(ctx context.Context, in *MoveClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Creates a backup for the specified MongoDB cluster.
 	Backup(ctx context.Context, in *BackupClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Creates a new MongoDB cluster using the specified backup.
@@ -2040,6 +2817,16 @@ type ClusterServiceClient interface {
 	AddHosts(ctx context.Context, in *AddClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Deletes the specified hosts for a cluster.
 	DeleteHosts(ctx context.Context, in *DeleteClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Enables sharding for the cluster.
+	EnableSharding(ctx context.Context, in *EnableClusterShardingRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Returns the specified shard.
+	GetShard(ctx context.Context, in *GetClusterShardRequest, opts ...grpc.CallOption) (*Shard, error)
+	// Retrieves a list of shards.
+	ListShards(ctx context.Context, in *ListClusterShardsRequest, opts ...grpc.CallOption) (*ListClusterShardsResponse, error)
+	// Creates a new shard.
+	AddShard(ctx context.Context, in *AddClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified shard.
+	DeleteShard(ctx context.Context, in *DeleteClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 }
 
 type clusterServiceClient struct {
@@ -2107,6 +2894,15 @@ func (c *clusterServiceClient) Start(ctx context.Context, in *StartClusterReques
 func (c *clusterServiceClient) Stop(ctx context.Context, in *StopClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	out := new(operation.Operation)
 	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/Stop", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) Move(ctx context.Context, in *MoveClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/Move", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2185,6 +2981,51 @@ func (c *clusterServiceClient) DeleteHosts(ctx context.Context, in *DeleteCluste
 	return out, nil
 }
 
+func (c *clusterServiceClient) EnableSharding(ctx context.Context, in *EnableClusterShardingRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/EnableSharding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) GetShard(ctx context.Context, in *GetClusterShardRequest, opts ...grpc.CallOption) (*Shard, error) {
+	out := new(Shard)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/GetShard", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) ListShards(ctx context.Context, in *ListClusterShardsRequest, opts ...grpc.CallOption) (*ListClusterShardsResponse, error) {
+	out := new(ListClusterShardsResponse)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/ListShards", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) AddShard(ctx context.Context, in *AddClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/AddShard", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterServiceClient) DeleteShard(ctx context.Context, in *DeleteClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.mdb.mongodb.v1.ClusterService/DeleteShard", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClusterServiceServer is the server API for ClusterService service.
 type ClusterServiceServer interface {
 	// Returns the specified MongoDB Cluster resource.
@@ -2204,6 +3045,8 @@ type ClusterServiceServer interface {
 	Start(context.Context, *StartClusterRequest) (*operation.Operation, error)
 	// Stop the specified MongoDB cluster.
 	Stop(context.Context, *StopClusterRequest) (*operation.Operation, error)
+	// Moves the specified MongoDB cluster to the specified folder.
+	Move(context.Context, *MoveClusterRequest) (*operation.Operation, error)
 	// Creates a backup for the specified MongoDB cluster.
 	Backup(context.Context, *BackupClusterRequest) (*operation.Operation, error)
 	// Creates a new MongoDB cluster using the specified backup.
@@ -2221,6 +3064,16 @@ type ClusterServiceServer interface {
 	AddHosts(context.Context, *AddClusterHostsRequest) (*operation.Operation, error)
 	// Deletes the specified hosts for a cluster.
 	DeleteHosts(context.Context, *DeleteClusterHostsRequest) (*operation.Operation, error)
+	// Enables sharding for the cluster.
+	EnableSharding(context.Context, *EnableClusterShardingRequest) (*operation.Operation, error)
+	// Returns the specified shard.
+	GetShard(context.Context, *GetClusterShardRequest) (*Shard, error)
+	// Retrieves a list of shards.
+	ListShards(context.Context, *ListClusterShardsRequest) (*ListClusterShardsResponse, error)
+	// Creates a new shard.
+	AddShard(context.Context, *AddClusterShardRequest) (*operation.Operation, error)
+	// Deletes the specified shard.
+	DeleteShard(context.Context, *DeleteClusterShardRequest) (*operation.Operation, error)
 }
 
 func RegisterClusterServiceServer(s *grpc.Server, srv ClusterServiceServer) {
@@ -2349,6 +3202,24 @@ func _ClusterService_Stop_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ClusterServiceServer).Stop(ctx, req.(*StopClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_Move_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).Move(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/Move",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).Move(ctx, req.(*MoveClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2497,6 +3368,96 @@ func _ClusterService_DeleteHosts_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClusterService_EnableSharding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnableClusterShardingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).EnableSharding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/EnableSharding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).EnableSharding(ctx, req.(*EnableClusterShardingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_GetShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClusterShardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).GetShard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/GetShard",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).GetShard(ctx, req.(*GetClusterShardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_ListShards_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListClusterShardsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).ListShards(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/ListShards",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).ListShards(ctx, req.(*ListClusterShardsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_AddShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddClusterShardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).AddShard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/AddShard",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).AddShard(ctx, req.(*AddClusterShardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_DeleteShard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteClusterShardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).DeleteShard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.mdb.mongodb.v1.ClusterService/DeleteShard",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).DeleteShard(ctx, req.(*DeleteClusterShardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ClusterService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "yandex.cloud.mdb.mongodb.v1.ClusterService",
 	HandlerType: (*ClusterServiceServer)(nil),
@@ -2530,6 +3491,10 @@ var _ClusterService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ClusterService_Stop_Handler,
 		},
 		{
+			MethodName: "Move",
+			Handler:    _ClusterService_Move_Handler,
+		},
+		{
 			MethodName: "Backup",
 			Handler:    _ClusterService_Backup_Handler,
 		},
@@ -2561,152 +3526,208 @@ var _ClusterService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteHosts",
 			Handler:    _ClusterService_DeleteHosts_Handler,
 		},
+		{
+			MethodName: "EnableSharding",
+			Handler:    _ClusterService_EnableSharding_Handler,
+		},
+		{
+			MethodName: "GetShard",
+			Handler:    _ClusterService_GetShard_Handler,
+		},
+		{
+			MethodName: "ListShards",
+			Handler:    _ClusterService_ListShards_Handler,
+		},
+		{
+			MethodName: "AddShard",
+			Handler:    _ClusterService_AddShard_Handler,
+		},
+		{
+			MethodName: "DeleteShard",
+			Handler:    _ClusterService_DeleteShard_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "yandex/cloud/mdb/mongodb/v1/cluster_service.proto",
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/mdb/mongodb/v1/cluster_service.proto", fileDescriptor_cluster_service_102bf0875d7e349f)
+	proto.RegisterFile("yandex/cloud/mdb/mongodb/v1/cluster_service.proto", fileDescriptor_cluster_service_86bdc30dc8ad0f00)
 }
 
-var fileDescriptor_cluster_service_102bf0875d7e349f = []byte{
-	// 2185 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x5a, 0xcd, 0x6f, 0x1b, 0xc7,
-	0x15, 0xcf, 0xe8, 0x83, 0x1f, 0x8f, 0xb6, 0xa2, 0x4e, 0x64, 0x87, 0x61, 0x6c, 0x47, 0xde, 0x38,
-	0x8e, 0x4c, 0x95, 0xcb, 0x2f, 0x9b, 0x8a, 0x64, 0x3b, 0xb1, 0x28, 0xc9, 0x36, 0x11, 0xc9, 0x16,
-	0x56, 0xb2, 0xeb, 0x3a, 0x35, 0x88, 0x25, 0x77, 0x44, 0x13, 0x22, 0x77, 0x59, 0xee, 0x52, 0xb5,
-	0x14, 0xb8, 0x08, 0xdc, 0x9b, 0x0f, 0x01, 0x8a, 0xa0, 0x2d, 0x8a, 0x00, 0xfd, 0x07, 0x8a, 0x02,
-	0xad, 0x50, 0xf4, 0x03, 0xe8, 0xa9, 0x45, 0x61, 0x01, 0xbd, 0x14, 0xea, 0xbd, 0xa7, 0x02, 0xed,
-	0x39, 0xb7, 0xf6, 0x54, 0xcc, 0xc7, 0x92, 0xbb, 0x22, 0xb9, 0x5a, 0x4a, 0x36, 0x10, 0x20, 0x37,
-	0xee, 0xcc, 0x7b, 0xbf, 0xf9, 0xbd, 0x37, 0x6f, 0xe6, 0xcd, 0x7b, 0x12, 0xa4, 0xb7, 0x55, 0x5d,
-	0x23, 0x4f, 0x92, 0xe5, 0x9a, 0xd1, 0xd2, 0x92, 0x75, 0xad, 0x94, 0xac, 0x1b, 0x7a, 0xc5, 0xd0,
-	0x4a, 0xc9, 0xad, 0x74, 0xb2, 0x5c, 0x6b, 0x99, 0x16, 0x69, 0x16, 0x4d, 0xd2, 0xdc, 0xaa, 0x96,
-	0x89, 0xdc, 0x68, 0x1a, 0x96, 0x81, 0xdf, 0xe6, 0x2a, 0x32, 0x53, 0x91, 0xeb, 0x5a, 0x49, 0x16,
-	0x2a, 0xf2, 0x56, 0x3a, 0x76, 0xa6, 0x62, 0x18, 0x95, 0x1a, 0x49, 0xaa, 0x8d, 0x6a, 0x52, 0xd5,
-	0x75, 0xc3, 0x52, 0xad, 0xaa, 0xa1, 0x9b, 0x5c, 0x35, 0x36, 0x29, 0x66, 0xd9, 0x57, 0xa9, 0xb5,
-	0x91, 0xdc, 0xa8, 0x92, 0x9a, 0x56, 0xac, 0xab, 0xe6, 0xa6, 0x90, 0x78, 0xe7, 0xa0, 0x84, 0x55,
-	0xad, 0x13, 0xd3, 0x52, 0xeb, 0x0d, 0x21, 0x10, 0x13, 0x84, 0xe9, 0x02, 0x46, 0x83, 0x34, 0x19,
-	0xbe, 0x98, 0xbb, 0xe8, 0x32, 0xa6, 0x3d, 0xdb, 0x25, 0x77, 0xd6, 0x25, 0xb7, 0xa5, 0xd6, 0xaa,
-	0x9a, 0x73, 0x7a, 0xca, 0xcb, 0x27, 0x25, 0xb5, 0xbc, 0xd9, 0xb2, 0xc9, 0x5c, 0xf2, 0xe1, 0x3d,
-	0x21, 0x1a, 0xf7, 0x12, 0xd5, 0x54, 0x4b, 0x2d, 0xa9, 0x26, 0xe9, 0x69, 0xc7, 0x01, 0xd9, 0x96,
-	0xd9, 0xc6, 0xcc, 0x7a, 0x2e, 0x6f, 0xe8, 0x1b, 0xd5, 0x8a, 0x3d, 0x92, 0x2d, 0xe6, 0xb8, 0x92,
-	0x74, 0x03, 0xbe, 0x75, 0x8b, 0x58, 0x0b, 0x9c, 0x9c, 0x42, 0xbe, 0xdf, 0x22, 0xa6, 0x85, 0xa7,
-	0x01, 0xec, 0xcd, 0xae, 0x6a, 0x51, 0x34, 0x89, 0xa6, 0xc2, 0xf9, 0x13, 0xff, 0x79, 0x91, 0x46,
-	0xcf, 0xf7, 0xd2, 0x23, 0xd7, 0xae, 0x5f, 0x49, 0x29, 0x61, 0x31, 0x5f, 0xd0, 0xa4, 0xdf, 0x23,
-	0x78, 0x63, 0xb9, 0x6a, 0xda, 0x18, 0xa6, 0x0d, 0x72, 0x09, 0xc2, 0x1b, 0x46, 0x4d, 0xeb, 0x8f,
-	0x11, 0xe2, 0xd3, 0x05, 0x0d, 0xbf, 0x0f, 0xe1, 0x86, 0x5a, 0x21, 0x45, 0xb3, 0xba, 0x43, 0xa2,
-	0x43, 0x93, 0x68, 0x6a, 0x38, 0x0f, 0xff, 0x7b, 0x91, 0x0e, 0x5c, 0xbb, 0x9e, 0x4e, 0xa5, 0x52,
-	0x4a, 0x88, 0x4e, 0xae, 0x55, 0x77, 0x08, 0x9e, 0x02, 0x60, 0x82, 0x96, 0xb1, 0x49, 0xf4, 0xe8,
-	0x30, 0x03, 0x0d, 0x3f, 0xdf, 0x4b, 0x8f, 0x32, 0x49, 0x85, 0xa1, 0xac, 0xd3, 0x39, 0x2c, 0x41,
-	0x60, 0xa3, 0x5a, 0xb3, 0x48, 0x33, 0x3a, 0xc2, 0xa4, 0xe0, 0xf9, 0x5e, 0x1b, 0x4f, 0xcc, 0x48,
-	0x9f, 0x21, 0x98, 0x70, 0x33, 0x37, 0x1b, 0x86, 0x6e, 0x12, 0x7c, 0x03, 0x42, 0xc2, 0x3e, 0x33,
-	0x8a, 0x26, 0x87, 0xa7, 0x22, 0x99, 0x0b, 0xb2, 0x47, 0x98, 0xcb, 0xb6, 0xfb, 0xda, 0x5a, 0xf8,
-	0x22, 0xbc, 0xae, 0x93, 0x27, 0x56, 0xd1, 0xc1, 0x96, 0xda, 0x15, 0x56, 0x4e, 0xd2, 0xe1, 0x55,
-	0x9b, 0xa6, 0xf4, 0xe7, 0x00, 0x4c, 0x2c, 0x34, 0x89, 0x6a, 0x91, 0x03, 0x5b, 0x30, 0x80, 0xf7,
-	0xd2, 0x30, 0xa2, 0xab, 0x75, 0xee, 0xb8, 0x70, 0xfe, 0x2c, 0x95, 0xfa, 0xea, 0x45, 0xfa, 0xe4,
-	0x27, 0x6a, 0x62, 0x67, 0x3e, 0xf1, 0x30, 0x95, 0x98, 0x2d, 0x3e, 0x8a, 0x73, 0xb5, 0x5c, 0x56,
-	0x61, 0xa2, 0x78, 0x1a, 0x22, 0x1a, 0x31, 0xcb, 0xcd, 0x6a, 0x83, 0x06, 0xba, 0xdb, 0x91, 0x99,
-	0x2b, 0x39, 0xc5, 0x39, 0x8b, 0x7f, 0x8a, 0x20, 0x50, 0x53, 0x4b, 0xa4, 0x66, 0x46, 0x47, 0x98,
-	0x33, 0xae, 0x7b, 0x3b, 0xa3, 0x87, 0x39, 0xf2, 0x32, 0xd3, 0x5f, 0xd2, 0xad, 0xe6, 0x76, 0xfe,
-	0xa3, 0xaf, 0x5e, 0xa4, 0x23, 0x9f, 0x24, 0x8a, 0xa9, 0xc4, 0xac, 0x9a, 0xd8, 0x79, 0x14, 0x7f,
-	0xc6, 0xb9, 0x5d, 0xb6, 0x39, 0xee, 0xee, 0xa5, 0x03, 0x31, 0xfb, 0x17, 0xc6, 0xe3, 0xd4, 0x90,
-	0x47, 0x0e, 0x79, 0x45, 0xb0, 0xc1, 0x0f, 0x20, 0x42, 0xf4, 0xad, 0x6a, 0xd3, 0xd0, 0xeb, 0x44,
-	0xb7, 0xa2, 0xa3, 0x93, 0x68, 0x6a, 0x2c, 0x93, 0xf2, 0xb3, 0x53, 0xf2, 0x52, 0x47, 0x2f, 0x3f,
-	0x42, 0x3d, 0xa6, 0x38, 0xa1, 0xf0, 0x1d, 0x88, 0xf0, 0x03, 0x53, 0x34, 0x1b, 0xa4, 0x1c, 0x0d,
-	0x4c, 0xa2, 0xa9, 0x48, 0xe6, 0x7d, 0x6f, 0x64, 0x26, 0xbf, 0xd6, 0x20, 0x65, 0x01, 0x08, 0xe5,
-	0xf6, 0x08, 0x7e, 0x00, 0x63, 0xf6, 0xa1, 0x66, 0x88, 0x66, 0x34, 0xc8, 0x3c, 0x79, 0xc9, 0x13,
-	0x72, 0x51, 0xa8, 0x30, 0xd0, 0xc0, 0xb3, 0xbd, 0xf4, 0xd0, 0x87, 0x29, 0xe5, 0xa4, 0xe6, 0x18,
-	0x35, 0xf1, 0x32, 0x00, 0xbd, 0x02, 0x04, 0x6a, 0x88, 0xa1, 0xbe, 0xe7, 0x89, 0x7a, 0xcf, 0x24,
-	0x4d, 0x17, 0x62, 0xb8, 0x25, 0x46, 0x18, 0xda, 0x63, 0xc3, 0xb4, 0x04, 0x5a, 0xd8, 0x07, 0xda,
-	0x6d, 0xc3, 0xb4, 0xdc, 0x68, 0x8f, 0xc5, 0x88, 0x49, 0xaf, 0x11, 0x9d, 0x58, 0x3f, 0x30, 0x9a,
-	0x9b, 0x34, 0x88, 0xa1, 0xd7, 0x35, 0x22, 0xe6, 0x0b, 0x5a, 0x6c, 0x16, 0x22, 0x8e, 0x20, 0xc1,
-	0xe3, 0x30, 0xbc, 0x49, 0xb6, 0x79, 0xe4, 0x2b, 0xf4, 0x27, 0x9e, 0x80, 0xd1, 0x2d, 0xb5, 0xd6,
-	0x12, 0x71, 0xae, 0xf0, 0x8f, 0xb9, 0xa1, 0x0f, 0x90, 0x94, 0x83, 0x53, 0xae, 0xa0, 0x5b, 0x21,
-	0x96, 0x4a, 0xbd, 0x84, 0xcf, 0x76, 0xdf, 0x63, 0xce, 0x9b, 0xeb, 0x6f, 0xc3, 0x30, 0x71, 0xaf,
-	0xa1, 0x75, 0x1f, 0xbe, 0x41, 0xee, 0x3f, 0x7c, 0x15, 0x22, 0x2d, 0x06, 0xc2, 0x12, 0x17, 0x63,
-	0x17, 0xc9, 0xc4, 0x64, 0x9e, 0xb9, 0x64, 0x3b, 0x73, 0xc9, 0x37, 0x69, 0x6e, 0x5b, 0x51, 0xcd,
-	0x4d, 0x05, 0xb8, 0x38, 0xfd, 0xfd, 0x4a, 0x0f, 0x62, 0x2f, 0xd3, 0x5e, 0xcd, 0x41, 0xbc, 0xed,
-	0x3e, 0x2e, 0xa3, 0x03, 0x1d, 0x17, 0xe7, 0x41, 0x39, 0x66, 0x14, 0xb8, 0x2c, 0xf6, 0x1b, 0x05,
-	0x0b, 0x30, 0xb1, 0x48, 0x6a, 0xe4, 0x58, 0x41, 0x40, 0x17, 0x77, 0x81, 0xf8, 0x5d, 0x3c, 0x0f,
-	0x6f, 0xac, 0x59, 0x6a, 0xf3, 0x58, 0x09, 0xf8, 0x0a, 0x4c, 0x38, 0x31, 0xfc, 0x2e, 0x3d, 0x0f,
-	0x78, 0xcd, 0x32, 0x1a, 0xc7, 0x59, 0xf9, 0x32, 0x65, 0xdf, 0x86, 0x18, 0xc0, 0xe1, 0x79, 0xf6,
-	0x6c, 0x3a, 0xa6, 0xc3, 0x5d, 0x20, 0x7e, 0x17, 0xff, 0xc9, 0x28, 0x9c, 0x52, 0x88, 0x69, 0x19,
-	0xcd, 0x83, 0xfb, 0x7d, 0x1e, 0xc2, 0xfc, 0x35, 0xd7, 0x59, 0x9d, 0x5f, 0xe4, 0x21, 0x3e, 0x5c,
-	0xd0, 0x70, 0xc6, 0x95, 0x69, 0xcf, 0x89, 0x4c, 0x3b, 0xe6, 0xc8, 0xb4, 0x89, 0xe3, 0xa5, 0xda,
-	0x9f, 0x1d, 0x3c, 0xe1, 0x1f, 0x7a, 0x1e, 0xa2, 0x9e, 0x86, 0x7c, 0xd3, 0x73, 0xad, 0x3b, 0x87,
-	0x05, 0x5f, 0x6a, 0x0e, 0x0b, 0xbd, 0xb2, 0x1c, 0xb6, 0x0e, 0xa7, 0xdd, 0xbb, 0xe9, 0x33, 0xa0,
-	0xf1, 0xdb, 0xce, 0xb0, 0xe5, 0xb0, 0xed, 0x80, 0x95, 0xfe, 0x8e, 0x20, 0xbc, 0x6c, 0x54, 0x14,
-	0x52, 0x36, 0x9a, 0x1a, 0xfe, 0x00, 0xc2, 0xed, 0xfa, 0x89, 0x01, 0xf5, 0xca, 0x53, 0xeb, 0xb6,
-	0x84, 0xd2, 0x11, 0xc6, 0x2b, 0x10, 0xac, 0x13, 0xd3, 0x54, 0x2b, 0x94, 0x39, 0x75, 0x68, 0xd6,
-	0xd3, 0xa1, 0xed, 0x25, 0xe5, 0x15, 0xae, 0xc5, 0xfc, 0xa1, 0xd8, 0x18, 0xb1, 0x39, 0x38, 0xe1,
-	0x9c, 0x18, 0xc8, 0x51, 0x7b, 0xc3, 0x70, 0xda, 0xf1, 0x68, 0x5f, 0x36, 0x2a, 0xe6, 0x91, 0xd2,
-	0xf6, 0xbb, 0x70, 0xb2, 0x6c, 0xd4, 0x5a, 0x75, 0xbd, 0x28, 0xea, 0x04, 0x6a, 0x58, 0x58, 0x39,
-	0xc1, 0x07, 0x6f, 0xb2, 0x31, 0x5c, 0x82, 0x13, 0xa2, 0xda, 0x2d, 0x5a, 0xdb, 0x0d, 0xc2, 0x4e,
-	0xef, 0x58, 0xe6, 0x23, 0x6f, 0xe3, 0x7b, 0x92, 0x93, 0xd7, 0x38, 0xce, 0xfa, 0x76, 0x83, 0x28,
-	0x11, 0xb3, 0xf3, 0x81, 0x67, 0x20, 0xbc, 0xd1, 0x34, 0xea, 0x45, 0xea, 0x6d, 0x56, 0xac, 0x78,
-	0xef, 0x4a, 0x88, 0x0a, 0xd3, 0x4f, 0x9c, 0x85, 0xa0, 0x65, 0x70, 0xb5, 0xd1, 0x43, 0xd5, 0x02,
-	0x96, 0xc1, 0x94, 0x5c, 0xa5, 0x56, 0xc0, 0x77, 0xa9, 0x15, 0xec, 0x5f, 0x6a, 0x49, 0x33, 0x10,
-	0x71, 0x18, 0x87, 0xcf, 0x40, 0x74, 0x6d, 0x49, 0xb9, 0x5f, 0x58, 0x58, 0x2a, 0xae, 0x7f, 0x77,
-	0x75, 0xa9, 0x78, 0xef, 0xce, 0xda, 0xea, 0xd2, 0x42, 0xe1, 0x66, 0x61, 0x69, 0x71, 0xfc, 0x35,
-	0x0c, 0x10, 0x58, 0xb9, 0x7b, 0xe7, 0xd6, 0xdd, 0xc5, 0x71, 0x24, 0x3d, 0x85, 0x37, 0xbb, 0x9c,
-	0x25, 0x2a, 0xb0, 0x39, 0x18, 0xa9, 0x19, 0x15, 0xbb, 0xfa, 0xba, 0xe8, 0x2f, 0xda, 0x14, 0xa6,
-	0xe3, 0xbb, 0xf6, 0xfa, 0x05, 0x82, 0x33, 0x8e, 0xf5, 0xef, 0xda, 0x6d, 0x81, 0xa3, 0xc5, 0xd3,
-	0xcb, 0xaf, 0x61, 0xa5, 0xe7, 0x08, 0xce, 0xf6, 0x21, 0x28, 0xdc, 0x34, 0x0f, 0xd0, 0xee, 0x66,
-	0xd8, 0xce, 0x3a, 0xef, 0x76, 0x56, 0xa7, 0xdb, 0xd1, 0xd6, 0x57, 0x1c, 0x4a, 0xbe, 0xbd, 0xf5,
-	0x25, 0x82, 0xb7, 0x1c, 0x64, 0x78, 0xf2, 0xfd, 0xda, 0xb8, 0xea, 0x47, 0x08, 0x62, 0xbd, 0xd8,
-	0x09, 0x3f, 0x5d, 0x87, 0x20, 0xbf, 0x13, 0x6d, 0x27, 0xbd, 0xeb, 0x19, 0x51, 0x5c, 0x5d, 0xb1,
-	0x75, 0x7c, 0xfb, 0xe8, 0xe7, 0xc8, 0x15, 0xd1, 0x34, 0xaf, 0x7c, 0x6d, 0x3c, 0xf4, 0x29, 0x44,
-	0xbb, 0xa9, 0x09, 0xf7, 0xcc, 0xc0, 0x28, 0xcd, 0x78, 0x7d, 0x22, 0xa8, 0x47, 0xb6, 0x54, 0xb8,
-	0xbc, 0x6f, 0xc7, 0x7c, 0x81, 0xe0, 0xf4, 0xbc, 0xa6, 0x1d, 0xdb, 0x2f, 0xee, 0xdc, 0x3e, 0x74,
-	0xbc, 0xdc, 0x2e, 0x7d, 0x07, 0xde, 0x3c, 0x40, 0xca, 0x6f, 0xd2, 0x3d, 0x2b, 0x78, 0xd0, 0x17,
-	0x9e, 0x29, 0x32, 0x07, 0x03, 0xbe, 0x43, 0x07, 0xa4, 0x27, 0xf0, 0x96, 0xab, 0x1a, 0x38, 0xba,
-	0xc1, 0x72, 0xf7, 0x42, 0xf9, 0xd7, 0xb9, 0x25, 0xf6, 0x13, 0x32, 0xeb, 0x5c, 0xf9, 0x21, 0xc4,
-	0xba, 0x57, 0x7e, 0x49, 0x56, 0xfd, 0x10, 0x42, 0xb6, 0x37, 0xf1, 0x79, 0x08, 0xee, 0x18, 0x3a,
-	0xe9, 0x58, 0x10, 0x6a, 0xb3, 0x0f, 0xd0, 0x89, 0x82, 0x86, 0xdf, 0x83, 0xb0, 0xd9, 0x2a, 0xe9,
-	0xc4, 0x6a, 0x3f, 0x4c, 0x1c, 0x42, 0x21, 0x3e, 0x55, 0xd0, 0xf0, 0x14, 0x8c, 0xab, 0xa6, 0x59,
-	0xad, 0xe8, 0xc5, 0x46, 0xab, 0x54, 0xab, 0x96, 0x8b, 0xd5, 0x06, 0x8b, 0xe3, 0x90, 0x32, 0xc6,
-	0xc7, 0x57, 0xd9, 0x70, 0xa1, 0x21, 0x7d, 0x36, 0x04, 0x63, 0x2b, 0x7c, 0x67, 0x29, 0x87, 0x6c,
-	0x31, 0x87, 0x57, 0x21, 0xc0, 0xf7, 0x5a, 0x3c, 0x67, 0x32, 0x9e, 0xb1, 0xe0, 0x56, 0x16, 0x9f,
-	0xe2, 0x05, 0x29, 0x70, 0x62, 0x5f, 0x22, 0x08, 0xf0, 0x09, 0xfc, 0x31, 0x04, 0xf8, 0xb3, 0x52,
-	0x80, 0x7b, 0xbf, 0x79, 0xb8, 0xa8, 0x00, 0xe5, 0x0f, 0xd4, 0x6c, 0x31, 0xa7, 0x08, 0x08, 0xbc,
-	0x08, 0xe1, 0x26, 0x31, 0x8d, 0x56, 0xb3, 0xcc, 0x5c, 0x8b, 0x0e, 0xcd, 0x6a, 0x8a, 0x2d, 0xad,
-	0x74, 0x14, 0xa5, 0xcf, 0x11, 0x40, 0xe7, 0xf1, 0x8b, 0xa3, 0x10, 0xdc, 0x22, 0x4d, 0x93, 0xd6,
-	0x15, 0x7c, 0x33, 0xed, 0x4f, 0x7c, 0x1f, 0xc6, 0x05, 0x16, 0x3b, 0x2b, 0xc5, 0x6c, 0x31, 0x27,
-	0x56, 0x9d, 0x1e, 0xc0, 0x45, 0xb7, 0x5f, 0x53, 0x4e, 0xd6, 0x1d, 0x23, 0xb9, 0xfc, 0x18, 0x9c,
-	0x70, 0xe2, 0x66, 0xfe, 0x7b, 0x0a, 0xc6, 0x44, 0xa8, 0x89, 0x37, 0x00, 0xfe, 0x1c, 0xc1, 0xf0,
-	0x2d, 0x62, 0x61, 0xd9, 0x73, 0xa1, 0xae, 0xa6, 0x73, 0xcc, 0x57, 0x8b, 0x55, 0x4a, 0x3f, 0xfb,
-	0xc7, 0xbf, 0xbe, 0x18, 0x9a, 0xc6, 0x97, 0x92, 0x75, 0x55, 0x57, 0x2b, 0x44, 0x4b, 0x74, 0xf7,
-	0xd8, 0xcd, 0xe4, 0xa7, 0x9d, 0x30, 0x7f, 0x8a, 0x7f, 0x8c, 0x60, 0x84, 0x5e, 0x7d, 0x38, 0xe5,
-	0xf7, 0xdd, 0x66, 0x9f, 0xd5, 0x58, 0x7a, 0x00, 0x0d, 0x7e, 0x97, 0x4a, 0x17, 0x18, 0xc1, 0x73,
-	0xf8, 0x8c, 0x17, 0x41, 0xfc, 0x4b, 0x04, 0x01, 0xde, 0xb3, 0xc2, 0xe9, 0x81, 0xbb, 0xa9, 0xb1,
-	0xc3, 0x53, 0xbc, 0xf4, 0xf1, 0xee, 0x7e, 0x7c, 0xb2, 0x5f, 0x5f, 0x2c, 0x28, 0x06, 0x18, 0xd5,
-	0xf3, 0x92, 0x27, 0xd5, 0x39, 0x14, 0xc7, 0x7f, 0x40, 0x10, 0xe0, 0xbd, 0x95, 0x43, 0xd8, 0xf6,
-	0x6a, 0x39, 0xf9, 0x61, 0xfb, 0x80, 0xb3, 0xed, 0xdd, 0xbf, 0x71, 0xb1, 0x95, 0x33, 0xfe, 0x77,
-	0x9e, 0x52, 0xff, 0x0b, 0x82, 0x00, 0xbf, 0x11, 0x0f, 0xa1, 0xde, 0xab, 0x07, 0xe4, 0x87, 0x7a,
-	0x79, 0x77, 0x3f, 0x2e, 0xf7, 0xeb, 0xfe, 0x9c, 0x3a, 0xf8, 0x20, 0x5f, 0xaa, 0x37, 0xac, 0x6d,
-	0x1e, 0xc2, 0xf1, 0x01, 0x42, 0xf8, 0xb7, 0x08, 0x46, 0x59, 0x8f, 0xe7, 0x90, 0x18, 0xee, 0xd1,
-	0x4b, 0xf2, 0x63, 0xc3, 0xfd, 0xdd, 0xfd, 0xf8, 0x3b, 0x7d, 0xba, 0x48, 0x2e, 0xef, 0x27, 0xa4,
-	0xe9, 0x3e, 0x7f, 0xd7, 0x3a, 0xe0, 0x79, 0x93, 0x91, 0xfd, 0x35, 0x82, 0x91, 0x35, 0xcb, 0x68,
-	0xe0, 0xe4, 0x21, 0xac, 0x0f, 0xb6, 0xa1, 0xfc, 0x90, 0x5e, 0xdf, 0xdd, 0x8f, 0x9f, 0xeb, 0xdd,
-	0x80, 0x72, 0x71, 0xfe, 0xb6, 0x14, 0xf7, 0xcb, 0xd9, 0x68, 0xe0, 0x3f, 0x21, 0x08, 0xf0, 0xe7,
-	0xdf, 0x21, 0xf1, 0xd2, 0xab, 0x85, 0xe5, 0x87, 0xf6, 0xf7, 0x78, 0xa8, 0xf7, 0x6e, 0x5e, 0xb9,
-	0x88, 0x67, 0xa4, 0x94, 0xff, 0x50, 0xe7, 0x4f, 0x55, 0xfc, 0x3b, 0x04, 0x41, 0xd1, 0x47, 0xc0,
-	0x99, 0xc1, 0x7b, 0x47, 0x7e, 0xfd, 0x7e, 0xbe, 0x6f, 0xb7, 0xc2, 0x65, 0xc1, 0x25, 0xe9, 0x82,
-	0xe7, 0xd5, 0xd2, 0xe4, 0x18, 0xf4, 0x9c, 0xfe, 0x0a, 0x41, 0x88, 0xde, 0xa7, 0xb4, 0x0a, 0xc4,
-	0xd9, 0x23, 0x14, 0xd8, 0xb1, 0xcb, 0x83, 0x29, 0x89, 0xeb, 0x3a, 0xc7, 0x88, 0xa6, 0xb0, 0xec,
-	0xdf, 0xd5, 0xac, 0xc8, 0xfc, 0x2b, 0x82, 0x31, 0x8a, 0xd9, 0x29, 0xca, 0xf0, 0xac, 0x5f, 0x02,
-	0x5d, 0x95, 0x66, 0x6c, 0xee, 0x28, 0xaa, 0xc2, 0x82, 0x6b, 0xcc, 0x82, 0x1c, 0xbe, 0xec, 0xdb,
-	0x82, 0xa4, 0xa3, 0xfc, 0xfb, 0x23, 0x82, 0x08, 0xc5, 0x17, 0x15, 0x13, 0xce, 0xf9, 0x65, 0xe2,
-	0x2e, 0x00, 0x63, 0x33, 0x03, 0xeb, 0x09, 0xfa, 0xb3, 0x8c, 0x7e, 0x16, 0xa7, 0xfd, 0xd3, 0xb7,
-	0xcb, 0xb2, 0xdf, 0x20, 0x08, 0x53, 0x64, 0xf6, 0xc8, 0xc5, 0xbe, 0xf7, 0xdf, 0xf9, 0x1a, 0x8f,
-	0x5d, 0x19, 0x50, 0x4b, 0xb0, 0x9e, 0x61, 0xac, 0xd3, 0x38, 0xe9, 0x9f, 0x35, 0xaf, 0x98, 0xfe,
-	0x89, 0x20, 0x34, 0xaf, 0x69, 0x9c, 0xb2, 0x77, 0x9c, 0xf7, 0x2e, 0x98, 0xfc, 0x1c, 0xd1, 0x9d,
-	0xdd, 0xfd, 0x78, 0xaa, 0x7f, 0x71, 0xe3, 0x91, 0x95, 0x6e, 0x48, 0x57, 0x07, 0xb4, 0x68, 0xae,
-	0xa4, 0x5a, 0xe5, 0xc7, 0xfc, 0x9d, 0x41, 0x0f, 0xf2, 0xbf, 0x11, 0x44, 0x78, 0x32, 0xe4, 0x36,
-	0xe6, 0xfc, 0x67, 0xdd, 0x41, 0xcd, 0x7c, 0xba, 0xbb, 0x1f, 0xcf, 0x7a, 0x16, 0x3c, 0xaf, 0xc0,
-	0x52, 0xbe, 0xda, 0x1c, 0x8a, 0xe7, 0x0b, 0x0f, 0x6f, 0x55, 0xaa, 0xd6, 0xe3, 0x56, 0x49, 0x2e,
-	0x1b, 0xf5, 0x24, 0x67, 0x9b, 0xe0, 0xff, 0x7c, 0x51, 0x31, 0x12, 0x15, 0xa2, 0xb3, 0x55, 0x93,
-	0x1e, 0xff, 0x95, 0x71, 0x55, 0xfc, 0x2c, 0x05, 0x98, 0x68, 0xf6, 0xff, 0x01, 0x00, 0x00, 0xff,
-	0xff, 0x77, 0xed, 0x33, 0x00, 0x80, 0x23, 0x00, 0x00,
+var fileDescriptor_cluster_service_86bdc30dc8ad0f00 = []byte{
+	// 2756 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x5b, 0x4d, 0x6c, 0x1b, 0xc7,
+	0xf5, 0xcf, 0xea, 0x83, 0x22, 0x1f, 0x6d, 0x45, 0x19, 0xcb, 0x0e, 0xc3, 0x58, 0x89, 0xbc, 0x49,
+	0x1c, 0x99, 0x86, 0xf8, 0x69, 0xd1, 0x96, 0x12, 0xc5, 0xb6, 0x3e, 0xec, 0x28, 0x91, 0x6c, 0x63,
+	0x25, 0x3b, 0xfe, 0x3b, 0x7f, 0x97, 0x58, 0x72, 0x87, 0x34, 0x21, 0x72, 0x97, 0xe5, 0x2e, 0x65,
+	0x4b, 0xae, 0xd1, 0xc2, 0x29, 0x50, 0xc0, 0x40, 0x0b, 0xb4, 0x41, 0x5b, 0xb4, 0x01, 0xda, 0x7b,
+	0x8b, 0x1e, 0x2a, 0xf4, 0x23, 0x05, 0x72, 0x6a, 0x51, 0x58, 0x40, 0x2f, 0x85, 0x0a, 0x14, 0x3d,
+	0xf5, 0x54, 0xb4, 0xbd, 0xf4, 0x12, 0xa0, 0x97, 0x9e, 0x8a, 0xf9, 0x58, 0x72, 0x97, 0x5c, 0x2d,
+	0x77, 0x45, 0x09, 0x31, 0xd0, 0x1b, 0x77, 0xe6, 0xbd, 0x37, 0xbf, 0xf7, 0xe6, 0x7d, 0xcc, 0xbc,
+	0x91, 0x20, 0xb5, 0x29, 0xab, 0x0a, 0x7e, 0x90, 0x28, 0x54, 0xb4, 0x86, 0x92, 0xa8, 0x2a, 0xf9,
+	0x44, 0x55, 0x53, 0x4b, 0x9a, 0x92, 0x4f, 0x6c, 0xa4, 0x12, 0x85, 0x4a, 0x43, 0x37, 0x70, 0x3d,
+	0xa7, 0xe3, 0xfa, 0x46, 0xb9, 0x80, 0xe3, 0xb5, 0xba, 0x66, 0x68, 0xe8, 0x65, 0xc6, 0x12, 0xa7,
+	0x2c, 0xf1, 0xaa, 0x92, 0x8f, 0x73, 0x96, 0xf8, 0x46, 0x2a, 0x7a, 0xb2, 0xa4, 0x69, 0xa5, 0x0a,
+	0x4e, 0xc8, 0xb5, 0x72, 0x42, 0x56, 0x55, 0xcd, 0x90, 0x8d, 0xb2, 0xa6, 0xea, 0x8c, 0x35, 0x3a,
+	0xce, 0x67, 0xe9, 0x57, 0xbe, 0x51, 0x4c, 0x14, 0xcb, 0xb8, 0xa2, 0xe4, 0xaa, 0xb2, 0xbe, 0xce,
+	0x29, 0x5e, 0x6d, 0xa7, 0x30, 0xca, 0x55, 0xac, 0x1b, 0x72, 0xb5, 0xc6, 0x09, 0x5e, 0xe6, 0x04,
+	0xc6, 0x66, 0x0d, 0xd3, 0x49, 0xad, 0xa8, 0xc8, 0x9b, 0x7c, 0x32, 0xca, 0xb5, 0x21, 0xab, 0x6b,
+	0x35, 0x5c, 0xa7, 0x8b, 0xf3, 0xb9, 0xd3, 0x36, 0x4d, 0x9b, 0xb3, 0x1d, 0x74, 0x63, 0x36, 0xba,
+	0x0d, 0xb9, 0x52, 0x56, 0xac, 0xd3, 0x13, 0x6e, 0x06, 0xcb, 0xcb, 0x85, 0xf5, 0x86, 0x89, 0xf4,
+	0x8c, 0x07, 0xd3, 0x72, 0xd2, 0x98, 0x1b, 0xa9, 0x22, 0x1b, 0x72, 0x5e, 0xd6, 0xb1, 0xa3, 0x1e,
+	0x6d, 0xb4, 0x0d, 0xbd, 0x29, 0x33, 0xe3, 0xba, 0xbc, 0xa6, 0x16, 0xcb, 0x25, 0x73, 0x24, 0x93,
+	0xcb, 0x32, 0x26, 0xf1, 0x12, 0xbc, 0x70, 0x15, 0x1b, 0xf3, 0x0c, 0x9c, 0x84, 0xbf, 0xdc, 0xc0,
+	0xba, 0x81, 0xce, 0x02, 0x98, 0x9e, 0x50, 0x56, 0x22, 0xc2, 0xb8, 0x30, 0x11, 0x9a, 0x3b, 0xf2,
+	0xcf, 0xa7, 0x29, 0xe1, 0xc9, 0x4e, 0x6a, 0xe0, 0xed, 0xd9, 0xa9, 0xa4, 0x14, 0xe2, 0xf3, 0x4b,
+	0x8a, 0xf8, 0x6b, 0x01, 0x8e, 0x2d, 0x97, 0x75, 0x53, 0x86, 0x6e, 0x0a, 0x39, 0x03, 0xa1, 0xa2,
+	0x56, 0x51, 0xf6, 0x96, 0x11, 0x64, 0xd3, 0x4b, 0x0a, 0x7a, 0x13, 0x42, 0x35, 0xb9, 0x84, 0x73,
+	0x7a, 0x79, 0x0b, 0x47, 0xfa, 0xc6, 0x85, 0x89, 0xfe, 0x39, 0xf8, 0xcf, 0xd3, 0x54, 0xe0, 0xed,
+	0xd9, 0x54, 0x32, 0x99, 0x94, 0x82, 0x64, 0x72, 0xb5, 0xbc, 0x85, 0xd1, 0x04, 0x00, 0x25, 0x34,
+	0xb4, 0x75, 0xac, 0x46, 0xfa, 0xa9, 0xd0, 0xd0, 0x93, 0x9d, 0xd4, 0x20, 0xa5, 0x94, 0xa8, 0x94,
+	0x35, 0x32, 0x87, 0x44, 0x08, 0x14, 0xcb, 0x15, 0x03, 0xd7, 0x23, 0x03, 0x94, 0x0a, 0x9e, 0xec,
+	0x34, 0xe5, 0xf1, 0x19, 0xf1, 0x6b, 0x02, 0x8c, 0xda, 0x91, 0xeb, 0x35, 0x4d, 0xd5, 0x31, 0xba,
+	0x04, 0x41, 0xae, 0x9f, 0x1e, 0x11, 0xc6, 0xfb, 0x27, 0xc2, 0xe9, 0xd7, 0xe3, 0x2e, 0x31, 0x10,
+	0x37, 0xcd, 0xd7, 0xe4, 0x42, 0xa7, 0xe1, 0x79, 0x15, 0x3f, 0x30, 0x72, 0x16, 0xb4, 0x44, 0xaf,
+	0x90, 0x74, 0x94, 0x0c, 0xdf, 0x30, 0x61, 0x8a, 0xbf, 0x0d, 0xc0, 0xe8, 0x7c, 0x1d, 0xcb, 0x06,
+	0x6e, 0xdb, 0x02, 0x1f, 0xd6, 0x4b, 0xc1, 0x80, 0x2a, 0x57, 0x99, 0xe1, 0x42, 0x73, 0x63, 0x84,
+	0xea, 0xf3, 0xa7, 0xa9, 0xa3, 0x1f, 0xca, 0x93, 0x5b, 0x97, 0x27, 0xef, 0x24, 0x27, 0xa7, 0x73,
+	0x77, 0x63, 0x8c, 0x2d, 0x9b, 0x91, 0x28, 0x29, 0x3a, 0x0b, 0x61, 0x05, 0xeb, 0x85, 0x7a, 0xb9,
+	0x46, 0x1c, 0xdd, 0x6e, 0xc8, 0xf4, 0x54, 0x56, 0xb2, 0xce, 0xa2, 0xef, 0x09, 0x10, 0xa8, 0xc8,
+	0x79, 0x5c, 0xd1, 0x23, 0x03, 0xd4, 0x18, 0xb3, 0xee, 0xc6, 0x70, 0x50, 0x27, 0xbe, 0x4c, 0xf9,
+	0x17, 0x55, 0xa3, 0xbe, 0x39, 0x77, 0xf1, 0xf3, 0xa7, 0xa9, 0xf0, 0x87, 0x93, 0xb9, 0xe4, 0xe4,
+	0xb4, 0x3c, 0xb9, 0x75, 0x37, 0xf6, 0x98, 0x61, 0x3b, 0x67, 0x62, 0xdc, 0xde, 0x49, 0x05, 0xa2,
+	0xe6, 0x2f, 0x84, 0x46, 0x88, 0x22, 0x77, 0x2d, 0xf4, 0x12, 0x47, 0x83, 0x6e, 0x43, 0x18, 0xab,
+	0x1b, 0xe5, 0xba, 0xa6, 0x56, 0xb1, 0x6a, 0x44, 0x06, 0xc7, 0x85, 0x89, 0xe1, 0x74, 0xd2, 0xcb,
+	0x4e, 0xc5, 0x17, 0x5b, 0x7c, 0x73, 0x03, 0xc4, 0x62, 0x92, 0x55, 0x14, 0xba, 0x06, 0x61, 0x16,
+	0x30, 0x39, 0xbd, 0x86, 0x0b, 0x91, 0xc0, 0xb8, 0x30, 0x11, 0x4e, 0xbf, 0xe9, 0x2e, 0x99, 0xd2,
+	0xaf, 0xd6, 0x70, 0x81, 0x0b, 0x84, 0x42, 0x73, 0x04, 0xdd, 0x86, 0x61, 0x33, 0xa8, 0xa9, 0x44,
+	0x3d, 0x32, 0x44, 0x2d, 0x79, 0xc6, 0x55, 0xe4, 0x02, 0x67, 0xa1, 0x42, 0x03, 0x8f, 0x77, 0x52,
+	0x7d, 0xef, 0x24, 0xa5, 0xa3, 0x8a, 0x65, 0x54, 0x47, 0xcb, 0x00, 0x24, 0x05, 0x70, 0xa9, 0x41,
+	0x2a, 0xf5, 0x0d, 0x57, 0xa9, 0x37, 0x75, 0x5c, 0xb7, 0x49, 0x0c, 0x35, 0xf8, 0x08, 0x95, 0x76,
+	0x4f, 0xd3, 0x0d, 0x2e, 0x2d, 0xe4, 0x41, 0xda, 0xbb, 0x9a, 0x6e, 0xd8, 0xa5, 0xdd, 0xe3, 0x23,
+	0x3a, 0x49, 0x23, 0x2a, 0x36, 0xee, 0x6b, 0xf5, 0x75, 0xe2, 0xc4, 0xe0, 0x94, 0x46, 0xf8, 0xfc,
+	0x92, 0x12, 0x9d, 0x86, 0xb0, 0xc5, 0x49, 0xd0, 0x08, 0xf4, 0xaf, 0xe3, 0x4d, 0xe6, 0xf9, 0x12,
+	0xf9, 0x89, 0x46, 0x61, 0x70, 0x43, 0xae, 0x34, 0xb8, 0x9f, 0x4b, 0xec, 0x63, 0xa6, 0xef, 0x82,
+	0x20, 0x66, 0xe1, 0xb8, 0xcd, 0xe9, 0x56, 0xb0, 0x21, 0x13, 0x2b, 0xa1, 0xb1, 0xce, 0x3c, 0x66,
+	0xcd, 0x5c, 0x7f, 0xe8, 0x87, 0xd1, 0x9b, 0x35, 0xa5, 0x33, 0xf8, 0xfc, 0xe4, 0x3f, 0xf4, 0x16,
+	0x84, 0x1b, 0x54, 0x08, 0xad, 0x6a, 0x14, 0x5d, 0x38, 0x1d, 0x8d, 0xb3, 0xaa, 0x15, 0x37, 0xcb,
+	0x5a, 0xfc, 0x0a, 0x29, 0x7c, 0x2b, 0xb2, 0xbe, 0x2e, 0x01, 0x23, 0x27, 0xbf, 0x0f, 0x35, 0x10,
+	0x9d, 0x54, 0x3b, 0x9c, 0x40, 0x7c, 0xd7, 0x1e, 0x2e, 0x83, 0xbe, 0xc2, 0xc5, 0x1a, 0x28, 0x3d,
+	0x7a, 0x81, 0x4d, 0x63, 0xaf, 0x5e, 0x30, 0x0f, 0xa3, 0x0b, 0xb8, 0x82, 0x7b, 0x72, 0x02, 0xb2,
+	0xb8, 0x4d, 0x88, 0xd7, 0xc5, 0xe7, 0xe0, 0xd8, 0xaa, 0x21, 0xd7, 0x7b, 0x2a, 0xc0, 0x53, 0x30,
+	0x6a, 0x95, 0xe1, 0x75, 0xe9, 0xcb, 0x80, 0x56, 0x0d, 0xad, 0xd6, 0xcb, 0xca, 0xe7, 0x08, 0xfa,
+	0xa6, 0x08, 0xaf, 0x0b, 0x7f, 0x24, 0x00, 0x5a, 0xd1, 0x36, 0x7a, 0x0a, 0xba, 0x4b, 0x70, 0x5c,
+	0xc1, 0xba, 0x51, 0x56, 0xe9, 0x49, 0x2d, 0xd7, 0x2a, 0x95, 0x7d, 0x0e, 0x7c, 0xc7, 0x2c, 0xa4,
+	0x57, 0x78, 0xd5, 0x14, 0xbf, 0x23, 0xc0, 0x31, 0x0b, 0x0a, 0x8f, 0xe0, 0xd1, 0x04, 0x8c, 0xe8,
+	0x5a, 0xa3, 0x5e, 0xc0, 0xed, 0x6b, 0x4a, 0xc3, 0x6c, 0xdc, 0x5c, 0x00, 0xa5, 0xf7, 0x82, 0x48,
+	0x83, 0xdc, 0x19, 0xd4, 0x3c, 0x8c, 0xce, 0xd1, 0x13, 0x65, 0x8f, 0xbe, 0x68, 0x13, 0xe2, 0x75,
+	0x5f, 0xbe, 0x3b, 0x08, 0xc7, 0x25, 0xac, 0x1b, 0x5a, 0xbd, 0x7d, 0x6b, 0x4e, 0x41, 0x88, 0x1d,
+	0x74, 0x5b, 0xab, 0xb3, 0x1a, 0x17, 0x64, 0xc3, 0x54, 0x5b, 0xeb, 0x21, 0xe4, 0x15, 0x7e, 0x08,
+	0x19, 0xb6, 0x1c, 0x42, 0x26, 0x7b, 0x3b, 0x85, 0x7c, 0xbf, 0x3d, 0xf9, 0xbd, 0xe3, 0x9a, 0x5f,
+	0x1c, 0x15, 0xf9, 0x5f, 0x3f, 0x86, 0xd8, 0xcb, 0xfb, 0xd0, 0x81, 0x96, 0xf7, 0xe0, 0xa1, 0x95,
+	0xf7, 0x35, 0x38, 0x61, 0xdf, 0x4d, 0xaf, 0xb1, 0xfa, 0xb2, 0xd5, 0x6d, 0x99, 0xd8, 0xa6, 0xc3,
+	0x8a, 0x7f, 0x14, 0x20, 0xb4, 0xac, 0x95, 0x24, 0x5c, 0xd0, 0xea, 0x0a, 0xba, 0x00, 0xa1, 0xe6,
+	0xbd, 0x93, 0x0a, 0x72, 0x2a, 0xe1, 0x6b, 0x26, 0x85, 0xd4, 0x22, 0x46, 0x2b, 0x30, 0x54, 0xc5,
+	0xba, 0x2e, 0x97, 0x08, 0x72, 0x62, 0xd0, 0x8c, 0xab, 0x41, 0x9b, 0x4b, 0xc6, 0x57, 0x18, 0x17,
+	0xb5, 0x87, 0x64, 0xca, 0x88, 0xce, 0xc0, 0x11, 0xeb, 0x84, 0x2f, 0x43, 0xed, 0xf4, 0xc3, 0x09,
+	0xcb, 0x7d, 0x66, 0x59, 0x2b, 0xe9, 0xfb, 0x4a, 0xae, 0xaf, 0xc1, 0xd1, 0x82, 0x56, 0x69, 0x54,
+	0xd5, 0x1c, 0xbf, 0x42, 0x11, 0xc5, 0x42, 0xd2, 0x11, 0x36, 0x78, 0x85, 0x8e, 0xa1, 0x3c, 0x1c,
+	0xe1, 0x5d, 0x82, 0x1c, 0xb9, 0x99, 0xd3, 0xe8, 0x1d, 0x4e, 0x5f, 0x74, 0x57, 0xde, 0x11, 0x5c,
+	0x7c, 0x95, 0xc9, 0x59, 0xdb, 0xac, 0x61, 0x29, 0xac, 0xb7, 0x3e, 0xd0, 0x79, 0x08, 0x15, 0xeb,
+	0x5a, 0x35, 0x47, 0xac, 0x4d, 0xef, 0x71, 0xee, 0xbb, 0x12, 0x24, 0xc4, 0xe4, 0x13, 0x65, 0x60,
+	0xc8, 0xd0, 0x18, 0xdb, 0x60, 0x57, 0xb6, 0x80, 0xa1, 0x51, 0x26, 0xdb, 0x2d, 0x34, 0xe0, 0xf9,
+	0x16, 0x3a, 0xb4, 0xf7, 0x2d, 0x54, 0x3c, 0x0f, 0x61, 0x8b, 0x72, 0xe8, 0x24, 0x44, 0x56, 0x17,
+	0xa5, 0x5b, 0x4b, 0xf3, 0x8b, 0xb9, 0xb5, 0xff, 0xbb, 0xb1, 0x98, 0xbb, 0x79, 0x6d, 0xf5, 0xc6,
+	0xe2, 0xfc, 0xd2, 0x95, 0xa5, 0xc5, 0x85, 0x91, 0xe7, 0x10, 0x40, 0x60, 0xe5, 0xfa, 0xb5, 0xab,
+	0xd7, 0x17, 0x46, 0x04, 0xf1, 0x11, 0xbc, 0xd8, 0x61, 0x2c, 0x7e, 0x39, 0x9d, 0x81, 0x81, 0x8a,
+	0x56, 0x32, 0x2f, 0xa6, 0xa7, 0xbd, 0x79, 0x9b, 0x44, 0x79, 0x3c, 0x5f, 0x4b, 0x7f, 0x24, 0xc0,
+	0x49, 0xcb, 0xfa, 0xd7, 0xcd, 0x8e, 0xc9, 0xfe, 0xfc, 0xe9, 0xe0, 0xaf, 0xf7, 0xe2, 0x13, 0x01,
+	0xc6, 0xf6, 0x00, 0xc8, 0xcd, 0x74, 0x19, 0xa0, 0xd9, 0xe8, 0x31, 0x8d, 0x75, 0xca, 0x6e, 0xac,
+	0x56, 0x23, 0xa8, 0xc9, 0x2f, 0x59, 0x98, 0x3c, 0x5b, 0xeb, 0x13, 0x01, 0x5e, 0xb2, 0x80, 0x61,
+	0xc5, 0xf7, 0x99, 0x31, 0xd5, 0x47, 0x02, 0x44, 0x9d, 0xd0, 0x71, 0x3b, 0xcd, 0xc2, 0x10, 0xcb,
+	0x89, 0xa6, 0x91, 0x5e, 0x73, 0xf5, 0x28, 0xc6, 0x2e, 0x99, 0x3c, 0x9e, 0x6d, 0xf4, 0x03, 0xc1,
+	0xe6, 0xd1, 0xa4, 0xae, 0x3c, 0x33, 0x16, 0x7a, 0x08, 0x91, 0x4e, 0x68, 0xdc, 0x3c, 0xe7, 0x61,
+	0x90, 0x54, 0xbc, 0x3d, 0x3c, 0xc8, 0xa1, 0x5a, 0x4a, 0x8c, 0xde, 0xb3, 0x61, 0x3e, 0x16, 0xe0,
+	0xc4, 0x65, 0x45, 0xe9, 0xd9, 0x2e, 0xf6, 0xda, 0xde, 0xd7, 0x5b, 0x6d, 0x17, 0x3f, 0x80, 0x17,
+	0xdb, 0x40, 0x79, 0x2d, 0xba, 0x63, 0x1c, 0x07, 0x39, 0xe1, 0xe9, 0xbc, 0x72, 0x50, 0xc1, 0xd7,
+	0xc8, 0x80, 0xf8, 0x00, 0x5e, 0xb2, 0x5d, 0x94, 0xf6, 0xaf, 0x70, 0xbc, 0x73, 0xa1, 0xb9, 0xe7,
+	0x99, 0x26, 0xe6, 0x11, 0x32, 0x63, 0x5d, 0xf9, 0x0e, 0x44, 0x3b, 0x57, 0x3e, 0x20, 0xad, 0xbe,
+	0x39, 0x00, 0x27, 0x17, 0x55, 0x39, 0x5f, 0x31, 0x85, 0xaf, 0xde, 0x93, 0xeb, 0x4a, 0x59, 0x2d,
+	0xed, 0x4b, 0x33, 0x05, 0x82, 0x74, 0x9b, 0x0a, 0xc5, 0x12, 0x6f, 0x27, 0xcc, 0xb9, 0x6e, 0xa4,
+	0xdb, 0xca, 0xf1, 0x15, 0x42, 0x37, 0x5f, 0x2c, 0x99, 0x27, 0x76, 0x53, 0x32, 0xfa, 0x12, 0x04,
+	0xe8, 0x6f, 0x9d, 0xc6, 0x46, 0x38, 0x7d, 0xa9, 0xc7, 0x35, 0x74, 0xbe, 0x02, 0x97, 0xda, 0xe6,
+	0x90, 0x03, 0xbd, 0x39, 0x64, 0xf4, 0x16, 0x04, 0x4d, 0x4d, 0xd0, 0x7b, 0x10, 0xaa, 0x63, 0x76,
+	0xdb, 0xd2, 0xf9, 0x61, 0xed, 0x74, 0xb7, 0xcb, 0x00, 0xa3, 0xe6, 0x10, 0x5b, 0xec, 0xd1, 0x35,
+	0x08, 0x30, 0xf4, 0x07, 0x29, 0x55, 0x7c, 0x07, 0xc6, 0x1c, 0x0d, 0xe6, 0xf5, 0x2a, 0xf6, 0x75,
+	0x01, 0x4e, 0xb4, 0xda, 0xf2, 0x94, 0x7b, 0x5f, 0x9e, 0x34, 0x0b, 0xa0, 0x13, 0xe6, 0x9c, 0x8f,
+	0xbb, 0x59, 0x88, 0x72, 0x10, 0xbf, 0x16, 0x7f, 0x28, 0xd8, 0x32, 0x23, 0xc5, 0xf1, 0xcc, 0x64,
+	0xed, 0xaf, 0xda, 0x8a, 0xae, 0x89, 0xad, 0x79, 0x48, 0x0a, 0x50, 0x35, 0xcc, 0xbc, 0x2d, 0xba,
+	0xee, 0x24, 0x33, 0x30, 0xe7, 0xf0, 0x9c, 0xb9, 0x77, 0x6d, 0x99, 0xfb, 0x8b, 0xda, 0xa4, 0xb6,
+	0x38, 0xeb, 0x3f, 0xc8, 0xc4, 0x4f, 0x75, 0xf2, 0x91, 0x22, 0xdb, 0xd5, 0xb0, 0xfa, 0xd2, 0x37,
+	0x84, 0xb6, 0xcc, 0xff, 0x85, 0x79, 0x75, 0x7b, 0x21, 0x38, 0x48, 0x2d, 0xff, 0x2d, 0x40, 0xd0,
+	0x34, 0x2f, 0x3a, 0x05, 0x43, 0x5b, 0x9a, 0x8a, 0x5b, 0x1a, 0x05, 0x9b, 0xda, 0x04, 0xc8, 0xc4,
+	0x92, 0x82, 0xde, 0x80, 0x90, 0xde, 0xc8, 0xab, 0xd8, 0x68, 0xf5, 0xae, 0x5a, 0x44, 0x41, 0x36,
+	0xc5, 0xba, 0x4e, 0xb2, 0xae, 0x97, 0x4b, 0x6a, 0xae, 0xd6, 0xc8, 0x57, 0xca, 0x85, 0x5c, 0xb9,
+	0x46, 0x63, 0x23, 0x28, 0x0d, 0xb3, 0xf1, 0x1b, 0x74, 0x78, 0xa9, 0x46, 0x6e, 0x07, 0xf4, 0x3a,
+	0x36, 0x40, 0xaf, 0x63, 0xa7, 0xbb, 0xfa, 0x41, 0x9c, 0xde, 0xba, 0x28, 0x0f, 0x9a, 0xb6, 0xe9,
+	0x36, 0x48, 0xd1, 0x44, 0xbd, 0xd9, 0xf4, 0x2f, 0x83, 0x30, 0xbc, 0xc2, 0x24, 0x13, 0xd5, 0x33,
+	0xb9, 0x2c, 0x7a, 0x8f, 0xd7, 0x17, 0x85, 0x27, 0xd3, 0xb4, 0x2b, 0x16, 0x3b, 0x33, 0xff, 0xe4,
+	0xb5, 0x44, 0x41, 0x37, 0x3a, 0x2a, 0xe2, 0x39, 0xdf, 0xd2, 0xe6, 0x8b, 0x25, 0x4b, 0xf5, 0x7b,
+	0xaf, 0xad, 0xfa, 0xf9, 0x47, 0xa7, 0x9b, 0x95, 0x2e, 0xfa, 0x89, 0xc0, 0x8b, 0x88, 0x82, 0xde,
+	0x87, 0x00, 0xeb, 0xb7, 0x70, 0xa5, 0xdd, 0x9b, 0x01, 0x8c, 0x94, 0x4b, 0x67, 0x9d, 0x9b, 0x4c,
+	0x2e, 0x2b, 0x71, 0x11, 0x68, 0xc1, 0x5a, 0x91, 0xfa, 0xfc, 0x54, 0x24, 0x6b, 0x85, 0xfb, 0xb1,
+	0x60, 0x29, 0x9d, 0x2b, 0x6d, 0xf8, 0xa6, 0x3c, 0xe3, 0x9b, 0x2f, 0x96, 0x0e, 0x0b, 0x61, 0xd3,
+	0x7e, 0x7a, 0x0f, 0xf6, 0xd3, 0x0f, 0x09, 0x9d, 0xf8, 0x67, 0x01, 0xa0, 0xd5, 0x55, 0x43, 0x11,
+	0x18, 0xda, 0xc0, 0x75, 0xbd, 0xac, 0xa9, 0x3c, 0x39, 0x98, 0x9f, 0xe8, 0x16, 0x8c, 0x70, 0x59,
+	0x34, 0x17, 0xe7, 0x32, 0xb9, 0x2c, 0x5f, 0xf5, 0xac, 0x0f, 0xe7, 0x7a, 0xf7, 0x39, 0xe9, 0x68,
+	0xd5, 0x32, 0x92, 0x45, 0x57, 0xe0, 0x18, 0x6f, 0x63, 0xdd, 0x2f, 0xab, 0x8a, 0x76, 0x3f, 0xa7,
+	0x1b, 0x72, 0xdd, 0xe0, 0x7e, 0x7b, 0xc2, 0x6c, 0x6c, 0x90, 0x08, 0xa6, 0x4d, 0x8d, 0xeb, 0xc5,
+	0x05, 0x79, 0x53, 0x7a, 0x81, 0xb1, 0x7c, 0x40, 0x39, 0xe8, 0xf3, 0xc0, 0xdc, 0x30, 0x1c, 0xb1,
+	0xe2, 0x4b, 0x7f, 0xf6, 0x2a, 0x0c, 0x9b, 0x29, 0x90, 0x35, 0x29, 0xd0, 0xb7, 0x04, 0xe8, 0xbf,
+	0x8a, 0x0d, 0x14, 0x77, 0x05, 0xdc, 0xf1, 0x07, 0x03, 0x51, 0x4f, 0xcf, 0xe3, 0x62, 0xea, 0xf1,
+	0x9f, 0xfe, 0xf6, 0x71, 0xdf, 0x59, 0x74, 0x26, 0x51, 0x95, 0x55, 0xb9, 0x84, 0x95, 0xc9, 0xce,
+	0xbf, 0x8f, 0xd0, 0x13, 0x0f, 0x5b, 0xe9, 0xf7, 0x11, 0xfa, 0xb6, 0x00, 0x03, 0xa4, 0xca, 0xa3,
+	0xa4, 0xd7, 0xc6, 0x92, 0x79, 0x3e, 0x89, 0xa6, 0x7c, 0x70, 0xb0, 0x53, 0x83, 0xf8, 0x3a, 0x05,
+	0xf8, 0x0a, 0x3a, 0xe9, 0x06, 0x10, 0xfd, 0x54, 0x80, 0x00, 0x7b, 0x6f, 0x44, 0x29, 0xdf, 0x2f,
+	0xe1, 0xd1, 0xee, 0x3d, 0x08, 0xf1, 0xfd, 0xed, 0xdd, 0xd8, 0xf8, 0x5e, 0x6f, 0x9a, 0x43, 0x7c,
+	0x80, 0x42, 0x3d, 0x25, 0xba, 0x42, 0x9d, 0x11, 0x62, 0xe8, 0x53, 0x01, 0x02, 0xec, 0x5d, 0xac,
+	0x0b, 0x5a, 0xa7, 0xe7, 0x42, 0x2f, 0x68, 0x6f, 0x33, 0xb4, 0xce, 0x6f, 0x6f, 0x36, 0xb4, 0xf1,
+	0xb4, 0xf7, 0x9d, 0x27, 0xd0, 0x7f, 0x27, 0x40, 0x80, 0x55, 0xea, 0x2e, 0xd0, 0x9d, 0xde, 0xef,
+	0xbc, 0x40, 0x2f, 0x6c, 0xef, 0xc6, 0xe2, 0x7b, 0xbd, 0xdc, 0x1d, 0x6f, 0xef, 0x18, 0x2e, 0x56,
+	0x6b, 0xc6, 0x26, 0x73, 0xe1, 0x98, 0x0f, 0x17, 0xfe, 0x54, 0x80, 0x41, 0x1a, 0x80, 0x5d, 0x7c,
+	0xd8, 0xe1, 0x1d, 0xd0, 0x8b, 0x0e, 0x77, 0xb6, 0x77, 0x63, 0xaf, 0xee, 0xf1, 0x02, 0x68, 0xb3,
+	0x7e, 0x4a, 0x4c, 0x78, 0xb7, 0x3e, 0x4d, 0x31, 0xe8, 0x17, 0x02, 0x0c, 0xac, 0x1a, 0x5a, 0x0d,
+	0x25, 0xba, 0x20, 0x6f, 0x7f, 0x46, 0xf4, 0xea, 0x37, 0xaf, 0x38, 0x3f, 0x20, 0xda, 0x70, 0x27,
+	0xc5, 0xb8, 0x1f, 0xdc, 0x5a, 0x8d, 0xc2, 0x5e, 0xd1, 0x36, 0x70, 0x17, 0xd8, 0x9d, 0x6f, 0x90,
+	0x3e, 0x60, 0x3b, 0x3d, 0x1d, 0xee, 0x1f, 0x76, 0x95, 0xa0, 0xfd, 0x4c, 0x80, 0x00, 0x6b, 0xaf,
+	0x75, 0x71, 0x77, 0xa7, 0x27, 0x42, 0x2f, 0xd0, 0xff, 0x9f, 0x45, 0xaa, 0xf3, 0xe3, 0xa0, 0x0d,
+	0x7c, 0x5a, 0x4c, 0x7a, 0x07, 0xcf, 0x2a, 0x0d, 0xfa, 0x95, 0x00, 0x43, 0xfc, 0x9d, 0x06, 0xa5,
+	0xfd, 0xbf, 0xcd, 0x79, 0x51, 0x60, 0x6d, 0x7b, 0x37, 0x76, 0x6a, 0xcf, 0xd7, 0x20, 0x9b, 0x06,
+	0x67, 0xc4, 0xd7, 0x5d, 0x33, 0x63, 0x9d, 0xc9, 0x20, 0x69, 0xe6, 0x67, 0x02, 0x04, 0x49, 0x39,
+	0x58, 0xd6, 0x4a, 0x3a, 0xca, 0xec, 0xe3, 0x01, 0x23, 0x7a, 0xce, 0x1f, 0x13, 0xaf, 0x36, 0x59,
+	0xe6, 0x27, 0xc8, 0x87, 0x9f, 0xd0, 0x26, 0xfe, 0xef, 0x05, 0x18, 0x26, 0x32, 0x5b, 0x4d, 0x6f,
+	0x34, 0xed, 0x15, 0x40, 0x47, 0x27, 0x3f, 0x3a, 0xb3, 0x1f, 0x56, 0xae, 0xc1, 0xdb, 0x54, 0x83,
+	0x2c, 0x3a, 0xe7, 0x59, 0x83, 0x84, 0xa5, 0xbd, 0xfe, 0x1b, 0x01, 0xc2, 0x44, 0x3e, 0xef, 0x48,
+	0xa3, 0xac, 0x57, 0x24, 0xf6, 0x06, 0x7b, 0xf4, 0xbc, 0x6f, 0x3e, 0x0e, 0x7f, 0x9a, 0xc2, 0xcf,
+	0xa0, 0x94, 0x77, 0xf8, 0x66, 0xdb, 0xfb, 0xe7, 0x02, 0x84, 0x88, 0x64, 0xda, 0x44, 0x44, 0x9e,
+	0xf7, 0xdf, 0xda, 0xed, 0x8c, 0x4e, 0xf9, 0xe4, 0xe2, 0xa8, 0xcf, 0xb3, 0x6c, 0x8e, 0xbc, 0x67,
+	0xf3, 0x04, 0xeb, 0x48, 0xff, 0x55, 0x80, 0xe0, 0x65, 0x45, 0x61, 0x90, 0xdd, 0xfd, 0xdc, 0xb9,
+	0x21, 0xed, 0x25, 0x44, 0xb7, 0xb6, 0x77, 0x63, 0xc9, 0xbd, 0x9b, 0xc7, 0x2e, 0x45, 0xf5, 0x92,
+	0xf8, 0x96, 0x4f, 0x8d, 0x66, 0xf2, 0xb2, 0x51, 0xb8, 0xc7, 0x8e, 0x49, 0x24, 0x90, 0xff, 0x21,
+	0x40, 0x98, 0xd5, 0x72, 0xa6, 0x63, 0xd6, 0xfb, 0xa1, 0xc1, 0xaf, 0x9a, 0x8f, 0xb6, 0x77, 0x63,
+	0x19, 0xd7, 0x86, 0xf2, 0x21, 0x68, 0xca, 0x56, 0x23, 0x9a, 0xfe, 0x4b, 0x80, 0x61, 0xd6, 0x60,
+	0x34, 0x3b, 0x8b, 0x5d, 0x52, 0x80, 0x5b, 0xfb, 0xd6, 0xab, 0xbe, 0xd9, 0x6e, 0x4d, 0x4d, 0x17,
+	0x95, 0x67, 0xc5, 0x0b, 0xde, 0xb3, 0x1c, 0xb6, 0x69, 0x46, 0xf4, 0xfd, 0x89, 0x00, 0xc1, 0xab,
+	0xd8, 0xa0, 0x43, 0x5d, 0x5c, 0xd7, 0xb9, 0x6d, 0x1a, 0xf5, 0xd0, 0x00, 0x14, 0x17, 0x29, 0xd4,
+	0x8b, 0x68, 0xd6, 0xfb, 0xee, 0xb0, 0x96, 0x61, 0xe2, 0x61, 0xab, 0x6f, 0xf2, 0x08, 0xfd, 0x52,
+	0x00, 0x20, 0xd1, 0xcb, 0x5a, 0x92, 0xc8, 0x73, 0x98, 0xdb, 0xda, 0xab, 0xd1, 0xac, 0x5f, 0x36,
+	0x9e, 0x1e, 0x2e, 0xb0, 0x02, 0x8e, 0x92, 0x7e, 0x95, 0x20, 0xc7, 0x6d, 0x92, 0x1f, 0xbc, 0x18,
+	0xd9, 0xb9, 0xed, 0xe9, 0xc5, 0x91, 0x72, 0xf4, 0x0c, 0xb2, 0x67, 0x8f, 0x71, 0x90, 0x7e, 0x52,
+	0x15, 0xa6, 0x44, 0xdf, 0x2a, 0x10, 0x57, 0xf9, 0x7b, 0x33, 0x09, 0x30, 0x45, 0x7c, 0x24, 0x01,
+	0xbf, 0xba, 0x7c, 0xc5, 0x21, 0x09, 0xd8, 0xd5, 0x71, 0x89, 0x88, 0x8b, 0xb1, 0xde, 0xdc, 0x6c,
+	0x6e, 0xe9, 0xce, 0xd5, 0x52, 0xd9, 0xb8, 0xd7, 0xc8, 0xc7, 0x0b, 0x5a, 0x35, 0xc1, 0xc0, 0x4e,
+	0xb2, 0xbf, 0xfd, 0x2f, 0x69, 0x93, 0x25, 0xac, 0xd2, 0x45, 0x13, 0x2e, 0xff, 0x14, 0xf0, 0x16,
+	0xff, 0x99, 0x0f, 0x50, 0xd2, 0xcc, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x14, 0xc4, 0x18, 0x52,
+	0x1c, 0x32, 0x00, 0x00,
 }

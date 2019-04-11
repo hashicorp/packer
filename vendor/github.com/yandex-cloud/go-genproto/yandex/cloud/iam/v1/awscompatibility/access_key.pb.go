@@ -19,7 +19,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// An AccessKey resource.
+// An access key.
 // For more information, see [AWS-compatible access keys](/docs/iam/concepts/authorization/access-key).
 type AccessKey struct {
 	// ID of the AccessKey resource.
@@ -43,7 +43,7 @@ func (m *AccessKey) Reset()         { *m = AccessKey{} }
 func (m *AccessKey) String() string { return proto.CompactTextString(m) }
 func (*AccessKey) ProtoMessage()    {}
 func (*AccessKey) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_dd425dc954899590, []int{0}
+	return fileDescriptor_access_key_262db7ab27be9a62, []int{0}
 }
 func (m *AccessKey) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccessKey.Unmarshal(m, b)
@@ -103,10 +103,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/iam/v1/awscompatibility/access_key.proto", fileDescriptor_access_key_dd425dc954899590)
+	proto.RegisterFile("yandex/cloud/iam/v1/awscompatibility/access_key.proto", fileDescriptor_access_key_262db7ab27be9a62)
 }
 
-var fileDescriptor_access_key_dd425dc954899590 = []byte{
+var fileDescriptor_access_key_262db7ab27be9a62 = []byte{
 	// 285 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x90, 0x41, 0x4b, 0xfb, 0x30,
 	0x18, 0xc6, 0xe9, 0xfe, 0xff, 0x0d, 0x96, 0x81, 0x48, 0x40, 0x28, 0xbb, 0x58, 0xc4, 0xc3, 0x0e,
