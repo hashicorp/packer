@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mitchellh/iochan"
+	"github.com/hashicorp/packer/common/iochan"
 )
 
 // CmdDisconnect is a sentinel value to indicate a RemoteCmd

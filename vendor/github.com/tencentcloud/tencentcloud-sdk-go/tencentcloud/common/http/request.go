@@ -125,7 +125,6 @@ func (r *BaseRequest) GetBodyReader() io.Reader {
 }
 
 func (r *BaseRequest) Init() *BaseRequest {
-	r.httpMethod = GET
 	r.domain = ""
 	r.path = Path
 	r.params = make(map[string]string)
@@ -154,7 +153,7 @@ func CompleteCommonParams(request Request, region string) {
 	params["Action"] = request.GetAction()
 	params["Timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
 	params["Nonce"] = strconv.Itoa(rand.Int())
-	params["RequestClient"] = "SDK_GO_3.0.26"
+	params["RequestClient"] = "SDK_GO_3.0.42"
 }
 
 func ConstructParams(req Request) (err error) {

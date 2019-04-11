@@ -2,8 +2,9 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	// "log"
+	//"log"
 	"net/http"
 
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -58,6 +59,9 @@ func ParseFromHttpResponse(hr *http.Response, response Response) (err error) {
 	body, err := ioutil.ReadAll(hr.Body)
 	if err != nil {
 		return
+	}
+	if hr.StatusCode != 200 {
+		return fmt.Errorf("Request fail with status: %s, with body: %s", hr.Status, body)
 	}
 	//log.Printf("[DEBUG] Response Body=%s", body)
 	err = response.ParseErrorFromHTTPResponse(body)
