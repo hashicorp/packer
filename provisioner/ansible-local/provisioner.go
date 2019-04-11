@@ -348,6 +348,7 @@ func (p *Provisioner) provisionPlaybookFile(ui packer.Ui, comm packer.Communicat
 }
 
 func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
+	ctx := context.TODO()
 	rolesDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles"))
 	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
 
@@ -358,12 +359,12 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		// ansible-galaxy version 2.0.0.2 doesn't return exit codes on error..
-		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus())
 	}
 	return nil
 }
@@ -403,6 +404,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 func (p *Provisioner) executeAnsiblePlaybook(
 	ui packer.Ui, comm packer.Communicator, playbookFile, extraArgs, inventory string,
 ) error {
+	ctx := context.TODO()
 	command := fmt.Sprintf("cd %s && %s %s%s -c local -i %s",
 		p.config.StagingDir, p.config.Command, playbookFile, extraArgs, inventory,
 	)
@@ -410,17 +412,17 @@ func (p *Provisioner) executeAnsiblePlaybook(
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
-		if cmd.ExitStatus == 127 {
+	if cmd.ExitStatus() != 0 {
+		if cmd.ExitStatus() == 127 {
 			return fmt.Errorf("%s could not be found. Verify that it is available on the\n"+
 				"PATH after connecting to the machine.",
 				p.config.Command)
 		}
 
-		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus())
 	}
 	return nil
 }
@@ -464,32 +466,34 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ctx := context.TODO()
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
 
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more information.")
 	}
 	return nil
 }
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ctx := context.TODO()
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("rm -rf '%s'", dir),
 	}
 
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more information.")
 	}
 	return nil

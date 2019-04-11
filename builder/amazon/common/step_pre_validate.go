@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -31,21 +32,24 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 			// time to become eventually-consistent
 			ui.Say("You're using Vault-generated AWS credentials. It may take a " +
 				"few moments for them to become available on AWS. Waiting...")
-			err := retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
-				ec2conn, err := accessconf.NewEC2Connection()
-				if err != nil {
-					return true, err
-				}
-				_, err = listEC2Regions(ec2conn)
-				if err != nil {
+			err := retry.Config{
+				Tries: 11,
+				ShouldRetry: func(err error) bool {
 					if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "AuthFailure" {
 						log.Printf("Waiting for Vault-generated AWS credentials" +
 							" to pass authentication... trying again.")
-						return false, nil
+						return true
 					}
-					return true, err
+					return false
+				},
+				RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+			}.Run(ctx, func(ctx context.Context) error {
+				ec2conn, err := accessconf.NewEC2Connection()
+				if err != nil {
+					return err
 				}
-				return true, nil
+				_, err = listEC2Regions(ec2conn)
+				return err
 			})
 
 			if err != nil {

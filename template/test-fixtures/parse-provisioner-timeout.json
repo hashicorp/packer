@@ -1,0 +1,8 @@
+{
+    "provisioners": [
+        {
+            "type": "something",
+            "timeout": "5m"
+        }
+    ]
+}

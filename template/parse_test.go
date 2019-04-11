@@ -107,6 +107,19 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"parse-provisioner-timeout.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					{
+						Type:    "something",
+						Timeout: 5 * time.Minute,
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"parse-provisioner-only.json",
 			&Template{
 				Provisioners: []*Provisioner{

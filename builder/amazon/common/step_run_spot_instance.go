@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
-	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -241,13 +241,16 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	spotTags.Report(ui)
 
 	if len(spotTags) > 0 && s.SpotTags.IsSet() {
-		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+		err = retry.Config{
+			Tries:       11,
+			ShouldRetry: func(error) bool { return false },
+			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
 				Tags:      spotTags,
 				Resources: []*string{spotRequestId},
 			})
-			return true, err
+			return err
 		})
 		if err != nil {
 			err := fmt.Errorf("Error tagging spot request: %s", err)
@@ -284,20 +287,24 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	instance := r.Reservations[0].Instances[0]
 
 	// Retry creating tags for about 2.5 minutes
-	err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(error) bool {
+			if awsErr, ok := err.(awserr.Error); ok {
+				switch awsErr.Code() {
+				case "InvalidInstanceID.NotFound":
+					return true
+				}
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
 		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Tags:      ec2Tags,
 			Resources: []*string{instance.InstanceId},
 		})
-		if err == nil {
-			return true, nil
-		}
-		if awsErr, ok := err.(awserr.Error); ok {
-			if awsErr.Code() == "InvalidInstanceID.NotFound" {
-				return false, nil
-			}
-		}
-		return true, err
+		return err
 	})
 
 	if err != nil {
