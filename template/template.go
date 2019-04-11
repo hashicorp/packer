@@ -148,6 +148,7 @@ type Provisioner struct {
 	Config      map[string]interface{} `json:"config,omitempty"`
 	Override    map[string]interface{} `json:"override,omitempty"`
 	PauseBefore time.Duration          `mapstructure:"pause_before" json:"pause_before,omitempty"`
+	Timeout     time.Duration          `mapstructure:"timeout" json:"timeout,omitempty"`
 }
 
 // MarshalJSON conducts the necessary flattening of the Provisioner struct

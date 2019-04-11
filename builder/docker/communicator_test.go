@@ -15,10 +15,6 @@ import (
 	"github.com/hashicorp/packer/template"
 )
 
-func TestCommunicator_impl(t *testing.T) {
-	var _ packer.Communicator = new(Communicator)
-}
-
 // TestUploadDownload verifies that basic upload / download functionality works
 func TestUploadDownload(t *testing.T) {
 	ui := packer.TestUi(t)

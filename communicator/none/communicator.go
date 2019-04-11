@@ -1,6 +1,7 @@
 package none
 
 import (
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -23,7 +24,7 @@ func New(config string) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
+func (c *comm) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
 	cmd.SetExited(0)
 	return
 }

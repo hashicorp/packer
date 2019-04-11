@@ -68,5 +68,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact.filename = b.config.Target
 	}
 
+	if hook != nil {
+		if err := hook.Run(ctx, packer.HookProvision, ui, new(packer.MockCommunicator), nil); err != nil {
+			return nil, err
+		}
+	}
+
 	return artifact, nil
 }

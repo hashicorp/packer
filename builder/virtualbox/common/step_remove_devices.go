@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -46,25 +47,26 @@ func (s *StepRemoveDevices) Run(ctx context.Context, state multistep.StateBag) m
 			return multistep.ActionHalt
 		}
 
-		var vboxErr error
 		// Retry for 10 minutes to remove the floppy controller.
 		log.Printf("Trying for 10 minutes to remove floppy controller.")
-		err := common.Retry(15, 15, 40, func(_ uint) (bool, error) {
+		err := retry.Config{
+			Tries:      40,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 15 * time.Second, MaxBackoff: 15 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
 			// Don't forget to remove the floppy controller as well
 			command = []string{
 				"storagectl", vmName,
 				"--name", "Floppy Controller",
 				"--remove",
 			}
-			vboxErr = driver.VBoxManage(command...)
-			if vboxErr != nil {
+			err := driver.VBoxManage(command...)
+			if err != nil {
 				log.Printf("Error removing floppy controller. Retrying.")
-				return false, nil
 			}
-			return true, nil
+			return err
 		})
-		if err == common.RetryExhaustedError {
-			err := fmt.Errorf("Error removing floppy controller: %s", vboxErr)
+		if err != nil {
+			err := fmt.Errorf("Error removing floppy controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

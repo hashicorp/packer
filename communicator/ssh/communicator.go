@@ -3,6 +3,7 @@ package ssh
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -82,7 +83,7 @@ func New(address string, config *Config) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
+func (c *comm) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
 	session, err := c.newSession()
 	if err != nil {
 		return
