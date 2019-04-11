@@ -39,7 +39,7 @@ func (m *GetAccessKeyRequest) Reset()         { *m = GetAccessKeyRequest{} }
 func (m *GetAccessKeyRequest) String() string { return proto.CompactTextString(m) }
 func (*GetAccessKeyRequest) ProtoMessage()    {}
 func (*GetAccessKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{0}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{0}
 }
 func (m *GetAccessKeyRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAccessKeyRequest.Unmarshal(m, b)
@@ -90,7 +90,7 @@ func (m *ListAccessKeysRequest) Reset()         { *m = ListAccessKeysRequest{} }
 func (m *ListAccessKeysRequest) String() string { return proto.CompactTextString(m) }
 func (*ListAccessKeysRequest) ProtoMessage()    {}
 func (*ListAccessKeysRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{1}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{1}
 }
 func (m *ListAccessKeysRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListAccessKeysRequest.Unmarshal(m, b)
@@ -132,7 +132,7 @@ func (m *ListAccessKeysRequest) GetPageToken() string {
 }
 
 type ListAccessKeysResponse struct {
-	// List of AccessKey resources.
+	// List of access keys.
 	AccessKeys []*AccessKey `protobuf:"bytes,1,rep,name=access_keys,json=accessKeys,proto3" json:"access_keys,omitempty"`
 	// This token allows you to get the next page of results for list requests. If the number of results
 	// is larger than [ListAccessKeysRequest.page_size], use
@@ -150,7 +150,7 @@ func (m *ListAccessKeysResponse) Reset()         { *m = ListAccessKeysResponse{}
 func (m *ListAccessKeysResponse) String() string { return proto.CompactTextString(m) }
 func (*ListAccessKeysResponse) ProtoMessage()    {}
 func (*ListAccessKeysResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{2}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{2}
 }
 func (m *ListAccessKeysResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListAccessKeysResponse.Unmarshal(m, b)
@@ -200,7 +200,7 @@ func (m *CreateAccessKeyRequest) Reset()         { *m = CreateAccessKeyRequest{}
 func (m *CreateAccessKeyRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateAccessKeyRequest) ProtoMessage()    {}
 func (*CreateAccessKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{3}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{3}
 }
 func (m *CreateAccessKeyRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateAccessKeyRequest.Unmarshal(m, b)
@@ -249,7 +249,7 @@ func (m *CreateAccessKeyResponse) Reset()         { *m = CreateAccessKeyResponse
 func (m *CreateAccessKeyResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateAccessKeyResponse) ProtoMessage()    {}
 func (*CreateAccessKeyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{4}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{4}
 }
 func (m *CreateAccessKeyResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateAccessKeyResponse.Unmarshal(m, b)
@@ -296,7 +296,7 @@ func (m *DeleteAccessKeyRequest) Reset()         { *m = DeleteAccessKeyRequest{}
 func (m *DeleteAccessKeyRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteAccessKeyRequest) ProtoMessage()    {}
 func (*DeleteAccessKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_access_key_service_efeaa691b26615d7, []int{5}
+	return fileDescriptor_access_key_service_1bf1b5014c53758f, []int{5}
 }
 func (m *DeleteAccessKeyRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteAccessKeyRequest.Unmarshal(m, b)
@@ -344,11 +344,11 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AccessKeyServiceClient interface {
-	// Retrieves the list of AccessKey resources for the specified service account.
+	// Retrieves the list of access keys for the specified service account.
 	List(ctx context.Context, in *ListAccessKeysRequest, opts ...grpc.CallOption) (*ListAccessKeysResponse, error)
-	// Returns the specified AccessKey resource.
+	// Returns the specified access key.
 	//
-	// To get the list of available AccessKey resources, make a [List] request.
+	// To get the list of available access keys, make a [List] request.
 	Get(ctx context.Context, in *GetAccessKeyRequest, opts ...grpc.CallOption) (*AccessKey, error)
 	// Creates an access key for the specified service account.
 	Create(ctx context.Context, in *CreateAccessKeyRequest, opts ...grpc.CallOption) (*CreateAccessKeyResponse, error)
@@ -402,11 +402,11 @@ func (c *accessKeyServiceClient) Delete(ctx context.Context, in *DeleteAccessKey
 
 // AccessKeyServiceServer is the server API for AccessKeyService service.
 type AccessKeyServiceServer interface {
-	// Retrieves the list of AccessKey resources for the specified service account.
+	// Retrieves the list of access keys for the specified service account.
 	List(context.Context, *ListAccessKeysRequest) (*ListAccessKeysResponse, error)
-	// Returns the specified AccessKey resource.
+	// Returns the specified access key.
 	//
-	// To get the list of available AccessKey resources, make a [List] request.
+	// To get the list of available access keys, make a [List] request.
 	Get(context.Context, *GetAccessKeyRequest) (*AccessKey, error)
 	// Creates an access key for the specified service account.
 	Create(context.Context, *CreateAccessKeyRequest) (*CreateAccessKeyResponse, error)
@@ -516,10 +516,10 @@ var _AccessKeyService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/iam/v1/awscompatibility/access_key_service.proto", fileDescriptor_access_key_service_efeaa691b26615d7)
+	proto.RegisterFile("yandex/cloud/iam/v1/awscompatibility/access_key_service.proto", fileDescriptor_access_key_service_1bf1b5014c53758f)
 }
 
-var fileDescriptor_access_key_service_efeaa691b26615d7 = []byte{
+var fileDescriptor_access_key_service_1bf1b5014c53758f = []byte{
 	// 649 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x95, 0xbf, 0x6e, 0x13, 0x4b,
 	0x14, 0xc6, 0x35, 0x71, 0x62, 0xc5, 0xc7, 0x37, 0xba, 0xd1, 0x5c, 0x5d, 0x63, 0x19, 0x90, 0xa2,

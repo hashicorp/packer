@@ -47,3 +47,8 @@ func (i *IAM) YandexPassportUserAccount() *YandexPassportUserAccountServiceClien
 func (i *IAM) Key() *KeyServiceClient {
 	return &KeyServiceClient{getConn: i.getConn}
 }
+
+// ApiKey gets ApiKeyService client
+func (i *IAM) ApiKey() *ApiKeyServiceClient {
+	return &ApiKeyServiceClient{getConn: i.getConn}
+}

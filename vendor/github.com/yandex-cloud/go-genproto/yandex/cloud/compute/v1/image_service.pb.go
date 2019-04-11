@@ -41,7 +41,7 @@ func (m *GetImageRequest) Reset()         { *m = GetImageRequest{} }
 func (m *GetImageRequest) String() string { return proto.CompactTextString(m) }
 func (*GetImageRequest) ProtoMessage()    {}
 func (*GetImageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{0}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{0}
 }
 func (m *GetImageRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetImageRequest.Unmarshal(m, b)
@@ -83,7 +83,7 @@ func (m *GetImageLatestByFamilyRequest) Reset()         { *m = GetImageLatestByF
 func (m *GetImageLatestByFamilyRequest) String() string { return proto.CompactTextString(m) }
 func (*GetImageLatestByFamilyRequest) ProtoMessage()    {}
 func (*GetImageLatestByFamilyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{1}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{1}
 }
 func (m *GetImageLatestByFamilyRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetImageLatestByFamilyRequest.Unmarshal(m, b)
@@ -144,7 +144,7 @@ func (m *ListImagesRequest) Reset()         { *m = ListImagesRequest{} }
 func (m *ListImagesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListImagesRequest) ProtoMessage()    {}
 func (*ListImagesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{2}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{2}
 }
 func (m *ListImagesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListImagesRequest.Unmarshal(m, b)
@@ -211,7 +211,7 @@ func (m *ListImagesResponse) Reset()         { *m = ListImagesResponse{} }
 func (m *ListImagesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListImagesResponse) ProtoMessage()    {}
 func (*ListImagesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{3}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{3}
 }
 func (m *ListImagesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListImagesResponse.Unmarshal(m, b)
@@ -253,7 +253,7 @@ type CreateImageRequest struct {
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the image.
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `` key:value `` pairs.
+	// Resource labels as `key:value` pairs.
 	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The name of the image family to which this image belongs.
 	// To get information about the most recent image from a family, use a [ImageService.GetLatestByFamily] request.
@@ -287,7 +287,7 @@ func (m *CreateImageRequest) Reset()         { *m = CreateImageRequest{} }
 func (m *CreateImageRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateImageRequest) ProtoMessage()    {}
 func (*CreateImageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{4}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{4}
 }
 func (m *CreateImageRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateImageRequest.Unmarshal(m, b)
@@ -534,7 +534,7 @@ func (m *CreateImageMetadata) Reset()         { *m = CreateImageMetadata{} }
 func (m *CreateImageMetadata) String() string { return proto.CompactTextString(m) }
 func (*CreateImageMetadata) ProtoMessage()    {}
 func (*CreateImageMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{5}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{5}
 }
 func (m *CreateImageMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateImageMetadata.Unmarshal(m, b)
@@ -574,9 +574,9 @@ type UpdateImageRequest struct {
 	// Minimum size of the disk that can be created from this image.
 	// Specified in bytes. Should be more than the volume of source data and more than the virtual disk size.
 	MinDiskSize int64 `protobuf:"varint,5,opt,name=min_disk_size,json=minDiskSize,proto3" json:"min_disk_size,omitempty"`
-	// Resource labels as `` key:value `` pairs.
+	// Resource labels as `key:value` pairs.
 	//
-	// Existing set of `` labels `` is completely replaced by the provided set.
+	// Existing set of `labels` is completely replaced by the provided set.
 	Labels               map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -587,7 +587,7 @@ func (m *UpdateImageRequest) Reset()         { *m = UpdateImageRequest{} }
 func (m *UpdateImageRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateImageRequest) ProtoMessage()    {}
 func (*UpdateImageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{6}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{6}
 }
 func (m *UpdateImageRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateImageRequest.Unmarshal(m, b)
@@ -661,7 +661,7 @@ func (m *UpdateImageMetadata) Reset()         { *m = UpdateImageMetadata{} }
 func (m *UpdateImageMetadata) String() string { return proto.CompactTextString(m) }
 func (*UpdateImageMetadata) ProtoMessage()    {}
 func (*UpdateImageMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{7}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{7}
 }
 func (m *UpdateImageMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateImageMetadata.Unmarshal(m, b)
@@ -701,7 +701,7 @@ func (m *DeleteImageRequest) Reset()         { *m = DeleteImageRequest{} }
 func (m *DeleteImageRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteImageRequest) ProtoMessage()    {}
 func (*DeleteImageRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{8}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{8}
 }
 func (m *DeleteImageRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteImageRequest.Unmarshal(m, b)
@@ -740,7 +740,7 @@ func (m *DeleteImageMetadata) Reset()         { *m = DeleteImageMetadata{} }
 func (m *DeleteImageMetadata) String() string { return proto.CompactTextString(m) }
 func (*DeleteImageMetadata) ProtoMessage()    {}
 func (*DeleteImageMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{9}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{9}
 }
 func (m *DeleteImageMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteImageMetadata.Unmarshal(m, b)
@@ -786,7 +786,7 @@ func (m *ListImageOperationsRequest) Reset()         { *m = ListImageOperationsR
 func (m *ListImageOperationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListImageOperationsRequest) ProtoMessage()    {}
 func (*ListImageOperationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{10}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{10}
 }
 func (m *ListImageOperationsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListImageOperationsRequest.Unmarshal(m, b)
@@ -844,7 +844,7 @@ func (m *ListImageOperationsResponse) Reset()         { *m = ListImageOperations
 func (m *ListImageOperationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListImageOperationsResponse) ProtoMessage()    {}
 func (*ListImageOperationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_service_6afec801ba593e67, []int{11}
+	return fileDescriptor_image_service_bc437c5b9fae1fa8, []int{11}
 }
 func (m *ListImageOperationsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListImageOperationsResponse.Unmarshal(m, b)
@@ -1194,10 +1194,10 @@ var _ImageService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/compute/v1/image_service.proto", fileDescriptor_image_service_6afec801ba593e67)
+	proto.RegisterFile("yandex/cloud/compute/v1/image_service.proto", fileDescriptor_image_service_bc437c5b9fae1fa8)
 }
 
-var fileDescriptor_image_service_6afec801ba593e67 = []byte{
+var fileDescriptor_image_service_bc437c5b9fae1fa8 = []byte{
 	// 1209 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0xbf, 0x6f, 0xdb, 0xd6,
 	0x13, 0x0f, 0x2d, 0x89, 0x96, 0x4e, 0xce, 0xaf, 0xf7, 0x4d, 0x10, 0x85, 0x89, 0xbf, 0xb5, 0x69,

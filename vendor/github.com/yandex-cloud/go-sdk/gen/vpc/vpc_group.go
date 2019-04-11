@@ -27,3 +27,8 @@ func (v *VPC) Network() *NetworkServiceClient {
 func (v *VPC) Subnet() *SubnetServiceClient {
 	return &SubnetServiceClient{getConn: v.getConn}
 }
+
+// RouteTable gets RouteTableService client
+func (v *VPC) RouteTable() *RouteTableServiceClient {
+	return &RouteTableServiceClient{getConn: v.getConn}
+}
