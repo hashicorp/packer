@@ -52,7 +52,7 @@ func (x Disk_Status) String() string {
 	return proto.EnumName(Disk_Status_name, int32(x))
 }
 func (Disk_Status) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_disk_d27a2bc800477bf5, []int{0, 0}
+	return fileDescriptor_disk_de2270285e4895a2, []int{0, 0}
 }
 
 // A Disk resource. For more information, see [Disks](/docs/compute/concepts/disk).
@@ -60,14 +60,13 @@ type Disk struct {
 	// ID of the disk.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ID of the folder that the disk belongs to.
-	FolderId string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	// Creation timestamp in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) text format.
+	FolderId  string               `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
 	CreatedAt *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Name of the disk. 1-63 characters long.
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the disk. 0-256 characters long.
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `` key:value `` pairs. Maximum of 64 per resource.
+	// Resource labels as `key:value` pairs. Maximum of 64 per resource.
 	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// ID of the disk type.
 	TypeId string `protobuf:"bytes,7,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
@@ -101,7 +100,7 @@ func (m *Disk) Reset()         { *m = Disk{} }
 func (m *Disk) String() string { return proto.CompactTextString(m) }
 func (*Disk) ProtoMessage()    {}
 func (*Disk) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_d27a2bc800477bf5, []int{0}
+	return fileDescriptor_disk_de2270285e4895a2, []int{0}
 }
 func (m *Disk) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Disk.Unmarshal(m, b)
@@ -315,10 +314,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/compute/v1/disk.proto", fileDescriptor_disk_d27a2bc800477bf5)
+	proto.RegisterFile("yandex/cloud/compute/v1/disk.proto", fileDescriptor_disk_de2270285e4895a2)
 }
 
-var fileDescriptor_disk_d27a2bc800477bf5 = []byte{
+var fileDescriptor_disk_de2270285e4895a2 = []byte{
 	// 533 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x93, 0x41, 0x4f, 0xdb, 0x3e,
 	0x18, 0xc6, 0x49, 0xd3, 0x86, 0xe6, 0x0d, 0xf0, 0x8f, 0xac, 0xbf, 0x46, 0xc4, 0x0e, 0x64, 0x68,

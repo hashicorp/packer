@@ -38,6 +38,8 @@ const (
 	IAMServiceID                Endpoint = "iam"
 	OperationServiceID          Endpoint = "operation"
 	ResourceManagementServiceID Endpoint = "resource-manager"
+	StorageServiceID            Endpoint = "storage"
+	SerialSSHServiceID          Endpoint = "serialssh"
 	// revive:disable:var-naming
 	ApiEndpointServiceID Endpoint = "endpoint"
 	// revive:enable:var-naming

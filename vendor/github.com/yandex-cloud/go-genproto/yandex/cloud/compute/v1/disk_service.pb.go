@@ -41,7 +41,7 @@ func (m *GetDiskRequest) Reset()         { *m = GetDiskRequest{} }
 func (m *GetDiskRequest) String() string { return proto.CompactTextString(m) }
 func (*GetDiskRequest) ProtoMessage()    {}
 func (*GetDiskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{0}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{0}
 }
 func (m *GetDiskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDiskRequest.Unmarshal(m, b)
@@ -95,7 +95,7 @@ func (m *ListDisksRequest) Reset()         { *m = ListDisksRequest{} }
 func (m *ListDisksRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDisksRequest) ProtoMessage()    {}
 func (*ListDisksRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{1}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{1}
 }
 func (m *ListDisksRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDisksRequest.Unmarshal(m, b)
@@ -162,7 +162,7 @@ func (m *ListDisksResponse) Reset()         { *m = ListDisksResponse{} }
 func (m *ListDisksResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDisksResponse) ProtoMessage()    {}
 func (*ListDisksResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{2}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{2}
 }
 func (m *ListDisksResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDisksResponse.Unmarshal(m, b)
@@ -204,7 +204,7 @@ type CreateDiskRequest struct {
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the disk.
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `` key:value `` pairs.
+	// Resource labels as `key:value` pairs.
 	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// ID of the disk type.
 	// To get a list of available disk types use the [yandex.cloud.compute.v1.DiskTypeService.List] request.
@@ -229,7 +229,7 @@ func (m *CreateDiskRequest) Reset()         { *m = CreateDiskRequest{} }
 func (m *CreateDiskRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateDiskRequest) ProtoMessage()    {}
 func (*CreateDiskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{3}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{3}
 }
 func (m *CreateDiskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDiskRequest.Unmarshal(m, b)
@@ -413,7 +413,7 @@ func (m *CreateDiskMetadata) Reset()         { *m = CreateDiskMetadata{} }
 func (m *CreateDiskMetadata) String() string { return proto.CompactTextString(m) }
 func (*CreateDiskMetadata) ProtoMessage()    {}
 func (*CreateDiskMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{4}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{4}
 }
 func (m *CreateDiskMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDiskMetadata.Unmarshal(m, b)
@@ -450,9 +450,9 @@ type UpdateDiskRequest struct {
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the disk.
 	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `` key:value `` pairs.
+	// Resource labels as `key:value` pairs.
 	//
-	// Existing set of `` labels `` is completely replaced by the provided set.
+	// Existing set of `labels` is completely replaced by the provided set.
 	Labels map[string]string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Size of the disk, specified in bytes.
 	Size                 int64    `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`
@@ -465,7 +465,7 @@ func (m *UpdateDiskRequest) Reset()         { *m = UpdateDiskRequest{} }
 func (m *UpdateDiskRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateDiskRequest) ProtoMessage()    {}
 func (*UpdateDiskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{5}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{5}
 }
 func (m *UpdateDiskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDiskRequest.Unmarshal(m, b)
@@ -539,7 +539,7 @@ func (m *UpdateDiskMetadata) Reset()         { *m = UpdateDiskMetadata{} }
 func (m *UpdateDiskMetadata) String() string { return proto.CompactTextString(m) }
 func (*UpdateDiskMetadata) ProtoMessage()    {}
 func (*UpdateDiskMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{6}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{6}
 }
 func (m *UpdateDiskMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDiskMetadata.Unmarshal(m, b)
@@ -579,7 +579,7 @@ func (m *DeleteDiskRequest) Reset()         { *m = DeleteDiskRequest{} }
 func (m *DeleteDiskRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteDiskRequest) ProtoMessage()    {}
 func (*DeleteDiskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{7}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{7}
 }
 func (m *DeleteDiskRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteDiskRequest.Unmarshal(m, b)
@@ -618,7 +618,7 @@ func (m *DeleteDiskMetadata) Reset()         { *m = DeleteDiskMetadata{} }
 func (m *DeleteDiskMetadata) String() string { return proto.CompactTextString(m) }
 func (*DeleteDiskMetadata) ProtoMessage()    {}
 func (*DeleteDiskMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{8}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{8}
 }
 func (m *DeleteDiskMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteDiskMetadata.Unmarshal(m, b)
@@ -664,7 +664,7 @@ func (m *ListDiskOperationsRequest) Reset()         { *m = ListDiskOperationsReq
 func (m *ListDiskOperationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDiskOperationsRequest) ProtoMessage()    {}
 func (*ListDiskOperationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{9}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{9}
 }
 func (m *ListDiskOperationsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDiskOperationsRequest.Unmarshal(m, b)
@@ -722,7 +722,7 @@ func (m *ListDiskOperationsResponse) Reset()         { *m = ListDiskOperationsRe
 func (m *ListDiskOperationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDiskOperationsResponse) ProtoMessage()    {}
 func (*ListDiskOperationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_disk_service_204a5ebc353c6801, []int{10}
+	return fileDescriptor_disk_service_314d5b4ba085ca45, []int{10}
 }
 func (m *ListDiskOperationsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDiskOperationsResponse.Unmarshal(m, b)
@@ -1042,10 +1042,10 @@ var _DiskService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/compute/v1/disk_service.proto", fileDescriptor_disk_service_204a5ebc353c6801)
+	proto.RegisterFile("yandex/cloud/compute/v1/disk_service.proto", fileDescriptor_disk_service_314d5b4ba085ca45)
 }
 
-var fileDescriptor_disk_service_204a5ebc353c6801 = []byte{
+var fileDescriptor_disk_service_314d5b4ba085ca45 = []byte{
 	// 1084 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x73, 0xdb, 0x44,
 	0x14, 0x46, 0xb1, 0xa2, 0xd8, 0xcf, 0x50, 0x92, 0x85, 0x52, 0x47, 0x90, 0x99, 0x44, 0x4c, 0xd3,

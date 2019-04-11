@@ -52,7 +52,7 @@ func (x Image_Status) String() string {
 	return proto.EnumName(Image_Status_name, int32(x))
 }
 func (Image_Status) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_image_b90d09089d7c657a, []int{0, 0}
+	return fileDescriptor_image_50f442d51c07b7d7, []int{0, 0}
 }
 
 type Os_Type int32
@@ -80,7 +80,7 @@ func (x Os_Type) String() string {
 	return proto.EnumName(Os_Type_name, int32(x))
 }
 func (Os_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_image_b90d09089d7c657a, []int{1, 0}
+	return fileDescriptor_image_50f442d51c07b7d7, []int{1, 0}
 }
 
 // An Image resource.
@@ -88,14 +88,13 @@ type Image struct {
 	// ID of the image.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ID of the folder that the image belongs to.
-	FolderId string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	// Creation timestamp in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) text format.
+	FolderId  string               `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
 	CreatedAt *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Name of the image. 1-63 characters long.
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the image. 0-256 characters long.
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `` key:value `` pairs. Maximum of 64 per resource.
+	// Resource labels as `key:value` pairs. Maximum of 64 per resource.
 	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The name of the image family to which this image belongs.
 	//
@@ -129,7 +128,7 @@ func (m *Image) Reset()         { *m = Image{} }
 func (m *Image) String() string { return proto.CompactTextString(m) }
 func (*Image) ProtoMessage()    {}
 func (*Image) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_b90d09089d7c657a, []int{0}
+	return fileDescriptor_image_50f442d51c07b7d7, []int{0}
 }
 func (m *Image) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Image.Unmarshal(m, b)
@@ -245,7 +244,7 @@ func (m *Os) Reset()         { *m = Os{} }
 func (m *Os) String() string { return proto.CompactTextString(m) }
 func (*Os) ProtoMessage()    {}
 func (*Os) Descriptor() ([]byte, []int) {
-	return fileDescriptor_image_b90d09089d7c657a, []int{1}
+	return fileDescriptor_image_50f442d51c07b7d7, []int{1}
 }
 func (m *Os) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Os.Unmarshal(m, b)
@@ -281,10 +280,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("yandex/cloud/compute/v1/image.proto", fileDescriptor_image_b90d09089d7c657a)
+	proto.RegisterFile("yandex/cloud/compute/v1/image.proto", fileDescriptor_image_50f442d51c07b7d7)
 }
 
-var fileDescriptor_image_b90d09089d7c657a = []byte{
+var fileDescriptor_image_50f442d51c07b7d7 = []byte{
 	// 555 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x93, 0xdf, 0x6b, 0x9c, 0x40,
 	0x10, 0xc7, 0xab, 0xf7, 0x23, 0x71, 0x4c, 0x83, 0x2c, 0x21, 0x95, 0xe4, 0x21, 0xf6, 0x4a, 0xe1,

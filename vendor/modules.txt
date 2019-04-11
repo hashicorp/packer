@@ -110,6 +110,8 @@ github.com/bgentry/go-netrc/netrc
 github.com/bgentry/speakeasy
 # github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 github.com/biogo/hts/bgzf
+# github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
+github.com/c2h5oh/datasize
 # github.com/cheggaaa/pb v1.0.27
 github.com/cheggaaa/pb
 # github.com/creack/goselect v0.0.0-20180210034346-528c74964609
@@ -135,17 +137,23 @@ github.com/dylanmei/iso8601
 github.com/dylanmei/winrmtest
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/ghodss/yaml v1.0.0
+github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
 # github.com/gofrs/flock v0.7.1
 github.com/gofrs/flock
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
-github.com/golang/protobuf/ptypes
+github.com/golang/protobuf/ptypes/timestamp
+github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes/any
+github.com/golang/protobuf/ptypes/empty
+github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/duration
-github.com/golang/protobuf/ptypes/timestamp
+github.com/golang/protobuf/ptypes/struct
+github.com/golang/protobuf/ptypes/wrappers
 # github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
 github.com/golang/snappy
 # github.com/google/go-cmp v0.2.0
@@ -385,6 +393,49 @@ github.com/vmware/govmomi/vim25/debug
 github.com/vmware/govmomi/vim25/xml
 # github.com/xanzy/go-cloudstack v2.4.1+incompatible
 github.com/xanzy/go-cloudstack/cloudstack
+# github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
+github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/endpoint
+github.com/yandex-cloud/go-genproto/yandex/cloud/vpc/v1
+github.com/yandex-cloud/go-genproto/yandex/api
+github.com/yandex-cloud/go-genproto/yandex/cloud/operation
+github.com/yandex-cloud/go-genproto/yandex/cloud/validation
+github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/access
+github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/loadbalancer/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/clickhouse/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mongodb/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/postgresql/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1
+github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/clickhouse/v1/config
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mongodb/v1/config
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/postgresql/v1/config
+github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1/config
+# github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
+github.com/yandex-cloud/go-sdk
+github.com/yandex-cloud/go-sdk/iamkey
+github.com/yandex-cloud/go-sdk/pkg/requestid
+github.com/yandex-cloud/go-sdk/dial
+github.com/yandex-cloud/go-sdk/gen/apiendpoint
+github.com/yandex-cloud/go-sdk/gen/compute
+github.com/yandex-cloud/go-sdk/gen/containerregistry
+github.com/yandex-cloud/go-sdk/gen/iam
+github.com/yandex-cloud/go-sdk/gen/loadbalancer
+github.com/yandex-cloud/go-sdk/gen/mdb/clickhouse
+github.com/yandex-cloud/go-sdk/gen/mdb/mongodb
+github.com/yandex-cloud/go-sdk/gen/mdb/postgresql
+github.com/yandex-cloud/go-sdk/gen/mdb/redis
+github.com/yandex-cloud/go-sdk/gen/operation
+github.com/yandex-cloud/go-sdk/gen/resourcemanager
+github.com/yandex-cloud/go-sdk/gen/vpc
+github.com/yandex-cloud/go-sdk/operation
+github.com/yandex-cloud/go-sdk/pkg/grpcclient
+github.com/yandex-cloud/go-sdk/pkg/sdkerrors
+github.com/yandex-cloud/go-sdk/pkg/singleflight
+github.com/yandex-cloud/go-sdk/gen/iam/awscompatibility
 # go.opencensus.io v0.18.0
 go.opencensus.io/trace
 go.opencensus.io/plugin/ochttp
@@ -415,16 +466,16 @@ golang.org/x/crypto/ssh/terminal
 golang.org/x/net/proxy
 golang.org/x/net/http2
 golang.org/x/net/html/charset
+golang.org/x/net/context
+golang.org/x/net/trace
 golang.org/x/net/internal/socks
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/context/ctxhttp
-golang.org/x/net/context
 golang.org/x/net/html
-golang.org/x/net/html/atom
-golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
+golang.org/x/net/html/atom
 # golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
 golang.org/x/oauth2
 golang.org/x/oauth2/google
@@ -483,19 +534,22 @@ google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 # google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922
-google.golang.org/genproto/googleapis/iam/v1
-google.golang.org/genproto/googleapis/rpc/code
 google.golang.org/genproto/googleapis/api/annotations
+google.golang.org/genproto/protobuf/field_mask
+google.golang.org/genproto/googleapis/rpc/errdetails
 google.golang.org/genproto/googleapis/rpc/status
+google.golang.org/genproto/googleapis/iam/v1
+google.golang.org/genproto/googleapis/type/timeofday
+google.golang.org/genproto/googleapis/rpc/code
 # google.golang.org/grpc v1.17.0
 google.golang.org/grpc
-google.golang.org/grpc/codes
 google.golang.org/grpc/metadata
+google.golang.org/grpc/credentials
 google.golang.org/grpc/status
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
+google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
-google.golang.org/grpc/credentials
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -515,8 +569,8 @@ google.golang.org/grpc/resolver/dns
 google.golang.org/grpc/resolver/passthrough
 google.golang.org/grpc/stats
 google.golang.org/grpc/tap
-google.golang.org/grpc/balancer/base
 google.golang.org/grpc/credentials/internal
+google.golang.org/grpc/balancer/base
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
 # gopkg.in/yaml.v2 v2.2.2
