@@ -113,3 +113,12 @@ func NewVPCClientWithEndpointAndSecurityToken(endpoint string, accessKeyId strin
 		InitClient()
 	return client
 }
+
+// ---------------------------------------
+// NewVPCClientWithRegion creates a new instance of VPC client automatically get endpoint
+// ---------------------------------------
+func NewVPCClientWithRegion(endpoint string, accessKeyId string, accessKeySecret string, regionID common.Region) *Client {
+	client := &Client{}
+	client.NewInit(endpoint, VPCAPIVersion, accessKeyId, accessKeySecret, VPCServiceCode, regionID)
+	return client
+}

@@ -159,7 +159,8 @@ func TestBuilderPrepare_CopyFilesNoDefault(t *testing.T) {
 	}
 
 	if len(b.config.CopyFiles) > 0 {
-		t.Errorf("Was expecting no default value for copy_files.")
+		t.Errorf("Was expecting no default value for copy_files. Found %v",
+			b.config.CopyFiles)
 	}
 }
 

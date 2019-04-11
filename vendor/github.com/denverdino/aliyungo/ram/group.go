@@ -33,7 +33,7 @@ type GroupListResponse struct {
 	RamCommonResponse
 	IsTruncated bool
 	Marker      string
-	Groups struct {
+	Groups      struct {
 		Group []Group
 	}
 }
