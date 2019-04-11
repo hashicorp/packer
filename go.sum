@@ -20,6 +20,8 @@ github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290 h1:K9I21XUHN
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591 h1:/P9HCl71+Eh6vDbKNyRu+rpIIR70UCZWNOGexVV3e6k=
 github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591/go.mod h1:EHGzQGbwozJBj/4qj3WGrTJ0FqjgOTOxLQ0VNWvPn08=
+github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d h1:igrCnHheXb+lZ1bW9Ths8JZZIjh9D4Vi/49JqiHE+cI=
+github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af h1:DBNMBMuMiWYu0b+8KMJuWmfCkcxl09JwdlqwDZZ6U14=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f h1:jI4DIE5Vf4oRaHfthB0oRhU+yuYuoOTurDzwAlskP00=
