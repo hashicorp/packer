@@ -1,8 +1,6 @@
-## 1.4.0 (Upcoming)
+## 1.4.0 (April 11, 2019)
 
 ### IMPROVEMENTS:
-* **new builder** `proxmox` implements a builder for https://www.proxmox.com/en
-    /proxmox-ve [GH-7391]
 * builder/alicloud: Improve error message for conflicting images name [GH-7415]
 * builder/amazon-chroot: Allow users to specify custom block device mapping
     [GH-7370]
@@ -23,6 +21,8 @@
 * core: Lock Packer VNC ports using a lock file to prevent collisions [GH-7422]
 * core: Print VerifyChecksum log for the download as ui.Message output
     [GH-7387]
+* core: Users can now set provisioner timeouts [GH-7466]
+* core: Switch to using go mod for managing dependencies [GH-7270]
 * core: Select a new VNC port if initial port is busy [GH-7423]
 * post-processor/googlecompute-export: Set network project id to builder
     [GH-7359]
@@ -32,7 +32,7 @@
 * postprocessor/amazon-import: Support S3 and AMI encryption. [GH-7396]
 * provisioner/shell provisioner/windows-shell: allow to specify valid exit
     codes [GH-7385]
-* sensitive-vars: Filter sensitive variables out of the ui as well as the logs
+* core: Filter sensitive variables out of the ui as well as the logs
     [GH-7462]
 
 ### BUG FIXES:
