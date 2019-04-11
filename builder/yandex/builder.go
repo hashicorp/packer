@@ -1,8 +1,8 @@
 package yandex
 
 import (
+	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -33,7 +33,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 // Run executes a yandex Packer build and returns a packer.Artifact
 // representing a Yandex.Cloud compute image.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverYC(ui, b.config)
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// Report any errors
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -91,12 +91,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 		config: b.config,
 	}
 	return artifact, nil
-}
-
-// Cancel.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
