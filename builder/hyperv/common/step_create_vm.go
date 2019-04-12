@@ -35,6 +35,7 @@ type StepCreateVM struct {
 	MacAddress                     string
 	FixedVHD                       bool
 	Version                        string
+	KeepRegistered                 bool
 }
 
 func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -168,6 +169,12 @@ func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.KeepRegistered {
+		ui.Say("keep_registered set. Skipping unregister/deletion of VM.")
+		return
+	}
+
 	ui.Say("Unregistering and deleting virtual machine...")
 
 	err := driver.DeleteVirtualMachine(s.VMName)
