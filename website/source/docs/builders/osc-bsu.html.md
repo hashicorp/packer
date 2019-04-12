@@ -256,7 +256,7 @@ Here is a basic example. You will need to provide access keys, and may need to c
       "source_omi": "ami-abcfd0283",
       "vm_type": "t2.micro",
       "ssh_username": "outscale",
-      "ami_name": "packer_osc {{timestamp}}"
+      "omi_name": "packer_osc {{timestamp}}"
     }
   ]
 }
@@ -289,10 +289,10 @@ configuration of `launch_block_device_mappings` will expand the root volume
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-fce3c696",
-  "VM_type": "t2.micro",
+  "source_omi": "ami-fce3c696",
+  "vm_type": "t2.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}",
+  "omi_name": "packer-quick-start {{timestamp}}",
   "launch_block_device_mappings": [
     {
       "device_name": "/dev/sda1",
@@ -333,10 +333,10 @@ Here is an example using the optional OMIS tags. This will add the tags `OS_Vers
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-fce3c696",
-  "VM_type": "t2.micro",
+  "source_omi": "ami-fce3c696",
+  "vm_type": "t2.micro",
   "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}",
+  "omi_name": "packer-quick-start {{timestamp}}",
   "tags": {
     "OS_Version": "Ubuntu",
     "Release": "Latest",
