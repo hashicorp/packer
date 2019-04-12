@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gofrs/flock"
 	getter "github.com/hashicorp/go-getter"
@@ -62,7 +63,17 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 			return multistep.ActionHalt
 		}
 		ui.Say(fmt.Sprintf("Trying %s", source))
-		dst, err := s.download(ctx, ui, source)
+		var err error
+		var dst string
+		if s.Description == "OVF/OVA" && strings.HasSuffix(source, ".ovf") {
+			// TODO(adrien): make go-getter allow using files in place.
+			// ovf files usually point to a file in the same directory, so
+			// using them in place is the only way.
+			ui.Say(fmt.Sprintf("Using ovf inplace"))
+			dst = source
+		} else {
+			dst, err = s.download(ctx, ui, source)
+		}
 		if err == nil {
 			state.Put(s.ResultKey, dst)
 			return multistep.ActionContinue
