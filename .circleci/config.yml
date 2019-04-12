@@ -16,6 +16,7 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
+      - run: GO111MODULE=on go run . --help
       - run: make check-vendor-vs-mod
 workflows:
   version: 2
