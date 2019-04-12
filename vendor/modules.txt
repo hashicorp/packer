@@ -45,6 +45,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
 github.com/NaverCloudPlatform/ncloud-sdk-go/common
 github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
+# github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d
+github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
