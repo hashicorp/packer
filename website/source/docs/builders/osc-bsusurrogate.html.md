@@ -1,7 +1,7 @@
 ---
 description: |
     The osc-bsusurrogate Packer builder is like the chroot builder, but does not
-    require running inside an Outscale instance.
+    require running inside an Outscale virtual machine.
 layout: docs
 page_title: 'Outacale BSU Surrogate - Builders'
 sidebar_current: 'docs-builders-osc-bsusurrogate'
@@ -12,7 +12,7 @@ sidebar_current: 'docs-builders-osc-bsusurrogate'
 Type: `osc-bsusurrogate`
 
 The `osc-bsusurrogate` Packer builder is able to create Outscale OMIs by
-running a source instance with an attached volume, provisioning the attached
+running a source virtual machine with an attached volume, provisioning the attached
 volume in such a way that it can be used as the root volume for the OMI, and
 then snapshotting and creating the OMI from that volume.
 
@@ -21,7 +21,7 @@ example FreeBSD or Ubuntu using ZFS as the root file system.
 
 This is all done in your own Outscale account. This builder will create temporary
 key pairs, security group rules, etc., that provide it temporary access to the
-instance while the image is being created.
+virtual machine while the image is being created.
 
 ## Configuration Reference
 
@@ -52,7 +52,7 @@ builder.
     `omi_block_device_mapping`, except with an additional field:
 
   - `source_device_name` (string) - The device name of the block device on
-        the source instance to be used as the root device for the OMI. This
+        the source virtual machine to be used as the root device for the OMI. This
         must correspond to a block device in `launch_block_device_mapping`.
 
 ### Optional:
@@ -169,7 +169,7 @@ builder.
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
 
-- `source_omi_filter` (object) - Filters used to populate the `source_ami` field.
+- `source_omi_filter` (object) - Filters used to populate the `source_omi` field.
   - `filters` (map of strings) - filters used to select a `source_omi`.
   - `owners` (array of strings) - Filters the images by their owner. You may specify one or more Outscale account IDs, "self" (which will use the   account whose credentials you are using to run Packer). This option is required for security reasons.
   
@@ -180,7 +180,7 @@ builder.
       "source_omi_filter": {
         "filters": {
           "virtualization-type": "hvm",
-          "image-name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "image-name": "image-name",
           "root-device-type": "ebs"
         },
         "owners": ["099720109477"],
@@ -245,8 +245,8 @@ builder.
    "access_key" : "YOUR KEY HERE",
    "region" : "eu-west-2",
    "ssh_username" : "outscale",
-   "instance_type" : "t2.medium",
-   "source_ami" : "ami-bcfc34e0",
+   "vm_type" : "t2.medium",
+   "source_omi" : "ami-bcfc34e0",
    "subregion_name": "eu-west-2a",
     "launch_block_device_mappings" : [
         {
@@ -274,13 +274,12 @@ for more information on what environmental variables Packer will look for.
 Further information on locating OMIS IDs and their relationship to VM
 types and regions can be found in the Outscale Documentation [reference](https://wiki.outscale.net/display/EN/Official+OMIs+Reference).
 
+## Accessing the Virtual Machine to Debug
 
-## Accessing the Instance to Debug
-
-If you need to access the instance to debug for some reason, run this builder
+If you need to access the virtual machine to debug for some reason, run this builder
 with the `-debug` flag. In debug mode, the Outscale builder will save the private
 key in the current directory and will output the DNS or IP information as well.
-You can use this information to access the instance as it is running.
+You can use this information to access the virtual machine as it is running.
 
 ## Build template data
 
@@ -293,6 +292,6 @@ In configuration directives marked as a template engine above, the following var
 
 -&gt; **Note:** Packer uses pre-built OMIs as the source for building images.
 These source OMIs may include volumes that are not flagged to be destroyed on
-termination of the instance building the new image. In addition to those
+termination of the virtual machine building the new image. In addition to those
 volumes created by this builder, any volumes inn the source OMI which are not
 marked for deletion on termination will remain in your account.
