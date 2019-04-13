@@ -52,7 +52,7 @@ artifacts that are created will be outputted at the end of the build.
     attribute is specified within the configuration. `-only` does not apply to
     post-processors.
 
--   `-parallel=false` - Disable parallelization of multiple builders (on by
+-   `-parallel=1` - Limit the number of builds to run in parallel (no limit by
     default).
 
 -   `-timestamp-ui` - Enable prefixing of each ui output with an RFC3339
