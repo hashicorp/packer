@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/posener/complete"
 )
@@ -24,7 +26,8 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
+	var cfgColor, cfgDebug, cfgForce, cfgTimestamp bool
+	var cfgParallel int64
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
@@ -34,7 +37,7 @@ func (c *BuildCommand) Run(args []string) int {
 	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
-	flags.BoolVar(&cfgParallel, "parallel", true, "")
+	flags.Int64Var(&cfgParallel, "parallel", 0, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -150,10 +153,18 @@ func (c *BuildCommand) Run(args []string) int {
 	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
 	// ctx := context.Background()
+	if cfgParallel < 1 {
+		cfgParallel = math.MaxInt64
+	}
+	limitParallel := semaphore.NewWeighted(cfgParallel)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
 		buildCtx, cancelCtx := context.WithCancel(context.Background())
+		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+			log.Printf("Stopping build: failed to acquire semaphore %s", err)
+			return 1
+		}
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
@@ -173,6 +184,7 @@ func (c *BuildCommand) Run(args []string) int {
 		// Run the build in a goroutine
 		go func(b packer.Build) {
 			defer wg.Done()
+			defer limitParallel.Release(1)
 
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
@@ -195,7 +207,7 @@ func (c *BuildCommand) Run(args []string) int {
 			wg.Wait()
 		}
 
-		if !cfgParallel {
+		if cfgParallel == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
@@ -308,7 +320,7 @@ Options:
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
-  -parallel=false               Disable parallelization. (Default: parallel)
+  -parallel=count               Number of builds to run in parallel. (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.

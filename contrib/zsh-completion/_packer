@@ -17,7 +17,7 @@ _packer () {
     '-except=[(foo,bar,baz) Run all builds and post-procesors other than these.]'
     '-on-error=[(cleanup,abort,ask) If the build fails do: clean up (default), abort, or ask.]'
     '-only=[(foo,bar,baz) Only build the given builds by name.]'
-    '-parallel=[(false) Disable parallelization. (Default: parallel)]'
+    '-parallel=[(0) Number of builds to run in parallel. (Default: 0)]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON file containing user variables.]'
     '(-)*:files:_files -g "*.json"'
