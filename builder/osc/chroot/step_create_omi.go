@@ -48,7 +48,7 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 		newDevice.Bsu.VolumeSize = gibSize
 
 		if newDevice.DeviceName == rootDeviceName {
-			if &newDevice.Bsu != nil {
+			if newDevice.Bsu != (oapi.BsuToCreate{}) {
 				newDevice.Bsu.SnapshotId = snapshotId
 			} else {
 				newDevice.Bsu = oapi.BsuToCreate{SnapshotId: snapshotId}
