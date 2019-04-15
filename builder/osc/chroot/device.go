@@ -51,7 +51,7 @@ func devicePrefix() (string, error) {
 	defer f.Close()
 
 	dirs, err := f.Readdirnames(-1)
-	if dirs != nil && len(dirs) > 0 {
+	if len(dirs) > 0 {
 		for _, dir := range dirs {
 			dirBase := filepath.Base(dir)
 			for _, prefix := range available {
