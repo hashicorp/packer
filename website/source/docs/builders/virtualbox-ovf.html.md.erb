@@ -67,6 +67,13 @@ builder.
 -   `source_path` (string) - The path to an OVF or OVA file that acts as the
     source of this build. It can also be a URL.
 
+-   `checksum` (string) - The checksum for the `source_path` file. The 
+    algorithm to use when computing the checksum can be optionally specified 
+    with `checksum_type`. When `checksum_type` is not set packer will guess the 
+    checksumming type based on `checksum` length. `checksum` can be also be a 
+    file or an URL, in which case `checksum_type` must be set to `file`; the 
+    go-getter will download it and use the first hash found.
+
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -81,9 +88,6 @@ builder.
     a duration. Examples are `5s` and `1m30s` which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
-
--   `checksum` (string) - The checksum for the OVA file. The type of the
-    checksum is specified with `checksum_type`, documented below.
 
 -   `checksum_type` (string) - The type of the checksum specified in `checksum`.
     Valid values are `none`, `md5`, `sha1`, `sha256`, or `sha512`. Although the
