@@ -96,7 +96,12 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	//Create tags for volume
 	if len(volTags) > 0 {
-		osccommon.CreateTags(oapiconn, s.volumeId, ui, volTags)
+		if err := osccommon.CreateTags(oapiconn, s.volumeId, ui, volTags); err != nil {
+			err := fmt.Errorf("Error creating tags for volume: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Wait for the volume to become ready
