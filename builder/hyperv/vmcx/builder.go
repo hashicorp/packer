@@ -95,6 +95,7 @@ type Config struct {
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
 	Version                        string `mapstructure:"configuration_version"`
+	KeepRegistered                 bool   `mapstructure:"keep_registered"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -441,6 +442,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			MacAddress:                     b.config.MacAddress,
+			KeepRegistered:                 b.config.KeepRegistered,
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},
