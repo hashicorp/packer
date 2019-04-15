@@ -281,6 +281,8 @@ github.com/klauspost/pgzip
 github.com/konsorten/go-windows-terminal-sequences
 # github.com/kr/fs v0.0.0-20131111012553-2788f0dbd169
 github.com/kr/fs
+# github.com/linode/linodego v0.7.1
+github.com/linode/linodego
 # github.com/marstr/guid v0.0.0-20170427235115-8bdf7d1a087c
 github.com/marstr/guid
 # github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c
@@ -475,6 +477,7 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/context/ctxhttp
+golang.org/x/net/publicsuffix
 golang.org/x/net/html
 golang.org/x/net/internal/timeseries
 golang.org/x/net/html/atom
@@ -575,5 +578,7 @@ google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/balancer/base
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
+# gopkg.in/resty.v1 v1.12.0
+gopkg.in/resty.v1
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
