@@ -82,7 +82,9 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 		errs = append(errs, err)
 	}
 
-	state.Put("error", fmt.Errorf("Downloading file: %v", errs))
+	err := fmt.Errorf("error downloading %s: %v", s.Description, errs)
+	state.Put("error", err)
+	ui.Error(err.Error())
 	return multistep.ActionHalt
 }
 
@@ -104,7 +106,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		q.Set("checksum", s.Checksum)
 		u.RawQuery = q.Encode()
 	} else if s.ChecksumType != "none" {
-		return "", fmt.Errorf("Empty checksum")
+		return "", fmt.Errorf("empty checksum, a checksum or a 'none' checksum type must be set")
 	}
 
 	targetPath := s.TargetPath
