@@ -17,6 +17,7 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.16.24
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
+	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/cheggaaa/pb v1.0.27
 	github.com/creack/goselect v0.0.0-20180210034346-528c74964609 // indirect
 	github.com/denverdino/aliyungo v0.0.0-20190220033614-36e2ae938978
@@ -104,6 +105,8 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
 	github.com/xanzy/go-cloudstack v2.4.1+incompatible
+	github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
+	github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
@@ -111,6 +114,7 @@ require (
 	golang.org/x/sys v0.0.0-20181218192612-074acd46bca6
 	google.golang.org/api v0.1.0
 	google.golang.org/appengine v1.4.0 // indirect
+	google.golang.org/grpc v1.17.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
