@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"runtime"
 
+	awschroot "github.com/hashicorp/packer/builder/amazon/chroot"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -237,7 +238,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	steps = append(steps,
-		&StepFlock{},
+		&awschroot.StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{
 			RootVolumeType: b.config.RootVolumeType,
@@ -246,21 +247,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 			Ctx:            b.config.ctx,
 		},
 		&StepLinkVolume{},
-		&StepEarlyUnflock{},
-		&StepPreMountCommands{
+		&awschroot.StepEarlyUnflock{},
+		&awschroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
 		},
-		&StepPostMountCommands{
+		&awschroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
 		},
-		&StepMountExtra{},
-		&StepCopyFiles{},
-		&StepChrootProvision{},
-		&StepEarlyCleanup{},
+		&awschroot.StepMountExtra{},
+		&awschroot.StepCopyFiles{},
+		&awschroot.StepChrootProvision{},
+		&awschroot.StepEarlyCleanup{},
 		&StepSnapshot{},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
