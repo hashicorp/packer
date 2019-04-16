@@ -105,8 +105,6 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		q := u.Query()
 		q.Set("checksum", s.Checksum)
 		u.RawQuery = q.Encode()
-	} else if s.ChecksumType != "none" {
-		return "", fmt.Errorf("empty checksum, a checksum or a 'none' checksum type must be set")
 	}
 
 	targetPath := s.TargetPath
