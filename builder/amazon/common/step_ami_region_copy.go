@@ -14,6 +14,7 @@ import (
 type StepAMIRegionCopy struct {
 	AccessConfig      *AccessConfig
 	Regions           []string
+	AMIKmsKeyId       string
 	RegionKeyIds      map[string]string
 	EncryptBootVolume *bool // nil means preserve
 	Name              string
@@ -31,6 +32,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		// AMI with required encryption setting.
 		// temp image was created by stepCreateAMI.
 		s.Regions = append(s.Regions, *ec2conn.Config.Region)
+		s.RegionKeyIds[*ec2conn.Config.Region] = s.AMIKmsKeyId
 	}
 
 	if len(s.Regions) == 0 {
