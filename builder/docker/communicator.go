@@ -233,6 +233,11 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 		return fmt.Errorf("Failed to open pipe: %s", err)
 	}
 
+	stderrP, err := localCmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open stderr pipe: %s", err)
+	}
+
 	if err = localCmd.Start(); err != nil {
 		return fmt.Errorf("Failed to start download: %s", err)
 	}
@@ -240,6 +245,16 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	// When you use - to send docker cp to stdout it is streamed as a tar; this
 	// enables it to work with directories. We don't actually support
 	// directories in Download() but we still need to handle the tar format.
+
+	stderrOut, err := ioutil.ReadAll(stderrP)
+	if err != nil {
+		return err
+	}
+
+	if string(stderrOut) != "" {
+		return fmt.Errorf("Error downloading file: %s", string(stderrOut))
+	}
+
 	archive := tar.NewReader(pipe)
 	_, err = archive.Next()
 	if err != nil {
