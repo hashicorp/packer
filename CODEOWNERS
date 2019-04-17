@@ -7,6 +7,7 @@
 /builder/amazon/ebsvolume/              @jen20
 /builder/azure/                         @paulmey
 /builder/hyperv/                        @taliesins
+/builder/linode/                        @displague @ctreatma @stvnjacobs
 /builder/lxc/                           @ChrisLundquist
 /builder/lxd/                           @ChrisLundquist
 /builder/oneandone/                     @jasmingacic
