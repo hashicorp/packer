@@ -15,6 +15,7 @@ be accessed using the template variables.
 
 For example, the public key can be provided in the boot command as a URL
 encoded string by appending `| urlquery` to the variable:
+
 ```json
 {
     "type": "virtualbox-iso",
@@ -26,7 +27,8 @@ encoded string by appending `| urlquery` to the variable:
 
 A kickstart could then leverage those fields from the kernel command line by
 decoding the URL-encoded public key:
-```
+
+``` sh
 %post
 
 # Newly created users need the file/folder framework for SSH key authentication.
@@ -59,3 +61,5 @@ fi
 
 %end
 ```
+
+
