@@ -299,7 +299,7 @@ github.com/mattn/go-colorable
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
-# github.com/mattn/go-tty v0.0.0-20190407112021-83fae09cc007
+# github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859
 github.com/mattn/go-tty
 # github.com/mitchellh/cli v1.0.0
 github.com/mitchellh/cli
