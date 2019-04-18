@@ -18,6 +18,11 @@ recommended usage of the file provisioner is to use it to upload files, and
 then use [shell provisioner](/docs/provisioners/shell.html) to move them to the
 proper place, set permissions, etc.
 
+Warning: You can only upload files to locations that the provisioning user 
+(generally not root) has permission to access. Creating files in /tmp and 
+using a shell provisioner to move them into the final location is the only
+way to upload files to root owned locations.
+
 The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
@@ -44,7 +49,9 @@ The available configuration options are listed below.
 
 -   `destination` (string) - The path where the file will be uploaded to in the
     machine. This value must be a writable location and any parent directories
-    must already exist. If the source is a file, it's a good idea to make the
+    must already exist. If the provisioning user (generally not root) cannot 
+    write to this directory, you will receive a "Permission Denied" error.
+    If the source is a file, it's a good idea to make the
     destination a file as well, but if you set your destination as a directory,
     at least make sure that the destination ends in a trailing slash so that
     Packer knows to use the source's basename in the final upload path. Failure
