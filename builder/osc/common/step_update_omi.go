@@ -91,6 +91,7 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 			ui.Say(fmt.Sprintf("Updating attributes on snapshot (%s)...", snapshot))
 			newConfig := &oapi.Config{
 				UserAgent: config.UserAgent,
+				AccessKey: config.AccessKey,
 				SecretKey: config.SecretKey,
 				Service:   config.Service,
 				Region:    region, //New region
