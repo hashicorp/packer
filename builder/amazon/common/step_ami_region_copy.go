@@ -32,6 +32,9 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		// AMI with required encryption setting.
 		// temp image was created by stepCreateAMI.
 		s.Regions = append(s.Regions, *ec2conn.Config.Region)
+		if s.RegionKeyIds == nil {
+			s.RegionKeyIds = make(map[string]string)
+		}
 		s.RegionKeyIds[*ec2conn.Config.Region] = s.AMIKmsKeyId
 	}
 
