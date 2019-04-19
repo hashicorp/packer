@@ -156,39 +156,41 @@ func (c *BuildCommand) Run(args []string) int {
 	if cfgParallel < 1 {
 		cfgParallel = math.MaxInt64
 	}
+
+	buildCtx, cancelCtx := context.WithCancel(context.Background())
+	// Handle interrupts for this build
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
+	go func() {
+		sig := <-sigCh
+		interruptWg.Add(1)
+		defer interruptWg.Done()
+		interrupted = true
+
+		cancelCtx()
+		c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
+	}()
+
 	limitParallel := semaphore.NewWeighted(cfgParallel)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
-		buildCtx, cancelCtx := context.WithCancel(context.Background())
-		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
-			log.Printf("Stopping build: failed to acquire semaphore %s", err)
-			return 1
-		}
-
-		// Handle interrupts for this build
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-		defer signal.Stop(sigCh)
-		go func(b packer.Build) {
-			sig := <-sigCh
-			interruptWg.Add(1)
-			defer interruptWg.Done()
-			interrupted = true
-
-			log.Printf("Stopping build: %s after receiving %s", b.Name(), sig)
-			cancelCtx()
-			log.Printf("Build cancelled: %s", b.Name())
-		}(b)
 
 		// Run the build in a goroutine
 		go func(b packer.Build) {
 			defer wg.Done()
-			defer limitParallel.Release(1)
 
 			name := b.Name()
-			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
+
+			if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+				ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
+				return
+			}
+			defer limitParallel.Release(1)
+
+			log.Printf("Starting build run: %s", name)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			if err != nil {
