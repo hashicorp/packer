@@ -186,6 +186,7 @@ func (c *BuildCommand) Run(args []string) int {
 
 			if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
+				errors[name] = err
 				return
 			}
 			defer limitParallel.Release(1)
