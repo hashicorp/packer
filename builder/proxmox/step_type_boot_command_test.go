@@ -106,7 +106,7 @@ func TestTypeBootCommand(t *testing.T) {
 			state := new(multistep.BasicStateBag)
 			state.Put("ui", packer.TestUi(t))
 			state.Put("config", c.builderConfig)
-			state.Put("http_port", uint(0))
+			state.Put("http_port", int(0))
 			state.Put("vmRef", proxmox.NewVmRef(1))
 			state.Put("proxmoxClient", typer)
 
