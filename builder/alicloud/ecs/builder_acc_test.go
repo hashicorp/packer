@@ -13,8 +13,14 @@ import (
 
 const defaultTestRegion = "cn-beijing"
 
-func TestBuilderAcc_invalidRegion(t *testing.T) {
+func TestBuilderAcc_validateRegion(t *testing.T) {
 	t.Parallel()
+
+	if os.Getenv(builderT.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf("Acceptance tests skipped unless env '%s' set", builderT.TestEnvVar))
+		return
+	}
+
 	testAccPreCheck(t)
 
 	access := &AlicloudAccessConfig{AlicloudRegion: "cn-beijing"}
