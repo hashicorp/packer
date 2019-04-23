@@ -347,16 +347,16 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 
 func TestConfigDefaults(t *testing.T) {
 	cases := []struct {
-		Read  func(c *Config) interface{}
+		Read  func(c *ConfigGCE) interface{}
 		Value interface{}
 	}{
 		{
-			func(c *Config) interface{} { return c.Comm.Type },
+			func(c *ConfigGCE) interface{} { return c.Comm.Type },
 			"ssh",
 		},
 
 		{
-			func(c *Config) interface{} { return c.Comm.SSHPort },
+			func(c *ConfigGCE) interface{} { return c.Comm.SSHPort },
 			22,
 		},
 	}
@@ -422,7 +422,7 @@ func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile st
 	return config, tempAccountFile
 }
 
-func testConfigStruct(t *testing.T) *Config {
+func testConfigStruct(t *testing.T) *ConfigGCE {
 	raw, tempfile := testConfig(t)
 	defer os.Remove(tempfile)
 

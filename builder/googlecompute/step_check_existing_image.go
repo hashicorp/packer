@@ -14,7 +14,7 @@ type StepCheckExistingImage int
 
 // Run executes the Packer build step that checks if the image already exists.
 func (s *StepCheckExistingImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -18,7 +18,7 @@ func TestStepCheckExistingImage(t *testing.T) {
 
 	state.Put("instance_name", "foo")
 
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(*DriverMock)
 	driver.ImageExistsResult = true
 

@@ -9,7 +9,7 @@ import (
 type Artifact struct {
 	image  *Image
 	driver Driver
-	config *Config
+	config *ConfigGCE
 }
 
 // BuilderId returns the builder Id.

@@ -17,7 +17,7 @@ func TestStepCreateSSHKey_impl(t *testing.T) {
 func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateSSHKey)
-	cfg := state.Get("config").(*Config)
+	cfg := state.Get("config").(*ConfigGCE)
 	cfg.Comm.SSHPrivateKeyFile = "test-fixtures/fake-key"
 	defer step.Cleanup(state)
 
@@ -35,7 +35,7 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 func TestStepCreateSSHKey(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateSSHKey)
-	cfg := state.Get("config").(*Config)
+	cfg := state.Get("config").(*ConfigGCE)
 	defer step.Cleanup(state)
 
 	// run the step
@@ -62,7 +62,7 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 
 	state := testState(t)
 	step := new(StepCreateSSHKey)
-	cfg := state.Get("config").(*Config)
+	cfg := state.Get("config").(*ConfigGCE)
 	step.Debug = true
 	step.DebugKeyPath = tf.Name()
 

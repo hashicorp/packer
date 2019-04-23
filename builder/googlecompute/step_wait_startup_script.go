@@ -16,7 +16,7 @@ type StepWaitStartupScript int
 // Run reads the instance metadata and looks for the log entry
 // indicating the startup script finished.
 func (s *StepWaitStartupScript) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	instanceName := state.Get("instance_name").(string)

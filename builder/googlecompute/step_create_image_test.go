@@ -18,7 +18,7 @@ func TestStepCreateImage(t *testing.T) {
 	step := new(StepCreateImage)
 	defer step.Cleanup(state)
 
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 	d := state.Get("driver").(*DriverMock)
 
 	// These are the values of the image the driver will return.
