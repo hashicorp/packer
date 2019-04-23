@@ -11,7 +11,7 @@ import (
 func TestStepWaitStartupScript(t *testing.T) {
 	state := testState(t)
 	step := new(StepWaitStartupScript)
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 	d := state.Get("driver").(*DriverMock)
 
 	testZone := "test-zone"
