@@ -1,6 +1,6 @@
 ## Which SSH Options to use:
 
-This chart breaks down Packer does if you set any of the below SSH options:
+This chart breaks down what Packer does if you set any of the below SSH options:
 
 | ssh_password | ssh_private_key_file | ssh_keypair_name | temporary_key_pair_name | Packer will... |
 | --- | --- | --- | --- | --- |
