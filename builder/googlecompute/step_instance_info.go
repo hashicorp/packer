@@ -18,7 +18,7 @@ type StepInstanceInfo struct {
 // Run executes the Packer build step that gathers GCE instance info.
 // This adds "instance_ip" to the multistep state.
 func (s *StepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

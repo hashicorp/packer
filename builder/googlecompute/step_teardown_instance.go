@@ -18,7 +18,7 @@ type StepTeardownInstance struct {
 
 // Run executes the Packer build step that tears down a GCE instance.
 func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -55,7 +55,7 @@ func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 // Deleting the instance does not remove the boot disk. This cleanup removes
 // the disk.
 func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

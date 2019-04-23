@@ -28,7 +28,7 @@ type StepCreateWindowsPassword struct {
 func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(Driver)
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 	name := state.Get("instance_name").(string)
 
 	if c.Comm.WinRMPassword != "" {

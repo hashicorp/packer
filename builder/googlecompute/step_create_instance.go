@@ -16,7 +16,7 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
+func (c *ConfigGCE) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
 
@@ -58,7 +58,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	return instanceMetadata, err
 }
 
-func getImage(c *Config, d Driver) (*Image, error) {
+func getImage(c *ConfigGCE, d Driver) (*Image, error) {
 	name := c.SourceImageFamily
 	fromFamily := true
 	if c.SourceImage != "" {
@@ -74,7 +74,7 @@ func getImage(c *Config, d Driver) (*Image, error) {
 
 // Run executes the Packer build step that creates a GCE instance.
 func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 	d := state.Get("driver").(Driver)
 
 	ui := state.Get("ui").(packer.Ui)
@@ -167,7 +167,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

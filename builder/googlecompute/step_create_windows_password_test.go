@@ -37,7 +37,7 @@ func TestStepCreateOrResetWindowsPassword_passwordSet(t *testing.T) {
 	// Step is run after the instance is created so we will have an instance name set
 	state.Put("instance_name", "mock_instance")
 
-	c := state.Get("config").(*Config)
+	c := state.Get("config").(*ConfigGCE)
 
 	c.Comm.WinRMPassword = "password"
 

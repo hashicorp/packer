@@ -104,17 +104,17 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(config Config) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
-		Description: description,
-		Name:        name,
-		Family:      family,
-		Labels:      image_labels,
-		Licenses:    image_licenses,
-		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
-		SourceType:  "RAW",
+		Description:        config.GetImageDescription(),
+		ImageEncryptionKey: config.GetImageEncryptionKey(),
+		Name:               config.GetImageName(),
+		Family:             config.GetImageFamily(),
+		Labels:             config.GetImageLabels(),
+		Licenses:           config.GetImageLicenses(),
+		SourceDisk:         fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, config.GetZone(), config.GetDiskName()),
+		SourceType:         "RAW",
 	}
-
 	imageCh := make(chan *Image, 1)
 	errCh := make(chan error, 1)
 	op, err := d.service.Images.Insert(d.projectId, gce_image).Do()
@@ -129,7 +129,7 @@ func (d *driverGCE) CreateImage(name, description, family, zone, disk string, im
 				return
 			}
 			var image *Image
-			image, err = d.GetImageFromProject(d.projectId, name, false)
+			image, err = d.GetImageFromProject(d.projectId, config.GetImageName(), false)
 			if err != nil {
 				close(imageCh)
 				errCh <- err

@@ -24,7 +24,7 @@ type StepCreateSSHKey struct {
 // The key pairs are added to the ssh config
 func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(*ConfigGCE)
 
 	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
