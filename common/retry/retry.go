@@ -25,7 +25,16 @@ type Config struct {
 	ShouldRetry func(error) bool
 }
 
-var RetryExhaustedError error = fmt.Errorf("Function never succeeded in Retry")
+type RetryExhaustedError struct {
+	Err error
+}
+
+func (err *RetryExhaustedError) Error() string {
+	if err == nil || err.Err == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("retry count exhausted. Last err: %s", err.Err)
+}
 
 // Run fn until context is cancelled up until StartTimeout time has passed.
 func (cfg Config) Run(ctx context.Context, fn func(context.Context) error) error {
@@ -42,10 +51,10 @@ func (cfg Config) Run(ctx context.Context, fn func(context.Context) error) error
 		startTimeout = time.After(cfg.StartTimeout)
 	}
 
+	var err error
 	for try := 0; ; try++ {
-		var err error
 		if cfg.Tries != 0 && try == cfg.Tries {
-			return RetryExhaustedError
+			return &RetryExhaustedError{err}
 		}
 		if err = fn(ctx); err == nil {
 			return nil
