@@ -71,7 +71,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      getVMIP,
+			Host:      commHost(b.config.Comm.SSHHost),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -98,6 +98,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	return artifact, nil
 }
 
+// Returns ssh_host config parameter when set, otherwise gets the host IP from running VM
+func commHost(sshHost string) func(state multistep.StateBag) (string, error) {
+	if sshHost != "" {
+		return func(state multistep.StateBag) (string, error) {
+			return sshHost, nil
+		}
+	}
+	return getVMIP
+}
+
+// Reads the first non-loopback interface's IP address from the VM.
+// qemu-guest-agent package must be installed on the VM
 func getVMIP(state multistep.StateBag) (string, error) {
 	c := state.Get("proxmoxClient").(*proxmox.Client)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
