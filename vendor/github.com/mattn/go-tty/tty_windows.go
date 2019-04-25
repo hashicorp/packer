@@ -3,7 +3,9 @@
 package tty
 
 import (
+	"context"
 	"os"
+	"errors"
 	"syscall"
 	"unsafe"
 
@@ -122,11 +124,13 @@ type charInfo struct {
 }
 
 type TTY struct {
-	in  *os.File
-	out *os.File
-	st  uint32
-	rs  []rune
-	ws  chan WINSIZE
+	in                *os.File
+	out               *os.File
+	st                uint32
+	rs                []rune
+	ws                chan WINSIZE
+	sigwinchCtx       context.Context
+	sigwinchCtxCancel context.CancelFunc
 }
 
 func readConsoleInput(fd uintptr, record *inputRecord) (err error) {
@@ -183,6 +187,7 @@ func open() (*TTY, error) {
 	procSetConsoleMode.Call(h, uintptr(st))
 
 	tty.ws = make(chan WINSIZE)
+	tty.sigwinchCtx, tty.sigwinchCtxCancel = context.WithCancel(context.Background())
 
 	return tty, nil
 }
@@ -206,9 +211,23 @@ func (tty *TTY) readRune() (rune, error) {
 	switch ir.eventType {
 	case windowBufferSizeEvent:
 		wr := (*windowBufferSizeRecord)(unsafe.Pointer(&ir.event))
-		tty.ws <- WINSIZE{
+		ws := WINSIZE{
 			W: int(wr.size.x),
 			H: int(wr.size.y),
+		}
+
+		if err := tty.sigwinchCtx.Err(); err != nil {
+			// closing
+			// the following select might panic without this guard close
+			return 0, err
+		}
+
+		select {
+		case tty.ws <- ws:
+		case <-tty.sigwinchCtx.Done():
+			return 0, tty.sigwinchCtx.Err()
+		default:
+			return 0, nil // no one is currently trying to read
 		}
 	case keyEvent:
 		kr := (*keyEventRecord)(unsafe.Pointer(&ir.event))
@@ -307,8 +326,9 @@ func (tty *TTY) readRune() (rune, error) {
 }
 
 func (tty *TTY) close() error {
-	close(tty.ws)
 	procSetConsoleMode.Call(tty.in.Fd(), uintptr(tty.st))
+	tty.sigwinchCtxCancel()
+	close(tty.ws)
 	return nil
 }
 
@@ -319,6 +339,15 @@ func (tty *TTY) size() (int, int, error) {
 		return 0, 0, err
 	}
 	return int(csbi.window.right - csbi.window.left + 1), int(csbi.window.bottom - csbi.window.top + 1), nil
+}
+
+func (tty *TTY) sizePixel() (int, int, int, int, error) {
+	x, y, err := tty.size()
+	if err != nil {
+		x = -1
+		y = -1
+	}
+	return x, y, -1, -1, errors.New("no implemented method for querying size in pixels on Windows")
 }
 
 func (tty *TTY) input() *os.File {
@@ -349,6 +378,6 @@ func (tty *TTY) raw() (func() error, error) {
 	}, nil
 }
 
-func (tty *TTY) sigwinch() chan WINSIZE {
+func (tty *TTY) sigwinch() <-chan WINSIZE {
 	return tty.ws
 }
