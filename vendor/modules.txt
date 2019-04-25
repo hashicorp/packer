@@ -127,7 +127,7 @@ github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/trace/v1
 # github.com/cheggaaa/pb v1.0.27
 github.com/cheggaaa/pb
-# github.com/creack/goselect v0.0.0-20180210034346-528c74964609
+# github.com/creack/goselect v0.1.0
 github.com/creack/goselect
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
