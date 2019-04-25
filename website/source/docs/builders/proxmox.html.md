@@ -146,6 +146,10 @@ builder.
 -   `unmount_iso` (bool) - If true, remove the mounted ISO from the template
     after finishing. Defaults to `false`.
 
+-   `qemu_agent` (string) - Enables (`1`) or disables (`0`) the QEMU Agent option 
+    for this VM. When disabled, then Packer can't determine the guest's IP, 
+    and `ssh_host` should be used. When enabled, then `qemu-guest-agent`
+    must be installed on the guest OS. Defaults to `1`.
 
 ## Example: Fedora with kickstart
 
