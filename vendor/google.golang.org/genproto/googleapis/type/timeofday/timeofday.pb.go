@@ -20,7 +20,8 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Represents a time of day. The date and time zone are either not significant
 // or are specified elsewhere. An API may chose to allow leap seconds. Related
-// types are [google.type.Date][google.type.Date] and `google.protobuf.Timestamp`.
+// types are [google.type.Date][google.type.Date] and
+// `google.protobuf.Timestamp`.
 type TimeOfDay struct {
 	// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
 	// to allow the value "24:00:00" for scenarios like business closing time.
@@ -41,7 +42,7 @@ func (m *TimeOfDay) Reset()         { *m = TimeOfDay{} }
 func (m *TimeOfDay) String() string { return proto.CompactTextString(m) }
 func (*TimeOfDay) ProtoMessage()    {}
 func (*TimeOfDay) Descriptor() ([]byte, []int) {
-	return fileDescriptor_timeofday_99fd81ba301b1e70, []int{0}
+	return fileDescriptor_timeofday_53fe8e3f23d45dda, []int{0}
 }
 func (m *TimeOfDay) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TimeOfDay.Unmarshal(m, b)
@@ -94,10 +95,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/type/timeofday.proto", fileDescriptor_timeofday_99fd81ba301b1e70)
+	proto.RegisterFile("google/type/timeofday.proto", fileDescriptor_timeofday_53fe8e3f23d45dda)
 }
 
-var fileDescriptor_timeofday_99fd81ba301b1e70 = []byte{
+var fileDescriptor_timeofday_53fe8e3f23d45dda = []byte{
 	// 198 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x4e, 0xcf, 0xcf, 0x4f,
 	0xcf, 0x49, 0xd5, 0x2f, 0xa9, 0x2c, 0x48, 0xd5, 0x2f, 0xc9, 0xcc, 0x4d, 0xcd, 0x4f, 0x4b, 0x49,
