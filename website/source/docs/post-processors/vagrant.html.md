@@ -150,3 +150,9 @@ The following Docker input artifacts are supported:
 
 The `libvirt` provider supports QEMU artifacts built using any these
 accelerators: none, kvm, tcg, or hvf.
+
+### VMWare
+
+If you are using the Vagrant post-processor with the `vmware-esxi` builder, you
+must export the builder artifact locally; the Vagrant post-processor will
+not work on remote artifacts.
