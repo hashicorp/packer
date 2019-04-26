@@ -101,10 +101,13 @@ func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err er
 
 	go func() {
 		conn, err := c.mux.Accept(responseStreamId)
+		log.Printf("Megan waiting...")
 		wg.Wait()
+		log.Printf("Megan done waiting...")
 		if err != nil {
 			log.Printf("[ERR] Error accepting response stream %d: %s",
 				responseStreamId, err)
+			log.Printf("Megan SetExited 1...")
 			cmd.SetExited(123)
 			return
 		}
@@ -115,15 +118,19 @@ func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err er
 		if err := decoder.Decode(&finished); err != nil {
 			log.Printf("[ERR] Error decoding response stream %d: %s",
 				responseStreamId, err)
+			log.Printf("Megan SetExited 2...")
 			cmd.SetExited(123)
 			return
 		}
 
 		log.Printf("[INFO] RPC client: Communicator ended with: %d", finished.ExitStatus)
+		log.Printf("Megan SetExited 3...")
 		cmd.SetExited(finished.ExitStatus)
 	}()
 
+	log.Printf("Megan, calling communicator using c.client.call")
 	err = c.client.Call("Communicator.Start", &args, new(interface{}))
+	log.Printf("Megan, returned from communicator.Start c.client.call")
 	return
 }
 
@@ -202,6 +209,7 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 }
 
 func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface{}) error {
+	log.Println("Megan inside communicatorServer")
 	ctx := context.TODO()
 
 	// Build the RemoteCmd on this side so that it all pipes over
