@@ -22,7 +22,6 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/cheggaaa/pb v1.0.27
 	github.com/creack/goselect v0.1.0 // indirect
-	github.com/denverdino/aliyungo v0.0.0-20190220033614-36e2ae938978
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/godo v1.11.1
 	github.com/dnaeon/go-vcr v1.0.0 // indirect
