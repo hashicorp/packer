@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,34 +19,34 @@ func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.S
 	if len(s.AlicloudImageDestinationRegions) == 0 {
 		return multistep.ActionContinue
 	}
-	client := state.Get("client").(*ecs.Client)
-	ui := state.Get("ui").(packer.Ui)
+
+	client := state.Get("client").(*ClientWrapper)
 	imageId := state.Get("alicloudimage").(string)
 	alicloudImages := state.Get("alicloudimages").(map[string]string)
-	region := common.Region(s.RegionId)
 
 	numberOfName := len(s.AlicloudImageDestinationNames)
 	for index, destinationRegion := range s.AlicloudImageDestinationRegions {
 		if destinationRegion == s.RegionId {
 			continue
 		}
+
 		ecsImageName := ""
 		if numberOfName > 0 && index < numberOfName {
 			ecsImageName = s.AlicloudImageDestinationNames[index]
 		}
-		imageId, err := client.CopyImage(
-			&ecs.CopyImageArgs{
-				RegionId:             region,
-				ImageId:              imageId,
-				DestinationRegionId:  common.Region(destinationRegion),
-				DestinationImageName: ecsImageName,
-			})
+
+		copyImageRequest := ecs.CreateCopyImageRequest()
+		copyImageRequest.RegionId = s.RegionId
+		copyImageRequest.ImageId = imageId
+		copyImageRequest.DestinationRegionId = destinationRegion
+		copyImageRequest.DestinationImageName = ecsImageName
+
+		image, err := client.CopyImage(copyImageRequest)
 		if err != nil {
-			state.Put("error", err)
-			ui.Say(fmt.Sprintf("Error copying images: %s", err))
-			return multistep.ActionHalt
+			return halt(state, err, "Error copying images")
 		}
-		alicloudImages[destinationRegion] = imageId
+
+		alicloudImages[destinationRegion] = image.ImageId
 	}
 	return multistep.ActionContinue
 }
@@ -57,14 +56,18 @@ func (s *stepRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 	_, halted := state.GetOk(multistep.StateHalted)
 	if cancelled || halted {
 		ui := state.Get("ui").(packer.Ui)
-		client := state.Get("client").(*ecs.Client)
+		client := state.Get("client").(*ClientWrapper)
 		alicloudImages := state.Get("alicloudimages").(map[string]string)
 		ui.Say(fmt.Sprintf("Stopping copy image because cancellation or error..."))
 		for copiedRegionId, copiedImageId := range alicloudImages {
 			if copiedRegionId == s.RegionId {
 				continue
 			}
-			if err := client.CancelCopyImage(common.Region(copiedRegionId), copiedImageId); err != nil {
+
+			cancelCopyImageRequest := ecs.CreateCancelCopyImageRequest()
+			cancelCopyImageRequest.RegionId = copiedRegionId
+			cancelCopyImageRequest.ImageId = copiedImageId
+			if _, err := client.CancelCopyImage(cancelCopyImageRequest); err != nil {
 				ui.Say(fmt.Sprintf("Error cancelling copy image: %v", err))
 			}
 		}

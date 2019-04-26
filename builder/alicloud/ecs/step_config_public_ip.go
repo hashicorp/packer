@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -16,9 +16,9 @@ type stepConfigAlicloudPublicIP struct {
 }
 
 func (s *stepConfigAlicloudPublicIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
-	instance := state.Get("instance").(*ecs.InstanceAttributesType)
+	instance := state.Get("instance").(*ecs.Instance)
 
 	if s.SSHPrivateIp {
 		ipaddress := instance.InnerIpAddress.IpAddress
@@ -30,15 +30,16 @@ func (s *stepConfigAlicloudPublicIP) Run(ctx context.Context, state multistep.St
 		return multistep.ActionContinue
 	}
 
-	ipaddress, err := client.AllocatePublicIpAddress(instance.InstanceId)
+	allocatePublicIpAddressRequest := ecs.CreateAllocatePublicIpAddressRequest()
+	allocatePublicIpAddressRequest.InstanceId = instance.InstanceId
+	ipaddress, err := client.AllocatePublicIpAddress(allocatePublicIpAddressRequest)
 	if err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Error allocating public ip: %s", err))
-		return multistep.ActionHalt
+		return halt(state, err, "Error allocating public ip")
 	}
-	s.publicIPAddress = ipaddress
-	ui.Say(fmt.Sprintf("Allocated public ip address %s.", ipaddress))
-	state.Put("ipaddress", ipaddress)
+
+	s.publicIPAddress = ipaddress.IpAddress
+	ui.Say(fmt.Sprintf("Allocated public ip address %s.", ipaddress.IpAddress))
+	state.Put("ipaddress", ipaddress.IpAddress)
 	return multistep.ActionContinue
 }
 
