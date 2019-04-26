@@ -34,8 +34,6 @@ type Builder struct {
 type InstanceNetWork string
 
 const (
-	ClassicNet                     = InstanceNetWork("classic")
-	VpcNet                         = InstanceNetWork("vpc")
 	ALICLOUD_DEFAULT_SHORT_TIMEOUT = 180
 	ALICLOUD_DEFAULT_TIMEOUT       = 1800
 	ALICLOUD_DEFAULT_LONG_TIMEOUT  = 3600
@@ -105,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			RegionId:     b.config.AlicloudRegion,
 		},
 	}
-	if b.chooseNetworkType() == VpcNet {
+	if b.chooseNetworkType() == InstanceNetworkVpc {
 		steps = append(steps,
 			&stepConfigAlicloudVPC{
 				VpcId:     b.config.VpcId,
@@ -136,7 +134,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceName:            b.config.InstanceName,
 			ZoneId:                  b.config.ZoneId,
 		})
-	if b.chooseNetworkType() == VpcNet {
+	if b.chooseNetworkType() == InstanceNetworkVpc {
 		steps = append(steps, &stepConfigAlicloudEIP{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
@@ -153,7 +151,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps = append(steps,
 		&stepAttachKeyPair{},
 		&stepRunAlicloudInstance{},
-		&stepMountAlicloudDisk{},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: SSHHost(
@@ -228,9 +225,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 func (b *Builder) chooseNetworkType() InstanceNetWork {
 	if b.isVpcNetRequired() {
-		return VpcNet
+		return InstanceNetworkVpc
 	} else {
-		return ClassicNet
+		return InstanceNetworkClassic
 	}
 }
 

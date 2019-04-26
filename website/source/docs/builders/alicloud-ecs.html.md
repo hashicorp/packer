@@ -266,18 +266,6 @@ builder.
 -   `tags` (object of key/value strings) - Tags applied to the destination
     image and relevant snapshots.
 
-### Service endpoints:
-      
-Considering network connectivities among different countries, it's highly recommended to set the service endpoint to the corresponding one described in our [official website](https://www.alibabacloud.com/help/doc-detail/25489.htm). Default `endpoint` is `https://ecs-cn-hangzhou.aliyuncs.com.`
-
-Usage:
-
-      $ export ECS_ENDPOINT="endpoint"
-
-Otherwise, you may encouter the following errors due to the network issue from other countries to the default endpoint.
-
-`Code: AliyunGoClientFailure Message: Get https://ecs-cn-hangzhou.aliyuncs.com?xx: net/http: TLS handshake timeout`
-
 ## Basic Example
 
 Here is a basic example for Alicloud.
