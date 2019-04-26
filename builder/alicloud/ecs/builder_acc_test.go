@@ -3,12 +3,13 @@ package ecs
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 const defaultTestRegion = "cn-beijing"
@@ -603,6 +604,200 @@ func checkImageTags() builderT.TestCheckFunc {
 					return fmt.Errorf("the value for tag %s on snapshot %s should be TagValue2 but got %s", tag.TagKey, mapping.SnapshotId, tag.TagValue)
 				}
 			}
+		}
+
+		return nil
+	}
+}
+
+func TestBuilderAcc_dataDiskEncrypted(t *testing.T) {
+	t.Parallel()
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Builder:  &Builder{},
+		Template: testBuilderAccDataDiskEncrypted,
+		Check:    checkDataDiskEncrypted(),
+	})
+}
+
+const testBuilderAccDataDiskEncrypted = `
+{	"builders": [{
+		"type": "test",
+		"region": "cn-beijing",
+		"instance_type": "ecs.n1.tiny",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"io_optimized":"true",
+		"ssh_username":"root",
+		"image_name": "packer-test-dataDiskEncrypted_{{timestamp}}",
+		"image_disk_mappings": [
+			{
+				"disk_name": "data_disk1",
+				"disk_size": 25,
+				"disk_encrypted": true,
+				"disk_delete_with_instance": true
+			},
+			{
+				"disk_name": "data_disk2",
+				"disk_size": 35,
+				"disk_encrypted": false,
+				"disk_delete_with_instance": true
+			},
+			{
+				"disk_name": "data_disk3",
+				"disk_size": 45,
+				"disk_delete_with_instance": true
+			}
+		]
+	}]
+}`
+
+func checkDataDiskEncrypted() builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			return fmt.Errorf("more than 1 artifact")
+		}
+
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+		imageId := artifact.AlicloudImages[defaultTestRegion]
+
+		// describe the image, get block devices with a snapshot
+		client, _ := testAliyunClient()
+
+		describeImagesRequest := ecs.CreateDescribeImagesRequest()
+		describeImagesRequest.RegionId = defaultTestRegion
+		describeImagesRequest.ImageId = imageId
+		imagesResponse, err := client.DescribeImages(describeImagesRequest)
+		if err != nil {
+			return fmt.Errorf("describe images failed due to %s", err)
+		}
+
+		if len(imagesResponse.Images.Image) == 0 {
+			return fmt.Errorf("image %s generated can not be found", imageId)
+		}
+		image := imagesResponse.Images.Image[0]
+
+		var snapshotIds []string
+		for _, mapping := range image.DiskDeviceMappings.DiskDeviceMapping {
+			snapshotIds = append(snapshotIds, mapping.SnapshotId)
+		}
+
+		data, _ := json.Marshal(snapshotIds)
+
+		describeSnapshotRequest := ecs.CreateDescribeSnapshotsRequest()
+		describeSnapshotRequest.RegionId = defaultTestRegion
+		describeSnapshotRequest.SnapshotIds = string(data)
+		describeSnapshotsResponse, err := client.DescribeSnapshots(describeSnapshotRequest)
+		if err != nil {
+			return fmt.Errorf("describe data snapshots failed due to %s", err)
+		}
+		if len(describeSnapshotsResponse.Snapshots.Snapshot) != 4 {
+			return fmt.Errorf("expect %d data snapshots but got %d", len(snapshotIds), len(describeSnapshotsResponse.Snapshots.Snapshot))
+		}
+		snapshots := describeSnapshotsResponse.Snapshots.Snapshot
+		for _, snapshot := range snapshots {
+			if snapshot.SourceDiskType == DiskTypeSystem {
+				if snapshot.Encrypted != false {
+					return fmt.Errorf("the system snapshot expected to be non-encrypted but got true")
+				}
+
+				continue
+			}
+
+			if snapshot.SourceDiskSize == "25" && snapshot.Encrypted != true {
+				return fmt.Errorf("the first snapshot expected to be encrypted but got false")
+			}
+
+			if snapshot.SourceDiskSize == "35" && snapshot.Encrypted != false {
+				return fmt.Errorf("the second snapshot expected to be non-encrypted but got true")
+			}
+
+			if snapshot.SourceDiskSize == "45" && snapshot.Encrypted != false {
+				return fmt.Errorf("the third snapshot expected to be non-encrypted but got true")
+			}
+		}
+		return nil
+	}
+}
+
+func TestBuilderAcc_systemDiskEncrypted(t *testing.T) {
+	t.Parallel()
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Builder:  &Builder{},
+		Template: testBuilderAccSystemDiskEncrypted,
+		Check:    checkSystemDiskEncrypted(),
+	})
+}
+
+const testBuilderAccSystemDiskEncrypted = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "cn-beijing",
+		"instance_type": "ecs.n1.tiny",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"io_optimized":"true",
+		"ssh_username":"root",
+		"image_name": "packer-test_{{timestamp}}",
+		"image_encrypted": "true"
+	}]
+}`
+
+func checkSystemDiskEncrypted() builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			return fmt.Errorf("more than 1 artifact")
+		}
+
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+
+		// describe the image, get block devices with a snapshot
+		client, _ := testAliyunClient()
+		imageId := artifact.AlicloudImages[defaultTestRegion]
+
+		describeImagesRequest := ecs.CreateDescribeImagesRequest()
+		describeImagesRequest.RegionId = defaultTestRegion
+		describeImagesRequest.ImageId = imageId
+		describeImagesRequest.Status = ImageStatusQueried
+		imagesResponse, err := client.DescribeImages(describeImagesRequest)
+		if err != nil {
+			return fmt.Errorf("describe images failed due to %s", err)
+		}
+
+		if len(imagesResponse.Images.Image) == 0 {
+			return fmt.Errorf("image %s generated can not be found", imageId)
+		}
+
+		image := imagesResponse.Images.Image[0]
+		if image.IsCopied == false {
+			return fmt.Errorf("image %s generated expexted to be copied but false", image.ImageId)
+		}
+
+		describeSnapshotRequest := ecs.CreateDescribeSnapshotsRequest()
+		describeSnapshotRequest.RegionId = defaultTestRegion
+		describeSnapshotRequest.SnapshotIds = fmt.Sprintf("[\"%s\"]", image.DiskDeviceMappings.DiskDeviceMapping[0].SnapshotId)
+		describeSnapshotsResponse, err := client.DescribeSnapshots(describeSnapshotRequest)
+		if err != nil {
+			return fmt.Errorf("describe system snapshots failed due to %s", err)
+		}
+		snapshots := describeSnapshotsResponse.Snapshots.Snapshot[0]
+
+		if snapshots.Encrypted != true {
+			return fmt.Errorf("system snapshot of image %s expected to be encrypted but got false", imageId)
 		}
 
 		return nil
