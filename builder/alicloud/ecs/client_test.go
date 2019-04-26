@@ -2,9 +2,10 @@ package ecs
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"testing"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 )
 
 func TestWaitForExpectedExceedRetryTimes(t *testing.T) {

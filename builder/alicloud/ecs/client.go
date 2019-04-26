@@ -2,10 +2,11 @@ package ecs
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"time"
 )
 
 type ClientWrapper struct {
