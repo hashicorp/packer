@@ -3,12 +3,15 @@ package ecs
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/hashicorp/packer/common/random"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"time"
 )
 
 type stepCreateAlicloudImage struct {
@@ -26,10 +29,15 @@ func (s *stepCreateAlicloudImage) Run(ctx context.Context, state multistep.State
 	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
 
-	// Create the alicloud image
-	ui.Say(fmt.Sprintf("Creating image: %s", config.AlicloudImageName))
+	tempImageName := config.AlicloudImageName
+	if config.ImageEncrypted != nil && *config.ImageEncrypted {
+		tempImageName = fmt.Sprintf("packer_%s", random.AlphaNum(7))
+		ui.Say(fmt.Sprintf("Creating temporary image for encryption: %s", tempImageName))
+	} else {
+		ui.Say(fmt.Sprintf("Creating image: %s", tempImageName))
+	}
 
-	createImageRequest := s.buildCreateImageRequest(state)
+	createImageRequest := s.buildCreateImageRequest(state, tempImageName)
 	createImageResponse, err := client.WaitForExpected(&WaitForExpectArgs{
 		RequestFunc: func() (responses.AcsResponse, error) {
 			return client.CreateImage(createImageRequest)
@@ -43,20 +51,12 @@ func (s *stepCreateAlicloudImage) Run(ctx context.Context, state multistep.State
 
 	imageId := createImageResponse.(*ecs.CreateImageResponse).ImageId
 
-	_, err = client.WaitForImageStatus(config.AlicloudRegion, imageId, ImageStatusAvailable, time.Duration(s.WaitSnapshotReadyTimeout)*time.Second)
+	imagesResponse, err := client.WaitForImageStatus(config.AlicloudRegion, imageId, ImageStatusAvailable, time.Duration(s.WaitSnapshotReadyTimeout)*time.Second)
 	if err != nil {
 		return halt(state, err, "Timeout waiting for image to be created")
 	}
 
-	describeImagesRequest := ecs.CreateDescribeImagesRequest()
-	describeImagesRequest.ImageId = imageId
-	describeImagesRequest.RegionId = config.AlicloudRegion
-	imagesResponse, err := client.DescribeImages(describeImagesRequest)
-	if err != nil {
-		return halt(state, err, "")
-	}
-
-	images := imagesResponse.Images.Image
+	images := imagesResponse.(*ecs.DescribeImagesResponse).Images.Image
 	if len(images) == 0 {
 		return halt(state, err, "Unable to find created image")
 	}
@@ -83,17 +83,24 @@ func (s *stepCreateAlicloudImage) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	config := state.Get("config").(*Config)
+	encryptedSet := config.ImageEncrypted != nil && *config.ImageEncrypted
+
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
+
+	if !cancelled && !halted && !encryptedSet {
 		return
 	}
 
 	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
 
-	ui.Say("Deleting the image because of cancellation or error...")
+	if !cancelled && !halted && encryptedSet {
+		ui.Say(fmt.Sprintf("Deleting temporary image %s(%s) and related snapshots after finishing encryption...", s.image.ImageId, s.image.ImageName))
+	} else {
+		ui.Say("Deleting the image and related snapshots because of cancellation or error...")
+	}
 
 	deleteImageRequest := ecs.CreateDeleteImageRequest()
 	deleteImageRequest.RegionId = config.AlicloudRegion
@@ -102,15 +109,25 @@ func (s *stepCreateAlicloudImage) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf("Error deleting image, it may still be around: %s", err))
 		return
 	}
+
+	//Delete the snapshot of this image
+	for _, diskDevices := range s.image.DiskDeviceMappings.DiskDeviceMapping {
+		deleteSnapshotRequest := ecs.CreateDeleteSnapshotRequest()
+		deleteSnapshotRequest.SnapshotId = diskDevices.SnapshotId
+		if _, err := client.DeleteSnapshot(deleteSnapshotRequest); err != nil {
+			ui.Error(fmt.Sprintf("Error deleting snapshot, it may still be around: %s", err))
+			return
+		}
+	}
 }
 
-func (s *stepCreateAlicloudImage) buildCreateImageRequest(state multistep.StateBag) *ecs.CreateImageRequest {
+func (s *stepCreateAlicloudImage) buildCreateImageRequest(state multistep.StateBag, imageName string) *ecs.CreateImageRequest {
 	config := state.Get("config").(*Config)
 
 	request := ecs.CreateCreateImageRequest()
 	request.ClientToken = uuid.TimeOrderedUUID()
 	request.RegionId = config.AlicloudRegion
-	request.ImageName = config.AlicloudImageName
+	request.ImageName = imageName
 	request.ImageVersion = config.AlicloudImageVersion
 	request.Description = config.AlicloudImageDescription
 

@@ -3,11 +3,12 @@ package ecs
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"time"
 )
 
 type stepCreateAlicloudSnapshot struct {
