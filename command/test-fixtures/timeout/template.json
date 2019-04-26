@@ -1,0 +1,37 @@
+{
+    "builders": [
+        {
+            "name": "roses",
+            "type": "file",
+            "content": "roses",
+            "target": "roses.txt"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell-local",
+            "inline": [
+                "touch fuchsias.txt"
+            ],
+            "timeout": "5s"
+        },
+        {
+            "type": "shell-local",
+            "inline": [
+                "touch lilas.txt"
+            ]
+        },
+        {
+            "type": "sleep",
+            "duration": "2m",
+
+            "timeout": "1ms"
+        },
+        {
+            "type": "shell-local",
+            "inline": [
+                "touch campanules.txt"
+            ]
+        }
+    ]
+} 

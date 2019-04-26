@@ -11,7 +11,6 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"syscall"
@@ -23,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/version"
+	"github.com/mattn/go-tty"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
@@ -144,12 +144,6 @@ func wrappedMain() int {
 
 	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
 
-	// Prepare stdin for plugin usage by switching it to a pipe
-	// But do not switch to pipe in plugin
-	if !inPlugin {
-		setupStdin()
-	}
-
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
@@ -165,19 +159,12 @@ func wrappedMain() int {
 		)
 	}
 
-	cacheDir := os.Getenv("PACKER_CACHE_DIR")
-	if cacheDir == "" {
-		cacheDir = "packer_cache"
-	}
-
-	cacheDir, err = filepath.Abs(cacheDir)
+	cacheDir, err := packer.CachePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Setting cache directory: %s", cacheDir)
-	cache := &packer.FileCache{CacheDir: cacheDir}
 
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
@@ -185,13 +172,9 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
-	// Setup the UI if we're being machine-readable
-	var ui packer.Ui = &packer.BasicUi{
-		Reader:      os.Stdin,
-		Writer:      os.Stdout,
-		ErrorWriter: os.Stdout,
-	}
+	var ui packer.Ui
 	if machineReadable {
+		// Setup the UI as we're being machine-readable
 		ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
@@ -202,8 +185,22 @@ func wrappedMain() int {
 			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
 			return 1
 		}
+	} else {
+		basicUi := &packer.BasicUi{
+			Reader:      os.Stdin,
+			Writer:      os.Stdout,
+			ErrorWriter: os.Stdout,
+		}
+		ui = basicUi
+		if !inPlugin {
+			if TTY, err := tty.Open(); err != nil {
+				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+			} else {
+				basicUi.TTY = TTY
+				defer TTY.Close()
+			}
+		}
 	}
-
 	// Create the CLI meta
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
@@ -215,8 +212,7 @@ func wrappedMain() int {
 			},
 			Version: version.Version,
 		},
-		Cache: cache,
-		Ui:    ui,
+		Ui: ui,
 	}
 
 	cli := &cli.CLI{

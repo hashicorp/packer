@@ -1,5 +1,5 @@
-TEST?=$(shell go list ./... | grep -v vendor)
-VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
+TEST?=$(shell go list ./...)
+VET?=$(shell go list ./...)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
@@ -32,7 +32,7 @@ release: deps test releasebin package ## Build a release build
 bin: deps ## Build debug/test build
 	@go get github.com/mitchellh/gox
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
 	@go get github.com/mitchellh/gox
@@ -40,7 +40,7 @@ releasebin: deps
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
 	fi
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
 
 package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
@@ -50,7 +50,6 @@ deps:
 	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
-	@go get github.com/kardianos/govendor
 
 dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -102,7 +101,7 @@ generate: deps ## Generate dynamically generated code
 	gofmt -w command/plugin.go
 
 test: fmt-check mode-check vet ## Run unit tests
-	@go test $(TEST) $(TESTARGS) -timeout=2m
+	@go test $(TEST) $(TESTARGS) -timeout=3m
 
 # testacc runs acceptance tests
 testacc: deps generate ## Run acceptance tests
@@ -110,13 +109,20 @@ testacc: deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: fmt-check mode-check vet ## Test with race detection enabled
-	@go test -race $(TEST) $(TESTARGS) -timeout=2m -p=8
+	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
+
+check-vendor-vs-mod:
+	@GO111MODULE=on go mod vendor 
+	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
+		echo "ERROR: vendor dir is not on par with go modules definition." && \
+		exit 1; \
+	fi
 
 updatedeps:
-	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
+	@echo "INFO: Packer deps are managed by go modules. See .github/CONTRIBUTING.md"
 
 vet: ## Vet Go code
-	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
+	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
 		exit 1; \
 	fi

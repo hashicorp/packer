@@ -28,7 +28,7 @@ type StepShutdown struct {
 	Delay   time.Duration
 }
 
-func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -38,7 +38,7 @@ func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multiste
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", s.Command)
 		cmd := &packer.RemoteCmd{Command: s.Command}
-		if err := cmd.StartWithUi(comm, ui); err != nil {
+		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

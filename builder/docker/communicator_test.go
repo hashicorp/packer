@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"crypto/sha256"
 	"io/ioutil"
 	"os"
@@ -14,14 +15,9 @@ import (
 	"github.com/hashicorp/packer/template"
 )
 
-func TestCommunicator_impl(t *testing.T) {
-	var _ packer.Communicator = new(Communicator)
-}
-
 // TestUploadDownload verifies that basic upload / download functionality works
 func TestUploadDownload(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(dockerBuilderConfig))
 	if err != nil {
@@ -76,7 +72,7 @@ func TestUploadDownload(t *testing.T) {
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -105,7 +101,6 @@ func TestUploadDownload(t *testing.T) {
 // only intermittently.
 func TestLargeDownload(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(dockerLargeBuilderConfig))
 	if err != nil {
@@ -166,7 +161,7 @@ func TestLargeDownload(t *testing.T) {
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -210,7 +205,6 @@ func TestLargeDownload(t *testing.T) {
 // TestFixUploadOwner verifies that owner of uploaded files is the user the container is running as.
 func TestFixUploadOwner(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(testFixUploadOwnerTemplate))
 	if err != nil {
@@ -275,7 +269,7 @@ func TestFixUploadOwner(t *testing.T) {
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}

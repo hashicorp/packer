@@ -2,8 +2,10 @@ package images
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/utils"
 )
 
 // `listURL` is a pure function. `listURL(c)` is a URL for which a GET
@@ -38,14 +40,26 @@ func deleteURL(c *gophercloud.ServiceClient, imageID string) string {
 }
 
 // builds next page full url based on current url
-func nextPageURL(currentURL string, next string) (string, error) {
-	base, err := url.Parse(currentURL)
+func nextPageURL(serviceURL, requestedNext string) (string, error) {
+	base, err := utils.BaseEndpoint(serviceURL)
 	if err != nil {
 		return "", err
 	}
-	rel, err := url.Parse(next)
+
+	requestedNextURL, err := url.Parse(requestedNext)
 	if err != nil {
 		return "", err
 	}
-	return base.ResolveReference(rel).String(), nil
+
+	base = gophercloud.NormalizeURL(base)
+	nextPath := base + strings.TrimPrefix(requestedNextURL.Path, "/")
+
+	nextURL, err := url.Parse(nextPath)
+	if err != nil {
+		return "", err
+	}
+
+	nextURL.RawQuery = requestedNextURL.RawQuery
+
+	return nextURL.String(), nil
 }

@@ -22,7 +22,7 @@ func testConfig() map[string]interface{} {
 		"shutdown_command":        "yes",
 		"ssh_username":            "foo",
 		"switch_name":             "switch", // to avoid using builder.detectSwitchName which can lock down in travis-ci
-		"ram_size":                64,
+		"memory":                  64,
 		"guest_additions_mode":    "none",
 		"clone_from_vmcx_path":    "generated",
 		packer.BuildNameConfigKey: "foo",
@@ -203,9 +203,6 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ISOChecksum != "foo" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
-	}
 }
 
 func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
@@ -226,8 +223,8 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatal("should have error")
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Test good
@@ -243,17 +240,6 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	if b.config.ISOChecksumType != "md5" {
 		t.Fatalf("should've lowercased: %s", b.config.ISOChecksumType)
-	}
-
-	// Test unknown
-	config["iso_checksum_type"] = "fake"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
 	}
 
 	// Test none
@@ -517,17 +503,15 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 	hook := &packer.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
 	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
-	state.Put("http_port", uint(0))
+	state.Put("http_port", 0)
 	state.Put("ui", ui)
 	state.Put("vmName", "packer-foo")
 

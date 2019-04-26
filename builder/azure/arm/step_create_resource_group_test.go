@@ -105,7 +105,7 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	var actualTags map[string]*string
 
 	var testSubject = &StepCreateResourceGroup{
-		create: func(_ context.Context, resourceGroupName string, location string, tags map[string]*string) error {
+		create: func(ctx context.Context, resourceGroupName string, location string, tags map[string]*string) error {
 			actualResourceGroupName = resourceGroupName
 			actualLocation = location
 			actualTags = tags

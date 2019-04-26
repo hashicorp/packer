@@ -75,3 +75,19 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 		}
 	}
 }
+
+func TestFixerAmazonPrivateIPNonBoolean(t *testing.T) {
+	var f FixerAmazonPrivateIP
+
+	input := map[string]interface{}{
+		"builders": []map[string]interface{}{{
+			"type":           "amazon-ebs",
+			"ssh_private_ip": "not-a-boolean-value",
+		}},
+	}
+
+	_, err := f.Fix(input)
+	if err == nil {
+		t.Fatal("should have errored")
+	}
+}

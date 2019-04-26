@@ -12,7 +12,7 @@ import (
 // StepEarlyUnflock unlocks the flock.
 type StepEarlyUnflock struct{}
 
-func (s *StepEarlyUnflock) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepEarlyUnflock) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	cleanup := state.Get("flock_cleanup").(Cleanup)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -31,9 +31,10 @@ type StepCloneVM struct {
 	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	MacAddress                     string
+	KeepRegistered                 bool
 }
 
-func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cloning virtual machine...")
@@ -147,6 +148,12 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.KeepRegistered {
+		ui.Say("keep_registered set. Skipping unregister/deletion of VM.")
+		return
+	}
+
 	ui.Say("Unregistering and deleting virtual machine...")
 
 	err := driver.DeleteVirtualMachine(s.VMName)

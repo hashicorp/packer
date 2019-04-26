@@ -18,7 +18,7 @@ import (
 // userDataTemplateData represents variables for user_data interpolation
 type userDataTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 }
 
 // stepCreateInstance represents a Packer build step that creates CloudStack instances.
@@ -28,7 +28,7 @@ type stepCreateInstance struct {
 }
 
 // Run executes the Packer build step that creates a CloudStack instance.
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -86,7 +86,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	}
 
 	if config.UserData != "" {
-		httpPort := state.Get("http_port").(uint)
+		httpPort := state.Get("http_port").(int)
 		httpIP, err := hostIP()
 		if err != nil {
 			err := fmt.Errorf("Failed to determine host IP: %s", err)

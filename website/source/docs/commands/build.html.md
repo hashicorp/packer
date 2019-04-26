@@ -31,7 +31,8 @@ artifacts that are created will be outputted at the end of the build.
     default are their type, unless a specific `name` attribute is specified
     within the configuration. Any post-processor following a skipped
     post-processor will not run. Because post-processors can be nested in
-    arrays a differ post-processor chain can still run.
+    arrays a different post-processor chain can still run. A post-processor
+    with an empty name will be ignored.
 
 -   `-force` - Forces a builder to run when artifacts from a previous build
     prevent a build from running. The exact behavior of a forced build is left

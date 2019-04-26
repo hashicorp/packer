@@ -1,5 +1,5 @@
 env:
-  - USER=travis
+  - USER=travis GO111MODULE=off
 
 os:
   - windows
@@ -11,8 +11,7 @@ sudo: false
 language: go
 
 go:
-  - 1.11.x
-  - master
+  - 1.12.x
 
 before_install:
   - >
@@ -30,6 +29,5 @@ branches:
 
 matrix:
   allow_failures:
-    - go: master
     - os: windows
   fast_finish: true

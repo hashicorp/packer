@@ -11,7 +11,7 @@ import (
 
 type StepConnectDocker struct{}
 
-func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectDocker) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	containerId := state.Get("container_id").(string)
 	driver := state.Get("driver").(Driver)
@@ -32,16 +32,31 @@ func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Create the communicator that talks to Docker via various
 	// os/exec tricks.
-	comm := &Communicator{
-		ContainerID:   containerId,
-		HostDir:       tempDir,
-		ContainerDir:  config.ContainerDir,
-		Version:       version,
-		Config:        config,
-		ContainerUser: containerUser,
-	}
+	if config.WindowsContainer {
+		comm := &WindowsContainerCommunicator{Communicator{
+			ContainerID:   containerId,
+			HostDir:       tempDir,
+			ContainerDir:  config.ContainerDir,
+			Version:       version,
+			Config:        config,
+			ContainerUser: containerUser,
+			EntryPoint:    []string{"powershell"},
+		},
+		}
+		state.Put("communicator", comm)
 
-	state.Put("communicator", comm)
+	} else {
+		comm := &Communicator{
+			ContainerID:   containerId,
+			HostDir:       tempDir,
+			ContainerDir:  config.ContainerDir,
+			Version:       version,
+			Config:        config,
+			ContainerUser: containerUser,
+			EntryPoint:    []string{"/bin/sh", "-c"},
+		}
+		state.Put("communicator", comm)
+	}
 	return multistep.ActionContinue
 }
 

@@ -3,9 +3,10 @@ package arm
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
-	"testing"
 )
 
 func TestStepSnapshotOSDiskShouldFailIfSnapshotFails(t *testing.T) {

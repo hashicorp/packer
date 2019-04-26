@@ -49,6 +49,8 @@ self-install. Still, the example serves to show the basic configuration:
 }
 ```
 
+<%= partial "partials/builders/iso-config" %>
+
 ## Configuration Reference
 
 There are many configuration options available for the VMware builder. They are
@@ -58,30 +60,6 @@ category, the available options are alphabetized and described.
 In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
-
-### Required:
-
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to
-    booting a virtual machine with the ISO attached. The type of the checksum is
-    specified with `iso_checksum_type`, documented below. At least one of
-    `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
-    over `iso_checksum_url` type.
-
--   `iso_checksum_type` (string) - The type of the checksum specified in
-    `iso_checksum`. Valid values are `none`, `md5`, `sha1`, `sha256`, or
-    `sha512` currently. While `none` will skip checksumming, this is not
-    recommended since ISO files are generally large and corruption does happen
-    from time to time.
-
--   `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
-    containing a checksum for the OS ISO file. At least one of `iso_checksum`
-    and `iso_checksum_url` must be defined. This will be ignored if
-    `iso_checksum` is non empty.
-
--   `iso_url` (string) - A URL to the ISO containing the installation image.
-    This URL can be either an HTTP URL or a file URL (or path to a file). If
-    this is an HTTP URL, Packer will download it and cache it between runs.
 
 ### Optional:
 
@@ -212,19 +190,6 @@ builder.
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are `8000` and `9000`, respectively.
-
--   `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to `iso`.
-
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
-    original filename as its name.
-
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
-    Packer will try these in order. If anything goes wrong attempting to
-    download or while downloading a single URL, it will move on to the next. All
-    URLs must point to the same file (same checksum). By default this is empty
-    and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
 -   `memory` (number) - The amount of memory to use when building the VM
     in megabytes.
@@ -531,69 +496,7 @@ variables isn't required, however.
 -   `Version` - The Hardware version VMWare will execute this vm under. Also
     known as the `virtualhw.version`.
 
-## Building on a Remote vSphere Hypervisor
-
-In addition to using the desktop products of VMware locally to build virtual
-machines, Packer can use a remote VMware Hypervisor to build the virtual
-machine.
-
--&gt; **Note:** Packer supports ESXi 5.1 and above.
-
-Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by
-running the following command:
-
-``` text
-esxcli system settings advanced set -o /Net/GuestIPHack -i 1
-```
-
-When using a remote VMware Hypervisor, the builder still downloads the ISO and
-various files locally, and uploads these to the remote machine. Packer currently
-uses SSH to communicate to the ESXi machine rather than the vSphere API. At some
-point, the vSphere API may be used.
-
-Packer also requires VNC to issue boot commands during a build, which may be
-disabled on some remote VMware Hypervisors. Please consult the appropriate
-documentation on how to update VMware Hypervisor's firewall to allow these
-connections. VNC can be disabled by not setting a `boot_command` and setting
-`disable_vnc` to `true`.
-
-To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
-the required `remote_*` configurations:
-
--   `remote_type` - This must be set to "esx5".
-
--   `remote_host` - The host of the remote machine.
-
-Additionally, there are some optional configurations that you'll likely have to
-modify as well:
-
--   `remote_port` - The SSH port of the remote machine
-
--   `remote_datastore` - The path to the datastore where the VM will be stored
-    on the ESXi machine.
-
--   `remote_cache_datastore` - The path to the datastore where supporting files
-    will be stored during the build on the remote machine.
-
--   `remote_cache_directory` - The path where the ISO and/or floppy files will
-    be stored during the build on the remote machine. The path is relative to
-    the `remote_cache_datastore` on the remote machine.
-
--   `remote_username` - The SSH username used to access the remote machine.
-
--   `remote_password` - The SSH password for access to the remote machine.
-
--   `remote_private_key_file` - The SSH key for access to the remote machine.
-
--   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
-    format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`. This option
-    currently only works when option remote_type is set to "esx5".
-    Since ovftool is only capable of password based authentication
-    `remote_password` must be set when exporting the VM.
-
--   `vnc_disable_password` - This must be set to "true" when using VNC with
-    ESXi 6.5 or 6.7.
+<%= partial "partials/builders/building_on_remote_vsphere_hypervisor" %>
 
 ### VNC port discovery
 

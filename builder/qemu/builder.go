@@ -1,6 +1,7 @@
 package qemu
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -116,12 +117,12 @@ type Config struct {
 	QemuArgs          [][]string `mapstructure:"qemuargs"`
 	QemuBinary        string     `mapstructure:"qemu_binary"`
 	ShutdownCommand   string     `mapstructure:"shutdown_command"`
-	SSHHostPortMin    uint       `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    uint       `mapstructure:"ssh_host_port_max"`
+	SSHHostPortMin    int        `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax    int        `mapstructure:"ssh_host_port_max"`
 	UseDefaultDisplay bool       `mapstructure:"use_default_display"`
 	VNCBindAddress    string     `mapstructure:"vnc_bind_address"`
-	VNCPortMin        uint       `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint       `mapstructure:"vnc_port_max"`
+	VNCPortMin        int        `mapstructure:"vnc_port_min"`
+	VNCPortMax        int        `mapstructure:"vnc_port_max"`
 	VMName            string     `mapstructure:"vm_name"`
 
 	// These are deprecated, but we keep them around for BC
@@ -337,6 +338,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
+	if b.config.SSHHostPortMin < 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ssh_host_port_min must be positive"))
+	}
 
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
@@ -354,7 +359,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with Qemu
 	driver, err := b.newDriver(b.config.QemuBinary)
 	if err != nil {
@@ -448,7 +453,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
 	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
@@ -457,7 +461,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -502,13 +506,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
 
 func (b *Builder) newDriver(qemuBinary string) (Driver, error) {

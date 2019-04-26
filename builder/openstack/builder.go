@@ -4,8 +4,8 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -65,7 +65,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	computeClient, err := b.config.computeV2Client()
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing compute client: %s", err)
@@ -115,6 +115,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ConfigDrive:           b.config.ConfigDrive,
 			InstanceMetadata:      b.config.InstanceMetadata,
 			UseBlockStorageVolume: b.config.UseBlockStorageVolume,
+			ForceDelete:           b.config.ForceDelete,
 		},
 		&StepGetPassword{
 			Debug: b.config.PackerDebug,
@@ -154,7 +155,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -174,11 +175,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

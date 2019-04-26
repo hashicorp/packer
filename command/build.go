@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -152,21 +153,20 @@ func (c *BuildCommand) Run(args []string) int {
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
-		// buildCtx, cancelCtx := ctx.WithCancel()
+		buildCtx, cancelCtx := context.WithCancel(context.Background())
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		defer signal.Stop(sigCh)
 		go func(b packer.Build) {
-			<-sigCh
+			sig := <-sigCh
 			interruptWg.Add(1)
 			defer interruptWg.Done()
 			interrupted = true
 
-			log.Printf("Stopping build: %s", b.Name())
-			b.Cancel()
-			//cancelCtx()
+			log.Printf("Stopping build: %s after receiving %s", b.Name(), sig)
+			cancelCtx()
 			log.Printf("Build cancelled: %s", b.Name())
 		}(b)
 
@@ -177,7 +177,7 @@ func (c *BuildCommand) Run(args []string) int {
 			name := b.Name()
 			log.Printf("Starting build run: %s", name)
 			ui := buildUis[name]
-			runArtifacts, err := b.Run(ui, c.Cache)
+			runArtifacts, err := b.Run(buildCtx, ui)
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
@@ -303,7 +303,7 @@ Options:
 
   -color=false                  Disable color output. (Default: color)
   -debug                        Debug mode enabled for builds.
-  -except=foo,bar,baz           Build all builds other than these.
+  -except=foo,bar,baz           Run all builds and post-procesors other than these.
   -only=foo,bar,baz             Build only the specified builds.
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.

@@ -78,14 +78,27 @@ builder.
 -   `username` or `user_id` (string) - The username or id used to connect to
     the OpenStack service. If not specified, Packer will use the environment
     variable `OS_USERNAME` or `OS_USERID`, if set. This is not required if
-    using access token instead of password or if using `cloud.yaml`.
+    using access token or application credential instead of password, or if using
+    `cloud.yaml`.
 
 -   `password` (string) - The password used to connect to the OpenStack
     service. If not specified, Packer will use the environment variables
-    `OS_PASSWORD`, if set. This is not required if using access token instead
-    of password or if using `cloud.yaml`.
+    `OS_PASSWORD`, if set. This is not required if using access token or
+    application credential instead of password, or if using `cloud.yaml`.
 
 ### Optional:
+
+-   `application_credential_id` (string) - The application credential id to
+    use with application credential based authorization. Packer will use the
+    environment variable `OS_APPLICATION_CREDENTIAL_ID`, if set.
+
+-   `application_credential_name` (string) - The application credential name to
+    use with application credential based authorization. Packer will use the
+    environment variable `OS_APPLICATION_CREDENTIAL_NAME`, if set.
+
+-   `application_credential_secret` (string) - The application credential secret
+    to use with application credential based authorization. Packer will use the
+    environment variable `OS_APPLICATION_CREDENTIAL_SECRET`, if set.
 
 -   `availability_zone` (string) - The availability zone to launch the server
     in. If this isn't specified, the default enforced by your OpenStack cluster
@@ -122,6 +135,10 @@ builder.
 
 -   `floating_ip_pool` (string) - *Deprecated* use `floating_ip_network`
     instead.
+
+-   `force_delete` (boolean) - Whether to force the OpenStack instance to be
+    forcefully deleted. This is useful for environments that have
+    reclaim / soft deletion enabled. By default this is false.
 
 -   `image_members` (array of strings) - List of members to add to the image
     after creation. An image member is usually a project (also called the
@@ -300,7 +317,7 @@ VM.
 ``` json
 {
   "type": "openstack",
-  "identity_endpoint": "http://<destack-ip>:5000/v3",
+  "identity_endpoint": "http://<devstack-ip>:5000/v3",
   "tenant_name": "admin",
   "domain_name": "Default",
   "username": "admin",
@@ -432,3 +449,13 @@ Or use the following environment variables:
 -   `OS_AUTH_URL`
 -   `OS_TOKEN`
 -   One of `OS_TENANT_NAME` or `OS_TENANT_ID`
+
+### Authorize Using Application Credential
+
+To authorize with an application credential, only `identity_endpoint`,
+`application_credential_id`, and `application_credential_secret` are needed.
+Or use the following environment variables:
+
+-   `OS_AUTH_URL`
+-   `OS_APPLICATION_CREDENTIAL_ID`
+-   `OS_APPLICATION_CREDENTIAL_SECRET`

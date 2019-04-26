@@ -4,6 +4,7 @@ package shell
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +14,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -25,29 +28,7 @@ const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 var retryableSleep = 2 * time.Second
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// If true, the script contains binary and line endings will not be
-	// converted from Windows to Unix-style.
-	Binary bool
-
-	// An inline script to execute. Multiple strings are all executed
-	// in the context of a single shell.
-	Inline []string
-
-	// The local path of the shell script to upload and execute.
-	Script string
-
-	// An array of multiple scripts to run.
-	Scripts []string
-
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	Vars []string `mapstructure:"environment_vars"`
-
-	// The remote path where the local shell script will be uploaded to.
-	// This should be set to a writable file that is in a pre-existing directory.
-	RemotePath string `mapstructure:"remote_path"`
+	shell.Provisioner `mapstructure:",squash"`
 
 	// The command used to execute the script. The '{{ .Path }}' variable
 	// should be used to specify where the script goes, {{ .Vars }}
@@ -61,7 +42,7 @@ type Config struct {
 
 	// This is used in the template generation to format environment variables
 	// inside the `ExecuteCommand` template.
-	EnvVarFormat string
+	EnvVarFormat string `mapstructure:"env_var_format"`
 
 	ctx interpolate.Context
 }
@@ -180,7 +161,7 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Provisioning with windows-shell..."))
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
@@ -224,7 +205,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// and then the command is executed but the file doesn't exist
 		// any longer.
 		var cmd *packer.RemoteCmd
-		err = p.retryable(func() error {
+		err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
@@ -234,7 +215,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 
 			cmd = &packer.RemoteCmd{Command: command}
-			return cmd.StartWithUi(comm, ui)
+			return cmd.RunWithUi(ctx, comm, ui)
 		})
 		if err != nil {
 			return err
@@ -243,44 +224,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// Close the original file since we copied it
 		f.Close()
 
-		if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
-}
-
-// retryable will retry the given function over and over until a
-// non-error is returned.
-func (p *Provisioner) retryable(f func() error) error {
-	startTimeout := time.After(p.config.StartRetryTimeout)
-	for {
-		var err error
-		if err = f(); err == nil {
-			return nil
-		}
-
-		// Create an error and log it
-		err = fmt.Errorf("Retryable error: %s", err)
-		log.Print(err.Error())
-
-		// Check if we timed out, otherwise we retry. It is safe to
-		// retry since the only error case above is if the command
-		// failed to START.
-		select {
-		case <-startTimeout:
-			return err
-		default:
-			time.Sleep(retryableSleep)
-		}
-	}
 }
 
 func (p *Provisioner) createFlattenedEnvVars() (flattened string) {

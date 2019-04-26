@@ -26,7 +26,7 @@ type StepRun struct {
 	vmxPath  string
 }
 
-func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
@@ -43,7 +43,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 		if vncIpOk && vncPortOk && vncPasswordOk {
 			vncIp := vncIpRaw.(string)
-			vncPort := vncPortRaw.(uint)
+			vncPort := vncPortRaw.(int)
 			vncPassword := vncPasswordRaw.(string)
 
 			ui.Message(fmt.Sprintf(

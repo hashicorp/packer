@@ -74,7 +74,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(_ context.Context, resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
+		captureVhd: func(ctx context.Context, resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 			actualVirtualMachineCaptureParameters = parameters

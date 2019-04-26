@@ -1,30 +1,130 @@
-## 1.3.5 (upcoming)
+## 1.4.0 (April 11, 2019)
 
 ### IMPROVEMENTS:
-* builder/amazon: AWS users can now use the Vault AWS engine to generate temporary credentials. [GH-7282]
-* builder/virtualbox: New "guest_additions_interface" option to enable attaching via a SATA interface. [GH-7298]
-* bulder/openstac: Deprecated compute/v2/images API [GH-7268]
-* post-processor/manifest: Add "custom_data" key to packer manifest post-processor [GH-7248]
-* builder/vmware: Add `cores` option for specifying the number of cores per socket. [GH-7191]
-* post-processor/googlecompute-export: Extend auth for the GCE-post-processors to act like the GCE builder. [GH-7222]
-* post-processor/googlecompute-import: Extend auth for the GCE-post-processors to act like the GCE builder. [GH-7222]
+* builder/alicloud: Improve error message for conflicting images name [GH-7415]
+* builder/amazon-chroot: Allow users to specify custom block device mapping
+    [GH-7370]
+* builder/ansible: Documentation fix explaining how to use ansible 2.7 + winrm
+    [GH-7461]
+* builder/azure-arm: specify zone resilient image from config [GH-7211]
+* builder/docker: Add support for windows containers [GH-7444]
+* builder/openstack: Allow both ports and networks in openstack builder
+    [GH-7451]
+* builder/openstack: Expose force_delete for openstack builder [GH-7395]
+* builder/OpenStack: Support Application Credential Authentication [GH-7300]
+* builder/virtualbox: Add validation for 'none' communicator. [GH-7419]
+* builder/virtualbox: create ephemeral SSH key pair for build process [GH-7287]
+* core: Add functionality to marshal a Template to valid Packer JSON [GH-7339]
+* core: Allow user variables to be interpreted within the variables section
+    [GH-7390]
+* core: Incorporate the go-getter to handle downloads [GH-6999]
+* core: Lock Packer VNC ports using a lock file to prevent collisions [GH-7422]
+* core: Print VerifyChecksum log for the download as ui.Message output
+    [GH-7387]
+* core: Users can now set provisioner timeouts [GH-7466]
+* core: Switch to using go mod for managing dependencies [GH-7270]
+* core: Select a new VNC port if initial port is busy [GH-7423]
+* post-processor/googlecompute-export: Set network project id to builder
+    [GH-7359]
+* post-processor/vagrant-cloud: support for the vagrant builder [GH-7397]
+* post-processor/Vagrant: Option to ignore SSL verification when using on-
+    premise vagrant cloud [GH-7377]
+* postprocessor/amazon-import: Support S3 and AMI encryption. [GH-7396]
+* provisioner/shell provisioner/windows-shell: allow to specify valid exit
+    codes [GH-7385]
+* core: Filter sensitive variables out of the ui as well as the logs
+    [GH-7462]
 
 ### BUG FIXES:
-* provisioner/salt: Force powershell to overwrite duplicate files [GH-7281]
-* builder/vmware-esxi: Should properly strip whitespace from end of names of files stored on esxi. [GH-7310]
-* builder/hyper-v: Fix regression where we improperly handled spaces in switch names [GH-7266]
-* core: clean up Makefile [GH-7254][GH-7265]
-* builder/cloudstack: Updated sdk version; can now use ostype name in template_os option.  [GH-7264]
+* builder/alibaba: Update to latest Alibaba Cloud official image to fix
+    acceptance tests [GH-7375]
+* builder/amazon-chroot: Fix building PV images and where mount_partition is
+    set [GH-7337]
+* builder/amazon: Fix http_proxy env var regression [GH-7361]
+* builder/azure: Fix: Power off before taking snapshot (windows) [GH-7464]
+* builder/hcloud: Fix usage of freebsd64 rescue image [GH-7381]
+* builder/vagrant: windows : fix docs and usage [GH-7416] [GH-7417]
+* builder/vmware-esxi: properly copy .vmxf files in remote vmx builds [GH-7357]
+* core: fix bug where Packer didn't pause in debug on certain linux platforms.
+    [GH-7352]
+* builder/amazon: Fix bug copying encrypted images between regions [GH-7342]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: Change `temporary_security_group_source_cidr` to
+    `temporary_security_group_source_cidrs` and allow it to accept a list of
+    strings. [GH-7450]
+* builder/amazon: If users do not pass any encrypt setting, retain any initial
+    encryption setting of the AMI. [GH-6787]
+* builder/docker: Update docker's default config to use /bin/sh instead of
+    /bin/bash [GH-7106]
+* builder/hyperv: Change option names cpu->cpus and ram_size->memory to bring
+    naming in line with vmware and virtualbox builders [GH-7447]
+* builder/oracle-classic: Remove default ssh_username from oracle classic
+    builder, but add note to docs with oracle's default user. [GH-7446]
+* builder/scaleway: Renamed attribute api_access_key to organization_id.
+    [GH-6983]
+* Change clean_image name and clean_ami_name to a more general clean_resource
+    name for Googlecompute, Azure, and AWS builders. [GH-7456]
+* core/post-processors: Change interface for post-processors to allow an
+    overridable default for keeping input artifacts. [GH-7463]
+
+## 1.3.5 (February 28, 2019)
+
+### IMPROVEMENTS:
+* builder/alicloud: Update aliyun sdk to support eu-west-1 region [GH-7338]
+* builder/amazon: AWS users can now use the Vault AWS engine to generate
+    temporary credentials. [GH-7282]
+* builder/azure: IMDS to get subscription for Azure MSI [GH-7332]
+* builder/openstack: Replaced deprecated compute/ api with imageservice/
+    [GH-7038]
+* builder/virtualbox: New "guest_additions_interface" option to enable
+    attaching via a SATA interface. [GH-7298]
+* builder/vmware: Add `cores` option for specifying the number of cores per
+    socket. [GH-7191]
+* bulder/openstac: Deprecated compute/v2/images API [GH-7268]
+* core: Add validation check to help folks who swap their iso_path and
+    checksum_path [GH-7311]
+* fixer/amazon: Make the amazon-private-ip fixer errors more visible [GH-7336]
+* post-processor/googlecompute-export: Extend auth for the GCE-post-processors
+    to act like the GCE builder. [GH-7222]
+* post-processor/googlecompute-import: Extend auth for the GCE-post-processors
+    to act like the GCE builder. [GH-7222]
+* post-processor/manifest: Add "custom_data" key to packer manifest post-
+    processor [GH-7248]
+
+### BUG FIXES:
+* builder/amazon: Fix support for aws-us-gov [GH-7347]
+* builder/amazon: Move snapshot deletion to cleanup phase. [GH-7343]
 * builder/azure: Fixed Azure interactive authentication [GH-7276]
+* builder/cloudstack: Updated sdk version; can now use ostype name in
+    template_os option.  [GH-7264]
+* builder/google: Change metadata url to use a FQDN fixing bug stemming from
+    differing DNS/search domains. [GH-7260]
 * builder/hyper-v: Fix integer overflows in 32-bit builds [GH-7251]
-* builder/google: Change metadata url to use a FQDN fixing bug stemming from differing DNS/search domains. [GH-7260]
+* builder/hyper-v: Fix regression where we improperly handled spaces in switch
+    names [GH-7266]
+* builder/openstack: Pass context So we know to cancel during WaitForImage
+    [GH-7341]
+* builder/vmware-esxi: Strip \r\n whitespace from end of names of
+    files stored on esxi. [GH-7310]
+* builder/vmware: Add "--noSSLVerify" to args in ovftool Validation [GH-7314]
+* core: clean up Makefile [GH-7254][GH-7265]
 * core: Fixes mismatches in checksums for dependencies for Go 1.11.4+ [GH-7261]
-* core: make sure 'only' option is completely ignored by post-processors [GH-7262]
+* core: make sure 'only' option is completely ignored by post-processors
+    [GH-7262]
+* core: name a post-processor to its type when it is not named [GH-7330]
+* provisioner/salt: Force powershell to overwrite duplicate files [GH-7281]
 
 ### Features:
-**new provisioner**`inspec` Added inspec.io provisioner #[GH-7180]
-**new post-processor** `digitalocean-import`Add digitalocean-import post-processor. [GH-7060]
-**new builder** `vagrant` allows users to call vagrant to provision starting from vagrant boxes and save them as new vagrant boxes. [GH-7221]
+* **new builder** `vagrant` allows users to call vagrant to provision starting
+    from vagrant boxes and save them as new vagrant boxes. [GH-7221]
+* **new builder:** `hyperone` for building new images on HyperOne Platform on
+    top of existing image or from the scratch with the use of chroot. [GH-7294]
+* **new post-processor** `digitalocean-import`Add digitalocean-import post-
+    processor. [GH-7060]
+* **new provisioner**`inspec` Added inspec.io provisioner [GH-7180]
+* communicator: Add configurable pause after communicator can connect but
+    before it performs provisioning tasks [GH-7317] [GH-7351]
 
 ## 1.3.4 (January 30, 2019)
 ### IMPROVEMENTS:

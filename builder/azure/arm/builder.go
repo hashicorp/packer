@@ -24,10 +24,9 @@ import (
 )
 
 type Builder struct {
-	config    *Config
-	stateBag  multistep.StateBag
-	runner    multistep.Runner
-	ctxCancel context.CancelFunc
+	config   *Config
+	stateBag multistep.StateBag
+	runner   multistep.Runner
 }
 
 const (
@@ -51,16 +50,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, errs
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	ui.Say("Running builder ...")
 
-	ctx, cancel := context.WithCancel(context.Background())
-	b.ctxCancel = cancel
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	if err := newConfigRetriever().FillParameters(b.config); err != nil {
-		return nil, err
+	// User's intent to use MSI is indicated with empty subscription id, tenant, client id, client cert, client secret and jwt.
+	// FillParameters function will set subscription and tenant id here. Therefore getServicePrincipalTokens won't select right auth type.
+	// If we run this after getServicePrincipalTokens call then getServicePrincipalTokens won't have tenant id.
+	if !b.config.useMSI() {
+		if err := newConfigRetriever().FillParameters(b.config); err != nil {
+			return nil, err
+		}
 	}
 
 	log.Print(":: Configuration")
@@ -72,6 +75,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	spnCloud, spnKeyVault, err := b.getServicePrincipalTokens(ui.Say)
 	if err != nil {
 		return nil, err
+	}
+
+	// We need subscription id and tenant id for arm operations. Users hasn't specified one so we try to detect them here.
+	if b.config.useMSI() {
+		if err := newConfigRetriever().FillParameters(b.config); err != nil {
+			return nil, err
+		}
 	}
 
 	ui.Message("Creating Azure Resource Manager (ARM) client ...")
@@ -138,6 +148,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		b.config.Location = *group.Location
 	}
+
+	b.config.validateLocationZoneResiliency(ui.Say)
 
 	if b.config.StorageAccount != "" {
 		account, err := b.getBlobAccount(ctx, azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
@@ -220,9 +232,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
+			NewStepPowerOffCompute(azureClient, ui),
 			NewStepSnapshotOSDisk(azureClient, ui, b.config),
 			NewStepSnapshotDataDisks(azureClient, ui, b.config),
-			NewStepPowerOffCompute(azureClient, ui),
 			NewStepCaptureImage(azureClient, ui),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
@@ -245,7 +257,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(b.stateBag)
+	b.runner.Run(ctx, b.stateBag)
 
 	// Report any errors.
 	if rawErr, ok := b.stateBag.GetOk(constants.Error); ok {
@@ -308,17 +320,6 @@ func (b *Builder) isPublicPrivateNetworkCommunication() bool {
 
 func (b *Builder) isPrivateNetworkCommunication() bool {
 	return b.config.VirtualNetworkName != ""
-}
-
-func (b *Builder) Cancel() {
-	if b.ctxCancel != nil {
-		log.Printf("Cancelling Azure builder...")
-		b.ctxCancel()
-	}
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
 
 func equalLocation(location1, location2 string) bool {

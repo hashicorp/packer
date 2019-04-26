@@ -30,7 +30,7 @@ type StepConnectSSH struct {
 	SSHPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator
@@ -186,7 +186,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			Timeout:                s.Config.SSHReadWriteTimeout,
 		}
 
-		log.Println("[INFO] Attempting SSH connection...")
+		log.Printf("[INFO] Attempting SSH connection to %s...", address)
+		log.Printf("[DEBUG] Config to %#v...", config)
 		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)

@@ -17,6 +17,7 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
+		"-parallel=false",
 		"-only=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -28,7 +29,7 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 
 	for _, f := range []string{"chocolate.txt", "vanilla.txt",
-		"apple.txt", "peach.txt", "pear.txt"} {
+		"apple.txt", "peach.txt", "pear.txt", "unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -58,11 +59,12 @@ func TestBuildStdin(t *testing.T) {
 	defer func() { os.Stdin = stdin }()
 
 	defer cleanup()
-	if code := c.Run([]string{"-"}); code != 0 {
+	if code := c.Run([]string{"-parallel=false", "-"}); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"vanilla.txt", "cherry.txt", "chocolate.txt"} {
+	for _, f := range []string{"vanilla.txt", "cherry.txt", "chocolate.txt",
+		"unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -75,6 +77,7 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 
 	args := []string{
+		"-parallel=false",
 		"-only=chocolate",
 		"-only=cherry",
 		"-only=apple", // ignored
@@ -89,13 +92,38 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"vanilla.txt"} {
+	for _, f := range []string{"vanilla.txt", "tomato.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
 	}
 	for _, f := range []string{"chocolate.txt", "cherry.txt",
-		"apple.txt", "peach.txt", "pear.txt"} {
+		"apple.txt", "peach.txt", "pear.txt", "unnamed.txt"} {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+}
+
+func TestBuildEverything(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		"-parallel=false",
+		`-except=`,
+		filepath.Join(testFixture("build-only"), "template.json"),
+	}
+
+	defer cleanup()
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
+		"apple.txt", "cherry.txt", "pear.txt", "peach.txt", "unnamed.txt"} {
 		if !fileExists(f) {
 			t.Errorf("Expected to find %s", f)
 		}
@@ -108,6 +136,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
+		"-parallel=false",
 		"-except=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -118,7 +147,8 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 
-	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt"} {
+	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
+		"unnamed.txt"} {
 		if fileExists(f) {
 			t.Errorf("Expected NOT to find %s", f)
 		}
@@ -174,4 +204,9 @@ func cleanup() {
 	os.RemoveAll("peach.txt")
 	os.RemoveAll("pear.txt")
 	os.RemoveAll("tomato.txt")
+	os.RemoveAll("unnamed.txt")
+	os.RemoveAll("roses.txt")
+	os.RemoveAll("fuchsias.txt")
+	os.RemoveAll("lilas.txt")
+	os.RemoveAll("campanules.txt")
 }

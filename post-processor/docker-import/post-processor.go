@@ -1,6 +1,7 @@
 package dockerimport
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/docker"
@@ -43,7 +44,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
 	case docker.BuilderId, artifice.BuilderId:
 		break
@@ -51,7 +52,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only import from Docker builder and Artifice post-processor artifacts.",
 			artifact.BuilderId())
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	importRepo := p.config.Repository
@@ -65,7 +66,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message("Repository: " + importRepo)
 	id, err := driver.Import(artifact.Files()[0], p.config.Changes, importRepo)
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	ui.Message("Imported ID: " + id)
@@ -77,5 +78,5 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		IdValue:        importRepo,
 	}
 
-	return artifact, false, nil
+	return artifact, false, false, nil
 }

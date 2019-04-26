@@ -22,7 +22,7 @@ type StepRun struct {
 	vmName string
 }
 
-func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -35,7 +35,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 		if vrdpIpOk && vrdpPortOk {
 			vrdpIp := vrdpIpRaw.(string)
-			vrdpPort := vrdpPortRaw.(uint)
+			vrdpPort := vrdpPortRaw.(int)
 
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+

@@ -69,6 +69,8 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
+<%= partial "partials/builders/iso-config" %>
+
 ### Required for virtual machine import:
 
 -   `clone_from_vmcx_path` (string) - The path to a directory containing a
@@ -193,38 +195,8 @@ builder.
     port, set an identical value for `http_port_min` and `http_port_max`.
     By default the values are 8000 and 9000, respectively.
 
--   `iso_checksum_type` (string) - The algorithm to be used when computing
-    the checksum of the file specified in `iso_checksum`. Currently, valid
-    values are "none", "md5", "sha1", "sha256", or "sha512". Since the
-    validity of ISO and virtual disk files are typically crucial to a
-    successful build, Packer performs a check of any supplied media by
-    default. While setting "none" will cause Packer to skip this check,
-    corruption of large files such as ISOs and virtual hard drives can
-    occur from time to time. As such, skipping this check is not
-    recommended.
-
--   `iso_checksum` (string) - The checksum for the ISO file or virtual
-    hard drive file. The algorithm to use when computing the checksum is
-    specified with `iso_checksum_type`.
-
--   `iso_target_extension` (string) - The extension of the ISO file after
-    download. This defaults to "iso".
-
--   `iso_target_path` (string) - The path where the ISO should be saved after
-    download. By default the ISO will be saved in the Packer cache
-    directory with a hash of the original filename as its name.
-
--   `iso_url` (string) - A URL to the ISO or VHD containing the installation
-    image. This URL can be either an HTTP URL or a file URL (or path to a
-    file). If this is an HTTP URL, Packer will download iso and cache it
-    between runs.
-
--   `iso_urls` (array of strings) - Multiple URLs for the ISO or VHD to
-    download. Packer will try these in order. If anything goes wrong
-    attempting to download or while downloading a single URL, it will move on
-    to the next.  All URLs must point to the same file (same checksum). By
-    default this is empty and `iso_url` is used. Only one of `iso_url` or
-    `iso_urls` can be specified.
+-   `keep_registered` (bool) - If "true", Packer will not delete the VM from
+    The Hyper-V manager.
 
 -   `mac_address` (string) - This allows a specific MAC address to be used on
     the default virtual network card. The MAC address must be a string with
@@ -238,7 +210,7 @@ builder.
     created, must be empty prior to running the builder. By default this is
     "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
--   `ram_size` (number) - The amount, in megabytes, of RAM to assign to the
+-   `memory` (number) - The amount, in megabytes, of RAM to assign to the
     VM. By default, this is 1 GB.
 
 -   `secondary_iso_images` (array of strings) - A list of ISO paths to
@@ -424,7 +396,7 @@ Packer config:
       "winrm_password": "vagrant",
       "winrm_timeout" : "4h",
       "shutdown_command": "f:\\run-sysprep.cmd",
-      "ram_size": 4096,
+      "memory": 4096,
       "cpu": 4,
       "generation": 2,
       "switch_name":"LAN",
@@ -921,6 +893,9 @@ Finish proxy after sysprep -->
 </unattend>
 ```
 
+-> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
+https://cloudywindows.io/post/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
+
 ## Example For Ubuntu Vivid Generation 2
 
 If you are running Windows under virtualization, you may need to create a
@@ -933,7 +908,7 @@ virtual switch with an `External` connection type.
   "variables": {
     "vm_name": "ubuntu-xenial",
     "cpu": "2",
-    "ram_size": "1024",
+    "memory": "1024",
     "disk_size": "21440",
     "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
     "iso_checksum_type": "sha1",
@@ -968,7 +943,7 @@ virtual switch with an `External` connection type.
         "boot<enter>"
       ],
       "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
-      "ram_size": "{{user `ram_size`}}",
+      "memory": "{{user `memory`}}",
       "cpu": "{{user `cpu`}}",
       "generation": 2,
       "enable_secure_boot": false

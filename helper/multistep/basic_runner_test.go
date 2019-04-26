@@ -1,9 +1,9 @@
 package multistep
 
 import (
+	"context"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestBasicRunner_ImplRunner(t *testing.T) {
@@ -20,7 +20,7 @@ func TestBasicRunner_Run(t *testing.T) {
 	stepB := &TestStepAcc{Data: "b"}
 
 	r := &BasicRunner{Steps: []Step{stepA, stepB}}
-	r.Run(data)
+	r.Run(context.Background(), data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -53,7 +53,7 @@ func TestBasicRunner_Run_Halt(t *testing.T) {
 	stepC := &TestStepAcc{Data: "c"}
 
 	r := &BasicRunner{Steps: []Step{stepA, stepB, stepC}}
-	r.Run(data)
+	r.Run(context.Background(), data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -86,52 +86,59 @@ func TestBasicRunner_Run_Run(t *testing.T) {
 	stepWait := &TestStepWaitForever{}
 	r := &BasicRunner{Steps: []Step{stepInt, stepWait}}
 
-	go r.Run(new(BasicStateBag))
+	go r.Run(context.Background(), new(BasicStateBag))
 	// wait until really running
 	<-ch
 
 	// now try to run aain
-	r.Run(new(BasicStateBag))
+	r.Run(context.Background(), new(BasicStateBag))
 
 	// should not get here in nominal codepath
 	t.Errorf("Was able to run an already running BasicRunner")
 }
 
 func TestBasicRunner_Cancel(t *testing.T) {
-	ch := make(chan chan bool)
-	data := new(BasicStateBag)
-	stepA := &TestStepAcc{Data: "a"}
-	stepB := &TestStepAcc{Data: "b"}
-	stepInt := &TestStepSync{ch}
-	stepC := &TestStepAcc{Data: "c"}
 
-	r := &BasicRunner{Steps: []Step{stepA, stepB, stepInt, stepC}}
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	// cancelling an idle Runner is a no-op
-	r.Cancel()
-
-	go r.Run(data)
-
-	// Wait until we reach the sync point
-	responseCh := <-ch
-
-	// Cancel then continue chain
-	cancelCh := make(chan bool)
-	go func() {
-		r.Cancel()
-		cancelCh <- true
-	}()
-
-	for {
-		if _, ok := data.GetOk(StateCancelled); ok {
-			responseCh <- true
-			break
+	checkCancelled := func(data StateBag) {
+		cancelled := data.Get(StateCancelled).(bool)
+		if !cancelled {
+			t.Fatal("state should be cancelled")
 		}
-
-		time.Sleep(10 * time.Millisecond)
 	}
 
-	<-cancelCh
+	data := new(BasicStateBag)
+	r := &BasicRunner{}
+	r.Steps = []Step{
+		&TestStepAcc{Data: "a"},
+		&TestStepAcc{Data: "b"},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(ctx context.Context, sb StateBag) StepAction {
+				topCtxCancel()
+				<-ctx.Done()
+				return ActionContinue
+			},
+			cleanup: checkCancelled,
+		},
+		TestStepFn{
+			run: func(context.Context, StateBag) StepAction {
+				t.Fatal("I should not be called")
+				return ActionContinue
+			},
+			cleanup: func(StateBag) {
+				t.Fatal("I should not be called")
+			},
+		},
+	}
+
+	r.Run(topCtx, data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -148,10 +155,8 @@ func TestBasicRunner_Cancel(t *testing.T) {
 	}
 
 	// Test that it says it is cancelled
-	cancelled := data.Get(StateCancelled).(bool)
-	if !cancelled {
-		t.Errorf("not cancelled")
-	}
+	checkCancelled(data)
+
 }
 
 func TestBasicRunner_Cancel_Special(t *testing.T) {
@@ -161,7 +166,7 @@ func TestBasicRunner_Cancel_Special(t *testing.T) {
 
 	state := new(BasicStateBag)
 	state.Put("runner", r)
-	r.Run(state)
+	r.Run(context.Background(), state)
 
 	// test that state contains cancelled
 	if _, ok := state.GetOk(StateCancelled); !ok {

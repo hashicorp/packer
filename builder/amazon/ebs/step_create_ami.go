@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common/random"
@@ -24,13 +25,13 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Create the image
 	amiName := config.AMIName
-	if config.AMIEncryptBootVolume {
-		// to avoid having a temporary unencrypted
-		// image named config.AMIName
+	if config.AMIEncryptBootVolume != nil {
+		// encrypt_boot was set, so we will create a temporary image
+		// and then create a copy of it with the correct encrypt_boot
 		amiName = random.AlphaNum(7)
 	}
 
-	ui.Say(fmt.Sprintf("Creating unencrypted AMI %s from instance %s", amiName, *instance.InstanceId))
+	ui.Say(fmt.Sprintf("Creating AMI %s from instance %s", amiName, *instance.InstanceId))
 	createOpts := &ec2.CreateImageInput{
 		InstanceId:          instance.InstanceId,
 		Name:                &amiName,
@@ -94,20 +95,61 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	if s.image == nil {
 		return
 	}
+	config := state.Get("config").(*Config)
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
+	encryptBootSet := config.AMIEncryptBootVolume != nil
+	if !cancelled && !halted && !encryptBootSet {
 		return
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancellation or error...")
-	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
-	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
-		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+	ui.Say("Deregistering the AMI and deleting associated snapshots because " +
+		"of cancellation, error or it was temporary (encrypt_boot was set)...")
+
+	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+		ImageIds: []*string{s.image.ImageId},
+	})
+
+	if err != nil {
+		err := fmt.Errorf("Error describing AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return
+	}
+
+	// Deregister image by name.
+	for _, i := range resp.Images {
+		_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+			ImageId: i.ImageId,
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error deregistering existing AMI: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return
+		}
+		ui.Say(fmt.Sprintf("Deregistered AMI id: %s", *i.ImageId))
+
+		// Delete snapshot(s) by image
+		for _, b := range i.BlockDeviceMappings {
+			if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
+				_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+					SnapshotId: b.Ebs.SnapshotId,
+				})
+
+				if err != nil {
+					err := fmt.Errorf("Error deleting existing snapshot: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return
+				}
+				ui.Say(fmt.Sprintf("Deleted snapshot: %s", *b.Ebs.SnapshotId))
+			}
+		}
 	}
 }

@@ -2,6 +2,7 @@ package checksum
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -46,7 +47,6 @@ func TestChecksumSHA1(t *testing.T) {
 func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	// Create fake UI and Cache
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	// Create config for file builder
 	const fileConfig = `{"builders":[{"type":"file","target":"package.txt","content":"Hello world!"}]}`
@@ -68,7 +68,7 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	}
 
 	// Run the file builder
-	artifact, err := builder.Run(ui, nil, cache)
+	artifact, err := builder.Run(context.Background(), ui, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to build artifact: %s", err)
 	}
@@ -99,7 +99,7 @@ func testChecksum(t *testing.T, config string) packer.Artifact {
 	checksum.config.PackerBuildName = "vanilla"
 	checksum.config.PackerBuilderType = "file"
 
-	artifactOut, _, err := checksum.PostProcess(ui, artifact)
+	artifactOut, _, _, err := checksum.PostProcess(context.Background(), ui, artifact)
 	if err != nil {
 		t.Fatalf("Failed to checksum artifact: %s", err)
 	}

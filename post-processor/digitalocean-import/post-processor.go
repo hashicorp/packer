@@ -3,11 +3,12 @@ package digitaloceanimport
 import (
 	"context"
 	"fmt"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"golang.org/x/oauth2"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -136,12 +137,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
 
 	p.config.ObjectName, err = interpolate.Render(p.config.ObjectName, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error rendering space_object_name template: %s", err)
+		return nil, false, false, fmt.Errorf("Error rendering space_object_name template: %s", err)
 	}
 	log.Printf("Rendered space_object_name as %s", p.config.ObjectName)
 
@@ -166,7 +167,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	if source == "" {
-		return nil, false, fmt.Errorf("Image file not found")
+		return nil, false, false, fmt.Errorf("Image file not found")
 	}
 
 	spacesCreds := credentials.NewStaticCredentials(p.config.SpacesKey, p.config.SpacesSecret, "")
@@ -185,7 +186,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Uploading %s to spaces://%s/%s", source, p.config.SpaceName, p.config.ObjectName))
 	err = uploadImageToSpaces(source, p, sess)
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 	ui.Message(fmt.Sprintf("Completed upload of %s to spaces://%s/%s", source, p.config.SpaceName, p.config.ObjectName))
 
@@ -196,13 +197,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Started import of spaces://%s/%s", p.config.SpaceName, p.config.ObjectName))
 	image, err := importImageFromSpaces(p, client)
 	if err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	ui.Message(fmt.Sprintf("Waiting for import of image %s to complete (may take a while)", p.config.Name))
 	err = waitUntilImageAvailable(client, image.ID, p.config.Timeout)
 	if err != nil {
-		return nil, false, fmt.Errorf("Import of image %s failed with error: %s", p.config.Name, err)
+		return nil, false, false, fmt.Errorf("Import of image %s failed with error: %s", p.config.Name, err)
 	}
 	ui.Message(fmt.Sprintf("Import of image %s complete", p.config.Name))
 
@@ -216,7 +217,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message(fmt.Sprintf("Distributing image %s to additional regions: %v", p.config.Name, regions))
 		err = distributeImageToRegions(client, image.ID, regions, p.config.Timeout)
 		if err != nil {
-			return nil, false, err
+			return nil, false, false, err
 		}
 	}
 
@@ -232,11 +233,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message(fmt.Sprintf("Deleting import source spaces://%s/%s", p.config.SpaceName, p.config.ObjectName))
 		err = deleteImageFromSpaces(p, sess)
 		if err != nil {
-			return nil, false, err
+			return nil, false, false, err
 		}
 	}
 
-	return artifact, false, nil
+	return artifact, false, false, nil
 }
 
 func uploadImageToSpaces(source string, p *PostProcessor, s *session.Session) (err error) {

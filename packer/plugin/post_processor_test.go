@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"os/exec"
 	"testing"
 
@@ -13,8 +14,8 @@ func (helperPostProcessor) Configure(...interface{}) error {
 	return nil
 }
 
-func (helperPostProcessor) PostProcess(packer.Ui, packer.Artifact) (packer.Artifact, bool, error) {
-	return nil, false, nil
+func (helperPostProcessor) PostProcess(context.Context, packer.Ui, packer.Artifact) (packer.Artifact, bool, bool, error) {
+	return nil, false, false, nil
 }
 
 func TestPostProcessor_NoExist(t *testing.T) {

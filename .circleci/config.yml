@@ -5,8 +5,22 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
       - run: make ci
+  check-vendor-vs-mod:
+    docker:
+      - image: circleci/golang:1.12
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - checkout
+      - run: GO111MODULE=on go run . --help
+      - run: make check-vendor-vs-mod
+workflows:
+  version: 2
+  build_and_check_vendor_vs_module:
+    jobs:
+      - build
+      - check-vendor-vs-mod

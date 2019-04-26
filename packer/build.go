@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -53,11 +54,8 @@ type Build interface {
 
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
-	Run(Ui, Cache) ([]Artifact, error)
-
-	// Cancel will cancel a running build. This will block until the build
-	// is actually completely canceled.
-	Cancel()
+	// Run can be context cancelled.
+	Run(context.Context, Ui) ([]Artifact, error)
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
 	// enabled by adding the additional key "packer_debug" to boolean
@@ -109,7 +107,7 @@ type coreBuildPostProcessor struct {
 	processor         PostProcessor
 	processorType     string
 	config            map[string]interface{}
-	keepInputArtifact bool
+	keepInputArtifact *bool
 }
 
 // Keeps track of the provisioner and the configuration of the provisioner
@@ -180,7 +178,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
+func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -235,7 +233,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 
 	log.Printf("Running builder: %s", b.builderType)
 	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
-	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
+	builderArtifact, err := b.builder.Run(ctx, builderUi, hook)
 	ts.End(err)
 	if err != nil {
 		return nil, err
@@ -262,7 +260,7 @@ PostProcessorRunSeqLoop:
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
 			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
-			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			artifact, defaultKeep, forceOverride, err := corePP.processor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
@@ -274,7 +272,25 @@ PostProcessorRunSeqLoop:
 				continue PostProcessorRunSeqLoop
 			}
 
-			keep = keep || corePP.keepInputArtifact
+			keep := defaultKeep
+			// When user has not set keep_input_artifuact
+			// corePP.keepInputArtifact is nil.
+			// In this case, use the keepDefault provided by the postprocessor.
+			// When user _has_ set keep_input_atifact, go with that instead.
+			// Exception: for postprocessors that will fail/become
+			// useless if keep isn't true, heed forceOverride and keep the
+			// input artifact regardless of user preference.
+			if corePP.keepInputArtifact != nil {
+				if defaultKeep && *corePP.keepInputArtifact == false && forceOverride {
+					log.Printf("The %s post-processor forces "+
+						"keep_input_artifact=true to preserve integrity of the"+
+						"build chain. User-set keep_input_artifact=false will be"+
+						"ignored.", corePP.processorType)
+				} else {
+					// User overrides default.
+					keep = *corePP.keepInputArtifact
+				}
+			}
 			if i == 0 {
 				// This is the first post-processor. We handle deleting
 				// previous artifacts a bit different because multiple
@@ -293,7 +309,8 @@ PostProcessorRunSeqLoop:
 				} else {
 					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
 					if err := priorArtifact.Destroy(); err != nil {
-						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s", err))
+						log.Printf("Error is %#v", err)
+						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s; pp is %s", err, corePP.processorType))
 					}
 				}
 			}
@@ -314,7 +331,7 @@ PostProcessorRunSeqLoop:
 	} else {
 		log.Printf("Deleting original artifact for build '%s'", b.name)
 		if err := builderArtifact.Destroy(); err != nil {
-			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s", err))
+			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s; bad artifact: %#v", err, builderArtifact.Files()))
 		}
 	}
 
@@ -347,9 +364,4 @@ func (b *coreBuild) SetOnError(val string) {
 	}
 
 	b.onError = val
-}
-
-// Cancels the build if it is running.
-func (b *coreBuild) Cancel() {
-	b.builder.Cancel()
 }

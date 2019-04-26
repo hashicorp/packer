@@ -2,12 +2,13 @@ package ecs
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
-func message(state multistep.StateBag, module string) {
+func cleanUpMessage(state multistep.StateBag, module string) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 
@@ -18,7 +19,6 @@ func message(state multistep.StateBag, module string) {
 	} else {
 		ui.Say(fmt.Sprintf("Cleaning up '%s'", module))
 	}
-
 }
 
 func halt(state multistep.StateBag, err error, prefix string) multistep.StepAction {
@@ -31,4 +31,22 @@ func halt(state multistep.StateBag, err error, prefix string) multistep.StepActi
 	state.Put("error", err)
 	ui.Error(err.Error())
 	return multistep.ActionHalt
+}
+
+func convertNumber(value int) string {
+	if value <= 0 {
+		return ""
+	}
+
+	return strconv.Itoa(value)
+}
+
+func ContainsInArray(arr []string, value string) bool {
+	for _, item := range arr {
+		if item == value {
+			return true
+		}
+	}
+
+	return false
 }

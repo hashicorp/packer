@@ -13,7 +13,7 @@ import (
 type BlockDevice struct {
 	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
 	DeviceName          string `mapstructure:"device_name"`
-	Encrypted           bool   `mapstructure:"encrypted"`
+	Encrypted           *bool  `mapstructure:"encrypted"`
 	IOPS                int64  `mapstructure:"iops"`
 	NoDevice            bool   `mapstructure:"no_device"`
 	SnapshotId          string `mapstructure:"snapshot_id"`
@@ -71,9 +71,8 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 			// You cannot specify Encrypted if you specify a Snapshot ID
 			if blockDevice.SnapshotId != "" {
 				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
-			} else if blockDevice.Encrypted {
-				ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
 			}
+			ebsBlockDevice.Encrypted = blockDevice.Encrypted
 
 			if blockDevice.KmsKeyId != "" {
 				ebsBlockDevice.KmsKeyId = aws.String(blockDevice.KmsKeyId)
@@ -93,7 +92,7 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 			"for every device in the block device mapping.")
 	}
 	// Warn that encrypted must be true when setting kms_key_id
-	if b.KmsKeyId != "" && b.Encrypted == false {
+	if b.KmsKeyId != "" && b.Encrypted != nil && *b.Encrypted == false {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}

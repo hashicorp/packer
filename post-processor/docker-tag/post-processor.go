@@ -1,13 +1,14 @@
 package dockertag
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/docker-import"
+	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -45,13 +46,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != BuilderId &&
 		artifact.BuilderId() != dockerimport.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only tag from Docker builder artifacts.",
 			artifact.BuilderId())
-		return nil, false, err
+		return nil, false, true, err
 	}
 
 	driver := p.Driver
@@ -69,7 +70,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message("Repository: " + importRepo)
 	err := driver.TagImage(artifact.Id(), importRepo, p.config.Force)
 	if err != nil {
-		return nil, false, err
+		return nil, false, true, err
 	}
 
 	// Build the artifact
@@ -79,5 +80,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		IdValue:        importRepo,
 	}
 
-	return artifact, true, nil
+	// If we tag an image and then delete it, there was no point in creating the
+	// tag. Override users to force us to always keep the input artifact.
+	return artifact, true, true, nil
 }

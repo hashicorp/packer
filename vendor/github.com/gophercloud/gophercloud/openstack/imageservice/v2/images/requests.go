@@ -129,7 +129,12 @@ func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 		url += query
 	}
 	return pagination.NewPager(c, url, func(r pagination.PageResult) pagination.Page {
-		return ImagePage{pagination.LinkedPageBase{PageResult: r}}
+		imagePage := ImagePage{
+			serviceURL:     c.ServiceURL(),
+			LinkedPageBase: pagination.LinkedPageBase{PageResult: r},
+		}
+
+		return imagePage
 	})
 }
 
@@ -266,11 +271,11 @@ type UpdateVisibility struct {
 }
 
 // ToImagePatchMap assembles a request body based on UpdateVisibility.
-func (u UpdateVisibility) ToImagePatchMap() map[string]interface{} {
+func (r UpdateVisibility) ToImagePatchMap() map[string]interface{} {
 	return map[string]interface{}{
 		"op":    "replace",
 		"path":  "/visibility",
-		"value": u.Visibility,
+		"value": r.Visibility,
 	}
 }
 
@@ -294,11 +299,11 @@ type ReplaceImageChecksum struct {
 }
 
 // ReplaceImageChecksum assembles a request body based on ReplaceImageChecksum.
-func (rc ReplaceImageChecksum) ToImagePatchMap() map[string]interface{} {
+func (r ReplaceImageChecksum) ToImagePatchMap() map[string]interface{} {
 	return map[string]interface{}{
 		"op":    "replace",
 		"path":  "/checksum",
-		"value": rc.Checksum,
+		"value": r.Checksum,
 	}
 }
 
@@ -314,4 +319,34 @@ func (r ReplaceImageTags) ToImagePatchMap() map[string]interface{} {
 		"path":  "/tags",
 		"value": r.NewTags,
 	}
+}
+
+// UpdateOp represents a valid update operation.
+type UpdateOp string
+
+const (
+	AddOp     UpdateOp = "add"
+	ReplaceOp UpdateOp = "replace"
+	RemoveOp  UpdateOp = "remove"
+)
+
+// UpdateImageProperty represents an update property request.
+type UpdateImageProperty struct {
+	Op    UpdateOp
+	Name  string
+	Value string
+}
+
+// ToImagePatchMap assembles a request body based on UpdateImageProperty.
+func (r UpdateImageProperty) ToImagePatchMap() map[string]interface{} {
+	updateMap := map[string]interface{}{
+		"op":   r.Op,
+		"path": fmt.Sprintf("/%s", r.Name),
+	}
+
+	if r.Value != "" {
+		updateMap["value"] = r.Value
+	}
+
+	return updateMap
 }

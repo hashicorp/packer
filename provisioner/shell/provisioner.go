@@ -4,6 +4,7 @@ package shell
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -15,6 +16,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -22,28 +25,10 @@ import (
 )
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// If true, the script contains binary and line endings will not be
-	// converted from Windows to Unix-style.
-	Binary bool
-
-	// An inline script to execute. Multiple strings are all executed
-	// in the context of a single shell.
-	Inline []string
+	shell.Provisioner `mapstructure:",squash"`
 
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
-
-	// The local path of the shell script to upload and execute.
-	Script string
-
-	// An array of multiple scripts to run.
-	Scripts []string
-
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	Vars []string `mapstructure:"environment_vars"`
 
 	// A duration of how long to pause after the provisioner
 	RawPauseAfter string `mapstructure:"pause_after"`
@@ -61,16 +46,6 @@ type Config struct {
 	// The remote file name of the local shell script.
 	// This defaults to script_nnn.sh
 	RemoteFile string `mapstructure:"remote_file"`
-
-	// The remote path where the local shell script will be uploaded to.
-	// This should be set to a writable file that is in a pre-existing directory.
-	// This defaults to remote_folder/remote_file
-	RemotePath string `mapstructure:"remote_path"`
-
-	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes, {{ .Vars }}
-	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand string `mapstructure:"execute_command"`
 
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
@@ -209,7 +184,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -263,7 +238,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// upload the var file
 		var cmd *packer.RemoteCmd
-		err = p.retryable(func() error {
+		err = retry.Config{StartTimeout: p.config.startRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := tf.Seek(0, 0); err != nil {
 				return err
 			}
@@ -282,7 +257,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd = &packer.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
 			}
-			if err := comm.Start(cmd); err != nil {
+			if err := comm.Start(ctx, cmd); err != nil {
 				return fmt.Errorf(
 					"Error chmodding script file to 0600 in remote "+
 						"machine: %s", err)
@@ -323,7 +298,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// and then the command is executed but the file doesn't exist
 		// any longer.
 		var cmd *packer.RemoteCmd
-		err = p.retryable(func() error {
+		err = retry.Config{StartTimeout: p.config.startRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
@@ -340,7 +315,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd = &packer.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
-			if err := comm.Start(cmd); err != nil {
+			if err := comm.Start(ctx, cmd); err != nil {
 				return fmt.Errorf(
 					"Error chmodding script file to 0755 in remote "+
 						"machine: %s", err)
@@ -348,7 +323,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd.Wait()
 
 			cmd = &packer.RemoteCmd{Command: command}
-			return cmd.StartWithUi(comm, ui)
+			return cmd.RunWithUi(ctx, comm, ui)
 		})
 
 		if err != nil {
@@ -357,15 +332,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// If the exit code indicates a remote disconnect, fail unless
 		// we were expecting it.
-		if cmd.ExitStatus == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packer.CmdDisconnect {
 			if !p.config.ExpectDisconnect {
 				return fmt.Errorf("Script disconnected unexpectedly. " +
 					"If you expected your script to disconnect, i.e. from a " +
 					"restart, you can try adding `\"expect_disconnect\": true` " +
-					"to the shell provisioner parameters.")
+					"or `\"valid_exit_codes\": [0, 2300218]` to the shell " +
+					"provisioner parameters.")
 			}
-		} else if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+		} else if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
+			return err
 		}
 
 		if !p.config.SkipClean {
@@ -396,21 +372,22 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 }
 
 func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) error {
-	err := p.retryable(func() error {
+	ctx := context.TODO()
+	err := retry.Config{StartTimeout: p.config.startRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 		cmd := &packer.RemoteCmd{
 			Command: fmt.Sprintf("rm -f %s", path),
 		}
-		if err := comm.Start(cmd); err != nil {
+		if err := comm.Start(ctx, cmd); err != nil {
 			return fmt.Errorf(
 				"Error removing temporary script at %s: %s",
 				path, err)
 		}
 		cmd.Wait()
 		// treat disconnects as retryable by returning an error
-		if cmd.ExitStatus == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packer.CmdDisconnect {
 			return fmt.Errorf("Disconnect while removing temporary script.")
 		}
-		if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus() != 0 {
 			return fmt.Errorf(
 				"Error removing temporary script at %s!",
 				path)
@@ -423,38 +400,6 @@ func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) e
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
-}
-
-// retryable will retry the given function over and over until a
-// non-error is returned.
-func (p *Provisioner) retryable(f func() error) error {
-	startTimeout := time.After(p.config.startRetryTimeout)
-	for {
-		var err error
-		if err = f(); err == nil {
-			return nil
-		}
-
-		// Create an error and log it
-		err = fmt.Errorf("Retryable error: %s", err)
-		log.Print(err.Error())
-
-		// Check if we timed out, otherwise we retry. It is safe to
-		// retry since the only error case above is if the command
-		// failed to START.
-		select {
-		case <-startTimeout:
-			return err
-		default:
-			time.Sleep(2 * time.Second)
-		}
-	}
 }
 
 func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {

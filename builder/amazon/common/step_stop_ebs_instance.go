@@ -3,10 +3,11 @@ package common
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -40,29 +41,26 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 		// does not exist.
 
 		// Work around this by retrying a few times, up to about 5 minutes.
-		err := common.Retry(10, 60, 6, func(i uint) (bool, error) {
-			ui.Message(fmt.Sprintf("Stopping instance, attempt %d", i+1))
+		err := retry.Config{
+			Tries: 6,
+			ShouldRetry: func(error) bool {
+				if awsErr, ok := err.(awserr.Error); ok {
+					switch awsErr.Code() {
+					case "InvalidInstanceID.NotFound":
+						return true
+					}
+				}
+				return false
+			},
+			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			ui.Message(fmt.Sprintf("Stopping instance"))
 
 			_, err = ec2conn.StopInstances(&ec2.StopInstancesInput{
 				InstanceIds: []*string{instance.InstanceId},
 			})
 
-			if err == nil {
-				// success
-				return true, nil
-			}
-
-			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() == "InvalidInstanceID.NotFound" {
-					ui.Message(fmt.Sprintf(
-						"Error stopping instance; will retry ..."+
-							"Error: %s", err))
-					// retry
-					return false, nil
-				}
-			}
-			// errored, but not in expected way. Don't want to retry
-			return true, err
+			return err
 		})
 
 		if err != nil {

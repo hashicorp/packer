@@ -72,7 +72,7 @@ func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
 	return abspath, nil
 }
 
-func (s *StepCreateVagrantfile) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVagrantfile) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip the initialize step if we're trying to launch from a global ID.

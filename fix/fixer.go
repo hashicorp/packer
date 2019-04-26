@@ -30,15 +30,19 @@ func init() {
 		"parallels-deprecations":     new(FixerParallelsDeprecations),
 		"sshkeypath":                 new(FixerSSHKeyPath),
 		"sshdisableagent":            new(FixerSSHDisableAgent),
+		"scaleway-access-key":        new(FixerScalewayAccessKey),
 		"manifest-filename":          new(FixerManifestFilename),
 		"amazon-shutdown_behavior":   new(FixerAmazonShutdownBehavior),
 		"amazon-enhanced-networking": new(FixerAmazonEnhancedNetworking),
 		"amazon-private-ip":          new(FixerAmazonPrivateIP),
+		"amazon-temp-sec-cidrs":      new(FixerAmazonTemporarySecurityCIDRs),
 		"docker-email":               new(FixerDockerEmail),
 		"powershell-escapes":         new(FixerPowerShellEscapes),
 		"hyperv-deprecations":        new(FixerHypervDeprecations),
 		"hyperv-vmxc-typo":           new(FixerHypervVmxcTypo),
+		"hyperv-cpu-and-ram":         new(FizerHypervCPUandRAM),
 		"vmware-compaction":          new(FixerVMwareCompaction),
+		"clean-image-name":           new(FixerCleanImageName),
 	}
 
 	FixerOrder = []string{
@@ -52,12 +56,16 @@ func init() {
 		"parallels-deprecations",
 		"sshkeypath",
 		"sshdisableagent",
+		"scaleway-access-key",
 		"manifest-filename",
 		"amazon-shutdown_behavior",
 		"amazon-enhanced-networking",
 		"amazon-private-ip",
+		"amazon-temp-sec-cidrs",
 		"docker-email",
 		"powershell-escapes",
 		"vmware-compaction",
+		"hyperv-cpu-and-ram",
+		"clean-image-name",
 	}
 }

@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"log"
 
 	"github.com/hashicorp/packer/packer"
@@ -20,22 +21,13 @@ func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, error) {
 	return b.builder.Prepare(config...)
 }
 
-func (b *cmdBuilder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *cmdBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)
 	}()
 
-	return b.builder.Run(ui, hook, cache)
-}
-
-func (b *cmdBuilder) Cancel() {
-	defer func() {
-		r := recover()
-		b.checkExit(r, nil)
-	}()
-
-	b.builder.Cancel()
+	return b.builder.Run(ctx, ui, hook)
 }
 
 func (c *cmdBuilder) checkExit(p interface{}, cb func()) {

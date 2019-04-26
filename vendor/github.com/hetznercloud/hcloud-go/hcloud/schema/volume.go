@@ -18,11 +18,13 @@ type Volume struct {
 // VolumeCreateRequest defines the schema of the request
 // to create a volume.
 type VolumeCreateRequest struct {
-	Name     string             `json:"name"`
-	Size     int                `json:"size"`
-	Server   *int               `json:"server,omitempty"`
-	Location interface{}        `json:"location,omitempty"` // int, string, or nil
-	Labels   *map[string]string `json:"labels,omitempty"`
+	Name      string             `json:"name"`
+	Size      int                `json:"size"`
+	Server    *int               `json:"server,omitempty"`
+	Location  interface{}        `json:"location,omitempty"` // int, string, or nil
+	Labels    *map[string]string `json:"labels,omitempty"`
+	Automount *bool              `json:"automount,omitempty"`
+	Format    *string            `json:"format,omitempty"`
 }
 
 // VolumeCreateResponse defines the schema of the response
@@ -76,7 +78,8 @@ type VolumeActionChangeProtectionResponse struct {
 // VolumeActionAttachVolumeRequest defines the schema of the request to
 // attach a volume to a server.
 type VolumeActionAttachVolumeRequest struct {
-	Server int `json:"server"`
+	Server    int   `json:"server"`
+	Automount *bool `json:"automount,omitempty"`
 }
 
 // VolumeActionAttachVolumeResponse defines the schema of the response when

@@ -22,7 +22,7 @@ import (
 //	 attachedIso bool
 type stepAttachISO struct{}
 
-func (s *stepAttachISO) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)

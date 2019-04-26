@@ -3,6 +3,7 @@ package inspec
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -52,7 +53,7 @@ type Config struct {
 	Backend              string   `mapstructure:"backend"`
 	User                 string   `mapstructure:"user"`
 	Host                 string   `mapstructure:"host"`
-	LocalPort            uint     `mapstructure:"local_port"`
+	LocalPort            int      `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 }
@@ -183,7 +184,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Inspec...")
 
 	for i, envVar := range p.config.InspecEnvVars {
@@ -264,12 +265,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				ui.Say(err.Error())
 				continue
 			}
-			portUint64, err := strconv.ParseUint(portStr, 10, 0)
+			p.config.LocalPort, err = strconv.Atoi(portStr)
 			if err != nil {
 				ui.Say(err.Error())
 				continue
 			}
-			p.config.LocalPort = uint(portUint64)
 			return l, nil
 		}
 		return nil, errors.New("Error setting up SSH proxy connection")
@@ -338,7 +338,7 @@ func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, priv
 			args = append(args, "--key-files", privKeyFile)
 		}
 		args = append(args, "--user", p.config.User)
-		args = append(args, "--port", strconv.FormatUint(uint64(p.config.LocalPort), 10))
+		args = append(args, "--port", strconv.Itoa(p.config.LocalPort))
 	}
 
 	args = append(args, "--attrs")

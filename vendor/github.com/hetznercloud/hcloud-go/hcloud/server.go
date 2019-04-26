@@ -205,6 +205,8 @@ type ServerCreateOpts struct {
 	UserData         string
 	StartAfterCreate *bool
 	Labels           map[string]string
+	Automount        *bool
+	Volumes          []*Volume
 }
 
 // Validate checks if options are valid.
@@ -241,6 +243,7 @@ func (c *ServerClient) Create(ctx context.Context, opts ServerCreateOpts) (Serve
 	var reqBody schema.ServerCreateRequest
 	reqBody.UserData = opts.UserData
 	reqBody.Name = opts.Name
+	reqBody.Automount = opts.Automount
 	reqBody.StartAfterCreate = opts.StartAfterCreate
 	if opts.ServerType.ID != 0 {
 		reqBody.ServerType = opts.ServerType.ID
@@ -258,6 +261,10 @@ func (c *ServerClient) Create(ctx context.Context, opts ServerCreateOpts) (Serve
 	for _, sshKey := range opts.SSHKeys {
 		reqBody.SSHKeys = append(reqBody.SSHKeys, sshKey.ID)
 	}
+	for _, volume := range opts.Volumes {
+		reqBody.Volumes = append(reqBody.Volumes, volume.ID)
+	}
+
 	if opts.Location != nil {
 		if opts.Location.ID != 0 {
 			reqBody.Location = strconv.Itoa(opts.Location.ID)

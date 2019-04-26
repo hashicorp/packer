@@ -1,9 +1,11 @@
 package ansiblelocal
 
 import (
-	"github.com/hashicorp/packer/packer"
+	"context"
 	"io"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type communicatorMock struct {
@@ -11,7 +13,7 @@ type communicatorMock struct {
 	uploadDestination []string
 }
 
-func (c *communicatorMock) Start(cmd *packer.RemoteCmd) error {
+func (c *communicatorMock) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
 	c.startCommand = append(c.startCommand, cmd.Command)
 	cmd.SetExited(0)
 	return nil

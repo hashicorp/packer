@@ -1,9 +1,9 @@
 ---
 description: |
     The Packer Vagrant Cloud post-processor receives a Vagrant box from the
-    `vagrant` post-processor and pushes it to Vagrant Cloud. Vagrant Cloud hosts
-    and serves boxes to Vagrant, allowing you to version and distribute boxes to an
-    organization in a simple way.
+    `vagrant` post-processor or vagrant builder and pushes it to Vagrant Cloud.
+    Vagrant Cloud hosts and serves boxes to Vagrant, allowing you to version and
+    distribute boxes to an organization in a simple way.
 layout: docs
 page_title: 'Vagrant Cloud - Post-Processors'
 sidebar_current: 'docs-post-processors-vagrant-cloud'
@@ -14,9 +14,9 @@ sidebar_current: 'docs-post-processors-vagrant-cloud'
 Type: `vagrant-cloud`
 
 The Packer Vagrant Cloud post-processor receives a Vagrant box from the
-`vagrant` post-processor and pushes it to Vagrant Cloud. [Vagrant
-Cloud](https://app.vagrantup.com/boxes/search) hosts and serves boxes to
-Vagrant, allowing you to version and distribute boxes to an organization in a
+`vagrant` post-processor or vagrant builder and pushes it to Vagrant Cloud.
+[Vagrant Cloud](https://app.vagrantup.com/boxes/search) hosts and serves boxes
+to Vagrant, allowing you to version and distribute boxes to an organization in a
 simple way.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
@@ -77,6 +77,15 @@ on Vagrant Cloud, as well as authentication and version information.
 -   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
     This is useful if you're using Vagrant Private Cloud in your own network.
     Defaults to `https://vagrantcloud.com/api/v1`
+
+-   `insecure_skip_tls_verify` (boolean) - If set to true *and* `vagrant_cloud_url`
+    is set to something different than its default, it will set TLS InsecureSkipVerify
+    to true. In other words, this will disable security checks of SSL. You may need
+    to set this option to true if your host at vagrant_cloud_url is using a
+    self-signed certificate.
+
+-   `keep_input_artifact` (boolean) - When true, preserve the local box
+    after uploading to Vagrant cloud. Defaults to `true`.
 
 -   `version_description` (string) - Optionally markdown text used as a
     full-length and in-depth description of the version, typically for denoting

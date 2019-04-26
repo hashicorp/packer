@@ -1,3 +1,14 @@
+---
+description: |
+    The Vagrant Packer builder is able to launch Vagrant boxes and
+    re-package them into .box files
+layout: docs
+page_title: 'Vagrant - Builders'
+sidebar_current: 'docs-builders-vagrant'
+---
+
+# Vagrant Builder
+
 The Vagrant builder is intended for building new boxes from already-existing
 boxes. Your source should be a URL or path to a .box file or a Vagrant Cloud
 box name such as `hashicorp/precise64`.
@@ -16,12 +27,13 @@ You can change the behavior so that the builder doesn't destroy the box by
 setting the `teardown_method` option. You can change the behavior so the builder
 doesn't package it (not all provisioners support the `vagrant package` command)
 by setting the `skip package` option. You can also change the behavior so that
-rather than inititalizing a new Vagrant workspace, you use an already defined
+rather than initializing a new Vagrant workspace, you use an already defined
 one, by using `global_id` instead of `source_box`.
 
-Required:
+## Configuration Reference
+### Required:
 
--    `source_path` (string) - URL of the vagrant box to use, or the name of the
+-   `source_path` (string) - URL of the vagrant box to use, or the name of the
     vagrant box. `hashicorp/precise64`, `./mylocalbox.box` and
     `https://example.com/my-box.box` are all valid source boxes. If your
     source is a .box file, whether locally or from a URL like the latter example
@@ -38,7 +50,7 @@ Required:
    `source_box`, Packer will skip the Vagrant initialize and add steps, and
    simply launch the box directly using the global id.
 
-Optional:
+### Optional:
 
 -   `output_dir` (string) - The directory to create that will contain
     your output box. We always create this directory and run from inside of it to
@@ -49,6 +61,10 @@ Optional:
     to Vagrant, this is the name to give it. If left blank, will default to
     "packer_" plus your buildname.
 
+-   `provider` (string) - The vagrant [provider](docs/post-processors/vagrant.html).
+    This parameter is required when `source_path` have more than one provider, 
+    or when using `vagrant-cloud` post-processor. Defaults to unset.
+
 -   `checksum` (string) - The checksum for the .box file. The type of the
     checksum is specified with `checksum_type`, documented below.
 
@@ -58,14 +74,24 @@ Optional:
     not recommended since OVA files can be very large and corruption does happen
     from time to time.
 
--   `vagrantfile_template` (string) - a path to a golang template for a
+-   `template` (string) - a path to a golang template for a
     vagrantfile. Our default template can be found
-    [here](https://github.com/hashicorp/packer/tree/master/builder/vagrant/step_initialize_vagrant.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
+    [here](https://github.com/hashicorp/packer/blob/a6d1d852bb0643e3593cc5d3dfe5ed80c4409b65/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
-    `synced_folder`
+    `synced_folder`.
 
--   `skip_add` (string) - Don't call "vagrant add" to add the box to your local
-    environment; this is necesasry if you want to launch a box that is already
+    You must provide a template if your default vagrant provider is Hyper-V.
+    Below is a Hyper-V compatible template.
+
+    ```ruby
+    Vagrant.configure("2") do |config|
+        config.vm.box = "{{ .BoxName }}"
+        config.vm.network 'public_network', bridge: 'Default Switch'
+    end
+    ```
+
+-   `skip_add` (bool) - Don't call "vagrant add" to add the box to your local
+    environment; this is necessary if you want to launch a box that is already
     added to your vagrant environment.
 
 -   `teardown_method` (string) - Whether to halt, suspend, or destroy the box when
@@ -94,8 +120,26 @@ Optional:
     `vagrant add`; defaults to unset.
 
 -   `add_insecure` (bool) - Equivalent to setting the
-    [`--force`](https://www.vagrantup.com/docs/cli/box.html#insecure) flag in
+    [`--insecure`](https://www.vagrantup.com/docs/cli/box.html#insecure) flag in
     `vagrant add`; defaults to unset.
 
 -   `skip_package` (bool) - if true, Packer will not call `vagrant package` to
     package your base box into its own standalone .box file.
+
+## Example
+
+Sample for `hashicorp/precise64` with virtualbox provider.
+
+```
+{
+  "builders": [
+    {
+      "communicator": "ssh",
+      "source_path": "hashicorp/precise64",
+      "provider": "virtualbox",
+      "add_force": true,
+      "type": "vagrant"
+    }
+  ]
+}
+```

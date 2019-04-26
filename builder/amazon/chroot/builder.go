@@ -5,15 +5,13 @@
 package chroot
 
 import (
+	"context"
 	"errors"
-	"log"
 	"runtime"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -104,7 +102,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// set default copy file if we're not giving our own
 	if b.config.CopyFiles == nil {
-		b.config.CopyFiles = make([]string, 0)
 		if !b.config.FromScratch {
 			b.config.CopyFiles = []string{"/etc/resolv.conf"}
 		}
@@ -167,11 +164,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("source_ami or source_ami_filter is required."))
 		}
-		if len(b.config.AMIMappings) != 0 {
-			warns = append(warns, "ami_block_device_mappings are unused when from_scratch is false")
-		}
-		if b.config.RootDeviceName != "" {
-			warns = append(warns, "root_device_name is unused when from_scratch is false")
+		if len(b.config.AMIMappings) > 0 && b.config.RootDeviceName != "" {
+			if b.config.RootVolumeSize == 0 {
+				// Although, they can specify the device size in the block device mapping, it's easier to
+				// be specific here.
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("root_volume_size is required if ami_block_device_mappings is specified"))
+			}
+			warns = append(warns, "ami_block_device_mappings from source image will be completely overwritten")
+		} else if len(b.config.AMIMappings) > 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If ami_block_device_mappings is specified, root_device_name must be specified"))
+		} else if b.config.RootDeviceName != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
 	}
 
@@ -183,7 +189,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warns, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
 	}
@@ -192,14 +198,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err != nil {
 		return nil, err
 	}
-	ec2conn := ec2.New(session, &aws.Config{
-		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
-	})
+	ec2conn := ec2.New(session)
 
 	wrappedCommand := func(command string) (string, error) {
-		ctx := b.config.ctx
-		ctx.Data = &wrappedCommandTemplate{Command: command}
-		return interpolate.Render(b.config.CommandWrapper, &ctx)
+		ictx := b.config.ctx
+		ictx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ictx)
 	}
 
 	// Setup the state bag and initial state for the steps
@@ -273,15 +277,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
-		&awscommon.StepCreateEncryptedAMICopy{
-			KeyID:             b.config.AMIKmsKeyId,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
-		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
 			Regions:           b.config.AMIRegions,
+			AMIKmsKeyId:       b.config.AMIKmsKeyId,
 			RegionKeyIds:      b.config.AMIRegionKMSKeyIDs,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
 			Name:              b.config.AMIName,
@@ -304,7 +303,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -324,11 +323,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

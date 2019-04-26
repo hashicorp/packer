@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,7 +18,7 @@ type StepDeregisterAMI struct {
 	Regions             []string
 }
 
-func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDeregisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check for force deregister
 	if !s.ForceDeregister {
 		return multistep.ActionContinue
@@ -27,7 +26,7 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 
 	ui := state.Get("ui").(packer.Ui)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	// Add the session region to list of regions will will deregister AMIs in
+	// Add the session region to list of regions will deregister AMIs in
 	regions := append(s.Regions, *ec2conn.Config.Region)
 
 	for _, region := range regions {
@@ -38,8 +37,7 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 		}
 
 		regionconn := ec2.New(session.Copy(&aws.Config{
-			Region:     aws.String(region),
-			HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
+			Region: aws.String(region),
 		}))
 
 		resp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{

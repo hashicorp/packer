@@ -1,6 +1,7 @@
 package lxd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -17,7 +18,7 @@ type Communicator struct {
 	CmdWrapper    CommandWrapper
 }
 
-func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
 	localCmd, err := c.Execute(cmd.Command)
 
 	if err != nil {
@@ -55,11 +56,13 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 }
 
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
+	ctx := context.TODO()
+
 	fileDestination := filepath.Join(c.ContainerName, dst)
 	// find out if the place we are pushing to is a directory
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, dst)
 	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
-	err := c.Start(cmd)
+	err := c.Start(ctx, cmd)
 
 	if err != nil {
 		log.Printf("Unable to check whether remote path is a dir: %s", err)
@@ -67,7 +70,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	}
 	cmd.Wait()
 
-	if cmd.ExitStatus == 0 {
+	if cmd.ExitStatus() == 0 {
 		log.Printf("path is a directory; copying file into directory.")
 		fileDestination = filepath.Join(c.ContainerName, dst, (*fi).Name())
 	}

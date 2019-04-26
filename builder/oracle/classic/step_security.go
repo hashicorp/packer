@@ -18,7 +18,7 @@ type stepSecurity struct {
 	secRuleName     string
 }
 
-func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepSecurity) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 	runID := state.Get("run_id").(string)

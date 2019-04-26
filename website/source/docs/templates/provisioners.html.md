@@ -140,3 +140,25 @@ that provisioner. By default, there is no pause. An example is shown below:
 
 For the above provisioner, Packer will wait 10 seconds before uploading and
 executing the shell script.
+
+## Timeout
+
+Sometimes a command can take much more time than expected
+
+Every provisioner definition in a Packer template can take a special
+configuration `timeout` that is the amount of time to wait before
+considering that the provisioner failed. By default, there is no timeout. An
+example is shown below:
+
+``` json
+{
+  "type": "shell",
+  "script": "script.sh",
+  "timeout": "5m"
+}
+```
+
+For the above provisioner, Packer will cancel the script if it takes more than
+5 minutes.
+
+Timeout has no effect in debug mode.

@@ -15,7 +15,7 @@ type stepAttachVolume struct {
 	InstanceInfoKey string
 }
 
-func (s *stepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*compute.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instanceInfo := state.Get(s.InstanceInfoKey).(*compute.InstanceInfo)

@@ -28,7 +28,7 @@ type StepShutdown struct {
 	Timeout time.Duration
 }
 
-func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
@@ -45,7 +45,7 @@ func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multiste
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
-		if err := comm.Start(cmd); err != nil {
+		if err := comm.Start(ctx, cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

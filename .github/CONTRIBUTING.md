@@ -53,7 +53,7 @@ can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to install its
 runtime in order to build packer.
 
-1. [Install go](https://golang.org/doc/install#install)
+1. This project always releases from the latest version of golang. [Install go](https://golang.org/doc/install#install)
 
 ## Setting up Packer for dev
 
@@ -212,22 +212,22 @@ project. After following the steps in "Setting up Go to work on Packer":
 This way you can push to your fork to create a PR, but the code on disk still
 lives in the spot where the go cli tools are expecting to find it.
 
-#### Govendor
+#### Go modules & go vendor
 
-If you are submitting a change that requires new or updated dependencies, please
-include them in `vendor/vendor.json` and in the `vendor/` folder. This helps
-everything get tested properly in CI.
+If you are submitting a change that requires new or updated dependencies,
+please include them in `go.mod`/`go.sum` and in the `vendor/` folder. This
+helps everything get tested properly in CI.
 
-Note that you will need to use [govendor](https://github.com/kardianos/govendor)
-to do this. This step is recommended but not required; if you don't use govendor
-please indicate in your PR which dependencies have changed and to what versions.
+Note that you will need to use [go
+mod](https://github.com/golang/go/wiki/Modules) to do this. This step is
+recommended but not required.
 
-Use `govendor fetch <project>` to add dependencies to the project. See
-[govendor quick start](https://github.com/kardianos/govendor#quick-start-also-see-the-faq)
-for examples.
+Use `go get <project>` to add dependencies to the project and `go mod vendor`
+to make vendored copy of dependencies. See [go mod quick
+start](https://github.com/golang/go/wiki/Modules#quick-start) for examples.
 
-Please only apply the minimal vendor changes to get your PR to work. Packer does
-not attempt to track the latest version for each dependency.
+Please only apply the minimal vendor changes to get your PR to work. Packer
+does not attempt to track the latest version for each dependency.
 
 #### Running Unit Tests
 

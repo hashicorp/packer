@@ -19,7 +19,7 @@ const KeyLeftShift uint32 = 0xFFE1
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 	Name     string
 }
 
@@ -29,7 +29,7 @@ type bootCommandTemplateData struct {
 //   config *config
 //   http_port int
 //   ui     packer.Ui
-//   vnc_port uint
+//   vnc_port int
 //
 // Produces:
 //   <nothing>
@@ -38,9 +38,9 @@ type stepTypeBootCommand struct{}
 func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	debug := state.Get("debug").(bool)
-	httpPort := state.Get("http_port").(uint)
+	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
-	vncPort := state.Get("vnc_port").(uint)
+	vncPort := state.Get("vnc_port").(int)
 	vncIP := state.Get("vnc_ip").(string)
 
 	if config.VNCConfig.DisableVNC {

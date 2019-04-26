@@ -26,7 +26,7 @@ type StepSSHConfig struct {
 	GlobalID string
 }
 
-func (s *StepSSHConfig) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	config := state.Get("config").(*Config)
 
