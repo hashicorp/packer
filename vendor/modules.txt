@@ -51,6 +51,19 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
 # github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d
 github.com/Telmate/proxmox-api-go/proxmox
+# github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
+github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
+github.com/aliyun/alibaba-cloud-sdk-go/services/ram
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
+github.com/aliyun/alibaba-cloud-sdk-go/sdk
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials/provider
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/endpoints
+github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/signers
 # github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
@@ -131,11 +144,6 @@ github.com/cheggaaa/pb
 github.com/creack/goselect
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/denverdino/aliyungo v0.0.0-20190220033614-36e2ae938978
-github.com/denverdino/aliyungo/common
-github.com/denverdino/aliyungo/ecs
-github.com/denverdino/aliyungo/ram
-github.com/denverdino/aliyungo/util
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
 # github.com/digitalocean/godo v1.11.1
@@ -285,6 +293,8 @@ github.com/joyent/triton-go/compute
 github.com/joyent/triton-go/errors
 github.com/joyent/triton-go/network
 github.com/joyent/triton-go/client
+# github.com/json-iterator/go v1.1.6
+github.com/json-iterator/go
 # github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 github.com/kardianos/osext
 # github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77
@@ -338,6 +348,10 @@ github.com/mitchellh/panicwrap
 github.com/mitchellh/prefixedio
 # github.com/mitchellh/reflectwalk v1.0.0
 github.com/mitchellh/reflectwalk
+# github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v1.0.1
+github.com/modern-go/reflect2
 # github.com/moul/anonuuid v0.0.0-20160222162117-609b752a95ef
 github.com/moul/anonuuid
 # github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215
@@ -509,7 +523,7 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/jwt
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
-# golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+# golang.org/x/sync v0.0.0-20190423024810-112230192c58
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
 # golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
@@ -604,6 +618,8 @@ google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/balancer/base
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
+# gopkg.in/ini.v1 v1.42.0
+gopkg.in/ini.v1
 # gopkg.in/resty.v1 v1.12.0
 gopkg.in/resty.v1
 # gopkg.in/yaml.v2 v2.2.2
