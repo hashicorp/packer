@@ -2,11 +2,9 @@ package ecs
 
 import (
 	"fmt"
-
 	"regexp"
 	"strings"
 
-	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -69,15 +67,6 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 
 			// Mark that we saw the region
 			regionSet[region] = struct{}{}
-
-			if !c.AlicloudImageSkipRegionValidation {
-				// Verify the region is real
-				if valid := validateRegion(region); valid != nil {
-					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-					continue
-				}
-			}
-
 			regions = append(regions, region)
 		}
 
@@ -89,15 +78,4 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func validateRegion(region string) error {
-
-	for _, valid := range common.ValidRegions {
-		if region == string(valid) {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Not a valid alicloud region: %s", region)
 }
