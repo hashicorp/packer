@@ -88,6 +88,19 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 	return multistep.ActionHalt
 }
 
+var (
+	getters = getter.Getters
+)
+
+func init() {
+	getters["file"] = &getter.FileGetter{
+		// always copy local files instead of symlinking to fix GH-7534. The
+		// longer term fix for this would be to change the go-getter so that it
+		// can leave the source file where it is & tell us where it is.
+		Copy: true,
+	}
+}
+
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
 	u, err := urlhelper.Parse(source)
 	if err != nil {
@@ -152,6 +165,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		ProgressListener: ui,
 		Pwd:              wd,
 		Dir:              false,
+		Getters:          getters,
 	}
 
 	switch err := gc.Get(); err.(type) {
