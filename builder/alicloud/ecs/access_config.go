@@ -2,11 +2,12 @@ package ecs
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/hashicorp/packer/version"
-	"os"
-	"time"
 )
 
 // Config of alicloud
