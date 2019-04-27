@@ -73,6 +73,12 @@ builder.
 
 -   `image_copy_regions` (array of string) - Copy to the destination regionIds.
 
+-   `image_encrypted` (boolean) - Whether or not to encrypt the target images,            including those copied if `image_copy_regions` is specified. If this option 
+    is set to true, a temporary image will be created from the provisioned 
+    instance in the main region and an encrypted copy will be generated in the 
+    same region. By default, Packer will keep the encryption setting to what 
+    it was in the source image.
+
 -   `image_description` (string) - The description of the image, with a length
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with `http://` or `https://`.
@@ -147,6 +153,13 @@ builder.
 
         Snapshots from on or before July 15, 2013 cannot be used to create a
         disk.
+
+    -   `disk_encrypted` (boolean) - Whether or not to encrypt the data disk. 
+        If this option is set to true, the data disk will be encryped and corresponding snapshot in the target image will also be encrypted. By 
+        default, if this is an extra data disk, Packer will not encrypt the 
+        data disk. Otherwise, Packer will keep the encryption setting to what 
+        it was in the source image. Please refer to Introduction of [ECS disk encryption](https://www.alibabacloud.com/help/doc-detail/59643.htm) 
+        for more details.
 
 -   `image_ignore_data_disks`(boolean) - If this value is true, the image
     created will not include any snapshot of data disks. This option would be

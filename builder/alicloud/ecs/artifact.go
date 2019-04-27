@@ -82,7 +82,7 @@ func (a *Artifact) Destroy() error {
 			continue
 		}
 
-		if images[0].IsCopied {
+		if images[0].IsCopied && images[0].Status != ImageStatusAvailable {
 			copyingImages[regionId] = imageId
 		} else {
 			sourceImage[regionId] = &images[0]
