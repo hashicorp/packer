@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/gofrs/flock"
@@ -93,11 +94,13 @@ var (
 )
 
 func init() {
-	getters["file"] = &getter.FileGetter{
-		// always copy local files instead of symlinking to fix GH-7534. The
-		// longer term fix for this would be to change the go-getter so that it
-		// can leave the source file where it is & tell us where it is.
-		Copy: true,
+	if runtime.GOOS == "windows" {
+		getters["file"] = &getter.FileGetter{
+			// always copy local files instead of symlinking to fix GH-7534. The
+			// longer term fix for this would be to change the go-getter so that it
+			// can leave the source file where it is & tell us where it is.
+			Copy: true,
+		}
 	}
 }
 
