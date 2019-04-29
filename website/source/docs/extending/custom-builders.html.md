@@ -32,8 +32,7 @@ method should do.
 ``` go
 type Builder interface {
   Prepare(...interface{}) error
-  Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
-  Cancel()
+  Run(context.Context, ui Ui, hook Hook) (Artifact, error)
 }
 ```
 
@@ -94,11 +93,19 @@ artifact section below. If something goes wrong during the build, an error can
 be returned, as well. Note that it is perfectly fine to produce no artifact and
 no error, although this is rare.
 
-### The "Cancel" Method
+### Cancellation
+The `Run` method is often run in parallel.
 
-The `Run` method is often run in parallel. The `Cancel` method can be called at
-any time and requests cancellation of any builder run in progress. This method
-should block until the run actually stops.
+#### With the "Cancel" Method	( up until packer 1.3 )
+
+The `Cancel` method can be called at any time and requests cancellation of any
+builder run in progress. This method should block until the run actually stops.
+Not that the Cancel method will no longer be called since packer 1.4.0.
+
+#### Context cancellation ( from packer 1.4 )
+
+The `<-ctx.Done()` can unblock at any time and signifies request for
+cancellation of any builder run in progress.
 
 Cancels are most commonly triggered by external interrupts, such as the user
 pressing `Ctrl-C`. Packer will only exit once all the builders clean up, so it
@@ -135,7 +142,7 @@ hook, making sure the communicator is not nil, since this is required for
 provisioners. An example of calling the hook is shown below:
 
 ``` go
-hook.Run(packer.HookProvision, ui, comm, nil)
+hook.Run(context.Context, packer.HookProvision, ui, comm, nil)
 ```
 
 At this point, Packer will run the provisioners and no additional work is
@@ -145,25 +152,3 @@ necessary.
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 
-## Caching Files
-
-It is common for some builders to deal with very large files, or files that
-take a long time to generate. For example, the VMware builder has the
-capability to download the operating system ISO from the internet. This is
-timely process, so it would be convenient to cache the file. This sort of
-caching is a core part of Packer that is exposed to builders.
-
-The cache interface is `packer.Cache`. It behaves much like a Go
-[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock"
-on certain cache keys, and is given exclusive access to that key for the
-duration of the lock. This locking mechanism allows multiple builders to share
-cache data even though they're running in parallel.
-
-For example, both the VMware and VirtualBox builders support downloading an
-operating system ISO from the internet. Most of the time, this ISO is
-identical. The locking mechanisms of the cache allow one of the builders to
-download it only once, but allow both builders to share the downloaded file.
-
-The [documentation for
-packer.Cache](https://github.com/hashicorp/packer/blob/master/packer/cache.go)
-is very detailed in how it works.
