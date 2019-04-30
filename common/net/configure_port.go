@@ -8,8 +8,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/gofrs/flock"
-
+	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -26,7 +25,7 @@ type Listener struct {
 	net.Listener
 	Port    int
 	Address string
-	lock    *flock.Flock
+	lock    *filelock.Flock
 }
 
 func (l *Listener) Close() error {
@@ -70,7 +69,7 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			return nil, err
 		}
 
-		lock := flock.New(lockFilePath)
+		lock := filelock.New(lockFilePath)
 		locked, err := lock.TryLock()
 		if err != nil {
 			return nil, err
