@@ -93,7 +93,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	// OS not set, using default 'other'
 	// NIC 0 model not set, using default 'e1000'
 	// Disk 0 cache mode not set, using default 'none'
-	// Agent not set, default is 1
+	// Agent not set, default is true
 
 	if b.config.Memory != 512 {
 		t.Errorf("Expected Memory to be 512, got %d", b.config.Memory)
@@ -113,7 +113,40 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	if b.config.Disks[0].CacheMode != "none" {
 		t.Errorf("Expected disk cache mode to be 'none', got %s", b.config.Disks[0].CacheMode)
 	}
-	if b.config.Agent != "1" {
-		t.Errorf("Expected Agent to be 1, got %s", b.config.Agent)
+	if b.config.Agent != true {
+		t.Errorf("Expected Agent to be true, got %t", b.config.Agent)
+	}
+}
+
+func TestAgentSetToFalse(t *testing.T) {
+	// pnly the mandatory attributes are specified
+	const config = `{
+		"builders": [
+			{
+				"type": "proxmox",
+				"proxmox_url": "https://my-proxmox.my-domain:8006/api2/json",
+				"username": "apiuser@pve",
+				"password": "supersecret",
+				"iso_file": "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
+				"ssh_username": "root",
+				"node": "my-proxmox",
+				"qemu_agent": false
+			}
+		]
+	}`
+
+	tpl, err := template.Parse(strings.NewReader(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b := &Builder{}
+	warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	if err != nil {
+		t.Fatal(err, warn)
+	}
+
+	if b.config.Agent != false {
+		t.Errorf("Expected Agent to be false, got %t", b.config.Agent)
 	}
 }
