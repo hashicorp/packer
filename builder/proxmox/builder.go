@@ -71,7 +71,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.SSHHost),
+			Host:      commHost(b.config.Comm.Host()),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -98,11 +98,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	return artifact, nil
 }
 
-// Returns ssh_host config parameter when set, otherwise gets the host IP from running VM
-func commHost(sshHost string) func(state multistep.StateBag) (string, error) {
-	if sshHost != "" {
+// Returns ssh_host or winrm_host (see communicator.Config.Host) config
+// parameter when set, otherwise gets the host IP from running VM
+func commHost(host string) func(state multistep.StateBag) (string, error) {
+	if host != "" {
 		return func(state multistep.StateBag) (string, error) {
-			return sshHost, nil
+			return host, nil
 		}
 	}
 	return getVMIP
