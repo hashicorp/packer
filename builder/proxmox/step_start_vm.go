@@ -21,10 +21,15 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	client := state.Get("proxmoxClient").(*proxmox.Client)
 	c := state.Get("config").(*Config)
 
+	agent := "1"
+	if c.Agent == false {
+		agent = "0"
+	}
+
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
-		Agent:        c.Agent,
+		Agent:        agent,
 		Description:  "Packer ephemeral build VM",
 		Memory:       c.Memory,
 		QemuCores:    c.Cores,
