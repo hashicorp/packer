@@ -17,6 +17,7 @@ jobs:
     steps:
       - checkout
       - run: GO111MODULE=on go run . --help
+      - run: GO111MODULE=on make bin
       - run: make check-vendor-vs-mod
 workflows:
   version: 2
