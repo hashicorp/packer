@@ -40,7 +40,7 @@ func (l *Listener) Close() error {
 // ListenRangeConfig contains options for listening to a free address [Min,Max)
 // range. ListenRangeConfig wraps a net.ListenConfig.
 type ListenRangeConfig struct {
-	// tcp", "udp"
+	// like "tcp" or "udp". defaults to "tcp".
 	Network  string
 	Addr     string
 	Min, Max int
@@ -51,6 +51,9 @@ type ListenRangeConfig struct {
 // until ctx is cancelled.
 // Listen uses net.ListenConfig.Listen internally.
 func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
+	if lc.Network == "" {
+		lc.Network = "tcp"
+	}
 	portRange := lc.Max - lc.Min
 	for {
 		if err := ctx.Err(); err != nil {
