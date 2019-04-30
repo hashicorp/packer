@@ -69,7 +69,7 @@ validates, but will never actually run the build.
 The `PostProcess` method is where the real work goes. PostProcess is
 responsible for taking one `packer.Artifact` implementation, and transforming
 it into another.
-A `PostProcess` call can be cancelled at any moment, cancellation is triggered
+A `PostProcess` call can be cancelled at any moment. Cancellation is triggered
 when the done chan of the context struct (`<-ctx.Done()`) unblocks .
 
 When we say "transform," we don't mean actually modifying the existing
