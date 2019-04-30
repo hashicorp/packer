@@ -48,7 +48,7 @@ type RunConfig struct {
 	OpenstackProvider string `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
 
-	sourceImageOpts images.ListOpts
+	sourceImageOpts images.ListOpts // derived from .SourceImageFilters.Filters ImageFilterOptions
 }
 
 type ImageFilter struct {
@@ -57,14 +57,15 @@ type ImageFilter struct {
 }
 
 type ImageFilterOptions struct {
-	Name       string   `mapstructure:"name"`
-	Owner      string   `mapstructure:"owner"`
-	Tags       []string `mapstructure:"tags"`
-	Visibility string   `mapstructure:"visibility"`
+	Name       string            `mapstructure:"name"`
+	Owner      string            `mapstructure:"owner"`
+	Tags       []string          `mapstructure:"tags"`
+	Visibility string            `mapstructure:"visibility"`
+	Properties map[string]string `mapstructure:"properties"`
 }
 
 func (f *ImageFilterOptions) Empty() bool {
-	return f.Name == "" && f.Owner == "" && len(f.Tags) == 0 && f.Visibility == ""
+	return f.Name == "" && f.Owner == "" && len(f.Tags) == 0 && f.Visibility == "" && len(f.Properties) == 0
 }
 
 func (f *ImageFilterOptions) Build() (*images.ListOpts, error) {

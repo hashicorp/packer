@@ -139,6 +139,7 @@ func TestBuildImageFilter(t *testing.T) {
 		Visibility: "public",
 		Owner:      "1234567890",
 		Tags:       []string{"prod", "ready"},
+		Properties: map[string]string{"os_distro": "ubuntu", "os_version": "16.04"},
 	}
 
 	listOpts, err := filters.Build()
@@ -198,6 +199,7 @@ func TestImageFiltersEmpty(t *testing.T) {
 		Visibility: "public",
 		Owner:      "1234567890",
 		Tags:       []string{"prod", "ready"},
+		Properties: map[string]string{"os_distro": "ubuntu", "os_version": "16.04"},
 	}
 
 	if filledFilters.Empty() {
