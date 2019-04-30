@@ -37,7 +37,7 @@ explaining what each method should do.
 ``` go
 type PostProcessor interface {
   Configure(interface{}) error
-  PostProcess(context.Context, Ui, Artifact) (a Artifact, keep, mustKeel bool, err error)
+  PostProcess(context.Context, Ui, Artifact) (a Artifact, keep, mustKeep bool, err error)
 }
 ```
 
