@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gofrs/flock"
 	getter "github.com/hashicorp/go-getter"
 	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -146,7 +146,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)
-	lock := flock.New(lockFile)
+	lock := filelock.New(lockFile)
 	lock.Lock()
 	defer lock.Unlock()
 
