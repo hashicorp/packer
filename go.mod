@@ -21,7 +21,7 @@ require (
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/cheggaaa/pb v1.0.27
-	github.com/creack/goselect v0.0.0-20180210034346-528c74964609 // indirect
+	github.com/creack/goselect v0.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/godo v1.11.1
 	github.com/dnaeon/go-vcr v1.0.0 // indirect
@@ -109,11 +109,12 @@ require (
 	github.com/xanzy/go-cloudstack v2.4.1+incompatible
 	github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
 	github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a
+	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
+	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
-	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+	golang.org/x/sys v0.0.0-20190425145619-16072639606e
+	golang.org/x/text v0.3.1 // indirect
 	google.golang.org/api v0.3.1
 	google.golang.org/grpc v1.19.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect

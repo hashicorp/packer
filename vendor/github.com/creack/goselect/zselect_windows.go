@@ -20,8 +20,6 @@ func _select(nfds int, readfds *FDSet, writefds *FDSet, exceptfds *FDSet, timeou
 	if total == 0 {
 		if e1 != 0 {
 			err = error(e1)
-		} else {
-			err = syscall.EINVAL
 		}
 	}
 	return
