@@ -140,7 +140,7 @@ github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/trace/v1
 # github.com/cheggaaa/pb v1.0.27
 github.com/cheggaaa/pb
-# github.com/creack/goselect v0.0.0-20180210034346-528c74964609
+# github.com/creack/goselect v0.1.0
 github.com/creack/goselect
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
@@ -493,7 +493,7 @@ go.opencensus.io/metric/metricproducer
 go.opencensus.io/stats/internal
 go.opencensus.io/internal
 go.opencensus.io/trace/internal
-# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+# golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/curve25519
@@ -504,7 +504,7 @@ golang.org/x/crypto/md4
 golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20190311183353-d8887717615a
+# golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
 golang.org/x/net/proxy
 golang.org/x/net/http2
 golang.org/x/net/html/charset
@@ -528,11 +528,11 @@ golang.org/x/oauth2/jws
 # golang.org/x/sync v0.0.0-20190423024810-112230192c58
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+# golang.org/x/sys v0.0.0-20190425145619-16072639606e
 golang.org/x/sys/unix
 golang.org/x/sys/cpu
 golang.org/x/sys/windows
-# golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2
+# golang.org/x/text v0.3.1
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
