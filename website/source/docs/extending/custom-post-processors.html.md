@@ -37,7 +37,7 @@ explaining what each method should do.
 ``` go
 type PostProcessor interface {
   Configure(interface{}) error
-  PostProcess(Ui, Artifact) (a Artifact, keep bool, err error)
+  PostProcess(context.Context, Ui, Artifact) (a Artifact, keep, mustKeep bool, err error)
 }
 ```
 
@@ -69,6 +69,8 @@ validates, but will never actually run the build.
 The `PostProcess` method is where the real work goes. PostProcess is
 responsible for taking one `packer.Artifact` implementation, and transforming
 it into another.
+A `PostProcess` call can be cancelled at any moment. Cancellation is triggered
+when the done chan of the context struct (`<-ctx.Done()`) unblocks .
 
 When we say "transform," we don't mean actually modifying the existing
 `packer.Artifact` value itself. We mean taking the contents of the artifact and
@@ -78,14 +80,17 @@ transformation would be taking the `Files()` from the original artifact,
 compressing them, and creating a new artifact with a single file: the
 compressed archive.
 
-The result signature of this method is `(Artifact, bool, error)`. Each return
-value is explained below:
+The result signature of this method is `(Artifact, bool, bool, error)`. Each
+return value is explained below:
 
 -   `Artifact` - The newly created artifact if no errors occurred.
--   `bool` - If true, the input artifact will forcefully be kept. By default,
+-   `bool` - If keep true, the input artifact will forcefully be kept. By default,
     Packer typically deletes all input artifacts, since the user doesn't
     generally want intermediary artifacts. However, some post-processors depend
     on the previous artifact existing. If this is `true`, it forces packer to
     keep the artifact around.
+-   `bool` - If forceOverride is true, then any user input for
+    keep_input_artifact is ignored and the artifact is either kept or discarded
+    according to the value set in `keep`. 
 -   `error` - Non-nil if there was an error in any way. If this is the case,
     the other two return values are ignored.
