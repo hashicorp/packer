@@ -119,7 +119,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 }
 
 func TestAgentSetToFalse(t *testing.T) {
-	// pnly the mandatory attributes are specified
+	// only the mandatory attributes are specified
 	const config = `{
 		"builders": [
 			{
