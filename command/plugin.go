@@ -49,6 +49,8 @@ import (
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
+	vmwareesxisobuilder "github.com/hashicorp/packer/builder/vmware-esx/iso"
+	vmwareesxvmxbuilder "github.com/hashicorp/packer/builder/vmware-esx/vmx"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
@@ -132,6 +134,8 @@ var Builders = map[string]packer.Builder{
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
+	"vmware-esx-iso":      new(vmwareesxisobuilder.Builder),
+	"vmware-esx-vmx":      new(vmwareesxvmxbuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
 }
 
