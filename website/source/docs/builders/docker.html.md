@@ -219,7 +219,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     running `docker run -it --rm $IMAGE` will start the docker image from the
     `/bin/sh` shell interpreter; you could run a script or another shell by
     running `docker run -it --rm $IMAGE -c /bin/bash`. If your docker image
-    embeds a binary intended do be run often, you should consider changing the
+    embeds a binary intended to be run often, you should consider changing the
     default entrypoint to point to it.
 
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
