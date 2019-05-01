@@ -40,7 +40,7 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 		PermissionsToCreateVolume: oapi.PermissionsOnResourceCreation{
 			Additions: oapi.PermissionsOnResource{
 				AccountIds:       s.AccountIds,
-				GlobalPermission: true,
+				GlobalPermission: false,
 			},
 		},
 	}
@@ -49,7 +49,7 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 		PermissionsToLaunch: oapi.PermissionsOnResourceCreation{
 			Additions: oapi.PermissionsOnResource{
 				AccountIds:       s.AccountIds,
-				GlobalPermission: true,
+				GlobalPermission: false,
 			},
 		},
 	}
