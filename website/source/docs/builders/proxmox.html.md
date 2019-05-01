@@ -146,6 +146,9 @@ builder.
 -   `unmount_iso` (bool) - If true, remove the mounted ISO from the template
     after finishing. Defaults to `false`.
 
+-   `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
+    then `qemu-guest-agent` must be installed on the guest. When disabled, then 
+    `ssh_host` should be used. Defaults to `true`.
 
 ## Example: Fedora with kickstart
 
