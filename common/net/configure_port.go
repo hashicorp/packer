@@ -60,7 +60,7 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 	var listener *Listener
 
 	err := retry.Config{
-		RetryDelay: func() time.Duration { return 20 * time.Millisecond },
+		RetryDelay: func() time.Duration { return 1 * time.Millisecond },
 	}.Run(ctx, func(context.Context) error {
 		port := lc.Min
 		if portRange > 0 {
@@ -78,7 +78,7 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			return err
 		}
 		if !locked {
-			return fmt.Errorf("Port %d is file locked", port)
+			return ErrPortFileLocked(port)
 		}
 
 		log.Printf("Trying port: %d", port)
@@ -88,7 +88,10 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			if err := lock.Unlock(); err != nil {
 				log.Fatalf("Could not unlock file lock for port %d: %v", port, err)
 			}
-			return fmt.Errorf("Port %d cannot be opened: %v", port, err)
+			return &ErrPortBusy{
+				Port: port,
+				Err:  err,
+			}
 		}
 
 		log.Printf("Found available port: %d on IP: %s", port, lc.Addr)
@@ -101,4 +104,22 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 		return nil
 	})
 	return listener, err
+}
+
+type ErrPortFileLocked int
+
+func (port ErrPortFileLocked) Error() string {
+	return fmt.Sprintf("Port %d is file locked", port)
+}
+
+type ErrPortBusy struct {
+	Port int
+	Err  error
+}
+
+func (err *ErrPortBusy) Error() string {
+	if err == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("port %d cannot be opened: %v", err.Port, err.Err)
 }
