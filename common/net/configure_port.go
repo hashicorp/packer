@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/filelock"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -55,11 +56,12 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 		lc.Network = "tcp"
 	}
 	portRange := lc.Max - lc.Min
-	for {
-		if err := ctx.Err(); err != nil {
-			return nil, err
-		}
 
+	var listener *Listener
+
+	err := retry.Config{
+		RetryDelay: func() time.Duration { return 20 * time.Millisecond },
+	}.Run(ctx, func(context.Context) error {
 		port := lc.Min
 		if portRange > 0 {
 			port += rand.Intn(portRange)
@@ -67,16 +69,16 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 
 		lockFilePath, err := packer.CachePath("port", strconv.Itoa(port))
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		lock := filelock.New(lockFilePath)
 		locked, err := lock.TryLock()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if !locked {
-			continue // this port seems to be locked by another packer goroutine
+			return fmt.Errorf("Port %d is file locked", port)
 		}
 
 		log.Printf("Trying port: %d", port)
@@ -84,20 +86,19 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 		l, err := lc.ListenConfig.Listen(ctx, lc.Network, fmt.Sprintf("%s:%d", lc.Addr, port))
 		if err != nil {
 			if err := lock.Unlock(); err != nil {
-				log.Printf("Could not unlock file lock for port %d: %v", port, err)
+				log.Fatalf("Could not unlock file lock for port %d: %v", port, err)
 			}
-
-			continue // this port is most likely already open
+			return fmt.Errorf("Port %d cannot be opened: %v", port, err)
 		}
 
 		log.Printf("Found available port: %d on IP: %s", port, lc.Addr)
-		return &Listener{
+		listener = &Listener{
 			Address:  lc.Addr,
 			Port:     port,
 			Listener: l,
 			lock:     lock,
-		}, err
-
-		time.Sleep(20 * time.Millisecond)
-	}
+		}
+		return nil
+	})
+	return listener, err
 }
