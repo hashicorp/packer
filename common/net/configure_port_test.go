@@ -53,8 +53,10 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 			Min: lockedListener.Port,
 			Max: lockedListener.Port,
 		}.Listen(ctx)
-		if err != context.DeadlineExceeded {
+		if l != nil {
 			l.Close()
+		}
+		if err != context.DeadlineExceeded {
 			t.Fatalf("port should be taken, this should timeout: %v", err)
 		}
 		cancel()
