@@ -10,7 +10,7 @@ import (
 
 const (
 	// BuilderId for the local artifacts
-	BuilderId    = "mitchellh.vmware"
+	BuilderId = "mitchellh.vmware"
 
 	ArtifactConfFormat         = "artifact.conf.format"
 	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
@@ -54,16 +54,12 @@ func (a *artifact) Destroy() error {
 	return nil
 }
 
-func NewArtifact(remoteType string, format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packer.Artifact, error) {
+func NewArtifact(format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packer.Artifact, error) {
 	var files []string
 	var dir OutputDir
 	var err error
-	if remoteType != "" && !skipExport {
-		dir = new(LocalOutputDir)
-		dir.SetOutputDir(exportOutputPath)
-	} else {
-		dir = state.Get("dir").(OutputDir)
-	}
+
+	dir = state.Get("dir").(OutputDir)
 	files, err = dir.ListFiles()
 	if err != nil {
 		return nil, err

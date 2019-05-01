@@ -2,8 +2,6 @@ package iso
 
 import (
 	"context"
-	"fmt"
-	"log"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -23,8 +21,7 @@ func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 	ui := state.Get("ui").(packer.Ui)
 
 	// Check if the driver is a remote driver (it should never be)
-	remote, ok := driver.(vmwcommon.RemoteDriver)
-	if !ok {
+	if _, ok := driver.(vmwcommon.RemoteDriver); !ok {
 		return multistep.ActionContinue
 	}
 

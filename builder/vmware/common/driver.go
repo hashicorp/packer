@@ -84,7 +84,6 @@ type Driver interface {
 func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
 	drivers := []Driver{}
 
-
 	switch runtime.GOOS {
 	case "darwin":
 		drivers = []Driver{

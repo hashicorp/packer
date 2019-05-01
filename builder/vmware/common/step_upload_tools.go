@@ -21,7 +21,6 @@ type StepUploadTools struct {
 }
 
 func (c *StepUploadTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(Driver)
 
 	if c.ToolsUploadFlavor == "" {
 		return multistep.ActionContinue

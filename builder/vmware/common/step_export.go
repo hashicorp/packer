@@ -1,14 +1,10 @@
 package common
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"net/url"
-	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -57,7 +53,6 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 }
 
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	c := state.Get("driverConfig").(*DriverConfig)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip export if requested

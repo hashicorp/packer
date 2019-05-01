@@ -12,7 +12,6 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -403,7 +402,7 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 	ictx.Data = &templateData
 
 	/// Render the .vmx template with the parameters we've assigned
-	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
+	vmxContents, err := interpolate.Render(vmxTemplate, &ictx)
 	if err != nil {
 		err := fmt.Errorf("Error processing VMX template: %s", err)
 		state.Put("error", err)
