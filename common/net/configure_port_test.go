@@ -53,11 +53,12 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 			Min: lockedListener.Port,
 			Max: lockedListener.Port,
 		}.Listen(ctx)
-		if l != nil {
+		if err == nil {
 			l.Close()
+			t.Fatal("port should be taken, this should fail")
 		}
-		if err != context.DeadlineExceeded {
-			t.Fatalf("port should be taken, this should timeout: %v", err)
+		if p := int(err.(ErrPortFileLocked)); p != lockedListener.Port {
+			t.Fatalf("wrong fileport: %d", p)
 		}
 		cancel()
 	}
@@ -68,9 +69,12 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 		l, err := ListenRangeConfig{
 			Min: lockedListener.Port,
 		}.Listen(ctx)
-		if err != context.DeadlineExceeded {
+		if err == nil {
 			l.Close()
-			t.Fatalf("port should be taken, this should timeout: %v", err)
+			t.Fatalf("port should be taken, this should timeout.")
+		}
+		if p := int(err.(ErrPortFileLocked)); p != lockedListener.Port {
+			t.Fatalf("wrong fileport: %d", p)
 		}
 		cancel()
 	}
@@ -104,15 +108,15 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 		l, err := ListenRangeConfig{
 			Min: lockedListener.Port,
 		}.Listen(ctx)
-		if err != context.DeadlineExceeded {
+		if err == nil {
 			l.Close()
-			t.Fatalf("port should be file locked, this should timeout: %v", err)
+			t.Fatalf("port should be file locked, this should timeout")
 		}
 		cancel()
 	}
 
 	var netListener net.Listener
-	{ // test that network port was closed. using net.Listen
+	{ // test that the closed network port can be reopened using net.Listen
 		netListener, err = net.Listen("tcp", lockedListener.Addr().String())
 		if err != nil {
 			t.Fatalf("listen on freed port failed: %v", err)
@@ -130,10 +134,16 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 		l, err := ListenRangeConfig{
 			Min: lockedListener.Port,
 		}.Listen(ctx)
-		if err != context.DeadlineExceeded {
+		if err == nil {
 			l.Close()
-			t.Fatalf("port should be file locked, this should timeout: %v", err)
+			t.Fatalf("port should be file locked, this should timeout")
 		}
+		busyErr := err.(*ErrPortBusy)
+		if busyErr.Port != lockedListener.Port {
+			t.Fatal("wrong port")
+		}
+		// error types vary depending on OS and it might get quickly
+		// complicated to test for the error we want.
 		cancel()
 	}
 
