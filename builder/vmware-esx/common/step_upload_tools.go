@@ -3,10 +3,8 @@ package common
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 

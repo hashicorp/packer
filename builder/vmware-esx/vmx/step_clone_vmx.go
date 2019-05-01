@@ -3,7 +3,6 @@ package vmx
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -61,8 +60,8 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 			return halt(err)
 		}
 
-	// If the type assertion for vmwcommon.RemoteDriver fails (it shouldn't),
-	// then we have no way of downloading the machine configuration.
+		// If the type assertion for vmwcommon.RemoteDriver fails (it shouldn't),
+		// then we have no way of downloading the machine configuration.
 	} else {
 		err := fmt.Errorf("Driver does not implement a method for downloading the machine configuration.")
 		return halt(err)

@@ -10,7 +10,7 @@ import (
 
 const (
 	// BuilderId for the local artifacts
-	BuilderId    = "mitchellh.vmware-esx"
+	BuilderId = "mitchellh.vmware-esx"
 
 	ArtifactConfFormat         = "artifact.conf.format"
 	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
@@ -66,8 +66,8 @@ func NewArtifact(format string, exportOutputPath string, vmName string, skipExpo
 		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
 
-	// Otherwise we don't need to set dir and just need to include all the
-	// files in the directory
+		// Otherwise we don't need to set dir and just need to include all the
+		// files in the directory
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
 	}

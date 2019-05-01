@@ -49,8 +49,8 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionContinue
 		}
 
-	// If we're not using the ESX5 checksum, then just notify the user we're
-	// going to re-upload anyways. (Matches logic of previous ESX implementation)
+		// If we're not using the ESX5 checksum, then just notify the user we're
+		// going to re-upload anyways. (Matches logic of previous ESX implementation)
 	} else {
 		ui.Say("Remote driver does not support the ability to verify the checksum. Re-uploading..")
 	}

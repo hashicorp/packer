@@ -18,7 +18,7 @@ import (
 //
 // Produces:
 //   <nothing>
-type StepUploadVMX struct {}
+type StepUploadVMX struct{}
 
 func (c *StepUploadVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)

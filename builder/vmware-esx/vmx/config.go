@@ -2,7 +2,6 @@ package vmx
 
 import (
 	"fmt"
-	"os"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"

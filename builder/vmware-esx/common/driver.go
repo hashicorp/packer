@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -112,7 +111,6 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 		"Unable to initialize any driver for this platform. The errors\n"+
 			"from each driver are shown below. Please fix at least one driver\n"+
 			"to continue:\n%s", errs)
-	}
 }
 
 func runAndLog(cmd *exec.Cmd) (string, string, error) {
