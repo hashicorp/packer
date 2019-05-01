@@ -31,7 +31,7 @@ type ESX5Driver struct {
 	base VmwareDriver
 
 	Host           string
-	Port           uint
+	Port           int
 	Username       string
 	Password       string
 	PrivateKeyFile string

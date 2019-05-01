@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware-esx/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"

@@ -20,7 +20,7 @@ type DriverConfig struct {
 	RemoteCacheDatastore    string `mapstructure:"remote_cache_datastore"`
 	RemoteCacheDirectory    string `mapstructure:"remote_cache_directory"`
 	RemoteHost              string `mapstructure:"remote_host"`
-	RemotePort              uint   `mapstructure:"remote_port"`
+	RemotePort              int    `mapstructure:"remote_port"`
 	RemoteUser              string `mapstructure:"remote_username"`
 	RemotePassword          string `mapstructure:"remote_password"`
 	RemotePrivateKey        string `mapstructure:"remote_private_key_file"`
@@ -69,9 +69,9 @@ func (c *DriverConfig) Validate(SkipExport bool) error {
 	// now, so that we don't fail for a simple mistake after a long
 	// build
 	ovftool := GetOVFTool()
-	ovfToolArgs := []string{"--verifyOnly", fmt.Sprintf("vi://" +
-		url.QueryEscape(c.RemoteUser) + ":" +
-		url.QueryEscape(c.RemotePassword) + "@" +
+	ovfToolArgs := []string{"--noSSLVerify", "--verifyOnly", fmt.Sprintf("vi://%s:%s@%s",
+		url.QueryEscape(c.RemoteUser),
+		url.QueryEscape(c.RemotePassword),
 		c.RemoteHost)}
 
 	var out bytes.Buffer

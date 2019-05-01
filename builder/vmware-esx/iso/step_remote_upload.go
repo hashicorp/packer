@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware-esx/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )

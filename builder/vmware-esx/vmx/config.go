@@ -3,7 +3,7 @@ package vmx
 import (
 	"fmt"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware-esx/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/config"
