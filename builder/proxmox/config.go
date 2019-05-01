@@ -43,6 +43,7 @@ type Config struct {
 	NICs    []nicConfig  `mapstructure:"network_adapters"`
 	Disks   []diskConfig `mapstructure:"disks"`
 	ISOFile string       `mapstructure:"iso_file"`
+	Agent   bool         `mapstructure:"qemu_agent"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
@@ -68,6 +69,8 @@ type diskConfig struct {
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
+	// Agent defaults to true
+	c.Agent = true
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
