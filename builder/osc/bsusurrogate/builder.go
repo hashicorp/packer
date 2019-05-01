@@ -1,12 +1,12 @@
-// The bsusurrogate package contains a packer.Builder implementation that
+// Package bsusurrogate contains a packer.Builder implementation that
 // builds a new EBS-backed OMI using an ephemeral instance.
 package bsusurrogate
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -98,7 +98,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	clientConfig, err := b.config.Config()
 	if err != nil {
 		return nil, err
@@ -226,7 +226,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -246,11 +246,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	}
 
 	return nil, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
