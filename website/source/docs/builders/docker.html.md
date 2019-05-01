@@ -214,7 +214,13 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     using a linux container, and
     `["-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"]` if you
     are running a windows container. {{.Image}} is a template variable that
-    corresponds to the `image` template option.
+    corresponds to the `image` template option. Passing the entrypoint option
+    this way will make it the default entrypoint of the resulting image, so
+    running `docker run -it --rm $IMAGE` will start the docker image from the
+    `/bin/sh` shell interpreter; you could run a script or another shell by
+    running `docker run -it --rm $IMAGE -c /bin/bash`. If your docker image
+    embeds a binary intended to be run often, you should consider changing the
+    default entrypoint to point to it.
 
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
     mount into this container. The key of the object is the host path, the
