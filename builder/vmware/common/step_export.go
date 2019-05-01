@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"net/url"
 	"os/exec"
 	"runtime"
 
@@ -34,25 +33,7 @@ func GetOVFTool() string {
 	return ovftool
 }
 
-func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) []string {
-	password := url.QueryEscape(c.RemotePassword)
-	username := url.QueryEscape(c.RemoteUser)
-
-	if hidePassword {
-		password = "****"
-	}
-	args := []string{
-		"--noSSLVerify=true",
-		"--skipManifestCheck",
-		"-tt=" + s.Format,
-
-		"vi://" + username + ":" + password + "@" + c.RemoteHost + "/" + displayName,
-		s.OutputDir,
-	}
-	return append(s.OVFToolOptions, args...)
-}
-
-func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip export if requested
