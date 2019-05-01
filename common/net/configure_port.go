@@ -81,8 +81,6 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			return ErrPortFileLocked(port)
 		}
 
-		log.Printf("Trying port: %d", port)
-
 		l, err := lc.ListenConfig.Listen(ctx, lc.Network, fmt.Sprintf("%s:%d", lc.Addr, port))
 		if err != nil {
 			if err := lock.Unlock(); err != nil {
