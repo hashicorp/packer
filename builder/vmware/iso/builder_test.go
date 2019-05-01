@@ -139,94 +139,6 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_RemoteType(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["format"] = "ovf"
-	config["remote_host"] = "foobar.example.com"
-	config["remote_password"] = "supersecret"
-	config["skip_validate_credentials"] = true
-	// Bad
-	config["remote_type"] = "foobar"
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	config["remote_type"] = "esx5"
-	// Bad
-	config["remote_host"] = ""
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Good
-	config["remote_type"] = ""
-	config["format"] = ""
-	config["remote_host"] = ""
-	config["remote_password"] = ""
-	config["remote_private_key_file"] = ""
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Good
-	config["remote_type"] = "esx5"
-	config["remote_host"] = "foobar.example.com"
-	config["remote_password"] = "supersecret"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestBuilderPrepare_RemoteExport(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	config["remote_type"] = "esx5"
-	config["remote_host"] = "foobar.example.com"
-	config["skip_validate_credentials"] = true
-	// Bad
-	config["remote_password"] = ""
-	warns, err := b.Prepare(config)
-	if len(warns) != 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Good
-	config["remote_password"] = "supersecret"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) != 0 {
-		t.Fatalf("err: %s", err)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_Format(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -246,10 +158,6 @@ func TestBuilderPrepare_Format(t *testing.T) {
 	for _, format := range goodFormats {
 		// Good
 		config["format"] = format
-		config["remote_type"] = "esx5"
-		config["remote_host"] = "hosty.hostface"
-		config["remote_password"] = "password"
-		config["skip_validate_credentials"] = true
 
 		b = Builder{}
 		warns, err = b.Prepare(config)
