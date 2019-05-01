@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/packer"
@@ -97,5 +98,6 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			lock:     lock,
 		}, err
 
+		time.Sleep(20 * time.Millisecond)
 	}
 }
