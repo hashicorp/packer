@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -66,12 +67,19 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 				ui.Error(fmt.Sprintf("Error destroying VM: %s", err))
 			}
 			// Wait for the machine to actually destroy
+			start := time.Now()
 			for {
-				destroyed, _ := remoteDriver.IsDestroyed()
+				destroyed, err := remoteDriver.IsDestroyed()
 				if destroyed {
 					break
 				}
+				log.Printf("error destroying vm: %s", err)
 				time.Sleep(1 * time.Second)
+				if time.Since(start) >= time.Duration(30*time.Minute) {
+					ui.Error("Error unregistering VM; timed out. You may " +
+						"need to manually clean up your machine")
+					break
+				}
 			}
 		}
 	}
