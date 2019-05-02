@@ -51,9 +51,11 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
-		if region == *ec2conn.Config.Region && s.EncryptBootVolume == nil {
+		if region == *ec2conn.Config.Region &&
+			(s.EncryptBootVolume == nil || *s.EncryptBootVolume == false) {
 			ui.Message(fmt.Sprintf(
 				"Avoiding copying AMI to duplicate region %s", region))
+			wg.Done()
 			continue
 		}
 
