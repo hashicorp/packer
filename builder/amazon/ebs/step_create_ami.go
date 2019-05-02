@@ -95,12 +95,10 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	if s.image == nil {
 		return
 	}
-	config := state.Get("config").(*Config)
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	encryptBootSet := config.AMIEncryptBootVolume != nil
-	if !cancelled && !halted && !encryptBootSet {
+	if !cancelled && !halted {
 		return
 	}
 
@@ -108,7 +106,7 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deregistering the AMI and deleting associated snapshots because " +
-		"of cancellation, error or it was temporary (encrypt_boot was set)...")
+		"of cancellation, or error...")
 
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 		ImageIds: []*string{s.image.ImageId},
