@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"os"
 	"testing"
 )
 
@@ -14,14 +15,10 @@ func testAlicloudAccessConfig() *AlicloudAccessConfig {
 
 func TestAlicloudAccessConfigPrepareRegion(t *testing.T) {
 	c := testAlicloudAccessConfig()
-	c.AlicloudRegion = ""
-	if err := c.Prepare(nil); err != nil {
-		t.Fatalf("shouldn't have err: %s", err)
-	}
 
-	c.AlicloudRegion = "cn-beijing-3"
+	c.AlicloudRegion = ""
 	if err := c.Prepare(nil); err == nil {
-		t.Fatal("should have error")
+		t.Fatalf("should have err")
 	}
 
 	c.AlicloudRegion = "cn-beijing"
@@ -29,16 +26,11 @@ func TestAlicloudAccessConfigPrepareRegion(t *testing.T) {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
-	c.AlicloudRegion = "unknown"
-	if err := c.Prepare(nil); err == nil {
-		t.Fatalf("should have err")
-	}
-
-	c.AlicloudRegion = "unknown"
-	c.AlicloudSkipValidation = true
+	os.Setenv("ALICLOUD_REGION", "cn-hangzhou")
+	c.AlicloudRegion = ""
 	if err := c.Prepare(nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
-	c.AlicloudSkipValidation = false
 
+	c.AlicloudSkipValidation = false
 }

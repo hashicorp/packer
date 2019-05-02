@@ -2,11 +2,9 @@ package ecs
 
 import (
 	"fmt"
-
 	"regexp"
 	"strings"
 
-	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -18,6 +16,7 @@ type AlicloudDiskDevice struct {
 	Description        string `mapstructure:"disk_description"`
 	DeleteWithInstance bool   `mapstructure:"disk_delete_with_instance"`
 	Device             string `mapstructure:"disk_device"`
+	Encrypted          *bool  `mapstructure:"disk_encrypted"`
 }
 
 type AlicloudDiskDevices struct {
@@ -33,6 +32,7 @@ type AlicloudImageConfig struct {
 	AlicloudImageUNShareAccounts      []string          `mapstructure:"image_unshare_account"`
 	AlicloudImageDestinationRegions   []string          `mapstructure:"image_copy_regions"`
 	AlicloudImageDestinationNames     []string          `mapstructure:"image_copy_names"`
+	ImageEncrypted                    *bool             `mapstructure:"image_encrypted"`
 	AlicloudImageForceDelete          bool              `mapstructure:"image_force_delete"`
 	AlicloudImageForceDeleteSnapshots bool              `mapstructure:"image_force_delete_snapshots"`
 	AlicloudImageForceDeleteInstances bool              `mapstructure:"image_force_delete_instances"`
@@ -69,15 +69,6 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 
 			// Mark that we saw the region
 			regionSet[region] = struct{}{}
-
-			if !c.AlicloudImageSkipRegionValidation {
-				// Verify the region is real
-				if valid := validateRegion(region); valid != nil {
-					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-					continue
-				}
-			}
-
 			regions = append(regions, region)
 		}
 
@@ -89,15 +80,4 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func validateRegion(region string) error {
-
-	for _, valid := range common.ValidRegions {
-		if region == string(valid) {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Not a valid alicloud region: %s", region)
 }

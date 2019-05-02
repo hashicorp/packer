@@ -106,7 +106,7 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 
 	vncPassword := VNCPassword(s.VNCDisablePassword)
 
-	log.Printf("Found available VNC port: %v", s.l)
+	log.Printf("Found available VNC port: %s:%d", vncBindAddress, vncPort)
 
 	vncFinder.UpdateVMX(vncBindAddress, vncPassword, vncPort, vmxData)
 
@@ -117,8 +117,8 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	state.Put("vnc_port", s.l.Port)
-	state.Put("vnc_ip", s.l.Address)
+	state.Put("vnc_port", vncPort)
+	state.Put("vnc_ip", vncBindAddress)
 	state.Put("vnc_password", vncPassword)
 
 	return multistep.ActionContinue

@@ -2,12 +2,12 @@ package ecs
 
 import (
 	"context"
-	"errors"
+	errorsNew "errors"
 	"fmt"
-	"time"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,54 +19,94 @@ type stepConfigAlicloudVPC struct {
 	isCreate  bool
 }
 
+var createVpcRetryErrors = []string{
+	"TOKEN_PROCESSING",
+}
+
+var deleteVpcRetryErrors = []string{
+	"DependencyViolation.Instance",
+	"DependencyViolation.RouteEntry",
+	"DependencyViolation.VSwitch",
+	"DependencyViolation.SecurityGroup",
+	"Forbbiden",
+	"TaskConflict",
+}
+
 func (s *stepConfigAlicloudVPC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.VpcId) != 0 {
-		vpcs, _, err := client.DescribeVpcs(&ecs.DescribeVpcsArgs{
-			VpcId:    s.VpcId,
-			RegionId: common.Region(config.AlicloudRegion),
-		})
+		describeVpcsRequest := ecs.CreateDescribeVpcsRequest()
+		describeVpcsRequest.VpcId = s.VpcId
+		describeVpcsRequest.RegionId = config.AlicloudRegion
+
+		vpcsResponse, err := client.DescribeVpcs(describeVpcsRequest)
 		if err != nil {
-			ui.Say(fmt.Sprintf("Failed querying vpcs: %s", err))
-			state.Put("error", err)
-			return multistep.ActionHalt
+			return halt(state, err, "Failed querying vpcs")
 		}
+
+		vpcs := vpcsResponse.Vpcs.Vpc
 		if len(vpcs) > 0 {
-			vpc := vpcs[0]
-			state.Put("vpcid", vpc.VpcId)
+			state.Put("vpcid", vpcs[0].VpcId)
 			s.isCreate = false
 			return multistep.ActionContinue
 		}
-		message := fmt.Sprintf("The specified vpc {%s} doesn't exist.", s.VpcId)
-		state.Put("error", errors.New(message))
-		ui.Say(message)
-		return multistep.ActionHalt
 
+		message := fmt.Sprintf("The specified vpc {%s} doesn't exist.", s.VpcId)
+		return halt(state, errorsNew.New(message), "")
 	}
-	ui.Say("Creating vpc")
-	vpc, err := client.CreateVpc(&ecs.CreateVpcArgs{
-		RegionId:  common.Region(config.AlicloudRegion),
-		CidrBlock: s.CidrBlock,
-		VpcName:   s.VpcName,
+
+	ui.Say("Creating vpc...")
+
+	createVpcRequest := s.buildCreateVpcRequest(state)
+	createVpcResponse, err := client.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			return client.CreateVpc(createVpcRequest)
+		},
+		EvalFunc: client.EvalCouldRetryResponse(createVpcRetryErrors, EvalRetryErrorType),
 	})
 	if err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Failed creating vpc: %s", err))
-		return multistep.ActionHalt
-	}
-	err = client.WaitForVpcAvailable(common.Region(config.AlicloudRegion), vpc.VpcId, ALICLOUD_DEFAULT_SHORT_TIMEOUT)
-	if err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Failed waiting for vpc to become available: %s", err))
-		return multistep.ActionHalt
+		return halt(state, err, "Failed creating vpc")
 	}
 
-	state.Put("vpcid", vpc.VpcId)
+	vpcId := createVpcResponse.(*ecs.CreateVpcResponse).VpcId
+	_, err = client.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			request := ecs.CreateDescribeVpcsRequest()
+			request.RegionId = config.AlicloudRegion
+			request.VpcId = vpcId
+			return client.DescribeVpcs(request)
+		},
+		EvalFunc: func(response responses.AcsResponse, err error) WaitForExpectEvalResult {
+			if err != nil {
+				return WaitForExpectToRetry
+			}
+
+			vpcsResponse := response.(*ecs.DescribeVpcsResponse)
+			vpcs := vpcsResponse.Vpcs.Vpc
+			if len(vpcs) > 0 {
+				for _, vpc := range vpcs {
+					if vpc.Status == VpcStatusAvailable {
+						return WaitForExpectSuccess
+					}
+				}
+			}
+
+			return WaitForExpectToRetry
+		},
+		RetryTimes: shortRetryTimes,
+	})
+
+	if err != nil {
+		return halt(state, err, "Failed waiting for vpc to become available")
+	}
+
+	ui.Message(fmt.Sprintf("Created vpc: %s", vpcId))
+	state.Put("vpcid", vpcId)
 	s.isCreate = true
-	s.VpcId = vpc.VpcId
+	s.VpcId = vpcId
 	return multistep.ActionContinue
 }
 
@@ -75,24 +115,34 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*ecs.Client)
+	cleanUpMessage(state, "VPC")
+
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
 
-	message(state, "VPC")
-	timeoutPoint := time.Now().Add(60 * time.Second)
-	for {
-		if err := client.DeleteVpc(s.VpcId); err != nil {
-			e, _ := err.(*common.Error)
-			if (e.Code == "DependencyViolation.Instance" || e.Code == "DependencyViolation.RouteEntry" ||
-				e.Code == "DependencyViolation.VSwitch" ||
-				e.Code == "DependencyViolation.SecurityGroup" ||
-				e.Code == "Forbbiden") && time.Now().Before(timeoutPoint) {
-				time.Sleep(1 * time.Second)
-				continue
-			}
-			ui.Error(fmt.Sprintf("Error deleting vpc, it may still be around: %s", err))
-			return
-		}
-		break
+	_, err := client.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			request := ecs.CreateDeleteVpcRequest()
+			request.VpcId = s.VpcId
+			return client.DeleteVpc(request)
+		},
+		EvalFunc:   client.EvalCouldRetryResponse(deleteVpcRetryErrors, EvalRetryErrorType),
+		RetryTimes: shortRetryTimes,
+	})
+
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting vpc, it may still be around: %s", err))
 	}
+}
+
+func (s *stepConfigAlicloudVPC) buildCreateVpcRequest(state multistep.StateBag) *ecs.CreateVpcRequest {
+	config := state.Get("config").(*Config)
+
+	request := ecs.CreateCreateVpcRequest()
+	request.ClientToken = uuid.TimeOrderedUUID()
+	request.RegionId = config.AlicloudRegion
+	request.CidrBlock = s.CidrBlock
+	request.VpcName = s.VpcName
+
+	return request
 }
