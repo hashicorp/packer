@@ -18,6 +18,8 @@ type StepAMIRegionCopy struct {
 	RegionKeyIds      map[string]string
 	EncryptBootVolume *bool // nil means preserve
 	Name              string
+
+	toDelete string
 }
 
 func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -36,6 +38,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			s.RegionKeyIds = make(map[string]string)
 		}
 		s.RegionKeyIds[*ec2conn.Config.Region] = s.AMIKmsKeyId
+		s.toDelete = ami
 	}
 
 	if len(s.Regions) == 0 {
@@ -94,7 +97,55 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 }
 
 func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
-	// No cleanup...
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+
+	// Delete the unencrypted amis and snapshots
+	ui.Say("Deregistering the AMI and deleting unencrypted temporary " +
+		"AMIs and snapshots")
+
+	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+		ImageIds: []*string{&s.toDelete},
+	})
+
+	if err != nil {
+		err := fmt.Errorf("Error describing AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return
+	}
+
+	// Deregister image by name.
+	for _, i := range resp.Images {
+		_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+			ImageId: i.ImageId,
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error deregistering existing AMI: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return
+		}
+		ui.Say(fmt.Sprintf("Deregistered AMI id: %s", *i.ImageId))
+
+		// Delete snapshot(s) by image
+		for _, b := range i.BlockDeviceMappings {
+			if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
+				_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+					SnapshotId: b.Ebs.SnapshotId,
+				})
+
+				if err != nil {
+					err := fmt.Errorf("Error deleting existing snapshot: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return
+				}
+				ui.Say(fmt.Sprintf("Deleted snapshot: %s", *b.Ebs.SnapshotId))
+			}
+		}
+	}
 }
 
 // amiRegionCopy does a copy for the given AMI to the target region and
