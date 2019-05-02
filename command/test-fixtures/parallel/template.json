@@ -1,6 +1,6 @@
 {
     "builders": [
-        {"type": "parallel-test", "name": "build0"},
+        {"type": "lock", "name": "build0"},
         {"type": "parallel-test", "name": "build1"},
         {"type": "parallel-test", "name": "build2"},
         {"type": "parallel-test", "name": "build3"},
