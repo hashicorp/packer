@@ -17,7 +17,7 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=1",
+		"-parallel=false",
 		"-only=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -59,7 +59,7 @@ func TestBuildStdin(t *testing.T) {
 	defer func() { os.Stdin = stdin }()
 
 	defer cleanup()
-	if code := c.Run([]string{"-parallel=1", "-"}); code != 0 {
+	if code := c.Run([]string{"-parallel=false", "-"}); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
 
@@ -77,7 +77,7 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=1",
+		"-parallel=false",
 		"-only=chocolate",
 		"-only=cherry",
 		"-only=apple", // ignored
@@ -111,7 +111,7 @@ func TestBuildEverything(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=1",
+		"-parallel=false",
 		`-except=`,
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -136,7 +136,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=1",
+		"-parallel=false",
 		"-except=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
