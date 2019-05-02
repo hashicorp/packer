@@ -4,32 +4,47 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math"
 	"path/filepath"
 	"sync"
 	"testing"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/hashicorp/packer/packer"
 )
 
+// NewParallelTestBuilder will return a New ParallelTestBuilder whose first run
+// will lock until unlockOnce is closed and that will unlock after `runs`
+// builds
+func NewParallelTestBuilder(runs int) *ParallelTestBuilder {
+	pb := &ParallelTestBuilder{
+		unlockOnce: make(chan interface{}),
+	}
+	pb.wg.Add(runs)
+	return pb
+}
+
+// The ParallelTestBuilder's first run will lock
 type ParallelTestBuilder struct {
-	Prepared int
-	Built    int
-	wg       *sync.WaitGroup
-	m        *sync.Mutex
+	once       sync.Once
+	unlockOnce chan interface{}
+
+	wg sync.WaitGroup
 }
 
 func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, error) {
-	b.Prepared++
 	return nil, nil
 }
 
 func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	ui.Say(fmt.Sprintf("count: %d", b.Built))
-	b.Built++
+	b.once.Do(func() {
+		ui.Say("locking build")
+		<-b.unlockOnce
+		b.wg.Add(1) // avoid a panic
+	})
+
+	ui.Say("building")
 	b.wg.Done()
-	b.m.Lock()
-	b.m.Unlock()
 	return nil, nil
 }
 
@@ -57,42 +72,29 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder) Meta {
 }
 
 func TestBuildParallel(t *testing.T) {
-	defer cleanup()
-
-	m := &sync.Mutex{}
-	m.Lock()
-	expected := 2
-	wg := &sync.WaitGroup{}
-	wg.Add(expected)
-	b := &ParallelTestBuilder{
-		wg: wg,
-		m:  m,
-	}
+	// testfile that running 6 builds, with first one locks 'forever', other
+	// builds should go through.
+	b := NewParallelTestBuilder(5)
 
 	c := &BuildCommand{
 		Meta: testMetaParallel(t, b),
 	}
 
 	args := []string{
-		fmt.Sprintf("-parallel=%d", expected),
+		fmt.Sprintf("-parallel=2"),
 		filepath.Join(testFixture("parallel"), "template.json"),
 	}
 
-	go func(t *testing.T, c *BuildCommand) {
+	wg := errgroup.Group{}
+
+	wg.Go(func() error {
 		if code := c.Run(args); code != 0 {
 			fatalCommand(t, c.Meta)
 		}
-	}(t, c)
+		return nil
+	})
 
-	wg.Wait()
-	if b.Prepared != 6 {
-		t.Errorf("Expected all builds to be prepared, was %d", b.Prepared)
-	}
-
-	if b.Built != expected {
-		t.Errorf("Expected only %d running/completed builds, was %d", expected, b.Built)
-	}
-
-	m.Unlock()
-	wg.Add(math.MaxInt32)
+	b.wg.Wait()         // ran 5 times
+	close(b.unlockOnce) // unlock locking one
+	wg.Wait()           // wait for termination
 }
