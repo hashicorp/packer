@@ -26,8 +26,8 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgTimestamp bool
-	var cfgParallel int64
+	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
+	var cfgParallelBuilds int64
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
@@ -37,7 +37,8 @@ func (c *BuildCommand) Run(args []string) int {
 	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
-	flags.Int64Var(&cfgParallel, "parallel", 0, "")
+	flags.BoolVar(&cfgParallel, "parallel", true, "")
+	flags.Int64Var(&cfgParallelBuilds, "parallel-builds", 0, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -153,8 +154,11 @@ func (c *BuildCommand) Run(args []string) int {
 	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
 	// ctx := context.Background()
-	if cfgParallel < 1 {
-		cfgParallel = math.MaxInt64
+	if cfgParallel == false {
+		cfgParallelBuilds = 1
+	}
+	if cfgParallelBuilds < 1 {
+		cfgParallelBuilds = math.MaxInt64
 	}
 
 	buildCtx, cancelCtx := context.WithCancel(context.Background())
@@ -172,7 +176,7 @@ func (c *BuildCommand) Run(args []string) int {
 		c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
 	}()
 
-	limitParallel := semaphore.NewWeighted(cfgParallel)
+	limitParallel := semaphore.NewWeighted(cfgParallelBuilds)
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
@@ -210,7 +214,7 @@ func (c *BuildCommand) Run(args []string) int {
 			wg.Wait()
 		}
 
-		if cfgParallel == 1 {
+		if cfgParallelBuilds == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
@@ -323,7 +327,8 @@ Options:
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
-  -parallel=count               Number of builds to run in parallel. (Default: 0)
+  -parallel=false               Disable parallelization. (Default: true)
+  -parallel-builds=1            Number of builds to run in parallel. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.
