@@ -26,7 +26,7 @@ type stepTypeBootCommand struct {
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 }
 
 type commandTyper interface {
@@ -66,7 +66,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	common.SetHTTPIP(httpIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:   httpIP,
-		HTTPPort: state.Get("http_port").(uint),
+		HTTPPort: state.Get("http_port").(int),
 	}
 
 	ui.Say("Typing the boot command")

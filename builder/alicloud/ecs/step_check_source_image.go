@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -15,40 +14,35 @@ type stepCheckAlicloudSourceImage struct {
 }
 
 func (s *stepCheckAlicloudSourceImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
-	args := &ecs.DescribeImagesArgs{
-		RegionId: common.Region(config.AlicloudRegion),
-		ImageId:  config.AlicloudSourceImage,
-	}
-	args.PageSize = 50
-	images, _, err := client.DescribeImages(args)
+
+	describeImagesRequest := ecs.CreateDescribeImagesRequest()
+	describeImagesRequest.RegionId = config.AlicloudRegion
+	describeImagesRequest.ImageId = config.AlicloudSourceImage
+	imagesResponse, err := client.DescribeImages(describeImagesRequest)
 	if err != nil {
-		err := fmt.Errorf("Error querying alicloud image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error querying alicloud image")
 	}
 
+	images := imagesResponse.Images.Image
+
 	// Describe markerplace image
-	args.ImageOwnerAlias = ecs.ImageOwnerMarketplace
-	imageMarkets, _, err := client.DescribeImages(args)
+	describeImagesRequest.ImageOwnerAlias = "marketplace"
+	marketImagesResponse, err := client.DescribeImages(describeImagesRequest)
 	if err != nil {
-		err := fmt.Errorf("Error querying alicloud marketplace image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error querying alicloud marketplace image")
 	}
-	if len(imageMarkets) > 0 {
-		images = append(images, imageMarkets...)
+
+	marketImages := marketImagesResponse.Images.Image
+	if len(marketImages) > 0 {
+		images = append(images, marketImages...)
 	}
 
 	if len(images) == 0 {
 		err := fmt.Errorf("No alicloud image was found matching filters: %v", config.AlicloudSourceImage)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "")
 	}
 
 	ui.Message(fmt.Sprintf("Found image ID: %s", images[0].ImageId))

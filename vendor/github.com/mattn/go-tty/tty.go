@@ -38,6 +38,10 @@ func (tty *TTY) Size() (int, int, error) {
 	return tty.size()
 }
 
+func (tty *TTY) SizePixel() (int, int, int, int, error) {
+	return tty.sizePixel()
+}
+
 func (tty *TTY) Input() *os.File {
 	return tty.input()
 }
@@ -115,6 +119,6 @@ type WINSIZE struct {
 	H int
 }
 
-func (tty *TTY) SIGWINCH() chan WINSIZE {
+func (tty *TTY) SIGWINCH() <-chan WINSIZE {
 	return tty.sigwinch()
 }

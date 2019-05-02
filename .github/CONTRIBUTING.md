@@ -53,7 +53,7 @@ can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to install its
 runtime in order to build packer.
 
-1. [Install go](https://golang.org/doc/install#install)
+1. This project always releases from the latest version of golang. [Install go](https://golang.org/doc/install#install)
 
 ## Setting up Packer for dev
 

@@ -404,6 +404,9 @@ Start-Service -Name WinRM
 </powershell>
 ```
 
+-> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
+https://cloudywindows.io/post/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
+
 Save the above code in a file named `bootstrap_win.txt`.
 
 -> **A quick aside/warning:**<br />

@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 
-	"github.com/gofrs/flock"
 	getter "github.com/hashicorp/go-getter"
 	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -82,8 +83,25 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 		errs = append(errs, err)
 	}
 
-	state.Put("error", fmt.Errorf("Downloading file: %v", errs))
+	err := fmt.Errorf("error downloading %s: %v", s.Description, errs)
+	state.Put("error", err)
+	ui.Error(err.Error())
 	return multistep.ActionHalt
+}
+
+var (
+	getters = getter.Getters
+)
+
+func init() {
+	if runtime.GOOS == "windows" {
+		getters["file"] = &getter.FileGetter{
+			// always copy local files instead of symlinking to fix GH-7534. The
+			// longer term fix for this would be to change the go-getter so that it
+			// can leave the source file where it is & tell us where it is.
+			Copy: true,
+		}
+	}
 }
 
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
@@ -103,8 +121,6 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		q := u.Query()
 		q.Set("checksum", s.Checksum)
 		u.RawQuery = q.Encode()
-	} else if s.ChecksumType != "none" {
-		return "", fmt.Errorf("Empty checksum")
 	}
 
 	targetPath := s.TargetPath
@@ -130,7 +146,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)
-	lock := flock.New(lockFile)
+	lock := filelock.New(lockFile)
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -152,6 +168,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		ProgressListener: ui,
 		Pwd:              wd,
 		Dir:              false,
+		Getters:          getters,
 	}
 
 	switch err := gc.Get(); err.(type) {

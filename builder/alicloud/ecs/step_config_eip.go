@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/hashicorp/packer/common/uuid"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,10 +22,14 @@ type stepConfigAlicloudEIP struct {
 	SSHPrivateIp             bool
 }
 
+var allocateEipAddressRetryErrors = []string{
+	"LastTokenProcessing",
+}
+
 func (s *stepConfigAlicloudEIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
-	instance := state.Get("instance").(*ecs.InstanceAttributesType)
+	instance := state.Get("instance").(*ecs.Instance)
 
 	if s.SSHPrivateIp {
 		ipaddress := instance.VpcAttributes.PrivateIpAddress.IpAddress
@@ -34,37 +41,48 @@ func (s *stepConfigAlicloudEIP) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionContinue
 	}
 
-	ui.Say("Allocating eip")
-	ipaddress, allocateId, err := client.AllocateEipAddress(&ecs.AllocateEipAddressArgs{
-		RegionId: common.Region(s.RegionId), InternetChargeType: common.InternetChargeType(s.InternetChargeType),
-		Bandwidth: s.InternetMaxBandwidthOut,
+	ui.Say("Allocating eip...")
+
+	allocateEipAddressRequest := s.buildAllocateEipAddressRequest(state)
+	allocateEipAddressResponse, err := client.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			return client.AllocateEipAddress(allocateEipAddressRequest)
+		},
+		EvalFunc: client.EvalCouldRetryResponse(allocateEipAddressRetryErrors, EvalRetryErrorType),
 	})
+
 	if err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Error allocating eip: %s", err))
-		return multistep.ActionHalt
+		return halt(state, err, "Error allocating eip")
 	}
+
+	ipaddress := allocateEipAddressResponse.(*ecs.AllocateEipAddressResponse).EipAddress
+	ui.Message(fmt.Sprintf("Allocated eip: %s", ipaddress))
+
+	allocateId := allocateEipAddressResponse.(*ecs.AllocateEipAddressResponse).AllocationId
 	s.allocatedId = allocateId
-	if err = client.WaitForEip(common.Region(s.RegionId), allocateId,
-		ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Error allocating eip: %s", err))
-		return multistep.ActionHalt
+
+	err = s.waitForEipStatus(client, instance.RegionId, s.allocatedId, EipStatusAvailable)
+	if err != nil {
+		return halt(state, err, "Error wait eip available timeout")
 	}
 
-	if err = client.AssociateEipAddress(allocateId, instance.InstanceId); err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Error binding eip: %s", err))
-		return multistep.ActionHalt
+	associateEipAddressRequest := ecs.CreateAssociateEipAddressRequest()
+	associateEipAddressRequest.AllocationId = allocateId
+	associateEipAddressRequest.InstanceId = instance.InstanceId
+	if _, err := client.AssociateEipAddress(associateEipAddressRequest); err != nil {
+		e, ok := err.(errors.Error)
+		if !ok || e.ErrorCode() != "TaskConflict" {
+			return halt(state, err, "Error associating eip")
+		}
+
+		ui.Error(fmt.Sprintf("Error associate eip: %s", err))
 	}
 
-	if err = client.WaitForEip(common.Region(s.RegionId), allocateId,
-		ecs.EipStatusInUse, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
-		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Error associating eip: %s", err))
-		return multistep.ActionHalt
+	err = s.waitForEipStatus(client, instance.RegionId, s.allocatedId, EipStatusInUse)
+	if err != nil {
+		return halt(state, err, "Error wait eip associated timeout")
 	}
-	ui.Say(fmt.Sprintf("Allocated eip %s", ipaddress))
+
 	state.Put("ipaddress", ipaddress)
 	return multistep.ActionContinue
 }
@@ -74,21 +92,74 @@ func (s *stepConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*ecs.Client)
-	instance := state.Get("instance").(*ecs.InstanceAttributesType)
+	cleanUpMessage(state, "EIP")
+
+	client := state.Get("client").(*ClientWrapper)
+	instance := state.Get("instance").(*ecs.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	message(state, "EIP")
-
-	if err := client.UnassociateEipAddress(s.allocatedId, instance.InstanceId); err != nil {
-		ui.Say(fmt.Sprintf("Failed to unassociate eip."))
+	unassociateEipAddressRequest := ecs.CreateUnassociateEipAddressRequest()
+	unassociateEipAddressRequest.AllocationId = s.allocatedId
+	unassociateEipAddressRequest.InstanceId = instance.InstanceId
+	if _, err := client.UnassociateEipAddress(unassociateEipAddressRequest); err != nil {
+		ui.Say(fmt.Sprintf("Failed to unassociate eip: %s", err))
 	}
 
-	if err := client.WaitForEip(common.Region(s.RegionId), s.allocatedId, ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
-		ui.Say(fmt.Sprintf("Timeout while unassociating eip."))
-	}
-	if err := client.ReleaseEipAddress(s.allocatedId); err != nil {
-		ui.Say(fmt.Sprintf("Failed to release eip."))
+	if err := s.waitForEipStatus(client, instance.RegionId, s.allocatedId, EipStatusAvailable); err != nil {
+		ui.Say(fmt.Sprintf("Timeout while unassociating eip: %s", err))
 	}
 
+	releaseEipAddressRequest := ecs.CreateReleaseEipAddressRequest()
+	releaseEipAddressRequest.AllocationId = s.allocatedId
+	if _, err := client.ReleaseEipAddress(releaseEipAddressRequest); err != nil {
+		ui.Say(fmt.Sprintf("Failed to release eip: %s", err))
+	}
+}
+
+func (s *stepConfigAlicloudEIP) waitForEipStatus(client *ClientWrapper, regionId string, allocationId string, expectedStatus string) error {
+	describeEipAddressesRequest := ecs.CreateDescribeEipAddressesRequest()
+	describeEipAddressesRequest.RegionId = regionId
+	describeEipAddressesRequest.AllocationId = s.allocatedId
+
+	_, err := client.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			response, err := client.DescribeEipAddresses(describeEipAddressesRequest)
+			if err == nil && len(response.EipAddresses.EipAddress) == 0 {
+				err = fmt.Errorf("eip allocated is not find")
+			}
+
+			return response, err
+		},
+		EvalFunc: func(response responses.AcsResponse, err error) WaitForExpectEvalResult {
+			if err != nil {
+				return WaitForExpectToRetry
+			}
+
+			eipAddressesResponse := response.(*ecs.DescribeEipAddressesResponse)
+			eipAddresses := eipAddressesResponse.EipAddresses.EipAddress
+
+			for _, eipAddress := range eipAddresses {
+				if eipAddress.Status == expectedStatus {
+					return WaitForExpectSuccess
+				}
+			}
+
+			return WaitForExpectToRetry
+		},
+		RetryTimes: shortRetryTimes,
+	})
+
+	return err
+}
+
+func (s *stepConfigAlicloudEIP) buildAllocateEipAddressRequest(state multistep.StateBag) *ecs.AllocateEipAddressRequest {
+	instance := state.Get("instance").(*ecs.Instance)
+
+	request := ecs.CreateAllocateEipAddressRequest()
+	request.ClientToken = uuid.TimeOrderedUUID()
+	request.RegionId = instance.RegionId
+	request.InternetChargeType = s.InternetChargeType
+	request.Bandwidth = string(convertNumber(s.InternetMaxBandwidthOut))
+
+	return request
 }
