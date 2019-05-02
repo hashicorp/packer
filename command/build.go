@@ -177,22 +177,22 @@ func (c *BuildCommand) Run(args []string) int {
 	}()
 
 	limitParallel := semaphore.NewWeighted(cfgParallelBuilds)
-	for _, b := range builds {
+	for i := range builds {
+		b := builds[i]
+		name := b.Name()
+		ui := buildUis[name]
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
+		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
+			errors[name] = err
+			break
+		}
 
 		// Run the build in a goroutine
-		go func(b packer.Build) {
+		go func() {
 			defer wg.Done()
 
-			name := b.Name()
-			ui := buildUis[name]
-
-			if err := limitParallel.Acquire(buildCtx, 1); err != nil {
-				ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
-				errors[name] = err
-				return
-			}
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
@@ -207,7 +207,7 @@ func (c *BuildCommand) Run(args []string) int {
 				artifacts.m[name] = runArtifacts
 				artifacts.Unlock()
 			}
-		}(b)
+		}()
 
 		if cfgDebug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
