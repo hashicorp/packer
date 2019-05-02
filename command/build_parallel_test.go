@@ -75,8 +75,8 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 }
 
 func TestBuildParallel_1(t *testing.T) {
-	// testfile that running 6 builds, with first one locks 'forever', other
-	// builds should go through.
+	// testfile has 6 builds, with first one locks 'forever', other builds
+	// should go through.
 	b := NewParallelTestBuilder(5)
 	locked := &LockedBuilder{unlock: make(chan interface{})}
 
@@ -86,7 +86,7 @@ func TestBuildParallel_1(t *testing.T) {
 
 	args := []string{
 		fmt.Sprintf("-parallel=true"),
-		filepath.Join(testFixture("parallel"), "template.json"),
+		filepath.Join(testFixture("parallel"), "1lock.json"),
 	}
 
 	wg := errgroup.Group{}
@@ -99,6 +99,35 @@ func TestBuildParallel_1(t *testing.T) {
 	})
 
 	b.wg.Wait()          // ran 5 times
+	close(locked.unlock) // unlock locking one
+	wg.Wait()            // wait for termination
+}
+
+func TestBuildParallel_2(t *testing.T) {
+	// testfile has 6 builds, 2 of them lock 'forever', other builds
+	// should go through.
+	b := NewParallelTestBuilder(4)
+	locked := &LockedBuilder{unlock: make(chan interface{})}
+
+	c := &BuildCommand{
+		Meta: testMetaParallel(t, b, locked),
+	}
+
+	args := []string{
+		fmt.Sprintf("-parallel-builds=3"),
+		filepath.Join(testFixture("parallel"), "2lock.json"),
+	}
+
+	wg := errgroup.Group{}
+
+	wg.Go(func() error {
+		if code := c.Run(args); code != 0 {
+			fatalCommand(t, c.Meta)
+		}
+		return nil
+	})
+
+	b.wg.Wait()          // ran 4 times
 	close(locked.unlock) // unlock locking one
 	wg.Wait()            // wait for termination
 }
