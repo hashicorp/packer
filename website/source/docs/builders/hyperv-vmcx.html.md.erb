@@ -195,6 +195,9 @@ builder.
     port, set an identical value for `http_port_min` and `http_port_max`.
     By default the values are 8000 and 9000, respectively.
 
+-   `keep_registered` (bool) - If "true", Packer will not delete the VM from
+    The Hyper-V manager.
+
 -   `mac_address` (string) - This allows a specific MAC address to be used on
     the default virtual network card. The MAC address must be a string with
     no delimiters, for example "0000deadbeef".
@@ -889,6 +892,9 @@ Finish proxy after sysprep -->
     </settings>
 </unattend>
 ```
+
+-> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
+https://cloudywindows.io/post/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
 
 ## Example For Ubuntu Vivid Generation 2
 

@@ -6,8 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -34,7 +33,6 @@ func (s *stepConfigAlicloudKeyPair) Run(ctx context.Context, state multistep.Sta
 		}
 
 		s.Comm.SSHPrivateKey = privateKeyBytes
-
 		return multistep.ActionContinue
 	}
 
@@ -54,16 +52,15 @@ func (s *stepConfigAlicloudKeyPair) Run(ctx context.Context, state multistep.Sta
 		return multistep.ActionContinue
 	}
 
-	client := state.Get("client").(*ecs.Client)
-
+	client := state.Get("client").(*ClientWrapper)
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
-	keyResp, err := client.CreateKeyPair(&ecs.CreateKeyPairArgs{
-		KeyPairName: s.Comm.SSHTemporaryKeyPairName,
-		RegionId:    common.Region(s.RegionId),
-	})
+
+	createKeyPairRequest := ecs.CreateCreateKeyPairRequest()
+	createKeyPairRequest.RegionId = s.RegionId
+	createKeyPairRequest.KeyPairName = s.Comm.SSHTemporaryKeyPairName
+	keyResp, err := client.CreateKeyPair(createKeyPairRequest)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
-		return multistep.ActionHalt
+		return halt(state, err, "Error creating temporary keypair")
 	}
 
 	// Set the keyname so we know to delete it later
@@ -110,15 +107,16 @@ func (s *stepConfigAlicloudKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")
-	err := client.DeleteKeyPairs(&ecs.DeleteKeyPairsArgs{
-		RegionId:     common.Region(s.RegionId),
-		KeyPairNames: "[\"" + s.keyName + "\"]",
-	})
+
+	deleteKeyPairsRequest := ecs.CreateDeleteKeyPairsRequest()
+	deleteKeyPairsRequest.RegionId = s.RegionId
+	deleteKeyPairsRequest.KeyPairNames = fmt.Sprintf("[\"%s\"]", s.keyName)
+	_, err := client.DeleteKeyPairs(deleteKeyPairsRequest)
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))

@@ -186,21 +186,19 @@ func wrappedMain() int {
 			return 1
 		}
 	} else {
-		var TTY packer.TTY
-		if !inPlugin {
-			var err error
-			TTY, err = tty.Open()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
-			} else {
-				defer TTY.Close()
-			}
-		}
-		ui = &packer.BasicUi{
+		basicUi := &packer.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,
-			TTY:         TTY,
+		}
+		ui = basicUi
+		if !inPlugin {
+			if TTY, err := tty.Open(); err != nil {
+				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+			} else {
+				basicUi.TTY = TTY
+				defer TTY.Close()
+			}
 		}
 	}
 	// Create the CLI meta

@@ -1,26 +1,60 @@
+defaults: &golang
+  docker:
+    - image: circleci/golang:1.12
+  working_directory: /go/src/github.com/hashicorp/packer
+  steps:
+    - checkout
+    - run: go build -o pkg/packer .
+
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/hashicorp/packer
+    <<: *golang
     steps:
       - checkout
       - run: make ci
   check-vendor-vs-mod:
-    docker:
-      - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/hashicorp/packer
+    <<: *golang
     steps:
       - checkout
       - run: GO111MODULE=on go run . --help
       - run: make check-vendor-vs-mod
+  build_linux:
+    <<: *golang
+    environment:
+      GOOS: linux
+  build_windows:
+    <<: *golang
+    environment:
+      GOOS: windows
+  build_darwin:
+    <<: *golang
+    environment:
+      GOOS: darwin
+  build_freebsd:
+    <<: *golang
+    environment:
+      GOOS: freebsd
+  build_solaris:
+    <<: *golang
+    environment:
+      GOOS: solaris
+  build_openbsd:
+    <<: *golang
+    environment:
+      GOOS: openbsd
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
     jobs:
       - build
       - check-vendor-vs-mod
+      - build_linux
+      - build_darwin
+      - build_windows
+      - build_freebsd
+      - build_openbsd
+      

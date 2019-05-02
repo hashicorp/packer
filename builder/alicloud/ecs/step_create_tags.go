@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -16,7 +15,7 @@ type stepCreateTags struct {
 
 func (s *stepCreateTags) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*ecs.Client)
+	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packer.Ui)
 	imageId := state.Get("alicloudimage").(string)
 	snapshotIds := state.Get("alicloudsnapshots").([]string)
@@ -24,26 +23,37 @@ func (s *stepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 	if len(s.Tags) == 0 {
 		return multistep.ActionContinue
 	}
+
 	ui.Say(fmt.Sprintf("Adding tags(%s) to image: %s", s.Tags, imageId))
-	err := client.AddTags(&ecs.AddTagsArgs{
-		ResourceId:   imageId,
-		ResourceType: ecs.TagResourceImage,
-		RegionId:     common.Region(config.AlicloudRegion),
-		Tag:          s.Tags,
-	})
-	if err != nil {
+
+	var tags []ecs.AddTagsTag
+	for key, value := range s.Tags {
+		var tag ecs.AddTagsTag
+		tag.Key = key
+		tag.Value = value
+		tags = append(tags, tag)
+	}
+
+	addTagsRequest := ecs.CreateAddTagsRequest()
+	addTagsRequest.RegionId = config.AlicloudRegion
+	addTagsRequest.ResourceId = imageId
+	addTagsRequest.ResourceType = TagResourceImage
+	addTagsRequest.Tag = &tags
+
+	if _, err := client.AddTags(addTagsRequest); err != nil {
 		return halt(state, err, "Error Adding tags to image")
 	}
 
 	for _, snapshotId := range snapshotIds {
 		ui.Say(fmt.Sprintf("Adding tags(%s) to snapshot: %s", s.Tags, snapshotId))
-		err = client.AddTags(&ecs.AddTagsArgs{
-			ResourceId:   snapshotId,
-			ResourceType: ecs.TagResourceSnapshot,
-			RegionId:     common.Region(config.AlicloudRegion),
-			Tag:          s.Tags,
-		})
-		if err != nil {
+		addTagsRequest := ecs.CreateAddTagsRequest()
+
+		addTagsRequest.RegionId = config.AlicloudRegion
+		addTagsRequest.ResourceId = snapshotId
+		addTagsRequest.ResourceType = TagResourceSnapshot
+		addTagsRequest.Tag = &tags
+
+		if _, err := client.AddTags(addTagsRequest); err != nil {
 			return halt(state, err, "Error Adding tags to snapshot")
 		}
 	}
