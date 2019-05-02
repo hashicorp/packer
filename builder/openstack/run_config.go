@@ -48,7 +48,7 @@ type RunConfig struct {
 	OpenstackProvider string `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
 
-	sourceImageOpts images.ListOpts // derived from .SourceImageFilters.Filters ImageFilterOptions
+	sourceImageOpts images.ListOpts
 }
 
 type ImageFilter struct {

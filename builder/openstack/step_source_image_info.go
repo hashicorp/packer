@@ -55,16 +55,10 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 		if err != nil {
 			return false, err
 		}
-		ui.Message(fmt.Sprintf("Resulting images: %d", len(imgs)))
 
-		for index, img := range imgs {
-			ui.Message(fmt.Sprintf("index +%v, image %+v", index, img))
-			ui.Message(fmt.Sprintf("Metadata %+v", img.Metadata))
-			ui.Message(fmt.Sprintf("Properties %+v", img.Properties))
-
+		for _, img := range imgs {
 			// Check if all Properties are satisfied
 			if PropertiesSatisfied(&img, &s.SourceProperties) {
-				ui.Message(fmt.Sprintf("Matched properties %+v", s.SourceProperties))
 				count++
 				if count == 1 {
 					// Tentatively return this result.
@@ -74,12 +68,9 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 				if count > 1 {
 					break
 				}
-			} else {
-				ui.Message(fmt.Sprintf("FAILED to match properties %+v", s.SourceProperties))
 			}
 		}
 
-		ui.Message(fmt.Sprintf("Count = %v", count))
 		switch count {
 		case 0: // Continue looking at next page.
 			return true, nil
