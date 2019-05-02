@@ -153,12 +153,11 @@ func (c *BuildCommand) Run(args []string) int {
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
-	// ctx := context.Background()
-	if cfgParallel == false {
-		cfgParallelBuilds = 1
-	}
 	if cfgParallelBuilds < 1 {
 		cfgParallelBuilds = math.MaxInt64
+	}
+	if cfgParallel == false && cfgParallelBuilds == 0 {
+		cfgParallelBuilds = 1
 	}
 
 	buildCtx, cancelCtx := context.WithCancel(context.Background())
