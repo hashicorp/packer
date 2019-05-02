@@ -13,43 +13,44 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// NewParallelTestBuilder will return a New ParallelTestBuilder whose first run
-// will lock until unlockOnce is closed and that will unlock after `runs`
-// builds
+// NewParallelTestBuilder will return a New ParallelTestBuilder that will
+// unlock after `runs` builds
 func NewParallelTestBuilder(runs int) *ParallelTestBuilder {
-	pb := &ParallelTestBuilder{
-		unlockOnce: make(chan interface{}),
-	}
+	pb := &ParallelTestBuilder{}
 	pb.wg.Add(runs)
 	return pb
 }
 
 // The ParallelTestBuilder's first run will lock
 type ParallelTestBuilder struct {
-	once       sync.Once
-	unlockOnce chan interface{}
-
 	wg sync.WaitGroup
 }
 
-func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, error) {
-	return nil, nil
-}
+func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
 
 func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	b.once.Do(func() {
-		ui.Say("locking build")
-		<-b.unlockOnce
-		b.wg.Add(1) // avoid a panic
-	})
-
 	ui.Say("building")
 	b.wg.Done()
 	return nil, nil
 }
 
+// LockedBuilder wont run until unlock is called
+type LockedBuilder struct{ unlock chan interface{} }
+
+func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
+
+func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+	ui.Say("locking build")
+	select {
+	case <-b.unlock:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	return nil, nil
+}
+
 // testMetaFile creates a Meta object that includes a file builder
-func testMetaParallel(t *testing.T, builder *ParallelTestBuilder) Meta {
+func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *LockedBuilder) Meta {
 	var out, err bytes.Buffer
 	return Meta{
 		CoreConfig: &packer.CoreConfig{
@@ -58,6 +59,8 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder) Meta {
 					switch n {
 					case "parallel-test":
 						return builder, nil
+					case "lock":
+						return locked, nil
 					default:
 						panic(n)
 					}
@@ -71,17 +74,18 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder) Meta {
 	}
 }
 
-func TestBuildParallel(t *testing.T) {
+func TestBuildParallel_1(t *testing.T) {
 	// testfile that running 6 builds, with first one locks 'forever', other
 	// builds should go through.
 	b := NewParallelTestBuilder(5)
+	locked := &LockedBuilder{unlock: make(chan interface{})}
 
 	c := &BuildCommand{
-		Meta: testMetaParallel(t, b),
+		Meta: testMetaParallel(t, b, locked),
 	}
 
 	args := []string{
-		fmt.Sprintf("-parallel=2"),
+		fmt.Sprintf("-parallel=true"),
 		filepath.Join(testFixture("parallel"), "template.json"),
 	}
 
@@ -94,7 +98,7 @@ func TestBuildParallel(t *testing.T) {
 		return nil
 	})
 
-	b.wg.Wait()         // ran 5 times
-	close(b.unlockOnce) // unlock locking one
-	wg.Wait()           // wait for termination
+	b.wg.Wait()          // ran 5 times
+	close(locked.unlock) // unlock locking one
+	wg.Wait()            // wait for termination
 }
