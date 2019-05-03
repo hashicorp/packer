@@ -180,13 +180,13 @@ func (c *BuildCommand) Run(args []string) int {
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[name]
-		// Increment the waitgroup so we wait for this item to finish properly
-		wg.Add(1)
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errors[name] = err
 			break
 		}
+		// Increment the waitgroup so we wait for this item to finish properly
+		wg.Add(1)
 
 		// Run the build in a goroutine
 		go func() {
