@@ -252,6 +252,14 @@ builder.
     new AMI, the instance automatically launches with these additional volumes,
     and will restore them from snapshots taken from the source instance.
 
+    In addition to the fields available in ami_block_device_mappings, you may
+    optionally use the following field:
+        - "omit_from_artifact" (boolean) - If true, this block device will not
+        be snapshotted and the created AMI will not contain block device mapping
+        information for this volume. If false, the block device will be mapped
+        into the final created AMI. Set this option to true if you need a block
+        device mounted in the surrogate AMI but not in the final created AMI.
+
 -   `mfa_code` (string) - The MFA
     [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the
