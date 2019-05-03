@@ -204,7 +204,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	//Build the artifact
-	if omis, ok := state.GetOk("omis"); !ok {
+	if omis, ok := state.GetOk("omis"); ok {
 		// Build the artifact and return it
 		artifact := &osccommon.Artifact{
 			Omis:           omis.(map[string]string),
