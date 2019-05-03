@@ -10,7 +10,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner/sleep"
 )
 
 // NewParallelTestBuilder will return a New ParallelTestBuilder that will
@@ -44,6 +46,7 @@ func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook)
 	select {
 	case <-b.unlock:
 	case <-ctx.Done():
+		panic("crap")
 		return nil, ctx.Err()
 	}
 	return nil, nil
@@ -59,8 +62,18 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 					switch n {
 					case "parallel-test":
 						return builder, nil
+					case "file":
+						return &file.Builder{}, nil
 					case "lock":
 						return locked, nil
+					default:
+						panic(n)
+					}
+				},
+				Provisioner: func(n string) (packer.Provisioner, error) {
+					switch n {
+					case "sleep":
+						return &sleep.Provisioner{}, nil
 					default:
 						panic(n)
 					}
@@ -122,6 +135,35 @@ func TestBuildParallel_2(t *testing.T) {
 
 	wg.Go(func() error {
 		if code := c.Run(args); code != 0 {
+			fatalCommand(t, c.Meta)
+		}
+		return nil
+	})
+
+	b.wg.Wait()          // ran 4 times
+	close(locked.unlock) // unlock locking one
+	wg.Wait()            // wait for termination
+}
+
+func TestBuildParallel_Timeout(t *testing.T) {
+	// testfile has 6 builds, 1 of them locks 'forever', one locks and times
+	// out other builds should go through.
+	b := NewParallelTestBuilder(4)
+	locked := &LockedBuilder{unlock: make(chan interface{})}
+
+	c := &BuildCommand{
+		Meta: testMetaParallel(t, b, locked),
+	}
+
+	args := []string{
+		fmt.Sprintf("-parallel-builds=3"),
+		filepath.Join(testFixture("parallel"), "2lock-timeout.json"),
+	}
+
+	wg := errgroup.Group{}
+
+	wg.Go(func() error {
+		if code := c.Run(args); code == 0 {
 			fatalCommand(t, c.Meta)
 		}
 		return nil
