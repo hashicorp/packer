@@ -16,7 +16,7 @@ func TestStepTeardownInstance(t *testing.T) {
 	step := new(StepTeardownInstance)
 	defer step.Cleanup(state)
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
 
 	// run the step

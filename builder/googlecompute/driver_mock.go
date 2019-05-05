@@ -12,8 +12,8 @@ type DriverMock struct {
 	CreateImageName            string
 	CreateImageDesc            string
 	CreateImageFamily          string
-	CreateImageLabels          map[string]string
 	CreateImageEncryptionKey   *compute.CustomerEncryptionKey
+	CreateImageLabels          map[string]string
 	CreateImageLicenses        []string
 	CreateImageZone            string
 	CreateImageDisk            string
@@ -87,16 +87,15 @@ type DriverMock struct {
 	WaitForInstanceErrCh <-chan error
 }
 
-func (d *DriverMock) CreateImage(config Config) (<-chan *Image, <-chan error) {
-	d.CreateImageName = config.GetImageName()
-	d.CreateImageDesc = config.GetImageDescription()
-	d.CreateImageFamily = config.GetImageFamily()
-	d.CreateImageLabels = config.GetImageLabels()
-	d.CreateImageLicenses = config.GetImageLicenses()
-	d.CreateImageZone = config.GetZone()
-	d.CreateImageDisk = config.GetDiskName()
-	d.CreateImageEncryptionKey = config.GetImageEncryptionKey()
-
+func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error) {
+	d.CreateImageName = name
+	d.CreateImageDesc = description
+	d.CreateImageFamily = family
+	d.CreateImageLabels = image_labels
+	d.CreateImageLicenses = image_licenses
+	d.CreateImageZone = zone
+	d.CreateImageDisk = disk
+	d.CreateImageEncryptionKey = image_encryption_key
 	if d.CreateImageResultProjectId == "" {
 		d.CreateImageResultProjectId = "test"
 	}
@@ -115,7 +114,7 @@ func (d *DriverMock) CreateImage(config Config) (<-chan *Image, <-chan error) {
 		ch <- &Image{
 			Labels:    d.CreateImageLabels,
 			Licenses:  d.CreateImageLicenses,
-			Name:      d.CreateImageName,
+			Name:      name,
 			ProjectId: d.CreateImageResultProjectId,
 			SelfLink:  d.CreateImageResultSelfLink,
 			SizeGb:    d.CreateImageResultSizeGb,

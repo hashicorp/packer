@@ -18,7 +18,7 @@ const BuilderId = "packer.googlecompute"
 
 // Builder represents a Packer Builder.
 type Builder struct {
-	config *ConfigGCE
+	config *Config
 	runner multistep.Runner
 }
 
