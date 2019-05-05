@@ -22,7 +22,7 @@ func TestStepCreateInstance(t *testing.T) {
 
 	state.Put("ssh_public_key", "key")
 
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	d := state.Get("driver").(*DriverMock)
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
@@ -61,7 +61,7 @@ func TestStepCreateInstance_fromFamily(t *testing.T) {
 
 		state.Put("ssh_public_key", "key")
 
-		c := state.Get("config").(*ConfigGCE)
+		c := state.Get("config").(*Config)
 		c.SourceImage = tc.Name
 		c.SourceImageFamily = tc.Family
 		d := state.Get("driver").(*DriverMock)
@@ -89,7 +89,7 @@ func TestStepCreateInstance_windowsNeedsPassword(t *testing.T) {
 	defer step.Cleanup(state)
 
 	state.Put("ssh_public_key", "key")
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	d := state.Get("driver").(*DriverMock)
 	d.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	c.Comm.Type = "winrm"
@@ -136,7 +136,7 @@ func TestStepCreateInstance_windowsPasswordSet(t *testing.T) {
 
 	state.Put("ssh_public_key", "key")
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
 	driver.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	config.Comm.Type = "winrm"
@@ -231,7 +231,7 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 
 	errCh := make(chan error, 1)
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	config.stateTimeout = 1 * time.Microsecond
 
 	d := state.Get("driver").(*DriverMock)
@@ -255,7 +255,7 @@ func TestStepCreateInstance_noServiceAccount(t *testing.T) {
 
 	state.Put("ssh_public_key", "key")
 
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	c.DisableDefaultServiceAccount = true
 	c.ServiceAccountEmail = ""
 	d := state.Get("driver").(*DriverMock)
@@ -279,7 +279,7 @@ func TestStepCreateInstance_customServiceAccount(t *testing.T) {
 
 	state.Put("ssh_public_key", "key")
 
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	c.DisableDefaultServiceAccount = true
 	c.ServiceAccountEmail = "custom-service-account"
 	d := state.Get("driver").(*DriverMock)
@@ -298,7 +298,7 @@ func TestStepCreateInstance_customServiceAccount(t *testing.T) {
 
 func TestCreateInstanceMetadata(t *testing.T) {
 	state := testState(t)
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	image := StubImage("test-image", "test-project", []string{}, 100)
 	key := "abcdefgh12345678"
 
@@ -313,7 +313,7 @@ func TestCreateInstanceMetadata(t *testing.T) {
 
 func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	state := testState(t)
-	c := state.Get("config").(*ConfigGCE)
+	c := state.Get("config").(*Config)
 	image := StubImage("test-image", "test-project", []string{}, 100)
 	sshKeys := c.Metadata["sshKeys"]
 
