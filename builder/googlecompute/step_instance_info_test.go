@@ -20,7 +20,7 @@ func TestStepInstanceInfo(t *testing.T) {
 
 	state.Put("instance_name", "foo")
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(*DriverMock)
 	driver.GetNatIPResult = "1.2.3.4"
 
@@ -58,7 +58,7 @@ func TestStepInstanceInfo_InternalIP(t *testing.T) {
 
 	state.Put("instance_name", "foo")
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	config.UseInternalIP = true
 	driver := state.Get("driver").(*DriverMock)
 	driver.GetNatIPResult = "1.2.3.4"
@@ -155,7 +155,7 @@ func TestStepInstanceInfo_errorTimeout(t *testing.T) {
 
 	state.Put("instance_name", "foo")
 
-	config := state.Get("config").(*ConfigGCE)
+	config := state.Get("config").(*Config)
 	config.stateTimeout = 1 * time.Microsecond
 
 	driver := state.Get("driver").(*DriverMock)

@@ -117,7 +117,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		"startup-script": StartupScript,
 		"zone":           p.config.Zone,
 	}
-	exporterConfig := googlecompute.ConfigGCE{
+	exporterConfig := googlecompute.Config{
 		DiskName:             exporterName,
 		DiskSizeGb:           p.config.DiskSizeGb,
 		DiskType:             p.config.DiskType,
