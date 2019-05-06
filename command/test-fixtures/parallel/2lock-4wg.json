@@ -1,0 +1,10 @@
+{
+    "builders": [
+        {"type": "lock", "name": "build0"},
+        {"type": "parallel-test", "name": "build1"},
+        {"type": "parallel-test", "name": "build2"},
+        {"type": "lock", "name": "build3"},
+        {"type": "parallel-test", "name": "build4"},
+        {"type": "parallel-test", "name": "build5"}
+    ]
+}
