@@ -28,8 +28,8 @@ func (s *stepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	var err error
 	s.l, err = net.ListenRangeConfig{
 		Addr:    config.VNCBindAddress,
-		Min:     config.VNCPortMin,
-		Max:     config.VNCPortMax,
+		Min:     config.SSHHostPortMin,
+		Max:     config.SSHHostPortMax,
 		Network: "tcp",
 	}.Listen(ctx)
 	if err != nil {
