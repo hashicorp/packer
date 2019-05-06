@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -85,16 +85,14 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
 	}
 
-	qemuVersion, err := driver.Version()
+	rawVersion, err := driver.Version()
 	if err != nil {
 		return nil, err
 	}
-	parts := strings.Split(qemuVersion, ".")
-	qemuMajor, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return nil, err
-	}
-	if qemuMajor >= 2 {
+	qemuVersion, err := version.NewVersion(rawVersion)
+	v2 := version.Must(version.NewVersion("1.2"))
+
+	if qemuVersion.GreaterThanOrEqual(v2) {
 		if config.DiskInterface == "virtio-scsi" {
 			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
 			driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
@@ -133,7 +131,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 				"to inspect the progress of the build.")
 		}
 	} else {
-		if qemuMajor >= 2 {
+		if qemuVersion.GreaterThanOrEqual(v2) {
 			if !config.UseDefaultDisplay {
 				defaultArgs["-display"] = "sdl"
 			}
