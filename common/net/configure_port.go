@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"strconv"
 	"time"
 
@@ -25,9 +26,10 @@ type Listener struct {
 	// Listener can be closed but Port will be file locked by packer until
 	// Close is called.
 	net.Listener
-	Port    int
-	Address string
-	lock    *filelock.Flock
+	Port        int
+	Address     string
+	lock        *filelock.Flock
+	cleanupFunc func() error
 }
 
 func (l *Listener) Close() error {
@@ -35,7 +37,18 @@ func (l *Listener) Close() error {
 	if err != nil {
 		log.Printf("cannot unlock lockfile %#v: %v", l, err)
 	}
-	return l.Listener.Close()
+	err = l.Listener.Close()
+	if err != nil {
+		return err
+	}
+
+	if l.cleanupFunc != nil {
+		err := l.cleanupFunc()
+		if err != nil {
+			log.Printf("cannot cleanup: %#v", err)
+		}
+	}
+	return nil
 }
 
 // ListenRangeConfig contains options for listening to a free address [Min,Max)
@@ -92,12 +105,17 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			}
 		}
 
+		cleanupFunc := func() error {
+			return os.Remove(lockFilePath)
+		}
+
 		log.Printf("Found available port: %d on IP: %s", port, lc.Addr)
 		listener = &Listener{
-			Address:  lc.Addr,
-			Port:     port,
-			Listener: l,
-			lock:     lock,
+			Address:     lc.Addr,
+			Port:        port,
+			Listener:    l,
+			lock:        lock,
+			cleanupFunc: cleanupFunc,
 		}
 		return nil
 	})

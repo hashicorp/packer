@@ -8,7 +8,6 @@ import (
 )
 
 func TestListenRangeConfig_Listen(t *testing.T) {
-
 	topCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
