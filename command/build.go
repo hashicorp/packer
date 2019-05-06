@@ -26,6 +26,25 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
+	buildCtx, cancelCtx := context.WithCancel(context.Background())
+	// Handle interrupts for this build
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	defer func() {
+		signal.Stop(sigCh)
+		close(sigCh)
+	}()
+	go func() {
+		sig := <-sigCh
+
+		c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
+		cancelCtx()
+	}()
+
+	return c.RunContext(buildCtx, args)
+}
+
+func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
 	var cfgParallelBuilds int64
 	var cfgOnError string
@@ -146,8 +165,7 @@ func (c *BuildCommand) Run(args []string) int {
 	}
 
 	// Run all the builds in parallel and wait for them to complete
-	var interruptWg, wg sync.WaitGroup
-	interrupted := false
+	var wg sync.WaitGroup
 	var artifacts = struct {
 		sync.RWMutex
 		m map[string][]packer.Artifact
@@ -160,23 +178,13 @@ func (c *BuildCommand) Run(args []string) int {
 		cfgParallelBuilds = 1
 	}
 
-	buildCtx, cancelCtx := context.WithCancel(context.Background())
-	// Handle interrupts for this build
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	defer signal.Stop(sigCh)
-	go func() {
-		sig := <-sigCh
-		interruptWg.Add(1)
-		defer interruptWg.Done()
-		interrupted = true
-
-		cancelCtx()
-		c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
-	}()
-
 	limitParallel := semaphore.NewWeighted(cfgParallelBuilds)
 	for i := range builds {
+		if err := buildCtx.Err(); err != nil {
+			log.Println("Interrupted, not going to start any more builds.")
+			break
+		}
+
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[name]
@@ -218,10 +226,6 @@ func (c *BuildCommand) Run(args []string) int {
 			wg.Wait()
 		}
 
-		if interrupted {
-			log.Println("Interrupted, not going to start any more builds.")
-			break
-		}
 	}
 
 	// Wait for both the builds to complete and the interrupt handler,
@@ -229,10 +233,7 @@ func (c *BuildCommand) Run(args []string) int {
 	log.Printf("Waiting on builds to complete...")
 	wg.Wait()
 
-	log.Printf("Builds completed. Waiting on interrupt barrier...")
-	interruptWg.Wait()
-
-	if interrupted {
+	if err := buildCtx.Err(); err != nil {
 		c.Ui.Say("Cleanly cancelled builds after being interrupted.")
 		return 1
 	}
