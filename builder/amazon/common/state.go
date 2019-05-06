@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -36,7 +37,7 @@ type StateChangeConf struct {
 // Following are wrapper functions that use Packer's environment-variables to
 // determing retry logic, then call the AWS SDK's built-in waiters.
 
-func WaitUntilAMIAvailable(ctx aws.Context, conn *ec2.EC2, imageId string) error {
+func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string) error {
 	imageInput := ec2.DescribeImagesInput{
 		ImageIds: []*string{&imageId},
 	}
