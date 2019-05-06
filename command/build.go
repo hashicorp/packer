@@ -38,6 +38,11 @@ func (c *BuildCommand) Run(args []string) int {
 	go func() {
 		select {
 		case sig := <-sigCh:
+			if sig == nil {
+				// context got cancelled and this closed chan probably
+				// triggered first
+				return
+			}
 			c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
 			cancelBuildCtx()
 		case <-buildCtx.Done():
