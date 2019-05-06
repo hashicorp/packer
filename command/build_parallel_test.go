@@ -127,7 +127,7 @@ func TestBuildParallel_2(t *testing.T) {
 
 	args := []string{
 		fmt.Sprintf("-parallel-builds=3"),
-		filepath.Join(testFixture("parallel"), "2lock-4wg"),
+		filepath.Join(testFixture("parallel"), "2lock-4wg.json"),
 	}
 
 	wg := errgroup.Group{}
