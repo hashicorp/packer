@@ -46,7 +46,6 @@ func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook)
 	select {
 	case <-b.unlock:
 	case <-ctx.Done():
-		panic("crap")
 		return nil, ctx.Err()
 	}
 	return nil, nil
@@ -99,7 +98,7 @@ func TestBuildParallel_1(t *testing.T) {
 
 	args := []string{
 		fmt.Sprintf("-parallel=true"),
-		filepath.Join(testFixture("parallel"), "1lock.json"),
+		filepath.Join(testFixture("parallel"), "1lock-5wg.json"),
 	}
 
 	wg := errgroup.Group{}
@@ -128,7 +127,7 @@ func TestBuildParallel_2(t *testing.T) {
 
 	args := []string{
 		fmt.Sprintf("-parallel-builds=3"),
-		filepath.Join(testFixture("parallel"), "2lock.json"),
+		filepath.Join(testFixture("parallel"), "2lock-4wg"),
 	}
 
 	wg := errgroup.Group{}
