@@ -27,26 +27,26 @@ func TestBuildCommand_RunContext_CtxCancel(t *testing.T) {
 			4,
 			1,
 		},
-		// {"cancel 1 locked build - debug - parallel=true",
-		// 	[]string{"-parallel=true", "-debug=true", filepath.Join(testFixture("parallel"), "1lock.json")},
-		// 	5,
-		// 	1,
-		// },
-		// {"cancel 2 locked builds - debug - parallel=true",
-		// 	[]string{"-parallel=true", "-debug=true", filepath.Join(testFixture("parallel"), "2lock.json")},
-		// 	4,
-		// 	1,
-		// },
-		// {"cancel 1 locked build - debug - parallel=false",
-		// 	[]string{"-parallel=false", "-debug=true", filepath.Join(testFixture("parallel"), "1lock.json")},
-		// 	5,
-		// 	1,
-		// },
-		// {"cancel 2 locked builds - debug - parallel=false",
-		// 	[]string{"-parallel=false", "-debug=true", filepath.Join(testFixture("parallel"), "2lock.json")},
-		// 	4,
-		// 	1,
-		// },
+		{"cancel 1 locked build - debug - parallel=true",
+			[]string{"-parallel=true", "-debug=true", filepath.Join(testFixture("parallel"), "1lock.json")},
+			0,
+			1,
+		},
+		{"cancel 2 locked builds - debug - parallel=true",
+			[]string{"-parallel=true", "-debug=true", filepath.Join(testFixture("parallel"), "2lock.json")},
+			0,
+			1,
+		},
+		{"cancel 1 locked build - debug - parallel=false",
+			[]string{"-parallel=false", "-debug=true", filepath.Join(testFixture("parallel"), "1lock.json")},
+			0,
+			1,
+		},
+		{"cancel 2 locked builds - debug - parallel=false",
+			[]string{"-parallel=false", "-debug=true", filepath.Join(testFixture("parallel"), "2lock.json")},
+			0,
+			1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -64,7 +64,9 @@ func TestBuildCommand_RunContext_CtxCancel(t *testing.T) {
 				defer close(codeC)
 				codeC <- c.RunContext(ctx, tt.args)
 			}()
+			t.Logf("waiting for passing tests if any")
 			b.wg.Wait() // ran `tt.parallelPassingTests` times
+			t.Logf("cancelling context")
 			cancelCtx()
 
 			select {
