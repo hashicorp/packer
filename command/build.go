@@ -178,7 +178,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		sync.RWMutex
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
-	errors := make(map[string]error)
+	var errors = struct {
+		sync.RWMutex
+		m map[string]error
+	}{m: make(map[string]error)}
+
 	if cfgParallelBuilds < 1 {
 		cfgParallelBuilds = math.MaxInt64
 	}
@@ -198,7 +202,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		ui := buildUis[name]
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
-			errors[name] = err
+			errors.Lock()
+			errors.m[name] = err
+			errors.Unlock()
 			break
 		}
 		// Increment the waitgroup so we wait for this item to finish properly
@@ -215,7 +221,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
-				errors[name] = err
+				errors.Lock()
+				errors.m[name] = err
+				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
 				artifacts.Lock()
@@ -246,11 +254,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		return 1
 	}
 
-	if len(errors) > 0 {
-		c.Ui.Machine("error-count", strconv.FormatInt(int64(len(errors)), 10))
+	if len(errors.m) > 0 {
+		c.Ui.Machine("error-count", strconv.FormatInt(int64(len(errors.m)), 10))
 
 		c.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
-		for name, err := range errors {
+		for name, err := range errors.m {
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
@@ -311,7 +319,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
 	}
 
-	if len(errors) > 0 {
+	if len(errors.m) > 0 {
 		// If any errors occurred, exit with a non-zero exit status
 		return 1
 	}
