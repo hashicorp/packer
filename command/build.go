@@ -26,19 +26,22 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	buildCtx, cancelCtx := context.WithCancel(context.Background())
+	buildCtx, cancelBuildCtx := context.WithCancel(context.Background())
 	// Handle interrupts for this build
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	defer func() {
+		cancelBuildCtx()
 		signal.Stop(sigCh)
 		close(sigCh)
 	}()
 	go func() {
-		sig := <-sigCh
-
-		c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
-		cancelCtx()
+		select {
+		case sig := <-sigCh:
+			c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
+			cancelBuildCtx()
+		case <-buildCtx.Done():
+		}
 	}()
 
 	return c.RunContext(buildCtx, args)
