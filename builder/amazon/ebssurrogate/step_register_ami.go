@@ -18,6 +18,7 @@ type StepRegisterAMI struct {
 	LaunchDevices            []*ec2.BlockDeviceMapping
 	EnableAMIENASupport      *bool
 	EnableAMISriovNetSupport bool
+	Architecture             string
 	image                    *ec2.Image
 }
 
@@ -33,7 +34,7 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
-		Architecture:        aws.String(ec2.ArchitectureValuesX8664),
+		Architecture:        aws.String(s.Architecture),
 		RootDeviceName:      aws.String(s.RootDevice.DeviceName),
 		VirtualizationType:  aws.String(config.AMIVirtType),
 		BlockDeviceMappings: blockDevices,
