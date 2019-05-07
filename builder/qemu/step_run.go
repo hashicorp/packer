@@ -90,7 +90,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		return nil, err
 	}
 	qemuVersion, err := version.NewVersion(rawVersion)
-	v2 := version.Must(version.NewVersion("1.2"))
+	v2 := version.Must(version.NewVersion("2.0"))
 
 	if qemuVersion.GreaterThanOrEqual(v2) {
 		if config.DiskInterface == "virtio-scsi" {
