@@ -107,7 +107,7 @@ the following options are required.
 -   `storage_account` (string) Storage account under which the final artifact
     will be stored.
 
-When creating a managed image the following two options are required.
+When creating a managed image the following options are required.
 
 -   `managed_image_name` (string) Specify the managed image name where the
     result of the Packer build will be saved. The image name must not exist
