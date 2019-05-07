@@ -157,6 +157,21 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			"image_encryption_key",
+			map[string]string{"kmsKeyName": "foo"},
+			false,
+		},
+		{
+			"image_encryption_key",
+			map[string]string{"No such key": "foo"},
+			true,
+		},
+		{
+			"image_encryption_key",
+			map[string]string{"kmsKeyName": "foo", "RawKey": "foo"},
+			false,
+		},
+		{
 			"scopes",
 			[]string{},
 			false,

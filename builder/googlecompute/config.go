@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	compute "google.golang.org/api/compute/v1"
 )
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -27,40 +28,41 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
-	AcceleratorType              string            `mapstructure:"accelerator_type"`
-	AcceleratorCount             int64             `mapstructure:"accelerator_count"`
-	Address                      string            `mapstructure:"address"`
-	DisableDefaultServiceAccount bool              `mapstructure:"disable_default_service_account"`
-	DiskName                     string            `mapstructure:"disk_name"`
-	DiskSizeGb                   int64             `mapstructure:"disk_size"`
-	DiskType                     string            `mapstructure:"disk_type"`
-	ImageName                    string            `mapstructure:"image_name"`
-	ImageDescription             string            `mapstructure:"image_description"`
-	ImageFamily                  string            `mapstructure:"image_family"`
-	ImageLabels                  map[string]string `mapstructure:"image_labels"`
-	ImageLicenses                []string          `mapstructure:"image_licenses"`
-	InstanceName                 string            `mapstructure:"instance_name"`
-	Labels                       map[string]string `mapstructure:"labels"`
-	MachineType                  string            `mapstructure:"machine_type"`
-	Metadata                     map[string]string `mapstructure:"metadata"`
-	MinCpuPlatform               string            `mapstructure:"min_cpu_platform"`
-	Network                      string            `mapstructure:"network"`
-	NetworkProjectId             string            `mapstructure:"network_project_id"`
-	OmitExternalIP               bool              `mapstructure:"omit_external_ip"`
-	OnHostMaintenance            string            `mapstructure:"on_host_maintenance"`
-	Preemptible                  bool              `mapstructure:"preemptible"`
-	RawStateTimeout              string            `mapstructure:"state_timeout"`
-	Region                       string            `mapstructure:"region"`
-	Scopes                       []string          `mapstructure:"scopes"`
-	ServiceAccountEmail          string            `mapstructure:"service_account_email"`
-	SourceImage                  string            `mapstructure:"source_image"`
-	SourceImageFamily            string            `mapstructure:"source_image_family"`
-	SourceImageProjectId         string            `mapstructure:"source_image_project_id"`
-	StartupScriptFile            string            `mapstructure:"startup_script_file"`
-	Subnetwork                   string            `mapstructure:"subnetwork"`
-	Tags                         []string          `mapstructure:"tags"`
-	UseInternalIP                bool              `mapstructure:"use_internal_ip"`
-	Zone                         string            `mapstructure:"zone"`
+	AcceleratorType              string                         `mapstructure:"accelerator_type"`
+	AcceleratorCount             int64                          `mapstructure:"accelerator_count"`
+	Address                      string                         `mapstructure:"address"`
+	DisableDefaultServiceAccount bool                           `mapstructure:"disable_default_service_account"`
+	DiskName                     string                         `mapstructure:"disk_name"`
+	DiskSizeGb                   int64                          `mapstructure:"disk_size"`
+	DiskType                     string                         `mapstructure:"disk_type"`
+	ImageName                    string                         `mapstructure:"image_name"`
+	ImageDescription             string                         `mapstructure:"image_description"`
+	ImageEncryptionKey           *compute.CustomerEncryptionKey `mapstructure:"image_encryption_key"`
+	ImageFamily                  string                         `mapstructure:"image_family"`
+	ImageLabels                  map[string]string              `mapstructure:"image_labels"`
+	ImageLicenses                []string                       `mapstructure:"image_licenses"`
+	InstanceName                 string                         `mapstructure:"instance_name"`
+	Labels                       map[string]string              `mapstructure:"labels"`
+	MachineType                  string                         `mapstructure:"machine_type"`
+	Metadata                     map[string]string              `mapstructure:"metadata"`
+	MinCpuPlatform               string                         `mapstructure:"min_cpu_platform"`
+	Network                      string                         `mapstructure:"network"`
+	NetworkProjectId             string                         `mapstructure:"network_project_id"`
+	OmitExternalIP               bool                           `mapstructure:"omit_external_ip"`
+	OnHostMaintenance            string                         `mapstructure:"on_host_maintenance"`
+	Preemptible                  bool                           `mapstructure:"preemptible"`
+	RawStateTimeout              string                         `mapstructure:"state_timeout"`
+	Region                       string                         `mapstructure:"region"`
+	Scopes                       []string                       `mapstructure:"scopes"`
+	ServiceAccountEmail          string                         `mapstructure:"service_account_email"`
+	SourceImage                  string                         `mapstructure:"source_image"`
+	SourceImageFamily            string                         `mapstructure:"source_image_family"`
+	SourceImageProjectId         string                         `mapstructure:"source_image_project_id"`
+	StartupScriptFile            string                         `mapstructure:"startup_script_file"`
+	Subnetwork                   string                         `mapstructure:"subnetwork"`
+	Tags                         []string                       `mapstructure:"tags"`
+	UseInternalIP                bool                           `mapstructure:"use_internal_ip"`
+	Zone                         string                         `mapstructure:"zone"`
 
 	Account            AccountFile
 	stateTimeout       time.Duration
