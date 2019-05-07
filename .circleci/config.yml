@@ -57,4 +57,4 @@ workflows:
       - build_windows
       - build_freebsd
       - build_openbsd
-      
+      - build_solaris
