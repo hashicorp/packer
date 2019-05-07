@@ -53,19 +53,21 @@ func (c *BuildCommand) Run(args []string) int {
 }
 
 func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
-	var cfgParallelBuilds int64
-	var cfgOnError string
+	var cfg = struct {
+		Color, Debug, Force, Timestamp, Parallel bool
+		ParallelBuilds                           int64
+		OnError                                  string
+	}{}
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
-	flags.BoolVar(&cfgColor, "color", true, "")
-	flags.BoolVar(&cfgDebug, "debug", false, "")
-	flags.BoolVar(&cfgForce, "force", false, "")
-	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
-	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
+	flags.BoolVar(&cfg.Color, "color", true, "")
+	flags.BoolVar(&cfg.Debug, "debug", false, "")
+	flags.BoolVar(&cfg.Force, "force", false, "")
+	flags.BoolVar(&cfg.Timestamp, "timestamp-ui", false, "")
+	flagOnError := enumflag.New(&cfg.OnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
-	flags.BoolVar(&cfgParallel, "parallel", true, "")
-	flags.Int64Var(&cfgParallelBuilds, "parallel-builds", 0, "")
+	flags.BoolVar(&cfg.Parallel, "parallel", true, "")
+	flags.Int64Var(&cfg.ParallelBuilds, "parallel-builds", 0, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -107,7 +109,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		builds = append(builds, b)
 	}
 
-	if cfgDebug {
+	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
@@ -123,7 +125,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	for i, b := range buildNames {
 		var ui packer.Ui
 		ui = c.Ui
-		if cfgColor {
+		if cfg.Color {
 			ui = &packer.ColoredUi{
 				Color: colors[i%len(colors)],
 				Ui:    ui,
@@ -135,7 +137,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 					c.Ui.Say("")
 				}
 				// Now add timestamps if requested
-				if cfgTimestamp {
+				if cfg.Timestamp {
 					ui = &packer.TimestampedUi{
 						Ui: ui,
 					}
@@ -146,16 +148,16 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		buildUis[b] = ui
 	}
 
-	log.Printf("Build debug mode: %v", cfgDebug)
-	log.Printf("Force build: %v", cfgForce)
-	log.Printf("On error: %v", cfgOnError)
+	log.Printf("Build debug mode: %v", cfg.Debug)
+	log.Printf("Force build: %v", cfg.Force)
+	log.Printf("On error: %v", cfg.OnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		b.SetDebug(cfgDebug)
-		b.SetForce(cfgForce)
-		b.SetOnError(cfgOnError)
+		b.SetDebug(cfg.Debug)
+		b.SetForce(cfg.Force)
+		b.SetOnError(cfg.OnError)
 
 		warnings, err := b.Prepare()
 		if err != nil {
@@ -183,14 +185,14 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		m map[string]error
 	}{m: make(map[string]error)}
 
-	if cfgParallelBuilds < 1 {
-		cfgParallelBuilds = math.MaxInt64
+	if cfg.ParallelBuilds < 1 {
+		cfg.ParallelBuilds = math.MaxInt64
 	}
-	if cfgParallel == false && cfgParallelBuilds == 0 {
-		cfgParallelBuilds = 1
+	if cfg.Parallel == false && cfg.ParallelBuilds == 0 {
+		cfg.ParallelBuilds = 1
 	}
 
-	limitParallel := semaphore.NewWeighted(cfgParallelBuilds)
+	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -232,12 +234,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 			}
 		}()
 
-		if cfgDebug {
+		if cfg.Debug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
-		if cfgParallelBuilds == 1 {
+		if cfg.ParallelBuilds == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
