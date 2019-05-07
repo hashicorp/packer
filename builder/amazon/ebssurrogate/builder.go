@@ -94,12 +94,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Architecture == "" {
-		b.config.Architecture == "x86_64"
+		b.config.Architecture = "x86_64"
 	}
 	valid := false
-	for validArch, _ := range []string{"x86_64", "arm64"} {
+	for _, validArch := range []string{"x86_64", "arm64"} {
 		if validArch == b.config.Architecture {
-			matched = true
+			valid = true
 			break
 		}
 	}

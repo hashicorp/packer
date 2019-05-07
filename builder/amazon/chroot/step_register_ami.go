@@ -16,7 +16,6 @@ type StepRegisterAMI struct {
 	RootVolumeSize           int64
 	EnableAMIENASupport      *bool
 	EnableAMISriovNetSupport bool
-	Architecture             string
 }
 
 func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -118,7 +117,7 @@ func buildBaseRegisterOpts(config *Config, sourceImage *ec2.Image, rootVolumeSiz
 	if config.FromScratch {
 		return &ec2.RegisterImageInput{
 			Name:                &config.AMIName,
-			Architecture:        aws.String(s.Architecture),
+			Architecture:        aws.String(config.Architecture),
 			RootDeviceName:      aws.String(rootDeviceName),
 			VirtualizationType:  aws.String(config.AMIVirtType),
 			BlockDeviceMappings: newMappings,

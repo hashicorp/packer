@@ -83,7 +83,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Architecture == "" {
-		b.config.Architecture == "x86_64"
+		b.config.Architecture = "x86_64"
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -186,9 +186,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 	valid := false
-	for validArch, _ := range []string{"x86_64", "arm64"} {
+	for _, validArch := range []string{"x86_64", "arm64"} {
 		if validArch == b.config.Architecture {
-			matched = true
+			valid = true
 			break
 		}
 	}
@@ -291,7 +291,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			RootVolumeSize:           b.config.RootVolumeSize,
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
-			Architecture:             b.config.Architecture,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
