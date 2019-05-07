@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/version"
-	"github.com/mattn/go-tty"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
@@ -193,7 +192,7 @@ func wrappedMain() int {
 		}
 		ui = basicUi
 		if !inPlugin {
-			if TTY, err := tty.Open(); err != nil {
+			if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			} else {
 				basicUi.TTY = TTY
