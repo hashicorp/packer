@@ -28,6 +28,7 @@ type Config struct {
 
 	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	Architecture  string           `mapstructure:"ami_architecture"`
 
 	ctx interpolate.Context
 }
@@ -92,6 +93,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"you use an AMI that already has either SR-IOV or ENA enabled."))
 	}
 
+	if b.config.Architecture == "" {
+		b.config.Architecture == "x86_64"
+	}
+	valid := false
+	for validArch, _ := range []string{"x86_64", "arm64"} {
+		if validArch == b.config.Architecture {
+			matched = true
+			break
+		}
+	}
+	if !valid {
+		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
+	}
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
@@ -244,6 +258,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			LaunchDevices:            launchDevices,
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
+			Architecture:             b.config.Architecture,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
