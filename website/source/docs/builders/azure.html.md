@@ -91,7 +91,7 @@ you should specify `subscription_id`, `client_id` and one of `client_secret`,
 The Azure builder can create either a VHD, or a managed image. If you are
 creating a VHD, you **must** start with a VHD. Likewise, if you want to create
 a managed image you **must** start with a managed image. When creating a VHD
-the following two options are required.
+the following options are required.
 
 -   `capture_container_name` (string) Destination container name. Essentially
     the "directory" where your VHD will be organized in Azure. The captured
@@ -107,7 +107,7 @@ the following two options are required.
 -   `storage_account` (string) Storage account under which the final artifact
     will be stored.
 
-When creating a managed image the following two options are required.
+When creating a managed image the following options are required.
 
 -   `managed_image_name` (string) Specify the managed image name where the
     result of the Packer build will be saved. The image name must not exist
