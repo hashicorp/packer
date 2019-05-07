@@ -270,6 +270,17 @@ builder.
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
+-   `image_encryption_key` (object of encryption key) - Image encryption key to apply to the created image. Possible values:
+    * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
+    * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
+
+    example: 
+    ``` json
+    {
+      "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+    }
+    ```
+
 -   `instance_name` (string) - A name to give the launched instance. Beware
     that this must be unique. Defaults to `"packer-{{uuid}}"`.
 

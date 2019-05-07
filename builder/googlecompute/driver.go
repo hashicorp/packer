@@ -3,6 +3,8 @@ package googlecompute
 import (
 	"crypto/rsa"
 	"time"
+
+	compute "google.golang.org/api/compute/v1"
 )
 
 // Driver is the interface that has to be implemented to communicate
@@ -11,7 +13,7 @@ import (
 type Driver interface {
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
-	CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error)
+	CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error)
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error

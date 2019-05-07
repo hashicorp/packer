@@ -104,15 +104,16 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
-		Description: description,
-		Name:        name,
-		Family:      family,
-		Labels:      image_labels,
-		Licenses:    image_licenses,
-		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
-		SourceType:  "RAW",
+		Description:        description,
+		Name:               name,
+		Family:             family,
+		Labels:             image_labels,
+		Licenses:           image_licenses,
+		ImageEncryptionKey: image_encryption_key,
+		SourceDisk:         fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
+		SourceType:         "RAW",
 	}
 
 	imageCh := make(chan *Image, 1)
