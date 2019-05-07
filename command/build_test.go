@@ -231,7 +231,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		{fields{defaultMeta},
 			args{[]string{"file.json"}},
 			Config{
-				Args:           []string{"file.json"},
+				Path:           "file.json",
 				ParallelBuilds: math.MaxInt64,
 				Color:          true,
 			},
@@ -240,7 +240,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		{fields{defaultMeta},
 			args{[]string{"-parallel=true", "file.json"}},
 			Config{
-				Args:           []string{"file.json"},
+				Path:           "file.json",
 				ParallelBuilds: math.MaxInt64,
 				Color:          true,
 			},
@@ -249,7 +249,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		{fields{defaultMeta},
 			args{[]string{"-parallel=false", "file.json"}},
 			Config{
-				Args:           []string{"file.json"},
+				Path:           "file.json",
 				ParallelBuilds: 1,
 				Color:          true,
 			},
@@ -258,7 +258,16 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		{fields{defaultMeta},
 			args{[]string{"-parallel-builds=5", "file.json"}},
 			Config{
-				Args:           []string{"file.json"},
+				Path:           "file.json",
+				ParallelBuilds: 5,
+				Color:          true,
+			},
+			0,
+		},
+		{fields{defaultMeta},
+			args{[]string{"-parallel=false", "-parallel-builds=5", "otherfile.json"}},
+			Config{
+				Path:           "otherfile.json",
 				ParallelBuilds: 5,
 				Color:          true,
 			},
