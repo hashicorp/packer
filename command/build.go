@@ -56,7 +56,7 @@ type Config struct {
 	Color, Debug, Force, Timestamp bool
 	ParallelBuilds                 int64
 	OnError                        string
-	Args                           []string
+	Path                           string
 }
 
 func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
@@ -83,11 +83,12 @@ func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
 		cfg.ParallelBuilds = math.MaxInt64
 	}
 
-	cfg.Args = flags.Args()
-	if len(cfg.Args) != 1 {
+	args = flags.Args()
+	if len(args) != 1 {
 		flags.Usage()
 		return cfg, 1
 	}
+	cfg.Path = args[0]
 	return cfg, 0
 }
 
@@ -100,7 +101,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	// Parse the template
 	var tpl *template.Template
 	var err error
-	tpl, err = template.ParseFile(cfg.Args[0])
+	tpl, err = template.ParseFile(cfg.Path)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
