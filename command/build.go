@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/posener/complete"
 )
@@ -24,31 +26,82 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
-	var cfgOnError string
+	buildCtx, cancelBuildCtx := context.WithCancel(context.Background())
+	// Handle interrupts for this build
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	defer func() {
+		cancelBuildCtx()
+		signal.Stop(sigCh)
+		close(sigCh)
+	}()
+	go func() {
+		select {
+		case sig := <-sigCh:
+			if sig == nil {
+				// context got cancelled and this closed chan probably
+				// triggered first
+				return
+			}
+			c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
+			cancelBuildCtx()
+		case <-buildCtx.Done():
+		}
+	}()
+
+	return c.RunContext(buildCtx, args)
+}
+
+type Config struct {
+	Color, Debug, Force, Timestamp bool
+	ParallelBuilds                 int64
+	OnError                        string
+	Path                           string
+}
+
+func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
+	var cfg Config
+	var parallel bool
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
-	flags.BoolVar(&cfgColor, "color", true, "")
-	flags.BoolVar(&cfgDebug, "debug", false, "")
-	flags.BoolVar(&cfgForce, "force", false, "")
-	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
-	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
+	flags.BoolVar(&cfg.Color, "color", true, "")
+	flags.BoolVar(&cfg.Debug, "debug", false, "")
+	flags.BoolVar(&cfg.Force, "force", false, "")
+	flags.BoolVar(&cfg.Timestamp, "timestamp-ui", false, "")
+	flagOnError := enumflag.New(&cfg.OnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
-	flags.BoolVar(&cfgParallel, "parallel", true, "")
+	flags.BoolVar(&parallel, "parallel", true, "")
+	flags.Int64Var(&cfg.ParallelBuilds, "parallel-builds", 0, "")
 	if err := flags.Parse(args); err != nil {
-		return 1
+		return cfg, 1
+	}
+
+	if parallel == false && cfg.ParallelBuilds == 0 {
+		cfg.ParallelBuilds = 1
+	}
+	if cfg.ParallelBuilds < 1 {
+		cfg.ParallelBuilds = math.MaxInt64
 	}
 
 	args = flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
-		return 1
+		return cfg, 1
+	}
+	cfg.Path = args[0]
+	return cfg, 0
+}
+
+func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
 	}
 
 	// Parse the template
 	var tpl *template.Template
 	var err error
-	tpl, err = template.ParseFile(args[0])
+	tpl, err = template.ParseFile(cfg.Path)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
@@ -76,7 +129,7 @@ func (c *BuildCommand) Run(args []string) int {
 		builds = append(builds, b)
 	}
 
-	if cfgDebug {
+	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
@@ -92,7 +145,7 @@ func (c *BuildCommand) Run(args []string) int {
 	for i, b := range buildNames {
 		var ui packer.Ui
 		ui = c.Ui
-		if cfgColor {
+		if cfg.Color {
 			ui = &packer.ColoredUi{
 				Color: colors[i%len(colors)],
 				Ui:    ui,
@@ -104,7 +157,7 @@ func (c *BuildCommand) Run(args []string) int {
 					c.Ui.Say("")
 				}
 				// Now add timestamps if requested
-				if cfgTimestamp {
+				if cfg.Timestamp {
 					ui = &packer.TimestampedUi{
 						Ui: ui,
 					}
@@ -115,16 +168,16 @@ func (c *BuildCommand) Run(args []string) int {
 		buildUis[b] = ui
 	}
 
-	log.Printf("Build debug mode: %v", cfgDebug)
-	log.Printf("Force build: %v", cfgForce)
-	log.Printf("On error: %v", cfgOnError)
+	log.Printf("Build debug mode: %v", cfg.Debug)
+	log.Printf("Force build: %v", cfg.Force)
+	log.Printf("On error: %v", cfg.OnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
-		b.SetDebug(cfgDebug)
-		b.SetForce(cfgForce)
-		b.SetOnError(cfgOnError)
+		b.SetDebug(cfg.Debug)
+		b.SetForce(cfg.Force)
+		b.SetOnError(cfg.OnError)
 
 		warnings, err := b.Prepare()
 		if err != nil {
@@ -142,68 +195,68 @@ func (c *BuildCommand) Run(args []string) int {
 	}
 
 	// Run all the builds in parallel and wait for them to complete
-	var interruptWg, wg sync.WaitGroup
-	interrupted := false
+	var wg sync.WaitGroup
 	var artifacts = struct {
 		sync.RWMutex
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
-	errors := make(map[string]error)
-	// ctx := context.Background()
-	for _, b := range builds {
+	var errors = struct {
+		sync.RWMutex
+		m map[string]error
+	}{m: make(map[string]error)}
+
+	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
+	for i := range builds {
+		if err := buildCtx.Err(); err != nil {
+			log.Println("Interrupted, not going to start any more builds.")
+			break
+		}
+
+		b := builds[i]
+		name := b.Name()
+		ui := buildUis[name]
+		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
+			errors.Lock()
+			errors.m[name] = err
+			errors.Unlock()
+			break
+		}
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
-		buildCtx, cancelCtx := context.WithCancel(context.Background())
-
-		// Handle interrupts for this build
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-		defer signal.Stop(sigCh)
-		go func(b packer.Build) {
-			sig := <-sigCh
-			interruptWg.Add(1)
-			defer interruptWg.Done()
-			interrupted = true
-
-			log.Printf("Stopping build: %s after receiving %s", b.Name(), sig)
-			cancelCtx()
-			log.Printf("Build cancelled: %s", b.Name())
-		}(b)
 
 		// Run the build in a goroutine
-		go func(b packer.Build) {
+		go func() {
 			defer wg.Done()
 
-			name := b.Name()
+			defer limitParallel.Release(1)
+
 			log.Printf("Starting build run: %s", name)
-			ui := buildUis[name]
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
-				errors[name] = err
+				errors.Lock()
+				errors.m[name] = err
+				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
 				artifacts.Lock()
 				artifacts.m[name] = runArtifacts
 				artifacts.Unlock()
 			}
-		}(b)
+		}()
 
-		if cfgDebug {
+		if cfg.Debug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
-		if !cfgParallel {
+		if cfg.ParallelBuilds == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
-		if interrupted {
-			log.Println("Interrupted, not going to start any more builds.")
-			break
-		}
 	}
 
 	// Wait for both the builds to complete and the interrupt handler,
@@ -211,19 +264,16 @@ func (c *BuildCommand) Run(args []string) int {
 	log.Printf("Waiting on builds to complete...")
 	wg.Wait()
 
-	log.Printf("Builds completed. Waiting on interrupt barrier...")
-	interruptWg.Wait()
-
-	if interrupted {
+	if err := buildCtx.Err(); err != nil {
 		c.Ui.Say("Cleanly cancelled builds after being interrupted.")
 		return 1
 	}
 
-	if len(errors) > 0 {
-		c.Ui.Machine("error-count", strconv.FormatInt(int64(len(errors)), 10))
+	if len(errors.m) > 0 {
+		c.Ui.Machine("error-count", strconv.FormatInt(int64(len(errors.m)), 10))
 
 		c.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
-		for name, err := range errors {
+		for name, err := range errors.m {
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
@@ -284,7 +334,7 @@ func (c *BuildCommand) Run(args []string) int {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
 	}
 
-	if len(errors) > 0 {
+	if len(errors.m) > 0 {
 		// If any errors occurred, exit with a non-zero exit status
 		return 1
 	}
@@ -308,7 +358,8 @@ Options:
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
-  -parallel=false               Disable parallelization. (Default: parallel)
+  -parallel=false               Disable parallelization. (Default: true)
+  -parallel-builds=1            Number of builds to run in parallel. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.

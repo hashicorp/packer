@@ -2,10 +2,13 @@ package command
 
 import (
 	"bytes"
+	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
 	shell_local "github.com/hashicorp/packer/post-processor/shell-local"
@@ -209,4 +212,80 @@ func cleanup() {
 	os.RemoveAll("fuchsias.txt")
 	os.RemoveAll("lilas.txt")
 	os.RemoveAll("campanules.txt")
+}
+
+func TestBuildCommand_ParseArgs(t *testing.T) {
+	defaultMeta := testMetaFile(t)
+	type fields struct {
+		Meta Meta
+	}
+	type args struct {
+		args []string
+	}
+	tests := []struct {
+		fields       fields
+		args         args
+		wantCfg      Config
+		wantExitCode int
+	}{
+		{fields{defaultMeta},
+			args{[]string{"file.json"}},
+			Config{
+				Path:           "file.json",
+				ParallelBuilds: math.MaxInt64,
+				Color:          true,
+			},
+			0,
+		},
+		{fields{defaultMeta},
+			args{[]string{"-parallel=true", "file.json"}},
+			Config{
+				Path:           "file.json",
+				ParallelBuilds: math.MaxInt64,
+				Color:          true,
+			},
+			0,
+		},
+		{fields{defaultMeta},
+			args{[]string{"-parallel=false", "file.json"}},
+			Config{
+				Path:           "file.json",
+				ParallelBuilds: 1,
+				Color:          true,
+			},
+			0,
+		},
+		{fields{defaultMeta},
+			args{[]string{"-parallel-builds=5", "file.json"}},
+			Config{
+				Path:           "file.json",
+				ParallelBuilds: 5,
+				Color:          true,
+			},
+			0,
+		},
+		{fields{defaultMeta},
+			args{[]string{"-parallel=false", "-parallel-builds=5", "otherfile.json"}},
+			Config{
+				Path:           "otherfile.json",
+				ParallelBuilds: 5,
+				Color:          true,
+			},
+			0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s", tt.args.args), func(t *testing.T) {
+			c := &BuildCommand{
+				Meta: tt.fields.Meta,
+			}
+			gotCfg, gotExitCode := c.ParseArgs(tt.args.args)
+			if diff := cmp.Diff(gotCfg, tt.wantCfg); diff != "" {
+				t.Fatalf("BuildCommand.ParseArgs() unexpected cfg %s", diff)
+			}
+			if gotExitCode != tt.wantExitCode {
+				t.Fatalf("BuildCommand.ParseArgs() gotExitCode = %v, want %v", gotExitCode, tt.wantExitCode)
+			}
+		})
+	}
 }
