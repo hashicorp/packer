@@ -52,12 +52,16 @@ func (c *BuildCommand) Run(args []string) int {
 	return c.RunContext(buildCtx, args)
 }
 
-func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
-	var cfg = struct {
-		Color, Debug, Force, Timestamp, Parallel bool
-		ParallelBuilds                           int64
-		OnError                                  string
-	}{}
+type Config struct {
+	Color, Debug, Force, Timestamp bool
+	ParallelBuilds                 int64
+	OnError                        string
+	Args                           []string
+}
+
+func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
+	var cfg Config
+	var parallel bool
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfg.Color, "color", true, "")
@@ -66,22 +70,37 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	flags.BoolVar(&cfg.Timestamp, "timestamp-ui", false, "")
 	flagOnError := enumflag.New(&cfg.OnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
-	flags.BoolVar(&cfg.Parallel, "parallel", true, "")
+	flags.BoolVar(&parallel, "parallel", true, "")
 	flags.Int64Var(&cfg.ParallelBuilds, "parallel-builds", 0, "")
 	if err := flags.Parse(args); err != nil {
-		return 1
+		return cfg, 1
 	}
 
-	args = flags.Args()
-	if len(args) != 1 {
+	if parallel == false && cfg.ParallelBuilds == 0 {
+		cfg.ParallelBuilds = 1
+	}
+	if cfg.ParallelBuilds < 1 {
+		cfg.ParallelBuilds = math.MaxInt64
+	}
+
+	cfg.Args = flags.Args()
+	if len(cfg.Args) != 1 {
 		flags.Usage()
-		return 1
+		return cfg, 1
+	}
+	return cfg, 0
+}
+
+func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
 	}
 
 	// Parse the template
 	var tpl *template.Template
 	var err error
-	tpl, err = template.ParseFile(args[0])
+	tpl, err = template.ParseFile(cfg.Args[0])
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
@@ -184,13 +203,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		sync.RWMutex
 		m map[string]error
 	}{m: make(map[string]error)}
-
-	if cfg.ParallelBuilds < 1 {
-		cfg.ParallelBuilds = math.MaxInt64
-	}
-	if cfg.Parallel == false && cfg.ParallelBuilds == 0 {
-		cfg.ParallelBuilds = 1
-	}
 
 	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
 	for i := range builds {
