@@ -52,11 +52,11 @@ jobs:
       - checkout
       - run: XC_ARCH=amd64 XC_OS="linux windows darwin" GOLDFLAGS="-s -w" ./scripts/build.sh
       - run: mkdir ./pkg/zipped_packers
-      - run: zip ./pkg/zipped_packers/packer_darwin.zip pkg/darwin_amd64/packer
-      - run: zip ./pkg/zipped_packers/packer_windows.zip pkg/windows_amd64/packer
-      - run: zip ./pkg/zipped_packers/packer_linux.zip pkg/linux_amd64/packer
+      - run: zip ./pkg/zipped_packers/packer_darwin.zip ./pkg/darwin_amd64/packer
+      - run: zip ./pkg/zipped_packers/packer_windows.zip ./pkg/windows_amd64/packer
+      - run: zip ./pkg/zipped_packers/packer_linux.zip ./pkg/linux_amd64/packer
       - store_artifacts:
-        path: ./pkg/zipped_packers
+          path: ./pkg/zipped_packers
 
 workflows:
   version: 2
