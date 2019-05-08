@@ -4,6 +4,7 @@
 ** new builder ** new proxmox builder implemented [GH-7490]
 ** new builder ** new yandex cloud builder implemented [GH-7484]
 ** new builder ** new linode builder implemented [GH-7508]
+* packer compiles on s390x [GH-7567]
 * builder/alicloud: Support encryption with default service key [GH-7574]
 * builder/azure: Update Azure SDK [GH-7563]
 * builder/docker: Better error messaging with container downloads. [GH-7513]
@@ -14,8 +15,10 @@
 * core: New option to set number of builds running in parallel & test
     BuildCommand more [GH-7501]
 * provisioner/file: Added warnings about writeable locations [GH-7494]
+* builder/google: add image encryption support [GH-7551]
 
 ### BUG FIXES:
+* packer compiles on Solaris again [GH-7589] [GH-7618]
 * builder/amazon: Fix bug that always encrypted build region with default key.
     [GH-7507]
 * builder/amazon: Fix bug that wasn't deleting unencrypted temporary snapshots
