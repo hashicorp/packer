@@ -70,3 +70,4 @@ workflows:
       - build_freebsd
       - build_openbsd
       - build_solaris
+      - generate_binaries
