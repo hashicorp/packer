@@ -71,8 +71,7 @@ workflows:
       - build_freebsd
       - build_openbsd
       - build_solaris
-      - request-binaries:
-          type: approval
+      - store_artifacts:
           requires:
             - build_linux
             - build_darwin
@@ -80,6 +79,3 @@ workflows:
             - build_freebsd
             - build_openbsd
             - build_solaris
-      - store_artifacts:
-          requires:
-            - request-binaries
