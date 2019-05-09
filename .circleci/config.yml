@@ -59,18 +59,45 @@ jobs:
       - store_artifacts:
           path: ./pkg/
           destination: /
+  publish-github-tag-release:
+    docker:
+      - image: cibuilds/github:0.10
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - attach_workspace:
+          at: .
+      - run: |
+          ghr -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
     jobs:
       - build
       - check-vendor-vs-mod
-      - build_linux
-      - build_darwin
-      - build_windows
-      - build_freebsd
-      - build_openbsd
-      - build_solaris
+      - build_linux:
+          filters:
+            tags:
+              only: /.*/
+      - build_darwin:
+          filters:
+            tags:
+              only: /.*/
+      - build_windows:
+          filters:
+            tags:
+              only: /.*/
+      - build_freebsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_openbsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_solaris:
+          filters:
+            tags:
+              only: /.*/
       - store_artifacts:
           requires:
             - build_linux
@@ -79,3 +106,14 @@ workflows:
             - build_freebsd
             - build_openbsd
             - build_solaris
+      - publish-github-tag-release:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
+          filters:
+            tags:
+              only: nightly
