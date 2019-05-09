@@ -31,6 +31,7 @@ resource "github_repository_webhook" "main" {
   configuration {
     content_type = "json"
     url          = "https://api.netlify.com/hooks/github"
+    insecure_ssl = false
   }
 
   depends_on = ["netlify_site.main"]
@@ -46,7 +47,8 @@ Netlify Resources
 resource "netlify_deploy_key" "key" {}
 
 resource "netlify_site" "main" {
-  name = "${var.name}"
+  name          = "${var.name}"
+  custom_domain = "${var.custom_site_domain}"
 
   repo {
     repo_branch   = "${var.github_branch}"
