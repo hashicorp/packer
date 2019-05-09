@@ -1,4 +1,4 @@
-// The chroot package is able to create an Outscale OMI without requiring
+// Package chroot is able to create an Outscale OMI without requiring
 // the launch of a new instance for every build. It does this by attaching
 // and mounting the root volume of another OMI and chrooting into that
 // directory. It then creates an OMI from that attached drive.
@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"runtime"
 
-	awschroot "github.com/hashicorp/packer/builder/amazon/chroot"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -238,7 +237,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps,
-		&awschroot.StepFlock{},
+		&StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{
 			RootVolumeType: b.config.RootVolumeType,
@@ -247,21 +246,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Ctx:            b.config.ctx,
 		},
 		&StepLinkVolume{},
-		&awschroot.StepEarlyUnflock{},
-		&awschroot.StepPreMountCommands{
+		&StepEarlyUnflock{},
+		&StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
 		},
-		&awschroot.StepPostMountCommands{
+		&StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
 		},
-		&awschroot.StepMountExtra{},
-		&awschroot.StepCopyFiles{},
-		&awschroot.StepChrootProvision{},
-		&awschroot.StepEarlyCleanup{},
+		&StepMountExtra{},
+		&StepCopyFiles{},
+		&StepChrootProvision{},
+		&StepEarlyCleanup{},
 		&StepSnapshot{},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
