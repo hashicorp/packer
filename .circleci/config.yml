@@ -4,7 +4,11 @@ defaults: &golang
   working_directory: /go/src/github.com/hashicorp/packer
   steps:
     - checkout
-    - run: go build -o pkg/packer .
+    - run: go build -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
+    - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH) ./pkg/
+    - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
+    - store_artifacts:
+        path: ./pkg/
 
 # Golang CircleCI 2.0 configuration file
 #
@@ -46,33 +50,6 @@ jobs:
     <<: *golang
     environment:
       GOOS: openbsd
-  save_windows_binary:
-    <<: *golang
-    steps:
-      - checkout
-      - run: go get github.com/mitchellh/gox
-      - run: PATH=$PATH:$GOPATH/bin XC_ARCH=amd64 XC_OS="windows" GOLDFLAGS="-s -w" ./scripts/build.sh
-      - run: zip ./pkg/packer_windows.zip ./pkg/windows_amd64/packer.exe
-      - store_artifacts:
-          path: ./pkg/packer_windows.zip
-  save_linux_binary:
-    <<: *golang
-    steps:
-      - checkout
-      - run: go get github.com/mitchellh/gox
-      - run: PATH=$PATH:$GOPATH/bin XC_ARCH=amd64 XC_OS="linux" GOLDFLAGS="-s -w" ./scripts/build.sh
-      - run: zip ./pkg/packer_linux.zip ./pkg/linux_amd64/packer
-      - store_artifacts:
-          path: ./pkg/packer_linux.zip
-  save_darwin_binary:
-    <<: *golang
-    steps:
-      - checkout
-      - run: go get github.com/mitchellh/gox
-      - run: PATH=$PATH:$GOPATH/bin XC_ARCH=amd64 XC_OS="darwin" GOLDFLAGS="-s -w" ./scripts/build.sh
-      - run: zip ./pkg/packer_darwin.zip ./pkg/darwin_amd64/packer
-      - store_artifacts:
-          path: ./pkg/packer_darwin.zip
 
 workflows:
   version: 2
@@ -86,6 +63,3 @@ workflows:
       - build_freebsd
       - build_openbsd
       - build_solaris
-      - save_darwin_binary
-      - save_linux_binary
-      - save_windows_binary
