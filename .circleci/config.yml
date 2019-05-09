@@ -4,8 +4,13 @@ defaults: &golang
   working_directory: /go/src/github.com/hashicorp/packer
   steps:
     - checkout
-    - run: go build -o pkg/packer .
-
+    - run: go build -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
+    - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH).zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
+    - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
+    - persist_to_workspace:
+        root: .
+        paths:
+          - ./pkg/
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
@@ -46,28 +51,71 @@ jobs:
     <<: *golang
     environment:
       GOOS: openbsd
-  generate_binaries:
+  store_artifacts:
     <<: *golang
     steps:
-      - checkout
-      - run: PATH=$PATH:$GOPATH/bin XC_ARCH=amd64 XC_OS="linux windows darwin" GOLDFLAGS="-s -w" ./scripts/build.sh
-      - run: mkdir ./pkg/zipped_packers
-      - run: zip ./pkg/zipped_packers/packer_darwin.zip ./pkg/darwin_amd64/packer
-      - run: zip ./pkg/zipped_packers/packer_windows.zip ./pkg/windows_amd64/packer
-      - run: zip ./pkg/zipped_packers/packer_linux.zip ./pkg/linux_amd64/packer
+      - attach_workspace:
+          at: .
       - store_artifacts:
-          path: ./pkg/zipped_packers
-
+          path: ./pkg/
+          destination: /
+  publish-github-tag-release:
+    docker:
+      - image: cibuilds/github:0.10
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - attach_workspace:
+          at: .
+      - run: |
+          ghr -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
     jobs:
       - build
       - check-vendor-vs-mod
-      - build_linux
-      - build_darwin
-      - build_windows
-      - build_freebsd
-      - build_openbsd
-      - build_solaris
-      - generate_binaries
+      - build_linux:
+          filters:
+            tags:
+              only: /.*/
+      - build_darwin:
+          filters:
+            tags:
+              only: /.*/
+      - build_windows:
+          filters:
+            tags:
+              only: /.*/
+      - build_freebsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_openbsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_solaris:
+          filters:
+            tags:
+              only: /.*/
+      - store_artifacts:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
+      - publish-github-tag-release:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: nightly
