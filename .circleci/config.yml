@@ -115,5 +115,7 @@ workflows:
             - build_openbsd
             - build_solaris
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: nightly
