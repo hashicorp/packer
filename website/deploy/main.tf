@@ -26,7 +26,6 @@ resource "github_repository_deploy_key" "key" {
 // Create a webhook that triggers Netlify builds on push.
 resource "github_repository_webhook" "main" {
   repository = "${local.github_repo}"
-  name       = "web"
   events     = ["delete", "push", "pull_request"]
 
   configuration {
