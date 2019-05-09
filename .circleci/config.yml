@@ -5,7 +5,7 @@ defaults: &golang
   steps:
     - checkout
     - run: go build -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
-    - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH) ./pkg/
+    - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH).zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - persist_to_workspace:
         root: .
