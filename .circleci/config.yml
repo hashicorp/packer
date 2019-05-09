@@ -7,9 +7,10 @@ defaults: &golang
     - run: go build -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
     - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH) ./pkg/
     - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
-    - store_artifacts:
-        path: ./pkg/
-
+    - persist_to_workspace:
+        root: .
+        paths:
+          - ./pkg/
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
@@ -50,7 +51,13 @@ jobs:
     <<: *golang
     environment:
       GOOS: openbsd
-
+  store_artifacts:
+    <<: *golang
+    steps:
+      - attach_workspace:
+          at: .
+      - store_artifacts:
+          path: ./pkg/
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
@@ -63,3 +70,11 @@ workflows:
       - build_freebsd
       - build_openbsd
       - build_solaris
+      - store_artifacts:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
