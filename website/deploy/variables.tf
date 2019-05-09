@@ -12,3 +12,8 @@ variable "github_branch" {
   default = "stable-website"
   description = "GitHub branch which netlify will continuously deploy."
 }
+
+variable "custom_site_domain" {
+  default = "packer.io"
+  description = "The custom domain to use for the Netlify site."
+}
