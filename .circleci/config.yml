@@ -58,6 +58,7 @@ jobs:
           at: .
       - store_artifacts:
           path: ./pkg/
+          destination: /
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
