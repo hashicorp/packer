@@ -13,6 +13,8 @@ GitHub Resources
 
 provider "github" {
   organization = "${local.github_org}"
+
+  version = "~> 2.0.0"
 }
 
 // Configure the repository with the dynamically created Netlify key.
@@ -42,6 +44,10 @@ resource "github_repository_webhook" "main" {
 Netlify Resources
 -------------------------------------------------------------------
 */
+
+provider "netlify" {
+  version = "~> 0.1.0"
+}
 
 // A new, unique deploy key for this specific website
 resource "netlify_deploy_key" "key" {}
