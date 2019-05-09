@@ -46,6 +46,7 @@ type Config struct {
 	SourceAmi         string                     `mapstructure:"source_ami"`
 	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
 	RootVolumeTags    awscommon.TagMap           `mapstructure:"root_volume_tags"`
+	Architecture      string                     `mapstructure:"ami_architecture"`
 
 	ctx interpolate.Context
 }
@@ -79,6 +80,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 	if err != nil {
 		return nil, err
+	}
+
+	if b.config.Architecture == "" {
+		b.config.Architecture = "x86_64"
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -179,6 +184,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
+	}
+	valid := false
+	for _, validArch := range []string{"x86_64", "arm64"} {
+		if validArch == b.config.Architecture {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

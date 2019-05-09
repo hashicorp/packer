@@ -75,6 +75,9 @@ each category, the available configuration keys are alphabetized.
 
 ### Optional:
 
+-   `ami_architecture` (string) - what architecture to use when registering the
+    final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
+
 -   `ami_description` (string) - The description to set for the resulting
     AMI(s). By default this description is empty. This is a [template
     engine](/docs/templates/engine.html), see [Build template
@@ -141,8 +144,8 @@ each category, the available configuration keys are alphabetized.
     documentation on enabling enhanced
     networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 
--   `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when 
-    copying a provisioned instance to an AMI. By default, Packer will keep the 
+-   `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when
+    copying a provisioned instance to an AMI. By default, Packer will keep the
     encryption setting to what it was in the source image. Setting `false` will
     result in an unencrypted image, and `true` will result in an encrypted one.
 
