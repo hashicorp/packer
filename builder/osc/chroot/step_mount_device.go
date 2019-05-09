@@ -71,7 +71,8 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Mount path: %s", mountPath)
+	log.Printf("[DEBUG] Device: %s", device)
+	log.Printf("[DEBUG] Mount path: %s", mountPath)
 
 	if err := os.MkdirAll(mountPath, 0755); err != nil {
 		err := fmt.Errorf("Error creating mount directory: %s", err)
@@ -92,9 +93,23 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	deviceMount := fmt.Sprintf("/dev/%s", strings.Replace(string(realDeviceName), "\n", "", -1))
+	log.Printf("[DEBUG] RealDeviceName: %s", realDeviceName)
+
+	realDeviceNameSplitted := strings.Split(string(realDeviceName), "\n")
+	log.Printf("[DEBUG] RealDeviceName Splitted %+v", realDeviceNameSplitted)
+	log.Printf("[DEBUG] RealDeviceName Splitted Length %d", len(realDeviceNameSplitted))
+	log.Printf("[DEBUG] RealDeviceName Splitted [0] %s", realDeviceNameSplitted[0])
+	log.Printf("[DEBUG] RealDeviceName Splitted [1] %s", realDeviceNameSplitted[1])
+
+	realDeviceNameStr := realDeviceNameSplitted[0]
+	if realDeviceNameStr == "" {
+		realDeviceNameStr = realDeviceNameSplitted[1]
+	}
+
+	deviceMount := fmt.Sprintf("/dev/%s", strings.Replace(realDeviceNameStr, "\n", "", -1))
 
 	log.Printf("[DEBUG] s.MountPartition  = %s", s.MountPartition)
+	log.Printf("[DEBUG ] DeviceMount: %s", deviceMount)
 
 	if virtualizationType == "hvm" && s.MountPartition != "0" {
 		deviceMount = fmt.Sprintf("%s%s", deviceMount, s.MountPartition)
