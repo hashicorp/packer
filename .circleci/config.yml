@@ -4,7 +4,7 @@ defaults: &golang
   working_directory: /go/src/github.com/hashicorp/packer
   steps:
     - checkout
-    - run: go build -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
+    - run: go build -ldflags="-s -w" -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
     - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH).zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - persist_to_workspace:
