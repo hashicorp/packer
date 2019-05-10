@@ -13,7 +13,7 @@ go:
 
 script:
   - df -h
-  - make ci
+  - travis_wait make ci
 
 branches:
   only:
