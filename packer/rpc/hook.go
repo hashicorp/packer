@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/rpc"
+	"sync"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -22,6 +23,7 @@ type HookServer struct {
 	contextCancel func()
 
 	hook packer.Hook
+	lock sync.Mutex
 	mux  *muxBroker
 }
 
@@ -67,9 +69,11 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 	}
 	defer client.Close()
 
+	h.lock.Lock()
 	if h.context == nil {
 		h.context, h.contextCancel = context.WithCancel(context.Background())
 	}
+	h.lock.Unlock()
 	if err := h.hook.Run(h.context, args.Name, client.Ui(), client.Communicator(), args.Data); err != nil {
 		return NewBasicError(err)
 	}
@@ -79,8 +83,10 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 }
 
 func (h *HookServer) Cancel(args *interface{}, reply *interface{}) error {
+	h.lock.Lock()
 	if h.contextCancel != nil {
 		h.contextCancel()
 	}
+	h.lock.Unlock()
 	return nil
 }
