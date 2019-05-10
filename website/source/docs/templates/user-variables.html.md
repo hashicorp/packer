@@ -161,6 +161,33 @@ stored at the key `bar`, storing it as "my\_secret".
 In order for this to work, you must set the environment variables `VAULT_TOKEN`
 and `VAULT_ADDR` to valid values.
 
+
+The api tool we use allows for more custom configuration of the Vault client via
+environment variables.
+
+The full list of available environment variables is:
+
+```
+"VAULT_ADDR"
+"VAULT_AGENT_ADDR"
+"VAULT_CACERT"
+"VAULT_CAPATH"
+"VAULT_CLIENT_CERT"
+"VAULT_CLIENT_KEY"
+"VAULT_CLIENT_TIMEOUT"
+"VAULT_SKIP_VERIFY"
+"VAULT_NAMESPACE"
+"VAULT_TLS_SERVER_NAME"
+"VAULT_WRAP_TTL"
+"VAULT_MAX_RETRIES"
+"VAULT_TOKEN"
+"VAULT_MFA"
+"VAULT_RATE_LIMIT"
+```
+
+and detailed documentation for usage of each of those variables can be found
+[here](https://www.vaultproject.io/docs/commands/#environment-variables).
+
 ## Using array values
 
 Some templates call for array values. You can use template variables for these,
