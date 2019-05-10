@@ -67,7 +67,7 @@ jobs:
       - attach_workspace:
           at: .
       - run: |
-          ghr -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
+          ghr -prerelease -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
 workflows:
   version: 2
   build_and_check_vendor_vs_module:
