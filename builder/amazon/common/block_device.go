@@ -21,6 +21,8 @@ type BlockDevice struct {
 	VolumeType          string `mapstructure:"volume_type"`
 	VolumeSize          int64  `mapstructure:"volume_size"`
 	KmsKeyId            string `mapstructure:"kms_key_id"`
+	// ebssurrogate only
+	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
 
 type BlockDevices struct {
@@ -96,6 +98,7 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}
+
 	return nil
 }
 
@@ -119,4 +122,14 @@ func (b *AMIBlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
 
 func (b *LaunchBlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
 	return buildBlockDevices(b.LaunchMappings)
+}
+
+func (b *LaunchBlockDevices) GetOmissions() map[string]bool {
+	omitMap := make(map[string]bool)
+
+	for _, blockDevice := range b.LaunchMappings {
+		omitMap[blockDevice.DeviceName] = blockDevice.OmitFromArtifact
+	}
+
+	return omitMap
 }
