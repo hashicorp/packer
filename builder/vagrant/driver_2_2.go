@@ -71,7 +71,7 @@ func (d *Vagrant_2_2_Driver) Destroy(id string) error {
 // Calls "vagrant package"
 func (d *Vagrant_2_2_Driver) Package(args []string) error {
 	// Ideally we'd pass vagrantCWD into the package command but
-	// we have to change directorie into the vagrant cwd instead in order to
+	// we have to change directory into the vagrant cwd instead in order to
 	// work around an upstream bug with the vagrant-libvirt plugin.
 	// We can stop doing this when
 	// https://github.com/vagrant-libvirt/vagrant-libvirt/issues/765
