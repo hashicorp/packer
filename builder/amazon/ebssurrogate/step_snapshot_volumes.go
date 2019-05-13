@@ -18,8 +18,9 @@ import (
 // Produces:
 //   snapshot_ids map[string]string - IDs of the created snapshots
 type StepSnapshotVolumes struct {
-	LaunchDevices []*ec2.BlockDeviceMapping
-	snapshotIds   map[string]string
+	LaunchDevices   []*ec2.BlockDeviceMapping
+	snapshotIds     map[string]string
+	SnapshotOmitMap map[string]bool
 }
 
 func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName string, state multistep.StateBag) error {
@@ -64,6 +65,12 @@ func (s *StepSnapshotVolumes) Run(ctx context.Context, state multistep.StateBag)
 	var wg sync.WaitGroup
 	var errs *multierror.Error
 	for _, device := range s.LaunchDevices {
+		// Skip devices we've flagged for omission
+		omit, ok := s.SnapshotOmitMap[*device.DeviceName]
+		if ok && omit {
+			continue
+		}
+
 		wg.Add(1)
 		go func(device *ec2.BlockDeviceMapping) {
 			defer wg.Done()

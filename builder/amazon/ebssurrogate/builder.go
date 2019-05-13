@@ -79,6 +79,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	for _, launchDevice := range b.config.BlockDevices.LaunchMappings {
 		if launchDevice.DeviceName == b.config.RootDevice.SourceDeviceName {
 			foundRootVolume = true
+			if launchDevice.OmitFromArtifact {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot set \"omit_from_artifact\": \"true\" for the root volume."))
+			}
 		}
 	}
 
@@ -243,7 +246,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&StepSnapshotVolumes{
-			LaunchDevices: launchDevices,
+			LaunchDevices:   launchDevices,
+			SnapshotOmitMap: b.config.GetOmissions(),
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -259,6 +263,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			Architecture:             b.config.Architecture,
+			LaunchOmitMap:            b.config.GetOmissions(),
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
