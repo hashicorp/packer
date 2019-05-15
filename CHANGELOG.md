@@ -1,4 +1,4 @@
-## 1.4.1 (upcoming)
+## 1.4.1 (May 15, 2019)
 
 ### IMPROVEMENTS:
 ** new builder ** new proxmox builder implemented [GH-7490]
