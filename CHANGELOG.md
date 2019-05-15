@@ -1,9 +1,9 @@
 ## 1.4.1 (May 15, 2019)
 
 ### IMPROVEMENTS:
-** new builder ** new proxmox builder implemented [GH-7490]
-** new builder ** new yandex cloud builder implemented [GH-7484]
-** new builder ** new linode builder implemented [GH-7508]
+* **new builder:** new proxmox builder implemented [GH-7490]
+* **new builder:** new yandex cloud builder implemented [GH-7484]
+* **new builder:** new linode builder implemented [GH-7508]
 * build: Circle CI now generates test binaries for all pull requests [GH-7624]
     [GH-7625] [GH-7630]
 * builder/alicloud: Support encryption with default service key [GH-7574]
