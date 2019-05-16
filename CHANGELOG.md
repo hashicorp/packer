@@ -1,3 +1,5 @@
+## 1.4.2 (upcoming)
+
 ## 1.4.1 (May 15, 2019)
 
 ### IMPROVEMENTS:
