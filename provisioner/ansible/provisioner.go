@@ -335,7 +335,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}()
 	}
 
-	if err := p.executeAnsible(ui, comm, k.privKeyFile); err != nil {
+	if err := p.executeAnsible(ctx, ui, comm, k.privKeyFile); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
 
@@ -352,7 +352,7 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
+func (p *Provisioner) executeAnsible(ctx context.Context, ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
 
@@ -380,7 +380,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		envvars = append(envvars, p.config.AnsibleEnvVars...)
 	}
 
-	cmd := exec.Command(p.config.Command, args...)
+	cmd := exec.CommandContext(ctx, p.config.Command, args...)
 
 	cmd.Env = os.Environ()
 	if len(envvars) > 0 {
