@@ -406,12 +406,10 @@ func (p *Provisioner) executeAnsible(ctx context.Context, ui packer.Ui, comm pac
 				ui.Message(line)
 			}
 			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
+				if err != io.EOF {
 					ui.Error(err.Error())
-					break
 				}
+				break
 			}
 		}
 		wg.Done()
