@@ -35,6 +35,33 @@ func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
 		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
 	}
 }
+func TestProvisionerPrepare_chefLicense(t *testing.T) {
+	var p Provisioner
+
+	// Test not set
+	config := testConfig()
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatal("should error")
+	}
+
+	if p.config.ChefLicense != "accept-silent" {
+		t.Fatalf("unexpected: %#v", p.config.ChefLicense)
+	}
+
+	// Test set
+	config = testConfig()
+	config["chef_license"] = "accept"
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefLicense != "accept" {
+		t.Fatalf("unexpected: %#v", p.config.ChefLicense)
+	}
+}
 
 func TestProvisionerPrepare_configTemplate(t *testing.T) {
 	var err error

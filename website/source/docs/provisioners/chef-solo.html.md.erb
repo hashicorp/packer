@@ -40,6 +40,12 @@ configuration is actually required, but at least `run_list` is recommended.
 -   `chef_environment` (string) - The name of the `chef_environment` sent to
     the Chef server. By default this is empty and will not use an environment
 
+-   `chef_license` (string) - As of Chef 15 chef requires a license be accepted
+    By default the chef_license with a value of accept-silent is set but possble
+    values are accept, accept-silent and accept-no-persist see 
+    [Accepting the Chef License](https://docs.chef.io/chef_license_accept.html)
+    for details
+
 -   `config_template` (string) - Path to a template that will be used for the
     Chef configuration file. By default Packer only sets configuration it needs
     to match the settings set in the provisioner configuration. If you need to
@@ -131,6 +137,7 @@ has a set of variables available to use:
 
 -   `ChefEnvironment` - The current enabled environment. Only non-empty if the
     environment path is set.
+-   `ChefLicense` - The Chef license acceptance value.
 -   `CookbookPaths` is the set of cookbook paths ready to embedded directly
     into a Ruby array to configure Chef.
 -   `DataBagsPath` is the path to the data bags folder.
