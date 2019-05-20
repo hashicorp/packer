@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -500,6 +501,22 @@ func TestProvisionerProvision_UISlurp(t *testing.T) {
 	// UI should be called n times
 
 	// UI should receive following messages / output
+}
+
+func TestProvisionerProvision_UploadFails(t *testing.T) {
+	config := testConfig()
+	ui := testUi()
+
+	p := new(Provisioner)
+	comm := new(packer.ScriptUploadErrorMockCommunicator)
+	p.Prepare(config)
+	p.config.StartRetryTimeout = time.Second
+	err := p.Provision(context.Background(), ui, comm)
+	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
+		t.Fatalf("expected Provision() error %q to contain %q",
+			err.Error(),
+			packer.ScriptUploadErrorMockCommunicatorError.Error())
+	}
 }
 
 func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
