@@ -402,14 +402,12 @@ interface to VirtualBox where you can completely control VirtualBox. It can be
 used to do things such as set RAM, CPUs, etc.
 
 Extra VBoxManage commands are defined in the template in the `vboxmanage`
-section. An example is shown below that sets the memory and number of CPUs
-within the virtual machine:
+section. An example is shown below that sets the VRAM within the virtual machine:
 
 ``` json
 {
   "vboxmanage": [
-    ["modifyvm", "{{.Name}}", "--memory", "1024"],
-    ["modifyvm", "{{.Name}}", "--cpus", "2"]
+    ["modifyvm", "{{.Name}}", "--vram", "64"]
   ]
 }
 ```
