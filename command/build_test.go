@@ -212,6 +212,7 @@ func cleanup() {
 	os.RemoveAll("fuchsias.txt")
 	os.RemoveAll("lilas.txt")
 	os.RemoveAll("campanules.txt")
+	os.RemoveAll("whale.txt")
 }
 
 func TestBuildCommand_ParseArgs(t *testing.T) {

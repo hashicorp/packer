@@ -20,6 +20,7 @@ jobs:
     <<: *golang
     steps:
       - checkout
+      - setup_remote_docker
       - run: make ci
   check-vendor-vs-mod:
     <<: *golang

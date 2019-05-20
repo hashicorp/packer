@@ -1,0 +1,28 @@
+{
+    "builders": [
+        {
+            "name": "alpine-docker",
+            "type": "docker",
+            "image": "alpine:latest",
+            "commit": true
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "{{template_dir}}/basic.json",
+            "destination": "/tmp/foo.json"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo im an inline script",
+                "apk update"
+            ]
+        },
+        {
+            "type": "shell-local",
+            "inline": [ "echo whale > whale.txt" ]
+        }
+    ]
+}

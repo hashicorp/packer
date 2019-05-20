@@ -13,7 +13,7 @@ import (
 
 // testCoreConfigBuilder creates a packer CoreConfig that has a file builder
 // available. This allows us to test a builder that writes files to disk.
-func testCoreConfigSleepBuilder(t *testing.T) *packer.CoreConfig {
+func testCoreConfigSleepBuilder(*testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		Builder: func(n string) (packer.Builder, error) {
 			switch n {
@@ -61,8 +61,6 @@ func TestBuildSleepTimeout(t *testing.T) {
 	args := []string{
 		filepath.Join(testFixture("timeout"), "template.json"),
 	}
-
-	defer cleanup()
 
 	if code := c.Run(args); code == 0 {
 		fatalCommand(t, c.Meta)
