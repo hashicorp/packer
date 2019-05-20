@@ -1,4 +1,7 @@
 * text=auto
 *.go text eol=lf
 *.sh text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
 common/test-fixtures/root/*	eol=lf
