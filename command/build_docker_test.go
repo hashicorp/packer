@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -48,6 +49,9 @@ func dockerPackerMeta(*testing.T) Meta {
 }
 
 func TestBuildDocker(t *testing.T) {
+	if v := os.Getenv("CIRCLECI"); v == "" {
+		t.Skipf("CIRCLECI '%s'. skipping", v)
+	}
 
 	defer cleanup()
 
