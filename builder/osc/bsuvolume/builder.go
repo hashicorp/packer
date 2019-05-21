@@ -26,7 +26,7 @@ type Config struct {
 	osccommon.AccessConfig `mapstructure:",squash"`
 	osccommon.RunConfig    `mapstructure:",squash"`
 
-	VolumeMappings []BlockDevice `mapstructure:"ebs_volumes"`
+	VolumeMappings []BlockDevice `mapstructure:"bsu_volumes"`
 
 	launchBlockDevices osccommon.BlockDevices
 	ctx                interpolate.Context

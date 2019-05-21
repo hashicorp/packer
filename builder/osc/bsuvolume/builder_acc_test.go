@@ -48,7 +48,7 @@ const testBuilderAccBasic = `
             "vm_type": "t2.micro",
             "source_omi": "ami-65efcc11",
             "ssh_username": "outscale",
-            "ebs_volumes": [
+            "bsu_volumes": [
                 {
                     "volume_type": "gp2",
                     "device_name": "/dev/xvdf",
