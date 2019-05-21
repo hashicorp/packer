@@ -146,8 +146,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
-	if p.config.ChefLicense == "" {
-		p.config.ChefLicense = "accept-silent"
+	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+		if p.config.ChefLicense == "" {
+			p.config.ChefLicense = "accept-silent"
+		}
 	}
 
 	var errs *packer.MultiError
