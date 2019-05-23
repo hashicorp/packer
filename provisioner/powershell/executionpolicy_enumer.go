@@ -7,9 +7,9 @@ import (
 	"fmt"
 )
 
-const _ExecutionPolicyName = "BypassAllSignedDefaultRemoteSignedRestrictedUndefinedUnrestricted"
+const _ExecutionPolicyName = "BypassAllSignedDefaultRemoteSignedRestrictedUndefinedUnrestrictedNone"
 
-var _ExecutionPolicyIndex = [...]uint8{0, 6, 15, 22, 34, 44, 53, 65}
+var _ExecutionPolicyIndex = [...]uint8{0, 6, 15, 22, 34, 44, 53, 65, 69}
 
 func (i ExecutionPolicy) String() string {
 	if i < 0 || i >= ExecutionPolicy(len(_ExecutionPolicyIndex)-1) {
@@ -18,7 +18,7 @@ func (i ExecutionPolicy) String() string {
 	return _ExecutionPolicyName[_ExecutionPolicyIndex[i]:_ExecutionPolicyIndex[i+1]]
 }
 
-var _ExecutionPolicyValues = []ExecutionPolicy{0, 1, 2, 3, 4, 5, 6}
+var _ExecutionPolicyValues = []ExecutionPolicy{0, 1, 2, 3, 4, 5, 6, 7}
 
 var _ExecutionPolicyNameToValueMap = map[string]ExecutionPolicy{
 	_ExecutionPolicyName[0:6]:   0,
@@ -28,6 +28,7 @@ var _ExecutionPolicyNameToValueMap = map[string]ExecutionPolicy{
 	_ExecutionPolicyName[34:44]: 4,
 	_ExecutionPolicyName[44:53]: 5,
 	_ExecutionPolicyName[53:65]: 6,
+	_ExecutionPolicyName[65:69]: 7,
 }
 
 // ExecutionPolicyString retrieves an enum value from the enum constants string name.
