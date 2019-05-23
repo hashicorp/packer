@@ -23,6 +23,14 @@ type DecodeOpts struct {
 	Interpolate        bool
 	InterpolateContext *interpolate.Context
 	InterpolateFilter  *interpolate.RenderFilter
+
+	DecodeHooks []mapstructure.DecodeHookFunc
+}
+
+var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
+	uint8ToStringHook,
+	mapstructure.StringToSliceHookFunc(","),
+	mapstructure.StringToTimeDurationHookFunc(),
 }
 
 // Decode decodes the configuration into the target and optionally
@@ -60,17 +68,18 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		}
 	}
 
+	decodeHookFuncs := DefaultDecodeHookFuncs
+	if len(config.DecodeHooks) != 0 {
+		decodeHookFuncs = config.DecodeHooks
+	}
+
 	// Build our decoder
 	var md mapstructure.Metadata
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Result:           target,
 		Metadata:         &md,
 		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			uint8ToStringHook,
-			mapstructure.StringToSliceHookFunc(","),
-			mapstructure.StringToTimeDurationHookFunc(),
-		),
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(decodeHookFuncs...),
 	})
 	if err != nil {
 		return err

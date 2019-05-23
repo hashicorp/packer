@@ -66,6 +66,8 @@ type Config struct {
 	ElevatedUser     string `mapstructure:"elevated_user"`
 	ElevatedPassword string `mapstructure:"elevated_password"`
 
+	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy"`
+
 	ctx interpolate.Context
 }
 
@@ -84,6 +86,13 @@ type EnvVarsTemplate struct {
 	WinRMPassword string
 }
 
+func (p *Provisioner) defaultExecuteCommand() string {
+	return `powershell -executionpolicy ` + p.config.ExecutionPolicy.String() +
+		` "& { if (Test-Path variable:global:ProgressPreference)` +
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
+		`. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+}
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Create passthrough for winrm password so we can fill it in once we know
 	// it
@@ -100,6 +109,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				"elevated_execute_command",
 			},
 		},
+		DecodeHooks: append(config.DefaultDecodeHookFuncs, StringToExecutionPolicyHook),
 	}, raws...)
 
 	if err != nil {
@@ -115,11 +125,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+		p.config.ExecuteCommand = p.defaultExecuteCommand()
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -271,6 +281,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 		// Close the original file since we copied it
 		f.Close()
+
+		log.Printf("%s returned with exit code %d", p.config.RemotePath, cmd.ExitStatus())
 
 		if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
 			return err
