@@ -102,6 +102,12 @@ The example below is fully functional.
     "elevated_password": "",
     ```
 
+-   `execution_policy` - To run ps scripts on windows packer defaults this to
+    "bypass" and wraps the command to run. Setting this to "none" will prevent
+    wrapping, allowing to see exit codes on docker for windows. Possible values
+    are "bypass", "allsigned", "default", "remotesigned", "restricted",
+    "undefined", "unrestricted", "none".
+
 -   `remote_path` (string) - The path where the PowerShell script will be
     uploaded to within the target build machine. This defaults to
     `C:/Windows/Temp/script-UUID.ps1` where UUID is replaced with a dynamically
