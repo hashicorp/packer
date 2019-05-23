@@ -1,7 +1,6 @@
 package powershell
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -19,15 +18,6 @@ const (
 	ExecutionPolicyUnrestricted
 	ExecutionPolicyNone // not set
 )
-
-func (ep *ExecutionPolicy) Decode(v interface{}) (err error) {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("%#v is not a string", v)
-	}
-	*ep, err = ExecutionPolicyString(str)
-	return err
-}
 
 func StringToExecutionPolicyHook(f reflect.Kind, t reflect.Kind, data interface{}) (interface{}, error) {
 	if f != reflect.String || t != reflect.Int {
