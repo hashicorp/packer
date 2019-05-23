@@ -90,7 +90,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
 		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
 		`. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
-	if p.config.ExecutionPolicy == None {
+	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
 	} else {
 		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)

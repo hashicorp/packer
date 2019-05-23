@@ -10,14 +10,14 @@ import (
 type ExecutionPolicy int
 
 const (
-	Bypass ExecutionPolicy = iota
-	AllSigned
-	Default
-	RemoteSigned
-	Restricted
-	Undefined
-	Unrestricted
-	None // not set
+	ExecutionPolicyBypass ExecutionPolicy = iota
+	ExecutionPolicyAllsigned
+	ExecutionPolicyDefault
+	ExecutionPolicyRemotesigned
+	ExecutionPolicyRestricted
+	ExecutionPolicyUndefined
+	ExecutionPolicyUnrestricted
+	ExecutionPolicyNone // not set
 )
 
 func (ep *ExecutionPolicy) Decode(v interface{}) (err error) {
