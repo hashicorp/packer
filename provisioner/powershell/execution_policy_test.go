@@ -7,7 +7,7 @@ import (
 func TestExecutionPolicy_Decode(t *testing.T) {
 	config := map[string]interface{}{
 		"inline":           []interface{}{"foo", "bar"},
-		"execution_policy": "AllSigned",
+		"execution_policy": "allsigned",
 	}
 	p := new(Provisioner)
 	err := p.Prepare(config)
@@ -15,7 +15,7 @@ func TestExecutionPolicy_Decode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if p.config.ExecutionPolicy != AllSigned {
+	if p.config.ExecutionPolicy != ExecutionPolicyAllsigned {
 		t.Fatalf("Expected AllSigned execution policy; got: %s", p.config.ExecutionPolicy)
 	}
 }
