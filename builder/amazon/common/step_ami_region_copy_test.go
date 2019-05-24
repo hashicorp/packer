@@ -14,10 +14,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func boolPointer(tf bool) *bool {
-	return &tf
-}
-
 // Define a mock struct to be used in unit tests for common aws steps.
 type mockEC2Conn struct {
 	ec2iface.EC2API
@@ -120,7 +116,7 @@ func TestStepAmiRegionCopy_false_encryption(t *testing.T) {
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
-		EncryptBootVolume: boolPointer(false),
+		EncryptBootVolume: aws.Bool(false),
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -145,7 +141,7 @@ func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
-		EncryptBootVolume: boolPointer(true),
+		EncryptBootVolume: aws.Bool(true),
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}

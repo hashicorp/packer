@@ -124,6 +124,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
 			SpotTags:                          b.config.SpotTags,
 			Tags:                              b.config.RunTags,
+			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
