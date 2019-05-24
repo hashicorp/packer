@@ -43,6 +43,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	ChefEnvironment            string   `mapstructure:"chef_environment"`
+	ChefLicense                string   `mapstructure:"chef_license"`
 	ConfigTemplate             string   `mapstructure:"config_template"`
 	CookbookPaths              []string `mapstructure:"cookbook_paths"`
 	RolesPath                  string   `mapstructure:"roles_path"`
@@ -76,6 +77,7 @@ type ConfigTemplate struct {
 	RolesPath                  string
 	EnvironmentsPath           string
 	ChefEnvironment            string
+	ChefLicense                string
 
 	// Templates don't support boolean statements until Go 1.2. In the
 	// mean time, we do this.
@@ -142,6 +144,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
+	}
+
+	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+		if p.config.ChefLicense == "" {
+			p.config.ChefLicense = "accept-silent"
+		}
 	}
 
 	var errs *packer.MultiError
@@ -283,7 +291,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 	}
 
-	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath, encryptedDataBagSecretPath, environmentsPath, p.config.ChefEnvironment)
+	configPath, err := p.createConfig(ui, comm, cookbookPaths, rolesPath, dataBagsPath, encryptedDataBagSecretPath, environmentsPath, p.config.ChefEnvironment, p.config.ChefLicense)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -324,7 +332,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst str
 	return comm.Upload(dst, f, nil)
 }
 
-func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string) (string, error) {
+func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string, chefLicense string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
@@ -365,6 +373,7 @@ func (p *Provisioner) createConfig(ui packer.Ui, comm packer.Communicator, local
 		HasEncryptedDataBagSecretPath: encryptedDataBagSecretPath != "",
 		HasEnvironmentsPath:           environmentsPath != "",
 		ChefEnvironment:               chefEnvironment,
+		ChefLicense:                   chefLicense,
 	}
 	configString, err := interpolate.Render(tpl, &p.config.ctx)
 	if err != nil {
@@ -569,6 +578,7 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 }
 
 var DefaultConfigTemplate = `
+chef_license 		"{{.ChefLicense}}"
 cookbook_path 	[{{.CookbookPaths}}]
 {{if .HasRolesPath}}
 role_path		"{{.RolesPath}}"

@@ -35,6 +35,59 @@ func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
 		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
 	}
 }
+func TestProvisionerPrepare_chefLicense(t *testing.T) {
+	var p Provisioner
+
+	// Test not set
+	config := testConfig()
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatal("should error")
+	}
+
+	if p.config.ChefLicense != "accept-silent" {
+		t.Fatalf("unexpected: %#v", p.config.ChefLicense)
+	}
+
+	// Test set
+	config = testConfig()
+	config["chef_license"] = "accept"
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefLicense != "accept" {
+		t.Fatalf("unexpected: %#v", p.config.ChefLicense)
+	}
+
+	// Test set skipInstall true
+	config = testConfig()
+	config["skip_install"] = true
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefLicense != "" {
+		t.Fatalf("unexpected: %#v", "empty string")
+	}
+
+	// Test set installCommand true
+	config = testConfig()
+	config["install_command"] = "install chef"
+	p = Provisioner{}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.ChefLicense != "" {
+		t.Fatalf("unexpected: %#v", "empty string")
+	}
+}
 
 func TestProvisionerPrepare_configTemplate(t *testing.T) {
 	var err error

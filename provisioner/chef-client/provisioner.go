@@ -50,6 +50,7 @@ type Config struct {
 	Json map[string]interface{}
 
 	ChefEnvironment            string   `mapstructure:"chef_environment"`
+	ChefLicense                string   `mapstructure:"chef_license"`
 	ClientKey                  string   `mapstructure:"client_key"`
 	ConfigTemplate             string   `mapstructure:"config_template"`
 	ElevatedUser               string   `mapstructure:"elevated_user"`
@@ -87,6 +88,7 @@ type Provisioner struct {
 
 type ConfigTemplate struct {
 	ChefEnvironment            string
+	ChefLicense                string
 	ClientKey                  string
 	EncryptedDataBagSecretPath string
 	NodeName                   string
@@ -194,6 +196,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("server_url must be set"))
 	}
 
+	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+		if p.config.ChefLicense == "" {
+			p.config.ChefLicense = "accept-silent"
+		}
+	}
+
 	if p.config.EncryptedDataBagSecretPath != "" {
 		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
 
@@ -283,6 +291,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		nodeName,
 		serverUrl,
 		p.config.ClientKey,
+		p.config.ChefLicense,
 		encryptedDataBagSecretPath,
 		remoteValidationKeyPath,
 		p.config.ValidationClientName,
@@ -355,6 +364,7 @@ func (p *Provisioner) createConfig(
 	nodeName string,
 	serverUrl string,
 	clientKey string,
+	chefLicense string,
 	encryptedDataBagSecretPath,
 	remoteKeyPath string,
 	validationClientName string,
@@ -388,6 +398,7 @@ func (p *Provisioner) createConfig(
 		NodeName:                   nodeName,
 		ServerUrl:                  serverUrl,
 		ClientKey:                  clientKey,
+		ChefLicense:                chefLicense,
 		ValidationKeyPath:          remoteKeyPath,
 		ValidationClientName:       validationClientName,
 		ChefEnvironment:            chefEnvironment,
@@ -730,6 +741,7 @@ log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
 client_key       "{{.ClientKey}}"
+chef_license     "{{.ChefLicense}}"
 {{if ne .EncryptedDataBagSecretPath ""}}
 encrypted_data_bag_secret "{{.EncryptedDataBagSecretPath}}"
 {{end}}
