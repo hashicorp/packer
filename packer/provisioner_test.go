@@ -138,9 +138,6 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 				if timeSinceStartTime < waitTime {
 					return fmt.Errorf("Spent not enough time waiting: %s", timeSinceStartTime)
 				}
-				if timeSinceStartTime > waitTime+10*time.Millisecond {
-					return fmt.Errorf("Spent too much time waiting: %s", timeSinceStartTime)
-				}
 				return nil
 			},
 		},
