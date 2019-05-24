@@ -893,9 +893,9 @@ virtual switch with an `External` connection type.
     "cpus": "2",
     "memory": "1024",
     "disk_size": "21440",
-    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
+    "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.6-server-amd64.iso",
     "iso_checksum_type": "sha1",
-    "iso_checksum": "DE5EE8665048F009577763EFBF4A6F0558833E59"
+    "iso_checksum": "056b7c15efc15bbbf40bf1a9ff1a3531fcbf70a2"
   },
   "builders": [
     {
@@ -927,7 +927,7 @@ virtual switch with an `External` connection type.
       ],
       "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
       "memory": "{{user `memory`}}",
-      "cpus": "{{user `cpu`}}",
+      "cpus": "{{user `cpus`}}",
       "generation": 2,
       "enable_secure_boot": false
     }
