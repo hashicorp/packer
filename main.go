@@ -25,6 +25,7 @@ import (
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
+	"github.com/thisguycodes/tcxpgrp"
 )
 
 func main() {
@@ -192,7 +193,9 @@ func wrappedMain() int {
 		}
 		ui = basicUi
 		if !inPlugin {
-			if TTY, err := openTTY(); err != nil {
+			if !tcxpgrp.IsForeground() {
+				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+			} else if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			} else {
 				basicUi.TTY = TTY
