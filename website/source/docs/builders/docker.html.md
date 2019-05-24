@@ -232,8 +232,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `container_dir` (string) - The directory inside container to mount temp
     directory from host server for work [file
-    provisioner](/docs/provisioners/file.html). By default this is set to
-    `/packer-files`.
+    provisioner](/docs/provisioners/file.html). This defaults to
+    `c:/packer-files` on windows and `/packer-files` on other systems.
 
 -   `fix_upload_owner` (boolean) - If true, files uploaded to the container
     will be owned by the user the container is running as. If false, the owner
