@@ -44,11 +44,11 @@ configuration is actually required.
 -   `chef_environment` (string) - The name of the chef\_environment sent to the
     Chef server. By default this is empty and will not use an environment.
 
--   `chef_license` (string) - As of Chef 15 chef requires a license be accepted
-    By default the chef_license with a value of accept-silent is set but possble
-    values are accept, accept-silent and accept-no-persist see 
-    [Accepting the Chef License](https://docs.chef.io/chef_license_accept.html)
-    for details
+-   `chef_license` (string) - As of Chef v15, Chef requires users to accept a
+    license. Defaults to `accept-silent` when `skip_install` is false and
+    `install_command` is unset. Possible values are `accept`,
+    `accept-silent` and `accept-no-persist`. For details see [Accepting the
+    Chef License](https://docs.chef.io/chef_license_accept.html).
 
 -   `config_template` (string) - Path to a template that will be used for the
     Chef configuration file. By default Packer only sets configuration it needs
