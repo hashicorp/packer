@@ -400,6 +400,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346 h1:a014AaXz7AISMePv8xKRffUZZkr5z2XmSDf41gRV3+A=
 github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
+github.com/thisguycodes/tcxpgrp v1.0.3-0.20190524210108-072b8d13cd0e h1:74CygOPpttpGQhDOMunZkvG0YXXU9N/O6kTeZXLRnd4=
+github.com/thisguycodes/tcxpgrp v1.0.3-0.20190524210108-072b8d13cd0e/go.mod h1:d1vbDX+F0kzNx0LQ/616O51qeKZViJmsWTPbH8pgcXU=
 github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1 h1:U6ufy3mLDgg9RYupntOvAF7xCmNNquyKaYaaVHo1Nnk=
 github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
 github.com/ulikunitz/xz v0.5.5 h1:pFrO0lVpTBXLpYw+pnLj6TbvHuyjXMfjGeCwSqCVwok=
