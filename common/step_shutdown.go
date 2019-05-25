@@ -54,7 +54,7 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
-		err := comm.Start(cmd)
+		err := comm.Start(ctx, cmd)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Failed to send shutdown command: %s", err))
 			return multistep.ActionHalt

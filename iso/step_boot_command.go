@@ -27,7 +27,7 @@ type BootConfig struct {
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
-	HTTPPort uint
+	HTTPPort int
 	Name     string
 }
 
@@ -112,7 +112,7 @@ WAITLOOP:
 		}
 	}
 
-	port := state.Get("http_port").(uint)
+	port := state.Get("http_port").(int)
 	if port > 0 {
 		ip, err := getHostIP(s.Config.HTTPIP)
 		if err != nil {
