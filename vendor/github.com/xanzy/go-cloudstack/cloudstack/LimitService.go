@@ -63,6 +63,8 @@ type GetApiLimitResponse struct {
 	ApiAllowed  int    `json:"apiAllowed"`
 	ApiIssued   int    `json:"apiIssued"`
 	ExpireAfter int64  `json:"expireAfter"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 }
 
 type ListResourceLimitsParams struct {
@@ -236,6 +238,8 @@ type ResourceLimit struct {
 	Account          string `json:"account"`
 	Domain           string `json:"domain"`
 	Domainid         string `json:"domainid"`
+	JobID            string `json:"jobid"`
+	Jobstatus        int    `json:"jobstatus"`
 	Max              int64  `json:"max"`
 	Project          string `json:"project"`
 	Projectid        string `json:"projectid"`
@@ -295,6 +299,8 @@ type ResetApiLimitResponse struct {
 	ApiAllowed  int    `json:"apiAllowed"`
 	ApiIssued   int    `json:"apiIssued"`
 	ExpireAfter int64  `json:"expireAfter"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 }
 
 type UpdateResourceCountParams struct {
@@ -382,6 +388,8 @@ type UpdateResourceCountResponse struct {
 	Account          string `json:"account"`
 	Domain           string `json:"domain"`
 	Domainid         string `json:"domainid"`
+	JobID            string `json:"jobid"`
+	Jobstatus        int    `json:"jobstatus"`
 	Project          string `json:"project"`
 	Projectid        string `json:"projectid"`
 	Resourcecount    int64  `json:"resourcecount"`
@@ -486,6 +494,8 @@ type UpdateResourceLimitResponse struct {
 	Account          string `json:"account"`
 	Domain           string `json:"domain"`
 	Domainid         string `json:"domainid"`
+	JobID            string `json:"jobid"`
+	Jobstatus        int    `json:"jobstatus"`
 	Max              int64  `json:"max"`
 	Project          string `json:"project"`
 	Projectid        string `json:"projectid"`

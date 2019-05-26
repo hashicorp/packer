@@ -142,7 +142,6 @@ func (s *VirtualMachineService) AddNicToVirtualMachine(p *AddNicToVirtualMachine
 }
 
 type AddNicToVirtualMachineResponse struct {
-	JobID                 string                                        `json:"jobid"`
 	Account               string                                        `json:"account"`
 	Affinitygroup         []AddNicToVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                           `json:"cpunumber"`
@@ -174,6 +173,8 @@ type AddNicToVirtualMachineResponse struct {
 	Isodisplaytext        string                                        `json:"isodisplaytext"`
 	Isoid                 string                                        `json:"isoid"`
 	Isoname               string                                        `json:"isoname"`
+	JobID                 string                                        `json:"jobid"`
+	Jobstatus             int                                           `json:"jobstatus"`
 	Keypair               string                                        `json:"keypair"`
 	Memory                int                                           `json:"memory"`
 	Memoryintfreekbs      int64                                         `json:"memoryintfreekbs"`
@@ -183,7 +184,7 @@ type AddNicToVirtualMachineResponse struct {
 	Networkkbsread        int64                                         `json:"networkkbsread"`
 	Networkkbswrite       int64                                         `json:"networkkbswrite"`
 	Nic                   []Nic                                         `json:"nic"`
-	Ostypeid              int64                                         `json:"ostypeid"`
+	Ostypeid              string                                        `json:"ostypeid"`
 	Password              string                                        `json:"password"`
 	Passwordenabled       bool                                          `json:"passwordenabled"`
 	Project               string                                        `json:"project"`
@@ -197,6 +198,7 @@ type AddNicToVirtualMachineResponse struct {
 	Serviceofferingname   string                                        `json:"serviceofferingname"`
 	Servicestate          string                                        `json:"servicestate"`
 	State                 string                                        `json:"state"`
+	Tags                  []Tags                                        `json:"tags"`
 	Templatedisplaytext   string                                        `json:"templatedisplaytext"`
 	Templateid            string                                        `json:"templateid"`
 	Templatename          string                                        `json:"templatename"`
@@ -247,6 +249,33 @@ type AddNicToVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *AddNicToVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias AddNicToVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type AssignVirtualMachineParams struct {
@@ -385,6 +414,8 @@ type AssignVirtualMachineResponse struct {
 	Isodisplaytext        string                                      `json:"isodisplaytext"`
 	Isoid                 string                                      `json:"isoid"`
 	Isoname               string                                      `json:"isoname"`
+	JobID                 string                                      `json:"jobid"`
+	Jobstatus             int                                         `json:"jobstatus"`
 	Keypair               string                                      `json:"keypair"`
 	Memory                int                                         `json:"memory"`
 	Memoryintfreekbs      int64                                       `json:"memoryintfreekbs"`
@@ -394,7 +425,7 @@ type AssignVirtualMachineResponse struct {
 	Networkkbsread        int64                                       `json:"networkkbsread"`
 	Networkkbswrite       int64                                       `json:"networkkbswrite"`
 	Nic                   []Nic                                       `json:"nic"`
-	Ostypeid              int64                                       `json:"ostypeid"`
+	Ostypeid              string                                      `json:"ostypeid"`
 	Password              string                                      `json:"password"`
 	Passwordenabled       bool                                        `json:"passwordenabled"`
 	Project               string                                      `json:"project"`
@@ -408,6 +439,7 @@ type AssignVirtualMachineResponse struct {
 	Serviceofferingname   string                                      `json:"serviceofferingname"`
 	Servicestate          string                                      `json:"servicestate"`
 	State                 string                                      `json:"state"`
+	Tags                  []Tags                                      `json:"tags"`
 	Templatedisplaytext   string                                      `json:"templatedisplaytext"`
 	Templateid            string                                      `json:"templateid"`
 	Templatename          string                                      `json:"templatename"`
@@ -458,6 +490,33 @@ type AssignVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *AssignVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias AssignVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ChangeServiceForVirtualMachineParams struct {
@@ -566,6 +625,8 @@ type ChangeServiceForVirtualMachineResponse struct {
 	Isodisplaytext        string                                                `json:"isodisplaytext"`
 	Isoid                 string                                                `json:"isoid"`
 	Isoname               string                                                `json:"isoname"`
+	JobID                 string                                                `json:"jobid"`
+	Jobstatus             int                                                   `json:"jobstatus"`
 	Keypair               string                                                `json:"keypair"`
 	Memory                int                                                   `json:"memory"`
 	Memoryintfreekbs      int64                                                 `json:"memoryintfreekbs"`
@@ -575,7 +636,7 @@ type ChangeServiceForVirtualMachineResponse struct {
 	Networkkbsread        int64                                                 `json:"networkkbsread"`
 	Networkkbswrite       int64                                                 `json:"networkkbswrite"`
 	Nic                   []Nic                                                 `json:"nic"`
-	Ostypeid              int64                                                 `json:"ostypeid"`
+	Ostypeid              string                                                `json:"ostypeid"`
 	Password              string                                                `json:"password"`
 	Passwordenabled       bool                                                  `json:"passwordenabled"`
 	Project               string                                                `json:"project"`
@@ -589,6 +650,7 @@ type ChangeServiceForVirtualMachineResponse struct {
 	Serviceofferingname   string                                                `json:"serviceofferingname"`
 	Servicestate          string                                                `json:"servicestate"`
 	State                 string                                                `json:"state"`
+	Tags                  []Tags                                                `json:"tags"`
 	Templatedisplaytext   string                                                `json:"templatedisplaytext"`
 	Templateid            string                                                `json:"templateid"`
 	Templatename          string                                                `json:"templatename"`
@@ -639,6 +701,33 @@ type ChangeServiceForVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *ChangeServiceForVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias ChangeServiceForVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type CleanVMReservationsParams struct {
@@ -692,8 +781,9 @@ func (s *VirtualMachineService) CleanVMReservations(p *CleanVMReservationsParams
 }
 
 type CleanVMReservationsResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -758,6 +848,9 @@ func (p *DeployVirtualMachineParams) toURLValues() url.Values {
 	}
 	if v, found := p.p["domainid"]; found {
 		u.Set("domainid", v.(string))
+	}
+	if v, found := p.p["extraconfig"]; found {
+		u.Set("extraconfig", v.(string))
 	}
 	if v, found := p.p["group"]; found {
 		u.Set("group", v.(string))
@@ -929,6 +1022,14 @@ func (p *DeployVirtualMachineParams) SetDomainid(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["domainid"] = v
+	return
+}
+
+func (p *DeployVirtualMachineParams) SetExtraconfig(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["extraconfig"] = v
 	return
 }
 
@@ -1147,7 +1248,6 @@ func (s *VirtualMachineService) DeployVirtualMachine(p *DeployVirtualMachinePara
 }
 
 type DeployVirtualMachineResponse struct {
-	JobID                 string                                      `json:"jobid"`
 	Account               string                                      `json:"account"`
 	Affinitygroup         []DeployVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                         `json:"cpunumber"`
@@ -1179,6 +1279,8 @@ type DeployVirtualMachineResponse struct {
 	Isodisplaytext        string                                      `json:"isodisplaytext"`
 	Isoid                 string                                      `json:"isoid"`
 	Isoname               string                                      `json:"isoname"`
+	JobID                 string                                      `json:"jobid"`
+	Jobstatus             int                                         `json:"jobstatus"`
 	Keypair               string                                      `json:"keypair"`
 	Memory                int                                         `json:"memory"`
 	Memoryintfreekbs      int64                                       `json:"memoryintfreekbs"`
@@ -1188,7 +1290,7 @@ type DeployVirtualMachineResponse struct {
 	Networkkbsread        int64                                       `json:"networkkbsread"`
 	Networkkbswrite       int64                                       `json:"networkkbswrite"`
 	Nic                   []Nic                                       `json:"nic"`
-	Ostypeid              int64                                       `json:"ostypeid"`
+	Ostypeid              string                                      `json:"ostypeid"`
 	Password              string                                      `json:"password"`
 	Passwordenabled       bool                                        `json:"passwordenabled"`
 	Project               string                                      `json:"project"`
@@ -1202,6 +1304,7 @@ type DeployVirtualMachineResponse struct {
 	Serviceofferingname   string                                      `json:"serviceofferingname"`
 	Servicestate          string                                      `json:"servicestate"`
 	State                 string                                      `json:"state"`
+	Tags                  []Tags                                      `json:"tags"`
 	Templatedisplaytext   string                                      `json:"templatedisplaytext"`
 	Templateid            string                                      `json:"templateid"`
 	Templatename          string                                      `json:"templatename"`
@@ -1254,6 +1357,33 @@ type DeployVirtualMachineResponseAffinitygroup struct {
 	VirtualmachineIds []string `json:"virtualmachineIds"`
 }
 
+func (r *DeployVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeployVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
 type DestroyVirtualMachineParams struct {
 	p map[string]interface{}
 }
@@ -1269,6 +1399,10 @@ func (p *DestroyVirtualMachineParams) toURLValues() url.Values {
 	}
 	if v, found := p.p["id"]; found {
 		u.Set("id", v.(string))
+	}
+	if v, found := p.p["volumeids"]; found {
+		vv := strings.Join(v.([]string), ",")
+		u.Set("volumeids", vv)
 	}
 	return u
 }
@@ -1286,6 +1420,14 @@ func (p *DestroyVirtualMachineParams) SetId(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["id"] = v
+	return
+}
+
+func (p *DestroyVirtualMachineParams) SetVolumeids(v []string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["volumeids"] = v
 	return
 }
 
@@ -1334,7 +1476,6 @@ func (s *VirtualMachineService) DestroyVirtualMachine(p *DestroyVirtualMachinePa
 }
 
 type DestroyVirtualMachineResponse struct {
-	JobID                 string                                       `json:"jobid"`
 	Account               string                                       `json:"account"`
 	Affinitygroup         []DestroyVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                          `json:"cpunumber"`
@@ -1366,6 +1507,8 @@ type DestroyVirtualMachineResponse struct {
 	Isodisplaytext        string                                       `json:"isodisplaytext"`
 	Isoid                 string                                       `json:"isoid"`
 	Isoname               string                                       `json:"isoname"`
+	JobID                 string                                       `json:"jobid"`
+	Jobstatus             int                                          `json:"jobstatus"`
 	Keypair               string                                       `json:"keypair"`
 	Memory                int                                          `json:"memory"`
 	Memoryintfreekbs      int64                                        `json:"memoryintfreekbs"`
@@ -1375,7 +1518,7 @@ type DestroyVirtualMachineResponse struct {
 	Networkkbsread        int64                                        `json:"networkkbsread"`
 	Networkkbswrite       int64                                        `json:"networkkbswrite"`
 	Nic                   []Nic                                        `json:"nic"`
-	Ostypeid              int64                                        `json:"ostypeid"`
+	Ostypeid              string                                       `json:"ostypeid"`
 	Password              string                                       `json:"password"`
 	Passwordenabled       bool                                         `json:"passwordenabled"`
 	Project               string                                       `json:"project"`
@@ -1389,6 +1532,7 @@ type DestroyVirtualMachineResponse struct {
 	Serviceofferingname   string                                       `json:"serviceofferingname"`
 	Servicestate          string                                       `json:"servicestate"`
 	State                 string                                       `json:"state"`
+	Tags                  []Tags                                       `json:"tags"`
 	Templatedisplaytext   string                                       `json:"templatedisplaytext"`
 	Templateid            string                                       `json:"templateid"`
 	Templatename          string                                       `json:"templatename"`
@@ -1439,6 +1583,33 @@ type DestroyVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *DestroyVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DestroyVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ExpungeVirtualMachineParams struct {
@@ -1504,8 +1675,9 @@ func (s *VirtualMachineService) ExpungeVirtualMachine(p *ExpungeVirtualMachinePa
 }
 
 type ExpungeVirtualMachineResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1558,6 +1730,8 @@ func (s *VirtualMachineService) GetVMPassword(p *GetVMPasswordParams) (*GetVMPas
 
 type GetVMPasswordResponse struct {
 	Encryptedpassword string `json:"encryptedpassword"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 }
 
 type ListVirtualMachinesParams struct {
@@ -2058,6 +2232,8 @@ type VirtualMachine struct {
 	Isodisplaytext        string                        `json:"isodisplaytext"`
 	Isoid                 string                        `json:"isoid"`
 	Isoname               string                        `json:"isoname"`
+	JobID                 string                        `json:"jobid"`
+	Jobstatus             int                           `json:"jobstatus"`
 	Keypair               string                        `json:"keypair"`
 	Memory                int                           `json:"memory"`
 	Memoryintfreekbs      int64                         `json:"memoryintfreekbs"`
@@ -2067,7 +2243,7 @@ type VirtualMachine struct {
 	Networkkbsread        int64                         `json:"networkkbsread"`
 	Networkkbswrite       int64                         `json:"networkkbswrite"`
 	Nic                   []Nic                         `json:"nic"`
-	Ostypeid              int64                         `json:"ostypeid"`
+	Ostypeid              string                        `json:"ostypeid"`
 	Password              string                        `json:"password"`
 	Passwordenabled       bool                          `json:"passwordenabled"`
 	Project               string                        `json:"project"`
@@ -2081,6 +2257,7 @@ type VirtualMachine struct {
 	Serviceofferingname   string                        `json:"serviceofferingname"`
 	Servicestate          string                        `json:"servicestate"`
 	State                 string                        `json:"state"`
+	Tags                  []Tags                        `json:"tags"`
 	Templatedisplaytext   string                        `json:"templatedisplaytext"`
 	Templateid            string                        `json:"templateid"`
 	Templatename          string                        `json:"templatename"`
@@ -2131,6 +2308,33 @@ type VirtualMachineAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *VirtualMachine) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias VirtualMachine
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type MigrateVirtualMachineParams struct {
@@ -2223,7 +2427,6 @@ func (s *VirtualMachineService) MigrateVirtualMachine(p *MigrateVirtualMachinePa
 }
 
 type MigrateVirtualMachineResponse struct {
-	JobID                 string                                       `json:"jobid"`
 	Account               string                                       `json:"account"`
 	Affinitygroup         []MigrateVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                          `json:"cpunumber"`
@@ -2255,6 +2458,8 @@ type MigrateVirtualMachineResponse struct {
 	Isodisplaytext        string                                       `json:"isodisplaytext"`
 	Isoid                 string                                       `json:"isoid"`
 	Isoname               string                                       `json:"isoname"`
+	JobID                 string                                       `json:"jobid"`
+	Jobstatus             int                                          `json:"jobstatus"`
 	Keypair               string                                       `json:"keypair"`
 	Memory                int                                          `json:"memory"`
 	Memoryintfreekbs      int64                                        `json:"memoryintfreekbs"`
@@ -2264,7 +2469,7 @@ type MigrateVirtualMachineResponse struct {
 	Networkkbsread        int64                                        `json:"networkkbsread"`
 	Networkkbswrite       int64                                        `json:"networkkbswrite"`
 	Nic                   []Nic                                        `json:"nic"`
-	Ostypeid              int64                                        `json:"ostypeid"`
+	Ostypeid              string                                       `json:"ostypeid"`
 	Password              string                                       `json:"password"`
 	Passwordenabled       bool                                         `json:"passwordenabled"`
 	Project               string                                       `json:"project"`
@@ -2278,6 +2483,7 @@ type MigrateVirtualMachineResponse struct {
 	Serviceofferingname   string                                       `json:"serviceofferingname"`
 	Servicestate          string                                       `json:"servicestate"`
 	State                 string                                       `json:"state"`
+	Tags                  []Tags                                       `json:"tags"`
 	Templatedisplaytext   string                                       `json:"templatedisplaytext"`
 	Templateid            string                                       `json:"templateid"`
 	Templatename          string                                       `json:"templatename"`
@@ -2328,6 +2534,33 @@ type MigrateVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *MigrateVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias MigrateVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type MigrateVirtualMachineWithVolumeParams struct {
@@ -2426,7 +2659,6 @@ func (s *VirtualMachineService) MigrateVirtualMachineWithVolume(p *MigrateVirtua
 }
 
 type MigrateVirtualMachineWithVolumeResponse struct {
-	JobID                 string                                                 `json:"jobid"`
 	Account               string                                                 `json:"account"`
 	Affinitygroup         []MigrateVirtualMachineWithVolumeResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                                    `json:"cpunumber"`
@@ -2458,6 +2690,8 @@ type MigrateVirtualMachineWithVolumeResponse struct {
 	Isodisplaytext        string                                                 `json:"isodisplaytext"`
 	Isoid                 string                                                 `json:"isoid"`
 	Isoname               string                                                 `json:"isoname"`
+	JobID                 string                                                 `json:"jobid"`
+	Jobstatus             int                                                    `json:"jobstatus"`
 	Keypair               string                                                 `json:"keypair"`
 	Memory                int                                                    `json:"memory"`
 	Memoryintfreekbs      int64                                                  `json:"memoryintfreekbs"`
@@ -2467,7 +2701,7 @@ type MigrateVirtualMachineWithVolumeResponse struct {
 	Networkkbsread        int64                                                  `json:"networkkbsread"`
 	Networkkbswrite       int64                                                  `json:"networkkbswrite"`
 	Nic                   []Nic                                                  `json:"nic"`
-	Ostypeid              int64                                                  `json:"ostypeid"`
+	Ostypeid              string                                                 `json:"ostypeid"`
 	Password              string                                                 `json:"password"`
 	Passwordenabled       bool                                                   `json:"passwordenabled"`
 	Project               string                                                 `json:"project"`
@@ -2481,6 +2715,7 @@ type MigrateVirtualMachineWithVolumeResponse struct {
 	Serviceofferingname   string                                                 `json:"serviceofferingname"`
 	Servicestate          string                                                 `json:"servicestate"`
 	State                 string                                                 `json:"state"`
+	Tags                  []Tags                                                 `json:"tags"`
 	Templatedisplaytext   string                                                 `json:"templatedisplaytext"`
 	Templateid            string                                                 `json:"templateid"`
 	Templatename          string                                                 `json:"templatename"`
@@ -2531,6 +2766,33 @@ type MigrateVirtualMachineWithVolumeResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *MigrateVirtualMachineWithVolumeResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias MigrateVirtualMachineWithVolumeResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RebootVirtualMachineParams struct {
@@ -2601,7 +2863,6 @@ func (s *VirtualMachineService) RebootVirtualMachine(p *RebootVirtualMachinePara
 }
 
 type RebootVirtualMachineResponse struct {
-	JobID                 string                                      `json:"jobid"`
 	Account               string                                      `json:"account"`
 	Affinitygroup         []RebootVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                         `json:"cpunumber"`
@@ -2633,6 +2894,8 @@ type RebootVirtualMachineResponse struct {
 	Isodisplaytext        string                                      `json:"isodisplaytext"`
 	Isoid                 string                                      `json:"isoid"`
 	Isoname               string                                      `json:"isoname"`
+	JobID                 string                                      `json:"jobid"`
+	Jobstatus             int                                         `json:"jobstatus"`
 	Keypair               string                                      `json:"keypair"`
 	Memory                int                                         `json:"memory"`
 	Memoryintfreekbs      int64                                       `json:"memoryintfreekbs"`
@@ -2642,7 +2905,7 @@ type RebootVirtualMachineResponse struct {
 	Networkkbsread        int64                                       `json:"networkkbsread"`
 	Networkkbswrite       int64                                       `json:"networkkbswrite"`
 	Nic                   []Nic                                       `json:"nic"`
-	Ostypeid              int64                                       `json:"ostypeid"`
+	Ostypeid              string                                      `json:"ostypeid"`
 	Password              string                                      `json:"password"`
 	Passwordenabled       bool                                        `json:"passwordenabled"`
 	Project               string                                      `json:"project"`
@@ -2656,6 +2919,7 @@ type RebootVirtualMachineResponse struct {
 	Serviceofferingname   string                                      `json:"serviceofferingname"`
 	Servicestate          string                                      `json:"servicestate"`
 	State                 string                                      `json:"state"`
+	Tags                  []Tags                                      `json:"tags"`
 	Templatedisplaytext   string                                      `json:"templatedisplaytext"`
 	Templateid            string                                      `json:"templateid"`
 	Templatename          string                                      `json:"templatename"`
@@ -2706,6 +2970,33 @@ type RebootVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *RebootVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RebootVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RecoverVirtualMachineParams struct {
@@ -2787,6 +3078,8 @@ type RecoverVirtualMachineResponse struct {
 	Isodisplaytext        string                                       `json:"isodisplaytext"`
 	Isoid                 string                                       `json:"isoid"`
 	Isoname               string                                       `json:"isoname"`
+	JobID                 string                                       `json:"jobid"`
+	Jobstatus             int                                          `json:"jobstatus"`
 	Keypair               string                                       `json:"keypair"`
 	Memory                int                                          `json:"memory"`
 	Memoryintfreekbs      int64                                        `json:"memoryintfreekbs"`
@@ -2796,7 +3089,7 @@ type RecoverVirtualMachineResponse struct {
 	Networkkbsread        int64                                        `json:"networkkbsread"`
 	Networkkbswrite       int64                                        `json:"networkkbswrite"`
 	Nic                   []Nic                                        `json:"nic"`
-	Ostypeid              int64                                        `json:"ostypeid"`
+	Ostypeid              string                                       `json:"ostypeid"`
 	Password              string                                       `json:"password"`
 	Passwordenabled       bool                                         `json:"passwordenabled"`
 	Project               string                                       `json:"project"`
@@ -2810,6 +3103,7 @@ type RecoverVirtualMachineResponse struct {
 	Serviceofferingname   string                                       `json:"serviceofferingname"`
 	Servicestate          string                                       `json:"servicestate"`
 	State                 string                                       `json:"state"`
+	Tags                  []Tags                                       `json:"tags"`
 	Templatedisplaytext   string                                       `json:"templatedisplaytext"`
 	Templateid            string                                       `json:"templateid"`
 	Templatename          string                                       `json:"templatename"`
@@ -2860,6 +3154,33 @@ type RecoverVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *RecoverVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RecoverVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RemoveNicFromVirtualMachineParams struct {
@@ -2942,7 +3263,6 @@ func (s *VirtualMachineService) RemoveNicFromVirtualMachine(p *RemoveNicFromVirt
 }
 
 type RemoveNicFromVirtualMachineResponse struct {
-	JobID                 string                                             `json:"jobid"`
 	Account               string                                             `json:"account"`
 	Affinitygroup         []RemoveNicFromVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                                `json:"cpunumber"`
@@ -2974,6 +3294,8 @@ type RemoveNicFromVirtualMachineResponse struct {
 	Isodisplaytext        string                                             `json:"isodisplaytext"`
 	Isoid                 string                                             `json:"isoid"`
 	Isoname               string                                             `json:"isoname"`
+	JobID                 string                                             `json:"jobid"`
+	Jobstatus             int                                                `json:"jobstatus"`
 	Keypair               string                                             `json:"keypair"`
 	Memory                int                                                `json:"memory"`
 	Memoryintfreekbs      int64                                              `json:"memoryintfreekbs"`
@@ -2983,7 +3305,7 @@ type RemoveNicFromVirtualMachineResponse struct {
 	Networkkbsread        int64                                              `json:"networkkbsread"`
 	Networkkbswrite       int64                                              `json:"networkkbswrite"`
 	Nic                   []Nic                                              `json:"nic"`
-	Ostypeid              int64                                              `json:"ostypeid"`
+	Ostypeid              string                                             `json:"ostypeid"`
 	Password              string                                             `json:"password"`
 	Passwordenabled       bool                                               `json:"passwordenabled"`
 	Project               string                                             `json:"project"`
@@ -2997,6 +3319,7 @@ type RemoveNicFromVirtualMachineResponse struct {
 	Serviceofferingname   string                                             `json:"serviceofferingname"`
 	Servicestate          string                                             `json:"servicestate"`
 	State                 string                                             `json:"state"`
+	Tags                  []Tags                                             `json:"tags"`
 	Templatedisplaytext   string                                             `json:"templatedisplaytext"`
 	Templateid            string                                             `json:"templateid"`
 	Templatename          string                                             `json:"templatename"`
@@ -3047,6 +3370,33 @@ type RemoveNicFromVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *RemoveNicFromVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RemoveNicFromVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ResetPasswordForVirtualMachineParams struct {
@@ -3117,7 +3467,6 @@ func (s *VirtualMachineService) ResetPasswordForVirtualMachine(p *ResetPasswordF
 }
 
 type ResetPasswordForVirtualMachineResponse struct {
-	JobID                 string                                                `json:"jobid"`
 	Account               string                                                `json:"account"`
 	Affinitygroup         []ResetPasswordForVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                                   `json:"cpunumber"`
@@ -3149,6 +3498,8 @@ type ResetPasswordForVirtualMachineResponse struct {
 	Isodisplaytext        string                                                `json:"isodisplaytext"`
 	Isoid                 string                                                `json:"isoid"`
 	Isoname               string                                                `json:"isoname"`
+	JobID                 string                                                `json:"jobid"`
+	Jobstatus             int                                                   `json:"jobstatus"`
 	Keypair               string                                                `json:"keypair"`
 	Memory                int                                                   `json:"memory"`
 	Memoryintfreekbs      int64                                                 `json:"memoryintfreekbs"`
@@ -3158,7 +3509,7 @@ type ResetPasswordForVirtualMachineResponse struct {
 	Networkkbsread        int64                                                 `json:"networkkbsread"`
 	Networkkbswrite       int64                                                 `json:"networkkbswrite"`
 	Nic                   []Nic                                                 `json:"nic"`
-	Ostypeid              int64                                                 `json:"ostypeid"`
+	Ostypeid              string                                                `json:"ostypeid"`
 	Password              string                                                `json:"password"`
 	Passwordenabled       bool                                                  `json:"passwordenabled"`
 	Project               string                                                `json:"project"`
@@ -3172,6 +3523,7 @@ type ResetPasswordForVirtualMachineResponse struct {
 	Serviceofferingname   string                                                `json:"serviceofferingname"`
 	Servicestate          string                                                `json:"servicestate"`
 	State                 string                                                `json:"state"`
+	Tags                  []Tags                                                `json:"tags"`
 	Templatedisplaytext   string                                                `json:"templatedisplaytext"`
 	Templateid            string                                                `json:"templateid"`
 	Templatename          string                                                `json:"templatename"`
@@ -3222,6 +3574,33 @@ type ResetPasswordForVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *ResetPasswordForVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias ResetPasswordForVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RestoreVirtualMachineParams struct {
@@ -3303,7 +3682,6 @@ func (s *VirtualMachineService) RestoreVirtualMachine(p *RestoreVirtualMachinePa
 }
 
 type RestoreVirtualMachineResponse struct {
-	JobID                 string                                       `json:"jobid"`
 	Account               string                                       `json:"account"`
 	Affinitygroup         []RestoreVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                          `json:"cpunumber"`
@@ -3335,6 +3713,8 @@ type RestoreVirtualMachineResponse struct {
 	Isodisplaytext        string                                       `json:"isodisplaytext"`
 	Isoid                 string                                       `json:"isoid"`
 	Isoname               string                                       `json:"isoname"`
+	JobID                 string                                       `json:"jobid"`
+	Jobstatus             int                                          `json:"jobstatus"`
 	Keypair               string                                       `json:"keypair"`
 	Memory                int                                          `json:"memory"`
 	Memoryintfreekbs      int64                                        `json:"memoryintfreekbs"`
@@ -3344,7 +3724,7 @@ type RestoreVirtualMachineResponse struct {
 	Networkkbsread        int64                                        `json:"networkkbsread"`
 	Networkkbswrite       int64                                        `json:"networkkbswrite"`
 	Nic                   []Nic                                        `json:"nic"`
-	Ostypeid              int64                                        `json:"ostypeid"`
+	Ostypeid              string                                       `json:"ostypeid"`
 	Password              string                                       `json:"password"`
 	Passwordenabled       bool                                         `json:"passwordenabled"`
 	Project               string                                       `json:"project"`
@@ -3358,6 +3738,7 @@ type RestoreVirtualMachineResponse struct {
 	Serviceofferingname   string                                       `json:"serviceofferingname"`
 	Servicestate          string                                       `json:"servicestate"`
 	State                 string                                       `json:"state"`
+	Tags                  []Tags                                       `json:"tags"`
 	Templatedisplaytext   string                                       `json:"templatedisplaytext"`
 	Templateid            string                                       `json:"templateid"`
 	Templatename          string                                       `json:"templatename"`
@@ -3408,6 +3789,33 @@ type RestoreVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *RestoreVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RestoreVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ScaleVirtualMachineParams struct {
@@ -3500,8 +3908,9 @@ func (s *VirtualMachineService) ScaleVirtualMachine(p *ScaleVirtualMachineParams
 }
 
 type ScaleVirtualMachineResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -3595,7 +4004,6 @@ func (s *VirtualMachineService) StartVirtualMachine(p *StartVirtualMachineParams
 }
 
 type StartVirtualMachineResponse struct {
-	JobID                 string                                     `json:"jobid"`
 	Account               string                                     `json:"account"`
 	Affinitygroup         []StartVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                        `json:"cpunumber"`
@@ -3627,6 +4035,8 @@ type StartVirtualMachineResponse struct {
 	Isodisplaytext        string                                     `json:"isodisplaytext"`
 	Isoid                 string                                     `json:"isoid"`
 	Isoname               string                                     `json:"isoname"`
+	JobID                 string                                     `json:"jobid"`
+	Jobstatus             int                                        `json:"jobstatus"`
 	Keypair               string                                     `json:"keypair"`
 	Memory                int                                        `json:"memory"`
 	Memoryintfreekbs      int64                                      `json:"memoryintfreekbs"`
@@ -3636,7 +4046,7 @@ type StartVirtualMachineResponse struct {
 	Networkkbsread        int64                                      `json:"networkkbsread"`
 	Networkkbswrite       int64                                      `json:"networkkbswrite"`
 	Nic                   []Nic                                      `json:"nic"`
-	Ostypeid              int64                                      `json:"ostypeid"`
+	Ostypeid              string                                     `json:"ostypeid"`
 	Password              string                                     `json:"password"`
 	Passwordenabled       bool                                       `json:"passwordenabled"`
 	Project               string                                     `json:"project"`
@@ -3650,6 +4060,7 @@ type StartVirtualMachineResponse struct {
 	Serviceofferingname   string                                     `json:"serviceofferingname"`
 	Servicestate          string                                     `json:"servicestate"`
 	State                 string                                     `json:"state"`
+	Tags                  []Tags                                     `json:"tags"`
 	Templatedisplaytext   string                                     `json:"templatedisplaytext"`
 	Templateid            string                                     `json:"templateid"`
 	Templatename          string                                     `json:"templatename"`
@@ -3700,6 +4111,33 @@ type StartVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *StartVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias StartVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type StopVirtualMachineParams struct {
@@ -3782,7 +4220,6 @@ func (s *VirtualMachineService) StopVirtualMachine(p *StopVirtualMachineParams) 
 }
 
 type StopVirtualMachineResponse struct {
-	JobID                 string                                    `json:"jobid"`
 	Account               string                                    `json:"account"`
 	Affinitygroup         []StopVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                       `json:"cpunumber"`
@@ -3814,6 +4251,8 @@ type StopVirtualMachineResponse struct {
 	Isodisplaytext        string                                    `json:"isodisplaytext"`
 	Isoid                 string                                    `json:"isoid"`
 	Isoname               string                                    `json:"isoname"`
+	JobID                 string                                    `json:"jobid"`
+	Jobstatus             int                                       `json:"jobstatus"`
 	Keypair               string                                    `json:"keypair"`
 	Memory                int                                       `json:"memory"`
 	Memoryintfreekbs      int64                                     `json:"memoryintfreekbs"`
@@ -3823,7 +4262,7 @@ type StopVirtualMachineResponse struct {
 	Networkkbsread        int64                                     `json:"networkkbsread"`
 	Networkkbswrite       int64                                     `json:"networkkbswrite"`
 	Nic                   []Nic                                     `json:"nic"`
-	Ostypeid              int64                                     `json:"ostypeid"`
+	Ostypeid              string                                    `json:"ostypeid"`
 	Password              string                                    `json:"password"`
 	Passwordenabled       bool                                      `json:"passwordenabled"`
 	Project               string                                    `json:"project"`
@@ -3837,6 +4276,7 @@ type StopVirtualMachineResponse struct {
 	Serviceofferingname   string                                    `json:"serviceofferingname"`
 	Servicestate          string                                    `json:"servicestate"`
 	State                 string                                    `json:"state"`
+	Tags                  []Tags                                    `json:"tags"`
 	Templatedisplaytext   string                                    `json:"templatedisplaytext"`
 	Templateid            string                                    `json:"templateid"`
 	Templatename          string                                    `json:"templatename"`
@@ -3887,6 +4327,33 @@ type StopVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *StopVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias StopVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type UpdateDefaultNicForVirtualMachineParams struct {
@@ -3969,7 +4436,6 @@ func (s *VirtualMachineService) UpdateDefaultNicForVirtualMachine(p *UpdateDefau
 }
 
 type UpdateDefaultNicForVirtualMachineResponse struct {
-	JobID                 string                                                   `json:"jobid"`
 	Account               string                                                   `json:"account"`
 	Affinitygroup         []UpdateDefaultNicForVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                                      `json:"cpunumber"`
@@ -4001,6 +4467,8 @@ type UpdateDefaultNicForVirtualMachineResponse struct {
 	Isodisplaytext        string                                                   `json:"isodisplaytext"`
 	Isoid                 string                                                   `json:"isoid"`
 	Isoname               string                                                   `json:"isoname"`
+	JobID                 string                                                   `json:"jobid"`
+	Jobstatus             int                                                      `json:"jobstatus"`
 	Keypair               string                                                   `json:"keypair"`
 	Memory                int                                                      `json:"memory"`
 	Memoryintfreekbs      int64                                                    `json:"memoryintfreekbs"`
@@ -4010,7 +4478,7 @@ type UpdateDefaultNicForVirtualMachineResponse struct {
 	Networkkbsread        int64                                                    `json:"networkkbsread"`
 	Networkkbswrite       int64                                                    `json:"networkkbswrite"`
 	Nic                   []Nic                                                    `json:"nic"`
-	Ostypeid              int64                                                    `json:"ostypeid"`
+	Ostypeid              string                                                   `json:"ostypeid"`
 	Password              string                                                   `json:"password"`
 	Passwordenabled       bool                                                     `json:"passwordenabled"`
 	Project               string                                                   `json:"project"`
@@ -4024,6 +4492,7 @@ type UpdateDefaultNicForVirtualMachineResponse struct {
 	Serviceofferingname   string                                                   `json:"serviceofferingname"`
 	Servicestate          string                                                   `json:"servicestate"`
 	State                 string                                                   `json:"state"`
+	Tags                  []Tags                                                   `json:"tags"`
 	Templatedisplaytext   string                                                   `json:"templatedisplaytext"`
 	Templateid            string                                                   `json:"templateid"`
 	Templatename          string                                                   `json:"templatename"`
@@ -4076,6 +4545,33 @@ type UpdateDefaultNicForVirtualMachineResponseAffinitygroup struct {
 	VirtualmachineIds []string `json:"virtualmachineIds"`
 }
 
+func (r *UpdateDefaultNicForVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateDefaultNicForVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
+}
+
 type UpdateVirtualMachineParams struct {
 	p map[string]interface{}
 }
@@ -4113,6 +4609,9 @@ func (p *UpdateVirtualMachineParams) toURLValues() url.Values {
 	if v, found := p.p["displayvm"]; found {
 		vv := strconv.FormatBool(v.(bool))
 		u.Set("displayvm", vv)
+	}
+	if v, found := p.p["extraconfig"]; found {
+		u.Set("extraconfig", v.(string))
 	}
 	if v, found := p.p["group"]; found {
 		u.Set("group", v.(string))
@@ -4196,6 +4695,14 @@ func (p *UpdateVirtualMachineParams) SetDisplayvm(v bool) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["displayvm"] = v
+	return
+}
+
+func (p *UpdateVirtualMachineParams) SetExtraconfig(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["extraconfig"] = v
 	return
 }
 
@@ -4335,6 +4842,8 @@ type UpdateVirtualMachineResponse struct {
 	Isodisplaytext        string                                      `json:"isodisplaytext"`
 	Isoid                 string                                      `json:"isoid"`
 	Isoname               string                                      `json:"isoname"`
+	JobID                 string                                      `json:"jobid"`
+	Jobstatus             int                                         `json:"jobstatus"`
 	Keypair               string                                      `json:"keypair"`
 	Memory                int                                         `json:"memory"`
 	Memoryintfreekbs      int64                                       `json:"memoryintfreekbs"`
@@ -4344,7 +4853,7 @@ type UpdateVirtualMachineResponse struct {
 	Networkkbsread        int64                                       `json:"networkkbsread"`
 	Networkkbswrite       int64                                       `json:"networkkbswrite"`
 	Nic                   []Nic                                       `json:"nic"`
-	Ostypeid              int64                                       `json:"ostypeid"`
+	Ostypeid              string                                      `json:"ostypeid"`
 	Password              string                                      `json:"password"`
 	Passwordenabled       bool                                        `json:"passwordenabled"`
 	Project               string                                      `json:"project"`
@@ -4358,6 +4867,7 @@ type UpdateVirtualMachineResponse struct {
 	Serviceofferingname   string                                      `json:"serviceofferingname"`
 	Servicestate          string                                      `json:"servicestate"`
 	State                 string                                      `json:"state"`
+	Tags                  []Tags                                      `json:"tags"`
 	Templatedisplaytext   string                                      `json:"templatedisplaytext"`
 	Templateid            string                                      `json:"templateid"`
 	Templatename          string                                      `json:"templatename"`
@@ -4408,4 +4918,31 @@ type UpdateVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *UpdateVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }

@@ -324,6 +324,8 @@ type CreateNetworkOfferingResponse struct {
 	Id                       string                                 `json:"id"`
 	Isdefault                bool                                   `json:"isdefault"`
 	Ispersistent             bool                                   `json:"ispersistent"`
+	JobID                    string                                 `json:"jobid"`
+	Jobstatus                int                                    `json:"jobstatus"`
 	Maxconnections           int                                    `json:"maxconnections"`
 	Name                     string                                 `json:"name"`
 	Networkrate              int                                    `json:"networkrate"`
@@ -409,6 +411,8 @@ func (s *NetworkOfferingService) DeleteNetworkOffering(p *DeleteNetworkOfferingP
 
 type DeleteNetworkOfferingResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -421,6 +425,14 @@ func (r *DeleteNetworkOfferingResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -795,6 +807,8 @@ type NetworkOffering struct {
 	Id                       string                           `json:"id"`
 	Isdefault                bool                             `json:"isdefault"`
 	Ispersistent             bool                             `json:"ispersistent"`
+	JobID                    string                           `json:"jobid"`
+	Jobstatus                int                              `json:"jobstatus"`
 	Maxconnections           int                              `json:"maxconnections"`
 	Name                     string                           `json:"name"`
 	Networkrate              int                              `json:"networkrate"`
@@ -980,6 +994,8 @@ type UpdateNetworkOfferingResponse struct {
 	Id                       string                                 `json:"id"`
 	Isdefault                bool                                   `json:"isdefault"`
 	Ispersistent             bool                                   `json:"ispersistent"`
+	JobID                    string                                 `json:"jobid"`
+	Jobstatus                int                                    `json:"jobstatus"`
 	Maxconnections           int                                    `json:"maxconnections"`
 	Name                     string                                 `json:"name"`
 	Networkrate              int                                    `json:"networkrate"`

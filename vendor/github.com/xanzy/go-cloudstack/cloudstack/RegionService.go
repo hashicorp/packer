@@ -98,6 +98,8 @@ type AddRegionResponse struct {
 	Endpoint                 string `json:"endpoint"`
 	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
 	Id                       int    `json:"id"`
+	JobID                    string `json:"jobid"`
+	Jobstatus                int    `json:"jobstatus"`
 	Name                     string `json:"name"`
 	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
 }
@@ -204,6 +206,8 @@ type Region struct {
 	Endpoint                 string `json:"endpoint"`
 	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
 	Id                       int    `json:"id"`
+	JobID                    string `json:"jobid"`
+	Jobstatus                int    `json:"jobstatus"`
 	Name                     string `json:"name"`
 	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
 }
@@ -258,6 +262,8 @@ func (s *RegionService) RemoveRegion(p *RemoveRegionParams) (*RemoveRegionRespon
 
 type RemoveRegionResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -270,6 +276,14 @@ func (r *RemoveRegionResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -354,6 +368,8 @@ type UpdateRegionResponse struct {
 	Endpoint                 string `json:"endpoint"`
 	Gslbserviceenabled       bool   `json:"gslbserviceenabled"`
 	Id                       int    `json:"id"`
+	JobID                    string `json:"jobid"`
+	Jobstatus                int    `json:"jobstatus"`
 	Name                     string `json:"name"`
 	Portableipserviceenabled bool   `json:"portableipserviceenabled"`
 }

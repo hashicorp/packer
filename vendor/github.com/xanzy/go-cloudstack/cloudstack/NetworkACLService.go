@@ -69,6 +69,9 @@ func (p *CreateNetworkACLParams) toURLValues() url.Values {
 	if v, found := p.p["protocol"]; found {
 		u.Set("protocol", v.(string))
 	}
+	if v, found := p.p["reason"]; found {
+		u.Set("reason", v.(string))
+	}
 	if v, found := p.p["startport"]; found {
 		vv := strconv.Itoa(v.(int))
 		u.Set("startport", vv)
@@ -159,6 +162,14 @@ func (p *CreateNetworkACLParams) SetProtocol(v string) {
 	return
 }
 
+func (p *CreateNetworkACLParams) SetReason(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["reason"] = v
+	return
+}
+
 func (p *CreateNetworkACLParams) SetStartport(v int) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
@@ -220,7 +231,6 @@ func (s *NetworkACLService) CreateNetworkACL(p *CreateNetworkACLParams) (*Create
 }
 
 type CreateNetworkACLResponse struct {
-	JobID       string `json:"jobid"`
 	Aclid       string `json:"aclid"`
 	Action      string `json:"action"`
 	Cidrlist    string `json:"cidrlist"`
@@ -229,8 +239,11 @@ type CreateNetworkACLResponse struct {
 	Icmpcode    int    `json:"icmpcode"`
 	Icmptype    int    `json:"icmptype"`
 	Id          string `json:"id"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Number      int    `json:"number"`
 	Protocol    string `json:"protocol"`
+	Reason      string `json:"reason"`
 	Startport   string `json:"startport"`
 	State       string `json:"state"`
 	Tags        []Tags `json:"tags"`
@@ -340,10 +353,11 @@ func (s *NetworkACLService) CreateNetworkACLList(p *CreateNetworkACLListParams) 
 }
 
 type CreateNetworkACLListResponse struct {
-	JobID       string `json:"jobid"`
 	Description string `json:"description"`
 	Fordisplay  bool   `json:"fordisplay"`
 	Id          string `json:"id"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Vpcid       string `json:"vpcid"`
 }
@@ -411,8 +425,9 @@ func (s *NetworkACLService) DeleteNetworkACL(p *DeleteNetworkACLParams) (*Delete
 }
 
 type DeleteNetworkACLResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -479,8 +494,9 @@ func (s *NetworkACLService) DeleteNetworkACLList(p *DeleteNetworkACLListParams) 
 }
 
 type DeleteNetworkACLListResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -759,6 +775,8 @@ type NetworkACLList struct {
 	Description string `json:"description"`
 	Fordisplay  bool   `json:"fordisplay"`
 	Id          string `json:"id"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Vpcid       string `json:"vpcid"`
 }
@@ -1031,8 +1049,11 @@ type NetworkACL struct {
 	Icmpcode    int    `json:"icmpcode"`
 	Icmptype    int    `json:"icmptype"`
 	Id          string `json:"id"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Number      int    `json:"number"`
 	Protocol    string `json:"protocol"`
+	Reason      string `json:"reason"`
 	Startport   string `json:"startport"`
 	State       string `json:"state"`
 	Tags        []Tags `json:"tags"`
@@ -1124,8 +1145,9 @@ func (s *NetworkACLService) ReplaceNetworkACLList(p *ReplaceNetworkACLListParams
 }
 
 type ReplaceNetworkACLListResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1171,8 +1193,15 @@ func (p *UpdateNetworkACLItemParams) toURLValues() url.Values {
 		vv := strconv.Itoa(v.(int))
 		u.Set("number", vv)
 	}
+	if v, found := p.p["partialupgrade"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("partialupgrade", vv)
+	}
 	if v, found := p.p["protocol"]; found {
 		u.Set("protocol", v.(string))
+	}
+	if v, found := p.p["reason"]; found {
+		u.Set("reason", v.(string))
 	}
 	if v, found := p.p["startport"]; found {
 		vv := strconv.Itoa(v.(int))
@@ -1256,11 +1285,27 @@ func (p *UpdateNetworkACLItemParams) SetNumber(v int) {
 	return
 }
 
+func (p *UpdateNetworkACLItemParams) SetPartialupgrade(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["partialupgrade"] = v
+	return
+}
+
 func (p *UpdateNetworkACLItemParams) SetProtocol(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
 	p.p["protocol"] = v
+	return
+}
+
+func (p *UpdateNetworkACLItemParams) SetReason(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["reason"] = v
 	return
 }
 
@@ -1325,7 +1370,6 @@ func (s *NetworkACLService) UpdateNetworkACLItem(p *UpdateNetworkACLItemParams) 
 }
 
 type UpdateNetworkACLItemResponse struct {
-	JobID       string `json:"jobid"`
 	Aclid       string `json:"aclid"`
 	Action      string `json:"action"`
 	Cidrlist    string `json:"cidrlist"`
@@ -1334,8 +1378,11 @@ type UpdateNetworkACLItemResponse struct {
 	Icmpcode    int    `json:"icmpcode"`
 	Icmptype    int    `json:"icmptype"`
 	Id          string `json:"id"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Number      int    `json:"number"`
 	Protocol    string `json:"protocol"`
+	Reason      string `json:"reason"`
 	Startport   string `json:"startport"`
 	State       string `json:"state"`
 	Tags        []Tags `json:"tags"`
@@ -1354,12 +1401,18 @@ func (p *UpdateNetworkACLListParams) toURLValues() url.Values {
 	if v, found := p.p["customid"]; found {
 		u.Set("customid", v.(string))
 	}
+	if v, found := p.p["description"]; found {
+		u.Set("description", v.(string))
+	}
 	if v, found := p.p["fordisplay"]; found {
 		vv := strconv.FormatBool(v.(bool))
 		u.Set("fordisplay", vv)
 	}
 	if v, found := p.p["id"]; found {
 		u.Set("id", v.(string))
+	}
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
 	}
 	return u
 }
@@ -1369,6 +1422,14 @@ func (p *UpdateNetworkACLListParams) SetCustomid(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["customid"] = v
+	return
+}
+
+func (p *UpdateNetworkACLListParams) SetDescription(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["description"] = v
 	return
 }
 
@@ -1385,6 +1446,14 @@ func (p *UpdateNetworkACLListParams) SetId(v string) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["id"] = v
+	return
+}
+
+func (p *UpdateNetworkACLListParams) SetName(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["name"] = v
 	return
 }
 
@@ -1428,7 +1497,8 @@ func (s *NetworkACLService) UpdateNetworkACLList(p *UpdateNetworkACLListParams) 
 }
 
 type UpdateNetworkACLListResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }

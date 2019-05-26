@@ -86,7 +86,9 @@ func (s *NetworkDeviceService) AddNetworkDevice(p *AddNetworkDeviceParams) (*Add
 }
 
 type AddNetworkDeviceResponse struct {
-	Id string `json:"id"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 }
 
 type DeleteNetworkDeviceParams struct {
@@ -138,6 +140,8 @@ func (s *NetworkDeviceService) DeleteNetworkDevice(p *DeleteNetworkDeviceParams)
 
 type DeleteNetworkDeviceResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -150,6 +154,14 @@ func (r *DeleteNetworkDeviceResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -263,5 +275,7 @@ type ListNetworkDeviceResponse struct {
 }
 
 type NetworkDevice struct {
-	Id string `json:"id"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 }

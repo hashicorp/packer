@@ -107,6 +107,8 @@ func (s *UsageService) AddTrafficMonitor(p *AddTrafficMonitorParams) (*AddTraffi
 type AddTrafficMonitorResponse struct {
 	Id         string `json:"id"`
 	Ipaddress  string `json:"ipaddress"`
+	JobID      string `json:"jobid"`
+	Jobstatus  int    `json:"jobstatus"`
 	Numretries string `json:"numretries"`
 	Timeout    string `json:"timeout"`
 	Zoneid     string `json:"zoneid"`
@@ -269,9 +271,10 @@ func (s *UsageService) AddTrafficType(p *AddTrafficTypeParams) (*AddTrafficTypeR
 }
 
 type AddTrafficTypeResponse struct {
-	JobID              string `json:"jobid"`
 	Hypervnetworklabel string `json:"hypervnetworklabel"`
 	Id                 string `json:"id"`
+	JobID              string `json:"jobid"`
+	Jobstatus          int    `json:"jobstatus"`
 	Kvmnetworklabel    string `json:"kvmnetworklabel"`
 	Ovm3networklabel   string `json:"ovm3networklabel"`
 	Physicalnetworkid  string `json:"physicalnetworkid"`
@@ -329,6 +332,8 @@ func (s *UsageService) DeleteTrafficMonitor(p *DeleteTrafficMonitorParams) (*Del
 
 type DeleteTrafficMonitorResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -341,6 +346,14 @@ func (r *DeleteTrafficMonitorResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -414,8 +427,9 @@ func (s *UsageService) DeleteTrafficType(p *DeleteTrafficTypeParams) (*DeleteTra
 }
 
 type DeleteTrafficTypeResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -491,6 +505,8 @@ func (s *UsageService) GenerateUsageRecords(p *GenerateUsageRecordsParams) (*Gen
 
 type GenerateUsageRecordsResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -503,6 +519,14 @@ func (r *GenerateUsageRecordsResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -603,6 +627,8 @@ type ListTrafficMonitorsResponse struct {
 type TrafficMonitor struct {
 	Id         string `json:"id"`
 	Ipaddress  string `json:"ipaddress"`
+	JobID      string `json:"jobid"`
+	Jobstatus  int    `json:"jobstatus"`
 	Numretries string `json:"numretries"`
 	Timeout    string `json:"timeout"`
 	Zoneid     string `json:"zoneid"`
@@ -695,6 +721,8 @@ type ListTrafficTypeImplementorsResponse struct {
 }
 
 type TrafficTypeImplementor struct {
+	JobID                  string `json:"jobid"`
+	Jobstatus              int    `json:"jobstatus"`
 	Traffictype            string `json:"traffictype"`
 	Traffictypeimplementor string `json:"traffictypeimplementor"`
 }
@@ -827,6 +855,8 @@ type TrafficType struct {
 	Canenableindividualservice   bool     `json:"canenableindividualservice"`
 	Destinationphysicalnetworkid string   `json:"destinationphysicalnetworkid"`
 	Id                           string   `json:"id"`
+	JobID                        string   `json:"jobid"`
+	Jobstatus                    int      `json:"jobstatus"`
 	Name                         string   `json:"name"`
 	Physicalnetworkid            string   `json:"physicalnetworkid"`
 	Servicelist                  []string `json:"servicelist"`
@@ -1023,6 +1053,8 @@ type UsageRecord struct {
 	Isdefault        bool   `json:"isdefault"`
 	Issourcenat      bool   `json:"issourcenat"`
 	Issystem         bool   `json:"issystem"`
+	JobID            string `json:"jobid"`
+	Jobstatus        int    `json:"jobstatus"`
 	Memory           int64  `json:"memory"`
 	Name             string `json:"name"`
 	Networkid        string `json:"networkid"`
@@ -1032,6 +1064,7 @@ type UsageRecord struct {
 	Rawusage         string `json:"rawusage"`
 	Size             int64  `json:"size"`
 	Startdate        string `json:"startdate"`
+	Tags             []Tags `json:"tags"`
 	Templateid       string `json:"templateid"`
 	Type             string `json:"type"`
 	Usage            string `json:"usage"`
@@ -1084,6 +1117,8 @@ type ListUsageTypesResponse struct {
 
 type UsageType struct {
 	Description string `json:"description"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Usagetypeid int    `json:"usagetypeid"`
 }
 
@@ -1137,6 +1172,8 @@ func (s *UsageService) RemoveRawUsageRecords(p *RemoveRawUsageRecordsParams) (*R
 
 type RemoveRawUsageRecordsResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1149,6 +1186,14 @@ func (r *RemoveRawUsageRecordsResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -1282,9 +1327,10 @@ func (s *UsageService) UpdateTrafficType(p *UpdateTrafficTypeParams) (*UpdateTra
 }
 
 type UpdateTrafficTypeResponse struct {
-	JobID              string `json:"jobid"`
 	Hypervnetworklabel string `json:"hypervnetworklabel"`
 	Id                 string `json:"id"`
+	JobID              string `json:"jobid"`
+	Jobstatus          int    `json:"jobstatus"`
 	Kvmnetworklabel    string `json:"kvmnetworklabel"`
 	Ovm3networklabel   string `json:"ovm3networklabel"`
 	Physicalnetworkid  string `json:"physicalnetworkid"`

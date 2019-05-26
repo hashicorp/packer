@@ -429,7 +429,7 @@ github.com/vmware/govmomi/vim25/methods
 github.com/vmware/govmomi/vim25/progress
 github.com/vmware/govmomi/vim25/debug
 github.com/vmware/govmomi/vim25/xml
-# github.com/xanzy/go-cloudstack v2.4.1+incompatible
+# github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 github.com/xanzy/go-cloudstack/cloudstack
 # github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
 github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1
