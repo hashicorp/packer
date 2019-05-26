@@ -185,7 +185,6 @@ func (s *VPCService) CreatePrivateGateway(p *CreatePrivateGatewayParams) (*Creat
 }
 
 type CreatePrivateGatewayResponse struct {
-	JobID              string `json:"jobid"`
 	Account            string `json:"account"`
 	Aclid              string `json:"aclid"`
 	Domain             string `json:"domain"`
@@ -193,6 +192,8 @@ type CreatePrivateGatewayResponse struct {
 	Gateway            string `json:"gateway"`
 	Id                 string `json:"id"`
 	Ipaddress          string `json:"ipaddress"`
+	JobID              string `json:"jobid"`
+	Jobstatus          int    `json:"jobstatus"`
 	Netmask            string `json:"netmask"`
 	Physicalnetworkid  string `json:"physicalnetworkid"`
 	Project            string `json:"project"`
@@ -285,13 +286,14 @@ func (s *VPCService) CreateStaticRoute(p *CreateStaticRouteParams) (*CreateStati
 }
 
 type CreateStaticRouteResponse struct {
-	JobID     string `json:"jobid"`
 	Account   string `json:"account"`
 	Cidr      string `json:"cidr"`
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Gatewayid string `json:"gatewayid"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
 	State     string `json:"state"`
@@ -483,7 +485,6 @@ func (s *VPCService) CreateVPC(p *CreateVPCParams) (*CreateVPCResponse, error) {
 }
 
 type CreateVPCResponse struct {
-	JobID                string                     `json:"jobid"`
 	Account              string                     `json:"account"`
 	Cidr                 string                     `json:"cidr"`
 	Created              string                     `json:"created"`
@@ -493,6 +494,8 @@ type CreateVPCResponse struct {
 	Domainid             string                     `json:"domainid"`
 	Fordisplay           bool                       `json:"fordisplay"`
 	Id                   string                     `json:"id"`
+	JobID                string                     `json:"jobid"`
+	Jobstatus            int                        `json:"jobstatus"`
 	Name                 string                     `json:"name"`
 	Network              []CreateVPCResponseNetwork `json:"network"`
 	Networkdomain        string                     `json:"networkdomain"`
@@ -742,12 +745,13 @@ func (s *VPCService) CreateVPCOffering(p *CreateVPCOfferingParams) (*CreateVPCOf
 }
 
 type CreateVPCOfferingResponse struct {
-	JobID                  string                             `json:"jobid"`
 	Created                string                             `json:"created"`
 	Displaytext            string                             `json:"displaytext"`
 	Distributedvpcrouter   bool                               `json:"distributedvpcrouter"`
 	Id                     string                             `json:"id"`
 	Isdefault              bool                               `json:"isdefault"`
+	JobID                  string                             `json:"jobid"`
+	Jobstatus              int                                `json:"jobstatus"`
 	Name                   string                             `json:"name"`
 	Service                []CreateVPCOfferingResponseService `json:"service"`
 	State                  string                             `json:"state"`
@@ -839,8 +843,9 @@ func (s *VPCService) DeletePrivateGateway(p *DeletePrivateGatewayParams) (*Delet
 }
 
 type DeletePrivateGatewayResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -907,8 +912,9 @@ func (s *VPCService) DeleteStaticRoute(p *DeleteStaticRouteParams) (*DeleteStati
 }
 
 type DeleteStaticRouteResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -975,8 +981,9 @@ func (s *VPCService) DeleteVPC(p *DeleteVPCParams) (*DeleteVPCResponse, error) {
 }
 
 type DeleteVPCResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1043,8 +1050,9 @@ func (s *VPCService) DeleteVPCOffering(p *DeleteVPCOfferingParams) (*DeleteVPCOf
 }
 
 type DeleteVPCOfferingResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1276,6 +1284,8 @@ type PrivateGateway struct {
 	Gateway            string `json:"gateway"`
 	Id                 string `json:"id"`
 	Ipaddress          string `json:"ipaddress"`
+	JobID              string `json:"jobid"`
+	Jobstatus          int    `json:"jobstatus"`
 	Netmask            string `json:"netmask"`
 	Physicalnetworkid  string `json:"physicalnetworkid"`
 	Project            string `json:"project"`
@@ -1509,6 +1519,8 @@ type StaticRoute struct {
 	Domainid  string `json:"domainid"`
 	Gatewayid string `json:"gatewayid"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
 	State     string `json:"state"`
@@ -1748,6 +1760,8 @@ type VPCOffering struct {
 	Distributedvpcrouter   bool                 `json:"distributedvpcrouter"`
 	Id                     string               `json:"id"`
 	Isdefault              bool                 `json:"isdefault"`
+	JobID                  string               `json:"jobid"`
+	Jobstatus              int                  `json:"jobstatus"`
 	Name                   string               `json:"name"`
 	Service                []VPCOfferingService `json:"service"`
 	State                  string               `json:"state"`
@@ -2130,6 +2144,8 @@ type VPC struct {
 	Domainid             string               `json:"domainid"`
 	Fordisplay           bool                 `json:"fordisplay"`
 	Id                   string               `json:"id"`
+	JobID                string               `json:"jobid"`
+	Jobstatus            int                  `json:"jobstatus"`
 	Name                 string               `json:"name"`
 	Network              []VPCNetwork         `json:"network"`
 	Networkdomain        string               `json:"networkdomain"`
@@ -2335,7 +2351,6 @@ func (s *VPCService) RestartVPC(p *RestartVPCParams) (*RestartVPCResponse, error
 }
 
 type RestartVPCResponse struct {
-	JobID                string                      `json:"jobid"`
 	Account              string                      `json:"account"`
 	Cidr                 string                      `json:"cidr"`
 	Created              string                      `json:"created"`
@@ -2345,6 +2360,8 @@ type RestartVPCResponse struct {
 	Domainid             string                      `json:"domainid"`
 	Fordisplay           bool                        `json:"fordisplay"`
 	Id                   string                      `json:"id"`
+	JobID                string                      `json:"jobid"`
+	Jobstatus            int                         `json:"jobstatus"`
 	Name                 string                      `json:"name"`
 	Network              []RestartVPCResponseNetwork `json:"network"`
 	Networkdomain        string                      `json:"networkdomain"`
@@ -2571,7 +2588,6 @@ func (s *VPCService) UpdateVPC(p *UpdateVPCParams) (*UpdateVPCResponse, error) {
 }
 
 type UpdateVPCResponse struct {
-	JobID                string                     `json:"jobid"`
 	Account              string                     `json:"account"`
 	Cidr                 string                     `json:"cidr"`
 	Created              string                     `json:"created"`
@@ -2581,6 +2597,8 @@ type UpdateVPCResponse struct {
 	Domainid             string                     `json:"domainid"`
 	Fordisplay           bool                       `json:"fordisplay"`
 	Id                   string                     `json:"id"`
+	JobID                string                     `json:"jobid"`
+	Jobstatus            int                        `json:"jobstatus"`
 	Name                 string                     `json:"name"`
 	Network              []UpdateVPCResponseNetwork `json:"network"`
 	Networkdomain        string                     `json:"networkdomain"`
@@ -2795,12 +2813,13 @@ func (s *VPCService) UpdateVPCOffering(p *UpdateVPCOfferingParams) (*UpdateVPCOf
 }
 
 type UpdateVPCOfferingResponse struct {
-	JobID                  string                             `json:"jobid"`
 	Created                string                             `json:"created"`
 	Displaytext            string                             `json:"displaytext"`
 	Distributedvpcrouter   bool                               `json:"distributedvpcrouter"`
 	Id                     string                             `json:"id"`
 	Isdefault              bool                               `json:"isdefault"`
+	JobID                  string                             `json:"jobid"`
+	Jobstatus              int                                `json:"jobstatus"`
 	Name                   string                             `json:"name"`
 	Service                []UpdateVPCOfferingResponseService `json:"service"`
 	State                  string                             `json:"state"`

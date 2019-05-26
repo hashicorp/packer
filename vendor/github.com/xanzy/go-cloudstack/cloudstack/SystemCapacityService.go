@@ -171,6 +171,8 @@ type Capacity struct {
 	Capacityused      int64  `json:"capacityused"`
 	Clusterid         string `json:"clusterid"`
 	Clustername       string `json:"clustername"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Name              string `json:"name"`
 	Percentused       string `json:"percentused"`
 	Podid             string `json:"podid"`

@@ -106,7 +106,7 @@ require (
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
-	github.com/xanzy/go-cloudstack v2.4.1+incompatible
+	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
 	github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
 	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d

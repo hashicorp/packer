@@ -280,6 +280,8 @@ type AddClusterResponse struct {
 	Cpuovercommitratio    string                       `json:"cpuovercommitratio"`
 	Hypervisortype        string                       `json:"hypervisortype"`
 	Id                    string                       `json:"id"`
+	JobID                 string                       `json:"jobid"`
+	Jobstatus             int                          `json:"jobstatus"`
 	Managedstate          string                       `json:"managedstate"`
 	Memoryovercommitratio string                       `json:"memoryovercommitratio"`
 	Name                  string                       `json:"name"`
@@ -397,13 +399,14 @@ func (s *ClusterService) DedicateCluster(p *DedicateClusterParams) (*DedicateClu
 }
 
 type DedicateClusterResponse struct {
-	JobID           string `json:"jobid"`
 	Accountid       string `json:"accountid"`
 	Affinitygroupid string `json:"affinitygroupid"`
 	Clusterid       string `json:"clusterid"`
 	Clustername     string `json:"clustername"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 }
 
 type DeleteClusterParams struct {
@@ -455,6 +458,8 @@ func (s *ClusterService) DeleteCluster(p *DeleteClusterParams) (*DeleteClusterRe
 
 type DeleteClusterResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -467,6 +472,14 @@ func (r *DeleteClusterResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -545,13 +558,14 @@ func (s *ClusterService) DisableOutOfBandManagementForCluster(p *DisableOutOfBan
 }
 
 type DisableOutOfBandManagementForClusterResponse struct {
-	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -627,13 +641,14 @@ func (s *ClusterService) EnableOutOfBandManagementForCluster(p *EnableOutOfBandM
 }
 
 type EnableOutOfBandManagementForClusterResponse struct {
-	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -906,6 +921,8 @@ type Cluster struct {
 	Cpuovercommitratio    string            `json:"cpuovercommitratio"`
 	Hypervisortype        string            `json:"hypervisortype"`
 	Id                    string            `json:"id"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Managedstate          string            `json:"managedstate"`
 	Memoryovercommitratio string            `json:"memoryovercommitratio"`
 	Name                  string            `json:"name"`
@@ -1058,6 +1075,8 @@ type DedicatedCluster struct {
 	Clustername     string `json:"clustername"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 }
 
 type ReleaseDedicatedClusterParams struct {
@@ -1123,8 +1142,9 @@ func (s *ClusterService) ReleaseDedicatedCluster(p *ReleaseDedicatedClusterParam
 }
 
 type ReleaseDedicatedClusterResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1237,6 +1257,8 @@ type UpdateClusterResponse struct {
 	Cpuovercommitratio    string                          `json:"cpuovercommitratio"`
 	Hypervisortype        string                          `json:"hypervisortype"`
 	Id                    string                          `json:"id"`
+	JobID                 string                          `json:"jobid"`
+	Jobstatus             int                             `json:"jobstatus"`
 	Managedstate          string                          `json:"managedstate"`
 	Memoryovercommitratio string                          `json:"memoryovercommitratio"`
 	Name                  string                          `json:"name"`

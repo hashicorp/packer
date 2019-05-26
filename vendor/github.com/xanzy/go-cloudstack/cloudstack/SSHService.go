@@ -107,7 +107,14 @@ func (s *SSHService) CreateSSHKeyPair(p *CreateSSHKeyPairParams) (*CreateSSHKeyP
 }
 
 type CreateSSHKeyPairResponse struct {
-	Privatekey string `json:"privatekey"`
+	Account     string `json:"account"`
+	Domain      string `json:"domain"`
+	Domainid    string `json:"domainid"`
+	Fingerprint string `json:"fingerprint"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
+	Name        string `json:"name"`
+	Privatekey  string `json:"privatekey"`
 }
 
 type DeleteSSHKeyPairParams struct {
@@ -192,6 +199,8 @@ func (s *SSHService) DeleteSSHKeyPair(p *DeleteSSHKeyPairParams) (*DeleteSSHKeyP
 
 type DeleteSSHKeyPairResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -204,6 +213,14 @@ func (r *DeleteSSHKeyPairResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -373,6 +390,8 @@ type SSHKeyPair struct {
 	Domain      string `json:"domain"`
 	Domainid    string `json:"domainid"`
 	Fingerprint string `json:"fingerprint"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 }
 
@@ -477,6 +496,8 @@ type RegisterSSHKeyPairResponse struct {
 	Domain      string `json:"domain"`
 	Domainid    string `json:"domainid"`
 	Fingerprint string `json:"fingerprint"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 }
 
@@ -593,7 +614,6 @@ func (s *SSHService) ResetSSHKeyForVirtualMachine(p *ResetSSHKeyForVirtualMachin
 }
 
 type ResetSSHKeyForVirtualMachineResponse struct {
-	JobID                 string                                              `json:"jobid"`
 	Account               string                                              `json:"account"`
 	Affinitygroup         []ResetSSHKeyForVirtualMachineResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                                 `json:"cpunumber"`
@@ -625,6 +645,8 @@ type ResetSSHKeyForVirtualMachineResponse struct {
 	Isodisplaytext        string                                              `json:"isodisplaytext"`
 	Isoid                 string                                              `json:"isoid"`
 	Isoname               string                                              `json:"isoname"`
+	JobID                 string                                              `json:"jobid"`
+	Jobstatus             int                                                 `json:"jobstatus"`
 	Keypair               string                                              `json:"keypair"`
 	Memory                int                                                 `json:"memory"`
 	Memoryintfreekbs      int64                                               `json:"memoryintfreekbs"`
@@ -634,7 +656,7 @@ type ResetSSHKeyForVirtualMachineResponse struct {
 	Networkkbsread        int64                                               `json:"networkkbsread"`
 	Networkkbswrite       int64                                               `json:"networkkbswrite"`
 	Nic                   []Nic                                               `json:"nic"`
-	Ostypeid              int64                                               `json:"ostypeid"`
+	Ostypeid              string                                              `json:"ostypeid"`
 	Password              string                                              `json:"password"`
 	Passwordenabled       bool                                                `json:"passwordenabled"`
 	Project               string                                              `json:"project"`
@@ -648,6 +670,7 @@ type ResetSSHKeyForVirtualMachineResponse struct {
 	Serviceofferingname   string                                              `json:"serviceofferingname"`
 	Servicestate          string                                              `json:"servicestate"`
 	State                 string                                              `json:"state"`
+	Tags                  []Tags                                              `json:"tags"`
 	Templatedisplaytext   string                                              `json:"templatedisplaytext"`
 	Templateid            string                                              `json:"templateid"`
 	Templatename          string                                              `json:"templatename"`
@@ -698,4 +721,31 @@ type ResetSSHKeyForVirtualMachineResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *ResetSSHKeyForVirtualMachineResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias ResetSSHKeyForVirtualMachineResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
