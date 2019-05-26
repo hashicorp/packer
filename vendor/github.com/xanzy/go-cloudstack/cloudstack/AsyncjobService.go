@@ -158,7 +158,9 @@ type ListAsyncJobsResponse struct {
 type AsyncJob struct {
 	Accountid       string          `json:"accountid"`
 	Cmd             string          `json:"cmd"`
+	Completed       string          `json:"completed"`
 	Created         string          `json:"created"`
+	JobID           string          `json:"jobid"`
 	Jobinstanceid   string          `json:"jobinstanceid"`
 	Jobinstancetype string          `json:"jobinstancetype"`
 	Jobprocstatus   int             `json:"jobprocstatus"`
@@ -229,7 +231,9 @@ func (s *AsyncjobService) QueryAsyncJobResult(p *QueryAsyncJobResultParams) (*Qu
 type QueryAsyncJobResultResponse struct {
 	Accountid       string          `json:"accountid"`
 	Cmd             string          `json:"cmd"`
+	Completed       string          `json:"completed"`
 	Created         string          `json:"created"`
+	JobID           string          `json:"jobid"`
 	Jobinstanceid   string          `json:"jobinstanceid"`
 	Jobinstancetype string          `json:"jobinstancetype"`
 	Jobprocstatus   int             `json:"jobprocstatus"`

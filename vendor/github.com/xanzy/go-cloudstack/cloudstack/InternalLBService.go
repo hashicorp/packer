@@ -105,10 +105,11 @@ func (s *InternalLBService) ConfigureInternalLoadBalancerElement(p *ConfigureInt
 }
 
 type InternalLoadBalancerElementResponse struct {
-	JobID   string `json:"jobid"`
-	Enabled bool   `json:"enabled"`
-	Id      string `json:"id"`
-	Nspid   string `json:"nspid"`
+	Enabled   bool   `json:"enabled"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Nspid     string `json:"nspid"`
 }
 
 type CreateInternalLoadBalancerElementParams struct {
@@ -179,10 +180,11 @@ func (s *InternalLBService) CreateInternalLoadBalancerElement(p *CreateInternalL
 }
 
 type CreateInternalLoadBalancerElementResponse struct {
-	JobID   string `json:"jobid"`
-	Enabled bool   `json:"enabled"`
-	Id      string `json:"id"`
-	Nspid   string `json:"nspid"`
+	Enabled   bool   `json:"enabled"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Nspid     string `json:"nspid"`
 }
 
 type ListInternalLoadBalancerElementsParams struct {
@@ -328,9 +330,11 @@ type ListInternalLoadBalancerElementsResponse struct {
 }
 
 type InternalLoadBalancerElement struct {
-	Enabled bool   `json:"enabled"`
-	Id      string `json:"id"`
-	Nspid   string `json:"nspid"`
+	Enabled   bool   `json:"enabled"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Nspid     string `json:"nspid"`
 }
 
 type ListInternalLoadBalancerVMsParams struct {
@@ -668,6 +672,8 @@ type InternalLoadBalancerVM struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -765,7 +771,6 @@ func (s *InternalLBService) StartInternalLoadBalancerVM(p *StartInternalLoadBala
 }
 
 type StartInternalLoadBalancerVMResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -785,6 +790,8 @@ type StartInternalLoadBalancerVMResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -894,7 +901,6 @@ func (s *InternalLBService) StopInternalLoadBalancerVM(p *StopInternalLoadBalanc
 }
 
 type StopInternalLoadBalancerVMResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -914,6 +920,8 @@ type StopInternalLoadBalancerVMResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`

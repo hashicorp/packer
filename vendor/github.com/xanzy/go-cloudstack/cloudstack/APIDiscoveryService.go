@@ -75,6 +75,8 @@ type ListApisResponse struct {
 type Api struct {
 	Description string        `json:"description"`
 	Isasync     bool          `json:"isasync"`
+	JobID       string        `json:"jobid"`
+	Jobstatus   int           `json:"jobstatus"`
 	Name        string        `json:"name"`
 	Params      []ApiParams   `json:"params"`
 	Related     string        `json:"related"`

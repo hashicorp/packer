@@ -101,9 +101,10 @@ func (s *NicService) AddIpToNic(p *AddIpToNicParams) (*AddIpToNicResponse, error
 }
 
 type AddIpToNicResponse struct {
-	JobID       string `json:"jobid"`
 	Id          string `json:"id"`
 	Ipaddress   string `json:"ipaddress"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Networkid   string `json:"networkid"`
 	Nicid       string `json:"nicid"`
 	Secondaryip []struct {
@@ -246,6 +247,8 @@ type Nic struct {
 	Ipaddress            string   `json:"ipaddress"`
 	Isdefault            bool     `json:"isdefault"`
 	Isolationuri         string   `json:"isolationuri"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
 	Macaddress           string   `json:"macaddress"`
 	Netmask              string   `json:"netmask"`
 	Networkid            string   `json:"networkid"`
@@ -324,8 +327,9 @@ func (s *NicService) RemoveIpFromNic(p *RemoveIpFromNicParams) (*RemoveIpFromNic
 }
 
 type RemoveIpFromNicResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -408,7 +412,6 @@ func (s *NicService) UpdateVmNicIp(p *UpdateVmNicIpParams) (*UpdateVmNicIpRespon
 }
 
 type UpdateVmNicIpResponse struct {
-	JobID                 string                               `json:"jobid"`
 	Account               string                               `json:"account"`
 	Affinitygroup         []UpdateVmNicIpResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                  `json:"cpunumber"`
@@ -440,6 +443,8 @@ type UpdateVmNicIpResponse struct {
 	Isodisplaytext        string                               `json:"isodisplaytext"`
 	Isoid                 string                               `json:"isoid"`
 	Isoname               string                               `json:"isoname"`
+	JobID                 string                               `json:"jobid"`
+	Jobstatus             int                                  `json:"jobstatus"`
 	Keypair               string                               `json:"keypair"`
 	Memory                int                                  `json:"memory"`
 	Memoryintfreekbs      int64                                `json:"memoryintfreekbs"`
@@ -449,7 +454,7 @@ type UpdateVmNicIpResponse struct {
 	Networkkbsread        int64                                `json:"networkkbsread"`
 	Networkkbswrite       int64                                `json:"networkkbswrite"`
 	Nic                   []Nic                                `json:"nic"`
-	Ostypeid              int64                                `json:"ostypeid"`
+	Ostypeid              string                               `json:"ostypeid"`
 	Password              string                               `json:"password"`
 	Passwordenabled       bool                                 `json:"passwordenabled"`
 	Project               string                               `json:"project"`
@@ -463,6 +468,7 @@ type UpdateVmNicIpResponse struct {
 	Serviceofferingname   string                               `json:"serviceofferingname"`
 	Servicestate          string                               `json:"servicestate"`
 	State                 string                               `json:"state"`
+	Tags                  []Tags                               `json:"tags"`
 	Templatedisplaytext   string                               `json:"templatedisplaytext"`
 	Templateid            string                               `json:"templateid"`
 	Templatename          string                               `json:"templatename"`
@@ -513,4 +519,31 @@ type UpdateVmNicIpResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *UpdateVmNicIpResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateVmNicIpResponse
+	return json.Unmarshal(b, (*alias)(r))
 }

@@ -152,10 +152,11 @@ func (s *PortableIPService) CreatePortableIpRange(p *CreatePortableIpRangeParams
 }
 
 type CreatePortableIpRangeResponse struct {
-	JobID             string                                           `json:"jobid"`
 	Endip             string                                           `json:"endip"`
 	Gateway           string                                           `json:"gateway"`
 	Id                string                                           `json:"id"`
+	JobID             string                                           `json:"jobid"`
+	Jobstatus         int                                              `json:"jobstatus"`
 	Netmask           string                                           `json:"netmask"`
 	Portableipaddress []CreatePortableIpRangeResponsePortableipaddress `json:"portableipaddress"`
 	Regionid          int                                              `json:"regionid"`
@@ -239,8 +240,9 @@ func (s *PortableIPService) DeletePortableIpRange(p *DeletePortableIpRangeParams
 }
 
 type DeletePortableIpRangeResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -379,6 +381,8 @@ type PortableIpRange struct {
 	Endip             string                             `json:"endip"`
 	Gateway           string                             `json:"gateway"`
 	Id                string                             `json:"id"`
+	JobID             string                             `json:"jobid"`
+	Jobstatus         int                                `json:"jobstatus"`
 	Netmask           string                             `json:"netmask"`
 	Portableipaddress []PortableIpRangePortableipaddress `json:"portableipaddress"`
 	Regionid          int                                `json:"regionid"`

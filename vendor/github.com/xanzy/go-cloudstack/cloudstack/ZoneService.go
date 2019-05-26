@@ -236,6 +236,8 @@ type CreateZoneResponse struct {
 	Internaldns2          string                       `json:"internaldns2"`
 	Ip6dns1               string                       `json:"ip6dns1"`
 	Ip6dns2               string                       `json:"ip6dns2"`
+	JobID                 string                       `json:"jobid"`
+	Jobstatus             int                          `json:"jobstatus"`
 	Localstorageenabled   bool                         `json:"localstorageenabled"`
 	Name                  string                       `json:"name"`
 	Networktype           string                       `json:"networktype"`
@@ -351,11 +353,12 @@ func (s *ZoneService) DedicateZone(p *DedicateZoneParams) (*DedicateZoneResponse
 }
 
 type DedicateZoneResponse struct {
-	JobID           string `json:"jobid"`
 	Accountid       string `json:"accountid"`
 	Affinitygroupid string `json:"affinitygroupid"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 	Zoneid          string `json:"zoneid"`
 	Zonename        string `json:"zonename"`
 }
@@ -409,6 +412,8 @@ func (s *ZoneService) DeleteZone(p *DeleteZoneParams) (*DeleteZoneResponse, erro
 
 type DeleteZoneResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -421,6 +426,14 @@ func (r *DeleteZoneResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -499,13 +512,14 @@ func (s *ZoneService) DisableOutOfBandManagementForZone(p *DisableOutOfBandManag
 }
 
 type DisableOutOfBandManagementForZoneResponse struct {
-	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -581,13 +595,14 @@ func (s *ZoneService) EnableOutOfBandManagementForZone(p *EnableOutOfBandManagem
 }
 
 type EnableOutOfBandManagementForZoneResponse struct {
-	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -719,6 +734,8 @@ type DedicatedZone struct {
 	Affinitygroupid string `json:"affinitygroupid"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 	Zoneid          string `json:"zoneid"`
 	Zonename        string `json:"zonename"`
 }
@@ -982,6 +999,8 @@ type Zone struct {
 	Internaldns2          string            `json:"internaldns2"`
 	Ip6dns1               string            `json:"ip6dns1"`
 	Ip6dns2               string            `json:"ip6dns2"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Localstorageenabled   bool              `json:"localstorageenabled"`
 	Name                  string            `json:"name"`
 	Networktype           string            `json:"networktype"`
@@ -1069,8 +1088,9 @@ func (s *ZoneService) ReleaseDedicatedZone(p *ReleaseDedicatedZoneParams) (*Rele
 }
 
 type ReleaseDedicatedZoneResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1310,6 +1330,8 @@ type UpdateZoneResponse struct {
 	Internaldns2          string                       `json:"internaldns2"`
 	Ip6dns1               string                       `json:"ip6dns1"`
 	Ip6dns2               string                       `json:"ip6dns2"`
+	JobID                 string                       `json:"jobid"`
+	Jobstatus             int                          `json:"jobstatus"`
 	Localstorageenabled   bool                         `json:"localstorageenabled"`
 	Name                  string                       `json:"name"`
 	Networktype           string                       `json:"networktype"`

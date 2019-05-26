@@ -103,6 +103,8 @@ type ChangeServiceForRouterResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -213,12 +215,13 @@ func (s *RouterService) ConfigureVirtualRouterElement(p *ConfigureVirtualRouterE
 }
 
 type VirtualRouterElementResponse struct {
-	JobID     string `json:"jobid"`
 	Account   string `json:"account"`
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Enabled   bool   `json:"enabled"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Nspid     string `json:"nspid"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -303,12 +306,13 @@ func (s *RouterService) CreateVirtualRouterElement(p *CreateVirtualRouterElement
 }
 
 type CreateVirtualRouterElementResponse struct {
-	JobID     string `json:"jobid"`
 	Account   string `json:"account"`
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Enabled   bool   `json:"enabled"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Nspid     string `json:"nspid"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -382,7 +386,6 @@ func (s *RouterService) DestroyRouter(p *DestroyRouterParams) (*DestroyRouterRes
 }
 
 type DestroyRouterResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -402,6 +405,8 @@ type DestroyRouterResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -788,6 +793,8 @@ type Router struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -965,6 +972,8 @@ type VirtualRouterElement struct {
 	Domainid  string `json:"domainid"`
 	Enabled   bool   `json:"enabled"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Nspid     string `json:"nspid"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -1038,7 +1047,6 @@ func (s *RouterService) RebootRouter(p *RebootRouterParams) (*RebootRouterRespon
 }
 
 type RebootRouterResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -1058,6 +1066,8 @@ type RebootRouterResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -1155,7 +1165,6 @@ func (s *RouterService) StartRouter(p *StartRouterParams) (*StartRouterResponse,
 }
 
 type StartRouterResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -1175,6 +1184,8 @@ type StartRouterResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
@@ -1284,7 +1295,6 @@ func (s *RouterService) StopRouter(p *StopRouterParams) (*StopRouterResponse, er
 }
 
 type StopRouterResponse struct {
-	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Created             string `json:"created"`
 	Dns1                string `json:"dns1"`
@@ -1304,6 +1314,8 @@ type StopRouterResponse struct {
 	Ip6dns1             string `json:"ip6dns1"`
 	Ip6dns2             string `json:"ip6dns2"`
 	Isredundantrouter   bool   `json:"isredundantrouter"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Linklocalip         string `json:"linklocalip"`
 	Linklocalmacaddress string `json:"linklocalmacaddress"`
 	Linklocalnetmask    string `json:"linklocalnetmask"`
