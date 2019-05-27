@@ -25,6 +25,7 @@ type StepCloneVMX struct {
 
 func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	halt := func(err error) multistep.StepAction {
+		log.Printf("StepCloneVMX returned error: %s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

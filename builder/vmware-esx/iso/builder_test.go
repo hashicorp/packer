@@ -12,6 +12,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
+		"remote_host":       "localhost",
 		"iso_checksum":      "foo",
 		"iso_checksum_type": "md5",
 		"iso_url":           "http://www.packer.io",

@@ -66,7 +66,7 @@ func TestStepCloneVMX(t *testing.T) {
 	step.Path = sourcePath
 	step.VMName = "foo"
 
-	driver := state.Get("driver").(*vmwcommon.DriverMock)
+	driver := state.Get("driver").(*vmwcommon.DriverMock) // XXX: RemoteDriverMock?
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {

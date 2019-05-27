@@ -40,20 +40,11 @@ func TestStepPrepareTools(t *testing.T) {
 	}
 
 	// Test the driver
-	if !driver.ToolsIsoPathCalled {
-		t.Fatal("tools iso path should be called")
+	if driver.ToolsIsoPathCalled {
+		t.Fatal("tools iso path should NOT be called")
 	}
 	if driver.ToolsIsoPathFlavor != "foo" {
 		t.Fatalf("bad: %#v", driver.ToolsIsoPathFlavor)
-	}
-
-	// Test the resulting state
-	path, ok := state.GetOk("tools_upload_source")
-	if !ok {
-		t.Fatal("should have tools_upload_source")
-	}
-	if path != tf.Name() {
-		t.Fatalf("bad: %#v", path)
 	}
 }
 
@@ -91,7 +82,7 @@ func TestStepPrepareTools_nonExist(t *testing.T) {
 	driver.ToolsIsoPathResult = "foo"
 
 	// Test the run
-	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -99,15 +90,10 @@ func TestStepPrepareTools_nonExist(t *testing.T) {
 	}
 
 	// Test the driver
-	if !driver.ToolsIsoPathCalled {
-		t.Fatal("tools iso path should be called")
+	if driver.ToolsIsoPathCalled {
+		t.Fatal("tools iso path should NOT be called")
 	}
 	if driver.ToolsIsoPathFlavor != "foo" {
 		t.Fatalf("bad: %#v", driver.ToolsIsoPathFlavor)
-	}
-
-	// Test the resulting state
-	if _, ok := state.GetOk("tools_upload_source"); ok {
-		t.Fatal("should NOT have tools_upload_source")
 	}
 }

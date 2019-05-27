@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware-esx/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,8 +19,8 @@ import (
 )
 
 var builtins = map[string]string{
-	vsphere.BuilderId:      "vmware",
-	vmwcommon.BuilderIdESX: "vmware",
+	vsphere.BuilderId:   "vmware",
+	vmwcommon.BuilderId: "vmware",
 }
 
 type Config struct {

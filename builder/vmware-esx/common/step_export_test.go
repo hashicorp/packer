@@ -14,6 +14,7 @@ func TestStepExport_impl(t *testing.T) {
 func testStepExport_wrongtype_impl(t *testing.T, remoteType string) {
 	state := testState(t)
 	step := new(StepExport)
+	step.SkipExport = true // XXX: We set this to true so there's no ovftool dependency for this test
 
 	var config DriverConfig
 	config.RemoteType = "foo"

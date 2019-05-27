@@ -8,6 +8,7 @@ import (
 
 func testConfig(t *testing.T) map[string]interface{} {
 	return map[string]interface{}{
+		"remote_host":      "localhost",
 		"ssh_username":     "foo",
 		"shutdown_command": "foo",
 		"source_path":      "config_test.go",
