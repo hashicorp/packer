@@ -95,7 +95,7 @@ generate: install-gen-deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	go fmt -w command/plugin.go
 
-test: fmt-check mode-check vet ## Run unit tests
+test: mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
 
 # testacc runs acceptance tests
@@ -103,7 +103,7 @@ testacc: install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace: fmt-check mode-check vet ## Test with race detection enabled
+testrace: mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 check-vendor-vs-mod: ## Check that go modules and vendored code are on par
