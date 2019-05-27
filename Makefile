@@ -8,9 +8,6 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-# gofmt
-UNFORMATTED_FILES=$(shell find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
-
 EXECUTABLE_FILES=$(shell find . -type f -executable | egrep -v '^\./(website/[vendor|tmp]|vendor/|\.git|bin/|scripts/|pkg/)' | egrep -v '.*(\.sh|\.bats|\.git)' | egrep -v './provisioner/(ansible|inspec)/test-fixtures/exit1')
 
 # Get the git commit
@@ -64,17 +61,14 @@ dev: ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s main.go $(UNFORMATTED_FILES)
+	@go fmt ./...
 
-fmt-check: ## Check go code formatting
-	@echo "==> Checking that code complies with gofmt requirements..."
-	@if [ ! -z "$(UNFORMATTED_FILES)" ]; then \
-		echo "gofmt needs to be run on the following files:"; \
-		echo "$(UNFORMATTED_FILES)" | xargs -n1; \
+fmt-check: fmt ## Check go code formatting
+	@echo "==> Checking that code complies with go fmt requirements..."
+	@git diff --exit-code; if [ $$? -eq 1 ]; then \
+		echo "Found files that are not fmt'ed."; \
 		echo "You can use the command: \`make fmt\` to reformat code."; \
 		exit 1; \
-	else \
-		echo "Check passed."; \
 	fi
 
 mode-check: ## Check that only certain files are executable
@@ -97,9 +91,9 @@ fmt-examples:
 # source files.
 generate: install-gen-deps ## Generate dynamically generated code
 	go generate ./...
-	gofmt -w common/bootcommand/boot_command.go
+	go fmt -w common/bootcommand/boot_command.go
 	goimports -w common/bootcommand/boot_command.go
-	gofmt -w command/plugin.go
+	go fmt -w command/plugin.go
 
 test: fmt-check mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
