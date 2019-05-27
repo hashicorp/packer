@@ -50,6 +50,7 @@ deps:
 	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
+	@go get github.com/alvaroloes/enumer
 
 dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -95,7 +96,7 @@ fmt-examples:
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate: deps ## Generate dynamically generated code
-	go generate .
+	go generate ./...
 	gofmt -w common/bootcommand/boot_command.go
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
