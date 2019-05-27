@@ -27,6 +27,11 @@ jobs:
       - checkout
       - run: GO111MODULE=on go run . --help
       - run: make check-vendor-vs-mod
+  check-fmt:
+    <<: *golang
+    steps:
+      - checkout
+      - run: make fmt-check
   build_linux:
     <<: *golang
     environment:
@@ -74,6 +79,7 @@ workflows:
     jobs:
       - build
       - check-vendor-vs-mod
+      - check-fmt
       - build_linux:
           filters:
             tags:
