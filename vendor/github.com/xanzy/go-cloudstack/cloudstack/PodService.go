@@ -148,6 +148,8 @@ type CreatePodResponse struct {
 	Forsystemvms    []string                    `json:"forsystemvms"`
 	Gateway         string                      `json:"gateway"`
 	Id              string                      `json:"id"`
+	JobID           string                      `json:"jobid"`
+	Jobstatus       int                         `json:"jobstatus"`
 	Name            string                      `json:"name"`
 	Netmask         string                      `json:"netmask"`
 	Startip         []string                    `json:"startip"`
@@ -262,11 +264,12 @@ func (s *PodService) DedicatePod(p *DedicatePodParams) (*DedicatePodResponse, er
 }
 
 type DedicatePodResponse struct {
-	JobID           string `json:"jobid"`
 	Accountid       string `json:"accountid"`
 	Affinitygroupid string `json:"affinitygroupid"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 	Podid           string `json:"podid"`
 	Podname         string `json:"podname"`
 }
@@ -320,6 +323,8 @@ func (s *PodService) DeletePod(p *DeletePodParams) (*DeletePodResponse, error) {
 
 type DeletePodResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -332,6 +337,14 @@ func (r *DeletePodResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -466,6 +479,8 @@ type DedicatedPod struct {
 	Affinitygroupid string `json:"affinitygroupid"`
 	Domainid        string `json:"domainid"`
 	Id              string `json:"id"`
+	JobID           string `json:"jobid"`
+	Jobstatus       int    `json:"jobstatus"`
 	Podid           string `json:"podid"`
 	Podname         string `json:"podname"`
 }
@@ -691,6 +706,8 @@ type Pod struct {
 	Forsystemvms    []string      `json:"forsystemvms"`
 	Gateway         string        `json:"gateway"`
 	Id              string        `json:"id"`
+	JobID           string        `json:"jobid"`
+	Jobstatus       int           `json:"jobstatus"`
 	Name            string        `json:"name"`
 	Netmask         string        `json:"netmask"`
 	Startip         []string      `json:"startip"`
@@ -777,8 +794,9 @@ func (s *PodService) ReleaseDedicatedPod(p *ReleaseDedicatedPodParams) (*Release
 }
 
 type ReleaseDedicatedPodResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -902,6 +920,8 @@ type UpdatePodResponse struct {
 	Forsystemvms    []string                    `json:"forsystemvms"`
 	Gateway         string                      `json:"gateway"`
 	Id              string                      `json:"id"`
+	JobID           string                      `json:"jobid"`
+	Jobstatus       int                         `json:"jobstatus"`
 	Name            string                      `json:"name"`
 	Netmask         string                      `json:"netmask"`
 	Startip         []string                    `json:"startip"`

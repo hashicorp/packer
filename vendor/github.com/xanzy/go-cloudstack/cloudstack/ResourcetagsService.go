@@ -128,8 +128,9 @@ func (s *ResourcetagsService) CreateTags(p *CreateTagsParams) (*CreateTagsRespon
 }
 
 type CreateTagsResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -225,8 +226,9 @@ func (s *ResourcetagsService) DeleteTags(p *DeleteTagsParams) (*DeleteTagsRespon
 }
 
 type DeleteTagsResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -342,9 +344,11 @@ type ListStorageTagsResponse struct {
 }
 
 type StorageTag struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Poolid int64  `json:"poolid"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Name      string `json:"name"`
+	Poolid    int64  `json:"poolid"`
 }
 
 type ListTagsParams struct {
@@ -539,6 +543,8 @@ type Tag struct {
 	Customer     string `json:"customer"`
 	Domain       string `json:"domain"`
 	Domainid     string `json:"domainid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Key          string `json:"key"`
 	Project      string `json:"project"`
 	Projectid    string `json:"projectid"`

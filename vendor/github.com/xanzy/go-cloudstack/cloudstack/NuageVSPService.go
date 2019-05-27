@@ -174,10 +174,11 @@ func (s *NuageVSPService) AddNuageVspDevice(p *AddNuageVspDeviceParams) (*AddNua
 }
 
 type AddNuageVspDeviceResponse struct {
-	JobID             string `json:"jobid"`
 	Apiversion        string `json:"apiversion"`
 	Cmsid             string `json:"cmsid"`
 	Hostname          string `json:"hostname"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Nuagedevicename   string `json:"nuagedevicename"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Port              int    `json:"port"`
@@ -250,8 +251,9 @@ func (s *NuageVSPService) DeleteNuageVspDevice(p *DeleteNuageVspDeviceParams) (*
 }
 
 type DeleteNuageVspDeviceResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -356,6 +358,8 @@ type NuageVspDevice struct {
 	Apiversion        string `json:"apiversion"`
 	Cmsid             string `json:"cmsid"`
 	Hostname          string `json:"hostname"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Nuagedevicename   string `json:"nuagedevicename"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Port              int    `json:"port"`
@@ -513,10 +517,11 @@ func (s *NuageVSPService) UpdateNuageVspDevice(p *UpdateNuageVspDeviceParams) (*
 }
 
 type UpdateNuageVspDeviceResponse struct {
-	JobID             string `json:"jobid"`
 	Apiversion        string `json:"apiversion"`
 	Cmsid             string `json:"cmsid"`
 	Hostname          string `json:"hostname"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Nuagedevicename   string `json:"nuagedevicename"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Port              int    `json:"port"`

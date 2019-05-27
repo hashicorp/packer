@@ -137,11 +137,12 @@ func (s *VPNService) AddVpnUser(p *AddVpnUserParams) (*AddVpnUserResponse, error
 }
 
 type AddVpnUserResponse struct {
-	JobID     string `json:"jobid"`
 	Account   string `json:"account"`
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
 	State     string `json:"state"`
@@ -273,13 +274,14 @@ func (s *VPNService) CreateRemoteAccessVpn(p *CreateRemoteAccessVpnParams) (*Cre
 }
 
 type CreateRemoteAccessVpnResponse struct {
-	JobID        string `json:"jobid"`
 	Account      string `json:"account"`
 	Domain       string `json:"domain"`
 	Domainid     string `json:"domainid"`
 	Fordisplay   bool   `json:"fordisplay"`
 	Id           string `json:"id"`
 	Iprange      string `json:"iprange"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Presharedkey string `json:"presharedkey"`
 	Project      string `json:"project"`
 	Projectid    string `json:"projectid"`
@@ -392,7 +394,6 @@ func (s *VPNService) CreateVpnConnection(p *CreateVpnConnectionParams) (*CreateV
 }
 
 type CreateVpnConnectionResponse struct {
-	JobID                string `json:"jobid"`
 	Account              string `json:"account"`
 	Cidrlist             string `json:"cidrlist"`
 	Created              string `json:"created"`
@@ -408,6 +409,8 @@ type CreateVpnConnectionResponse struct {
 	Ikelifetime          int64  `json:"ikelifetime"`
 	Ikepolicy            string `json:"ikepolicy"`
 	Ipsecpsk             string `json:"ipsecpsk"`
+	JobID                string `json:"jobid"`
+	Jobstatus            int    `json:"jobstatus"`
 	Passive              bool   `json:"passive"`
 	Project              string `json:"project"`
 	Projectid            string `json:"projectid"`
@@ -626,7 +629,6 @@ func (s *VPNService) CreateVpnCustomerGateway(p *CreateVpnCustomerGatewayParams)
 }
 
 type CreateVpnCustomerGatewayResponse struct {
-	JobID       string `json:"jobid"`
 	Account     string `json:"account"`
 	Cidrlist    string `json:"cidrlist"`
 	Domain      string `json:"domain"`
@@ -641,6 +643,8 @@ type CreateVpnCustomerGatewayResponse struct {
 	Ikepolicy   string `json:"ikepolicy"`
 	Ipaddress   string `json:"ipaddress"`
 	Ipsecpsk    string `json:"ipsecpsk"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Project     string `json:"project"`
 	Projectid   string `json:"projectid"`
@@ -727,12 +731,13 @@ func (s *VPNService) CreateVpnGateway(p *CreateVpnGatewayParams) (*CreateVpnGate
 }
 
 type CreateVpnGatewayResponse struct {
-	JobID      string `json:"jobid"`
 	Account    string `json:"account"`
 	Domain     string `json:"domain"`
 	Domainid   string `json:"domainid"`
 	Fordisplay bool   `json:"fordisplay"`
 	Id         string `json:"id"`
+	JobID      string `json:"jobid"`
+	Jobstatus  int    `json:"jobstatus"`
 	Project    string `json:"project"`
 	Projectid  string `json:"projectid"`
 	Publicip   string `json:"publicip"`
@@ -803,8 +808,9 @@ func (s *VPNService) DeleteRemoteAccessVpn(p *DeleteRemoteAccessVpnParams) (*Del
 }
 
 type DeleteRemoteAccessVpnResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -871,8 +877,9 @@ func (s *VPNService) DeleteVpnConnection(p *DeleteVpnConnectionParams) (*DeleteV
 }
 
 type DeleteVpnConnectionResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -939,8 +946,9 @@ func (s *VPNService) DeleteVpnCustomerGateway(p *DeleteVpnCustomerGatewayParams)
 }
 
 type DeleteVpnCustomerGatewayResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1007,8 +1015,9 @@ func (s *VPNService) DeleteVpnGateway(p *DeleteVpnGatewayParams) (*DeleteVpnGate
 }
 
 type DeleteVpnGatewayResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1229,6 +1238,8 @@ type RemoteAccessVpn struct {
 	Fordisplay   bool   `json:"fordisplay"`
 	Id           string `json:"id"`
 	Iprange      string `json:"iprange"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Presharedkey string `json:"presharedkey"`
 	Project      string `json:"project"`
 	Projectid    string `json:"projectid"`
@@ -1452,6 +1463,8 @@ type VpnConnection struct {
 	Ikelifetime          int64  `json:"ikelifetime"`
 	Ikepolicy            string `json:"ikepolicy"`
 	Ipsecpsk             string `json:"ipsecpsk"`
+	JobID                string `json:"jobid"`
+	Jobstatus            int    `json:"jobstatus"`
 	Passive              bool   `json:"passive"`
 	Project              string `json:"project"`
 	Projectid            string `json:"projectid"`
@@ -1703,6 +1716,8 @@ type VpnCustomerGateway struct {
 	Ikepolicy   string `json:"ikepolicy"`
 	Ipaddress   string `json:"ipaddress"`
 	Ipsecpsk    string `json:"ipsecpsk"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Project     string `json:"project"`
 	Projectid   string `json:"projectid"`
@@ -1914,6 +1929,8 @@ type VpnGateway struct {
 	Domainid   string `json:"domainid"`
 	Fordisplay bool   `json:"fordisplay"`
 	Id         string `json:"id"`
+	JobID      string `json:"jobid"`
+	Jobstatus  int    `json:"jobstatus"`
 	Project    string `json:"project"`
 	Projectid  string `json:"projectid"`
 	Publicip   string `json:"publicip"`
@@ -2113,6 +2130,8 @@ type VpnUser struct {
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
 	State     string `json:"state"`
@@ -2215,8 +2234,9 @@ func (s *VPNService) RemoveVpnUser(p *RemoveVpnUserParams) (*RemoveVpnUserRespon
 }
 
 type RemoveVpnUserResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -2310,7 +2330,6 @@ func (s *VPNService) ResetVpnConnection(p *ResetVpnConnectionParams) (*ResetVpnC
 }
 
 type ResetVpnConnectionResponse struct {
-	JobID                string `json:"jobid"`
 	Account              string `json:"account"`
 	Cidrlist             string `json:"cidrlist"`
 	Created              string `json:"created"`
@@ -2326,6 +2345,8 @@ type ResetVpnConnectionResponse struct {
 	Ikelifetime          int64  `json:"ikelifetime"`
 	Ikepolicy            string `json:"ikepolicy"`
 	Ipsecpsk             string `json:"ipsecpsk"`
+	JobID                string `json:"jobid"`
+	Jobstatus            int    `json:"jobstatus"`
 	Passive              bool   `json:"passive"`
 	Project              string `json:"project"`
 	Projectid            string `json:"projectid"`
@@ -2427,13 +2448,14 @@ func (s *VPNService) UpdateRemoteAccessVpn(p *UpdateRemoteAccessVpnParams) (*Upd
 }
 
 type UpdateRemoteAccessVpnResponse struct {
-	JobID        string `json:"jobid"`
 	Account      string `json:"account"`
 	Domain       string `json:"domain"`
 	Domainid     string `json:"domainid"`
 	Fordisplay   bool   `json:"fordisplay"`
 	Id           string `json:"id"`
 	Iprange      string `json:"iprange"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Presharedkey string `json:"presharedkey"`
 	Project      string `json:"project"`
 	Projectid    string `json:"projectid"`
@@ -2533,7 +2555,6 @@ func (s *VPNService) UpdateVpnConnection(p *UpdateVpnConnectionParams) (*UpdateV
 }
 
 type UpdateVpnConnectionResponse struct {
-	JobID                string `json:"jobid"`
 	Account              string `json:"account"`
 	Cidrlist             string `json:"cidrlist"`
 	Created              string `json:"created"`
@@ -2549,6 +2570,8 @@ type UpdateVpnConnectionResponse struct {
 	Ikelifetime          int64  `json:"ikelifetime"`
 	Ikepolicy            string `json:"ikepolicy"`
 	Ipsecpsk             string `json:"ipsecpsk"`
+	JobID                string `json:"jobid"`
+	Jobstatus            int    `json:"jobstatus"`
 	Passive              bool   `json:"passive"`
 	Project              string `json:"project"`
 	Projectid            string `json:"projectid"`
@@ -2768,7 +2791,6 @@ func (s *VPNService) UpdateVpnCustomerGateway(p *UpdateVpnCustomerGatewayParams)
 }
 
 type UpdateVpnCustomerGatewayResponse struct {
-	JobID       string `json:"jobid"`
 	Account     string `json:"account"`
 	Cidrlist    string `json:"cidrlist"`
 	Domain      string `json:"domain"`
@@ -2783,6 +2805,8 @@ type UpdateVpnCustomerGatewayResponse struct {
 	Ikepolicy   string `json:"ikepolicy"`
 	Ipaddress   string `json:"ipaddress"`
 	Ipsecpsk    string `json:"ipsecpsk"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Project     string `json:"project"`
 	Projectid   string `json:"projectid"`
@@ -2880,12 +2904,13 @@ func (s *VPNService) UpdateVpnGateway(p *UpdateVpnGatewayParams) (*UpdateVpnGate
 }
 
 type UpdateVpnGatewayResponse struct {
-	JobID      string `json:"jobid"`
 	Account    string `json:"account"`
 	Domain     string `json:"domain"`
 	Domainid   string `json:"domainid"`
 	Fordisplay bool   `json:"fordisplay"`
 	Id         string `json:"id"`
+	JobID      string `json:"jobid"`
+	Jobstatus  int    `json:"jobstatus"`
 	Project    string `json:"project"`
 	Projectid  string `json:"projectid"`
 	Publicip   string `json:"publicip"`

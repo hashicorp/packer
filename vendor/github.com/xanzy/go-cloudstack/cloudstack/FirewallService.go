@@ -195,12 +195,13 @@ func (s *FirewallService) AddPaloAltoFirewall(p *AddPaloAltoFirewallParams) (*Ad
 }
 
 type AddPaloAltoFirewallResponse struct {
-	JobID             string `json:"jobid"`
 	Fwdevicecapacity  int64  `json:"fwdevicecapacity"`
 	Fwdeviceid        string `json:"fwdeviceid"`
 	Fwdevicename      string `json:"fwdevicename"`
 	Fwdevicestate     string `json:"fwdevicestate"`
 	Ipaddress         string `json:"ipaddress"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Numretries        string `json:"numretries"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Privateinterface  string `json:"privateinterface"`
@@ -299,12 +300,13 @@ func (s *FirewallService) ConfigurePaloAltoFirewall(p *ConfigurePaloAltoFirewall
 }
 
 type PaloAltoFirewallResponse struct {
-	JobID             string `json:"jobid"`
 	Fwdevicecapacity  int64  `json:"fwdevicecapacity"`
 	Fwdeviceid        string `json:"fwdeviceid"`
 	Fwdevicename      string `json:"fwdevicename"`
 	Fwdevicestate     string `json:"fwdevicestate"`
 	Ipaddress         string `json:"ipaddress"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Numretries        string `json:"numretries"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Privateinterface  string `json:"privateinterface"`
@@ -498,7 +500,6 @@ func (s *FirewallService) CreateEgressFirewallRule(p *CreateEgressFirewallRulePa
 }
 
 type CreateEgressFirewallRuleResponse struct {
-	JobID        string `json:"jobid"`
 	Cidrlist     string `json:"cidrlist"`
 	Destcidrlist string `json:"destcidrlist"`
 	Endport      int    `json:"endport"`
@@ -508,6 +509,8 @@ type CreateEgressFirewallRuleResponse struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -683,7 +686,6 @@ func (s *FirewallService) CreateFirewallRule(p *CreateFirewallRuleParams) (*Crea
 }
 
 type CreateFirewallRuleResponse struct {
-	JobID        string `json:"jobid"`
 	Cidrlist     string `json:"cidrlist"`
 	Destcidrlist string `json:"destcidrlist"`
 	Endport      int    `json:"endport"`
@@ -693,6 +695,8 @@ type CreateFirewallRuleResponse struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -905,12 +909,13 @@ func (s *FirewallService) CreatePortForwardingRule(p *CreatePortForwardingRulePa
 }
 
 type CreatePortForwardingRuleResponse struct {
-	JobID                     string `json:"jobid"`
 	Cidrlist                  string `json:"cidrlist"`
 	Fordisplay                bool   `json:"fordisplay"`
 	Id                        string `json:"id"`
 	Ipaddress                 string `json:"ipaddress"`
 	Ipaddressid               string `json:"ipaddressid"`
+	JobID                     string `json:"jobid"`
+	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Privateendport            string `json:"privateendport"`
 	Privateport               string `json:"privateport"`
@@ -993,8 +998,9 @@ func (s *FirewallService) DeleteEgressFirewallRule(p *DeleteEgressFirewallRulePa
 }
 
 type DeleteEgressFirewallRuleResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1066,8 +1072,9 @@ func (s *FirewallService) DeleteFirewallRule(p *DeleteFirewallRuleParams) (*Dele
 }
 
 type DeleteFirewallRuleResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1139,8 +1146,9 @@ func (s *FirewallService) DeletePaloAltoFirewall(p *DeletePaloAltoFirewallParams
 }
 
 type DeletePaloAltoFirewallResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1212,8 +1220,9 @@ func (s *FirewallService) DeletePortForwardingRule(p *DeletePortForwardingRulePa
 }
 
 type DeletePortForwardingRuleResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -1458,6 +1467,8 @@ type EgressFirewallRule struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -1706,6 +1717,8 @@ type FirewallRule struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -1821,6 +1834,8 @@ type PaloAltoFirewall struct {
 	Fwdevicename      string `json:"fwdevicename"`
 	Fwdevicestate     string `json:"fwdevicestate"`
 	Ipaddress         string `json:"ipaddress"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Numretries        string `json:"numretries"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Privateinterface  string `json:"privateinterface"`
@@ -2071,6 +2086,8 @@ type PortForwardingRule struct {
 	Id                        string `json:"id"`
 	Ipaddress                 string `json:"ipaddress"`
 	Ipaddressid               string `json:"ipaddressid"`
+	JobID                     string `json:"jobid"`
+	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Privateendport            string `json:"privateendport"`
 	Privateport               string `json:"privateport"`
@@ -2181,7 +2198,6 @@ func (s *FirewallService) UpdateEgressFirewallRule(p *UpdateEgressFirewallRulePa
 }
 
 type UpdateEgressFirewallRuleResponse struct {
-	JobID        string `json:"jobid"`
 	Cidrlist     string `json:"cidrlist"`
 	Destcidrlist string `json:"destcidrlist"`
 	Endport      int    `json:"endport"`
@@ -2191,6 +2207,8 @@ type UpdateEgressFirewallRuleResponse struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -2294,7 +2312,6 @@ func (s *FirewallService) UpdateFirewallRule(p *UpdateFirewallRuleParams) (*Upda
 }
 
 type UpdateFirewallRuleResponse struct {
-	JobID        string `json:"jobid"`
 	Cidrlist     string `json:"cidrlist"`
 	Destcidrlist string `json:"destcidrlist"`
 	Endport      int    `json:"endport"`
@@ -2304,6 +2321,8 @@ type UpdateFirewallRuleResponse struct {
 	Id           string `json:"id"`
 	Ipaddress    string `json:"ipaddress"`
 	Ipaddressid  string `json:"ipaddressid"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Networkid    string `json:"networkid"`
 	Protocol     string `json:"protocol"`
 	Startport    int    `json:"startport"`
@@ -2453,12 +2472,13 @@ func (s *FirewallService) UpdatePortForwardingRule(p *UpdatePortForwardingRulePa
 }
 
 type UpdatePortForwardingRuleResponse struct {
-	JobID                     string `json:"jobid"`
 	Cidrlist                  string `json:"cidrlist"`
 	Fordisplay                bool   `json:"fordisplay"`
 	Id                        string `json:"id"`
 	Ipaddress                 string `json:"ipaddress"`
 	Ipaddressid               string `json:"ipaddressid"`
+	JobID                     string `json:"jobid"`
+	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Privateendport            string `json:"privateendport"`
 	Privateport               string `json:"privateport"`

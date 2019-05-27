@@ -224,6 +224,8 @@ type CreateStoragePoolResponse struct {
 	Hypervisor           string            `json:"hypervisor"`
 	Id                   string            `json:"id"`
 	Ipaddress            string            `json:"ipaddress"`
+	JobID                string            `json:"jobid"`
+	Jobstatus            int               `json:"jobstatus"`
 	Name                 string            `json:"name"`
 	Overprovisionfactor  string            `json:"overprovisionfactor"`
 	Path                 string            `json:"path"`
@@ -301,6 +303,8 @@ func (s *PoolService) DeleteStoragePool(p *DeleteStoragePoolParams) (*DeleteStor
 
 type DeleteStoragePoolResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -313,6 +317,14 @@ func (r *DeleteStoragePoolResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -417,6 +429,8 @@ type FindStoragePoolsForMigrationResponse struct {
 	Hypervisor           string            `json:"hypervisor"`
 	Id                   string            `json:"id"`
 	Ipaddress            string            `json:"ipaddress"`
+	JobID                string            `json:"jobid"`
+	Jobstatus            int               `json:"jobstatus"`
 	Name                 string            `json:"name"`
 	Overprovisionfactor  string            `json:"overprovisionfactor"`
 	Path                 string            `json:"path"`
@@ -691,6 +705,8 @@ type StoragePool struct {
 	Hypervisor           string            `json:"hypervisor"`
 	Id                   string            `json:"id"`
 	Ipaddress            string            `json:"ipaddress"`
+	JobID                string            `json:"jobid"`
+	Jobstatus            int               `json:"jobstatus"`
 	Name                 string            `json:"name"`
 	Overprovisionfactor  string            `json:"overprovisionfactor"`
 	Path                 string            `json:"path"`
@@ -814,6 +830,8 @@ type UpdateStoragePoolResponse struct {
 	Hypervisor           string            `json:"hypervisor"`
 	Id                   string            `json:"id"`
 	Ipaddress            string            `json:"ipaddress"`
+	JobID                string            `json:"jobid"`
+	Jobstatus            int               `json:"jobstatus"`
 	Name                 string            `json:"name"`
 	Overprovisionfactor  string            `json:"overprovisionfactor"`
 	Path                 string            `json:"path"`
