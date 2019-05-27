@@ -49,7 +49,6 @@ install-build-deps: ## Install dependencies for bin build
 
 install-gen-deps: ## Install dependencies for code generation
 	@go get golang.org/x/tools/cmd/goimports
-	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/alvaroloes/enumer
 
