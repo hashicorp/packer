@@ -21,21 +21,19 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)
 
 export GOLDFLAGS
 
-.PHONY: bin checkversion ci default deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace updatedeps
+.PHONY: bin checkversion ci default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace
 
-default: deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
+default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
-ci: testrace
+ci: testrace ## Test in continuous integration
 
-release: deps test releasebin package ## Build a release build
+release: install-build-deps test releasebin package ## Build a release build
 
-bin: deps ## Build debug/test build
-	@go get github.com/mitchellh/gox
+bin: install-build-deps ## Build debug/test build
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
 	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
 
-releasebin: deps
-	@go get github.com/mitchellh/gox
+releasebin: install-build-deps
 	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
@@ -46,13 +44,16 @@ package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
-deps:
+install-build-deps: ## Install dependencies for bin build
+	@go get github.com/mitchellh/gox
+
+install-gen-deps: ## Install dependencies for code generation
 	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/alvaroloes/enumer
 
-dev: deps ## Build and install a development build
+dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
@@ -95,7 +96,7 @@ fmt-examples:
 
 # generate runs `go generate` to build the dynamically generated
 # source files.
-generate: deps ## Generate dynamically generated code
+generate: install-gen-deps ## Generate dynamically generated code
 	go generate ./...
 	gofmt -w common/bootcommand/boot_command.go
 	goimports -w common/bootcommand/boot_command.go
@@ -105,22 +106,19 @@ test: fmt-check mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
 
 # testacc runs acceptance tests
-testacc: deps generate ## Run acceptance tests
+testacc: install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: fmt-check mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
-check-vendor-vs-mod:
+check-vendor-vs-mod: ## Check that go modules and vendored code are on par
 	@GO111MODULE=on go mod vendor 
 	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: vendor dir is not on par with go modules definition." && \
 		exit 1; \
 	fi
-
-updatedeps:
-	@echo "INFO: Packer deps are managed by go modules. See .github/CONTRIBUTING.md"
 
 vet: ## Vet Go code
 	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
