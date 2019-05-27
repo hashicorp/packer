@@ -91,9 +91,17 @@ fmt-examples:
 # source files.
 generate: install-gen-deps ## Generate dynamically generated code
 	go generate ./...
-	go fmt -w common/bootcommand/boot_command.go
+	go fmt common/bootcommand/boot_command.go
 	goimports -w common/bootcommand/boot_command.go
-	go fmt -w command/plugin.go
+	go fmt command/plugin.go
+
+generate-check: generate ## Check go code generation is on par
+	@echo "==> Checking that auto-generated code is not changed..."
+	@git diff --exit-code; if [ $$? -eq 1 ]; then \
+		echo "Found diffs in go generated code."; \
+		echo "You can use the command: \`make generate\` to reformat code."; \
+		exit 1; \
+	fi
 
 test: mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
