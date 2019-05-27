@@ -138,9 +138,10 @@ func (s *BaremetalService) AddBaremetalDhcp(p *AddBaremetalDhcpParams) (*AddBare
 }
 
 type AddBaremetalDhcpResponse struct {
-	JobID             string `json:"jobid"`
 	Dhcpservertype    string `json:"dhcpservertype"`
 	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Provider          string `json:"provider"`
 	Url               string `json:"url"`
@@ -285,8 +286,13 @@ func (s *BaremetalService) AddBaremetalPxeKickStartServer(p *AddBaremetalPxeKick
 }
 
 type AddBaremetalPxeKickStartServerResponse struct {
-	JobID   string `json:"jobid"`
-	Tftpdir string `json:"tftpdir"`
+	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
+	Physicalnetworkid string `json:"physicalnetworkid"`
+	Provider          string `json:"provider"`
+	Tftpdir           string `json:"tftpdir"`
+	Url               string `json:"url"`
 }
 
 type AddBaremetalPxePingServerParams struct {
@@ -474,10 +480,15 @@ func (s *BaremetalService) AddBaremetalPxePingServer(p *AddBaremetalPxePingServe
 }
 
 type AddBaremetalPxePingServerResponse struct {
+	Id                  string `json:"id"`
 	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
+	Physicalnetworkid   string `json:"physicalnetworkid"`
 	Pingdir             string `json:"pingdir"`
 	Pingstorageserverip string `json:"pingstorageserverip"`
+	Provider            string `json:"provider"`
 	Tftpdir             string `json:"tftpdir"`
+	Url                 string `json:"url"`
 }
 
 type AddBaremetalRctParams struct {
@@ -548,9 +559,10 @@ func (s *BaremetalService) AddBaremetalRct(p *AddBaremetalRctParams) (*AddBareme
 }
 
 type AddBaremetalRctResponse struct {
-	JobID string `json:"jobid"`
-	Id    string `json:"id"`
-	Url   string `json:"url"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Url       string `json:"url"`
 }
 
 type DeleteBaremetalRctParams struct {
@@ -616,8 +628,9 @@ func (s *BaremetalService) DeleteBaremetalRct(p *DeleteBaremetalRctParams) (*Del
 }
 
 type DeleteBaremetalRctResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -734,6 +747,8 @@ type ListBaremetalDhcpResponse struct {
 type BaremetalDhcp struct {
 	Dhcpservertype    string `json:"dhcpservertype"`
 	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Provider          string `json:"provider"`
 	Url               string `json:"url"`
@@ -840,6 +855,8 @@ type ListBaremetalPxeServersResponse struct {
 
 type BaremetalPxeServer struct {
 	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Provider          string `json:"provider"`
 	Url               string `json:"url"`
@@ -921,8 +938,10 @@ type ListBaremetalRctResponse struct {
 }
 
 type BaremetalRct struct {
-	Id  string `json:"id"`
-	Url string `json:"url"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Url       string `json:"url"`
 }
 
 type NotifyBaremetalProvisionDoneParams struct {
@@ -988,7 +1007,8 @@ func (s *BaremetalService) NotifyBaremetalProvisionDone(p *NotifyBaremetalProvis
 }
 
 type NotifyBaremetalProvisionDoneResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }

@@ -113,6 +113,8 @@ type CreateDomainResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
+	JobID                     string  `json:"jobid"`
+	Jobstatus                 int     `json:"jobstatus"`
 	Level                     int     `json:"level"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
@@ -227,8 +229,9 @@ func (s *DomainService) DeleteDomain(p *DeleteDomainParams) (*DeleteDomainRespon
 }
 
 type DeleteDomainResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -445,6 +448,8 @@ type DomainChildren struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
+	JobID                     string  `json:"jobid"`
+	Jobstatus                 int     `json:"jobstatus"`
 	Level                     int     `json:"level"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
@@ -709,6 +714,8 @@ type Domain struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
+	JobID                     string  `json:"jobid"`
+	Jobstatus                 int     `json:"jobstatus"`
 	Level                     int     `json:"level"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
@@ -826,6 +833,8 @@ type UpdateDomainResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
+	JobID                     string  `json:"jobid"`
+	Jobstatus                 int     `json:"jobstatus"`
 	Level                     int     `json:"level"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
