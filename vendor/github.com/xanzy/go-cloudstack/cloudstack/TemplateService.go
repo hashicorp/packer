@@ -126,7 +126,6 @@ func (s *TemplateService) CopyTemplate(p *CopyTemplateParams) (*CopyTemplateResp
 }
 
 type CopyTemplateResponse struct {
-	JobID                 string            `json:"jobid"`
 	Account               string            `json:"account"`
 	Accountid             string            `json:"accountid"`
 	Bits                  int               `json:"bits"`
@@ -150,6 +149,8 @@ type CopyTemplateResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -159,14 +160,43 @@ type CopyTemplateResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *CopyTemplateResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias CopyTemplateResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type CreateTemplateParams struct {
@@ -223,6 +253,10 @@ func (p *CreateTemplateParams) toURLValues() url.Values {
 	}
 	if v, found := p.p["snapshotid"]; found {
 		u.Set("snapshotid", v.(string))
+	}
+	if v, found := p.p["sshkeyenabled"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("sshkeyenabled", vv)
 	}
 	if v, found := p.p["templatetag"]; found {
 		u.Set("templatetag", v.(string))
@@ -335,6 +369,14 @@ func (p *CreateTemplateParams) SetSnapshotid(v string) {
 	return
 }
 
+func (p *CreateTemplateParams) SetSshkeyenabled(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["sshkeyenabled"] = v
+	return
+}
+
 func (p *CreateTemplateParams) SetTemplatetag(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
@@ -414,7 +456,6 @@ func (s *TemplateService) CreateTemplate(p *CreateTemplateParams) (*CreateTempla
 }
 
 type CreateTemplateResponse struct {
-	JobID                 string            `json:"jobid"`
 	Account               string            `json:"account"`
 	Accountid             string            `json:"accountid"`
 	Bits                  int               `json:"bits"`
@@ -438,6 +479,8 @@ type CreateTemplateResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -447,14 +490,43 @@ type CreateTemplateResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *CreateTemplateResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias CreateTemplateResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type DeleteTemplateParams struct {
@@ -543,8 +615,9 @@ func (s *TemplateService) DeleteTemplate(p *DeleteTemplateParams) (*DeleteTempla
 }
 
 type DeleteTemplateResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -650,12 +723,13 @@ func (s *TemplateService) ExtractTemplate(p *ExtractTemplateParams) (*ExtractTem
 }
 
 type ExtractTemplateResponse struct {
-	JobID            string `json:"jobid"`
 	Accountid        string `json:"accountid"`
 	Created          string `json:"created"`
 	ExtractId        string `json:"extractId"`
 	ExtractMode      string `json:"extractMode"`
 	Id               string `json:"id"`
+	JobID            string `json:"jobid"`
+	Jobstatus        int    `json:"jobstatus"`
 	Name             string `json:"name"`
 	Resultstring     string `json:"resultstring"`
 	State            string `json:"state"`
@@ -955,6 +1029,8 @@ func (s *TemplateService) GetUploadParamsForTemplate(p *GetUploadParamsForTempla
 type GetUploadParamsForTemplateResponse struct {
 	Expires   string `json:"expires"`
 	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
 	Metadata  string `json:"metadata"`
 	PostURL   string `json:"postURL"`
 	Signature string `json:"signature"`
@@ -1050,6 +1126,8 @@ type TemplatePermission struct {
 	Domainid   string   `json:"domainid"`
 	Id         string   `json:"id"`
 	Ispublic   bool     `json:"ispublic"`
+	JobID      string   `json:"jobid"`
+	Jobstatus  int      `json:"jobstatus"`
 	Projectids []string `json:"projectids"`
 }
 
@@ -1402,6 +1480,8 @@ type Template struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1411,14 +1491,43 @@ type Template struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *Template) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias Template
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type PrepareTemplateParams struct {
@@ -1515,6 +1624,8 @@ type PrepareTemplateResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1524,14 +1635,43 @@ type PrepareTemplateResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *PrepareTemplateResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias PrepareTemplateResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RegisterTemplateParams struct {
@@ -1883,6 +2023,8 @@ type RegisterTemplate struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1892,14 +2034,43 @@ type RegisterTemplate struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *RegisterTemplate) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias RegisterTemplate
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type UpdateTemplateParams struct {
@@ -1960,6 +2131,10 @@ func (p *UpdateTemplateParams) toURLValues() url.Values {
 	if v, found := p.p["sortkey"]; found {
 		vv := strconv.Itoa(v.(int))
 		u.Set("sortkey", vv)
+	}
+	if v, found := p.p["sshkeyenabled"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("sshkeyenabled", vv)
 	}
 	return u
 }
@@ -2068,6 +2243,14 @@ func (p *UpdateTemplateParams) SetSortkey(v int) {
 	return
 }
 
+func (p *UpdateTemplateParams) SetSshkeyenabled(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["sshkeyenabled"] = v
+	return
+}
+
 // You should always use this function to get a new UpdateTemplateParams instance,
 // as then you are sure you have configured all required params
 func (s *TemplateService) NewUpdateTemplateParams(id string) *UpdateTemplateParams {
@@ -2116,6 +2299,8 @@ type UpdateTemplateResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
+	JobID                 string            `json:"jobid"`
+	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -2125,14 +2310,43 @@ type UpdateTemplateResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
+	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
+	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
+}
+
+func (r *UpdateTemplateResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateTemplateResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type UpdateTemplatePermissionsParams struct {
@@ -2255,6 +2469,8 @@ func (s *TemplateService) UpdateTemplatePermissions(p *UpdateTemplatePermissions
 
 type UpdateTemplatePermissionsResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -2267,6 +2483,14 @@ func (r *UpdateTemplatePermissionsResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err

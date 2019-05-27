@@ -272,6 +272,8 @@ type CreateVlanIpRangeResponse struct {
 	Id                string `json:"id"`
 	Ip6cidr           string `json:"ip6cidr"`
 	Ip6gateway        string `json:"ip6gateway"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Netmask           string `json:"netmask"`
 	Networkid         string `json:"networkid"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
@@ -383,6 +385,8 @@ type DedicateGuestVlanRangeResponse struct {
 	Domainid          string `json:"domainid"`
 	Guestvlanrange    string `json:"guestvlanrange"`
 	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid int64  `json:"physicalnetworkid"`
 	Project           string `json:"project"`
 	Projectid         string `json:"projectid"`
@@ -438,6 +442,8 @@ func (s *VLANService) DeleteVlanIpRange(p *DeleteVlanIpRangeParams) (*DeleteVlan
 
 type DeleteVlanIpRangeResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -450,6 +456,14 @@ func (r *DeleteVlanIpRangeResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -651,6 +665,8 @@ type DedicatedGuestVlanRange struct {
 	Domainid          string `json:"domainid"`
 	Guestvlanrange    string `json:"guestvlanrange"`
 	Id                string `json:"id"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid int64  `json:"physicalnetworkid"`
 	Project           string `json:"project"`
 	Projectid         string `json:"projectid"`
@@ -889,6 +905,8 @@ type VlanIpRange struct {
 	Id                string `json:"id"`
 	Ip6cidr           string `json:"ip6cidr"`
 	Ip6gateway        string `json:"ip6gateway"`
+	JobID             string `json:"jobid"`
+	Jobstatus         int    `json:"jobstatus"`
 	Netmask           string `json:"netmask"`
 	Networkid         string `json:"networkid"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
@@ -965,7 +983,8 @@ func (s *VLANService) ReleaseDedicatedGuestVlanRange(p *ReleaseDedicatedGuestVla
 }
 
 type ReleaseDedicatedGuestVlanRangeResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }

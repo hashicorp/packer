@@ -131,10 +131,11 @@ func (s *GuestOSService) AddGuestOs(p *AddGuestOsParams) (*AddGuestOsResponse, e
 }
 
 type AddGuestOsResponse struct {
-	JobID         string `json:"jobid"`
 	Description   string `json:"description"`
 	Id            string `json:"id"`
 	Isuserdefined bool   `json:"isuserdefined"`
+	JobID         string `json:"jobid"`
+	Jobstatus     int    `json:"jobstatus"`
 	Oscategoryid  string `json:"oscategoryid"`
 }
 
@@ -252,14 +253,42 @@ func (s *GuestOSService) AddGuestOsMapping(p *AddGuestOsMappingParams) (*AddGues
 }
 
 type AddGuestOsMappingResponse struct {
-	JobID               string `json:"jobid"`
 	Hypervisor          string `json:"hypervisor"`
 	Hypervisorversion   string `json:"hypervisorversion"`
 	Id                  string `json:"id"`
 	Isuserdefined       string `json:"isuserdefined"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Osdisplayname       string `json:"osdisplayname"`
 	Osnameforhypervisor string `json:"osnameforhypervisor"`
 	Ostypeid            string `json:"ostypeid"`
+}
+
+func (r *AddGuestOsMappingResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias AddGuestOsMappingResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ListGuestOsMappingParams struct {
@@ -419,9 +448,38 @@ type GuestOsMapping struct {
 	Hypervisorversion   string `json:"hypervisorversion"`
 	Id                  string `json:"id"`
 	Isuserdefined       string `json:"isuserdefined"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Osdisplayname       string `json:"osdisplayname"`
 	Osnameforhypervisor string `json:"osnameforhypervisor"`
 	Ostypeid            string `json:"ostypeid"`
+}
+
+func (r *GuestOsMapping) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias GuestOsMapping
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ListOsCategoriesParams struct {
@@ -605,8 +663,10 @@ type ListOsCategoriesResponse struct {
 }
 
 type OsCategory struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id        string `json:"id"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Name      string `json:"name"`
 }
 
 type ListOsTypesParams struct {
@@ -754,6 +814,8 @@ type OsType struct {
 	Description   string `json:"description"`
 	Id            string `json:"id"`
 	Isuserdefined bool   `json:"isuserdefined"`
+	JobID         string `json:"jobid"`
+	Jobstatus     int    `json:"jobstatus"`
 	Oscategoryid  string `json:"oscategoryid"`
 }
 
@@ -820,8 +882,9 @@ func (s *GuestOSService) RemoveGuestOs(p *RemoveGuestOsParams) (*RemoveGuestOsRe
 }
 
 type RemoveGuestOsResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -888,8 +951,9 @@ func (s *GuestOSService) RemoveGuestOsMapping(p *RemoveGuestOsMappingParams) (*R
 }
 
 type RemoveGuestOsMappingResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -989,10 +1053,11 @@ func (s *GuestOSService) UpdateGuestOs(p *UpdateGuestOsParams) (*UpdateGuestOsRe
 }
 
 type UpdateGuestOsResponse struct {
-	JobID         string `json:"jobid"`
 	Description   string `json:"description"`
 	Id            string `json:"id"`
 	Isuserdefined bool   `json:"isuserdefined"`
+	JobID         string `json:"jobid"`
+	Jobstatus     int    `json:"jobstatus"`
 	Oscategoryid  string `json:"oscategoryid"`
 }
 
@@ -1076,12 +1141,40 @@ func (s *GuestOSService) UpdateGuestOsMapping(p *UpdateGuestOsMappingParams) (*U
 }
 
 type UpdateGuestOsMappingResponse struct {
-	JobID               string `json:"jobid"`
 	Hypervisor          string `json:"hypervisor"`
 	Hypervisorversion   string `json:"hypervisorversion"`
 	Id                  string `json:"id"`
 	Isuserdefined       string `json:"isuserdefined"`
+	JobID               string `json:"jobid"`
+	Jobstatus           int    `json:"jobstatus"`
 	Osdisplayname       string `json:"osdisplayname"`
 	Osnameforhypervisor string `json:"osnameforhypervisor"`
 	Ostypeid            string `json:"ostypeid"`
+}
+
+func (r *UpdateGuestOsMappingResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateGuestOsMappingResponse
+	return json.Unmarshal(b, (*alias)(r))
 }

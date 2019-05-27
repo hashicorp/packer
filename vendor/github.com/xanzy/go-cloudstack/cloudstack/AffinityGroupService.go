@@ -148,12 +148,13 @@ func (s *AffinityGroupService) CreateAffinityGroup(p *CreateAffinityGroupParams)
 }
 
 type CreateAffinityGroupResponse struct {
-	JobID             string   `json:"jobid"`
 	Account           string   `json:"account"`
 	Description       string   `json:"description"`
 	Domain            string   `json:"domain"`
 	Domainid          string   `json:"domainid"`
 	Id                string   `json:"id"`
+	JobID             string   `json:"jobid"`
+	Jobstatus         int      `json:"jobstatus"`
 	Name              string   `json:"name"`
 	Project           string   `json:"project"`
 	Projectid         string   `json:"projectid"`
@@ -267,8 +268,9 @@ func (s *AffinityGroupService) DeleteAffinityGroup(p *DeleteAffinityGroupParams)
 }
 
 type DeleteAffinityGroupResponse struct {
-	JobID       string `json:"jobid"`
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -348,7 +350,9 @@ type ListAffinityGroupTypesResponse struct {
 }
 
 type AffinityGroupType struct {
-	Type string `json:"type"`
+	JobID     string `json:"jobid"`
+	Jobstatus int    `json:"jobstatus"`
+	Type      string `json:"type"`
 }
 
 type ListAffinityGroupsParams struct {
@@ -624,6 +628,8 @@ type AffinityGroup struct {
 	Domain            string   `json:"domain"`
 	Domainid          string   `json:"domainid"`
 	Id                string   `json:"id"`
+	JobID             string   `json:"jobid"`
+	Jobstatus         int      `json:"jobstatus"`
 	Name              string   `json:"name"`
 	Project           string   `json:"project"`
 	Projectid         string   `json:"projectid"`
@@ -723,7 +729,6 @@ func (s *AffinityGroupService) UpdateVMAffinityGroup(p *UpdateVMAffinityGroupPar
 }
 
 type UpdateVMAffinityGroupResponse struct {
-	JobID                 string                                       `json:"jobid"`
 	Account               string                                       `json:"account"`
 	Affinitygroup         []UpdateVMAffinityGroupResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                                          `json:"cpunumber"`
@@ -755,6 +760,8 @@ type UpdateVMAffinityGroupResponse struct {
 	Isodisplaytext        string                                       `json:"isodisplaytext"`
 	Isoid                 string                                       `json:"isoid"`
 	Isoname               string                                       `json:"isoname"`
+	JobID                 string                                       `json:"jobid"`
+	Jobstatus             int                                          `json:"jobstatus"`
 	Keypair               string                                       `json:"keypair"`
 	Memory                int                                          `json:"memory"`
 	Memoryintfreekbs      int64                                        `json:"memoryintfreekbs"`
@@ -764,7 +771,7 @@ type UpdateVMAffinityGroupResponse struct {
 	Networkkbsread        int64                                        `json:"networkkbsread"`
 	Networkkbswrite       int64                                        `json:"networkkbswrite"`
 	Nic                   []Nic                                        `json:"nic"`
-	Ostypeid              int64                                        `json:"ostypeid"`
+	Ostypeid              string                                       `json:"ostypeid"`
 	Password              string                                       `json:"password"`
 	Passwordenabled       bool                                         `json:"passwordenabled"`
 	Project               string                                       `json:"project"`
@@ -778,6 +785,7 @@ type UpdateVMAffinityGroupResponse struct {
 	Serviceofferingname   string                                       `json:"serviceofferingname"`
 	Servicestate          string                                       `json:"servicestate"`
 	State                 string                                       `json:"state"`
+	Tags                  []Tags                                       `json:"tags"`
 	Templatedisplaytext   string                                       `json:"templatedisplaytext"`
 	Templateid            string                                       `json:"templateid"`
 	Templatename          string                                       `json:"templatename"`
@@ -828,4 +836,31 @@ type UpdateVMAffinityGroupResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
+}
+
+func (r *UpdateVMAffinityGroupResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias UpdateVMAffinityGroupResponse
+	return json.Unmarshal(b, (*alias)(r))
 }

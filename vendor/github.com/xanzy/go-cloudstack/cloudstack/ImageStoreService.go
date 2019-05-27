@@ -121,6 +121,8 @@ func (s *ImageStoreService) AddImageStore(p *AddImageStoreParams) (*AddImageStor
 
 type AddImageStoreResponse struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -298,6 +300,8 @@ func (s *ImageStoreService) AddImageStoreS3(p *AddImageStoreS3Params) (*AddImage
 
 type AddImageStoreS3Response struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -404,6 +408,8 @@ func (s *ImageStoreService) CreateSecondaryStagingStore(p *CreateSecondaryStagin
 
 type CreateSecondaryStagingStoreResponse struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -462,6 +468,8 @@ func (s *ImageStoreService) DeleteImageStore(p *DeleteImageStoreParams) (*Delete
 
 type DeleteImageStoreResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -474,6 +482,14 @@ func (r *DeleteImageStoreResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -533,6 +549,8 @@ func (s *ImageStoreService) DeleteSecondaryStagingStore(p *DeleteSecondaryStagin
 
 type DeleteSecondaryStagingStoreResponse struct {
 	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -545,6 +563,14 @@ func (r *DeleteSecondaryStagingStoreResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -770,6 +796,8 @@ type ListImageStoresResponse struct {
 
 type ImageStore struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -994,6 +1022,8 @@ type ListSecondaryStagingStoresResponse struct {
 
 type SecondaryStagingStore struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -1089,6 +1119,8 @@ func (s *ImageStoreService) UpdateCloudToUseObjectStore(p *UpdateCloudToUseObjec
 
 type UpdateCloudToUseObjectStoreResponse struct {
 	Id           string `json:"id"`
+	JobID        string `json:"jobid"`
+	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
