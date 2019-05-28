@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DocsUrl  = "https://www.packer.io/docs/"
+	DocsUrl  = "http://127.0.0.1:4567/docs/"
 	CacheDir = "cache/"
 )
 
