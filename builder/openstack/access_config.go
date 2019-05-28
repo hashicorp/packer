@@ -16,25 +16,76 @@ import (
 
 // AccessConfig is for common configuration related to openstack access
 type AccessConfig struct {
-	Username                    string `mapstructure:"username"`
+	// The username or id used to connect to
+    // the OpenStack service. If not specified, Packer will use the environment
+    // variable OS_USERNAME or OS_USERID, if set. This is not required if
+    // using access token or application credential instead of password, or if using
+    // cloud.yaml.
+	Username                    string `mapstructure:"username" required:"true"`
 	UserID                      string `mapstructure:"user_id"`
-	Password                    string `mapstructure:"password"`
-	IdentityEndpoint            string `mapstructure:"identity_endpoint"`
-	TenantID                    string `mapstructure:"tenant_id"`
+	// The password used to connect to the OpenStack
+    // service. If not specified, Packer will use the environment variables
+    // OS_PASSWORD, if set. This is not required if using access token or
+    // application credential instead of password, or if using cloud.yaml.
+	Password                    string `mapstructure:"password" required:"true"`
+	// The URL to the OpenStack Identity service.
+    // If not specified, Packer will use the environment variables OS_AUTH_URL,
+    // if set. This is not required if using cloud.yaml.
+	IdentityEndpoint            string `mapstructure:"identity_endpoint" required:"true"`
+	// The tenant ID or name to boot the
+    // instance into. Some OpenStack installations require this. If not specified,
+    // Packer will use the environment variable OS_TENANT_NAME or
+    // OS_TENANT_ID, if set. Tenant is also called Project in later versions of
+    // OpenStack.
+	TenantID                    string `mapstructure:"tenant_id" required:"false"`
 	TenantName                  string `mapstructure:"tenant_name"`
 	DomainID                    string `mapstructure:"domain_id"`
-	DomainName                  string `mapstructure:"domain_name"`
-	Insecure                    bool   `mapstructure:"insecure"`
-	Region                      string `mapstructure:"region"`
-	EndpointType                string `mapstructure:"endpoint_type"`
-	CACertFile                  string `mapstructure:"cacert"`
-	ClientCertFile              string `mapstructure:"cert"`
-	ClientKeyFile               string `mapstructure:"key"`
-	Token                       string `mapstructure:"token"`
-	ApplicationCredentialName   string `mapstructure:"application_credential_name"`
-	ApplicationCredentialID     string `mapstructure:"application_credential_id"`
-	ApplicationCredentialSecret string `mapstructure:"application_credential_secret"`
-	Cloud                       string `mapstructure:"cloud"`
+	// The Domain name or ID you are
+    // authenticating with. OpenStack installations require this if identity v3 is
+    // used. Packer will use the environment variable OS_DOMAIN_NAME or
+    // OS_DOMAIN_ID, if set.
+	DomainName                  string `mapstructure:"domain_name" required:"false"`
+	// Whether or not the connection to OpenStack can be
+    // done over an insecure connection. By default this is false.
+	Insecure                    bool   `mapstructure:"insecure" required:"false"`
+	// The name of the region, such as "DFW", in which to
+    // launch the server to create the image. If not specified, Packer will use
+    // the environment variable OS_REGION_NAME, if set.
+	Region                      string `mapstructure:"region" required:"false"`
+	// The endpoint type to use. Can be any of
+    // "internal", "internalURL", "admin", "adminURL", "public", and "publicURL".
+    // By default this is "public".
+	EndpointType                string `mapstructure:"endpoint_type" required:"false"`
+	// Custom CA certificate file path. If omitted the
+    // OS_CACERT environment variable can be used.
+	CACertFile                  string `mapstructure:"cacert" required:"false"`
+	// Client certificate file path for SSL client
+    // authentication. If omitted the OS_CERT environment variable can be used.
+	ClientCertFile              string `mapstructure:"cert" required:"false"`
+	// Client private key file path for SSL client
+    // authentication. If omitted the OS_KEY environment variable can be used.
+	ClientKeyFile               string `mapstructure:"key" required:"false"`
+	// the token (id) to use with token based authorization.
+    // Packer will use the environment variable OS_TOKEN, if set.
+	Token                       string `mapstructure:"token" required:"false"`
+	// The application credential name to
+    // use with application credential based authorization. Packer will use the
+    // environment variable OS_APPLICATION_CREDENTIAL_NAME, if set.
+	ApplicationCredentialName   string `mapstructure:"application_credential_name" required:"false"`
+	// The application credential id to
+    // use with application credential based authorization. Packer will use the
+    // environment variable OS_APPLICATION_CREDENTIAL_ID, if set.
+	ApplicationCredentialID     string `mapstructure:"application_credential_id" required:"false"`
+	// The application credential secret
+    // to use with application credential based authorization. Packer will use the
+    // environment variable OS_APPLICATION_CREDENTIAL_SECRET, if set.
+	ApplicationCredentialSecret string `mapstructure:"application_credential_secret" required:"false"`
+	// An entry in a clouds.yaml file. See the OpenStack
+    // os-client-config
+    // documentation
+    // for more information about clouds.yaml files. If omitted, the OS_CLOUD
+    // environment variable is used.
+	Cloud                       string `mapstructure:"cloud" required:"false"`
 
 	osClient *gophercloud.ProviderClient
 }

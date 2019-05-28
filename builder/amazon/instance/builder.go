@@ -30,16 +30,44 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-
-	AccountId           string `mapstructure:"account_id"`
-	BundleDestination   string `mapstructure:"bundle_destination"`
-	BundlePrefix        string `mapstructure:"bundle_prefix"`
-	BundleUploadCommand string `mapstructure:"bundle_upload_command"`
-	BundleVolCommand    string `mapstructure:"bundle_vol_command"`
-	S3Bucket            string `mapstructure:"s3_bucket"`
-	X509CertPath        string `mapstructure:"x509_cert_path"`
-	X509KeyPath         string `mapstructure:"x509_key_path"`
-	X509UploadPath      string `mapstructure:"x509_upload_path"`
+	// Your AWS account ID. This is required for bundling
+    // the AMI. This is not the same as the access key. You can find your
+    // account ID in the security credentials page of your AWS account.
+	AccountId           string `mapstructure:"account_id" required:"true"`
+	// The directory on the running instance where
+    // the bundled AMI will be saved prior to uploading. By default this is
+    // /tmp. This directory must exist and be writable.
+	BundleDestination   string `mapstructure:"bundle_destination" required:"false"`
+	// The prefix for files created from bundling the
+    // root volume. By default this is image-{{timestamp}}. The timestamp
+    // variable should be used to make sure this is unique, otherwise it can
+    // collide with other created AMIs by Packer in your account.
+	BundlePrefix        string `mapstructure:"bundle_prefix" required:"false"`
+	// The command to use to upload the bundled
+    // volume. See the "custom bundle commands" section below for more
+    // information.
+	BundleUploadCommand string `mapstructure:"bundle_upload_command" required:"false"`
+	// The command to use to bundle the volume.
+    // See the "custom bundle commands" section below for more information.
+	BundleVolCommand    string `mapstructure:"bundle_vol_command" required:"false"`
+	// The name of the S3 bucket to upload the AMI. This
+    // bucket will be created if it doesn't exist.
+	S3Bucket            string `mapstructure:"s3_bucket" required:"true"`
+	// The local path to a valid X509 certificate for
+    // your AWS account. This is used for bundling the AMI. This X509 certificate
+    // must be registered with your account from the security credentials page in
+    // the AWS console.
+	X509CertPath        string `mapstructure:"x509_cert_path" required:"true"`
+	// The local path to the private key for the X509
+    // certificate specified by x509_cert_path. This is used for bundling the
+    // AMI.
+	X509KeyPath         string `mapstructure:"x509_key_path" required:"true"`
+	// The path on the remote machine where the X509
+    // certificate will be uploaded. This path must already exist and be writable.
+    // X509 certificates are uploaded after provisioning is run, so it is
+    // perfectly okay to create this directory as part of the provisioning
+    // process. Defaults to /tmp.
+	X509UploadPath      string `mapstructure:"x509_upload_path" required:"false"`
 
 	ctx interpolate.Context
 }

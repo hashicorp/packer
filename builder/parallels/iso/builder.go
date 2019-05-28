@@ -36,14 +36,44 @@ type Config struct {
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
-
-	DiskSize           uint     `mapstructure:"disk_size"`
-	DiskType           string   `mapstructure:"disk_type"`
-	GuestOSType        string   `mapstructure:"guest_os_type"`
-	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
-	HostInterfaces     []string `mapstructure:"host_interfaces"`
-	SkipCompaction     bool     `mapstructure:"skip_compaction"`
-	VMName             string   `mapstructure:"vm_name"`
+	// The size, in megabytes, of the hard disk to create
+    // for the VM. By default, this is 40000 (about 40 GB).
+	DiskSize           uint     `mapstructure:"disk_size" required:"false"`
+	// The type for image file based virtual disk drives,
+    // defaults to expand. Valid options are expand (expanding disk) that the
+    // image file is small initially and grows in size as you add data to it, and
+    // plain (plain disk) that the image file has a fixed size from the moment it
+    // is created (i.e the space is allocated for the full drive). Plain disks
+    // perform faster than expanding disks. skip_compaction will be set to true
+    // automatically for plain disks.
+	DiskType           string   `mapstructure:"disk_type" required:"false"`
+	// The guest OS type being installed. By default
+    // this is "other", but you can get dramatic performance improvements by
+    // setting this to the proper value. To view all available values for this run
+    // prlctl create x --distribution list. Setting the correct value hints to
+    // Parallels Desktop how to optimize the virtual hardware to work best with
+    // that operating system.
+	GuestOSType        string   `mapstructure:"guest_os_type" required:"false"`
+	// The type of controller that the hard
+    // drives are attached to, defaults to "sata". Valid options are "sata", "ide",
+    // and "scsi".
+	HardDriveInterface string   `mapstructure:"hard_drive_interface" required:"false"`
+	// A list of which interfaces on the
+    // host should be searched for a IP address. The first IP address found on one
+    // of these will be used as {{ .HTTPIP }} in the boot_command. Defaults to
+    // ["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8", "en9",
+    // "ppp0", "ppp1", "ppp2"].
+	HostInterfaces     []string `mapstructure:"host_interfaces" required:"false"`
+	// Virtual disk image is compacted at the end of
+    // the build process using prl_disk_tool utility (except for the case that
+    // disk_type is set to plain). In certain rare cases, this might corrupt
+    // the resulting disk image. If you find this to be the case, you can disable
+    // compaction using this configuration value.
+	SkipCompaction     bool     `mapstructure:"skip_compaction" required:"false"`
+	// This is the name of the PVM directory for the new
+    // virtual machine, without the file extension. By default this is
+    // "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+	VMName             string   `mapstructure:"vm_name" required:"false"`
 
 	ctx interpolate.Context
 }

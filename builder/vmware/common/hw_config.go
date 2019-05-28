@@ -10,23 +10,42 @@ import (
 )
 
 type HWConfig struct {
-
-	// cpu information
-	CpuCount   int `mapstructure:"cpus"`
-	MemorySize int `mapstructure:"memory"`
-	CoreCount  int `mapstructure:"cores"`
-
-	// network type and adapter
-	Network            string `mapstructure:"network"`
-	NetworkAdapterType string `mapstructure:"network_adapter_type"`
-
-	// device presence
-	Sound bool `mapstructure:"sound"`
-	USB   bool `mapstructure:"usb"`
-
-	// communication ports
-	Serial   string `mapstructure:"serial"`
-	Parallel string `mapstructure:"parallel"`
+	// The number of cpus to use when building the VM.
+	CpuCount   int `mapstructure:"cpus" required:"false"`
+	// The amount of memory to use when building the VM
+    // in megabytes.
+	MemorySize int `mapstructure:"memory" required:"false"`
+	// The number of cores per socket to use when building the VM.
+    // This corresponds to the cpuid.coresPerSocket option in the .vmx file.
+	CoreCount  int `mapstructure:"cores" required:"false"`
+	// This is the network type that the virtual machine will
+    // be created with. This can be one of the generic values that map to a device
+    // such as hostonly, nat, or bridged. If the network is not one of these
+    // values, then it is assumed to be a VMware network device. (VMnet0..x)
+	Network            string `mapstructure:"network" required:"false"`
+	// This is the ethernet adapter type the the
+    // virtual machine will be created with. By default the e1000 network adapter
+    // type will be used by Packer. For more information, please consult the
+    // 
+    // Choosing a network adapter for your virtual machine for desktop VMware
+    // clients. For ESXi, refer to the proper ESXi documentation.
+	NetworkAdapterType string `mapstructure:"network_adapter_type" required:"false"`
+	// Specify whether to enable VMware's virtual soundcard
+    // device when building the VM. Defaults to false.
+	Sound bool `mapstructure:"sound" required:"false"`
+	// Enable VMware's USB bus when building the guest VM.
+    // Defaults to false. To enable usage of the XHCI bus for USB 3 (5 Gbit/s),
+    // one can use the vmx_data option to enable it by specifying true for
+    // the usb_xhci.present property.
+	USB   bool `mapstructure:"usb" required:"false"`
+	// This specifies a serial port to add to the VM.
+    // It has a format of Type:option1,option2,.... The field Type can be one
+    // of the following values: FILE, DEVICE, PIPE, AUTO, or NONE.
+	Serial   string `mapstructure:"serial" required:"false"`
+	// This specifies a parallel port to add to the VM. It
+    // has the format of Type:option1,option2,.... Type can be one of the
+    // following values: FILE, DEVICE, AUTO, or NONE.
+	Parallel string `mapstructure:"parallel" required:"false"`
 }
 
 func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {

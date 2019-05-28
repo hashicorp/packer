@@ -10,25 +10,107 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName                 string            `mapstructure:"ami_name"`
-	AMIDescription          string            `mapstructure:"ami_description"`
-	AMIVirtType             string            `mapstructure:"ami_virtualization_type"`
-	AMIUsers                []string          `mapstructure:"ami_users"`
-	AMIGroups               []string          `mapstructure:"ami_groups"`
-	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
-	AMIRegions              []string          `mapstructure:"ami_regions"`
-	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
-	AMITags                 TagMap            `mapstructure:"tags"`
-	AMIENASupport           *bool             `mapstructure:"ena_support"`
-	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
-	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
-	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
-	AMIEncryptBootVolume    *bool             `mapstructure:"encrypt_boot"`
-	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
-	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
-	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
-	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
-	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
+	// The name of the resulting AMI that will appear when
+    // managing AMIs in the AWS console or via APIs. This must be unique. To help
+    // make this unique, use a function like timestamp (see template
+    // engine for more info).
+	AMIName                 string            `mapstructure:"ami_name" required:"true"`
+	// The description to set for the resulting
+    // AMI(s). By default this description is empty. This is a template
+    // engine, see Build template
+    // data for more information.
+	AMIDescription          string            `mapstructure:"ami_description" required:"false"`
+	// The type of virtualization for the AMI
+    // you are building. This option is required to register HVM images. Can be
+    // paravirtual (default) or hvm.
+	AMIVirtType             string            `mapstructure:"ami_virtualization_type" required:"false"`
+	// A list of account IDs that have access to
+    // launch the resulting AMI(s). By default no additional users other than the
+    // user creating the AMI has permissions to launch it.
+	AMIUsers                []string          `mapstructure:"ami_users" required:"false"`
+	// A list of groups that have access to
+    // launch the resulting AMI(s). By default no groups have permission to launch
+    // the AMI. all will make the AMI publicly accessible.
+	AMIGroups               []string          `mapstructure:"ami_groups" required:"false"`
+	// A list of product codes to
+    // associate with the AMI. By default no product codes are associated with the
+    // AMI.
+	AMIProductCodes         []string          `mapstructure:"ami_product_codes" required:"false"`
+	// A list of regions to copy the AMI to.
+    // Tags and attributes are copied along with the AMI. AMI copying takes time
+    // depending on the size of the AMI, but will generally take many minutes.
+	AMIRegions              []string          `mapstructure:"ami_regions" required:"false"`
+	// Set to true if you want to skip
+    // validation of the ami_regions configuration option. Default false.
+	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation" required:"false"`
+	// Tags applied to the AMI. This is a
+    // template engine, see Build template
+    // data for more information.
+	AMITags                 TagMap            `mapstructure:"tags" required:"false"`
+	// Enable enhanced networking (ENA but not
+    // SriovNetSupport) on HVM-compatible AMIs. If set, add
+    // ec2:ModifyInstanceAttribute to your AWS IAM policy. If false, this will
+    // disable enhanced networking in the final AMI as opposed to passing the
+    // setting through unchanged from the source. Note: you must make sure
+    // enhanced networking is enabled on your instance. See Amazon's
+    // documentation on enabling enhanced
+    // networking.
+	AMIENASupport           *bool             `mapstructure:"ena_support" required:"false"`
+	// Enable enhanced networking (SriovNetSupport but
+    // not ENA) on HVM-compatible AMIs. If true, add
+    // ec2:ModifyInstanceAttribute to your AWS IAM policy. Note: you must make
+    // sure enhanced networking is enabled on your instance. See Amazon's
+    // documentation on enabling enhanced
+    // networking.
+    // Default false.
+	AMISriovNetSupport      bool              `mapstructure:"sriov_support" required:"false"`
+	// Force Packer to first deregister an existing
+    // AMI if one with the same name already exists. Default false.
+	AMIForceDeregister      bool              `mapstructure:"force_deregister" required:"false"`
+	// Force Packer to delete snapshots
+    // associated with AMIs, which have been deregistered by force_deregister.
+    // Default false.
+	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot" required:"false"`
+	// Whether or not to encrypt the resulting AMI when
+    // copying a provisioned instance to an AMI. By default, Packer will keep the
+    // encryption setting to what it was in the source image. Setting false will
+    // result in an unencrypted image, and true will result in an encrypted one.
+	AMIEncryptBootVolume    *bool             `mapstructure:"encrypt_boot" required:"false"`
+	// ID, alias or ARN of the KMS key to use for boot
+    // volume encryption. This only applies to the main region, other regions
+    // where the AMI will be copied will be encrypted by the default EBS KMS key.
+    // For valid formats see KmsKeyId in the AWS API docs -
+    // CopyImage.
+    // This field is validated by Packer, when using an alias, you will have to
+    // prefix kms_key_id with alias/.
+	AMIKmsKeyId             string            `mapstructure:"kms_key_id" required:"false"`
+	// a map of regions to copy the ami
+    // to, along with the custom kms key id (alias or arn) to use for encryption
+    // for that region. Keys must match the regions provided in ami_regions. If
+    // you just want to encrypt using a default ID, you can stick with
+    // kms_key_id and ami_regions. If you want a region to be encrypted with
+    // that region's default key ID, you can use an empty string "" instead of a
+    // key id in this map. (e.g. "us-east-1": "") However, you cannot use
+    // default key IDs if you are using this in conjunction with snapshot_users
+    // -- in that situation you must use custom keys. For valid formats see
+    // KmsKeyId in the AWS API docs -
+    // CopyImage.
+	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids" required:"false"`
+	// Tags to apply to snapshot.
+    // They will override AMI tags if already applied to snapshot. This is a
+    // template engine, see Build template
+    // data for more information.
+	SnapshotTags            TagMap            `mapstructure:"snapshot_tags" required:"false"`
+	// A list of account IDs that have
+    // access to create volumes from the snapshot(s). By default no additional
+    // users other than the user creating the AMI has permissions to create
+    // volumes from the backing snapshot(s).
+	SnapshotUsers           []string          `mapstructure:"snapshot_users" required:"false"`
+	// A list of groups that have access to
+    // create volumes from the snapshot(s). By default no groups have permission
+    // to create volumes from the snapshot(s). all will make the snapshot
+    // publicly accessible.
+	SnapshotGroups          []string          `mapstructure:"snapshot_groups" required:"false"`
 }
 
 func stringInSlice(s []string, searchstr string) bool {

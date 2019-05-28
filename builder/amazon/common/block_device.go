@@ -11,16 +11,52 @@ import (
 
 // BlockDevice
 type BlockDevice struct {
-	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
-	DeviceName          string `mapstructure:"device_name"`
-	Encrypted           *bool  `mapstructure:"encrypted"`
-	IOPS                int64  `mapstructure:"iops"`
-	NoDevice            bool   `mapstructure:"no_device"`
-	SnapshotId          string `mapstructure:"snapshot_id"`
-	VirtualName         string `mapstructure:"virtual_name"`
-	VolumeType          string `mapstructure:"volume_type"`
-	VolumeSize          int64  `mapstructure:"volume_size"`
-	KmsKeyId            string `mapstructure:"kms_key_id"`
+	// Indicates whether the EBS volume is
+    // deleted on instance termination. Default false. NOTE: If this
+    // value is not explicitly set to true and volumes are not cleaned up by
+    // an alternative method, additional volumes will accumulate after every
+    // build.
+	DeleteOnTermination bool   `mapstructure:"delete_on_termination" required:"false"`
+	// The device name exposed to the instance (for
+    // example, /dev/sdh or xvdh). Required for every device in the block
+    // device mapping.
+	DeviceName          string `mapstructure:"device_name" required:"false"`
+	// Indicates whether or not to encrypt the volume.
+    // By default, Packer will keep the encryption setting to what it was in
+    // the source image. Setting false will result in an unencrypted device,
+    // and true will result in an encrypted one.
+	Encrypted           *bool  `mapstructure:"encrypted" required:"false"`
+	// The number of I/O operations per second (IOPS) that
+    // the volume supports. See the documentation on
+    // IOPs
+    // for more information
+	IOPS                int64  `mapstructure:"iops" required:"false"`
+	// Suppresses the specified device included in the
+    // block device mapping of the AMI.
+	NoDevice            bool   `mapstructure:"no_device" required:"false"`
+	// The ID of the snapshot.
+	SnapshotId          string `mapstructure:"snapshot_id" required:"false"`
+	// The virtual device name. See the
+    // documentation on Block Device
+    // Mapping
+    // for more information.
+	VirtualName         string `mapstructure:"virtual_name" required:"false"`
+	// The volume type. gp2 for General Purpose
+    // (SSD) volumes, io1 for Provisioned IOPS (SSD) volumes, st1 for
+    // Throughput Optimized HDD, sc1 for Cold HDD, and standard for
+    // Magnetic volumes.
+	VolumeType          string `mapstructure:"volume_type" required:"false"`
+	// The size of the volume, in GiB. Required if
+    // not specifying a snapshot_id.
+	VolumeSize          int64  `mapstructure:"volume_size" required:"false"`
+	// ID, alias or ARN of the KMS key to use for boot
+    // volume encryption. This only applies to the main region, other regions
+    // where the AMI will be copied will be encrypted by the default EBS KMS key.
+    // For valid formats see KmsKeyId in the AWS API docs -
+    // CopyImage.
+    // This field is validated by Packer, when using an alias, you will have to
+    // prefix kms_key_id with alias/.
+	KmsKeyId            string `mapstructure:"kms_key_id" required:"false"`
 	// ebssurrogate only
 	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
@@ -31,11 +67,28 @@ type BlockDevices struct {
 }
 
 type AMIBlockDevices struct {
-	AMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings"`
+	// Add one or
+    // more block device
+    // mappings
+    // to the AMI. These will be attached when booting a new instance from your
+    // AMI. If this field is populated, and you are building from an existing source image,
+    // the block device mappings in the source image will be overwritten. This means you
+    // must have a block device mapping entry for your root volume, root_volume_size,
+    // and root_device_name. `Your options here may vary depending on the type of VM
+    // you use. The block device mappings allow for the following configuration:
+	AMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings" required:"false"`
 }
 
 type LaunchBlockDevices struct {
-	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
+	// Add one
+    // or more block devices before the Packer build starts. If you add instance
+    // store volumes or EBS volumes in addition to the root device volume, the
+    // created AMI will contain block device mapping information for those
+    // volumes. Amazon creates snapshots of the source instance's root volume and
+    // any other EBS volumes described here. When you launch an instance from this
+    // new AMI, the instance automatically launches with these additional volumes,
+    // and will restore them from snapshots taken from the source instance.
+	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings" required:"false"`
 }
 
 func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {

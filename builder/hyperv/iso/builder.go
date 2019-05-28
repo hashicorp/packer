@@ -58,63 +58,133 @@ type Config struct {
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig `mapstructure:",squash"`
-
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
-
-	// The size, in megabytes, of the block size used to create the hard disk.
-	// By default, this is 32768 (about 32 MB)
-	DiskBlockSize uint `mapstructure:"disk_block_size"`
-
-	// The size, in megabytes, of the computer memory in the VM.
-	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"memory"`
-
-	//
-	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
-
-	// Should integration services iso be mounted
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
-
-	// The path to the integration services iso
-	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
-
-	// This is the name of the new virtual machine.
-	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
-	VMName string `mapstructure:"vm_name"`
-
-	SwitchName                     string `mapstructure:"switch_name"`
-	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
-	MacAddress                     string `mapstructure:"mac_address"`
-	VlanId                         string `mapstructure:"vlan_id"`
-	Cpu                            uint   `mapstructure:"cpus"`
-	Generation                     uint   `mapstructure:"generation"`
-	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
-	UseLegacyNetworkAdapter        bool   `mapstructure:"use_legacy_network_adapter"`
-	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
-	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
-	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
-	TempPath                       string `mapstructure:"temp_path"`
-	Version                        string `mapstructure:"configuration_version"`
-	KeepRegistered                 bool   `mapstructure:"keep_registered"`
+	// The size, in megabytes, of the hard disk to create
+    // for the VM. By default, this is 40 GB.
+	DiskSize uint `mapstructure:"disk_size" required:"false"`
+	// The block size of the VHD to be created.
+    // Recommended disk block size for Linux hyper-v guests is 1 MiB. This
+    // defaults to "32 MiB".
+	DiskBlockSize uint `mapstructure:"disk_block_size" required:"false"`
+	// The amount, in megabytes, of RAM to assign to the
+    // VM. By default, this is 1 GB.
+	RamSize uint `mapstructure:"memory" required:"false"`
+	// A list of ISO paths to
+    // attach to a VM when it is booted. This is most useful for unattended
+    // Windows installs, which look for an Autounattend.xml file on removable
+    // media. By default, no secondary ISO will be attached.
+	SecondaryDvdImages []string `mapstructure:"secondary_iso_images" required:"false"`
+	// If set to attach then attach and
+    // mount the ISO image specified in guest_additions_path. If set to
+    // none then guest additions are not attached and mounted; This is the
+    // default.
+	GuestAdditionsMode string `mapstructure:"guest_additions_mode" required:"false"`
+	// The path to the ISO image for guest
+    // additions.
+	GuestAdditionsPath string `mapstructure:"guest_additions_path" required:"false"`
+	// This is the name of the new virtual machine,
+    // without the file extension. By default this is "packer-BUILDNAME",
+    // where "BUILDNAME" is the name of the build.
+	VMName string `mapstructure:"vm_name" required:"false"`
+	// The name of the switch to connect the virtual
+    // machine to. By default, leaving this value unset will cause Packer to
+    // try and determine the switch to use by looking for an external switch
+    // that is up and running.
+	SwitchName                     string `mapstructure:"switch_name" required:"false"`
+	// This is the VLAN of the virtual switch's
+    // network card. By default none is set. If none is set then a VLAN is not
+    // set on the switch's network card. If this value is set it should match
+    // the VLAN specified in by vlan_id.
+	SwitchVlanId                   string `mapstructure:"switch_vlan_id" required:"false"`
+	// This allows a specific MAC address to be used on
+    // the default virtual network card. The MAC address must be a string with
+    // no delimiters, for example "0000deadbeef".
+	MacAddress                     string `mapstructure:"mac_address" required:"false"`
+	// This is the VLAN of the virtual machine's network
+    // card for the new virtual machine. By default none is set. If none is set
+    // then VLANs are not set on the virtual machine's network card.
+	VlanId                         string `mapstructure:"vlan_id" required:"false"`
+	// The number of CPUs the virtual machine should use. If
+    // this isn't specified, the default is 1 CPU.
+	Cpu                            uint   `mapstructure:"cpus" required:"false"`
+	// The Hyper-V generation for the virtual machine. By
+    // default, this is 1. Generation 2 Hyper-V virtual machines do not support
+    // floppy drives. In this scenario use secondary_iso_images instead. Hard
+    // drives and DVD drives will also be SCSI and not IDE.
+	Generation                     uint   `mapstructure:"generation" required:"false"`
+	// If true enable MAC address spoofing
+    // for the virtual machine. This defaults to false.
+	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing" required:"false"`
+	// If true use a legacy network adapter as the NIC.
+    // This defaults to false. A legacy network adapter is fully emulated NIC, and is thus
+    // supported by various exotic operating systems, but this emulation requires
+    // additional overhead and should only be used if absolutely necessary.
+	UseLegacyNetworkAdapter        bool   `mapstructure:"use_legacy_network_adapter" required:"false"`
+	// If true enable dynamic memory for
+    // the virtual machine. This defaults to false.
+	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory" required:"false"`
+	// If true enable secure boot for the
+    // virtual machine. This defaults to false. See secure_boot_template
+    // below for additional settings.
+	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot" required:"false"`
+	// The secure boot template to be
+    // configured. Valid values are "MicrosoftWindows" (Windows) or
+    // "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if
+    // enable_secure_boot is set to "true". This defaults to "MicrosoftWindows".
+	SecureBootTemplate             string `mapstructure:"secure_boot_template" required:"false"`
+	// If true enable
+    // virtualization extensions for the virtual machine. This defaults to
+    // false. For nested virtualization you need to enable MAC spoofing,
+    // disable dynamic memory and have at least 4GB of RAM assigned to the
+    // virtual machine.
+	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions" required:"false"`
+	// The location under which Packer will create a
+    // directory to house all the VM files and folders during the build.
+    // By default %TEMP% is used which, for most systems, will evaluate to
+    // %USERPROFILE%/AppData/Local/Temp.
+	TempPath                       string `mapstructure:"temp_path" required:"false"`
+	// This allows you to set the vm version when
+    //  calling New-VM to generate the vm.
+	Version                        string `mapstructure:"configuration_version" required:"false"`
+	// If "true", Packer will not delete the VM from
+    // The Hyper-V manager.
+	KeepRegistered                 bool   `mapstructure:"keep_registered" required:"false"`
 
 	Communicator string `mapstructure:"communicator"`
-
-	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
-
-	SkipCompaction bool `mapstructure:"skip_compaction"`
-
-	SkipExport bool `mapstructure:"skip_export"`
-
-	// Use differencing disk
-	DifferencingDisk bool `mapstructure:"differencing_disk"`
-
-	// Create the VM with a Fixed VHD format disk instead of Dynamic VHDX
-	FixedVHD bool `mapstructure:"use_fixed_vhd_format"`
-
-	Headless bool `mapstructure:"headless"`
+	// The size or sizes of any
+    // additional hard disks for the VM in megabytes. If this is not specified
+    // then the VM will only contain a primary hard disk. Additional drives
+    // will be attached to the SCSI interface only. The builder uses
+    // expandable rather than fixed-size virtual hard disks, so the actual
+    // file representing the disk will not use the full size unless it is
+    // full.
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
+	// If true skip compacting the hard disk for
+    // the virtual machine when exporting. This defaults to false.
+	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`
+	// If true Packer will skip the export of the VM.
+    // If you are interested only in the VHD/VHDX files, you can enable this
+    // option. The resulting VHD/VHDX file will be output to
+    // <output_directory>/Virtual Hard Disks. By default this option is false
+    // and Packer will export the VM to output_directory.
+	SkipExport bool `mapstructure:"skip_export" required:"false"`
+	// If true enables differencing disks. Only
+    // the changes will be written to the new disk. This is especially useful if
+    // your source is a VHD/VHDX. This defaults to false.
+	DifferencingDisk bool `mapstructure:"differencing_disk" required:"false"`
+	// If true, creates the boot disk on the
+    // virtual machine as a fixed VHD format disk. The default is false, which
+    // creates a dynamic VHDX format disk. This option requires setting
+    // generation to 1, skip_compaction to true, and
+    // differencing_disk to false. Additionally, any value entered for
+    // disk_block_size will be ignored. The most likely use case for this
+    // option is outputing a disk that is in the format required for upload to
+    // Azure.
+	FixedVHD bool `mapstructure:"use_fixed_vhd_format" required:"false"`
+	// Packer defaults to building Hyper-V virtual
+    // machines by launching a GUI that shows the console of the machine being
+    // built. When this value is set to true, the machine will start without a
+    // console.
+	Headless bool `mapstructure:"headless" required:"false"`
 
 	ctx interpolate.Context
 }

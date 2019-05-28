@@ -12,14 +12,30 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	OutputImage         string            `mapstructure:"output_image"`
+	// The name of the output artifact. Defaults to
+    // name.
+	OutputImage         string            `mapstructure:"output_image" required:"false"`
 	ContainerName       string            `mapstructure:"container_name"`
-	CommandWrapper      string            `mapstructure:"command_wrapper"`
-	Image               string            `mapstructure:"image"`
+	// Lets you prefix all builder commands, such as
+    // with ssh for a remote build host. Defaults to "".
+	CommandWrapper      string            `mapstructure:"command_wrapper" required:"false"`
+	// The source image to use when creating the build
+    // container. This can be a (local or remote) image (name or fingerprint).
+    // E.G. my-base-image, ubuntu-daily:x, 08fababf6f27, ...
+	Image               string            `mapstructure:"image" required:"true"`
 	Profile             string            `mapstructure:"profile"`
-	InitSleep           string            `mapstructure:"init_sleep"`
-	PublishProperties   map[string]string `mapstructure:"publish_properties"`
-	LaunchConfig        map[string]string `mapstructure:"launch_config"`
+	// The number of seconds to sleep between launching
+    // the LXD instance and provisioning it; defaults to 3 seconds.
+	InitSleep           string            `mapstructure:"init_sleep" required:"false"`
+	// Pass key values to the publish
+    // step to be set as properties on the output image. This is most helpful to
+    // set the description, but can be used to set anything needed. See
+    // https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/
+    // for more properties.
+	PublishProperties   map[string]string `mapstructure:"publish_properties" required:"false"`
+	// List of key/value pairs you wish to
+    // pass to lxc launch via --config. Defaults to empty.
+	LaunchConfig        map[string]string `mapstructure:"launch_config" required:"false"`
 
 	ctx interpolate.Context
 }

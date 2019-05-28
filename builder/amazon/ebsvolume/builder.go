@@ -22,10 +22,26 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-
-	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes"`
-	AMIENASupport      *bool         `mapstructure:"ena_support"`
-	AMISriovNetSupport bool          `mapstructure:"sriov_support"`
+	// Add the block device
+    // mappings to the AMI. The block device mappings allow for keys:
+	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes" required:"false"`
+	// Enable enhanced networking (ENA but not
+    // SriovNetSupport) on HVM-compatible AMIs. If set, add
+    // ec2:ModifyInstanceAttribute to your AWS IAM policy. If false, this will
+    // disable enhanced networking in the final AMI as opposed to passing the
+    // setting through unchanged from the source. Note: you must make sure
+    // enhanced networking is enabled on your instance. See Amazon's
+    // documentation on enabling enhanced
+    // networking.
+	AMIENASupport      *bool         `mapstructure:"ena_support" required:"false"`
+	// Enable enhanced networking (SriovNetSupport but
+    // not ENA) on HVM-compatible AMIs. If true, add
+    // ec2:ModifyInstanceAttribute to your AWS IAM policy. Note: you must make
+    // sure enhanced networking is enabled on your instance. See Amazon's
+    // documentation on enabling enhanced
+    // networking.
+    // Default false.
+	AMISriovNetSupport bool          `mapstructure:"sriov_support" required:"false"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context

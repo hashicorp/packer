@@ -5,7 +5,10 @@ import (
 )
 
 type VBoxManagePostConfig struct {
-	VBoxManagePost [][]string `mapstructure:"vboxmanage_post"`
+	// Identical to vboxmanage,
+    // except that it is run after the virtual machine is shutdown, and before the
+    // virtual machine is exported.
+	VBoxManagePost [][]string `mapstructure:"vboxmanage_post" required:"false"`
 }
 
 func (c *VBoxManagePostConfig) Prepare(ctx *interpolate.Context) []error {

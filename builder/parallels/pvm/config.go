@@ -24,11 +24,23 @@ type Config struct {
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
 	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
-
-	SourcePath     string `mapstructure:"source_path"`
-	SkipCompaction bool   `mapstructure:"skip_compaction"`
-	VMName         string `mapstructure:"vm_name"`
-	ReassignMAC    bool   `mapstructure:"reassign_mac"`
+	// The path to a PVM directory that acts as the source
+    // of this build.
+	SourcePath     string `mapstructure:"source_path" required:"true"`
+	// Virtual disk image is compacted at the end of
+    // the build process using prl_disk_tool utility (except for the case that
+    // disk_type is set to plain). In certain rare cases, this might corrupt
+    // the resulting disk image. If you find this to be the case, you can disable
+    // compaction using this configuration value.
+	SkipCompaction bool   `mapstructure:"skip_compaction" required:"false"`
+	// This is the name of the PVM directory for the new
+    // virtual machine, without the file extension. By default this is
+    // "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+	VMName         string `mapstructure:"vm_name" required:"false"`
+	// If this is "false" the MAC address of the first
+    // NIC will reused when imported else a new MAC address will be generated
+    // by Parallels. Defaults to "false".
+	ReassignMAC    bool   `mapstructure:"reassign_mac" required:"false"`
 
 	ctx interpolate.Context
 }

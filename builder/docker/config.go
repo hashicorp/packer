@@ -27,27 +27,66 @@ type Config struct {
 	Author           string
 	Changes          []string
 	Commit           bool
-	ContainerDir     string `mapstructure:"container_dir"`
+	// The directory inside container to mount temp
+    // directory from host server for work file
+    // provisioner. This defaults to
+    // c:/packer-files on windows and /packer-files on other systems.
+	ContainerDir     string `mapstructure:"container_dir" required:"false"`
 	Discard          bool
-	ExecUser         string `mapstructure:"exec_user"`
+	// Username (UID) to run remote commands with. You can
+    // also set the group name/ID if you want: (UID or UID:GID).
+    // You may need this if you get permission errors trying to run the shell or
+    // other provisioners.
+	ExecUser         string `mapstructure:"exec_user" required:"false"`
 	ExportPath       string `mapstructure:"export_path"`
 	Image            string
 	Message          string
-	Privileged       bool `mapstructure:"privileged"`
+	// If true, run the docker container with the
+    // --privileged flag. This defaults to false if not set.
+	Privileged       bool `mapstructure:"privileged" required:"false"`
 	Pty              bool
 	Pull             bool
-	RunCommand       []string `mapstructure:"run_command"`
+	// An array of arguments to pass to
+    // docker run in order to run the container. By default this is set to
+    // ["-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"] if you are
+    // using a linux container, and
+    // ["-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"] if you
+    // are running a windows container. {{.Image}} is a template variable that
+    // corresponds to the image template option. Passing the entrypoint option
+    // this way will make it the default entrypoint of the resulting image, so
+    // running docker run -it --rm  will start the docker image from the
+    // /bin/sh shell interpreter; you could run a script or another shell by
+    // running docker run -it --rm  -c /bin/bash. If your docker image
+    // embeds a binary intended to be run often, you should consider changing the
+    // default entrypoint to point to it.
+	RunCommand       []string `mapstructure:"run_command" required:"false"`
 	Volumes          map[string]string
-	FixUploadOwner   bool `mapstructure:"fix_upload_owner"`
-	WindowsContainer bool `mapstructure:"windows_container"`
+	// If true, files uploaded to the container
+    // will be owned by the user the container is running as. If false, the owner
+    // will depend on the version of docker installed in the system. Defaults to
+    // true.
+	FixUploadOwner   bool `mapstructure:"fix_upload_owner" required:"false"`
+	// If "true", tells Packer that you are building a
+    // Windows container running on a windows host. This is necessary for building
+    // Windows containers, because our normal docker bindings do not work for them.
+	WindowsContainer bool `mapstructure:"windows_container" required:"false"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
 	Login           bool
-	LoginPassword   string `mapstructure:"login_password"`
-	LoginServer     string `mapstructure:"login_server"`
-	LoginUsername   string `mapstructure:"login_username"`
-	EcrLogin        bool   `mapstructure:"ecr_login"`
+	// The password to use to authenticate to login.
+	LoginPassword   string `mapstructure:"login_password" required:"false"`
+	// The server address to login to.
+	LoginServer     string `mapstructure:"login_server" required:"false"`
+	// The username to use to authenticate to login.
+	LoginUsername   string `mapstructure:"login_username" required:"false"`
+	// Defaults to false. If true, the builder will login
+    // in order to pull the image from Amazon EC2 Container Registry
+    // (ECR). The builder only logs in for the
+    // duration of the pull. If true login_server is required and login,
+    // login_username, and login_password will be ignored. For more
+    // information see the section on ECR.
+	EcrLogin        bool   `mapstructure:"ecr_login" required:"false"`
 	AwsAccessConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context

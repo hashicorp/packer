@@ -26,11 +26,22 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 	vmwcommon.ExportConfig   `mapstructure:",squash"`
-
-	Linked     bool   `mapstructure:"linked"`
-	RemoteType string `mapstructure:"remote_type"`
-	SourcePath string `mapstructure:"source_path"`
-	VMName     string `mapstructure:"vm_name"`
+	// By default Packer creates a 'full' clone of
+    // the virtual machine specified in source_path. The resultant virtual
+    // machine is fully independant from the parent it was cloned from.
+	Linked     bool   `mapstructure:"linked" required:"false"`
+	// The type of remote machine that will be used to
+    // build this VM rather than a local desktop product. The only value accepted
+    // for this currently is esx5. If this is not set, a desktop product will
+    // be used. By default, this is not set.
+	RemoteType string `mapstructure:"remote_type" required:"false"`
+	// Path to the source VMX file to clone. If
+    // remote_type is enabled then this specifies a path on the remote_host.
+	SourcePath string `mapstructure:"source_path" required:"true"`
+	// This is the name of the VMX file for the new virtual
+    // machine, without the file extension. By default this is packer-BUILDNAME,
+    // where "BUILDNAME" is the name of the build.
+	VMName     string `mapstructure:"vm_name" required:"false"`
 
 	ctx interpolate.Context
 }
