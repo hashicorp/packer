@@ -3,8 +3,6 @@
 # builders
 
 /builder/alicloud/                      @chhaj5236
-/builder/amazon/ebssurrogate/           @jen20
-/builder/amazon/ebsvolume/              @jen20
 /builder/azure/                         @paulmey
 /builder/hyperv/                        @taliesins
 /builder/linode/                        @displague @ctreatma @stvnjacobs
@@ -13,7 +11,7 @@
 /builder/oneandone/                     @jasmingacic
 /builder/oracle/                        @prydie @owainlewis
 /builder/profitbricks/                  @jasmingacic
-/builder/triton/                        @jen20 @sean-
+/builder/triton/                        @sean-
 /builder/ncloud/                        @YuSungDuk
 /builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
 /builder/hcloud/                        @LKaemmerling
