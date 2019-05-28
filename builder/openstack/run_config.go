@@ -14,46 +14,121 @@ import (
 // image and details on how to access that launched image.
 type RunConfig struct {
 	Comm communicator.Config `mapstructure:",squash"`
-
-	SourceImage        string            `mapstructure:"source_image"`
-	SourceImageName    string            `mapstructure:"source_image_name"`
-	SourceImageFilters ImageFilter       `mapstructure:"source_image_filter"`
-	Flavor             string            `mapstructure:"flavor"`
-	AvailabilityZone   string            `mapstructure:"availability_zone"`
-	RackconnectWait    bool              `mapstructure:"rackconnect_wait"`
-	FloatingIPNetwork  string            `mapstructure:"floating_ip_network"`
-	FloatingIP         string            `mapstructure:"floating_ip"`
-	ReuseIPs           bool              `mapstructure:"reuse_ips"`
-	SecurityGroups     []string          `mapstructure:"security_groups"`
-	Networks           []string          `mapstructure:"networks"`
-	Ports              []string          `mapstructure:"ports"`
-	UserData           string            `mapstructure:"user_data"`
-	UserDataFile       string            `mapstructure:"user_data_file"`
-	InstanceName       string            `mapstructure:"instance_name"`
-	InstanceMetadata   map[string]string `mapstructure:"instance_metadata"`
-	ForceDelete        bool              `mapstructure:"force_delete"`
-
-	ConfigDrive bool `mapstructure:"config_drive"`
-
-	// Used for BC, value will be passed to the "floating_ip_network"
-	FloatingIPPool string `mapstructure:"floating_ip_pool"`
-
-	UseBlockStorageVolume  bool   `mapstructure:"use_blockstorage_volume"`
-	VolumeName             string `mapstructure:"volume_name"`
-	VolumeType             string `mapstructure:"volume_type"`
-	VolumeSize             int    `mapstructure:"volume_size"`
-	VolumeAvailabilityZone string `mapstructure:"volume_availability_zone"`
+	// The ID or full URL to the base image to use. This
+    // is the image that will be used to launch a new server and provision it.
+    // Unless you specify completely custom SSH settings, the source image must
+    // have cloud-init installed so that the keypair gets assigned properly.
+	SourceImage        string            `mapstructure:"source_image" required:"true"`
+	// The name of the base image to use. This is
+    // an alternative way of providing source_image and only either of them can
+    // be specified.
+	SourceImageName    string            `mapstructure:"source_image_name" required:"true"`
+	// The search filters for determining the base
+    // image to use. This is an alternative way of providing source_image and
+    // only one of these methods can be used. source_image will override the
+    // filters.
+	SourceImageFilters ImageFilter       `mapstructure:"source_image_filter" required:"true"`
+	// The ID, name, or full URL for the desired flavor for
+    // the server to be created.
+	Flavor             string            `mapstructure:"flavor" required:"true"`
+	// The availability zone to launch the server
+    // in. If this isn't specified, the default enforced by your OpenStack cluster
+    // will be used. This may be required for some OpenStack clusters.
+	AvailabilityZone   string            `mapstructure:"availability_zone" required:"false"`
+	// For rackspace, whether or not to wait for
+    // Rackconnect to assign the machine an IP address before connecting via SSH.
+    // Defaults to false.
+	RackconnectWait    bool              `mapstructure:"rackconnect_wait" required:"false"`
+	// The ID or name of an external network that
+    // can be used for creation of a new floating IP.
+	FloatingIPNetwork  string            `mapstructure:"floating_ip_network" required:"false"`
+	// A specific floating IP to assign to this instance.
+	FloatingIP         string            `mapstructure:"floating_ip" required:"false"`
+	// Whether or not to attempt to reuse existing
+    // unassigned floating ips in the project before allocating a new one. Note
+    // that it is not possible to safely do this concurrently, so if you are
+    // running multiple openstack builds concurrently, or if other processes are
+    // assigning and using floating IPs in the same openstack project while packer
+    // is running, you should not set this to true. Defaults to false.
+	ReuseIPs           bool              `mapstructure:"reuse_ips" required:"false"`
+	// A list of security groups by name to
+    // add to this instance.
+	SecurityGroups     []string          `mapstructure:"security_groups" required:"false"`
+	// A list of networks by UUID to attach to
+    // this instance.
+	Networks           []string          `mapstructure:"networks" required:"false"`
+	// A list of ports by UUID to attach to this
+    // instance.
+	Ports              []string          `mapstructure:"ports" required:"false"`
+	// User data to apply when launching the instance. Note
+    // that you need to be careful about escaping characters due to the templates
+    // being JSON. It is often more convenient to use user_data_file, instead.
+    // Packer will not automatically wait for a user script to finish before
+    // shutting down the instance this must be handled in a provisioner.
+	UserData           string            `mapstructure:"user_data" required:"false"`
+	// Path to a file that will be used for the user
+    // data when launching the instance.
+	UserDataFile       string            `mapstructure:"user_data_file" required:"false"`
+	// Name that is applied to the server instance
+    // created by Packer. If this isn't specified, the default is same as
+    // image_name.
+	InstanceName       string            `mapstructure:"instance_name" required:"false"`
+	// Metadata that is
+    // applied to the server instance created by Packer. Also called server
+    // properties in some documentation. The strings have a max size of 255 bytes
+    // each.
+	InstanceMetadata   map[string]string `mapstructure:"instance_metadata" required:"false"`
+	// Whether to force the OpenStack instance to be
+    // forcefully deleted. This is useful for environments that have
+    // reclaim / soft deletion enabled. By default this is false.
+	ForceDelete        bool              `mapstructure:"force_delete" required:"false"`
+	// Whether or not nova should use ConfigDrive for
+    // cloud-init metadata.
+	ConfigDrive bool `mapstructure:"config_drive" required:"false"`
+	// Deprecated use floating_ip_network
+    // instead.
+	FloatingIPPool string `mapstructure:"floating_ip_pool" required:"false"`
+	// Use Block Storage service volume for
+    // the instance root volume instead of Compute service local volume (default).
+	UseBlockStorageVolume  bool   `mapstructure:"use_blockstorage_volume" required:"false"`
+	// Name of the Block Storage service volume. If this
+    // isn't specified, random string will be used.
+	VolumeName             string `mapstructure:"volume_name" required:"false"`
+	// Type of the Block Storage service volume. If this
+    // isn't specified, the default enforced by your OpenStack cluster will be
+    // used.
+	VolumeType             string `mapstructure:"volume_type" required:"false"`
+	// Size of the Block Storage service volume in GB. If
+    // this isn't specified, it is set to source image min disk value (if set) or
+    // calculated from the source image bytes size. Note that in some cases this
+    // needs to be specified, if use_blockstorage_volume is true.
+	VolumeSize             int    `mapstructure:"volume_size" required:"false"`
+	// Availability zone of the Block
+    // Storage service volume. If omitted, Compute instance availability zone will
+    // be used. If both of Compute instance and Block Storage volume availability
+    // zones aren't specified, the default enforced by your OpenStack cluster will
+    // be used.
+	VolumeAvailabilityZone string `mapstructure:"volume_availability_zone" required:"false"`
 
 	// Not really used, but here for BC
 	OpenstackProvider string `mapstructure:"openstack_provider"`
-	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
+	// Deprecated use floating_ip or
+    // floating_ip_pool instead.
+	UseFloatingIp     bool   `mapstructure:"use_floating_ip" required:"false"`
 
 	sourceImageOpts images.ListOpts
 }
 
 type ImageFilter struct {
-	Filters    ImageFilterOptions `mapstructure:"filters"`
-	MostRecent bool               `mapstructure:"most_recent"`
+	// filters used to select a source_image.
+    // NOTE: This will fail unless exactly one image is returned, or
+    // most_recent is set to true. Of the filters described in
+    // ImageService, the
+    // following are valid:
+	Filters    ImageFilterOptions `mapstructure:"filters" required:"false"`
+	// Selects the newest created image when true.
+    // This is most useful for selecting a daily distro build.
+	MostRecent bool               `mapstructure:"most_recent" required:"false"`
 }
 
 type ImageFilterOptions struct {

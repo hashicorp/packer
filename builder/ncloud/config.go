@@ -18,16 +18,39 @@ type Config struct {
 
 	AccessKey                         string `mapstructure:"access_key"`
 	SecretKey                         string `mapstructure:"secret_key"`
-	ServerImageProductCode            string `mapstructure:"server_image_product_code"`
-	ServerProductCode                 string `mapstructure:"server_product_code"`
-	MemberServerImageNo               string `mapstructure:"member_server_image_no"`
-	ServerImageName                   string `mapstructure:"server_image_name"`
-	ServerImageDescription            string `mapstructure:"server_image_description"`
-	UserData                          string `mapstructure:"user_data"`
-	UserDataFile                      string `mapstructure:"user_data_file"`
-	BlockStorageSize                  int    `mapstructure:"block_storage_size"`
-	Region                            string `mapstructure:"region"`
-	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no"`
+	// Product code of an image to create.
+    // (member_server_image_no is required if not specified)
+	ServerImageProductCode            string `mapstructure:"server_image_product_code" required:"true"`
+	// Product (spec) code to create.
+	ServerProductCode                 string `mapstructure:"server_product_code" required:"true"`
+	// Previous image code. If there is an
+    // image previously created, it can be used to create a new image.
+    // (server_image_product_code is required if not specified)
+	MemberServerImageNo               string `mapstructure:"member_server_image_no" required:"false"`
+	// Name of an image to create.
+	ServerImageName                   string `mapstructure:"server_image_name" required:"false"`
+	// Description of an image to create.
+	ServerImageDescription            string `mapstructure:"server_image_description" required:"false"`
+	// User data to apply when launching the instance. Note
+    // that you need to be careful about escaping characters due to the templates
+    // being JSON. It is often more convenient to use user_data_file, instead.
+    // Packer will not automatically wait for a user script to finish before
+    // shutting down the instance this must be handled in a provisioner.
+	UserData                          string `mapstructure:"user_data" required:"false"`
+	// Path to a file that will be used for the user
+    // data when launching the instance.
+	UserDataFile                      string `mapstructure:"user_data_file" required:"false"`
+	// You can add block storage ranging from 10
+    // GB to 2000 GB, in increments of 10 GB.
+	BlockStorageSize                  int    `mapstructure:"block_storage_size" required:"false"`
+	// Name of the region where you want to create an image.
+    // (default: Korea)
+	Region                            string `mapstructure:"region" required:"false"`
+	// This is used to allow
+    // winrm access when you create a Windows server. An ACG that specifies an
+    // access source (0.0.0.0/0) and allowed port (5985) must be created in
+    // advance.
+	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no" required:"false"`
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  *interpolate.Context

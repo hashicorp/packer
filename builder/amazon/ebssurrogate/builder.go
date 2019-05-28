@@ -25,10 +25,14 @@ type Config struct {
 	awscommon.RunConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
-
-	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
+	// A block device mapping
+    // describing the root device of the AMI. This looks like the mappings in
+    // ami_block_device_mapping, except with an additional field:
+	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device" required:"true"`
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
-	Architecture  string           `mapstructure:"ami_architecture"`
+	// what architecture to use when registering the
+    // final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
+	Architecture  string           `mapstructure:"ami_architecture" required:"false"`
 
 	ctx interpolate.Context
 }

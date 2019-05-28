@@ -44,11 +44,22 @@ var ValidRegions = []Region{
 }
 
 type TencentCloudAccessConfig struct {
-	SecretId       string `mapstructure:"secret_id"`
-	SecretKey      string `mapstructure:"secret_key"`
-	Region         string `mapstructure:"region"`
-	Zone           string `mapstructure:"zone"`
-	SkipValidation bool   `mapstructure:"skip_region_validation"`
+	// Tencentcloud secret id. You should set it directly,
+    // or set the TENCENTCLOUD_ACCESS_KEY environment variable.
+	SecretId       string `mapstructure:"secret_id" required:"true"`
+	// Tencentcloud secret key. You should set it directly,
+    // or set the TENCENTCLOUD_SECRET_KEY environment variable.
+	SecretKey      string `mapstructure:"secret_key" required:"true"`
+	// The region where your cvm will be launch. You should
+    // reference Region and Zone
+    //  for parameter taking.
+	Region         string `mapstructure:"region" required:"true"`
+	// The zone where your cvm will be launch. You should
+    // reference Region and Zone
+    //  for parameter taking.
+	Zone           string `mapstructure:"zone" required:"true"`
+	// Do not check region and zone when validate.
+	SkipValidation bool   `mapstructure:"skip_region_validation" required:"false"`
 }
 
 func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {

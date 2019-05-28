@@ -13,10 +13,23 @@ import (
 )
 
 type AwsAccessConfig struct {
-	AccessKey string `mapstructure:"aws_access_key"`
-	SecretKey string `mapstructure:"aws_secret_key"`
-	Token     string `mapstructure:"aws_token"`
-	Profile   string `mapstructure:"aws_profile"`
+	// The AWS access key used to communicate with
+    // AWS. Learn how to set
+    // this.
+	AccessKey string `mapstructure:"aws_access_key" required:"false"`
+	// The AWS secret key used to communicate with
+    // AWS. Learn how to set
+    // this.
+	SecretKey string `mapstructure:"aws_secret_key" required:"false"`
+	// The AWS access token to use. This is different from
+    // the access key and secret key. If you're not sure what this is, then you
+    // probably don't need it. This will also be read from the AWS_SESSION_TOKEN
+    // environmental variable.
+	Token     string `mapstructure:"aws_token" required:"false"`
+	// The AWS shared credentials profile used to
+    // communicate with AWS. Learn how to set
+    // this.
+	Profile   string `mapstructure:"aws_profile" required:"false"`
 	cfg       *common.AccessConfig
 }
 
