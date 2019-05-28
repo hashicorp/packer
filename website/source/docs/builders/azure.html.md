@@ -45,41 +45,41 @@ If you want to use a [service principal](/docs/builders/azure-setup.html#create-
 you should specify `subscription_id`, `client_id` and one of `client_secret`,
 `client_cert_path` or `client_jwt`.
 
--   `subscription_id` (string) Subscription under which the build will be
+-   `subscription_id` (string) - Subscription under which the build will be
     performed. **The service principal specified in `client_id` must have full
     access to this subscription, unless build\_resource\_group\_name option is
     specified in which case it needs to have owner access to the existing
     resource group specified in build\_resource\_group\_name parameter.**
 
--   `client_id` (string) The Active Directory service principal associated with
+-   `client_id` (string) - The Active Directory service principal associated with
     your builder.
 
--   `client_secret` (string) The password or secret for your service principal.
+-   `client_secret` (string) - The password or secret for your service principal.
 
--   `client_cert_path` (string) The location of a PEM file containing a
+-   `client_cert_path` (string) - The location of a PEM file containing a
     certificate and private key for service principal.
 
--   `client_jwt` (string) The bearer JWT assertion signed using a certificate
+-   `client_jwt` (string) - The bearer JWT assertion signed using a certificate
     associated with your service principal principal. See [Azure Active
     Directory docs](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)
     for more information.
 
 ### Required:
 
--   `image_publisher` (string) PublisherName for your base image. See
+-   `image_publisher` (string) - PublisherName for your base image. See
     [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
     for details.
 
     CLI example `az vm image list-publishers --location westus`
 
--   `image_offer` (string) Offer for your base image. See
+-   `image_offer` (string) - Offer for your base image. See
     [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
     for details.
 
     CLI example
     `az vm image list-offers --location westus --publisher Canonical`
 
--   `image_sku` (string) SKU for your base image. See
+-   `image_sku` (string) - SKU for your base image. See
     [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
     for details.
 
@@ -93,30 +93,30 @@ creating a VHD, you **must** start with a VHD. Likewise, if you want to create
 a managed image you **must** start with a managed image. When creating a VHD
 the following options are required.
 
--   `capture_container_name` (string) Destination container name. Essentially
+-   `capture_container_name` (string) - Destination container name. Essentially
     the "directory" where your VHD will be organized in Azure. The captured
     VHD's URL will be
     `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
 
--   `capture_name_prefix` (string) VHD prefix. The final artifacts will be
+-   `capture_name_prefix` (string) - VHD prefix. The final artifacts will be
     named `PREFIX-osDisk.UUID` and `PREFIX-vmTemplate.UUID`.
 
--   `resource_group_name` (string) Resource group under which the final
+-   `resource_group_name` (string) - Resource group under which the final
     artifact will be stored.
 
--   `storage_account` (string) Storage account under which the final artifact
+-   `storage_account` (string) - Storage account under which the final artifact
     will be stored.
 
 When creating a managed image the following options are required.
 
--   `managed_image_name` (string) Specify the managed image name where the
+-   `managed_image_name` (string) - Specify the managed image name where the
     result of the Packer build will be saved. The image name must not exist
     ahead of time, and will not be overwritten. If this value is set, the value
     `managed_image_resource_group_name` must also be set. See
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
 
--   `managed_image_resource_group_name` (string) Specify the managed image
+-   `managed_image_resource_group_name` (string) - Specify the managed image
     resource group name where the result of the Packer build will be saved. The
     resource group must already exist. If this value is set, the value
     `managed_image_name` must also be set. See
