@@ -314,23 +314,23 @@ builder.
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami`
     field. Example:
 
-    ``` json
-    {
-      "source_ami_filter": {
-        "filters": {
-          "virtualization-type": "hvm",
-          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-          "root-device-type": "ebs"
-        },
-        "owners": ["099720109477"],
-        "most_recent": true
+      ``` json
+      {
+        "source_ami_filter": {
+          "filters": {
+            "virtualization-type": "hvm",
+            "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+            "root-device-type": "ebs"
+          },
+          "owners": ["099720109477"],
+          "most_recent": true
+        }
       }
-    }
-    ```
+      ```
 
-    This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
-    This will fail unless *exactly* one AMI is returned. In the above example,
-    `most_recent` will cause this to succeed by selecting the newest image.
+      This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+      This will fail unless *exactly* one AMI is returned. In the above example,
+      `most_recent` will cause this to succeed by selecting the newest image.
 
     -   `filters` (map of strings) - filters used to select a `source_ami`.
         NOTE: This will fail unless *exactly* one AMI is returned. Any filter
