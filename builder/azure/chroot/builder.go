@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	amznchroot "github.com/hashicorp/packer/builder/amazon/chroot"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/common"
@@ -21,6 +22,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	FromScratch bool `mapstructure:"from_scratch"`
+
+	CommandWrapper   string   `mapstructure:"command_wrapper"`
+	PreMountCommands []string `mapstructure:"pre_mount_commands"`
 
 	OSDiskSizeGB             int32  `mapstructure:"osdisk_size_gb"`
 	OSDiskStorageAccountType string `mapstructure:"osdisk_storageaccounttype"`
@@ -59,6 +63,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("osdisk_size_gb is required with from_scratch."))
 		}
+		if len(b.config.PreMountCommands) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("pre_mount_commands is required with from_scratch."))
+		}
 	}
 
 	if err != nil {
@@ -74,11 +82,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	var azcli client.AzureClientSet
 
+	wrappedCommand := func(command string) (string, error) {
+		ictx := b.config.ctx
+		ictx.Data = &struct{ Command string }{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ictx)
+	}
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("wrappedCommand", amznchroot.CommandWrapper(wrappedCommand))
 
 	info, err := azcli.MetadataClient().GetComputeInfo()
 	if err != nil {
@@ -114,6 +129,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				DiskStorageAccountType: b.config.OSDiskStorageAccountType,
 			})
 	}
+
+	steps = append(steps,
+		//&StepAttachDisk{},
+		&amznchroot.StepPreMountCommands{
+			Commands: b.config.PreMountCommands,
+		},
+	)
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)

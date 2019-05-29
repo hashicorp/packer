@@ -168,6 +168,14 @@ type Config struct {
 	ctx interpolate.Context
 }
 
+func (c *Config) GetContext() interpolate.Context {
+	return c.ctx
+}
+
+type interpolateContextProvider interface {
+	GetContext() interpolate.Context
+}
+
 type wrappedCommandTemplate struct {
 	Command string
 }
