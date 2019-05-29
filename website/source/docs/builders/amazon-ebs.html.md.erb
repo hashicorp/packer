@@ -327,30 +327,30 @@ builder.
       }
       ```
 
-    This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
-    This will fail unless *exactly* one AMI is returned. In the above example,
-    `most_recent` will cause this to succeed by selecting the newest image.
+      This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+      This will fail unless *exactly* one AMI is returned. In the above example,
+      `most_recent` will cause this to succeed by selecting the newest image.
 
-    -   `filters` (map of strings) - filters used to select a `source_ami`.
-        NOTE: This will fail unless *exactly* one AMI is returned. Any filter
-        described in the docs for
-        [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-        is valid.
+      -   `filters` (map of strings) - filters used to select a `source_ami`.
+          NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+          described in the docs for
+          [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+          is valid.
 
-    -   `owners` (array of strings) - Filters the images by their owner. You
-        may specify one or more AWS account IDs, "self" (which will use the
-        account whose credentials you are using to run Packer), or an AWS owner
-        alias: for example, `amazon`, `aws-marketplace`, or `microsoft`. This
-        option is required for security reasons.
+      -   `owners` (array of strings) - Filters the images by their owner. You
+          may specify one or more AWS account IDs, "self" (which will use the
+          account whose credentials you are using to run Packer), or an AWS owner
+          alias: for example, `amazon`, `aws-marketplace`, or `microsoft`. This
+          option is required for security reasons.
 
-    -   `most_recent` (boolean) - Selects the newest created image when true.
-        This is most useful for selecting a daily distro build.
+      -   `most_recent` (boolean) - Selects the newest created image when true.
+          This is most useful for selecting a daily distro build.
 
-    You may set this in place of `source_ami` or in conjunction with it. If you
-    set this in conjunction with `source_ami`, the `source_ami` will be added
-    to the filter. The provided `source_ami` must meet all of the filtering
-    criteria provided in `source_ami_filter`; this pins the AMI returned by the
-    filter, but will cause Packer to fail if the `source_ami` does not exist.
+      You may set this in place of `source_ami` or in conjunction with it. If you
+      set this in conjunction with `source_ami`, the `source_ami` will be added
+      to the filter. The provided `source_ami` must meet all of the filtering
+      criteria provided in `source_ami_filter`; this pins the AMI returned by the
+      filter, but will cause Packer to fail if the `source_ami` does not exist.
 
 -   `spot_instance_types` (array of strings) - a list of acceptable instance
     types to run your build on. We will request a spot instance using the max
