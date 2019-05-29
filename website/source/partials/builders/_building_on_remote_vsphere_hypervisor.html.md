@@ -30,12 +30,13 @@ Packer builds on; a vMotion event will cause the Packer build to fail.
 To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
 the required `remote_*` configurations:
 
+### Required:
+
 -   `remote_type` - This must be set to "esx5".
 
 -   `remote_host` - The host of the remote machine.
 
-Additionally, there are some optional configurations that you'll likely have to
-modify as well:
+### Optional:
 
 -   `remote_port` - The SSH port of the remote machine
 
