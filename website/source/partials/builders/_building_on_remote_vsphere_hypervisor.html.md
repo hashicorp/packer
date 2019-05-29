@@ -62,6 +62,3 @@ the required `remote_*` configurations:
     currently only works when option remote_type is set to "esx5".
     Since ovftool is only capable of password based authentication
     `remote_password` must be set when exporting the VM.
-
--   `vnc_disable_password` (boolean) - This must be set to "true" when using VNC with
-    ESXi 6.5 or 6.7.
