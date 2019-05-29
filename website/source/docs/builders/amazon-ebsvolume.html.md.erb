@@ -439,29 +439,29 @@ builder.
 -   `vpc_filter` (object) - Filters used to populate the `vpc_id` field.
     Example:
 
-    ``` json
-    {
-      "vpc_filter": {
-        "filters": {
-          "tag:Class": "build",
-          "isDefault": "false",
-          "cidr": "/24"
+      ``` json
+      {
+        "vpc_filter": {
+          "filters": {
+            "tag:Class": "build",
+            "isDefault": "false",
+            "cidr": "/24"
+          }
         }
       }
-    }
-    ```
+      ```
 
-    This selects the VPC with tag `Class` with the value `build`, which is not
-    the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
-    unless *exactly* one VPC is returned.
+      This selects the VPC with tag `Class` with the value `build`, which is not
+      the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
+      unless *exactly* one VPC is returned.
 
-    -   `filters` (map of strings) - filters used to select a `vpc_id`. NOTE:
-        This will fail unless *exactly* one VPC is returned. Any filter
-        described in the docs for
-        [DescribeVpcs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html)
-        is valid.
+      -   `filters` (map of strings) - filters used to select a `vpc_id`. NOTE:
+          This will fail unless *exactly* one VPC is returned. Any filter
+          described in the docs for
+          [DescribeVpcs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html)
+          is valid.
 
-    `vpc_id` take precedence over this.
+      `vpc_id` take precedence over this.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value:
