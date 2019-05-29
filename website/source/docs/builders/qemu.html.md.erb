@@ -272,63 +272,63 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
-~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
-of conflicting arguments causing failures of your run. For instance, using
---no-acpi could break the ability to send power signal type commands (e.g.,
-shutdown -P now) to the virtual machine, thus preventing proper shutdown. To see
-the defaults, look in the packer.log file and search for the qemu-system-x86
-command. The arguments are all printed for review.
+    ~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
+    of conflicting arguments causing failures of your run. For instance, using
+    --no-acpi could break the ability to send power signal type commands (e.g.,
+    shutdown -P now) to the virtual machine, thus preventing proper shutdown. To see
+    the defaults, look in the packer.log file and search for the qemu-system-x86
+    command. The arguments are all printed for review.
 
-The following shows a sample usage:
+    The following shows a sample usage:
 
-``` json
-{
-  "qemuargs": [
-    [ "-m", "1024M" ],
-    [ "--no-acpi", "" ],
-    [
-       "-netdev",
-      "user,id=mynet0,",
-      "hostfwd=hostip:hostport-guestip:guestport",
-      ""
-    ],
-    [ "-device", "virtio-net,netdev=mynet0" ]
-  ]
-}
-```
+    ``` json
+    {
+      "qemuargs": [
+        [ "-m", "1024M" ],
+        [ "--no-acpi", "" ],
+        [
+          "-netdev",
+          "user,id=mynet0,",
+          "hostfwd=hostip:hostport-guestip:guestport",
+          ""
+        ],
+        [ "-device", "virtio-net,netdev=mynet0" ]
+      ]
+    }
+    ```
 
-would produce the following (not including other defaults supplied by the
-builder and not otherwise conflicting with the qemuargs):
+    would produce the following (not including other defaults supplied by the
+    builder and not otherwise conflicting with the qemuargs):
 
-``` text
-qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
-```
+    ``` text
+    qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+    ```
 
-~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
-to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
+    ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+    to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
 
-The following shows the environment variable that needs to be set for Windows QEMU support:
+    The following shows the environment variable that needs to be set for Windows QEMU support:
 
-``` text
-setx SDL_STDIO_REDIRECT=0
-```
+    ``` text
+    setx SDL_STDIO_REDIRECT=0
+    ```
 
-You can also use the `SSHHostPort` template variable to produce a packer
-template that can be invoked by `make` in parallel:
+    You can also use the `SSHHostPort` template variable to produce a packer
+    template that can be invoked by `make` in parallel:
 
-``` json
-{
-  "qemuargs": [
-    [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
-    [ "-device", "virtio-net,netdev=forward,id=net0"]
-  ]
-}
-```
+    ``` json
+    {
+      "qemuargs": [
+        [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+        [ "-device", "virtio-net,netdev=forward,id=net0"]
+      ]
+    }
+    ```
 
-`make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
-will bind to their own SSH port as determined by each process. This will also
-work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
-default port of `5985` or whatever value you have the service set to listen on.
+    `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
+    will bind to their own SSH port as determined by each process. This will also
+    work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
+    default port of `5985` or whatever value you have the service set to listen on.
 
 -   `use_backing_file` (boolean) - Only applicable when `disk_image` is `true`
     and `format` is `qcow2`, set this option to `true` to create a new QCOW2
