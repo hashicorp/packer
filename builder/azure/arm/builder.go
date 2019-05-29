@@ -126,7 +126,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				ui.Say(fmt.Sprintf("the managed image named %s already exists, but deleting it due to -force flag", b.config.ManagedImageName))
 				f, err := azureClient.ImagesClient.Delete(ctx, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
 				if err == nil {
-					err = f.WaitForCompletion(ctx, azureClient.ImagesClient.Client)
+					err = f.WaitForCompletionRef(ctx, azureClient.ImagesClient.Client)
 				}
 				if err != nil {
 					return nil, fmt.Errorf("failed to delete the managed image named %s : %s", b.config.ManagedImageName, azureClient.LastError.Error())

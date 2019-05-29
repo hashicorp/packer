@@ -84,6 +84,7 @@ func (client RouteFiltersClient) CreateOrUpdatePreparer(ctx context.Context, res
 		"api-version": APIVersion,
 	}
 
+	routeFilterParameters.Etag = nil
 	preparer := autorest.CreatePreparer(
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPut(),
@@ -544,6 +545,9 @@ func (client RouteFiltersClient) UpdatePreparer(ctx context.Context, resourceGro
 		"api-version": APIVersion,
 	}
 
+	routeFilterParameters.Name = nil
+	routeFilterParameters.Etag = nil
+	routeFilterParameters.Type = nil
 	preparer := autorest.CreatePreparer(
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPatch(),
