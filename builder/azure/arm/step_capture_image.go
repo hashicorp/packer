@@ -54,7 +54,7 @@ func (s *StepCaptureImage) captureImageFromVM(ctx context.Context, resourceGroup
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
-	return f.WaitForCompletion(ctx, s.client.ImagesClient.Client)
+	return f.WaitForCompletionRef(ctx, s.client.ImagesClient.Client)
 }
 
 func (s *StepCaptureImage) captureImage(ctx context.Context, resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
@@ -62,7 +62,7 @@ func (s *StepCaptureImage) captureImage(ctx context.Context, resourceGroupName s
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
-	return f.WaitForCompletion(ctx, s.client.VirtualMachinesClient.Client)
+	return f.WaitForCompletionRef(ctx, s.client.VirtualMachinesClient.Client)
 }
 
 func (s *StepCaptureImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
