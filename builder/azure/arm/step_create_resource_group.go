@@ -121,7 +121,7 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
 				s.say(fmt.Sprintf("\n Not waiting for Resource Group delete as requested by user. Resource Group Name is %s", resourceGroupName))
 			} else {
-				err = f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+				err = f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)
 			}
 		}
 		if err != nil {

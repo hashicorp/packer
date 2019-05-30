@@ -52,7 +52,7 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 		return err
 	}
 
-	err = f.WaitForCompletion(ctx, s.client.SnapshotsClient.Client)
+	err = f.WaitForCompletionRef(ctx, s.client.SnapshotsClient.Client)
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
