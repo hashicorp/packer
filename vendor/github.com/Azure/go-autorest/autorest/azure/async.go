@@ -141,7 +141,7 @@ func (f Future) GetPollingDelay() (time.Duration, bool) {
 	return d, true
 }
 
-// WaitForCompletionRef will return when one of the following conditions is met: the long
+// WaitForCompletionRefRef will return when one of the following conditions is met: the long
 // running operation has completed, the provided context is cancelled, or the client's
 // polling duration has been exceeded.  It will retry failed polling attempts based on
 // the retry value defined in the client up to the maximum retry attempts.
@@ -149,8 +149,8 @@ func (f Future) GetPollingDelay() (time.Duration, bool) {
 // used to determine if a default deadline should be used.
 // If PollingDuration is greater than zero the value will be used as the context's timeout.
 // If PollingDuration is zero then no default deadline will be used.
-func (f *Future) WaitForCompletionRef(ctx context.Context, client autorest.Client) (err error) {
-	ctx = tracing.StartSpan(ctx, "github.com/Azure/go-autorest/autorest/azure/async.WaitForCompletionRef")
+func (f *Future) WaitForCompletionRefRef(ctx context.Context, client autorest.Client) (err error) {
+	ctx = tracing.StartSpan(ctx, "github.com/Azure/go-autorest/autorest/azure/async.WaitForCompletionRefRef")
 	defer func() {
 		sc := -1
 		resp := f.Response()
@@ -171,7 +171,7 @@ func (f *Future) WaitForCompletionRef(ctx context.Context, client autorest.Clien
 	done, err := f.DoneWithContext(ctx, client)
 	for attempts := 0; !done; done, err = f.DoneWithContext(ctx, client) {
 		if attempts >= client.RetryAttempts {
-			return autorest.NewErrorWithError(err, "Future", "WaitForCompletion", f.pt.latestResponse(), "the number of retries has been exceeded")
+			return autorest.NewErrorWithError(err, "Future", "WaitForCompletionRef", f.pt.latestResponse(), "the number of retries has been exceeded")
 		}
 		// we want delayAttempt to be zero in the non-error case so
 		// that DelayForBackoff doesn't perform exponential back-off
@@ -195,7 +195,7 @@ func (f *Future) WaitForCompletionRef(ctx context.Context, client autorest.Clien
 		// wait until the delay elapses or the context is cancelled
 		delayElapsed := autorest.DelayForBackoff(delay, delayAttempt, cancelCtx.Done())
 		if !delayElapsed {
-			return autorest.NewErrorWithError(cancelCtx.Err(), "Future", "WaitForCompletion", f.pt.latestResponse(), "context has been cancelled")
+			return autorest.NewErrorWithError(cancelCtx.Err(), "Future", "WaitForCompletionRef", f.pt.latestResponse(), "context has been cancelled")
 		}
 	}
 	return
