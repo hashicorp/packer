@@ -141,7 +141,7 @@ func (f Future) GetPollingDelay() (time.Duration, bool) {
 	return d, true
 }
 
-// WaitForCompletionRefRef will return when one of the following conditions is met: the long
+// WaitForCompletionRef will return when one of the following conditions is met: the long
 // running operation has completed, the provided context is cancelled, or the client's
 // polling duration has been exceeded.  It will retry failed polling attempts based on
 // the retry value defined in the client up to the maximum retry attempts.
@@ -149,8 +149,8 @@ func (f Future) GetPollingDelay() (time.Duration, bool) {
 // used to determine if a default deadline should be used.
 // If PollingDuration is greater than zero the value will be used as the context's timeout.
 // If PollingDuration is zero then no default deadline will be used.
-func (f *Future) WaitForCompletionRefRef(ctx context.Context, client autorest.Client) (err error) {
-	ctx = tracing.StartSpan(ctx, "github.com/Azure/go-autorest/autorest/azure/async.WaitForCompletionRefRef")
+func (f *Future) WaitForCompletionRef(ctx context.Context, client autorest.Client) (err error) {
+	ctx = tracing.StartSpan(ctx, "github.com/Azure/go-autorest/autorest/azure/async.WaitForCompletionRef")
 	defer func() {
 		sc := -1
 		resp := f.Response()
