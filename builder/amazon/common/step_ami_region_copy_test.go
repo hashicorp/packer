@@ -101,11 +101,11 @@ func TestStepAmiRegionCopy_nil_encryption(t *testing.T) {
 	state := tState()
 	stepAMIRegionCopy.Run(context.Background(), state)
 
-	if stepAMIRegionCopy.toDelete != "" {
-		t.Fatalf("Shouldn't delete original AMI if not encrypted")
+	if stepAMIRegionCopy.toDelete != "ami-12345" {
+		t.Fatalf("Should delete original intermediary ami even if not encrypted")
 	}
-	if len(stepAMIRegionCopy.Regions) > 0 {
-		t.Fatalf("Shouldn't have added original ami to original region")
+	if len(stepAMIRegionCopy.Regions) == 0 {
+		t.Fatalf("Should have added original ami to original region")
 	}
 }
 
@@ -126,11 +126,11 @@ func TestStepAmiRegionCopy_false_encryption(t *testing.T) {
 	state := tState()
 	stepAMIRegionCopy.Run(context.Background(), state)
 
-	if stepAMIRegionCopy.toDelete != "" {
-		t.Fatalf("Shouldn't delete original AMI if not encrypted")
+	if stepAMIRegionCopy.toDelete != "ami-12345" {
+		t.Fatalf("should be deleting the original intermediary ami")
 	}
-	if len(stepAMIRegionCopy.Regions) > 0 {
-		t.Fatalf("Shouldn't have added original ami to Regions")
+	if len(stepAMIRegionCopy.Regions) == 0 {
+		t.Fatalf("Should have added original ami to Regions")
 	}
 }
 
