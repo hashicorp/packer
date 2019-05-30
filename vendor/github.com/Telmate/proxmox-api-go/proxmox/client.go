@@ -279,8 +279,8 @@ func (c *Client) MonitorCmd(vmr *VmRef, command string) (monitorRes map[string]i
 	return
 }
 
-// WaitForCompletionRef - poll the API for task completion
-func (c *Client) WaitForCompletionRef(taskResponse map[string]interface{}) (waitExitStatus string, err error) {
+// WaitForCompletion - poll the API for task completion
+func (c *Client) WaitForCompletion(taskResponse map[string]interface{}) (waitExitStatus string, err error) {
 	if taskResponse["errors"] != nil {
 		errJSON, _ := json.MarshalIndent(taskResponse["errors"], "", "  ")
 		return string(errJSON), errors.New("Error reponse")
@@ -333,7 +333,7 @@ func (c *Client) StatusChangeVm(vmr *VmRef, setStatus string) (exitStatus string
 	var taskResponse map[string]interface{}
 	for i := 0; i < 3; i++ {
 		_, err = c.session.PostJSON(url, nil, nil, nil, &taskResponse)
-		exitStatus, err = c.WaitForCompletionRef(taskResponse)
+		exitStatus, err = c.WaitForCompletion(taskResponse)
 		if exitStatus == "" {
 			time.Sleep(TaskStatusCheckInterval * time.Second)
 		} else {
@@ -375,7 +375,7 @@ func (c *Client) DeleteVm(vmr *VmRef) (exitStatus string, err error) {
 	url := fmt.Sprintf("/nodes/%s/%s/%d", vmr.node, vmr.vmType, vmr.vmId)
 	var taskResponse map[string]interface{}
 	_, err = c.session.RequestJSON("DELETE", url, nil, nil, nil, &taskResponse)
-	exitStatus, err = c.WaitForCompletionRef(taskResponse)
+	exitStatus, err = c.WaitForCompletion(taskResponse)
 	return
 }
 
@@ -404,7 +404,7 @@ func (c *Client) CreateQemuVm(node string, vmParams map[string]interface{}) (exi
 	if err != nil {
 		return "", err
 	}
-	exitStatus, err = c.WaitForCompletionRef(taskResponse)
+	exitStatus, err = c.WaitForCompletion(taskResponse)
 	// Delete VM disks if the VM didn't create.
 	if exitStatus != "OK" {
 		deleteDisksErr := c.DeleteVMDisks(node, createdDisks)
@@ -425,7 +425,7 @@ func (c *Client) CloneQemuVm(vmr *VmRef, vmParams map[string]interface{}) (exitS
 		if err != nil {
 			return "", err
 		}
-		exitStatus, err = c.WaitForCompletionRef(taskResponse)
+		exitStatus, err = c.WaitForCompletion(taskResponse)
 	}
 	return
 }
@@ -438,7 +438,7 @@ func (c *Client) RollbackQemuVm(vmr *VmRef, snapshot string) (exitStatus string,
 	url := fmt.Sprintf("/nodes/%s/%s/%d/snapshot/%s/rollback", vmr.node, vmr.vmType, vmr.vmId, snapshot)
 	var taskResponse map[string]interface{}
 	_, err = c.session.PostJSON(url, nil, nil, nil, &taskResponse)
-	exitStatus, err = c.WaitForCompletionRef(taskResponse)
+	exitStatus, err = c.WaitForCompletion(taskResponse)
 	return
 }
 
@@ -452,7 +452,7 @@ func (c *Client) SetVmConfig(vmr *VmRef, vmParams map[string]interface{}) (exitS
 		if err != nil {
 			return nil, err
 		}
-		exitStatus, err = c.WaitForCompletionRef(taskResponse)
+		exitStatus, err = c.WaitForCompletion(taskResponse)
 	}
 	return
 }
@@ -473,7 +473,7 @@ func (c *Client) ResizeQemuDisk(vmr *VmRef, disk string, moreSizeGB int) (exitSt
 		if err != nil {
 			return nil, err
 		}
-		exitStatus, err = c.WaitForCompletionRef(taskResponse)
+		exitStatus, err = c.WaitForCompletion(taskResponse)
 	}
 	return
 }
