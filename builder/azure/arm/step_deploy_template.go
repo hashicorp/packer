@@ -50,7 +50,7 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 
 	f, err := s.client.DeploymentsClient.CreateOrUpdate(ctx, resourceGroupName, deploymentName, *deployment)
 	if err == nil {
-		err = f.WaitForCompletion(ctx, s.client.DeploymentsClient.Client)
+		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
 	}
 	if err != nil {
 		s.say(s.client.LastError.Error())
@@ -96,7 +96,7 @@ func deleteResource(ctx context.Context, client *AzureClient, resourceType strin
 	case "Microsoft.Compute/virtualMachines":
 		f, err := client.VirtualMachinesClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, client.VirtualMachinesClient.Client)
+			err = f.WaitForCompletionRef(ctx, client.VirtualMachinesClient.Client)
 		}
 		return err
 	case "Microsoft.KeyVault/vaults":
@@ -106,19 +106,19 @@ func deleteResource(ctx context.Context, client *AzureClient, resourceType strin
 	case "Microsoft.Network/networkInterfaces":
 		f, err := client.InterfacesClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, client.InterfacesClient.Client)
+			err = f.WaitForCompletionRef(ctx, client.InterfacesClient.Client)
 		}
 		return err
 	case "Microsoft.Network/virtualNetworks":
 		f, err := client.VirtualNetworksClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, client.VirtualNetworksClient.Client)
+			err = f.WaitForCompletionRef(ctx, client.VirtualNetworksClient.Client)
 		}
 		return err
 	case "Microsoft.Network/publicIPAddresses":
 		f, err := client.PublicIPAddressesClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, client.PublicIPAddressesClient.Client)
+			err = f.WaitForCompletionRef(ctx, client.PublicIPAddressesClient.Client)
 		}
 		return err
 	}
@@ -132,7 +132,7 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 		diskName := xs[len(xs)-1]
 		f, err := s.client.DisksClient.Delete(ctx, resourceGroupName, diskName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, s.client.DisksClient.Client)
+			err = f.WaitForCompletionRef(ctx, s.client.DisksClient.Client)
 		}
 		return err
 	}
