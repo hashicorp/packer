@@ -130,7 +130,11 @@ func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) err
 	}
 	if strings.HasSuffix(path, `\`) {
 		// path is a directory
-		path += filepath.Base((*fi).Name())
+		if fi != nil {
+			path += filepath.Base((*fi).Name())
+		} else {
+			return fmt.Errorf("Was unable to infer file basename for upload.")
+		}
 	}
 	log.Printf("Uploading file to '%s'", path)
 	return wcp.Write(path, input)
