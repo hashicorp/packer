@@ -30,6 +30,7 @@ type Config struct {
 	MountPath         string     `mapstructure:"mount_path"`
 	PostMountCommands []string   `mapstructure:"post_mount_commands"`
 	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
+	CopyFiles         []string   `mapstructure:"copy_files"`
 
 	OSDiskSizeGB             int32  `mapstructure:"osdisk_size_gb"`
 	OSDiskStorageAccountType string `mapstructure:"osdisk_storageaccounttype"`
@@ -160,6 +161,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&chroot.StepMountExtra{
 			ChrootMounts: b.config.ChrootMounts,
 		},
+		&chroot.StepCopyFiles{
+			Files: b.config.CopyFiles,
+		},
+		&chroot.StepChrootProvision{},
 	)
 
 	// Run!
