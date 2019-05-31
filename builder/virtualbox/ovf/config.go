@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package ovf
 
 import (
