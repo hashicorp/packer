@@ -31,17 +31,18 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 	snapshots := state.Get("snapshots").(map[string][]string)
 
 	ami := amis[s.OriginalRegion]
+	// Always copy back into original region to preserve the ami name
+	s.toDelete = ami
+	s.Regions = append(s.Regions, s.OriginalRegion)
 
 	if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
 		// encrypt_boot is true, so we have to copy the temporary
 		// AMI with required encryption setting.
 		// temp image was created by stepCreateAMI.
-		s.Regions = append(s.Regions, s.OriginalRegion)
 		if s.RegionKeyIds == nil {
 			s.RegionKeyIds = make(map[string]string)
 		}
 		s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
-		s.toDelete = ami
 	}
 
 	if len(s.Regions) == 0 {
@@ -57,20 +58,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
-		if region == s.OriginalRegion {
-			if s.EncryptBootVolume == nil || *s.EncryptBootVolume == false {
-				ui.Message(fmt.Sprintf(
-					"Avoiding copying AMI to duplicate region %s", region))
-				wg.Done()
-				continue
-			} else {
-				// encryption is true and we're in the original region
-				ui.Message(fmt.Sprintf("Creating encrypted copy in build region: %s", region))
-			}
-		} else {
-			// in non-build region
-			ui.Message(fmt.Sprintf("Copying to: %s", region))
-		}
+		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
 		if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
 			regKeyID = s.RegionKeyIds[region]
@@ -107,11 +95,6 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
-
-	// cleanup is only for encrypted copies.
-	if s.EncryptBootVolume == nil || !*s.EncryptBootVolume {
-		return
-	}
 
 	// Delete the unencrypted amis and snapshots
 	ui.Say("Deregistering the AMI and deleting unencrypted temporary " +
