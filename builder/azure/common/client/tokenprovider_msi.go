@@ -1,4 +1,4 @@
-package arm
+package client
 
 import (
 	"github.com/Azure/go-autorest/autorest/adal"

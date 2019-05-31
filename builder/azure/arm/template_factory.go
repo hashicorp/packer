@@ -18,8 +18,8 @@ func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
 	params := &template.TemplateParameters{
 		KeyVaultName:        &template.TemplateParameter{Value: config.tmpKeyVaultName},
 		KeyVaultSecretValue: &template.TemplateParameter{Value: config.winrmCertificate},
-		ObjectId:            &template.TemplateParameter{Value: config.ObjectID},
-		TenantId:            &template.TemplateParameter{Value: config.TenantID},
+		ObjectId:            &template.TemplateParameter{Value: config.ClientConfig.ObjectID},
+		TenantId:            &template.TemplateParameter{Value: config.ClientConfig.TenantID},
 	}
 
 	builder, _ := template.NewTemplateBuilder(template.KeyVault)
@@ -64,7 +64,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType, config.diskCachingType)
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
-			config.SubscriptionID,
+			config.ClientConfig.SubscriptionID,
 			config.Location,
 			config.ImagePublisher,
 			config.ImageOffer,
