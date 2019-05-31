@@ -202,7 +202,10 @@ builder.
                 "name": "ubuntu-16.04",
                 "visibility": "protected",
                 "owner": "d1a588cf4b0743344508dc145649372d1",
-                "tags": ["prod", "ready"]
+                "tags": ["prod", "ready"],
+                "properties": {
+                    "os_distro": "ubuntu"
+                }
             },
             "most_recent": true
         }
@@ -228,6 +231,9 @@ builder.
         -   tags (array of strings)
 
         -   visibility (string)
+
+        -   properties (map of strings to strings) (fields that can be set
+            with `openstack image set --property key=value`)
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.

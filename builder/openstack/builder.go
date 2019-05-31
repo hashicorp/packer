@@ -97,6 +97,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SourceImageName:  b.config.RunConfig.SourceImageName,
 			SourceImageOpts:  b.config.RunConfig.sourceImageOpts,
 			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
+			SourceProperties: b.config.SourceImageFilters.Filters.Properties,
 		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
