@@ -183,11 +183,11 @@ Providing `temp_resource_group_name` or `location` in combination with
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
 
--   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
+-   `cloud_environment_name` (string) - One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
--   `custom_data_file` (string) Specify a file containing custom data to inject
+-   `custom_data_file` (string) - Specify a file containing custom data to inject
     into the cloud-init process. The contents of the file are read and injected
     into the ARM template. The custom data will be passed to cloud-init for
     processing at the time of provisioning. See
@@ -195,21 +195,21 @@ Providing `temp_resource_group_name` or `location` in combination with
     to learn more about custom data, and how it can be used to influence the
     provisioning process.
 
--   `custom_managed_image_name` (string) Specify the source managed image's
+-   `custom_managed_image_name` (string) - Specify the source managed image's
     name to use. If this value is set, do not set image\_publisher,
     image\_offer, image\_sku, or image\_version. If this value is set, the
     value `custom_managed_image_resource_group_name` must also be set. See
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
 
--   `custom_managed_image_resource_group_name` (string) Specify the source
+-   `custom_managed_image_resource_group_name` (string) - Specify the source
     managed image's resource group used to use. If this value is set, do not
     set image\_publisher, image\_offer, image\_sku, or image\_version. If this
     value is set, the value `custom_managed_image_name` must also be set. See
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
 
--   `image_version` (string) Specify a specific version of an OS to boot from.
+-   `image_version` (string) - Specify a specific version of an OS to boot from.
     Defaults to `latest`. There may be a difference in versions available
     across regions due to image synchronization latency. To ensure a consistent
     version across regions set this value to one that is available in all
@@ -218,17 +218,17 @@ Providing `temp_resource_group_name` or `location` in combination with
     CLI example
     `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 
--   `image_url` (string) Specify a custom VHD to use. If this value is set, do
+-   `image_url` (string) - Specify a custom VHD to use. If this value is set, do
     not set image\_publisher, image\_offer, image\_sku, or image\_version.
 
--   `managed_image_storage_account_type` (string) Specify the storage account
+-   `managed_image_storage_account_type` (string) - Specify the storage account
     type for a managed image. Valid values are Standard\_LRS and Premium\_LRS.
     The default is Standard\_LRS.
 
--   `os_disk_size_gb` (number) Specify the size of the OS disk in GB
+-   `os_disk_size_gb` (number) - Specify the size of the OS disk in GB
     (gigabytes). Values of zero or less than zero are ignored.
 
--   `disk_caching_type` (string) Specify the disk caching type. Valid values
+-   `disk_caching_type` (string) - Specify the disk caching type. Valid values
     are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
 
 -   `disk_additional_size` (array of integers) - The size(s) of any additional
@@ -249,7 +249,7 @@ Providing `temp_resource_group_name` or `location` in combination with
     The additional disk will have the same storage account type as the OS disk,
     as specified with the `managed_image_storage_account_type` setting.
 
--   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
+-   `os_type` (string) - If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned
     machine. For `Linux` this configures an SSH authorized key. For `Windows`
     this configures a WinRM certificate.
@@ -260,103 +260,101 @@ Providing `temp_resource_group_name` or `location` in combination with
     all Marketplace images support programmatic deployment, and support is
     controlled by the image publisher.
 
-    An example plan\_info object is defined below.
+        An example plan\_info object is defined below.
 
-    ``` json
-    {
-       "plan_info": {
-           "plan_name": "rabbitmq",
-           "plan_product": "rabbitmq",
-           "plan_publisher": "bitnami"
-       }
-    }
-    ```
+        ``` json
+        {
+          "plan_info": {
+              "plan_name": "rabbitmq",
+              "plan_product": "rabbitmq",
+              "plan_publisher": "bitnami"
+          }
+        }
+        ```
 
-    `plan_name` (string) - The plan name, required. `plan_product` (string) -
-    The plan product, required. `plan_publisher` (string) - The plan publisher,
-    required. `plan_promotion_code` (string) - Some images accept a promotion
-    code, optional.
+        `plan_name` (string) - The plan name, required. `plan_product` (string) -
+        The plan product, required. `plan_publisher` (string) - The plan publisher,
+        required. `plan_promotion_code` (string) - Some images accept a promotion
+        code, optional.
 
-    Images created from the Marketplace with `plan_info` **must** specify
-    `plan_info` whenever the image is deployed. The builder automatically adds
-    tags to the image to ensure this information is not lost. The following
-    tags are added.
+        Images created from the Marketplace with `plan_info` **must** specify
+        `plan_info` whenever the image is deployed. The builder automatically adds
+        tags to the image to ensure this information is not lost. The following
+        tags are added.
 
-    1.  PlanName
-    2.  PlanProduct
-    3.  PlanPublisher
-    4.  PlanPromotionCode
+        1.  PlanName
+        2.  PlanProduct
+        3.  PlanPublisher
+        4.  PlanPromotionCode
 
--   `shared_image_gallery` (object) Use a [Shared Gallery
+-   `shared_image_gallery` (object) - Use a [Shared Gallery
     image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
     as the source for this build. *VHD targets are incompatible with this build
     type* - the target must be a *Managed Image*.
 
-<!-- -->
+        "shared_image_gallery": {
+            "subscription": "00000000-0000-0000-0000-00000000000",
+            "resource_group": "ResourceGroup",
+            "gallery_name": "GalleryName",
+            "image_name": "ImageName",
+            "image_version": "1.0.0"
+        }
+        "managed_image_name": "TargetImageName",
+        "managed_image_resource_group_name": "TargetResourceGroup"
 
-    "shared_image_gallery": {
-        "subscription": "00000000-0000-0000-0000-00000000000",
-        "resource_group": "ResourceGroup",
-        "gallery_name": "GalleryName",
-        "image_name": "ImageName",
-        "image_version": "1.0.0"
-    }
-    "managed_image_name": "TargetImageName",
-    "managed_image_resource_group_name": "TargetResourceGroup"
-
--   `temp_compute_name` (string) temporary name assigned to the VM. If this
+-   `temp_compute_name` (string) - temporary name assigned to the VM. If this
     value is not set, a random value will be assigned. Knowing the resource
     group and VM name allows one to execute commands to update the VM during a
     Packer build, e.g. attach a resource disk to the VM.
 
--   `tenant_id` (string) The account identifier with which your `client_id` and
+-   `tenant_id` (string) - The account identifier with which your `client_id` and
     `subscription_id` are associated. If not specified, `tenant_id` will be
     looked up using `subscription_id`.
 
--   `private_virtual_network_with_public_ip` (boolean) This value allows you to
+-   `private_virtual_network_with_public_ip` (boolean) - This value allows you to
     set a `virtual_network_name` and obtain a public IP. If this value is not
     set and `virtual_network_name` is defined Packer is only allowed to be
     executed from a host on the same subnet / virtual network.
 
--   `virtual_network_name` (string) Use a pre-existing virtual network for the
+-   `virtual_network_name` (string) - Use a pre-existing virtual network for the
     VM. This option enables private communication with the VM, no public IP
     address is **used** or **provisioned** (unless you set
     `private_virtual_network_with_public_ip`).
 
--   `virtual_network_resource_group_name` (string) If virtual\_network\_name is
+-   `virtual_network_resource_group_name` (string) - If virtual\_network\_name is
     set, this value **may** also be set. If virtual\_network\_name is set, and
     this value is not set the builder attempts to determine the resource group
     containing the virtual network. If the resource group cannot be found, or
     it cannot be disambiguated, this value should be set.
 
--   `virtual_network_subnet_name` (string) If virtual\_network\_name is set,
+-   `virtual_network_subnet_name` (string) - If virtual\_network\_name is set,
     this value **may** also be set. If virtual\_network\_name is set, and this
     value is not set the builder attempts to determine the subnet to use with
     the virtual network. If the subnet cannot be found, or it cannot be
     disambiguated, this value should be set.
 
--   `vm_size` (string) Size of the VM used for building. This can be changed
+-   `vm_size` (string) - Size of the VM used for building. This can be changed
     when you deploy a VM from your VHD. See
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
     information. Defaults to `Standard_A1`.
 
     CLI example `az vm list-sizes --location westus`
 
--   `async_resourcegroup_delete` (boolean) If you want packer to delete the
+-   `async_resourcegroup_delete` (boolean) - If you want packer to delete the
     temporary resource group asynchronously set this value. It's a boolean
     value and defaults to false. **Important** Setting this true means that
     your builds are faster, however any failed deletes are not reported.
 
--   `managed_image_os_disk_snapshot_name` (string) If
+-   `managed_image_os_disk_snapshot_name` (string) - If
     managed\_image\_os\_disk\_snapshot\_name is set, a snapshot of the OS disk
     is created with the same name as this value before the VM is captured.
 
--   `managed_image_data_disk_snapshot_prefix` (string) If
+-   `managed_image_data_disk_snapshot_prefix` (string) - If
     managed\_image\_data\_disk\_snapshot\_prefix is set, snapshot of the data
     disk(s) is created with the same prefix as this value before the VM is
     captured.
 
--   `managed_image_zone_resilient` (bool) Store the image in zone-resilient storage. You need to create it
+-   `managed_image_zone_resilient` (bool) - Store the image in zone-resilient storage. You need to create it
     in a region that supports [availability zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
 
 ## Basic Example
