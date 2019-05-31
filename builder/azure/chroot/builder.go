@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
-	amznchroot "github.com/hashicorp/packer/builder/amazon/chroot"
+	"github.com/hashicorp/packer/builder/amazon/chroot"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/common"
@@ -23,8 +23,12 @@ type Config struct {
 
 	FromScratch bool `mapstructure:"from_scratch"`
 
-	CommandWrapper   string   `mapstructure:"command_wrapper"`
-	PreMountCommands []string `mapstructure:"pre_mount_commands"`
+	CommandWrapper    string   `mapstructure:"command_wrapper"`
+	MountOptions      []string `mapstructure:"mount_options"`
+	MountPartition    string   `mapstructure:"mount_partition"`
+	MountPath         string   `mapstructure:"mount_path"`
+	PreMountCommands  []string `mapstructure:"pre_mount_commands"`
+	PostMountCommands []string `mapstructure:"post_mount_commands"`
 
 	OSDiskSizeGB             int32  `mapstructure:"osdisk_size_gb"`
 	OSDiskStorageAccountType string `mapstructure:"osdisk_storageaccounttype"`
@@ -93,7 +97,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("wrappedCommand", amznchroot.CommandWrapper(wrappedCommand))
+	state.Put("wrappedCommand", chroot.CommandWrapper(wrappedCommand))
 
 	info, err := azcli.MetadataClient().GetComputeInfo()
 	if err != nil {
@@ -136,8 +140,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ResourceGroup:  info.ResourceGroupName,
 			DiskName:       osDiskName,
 		},
-		&amznchroot.StepPreMountCommands{
+		&chroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
+		},
+		&StepMountDevice{
+			MountOptions:   b.config.MountOptions,
+			MountPartition: b.config.MountPartition,
+			MountPath:      b.config.MountPath,
+		},
+		&chroot.StepPostMountCommands{
+			Commands: b.config.PostMountCommands,
 		},
 	)
 
