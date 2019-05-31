@@ -16,6 +16,17 @@ type StepSourceImageInfo struct {
 	SourceImageName  string
 	SourceImageOpts  images.ListOpts
 	SourceMostRecent bool
+	SourceProperties map[string]string
+}
+
+func PropertiesSatisfied(image *images.Image, props *map[string]string) bool {
+	for key, value := range *props {
+		if image.Properties[key] != value {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -36,26 +47,45 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	log.Printf("Using Image Filters %v", s.SourceImageOpts)
+	log.Printf("Using Image Filters %+v", s.SourceImageOpts)
 	image := &images.Image{}
+	count := 0
 	err = images.List(client, s.SourceImageOpts).EachPage(func(page pagination.Page) (bool, error) {
-		i, err := images.ExtractImages(page)
+		imgs, err := images.ExtractImages(page)
 		if err != nil {
 			return false, err
 		}
 
-		switch len(i) {
-		case 1:
-			*image = i[0]
-			return false, nil
-		default:
+		for _, img := range imgs {
+			// Check if all Properties are satisfied
+			if PropertiesSatisfied(&img, &s.SourceProperties) {
+				count++
+				if count == 1 {
+					// Tentatively return this result.
+					*image = img
+				}
+				// Don't iterate over entries we will never use.
+				if count > 1 {
+					break
+				}
+			}
+		}
+
+		switch count {
+		case 0: // Continue looking at next page.
+			return true, nil
+		case 1: // Maybe we're done, maybe there is another result in a later page and it is an error.
 			if s.SourceMostRecent {
-				*image = i[0]
+				return false, nil
+			}
+			return true, nil
+		default: // By now we should know if getting 2+ results is an error or not.
+			if s.SourceMostRecent {
 				return false, nil
 			}
 			return false, fmt.Errorf(
-				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v",
-				s.SourceImageOpts)
+				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %+v properties %+v",
+				s.SourceImageOpts, s.SourceProperties)
 		}
 	})
 
@@ -67,7 +97,8 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	if image.ID == "" {
-		err := fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
+		err := fmt.Errorf("No image was found matching filters: %+v properties %+v",
+			s.SourceImageOpts, s.SourceProperties)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
