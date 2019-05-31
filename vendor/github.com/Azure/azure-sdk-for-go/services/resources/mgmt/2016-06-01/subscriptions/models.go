@@ -214,17 +214,17 @@ func NewListResultPage(getNextPage func(context.Context, ListResult) (ListResult
 
 // Location location information.
 type Location struct {
-	// ID - The fully qualified ID of the location. For example, /subscriptions/00000000-0000-0000-0000-000000000000/locations/westus.
+	// ID - READ-ONLY; The fully qualified ID of the location. For example, /subscriptions/00000000-0000-0000-0000-000000000000/locations/westus.
 	ID *string `json:"id,omitempty"`
-	// SubscriptionID - The subscription ID.
+	// SubscriptionID - READ-ONLY; The subscription ID.
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
-	// Name - The location name.
+	// Name - READ-ONLY; The location name.
 	Name *string `json:"name,omitempty"`
-	// DisplayName - The display name of the location.
+	// DisplayName - READ-ONLY; The display name of the location.
 	DisplayName *string `json:"displayName,omitempty"`
-	// Latitude - The latitude of the location.
+	// Latitude - READ-ONLY; The latitude of the location.
 	Latitude *string `json:"latitude,omitempty"`
-	// Longitude - The longitude of the location.
+	// Longitude - READ-ONLY; The longitude of the location.
 	Longitude *string `json:"longitude,omitempty"`
 }
 
@@ -404,24 +404,24 @@ func NewOperationListResultPage(getNextPage func(context.Context, OperationListR
 
 // Policies subscription policies.
 type Policies struct {
-	// LocationPlacementID - The subscription location placement ID. The ID indicates which regions are visible for a subscription. For example, a subscription with a location placement Id of Public_2014-09-01 has access to Azure public regions.
+	// LocationPlacementID - READ-ONLY; The subscription location placement ID. The ID indicates which regions are visible for a subscription. For example, a subscription with a location placement Id of Public_2014-09-01 has access to Azure public regions.
 	LocationPlacementID *string `json:"locationPlacementId,omitempty"`
-	// QuotaID - The subscription quota ID.
+	// QuotaID - READ-ONLY; The subscription quota ID.
 	QuotaID *string `json:"quotaId,omitempty"`
-	// SpendingLimit - The subscription spending limit. Possible values include: 'On', 'Off', 'CurrentPeriodOff'
+	// SpendingLimit - READ-ONLY; The subscription spending limit. Possible values include: 'On', 'Off', 'CurrentPeriodOff'
 	SpendingLimit SpendingLimit `json:"spendingLimit,omitempty"`
 }
 
 // Subscription subscription information.
 type Subscription struct {
 	autorest.Response `json:"-"`
-	// ID - The fully qualified ID for the subscription. For example, /subscriptions/00000000-0000-0000-0000-000000000000.
+	// ID - READ-ONLY; The fully qualified ID for the subscription. For example, /subscriptions/00000000-0000-0000-0000-000000000000.
 	ID *string `json:"id,omitempty"`
-	// SubscriptionID - The subscription ID.
+	// SubscriptionID - READ-ONLY; The subscription ID.
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
-	// DisplayName - The subscription display name.
+	// DisplayName - READ-ONLY; The subscription display name.
 	DisplayName *string `json:"displayName,omitempty"`
-	// State - The subscription state. Possible values are Enabled, Warned, PastDue, Disabled, and Deleted. Possible values include: 'Enabled', 'Warned', 'PastDue', 'Disabled', 'Deleted'
+	// State - READ-ONLY; The subscription state. Possible values are Enabled, Warned, PastDue, Disabled, and Deleted. Possible values include: 'Enabled', 'Warned', 'PastDue', 'Disabled', 'Deleted'
 	State State `json:"state,omitempty"`
 	// SubscriptionPolicies - The subscription policies.
 	SubscriptionPolicies *Policies `json:"subscriptionPolicies,omitempty"`
@@ -431,9 +431,9 @@ type Subscription struct {
 
 // TenantIDDescription tenant Id information.
 type TenantIDDescription struct {
-	// ID - The fully qualified ID of the tenant. For example, /tenants/00000000-0000-0000-0000-000000000000.
+	// ID - READ-ONLY; The fully qualified ID of the tenant. For example, /tenants/00000000-0000-0000-0000-000000000000.
 	ID *string `json:"id,omitempty"`
-	// TenantID - The tenant ID. For example, 00000000-0000-0000-0000-000000000000.
+	// TenantID - READ-ONLY; The tenant ID. For example, 00000000-0000-0000-0000-000000000000.
 	TenantID *string `json:"tenantId,omitempty"`
 }
 

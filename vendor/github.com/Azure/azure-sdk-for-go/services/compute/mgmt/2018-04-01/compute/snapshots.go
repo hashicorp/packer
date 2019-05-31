@@ -107,6 +107,7 @@ func (client SnapshotsClient) CreateOrUpdatePreparer(ctx context.Context, resour
 		"api-version": APIVersion,
 	}
 
+	snapshot.ManagedBy = nil
 	preparer := autorest.CreatePreparer(
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPut(),
