@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 // The instance package contains a packer.Builder implementation that builds
 // AMIs for Amazon EC2 backed by instance storage, as opposed to EBS storage.
 package instance

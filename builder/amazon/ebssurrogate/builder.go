@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 // The ebssurrogate package contains a packer.Builder implementation that
 // builds a new EBS-backed AMI using an ephemeral instance.
 package ebssurrogate
