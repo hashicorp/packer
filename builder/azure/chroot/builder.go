@@ -22,6 +22,8 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	ClientConfig client.Config `mapstructure:",squash"`
+
 	FromScratch bool `mapstructure:"from_scratch"`
 
 	CommandWrapper    string     `mapstructure:"command_wrapper"`
@@ -66,6 +68,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 
 	// Defaults
+	err = b.config.ClientConfig.SetDefaultValues()
+	if err != nil {
+		return nil, err
+	}
+
 	if b.config.ChrootMounts == nil {
 		b.config.ChrootMounts = make([][]string, 0)
 	}
@@ -92,7 +99,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.MountPath == "" {
-		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
+		b.config.MountPath = "/mnt/packer-azure-chroot-disks/{{.Device}}"
 	}
 
 	if b.config.MountPartition == "" {
@@ -107,6 +114,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OSDiskCacheType = string(compute.CachingTypesReadOnly)
 	}
 
+	if b.config.ImageOSState == "" {
+		b.config.ImageOSState = string(compute.Generalized)
+
+	}
+
 	// checks, accumulate any errors or warnings
 	var errs *packer.MultiError
 	var warns []string
@@ -114,18 +126,62 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.FromScratch {
 		if b.config.OSDiskSizeGB == 0 {
 			errs = packer.MultiErrorAppend(
-				errs, errors.New("osdisk_size_gb is required with from_scratch"))
+				errs, errors.New("os_disk_size_gb is required with from_scratch"))
 		}
 		if len(b.config.PreMountCommands) == 0 {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("pre_mount_commands is required with from_scratch"))
 		}
+	} else {
+		errs = packer.MultiErrorAppend(errors.New("only 'from_scratch'=true is supported right now"))
 	}
 
-	if err != nil {
-		return nil, err
+	if err := checkOSState(b.config.ImageOSState); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("image_os_state: %v", err))
 	}
-	return warns, errs
+	if err := checkDiskCacheType(b.config.OSDiskCacheType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("os_disk_cache_type: %v", err))
+	}
+	if err := checkStorageAccountType(b.config.OSDiskStorageAccountType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("os_disk_storage_account_type: %v", err))
+	}
+
+	if errs != nil {
+		return warns, errs
+	}
+
+	packer.LogSecretFilter.Set(b.config.ClientConfig.ClientSecret, b.config.ClientConfig.ClientJWT)
+	return warns, nil
+}
+
+func checkOSState(s string) interface{} {
+	for _, v := range compute.PossibleOperatingSystemStateTypesValues() {
+		if compute.OperatingSystemStateTypes(s) == v {
+			return nil
+		}
+	}
+	return fmt.Errorf("%q is not a valid value (%v)",
+		s, compute.PossibleOperatingSystemStateTypesValues())
+}
+
+func checkDiskCacheType(s string) interface{} {
+	for _, v := range compute.PossibleCachingTypesValues() {
+		if compute.CachingTypes(s) == v {
+			return nil
+		}
+	}
+	return fmt.Errorf("%q is not a valid value (%v)",
+		s, compute.PossibleCachingTypesValues())
+}
+
+func checkStorageAccountType(s string) interface{} {
+	for _, v := range compute.PossibleStorageAccountTypesValues() {
+		if compute.StorageAccountTypes(s) == v {
+			return nil
+		}
+	}
+	return fmt.Errorf("%q is not a valid value (%v)",
+		s, compute.PossibleStorageAccountTypesValues())
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -133,8 +189,14 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("the azure-chroot builder only works on Linux environments")
 	}
 
-	// todo: instantiate Azure client
-	var azcli client.AzureClientSet
+	err := b.config.ClientConfig.FillParameters()
+	if err != nil {
+		return nil, fmt.Errorf("error setting Azure client defaults: %v", err)
+	}
+	azcli, err := client.New(b.config.ClientConfig, ui.Say)
+	if err != nil {
+		return nil, fmt.Errorf("error creating Azure client: %v", err)
+	}
 
 	wrappedCommand := func(command string) (string, error) {
 		ictx := b.config.ctx
@@ -164,9 +226,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	osDiskName := "PackerBuiltOsDisk"
 
 	state.Put("instance", info)
-	if err != nil {
-		return nil, err
-	}
 
 	// Build the steps
 	var steps []multistep.Step
