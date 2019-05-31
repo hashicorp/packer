@@ -488,11 +488,11 @@ func TestKeyVaultDeployment02(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if params.ObjectId.Value != c.ObjectID {
-		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ObjectID)
+	if params.ObjectId.Value != c.ClientConfig.ObjectID {
+		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ClientConfig.ObjectID)
 	}
-	if params.TenantId.Value != c.TenantID {
-		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.TenantID)
+	if params.TenantId.Value != c.ClientConfig.TenantID {
+		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.ClientConfig.TenantID)
 	}
 	if params.KeyVaultName.Value != c.tmpKeyVaultName {
 		t.Errorf("Expected template parameter 'KeyVaultName' to be %s, but got %s.", params.KeyVaultName.Value, c.tmpKeyVaultName)

@@ -1,4 +1,4 @@
-package arm
+package client
 
 import (
 	"crypto/ecdsa"
@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/Azure/go-autorest/autorest/azure"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 )
 
 func NewCertOAuthTokenProvider(env azure.Environment, clientID, clientCertPath, tenantID string) (oAuthTokenProvider, error) {

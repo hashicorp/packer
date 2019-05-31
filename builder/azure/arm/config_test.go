@@ -41,8 +41,8 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 		t.Error("Expected 'VMSize' to be populated, but it was empty!")
 	}
 
-	if c.ObjectID != "" {
-		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	if c.ClientConfig.ObjectID != "" {
+		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ClientConfig.ObjectID)
 	}
 
 	if c.managedImageStorageAccountType == "" {
@@ -273,12 +273,12 @@ func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testin
 func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
-	if c.CloudEnvironmentName != "Public" {
-		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.CloudEnvironmentName)
+	if c.ClientConfig.CloudEnvironmentName != "Public" {
+		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.ClientConfig.CloudEnvironmentName)
 	}
 
-	if c.cloudEnvironment == nil || c.cloudEnvironment.Name != "AzurePublicCloud" {
-		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.cloudEnvironment)
+	if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != "AzurePublicCloud" {
+		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.ClientConfig.CloudEnvironment)
 	}
 }
 
@@ -327,8 +327,8 @@ func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if c.cloudEnvironment == nil || c.cloudEnvironment.Name != x.environmentName {
-			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.cloudEnvironment)
+		if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != x.environmentName {
+			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.ClientConfig.CloudEnvironment)
 		}
 	}
 }

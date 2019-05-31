@@ -20,6 +20,8 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
 
+	azcommon "github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
@@ -92,7 +94,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Authentication via OAUTH
-	ClientConfig `mapstructure:",squash"`
+	ClientConfig client.Config `mapstructure:",squash"`
 
 	// Capture
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
@@ -385,7 +387,7 @@ func (c *Config) toVMID() string {
 	} else {
 		resourceGroupName = c.BuildResourceGroupName
 	}
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, resourceGroupName, c.tmpComputeName)
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.ClientConfig.SubscriptionID, resourceGroupName, c.tmpComputeName)
 }
 
 func (c *Config) isManagedImage() bool {
@@ -477,7 +479,7 @@ func (c *Config) createCertificate() (string, error) {
 
 func newConfig(raws ...interface{}) (*Config, []string, error) {
 	var c Config
-	c.ctx.Funcs = TemplateFuncs
+	c.ctx.Funcs = azcommon.TemplateFuncs
 	err := config.Decode(&c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -490,7 +492,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	provideDefaultValues(&c)
 	setRuntimeValues(&c)
 	setUserNamePassword(&c)
-	err = c.ClientConfig.setCloudEnvironment()
+	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -650,7 +652,7 @@ func provideDefaultValues(c *Config) {
 		c.ImageVersion = DefaultImageVersion
 	}
 
-	c.provideDefaultValues()
+	c.ClientConfig.SetDefaultValues()
 }
 
 func assertTagProperties(c *Config, errs *packer.MultiError) {
@@ -669,7 +671,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 }
 
 func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
-	c.ClientConfig.assertRequiredParametersSet(errs)
+	c.ClientConfig.Validate(errs)
 
 	/////////////////////////////////////////////
 	// Capture

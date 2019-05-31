@@ -1,4 +1,4 @@
-package arm
+package client
 
 import (
 	crand "crypto/rand"
@@ -21,52 +21,52 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		config  ClientConfig
+		config  Config
 		wantErr bool
 	}{
 		{
 			name:    "no client_id, client_secret or subscription_id should enable MSI auth",
-			config:  ClientConfig{},
+			config:  Config{},
 			wantErr: false,
 		},
 		{
 			name: "subscription_id is set will trigger device flow",
-			config: ClientConfig{
+			config: Config{
 				SubscriptionID: "error",
 			},
 			wantErr: false,
 		},
 		{
 			name: "client_id without client_secret, client_cert_path or client_jwt should error",
-			config: ClientConfig{
+			config: Config{
 				ClientID: "error",
 			},
 			wantErr: true,
 		},
 		{
 			name: "client_secret without client_id should error",
-			config: ClientConfig{
+			config: Config{
 				ClientSecret: "error",
 			},
 			wantErr: true,
 		},
 		{
 			name: "client_cert_path without client_id should error",
-			config: ClientConfig{
+			config: Config{
 				ClientCertPath: "/dev/null",
 			},
 			wantErr: true,
 		},
 		{
 			name: "client_jwt without client_id should error",
-			config: ClientConfig{
+			config: Config{
 				ClientJWT: "error",
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing subscription_id when using secret",
-			config: ClientConfig{
+			config: Config{
 				ClientID:     "ok",
 				ClientSecret: "ok",
 			},
@@ -74,7 +74,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		},
 		{
 			name: "missing subscription_id when using certificate",
-			config: ClientConfig{
+			config: Config{
 				ClientID:       "ok",
 				ClientCertPath: "ok",
 			},
@@ -82,7 +82,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		},
 		{
 			name: "missing subscription_id when using JWT",
-			config: ClientConfig{
+			config: Config{
 				ClientID:  "ok",
 				ClientJWT: "ok",
 			},
@@ -90,7 +90,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		},
 		{
 			name: "too many client_* values",
-			config: ClientConfig{
+			config: Config{
 				SubscriptionID: "ok",
 				ClientID:       "ok",
 				ClientSecret:   "ok",
@@ -100,7 +100,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		},
 		{
 			name: "too many client_* values (2)",
-			config: ClientConfig{
+			config: Config{
 				SubscriptionID: "ok",
 				ClientID:       "ok",
 				ClientSecret:   "ok",
@@ -110,7 +110,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		},
 		{
 			name: "tenant_id alone should fail",
-			config: ClientConfig{
+			config: Config{
 				TenantID: "ok",
 			},
 			wantErr: true,
@@ -120,7 +120,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			errs := &packer.MultiError{}
-			tt.config.assertRequiredParametersSet(errs)
+			tt.config.Validate(errs)
 			if (len(errs.Errors) != 0) != tt.wantErr {
 				t.Errorf("newConfig() error = %v, wantErr %v", errs, tt.wantErr)
 				return
@@ -131,13 +131,13 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 
 func Test_ClientConfig_DeviceLogin(t *testing.T) {
 	getEnvOrSkip(t, "AZURE_DEVICE_LOGIN")
-	cfg := ClientConfig{
+	cfg := Config{
 		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
-		cloudEnvironment: getCloud(),
+		CloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
-	spt, sptkv, err := cfg.getServicePrincipalTokens(
+	spt, sptkv, err := cfg.GetServicePrincipalTokens(
 		func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
@@ -159,16 +159,16 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 }
 
 func Test_ClientConfig_ClientPassword(t *testing.T) {
-	cfg := ClientConfig{
+	cfg := Config{
 		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientSecret:     getEnvOrSkip(t, "AZURE_CLIENTSECRET"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		cloudEnvironment: getCloud(),
+		CloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
-	spt, sptkv, err := cfg.getServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
+	spt, sptkv, err := cfg.GetServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
 	}
@@ -189,16 +189,16 @@ func Test_ClientConfig_ClientPassword(t *testing.T) {
 }
 
 func Test_ClientConfig_ClientCert(t *testing.T) {
-	cfg := ClientConfig{
+	cfg := Config{
 		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientCertPath:   getEnvOrSkip(t, "AZURE_CLIENTCERT"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		cloudEnvironment: getCloud(),
+		CloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
-	spt, sptkv, err := cfg.getServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
+	spt, sptkv, err := cfg.GetServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
 	}
@@ -219,16 +219,16 @@ func Test_ClientConfig_ClientCert(t *testing.T) {
 }
 
 func Test_ClientConfig_ClientJWT(t *testing.T) {
-	cfg := ClientConfig{
+	cfg := Config{
 		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientJWT:        getEnvOrSkip(t, "AZURE_CLIENTJWT"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		cloudEnvironment: getCloud(),
+		CloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
-	spt, sptkv, err := cfg.getServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
+	spt, sptkv, err := cfg.GetServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
 	}
@@ -270,104 +270,107 @@ func getCloud() *azure.Environment {
 func Test_ClientConfig_CanUseDeviceCode(t *testing.T) {
 	// TenantID is optional, but Builder will look up tenant ID before requesting
 	t.Run("without TenantID", func(t *testing.T) {
-		cfg := emptyClientConfig()
-		cfg.SubscriptionID = "12345"
+		cfg := Config{
+			SubscriptionID: "12345",
+		}
 		assertValid(t, cfg)
 	})
 	t.Run("with TenantID", func(t *testing.T) {
-		cfg := emptyClientConfig()
-		cfg.SubscriptionID = "12345"
-		cfg.TenantID = "12345"
+		cfg := Config{
+			SubscriptionID: "12345",
+			TenantID:       "12345",
+		}
 		assertValid(t, cfg)
 	})
 }
 
-func assertValid(t *testing.T, cfg ClientConfig) {
+func assertValid(t *testing.T, cfg Config) {
 	errs := &packer.MultiError{}
-	cfg.assertRequiredParametersSet(errs)
+	cfg.Validate(errs)
 	if len(errs.Errors) != 0 {
 		t.Fatal("Expected errs to be empty: ", errs)
 	}
 }
 
-func assertInvalid(t *testing.T, cfg ClientConfig) {
+func assertInvalid(t *testing.T, cfg Config) {
 	errs := &packer.MultiError{}
-	cfg.assertRequiredParametersSet(errs)
+	cfg.Validate(errs)
 	if len(errs.Errors) == 0 {
 		t.Fatal("Expected errs to be non-empty")
 	}
 }
 
 func Test_ClientConfig_CanUseClientSecret(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientSecret = "12345"
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientSecret:   "12345",
+	}
 
 	assertValid(t, cfg)
 }
 
 func Test_ClientConfig_CanUseClientSecretWithTenantID(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientSecret = "12345"
-	cfg.TenantID = "12345"
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientSecret:   "12345",
+		TenantID:       "12345",
+	}
 
 	assertValid(t, cfg)
 }
 
 func Test_ClientConfig_CanUseClientJWT(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientJWT = getJWT(10*time.Minute, true)
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientJWT:      getJWT(10*time.Minute, true),
+	}
 
 	assertValid(t, cfg)
 }
 
 func Test_ClientConfig_CanUseClientJWTWithTenantID(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientJWT = getJWT(10*time.Minute, true)
-	cfg.TenantID = "12345"
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientJWT:      getJWT(10*time.Minute, true),
+		TenantID:       "12345",
+	}
 
 	assertValid(t, cfg)
 }
 
 func Test_ClientConfig_CannotUseBothClientJWTAndSecret(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientSecret = "12345"
-	cfg.ClientJWT = getJWT(10*time.Minute, true)
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientSecret:   "12345",
+		ClientJWT:      getJWT(10*time.Minute, true),
+	}
 
 	assertInvalid(t, cfg)
 }
 
 func Test_ClientConfig_ClientJWTShouldBeValidForAtLeast5Minutes(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientJWT = getJWT(time.Minute, true)
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientJWT:      getJWT(time.Minute, true),
+	}
 
 	assertInvalid(t, cfg)
 }
 
 func Test_ClientConfig_ClientJWTShouldHaveThumbprint(t *testing.T) {
-	cfg := emptyClientConfig()
-	cfg.SubscriptionID = "12345"
-	cfg.ClientID = "12345"
-	cfg.ClientJWT = getJWT(10*time.Minute, false)
+	cfg := Config{
+		SubscriptionID: "12345",
+		ClientID:       "12345",
+		ClientJWT:      getJWT(10*time.Minute, false),
+	}
 
 	assertInvalid(t, cfg)
-}
-
-func emptyClientConfig() ClientConfig {
-	cfg := ClientConfig{}
-	_ = cfg.setCloudEnvironment()
-	return cfg
 }
 
 func Test_getJWT(t *testing.T) {
