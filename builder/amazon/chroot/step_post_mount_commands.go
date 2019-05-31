@@ -19,7 +19,7 @@ type StepPostMountCommands struct {
 }
 
 func (s *StepPostMountCommands) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(interpolateContextProvider)
 	device := state.Get("device").(string)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -29,7 +29,7 @@ func (s *StepPostMountCommands) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionContinue
 	}
 
-	ictx := config.ctx
+	ictx := config.GetContext()
 	ictx.Data = &postMountCommandsData{
 		Device:    device,
 		MountPath: mountPath,
