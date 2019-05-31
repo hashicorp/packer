@@ -3,27 +3,24 @@ package chroot
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
-	"time"
 )
 
 var _ multistep.Step = &StepAttachDisk{}
 
 type StepAttachDisk struct {
-	SubscriptionID, ResourceGroup, DiskName string
 }
 
 func (s StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
+	diskResourceID := state.Get("os_disk_resource_id").(string)
 
-	diskResourceID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s",
-		s.SubscriptionID,
-		s.ResourceGroup,
-		s.DiskName)
 	ui.Say(fmt.Sprintf("Attaching disk '%s'", diskResourceID))
 
 	da := NewDiskAttacher(azcli)
@@ -58,11 +55,8 @@ func (s StepAttachDisk) Cleanup(state multistep.StateBag) {
 func (s *StepAttachDisk) CleanupFunc(state multistep.StateBag) error {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
+	diskResourceID := state.Get("os_disk_resource_id").(string)
 
-	diskResourceID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s",
-		s.SubscriptionID,
-		s.ResourceGroup,
-		s.DiskName)
 	ui.Say(fmt.Sprintf("Detaching disk '%s'", diskResourceID))
 
 	da := NewDiskAttacher(azcli)
