@@ -59,7 +59,7 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state
 				// No need to wait for the complition for delete if request is Accepted
 				s.say(fmt.Sprintf("\nResource Group is being deleted, not waiting for deletion due to config. Resource Group Name '%s'", resourceGroupName))
 			} else {
-				f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+				f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)
 			}
 
 		}

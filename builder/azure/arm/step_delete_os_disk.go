@@ -48,7 +48,7 @@ func (s *StepDeleteOSDisk) deleteManagedDisk(ctx context.Context, resourceGroupN
 	diskName := xs[len(xs)-1]
 	f, err := s.client.DisksClient.Delete(ctx, resourceGroupName, diskName)
 	if err == nil {
-		err = f.WaitForCompletion(ctx, s.client.DisksClient.Client)
+		err = f.WaitForCompletionRef(ctx, s.client.DisksClient.Client)
 	}
 	return err
 }

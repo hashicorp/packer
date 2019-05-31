@@ -108,6 +108,7 @@ func (client DisksClient) CreateOrUpdatePreparer(ctx context.Context, resourceGr
 		"api-version": APIVersion,
 	}
 
+	disk.ManagedBy = nil
 	preparer := autorest.CreatePreparer(
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPut(),

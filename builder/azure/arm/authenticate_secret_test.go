@@ -22,14 +22,14 @@ func TestNewSecretOAuthTokenProvider(t *testing.T) {
 	if spn.Token().RefreshToken != "" {
 		t.Errorf("spn.Token().RefreshToken: expected=\"\", actual=%s", spn.Token().RefreshToken)
 	}
-	if spn.Token().ExpiresIn != "" {
-		t.Errorf("spn.Token().ExpiresIn: expected=\"\", actual=%s", spn.Token().ExpiresIn)
+	if spn.Token().ExpiresIn != "0" {
+		t.Errorf("spn.Token().ExpiresIn: expected=\"0\", actual=%s", spn.Token().ExpiresIn)
 	}
-	if spn.Token().ExpiresOn != "" {
-		t.Errorf("spn.Token().ExpiresOn: expected=\"\", actual=%s", spn.Token().ExpiresOn)
+	if spn.Token().ExpiresOn != "0" {
+		t.Errorf("spn.Token().ExpiresOn: expected=\"0\", actual=%s", spn.Token().ExpiresOn)
 	}
-	if spn.Token().NotBefore != "" {
-		t.Errorf("spn.Token().NotBefore: expected=\"\", actual=%s", spn.Token().NotBefore)
+	if spn.Token().NotBefore != "0" {
+		t.Errorf("spn.Token().NotBefore: expected=\"0\", actual=%s", spn.Token().NotBefore)
 	}
 	if spn.Token().Resource != "" {
 		t.Errorf("spn.Token().Resource: expected=\"\", actual=%s", spn.Token().Resource)
