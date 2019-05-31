@@ -23,12 +23,13 @@ type Config struct {
 
 	FromScratch bool `mapstructure:"from_scratch"`
 
-	CommandWrapper    string   `mapstructure:"command_wrapper"`
-	MountOptions      []string `mapstructure:"mount_options"`
-	MountPartition    string   `mapstructure:"mount_partition"`
-	MountPath         string   `mapstructure:"mount_path"`
-	PreMountCommands  []string `mapstructure:"pre_mount_commands"`
-	PostMountCommands []string `mapstructure:"post_mount_commands"`
+	CommandWrapper    string     `mapstructure:"command_wrapper"`
+	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
+	MountOptions      []string   `mapstructure:"mount_options"`
+	MountPartition    string     `mapstructure:"mount_partition"`
+	MountPath         string     `mapstructure:"mount_path"`
+	PostMountCommands []string   `mapstructure:"post_mount_commands"`
+	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
 
 	OSDiskSizeGB             int32  `mapstructure:"osdisk_size_gb"`
 	OSDiskStorageAccountType string `mapstructure:"osdisk_storageaccounttype"`
@@ -48,7 +49,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
-				// fields to exclude from interpolation
+				// these fields are interpolated in the steps,
+				// when more information is available
+				"command_wrapper",
+				"post_mount_commands",
+				"pre_mount_commands",
+				"mount_path",
 			},
 		},
 	}, raws...)
@@ -65,11 +71,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.FromScratch {
 		if b.config.OSDiskSizeGB == 0 {
 			errs = packer.MultiErrorAppend(
-				errs, errors.New("osdisk_size_gb is required with from_scratch."))
+				errs, errors.New("osdisk_size_gb is required with from_scratch"))
 		}
 		if len(b.config.PreMountCommands) == 0 {
 			errs = packer.MultiErrorAppend(
-				errs, errors.New("pre_mount_commands is required with from_scratch."))
+				errs, errors.New("pre_mount_commands is required with from_scratch"))
 		}
 	}
 
@@ -81,7 +87,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
-		return nil, errors.New("The azure-chroot builder only works on Linux environments.")
+		return nil, errors.New("the azure-chroot builder only works on Linux environments")
 	}
 
 	var azcli client.AzureClientSet
@@ -150,6 +156,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&chroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
+		},
+		&chroot.StepMountExtra{
+			ChrootMounts: b.config.ChrootMounts,
 		},
 	)
 
