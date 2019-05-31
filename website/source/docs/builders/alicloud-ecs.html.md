@@ -87,13 +87,13 @@ builder.
     disk.
     -   `disk_category` (string) - Category of the system disk. Optional values
         are:
-        -   `cloud` - general cloud disk
-        -   `cloud_efficiency` - efficiency cloud disk
-        -   `cloud_ssd` - cloud SSD
+            -   `cloud` - general cloud disk
+            -   `cloud_efficiency` - efficiency cloud disk
+            -   `cloud_ssd` - cloud SSD
 
-        For phased-out instance types and non-I/O optimized instances, the
-        default value is cloud. Otherwise, the default value is
-        cloud\_efficiency.
+            For phased-out instance types and non-I/O optimized instances, the
+            default value is cloud. Otherwise, the default value is
+            cloud\_efficiency.
 
     -   `disk_description` (string) - The value of disk description is blank by
         default. \[2, 256\] characters. The disk description will appear on the
