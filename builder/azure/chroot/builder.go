@@ -7,7 +7,6 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 	"github.com/hashicorp/packer/builder/amazon/chroot"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
@@ -16,6 +15,8 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+
+	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 )
 
 type Config struct {
@@ -32,8 +33,12 @@ type Config struct {
 	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles         []string   `mapstructure:"copy_files"`
 
-	OSDiskSizeGB             int32  `mapstructure:"osdisk_size_gb"`
-	OSDiskStorageAccountType string `mapstructure:"osdisk_storageaccounttype"`
+	OSDiskSizeGB             int32  `mapstructure:"os_disk_size_gb"`
+	OSDiskStorageAccountType string `mapstructure:"os_disk_storage_account_type"`
+	OSDiskCacheType          string `mapstructure:"os_disk_cache_type"`
+
+	ImageResourceID string `mapstructure:"image_resource_id"`
+	ImageOSState    string `mapstructure:"image_os_state"`
 
 	ctx interpolate.Context
 }
@@ -60,9 +65,46 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 
-	// defaults
+	// Defaults
+	if b.config.ChrootMounts == nil {
+		b.config.ChrootMounts = make([][]string, 0)
+	}
+
+	if len(b.config.ChrootMounts) == 0 {
+		b.config.ChrootMounts = [][]string{
+			{"proc", "proc", "/proc"},
+			{"sysfs", "sysfs", "/sys"},
+			{"bind", "/dev", "/dev"},
+			{"devpts", "devpts", "/dev/pts"},
+			{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
+		}
+	}
+
+	// set default copy file if we're not giving our own
+	if b.config.CopyFiles == nil {
+		if !b.config.FromScratch {
+			b.config.CopyFiles = []string{"/etc/resolv.conf"}
+		}
+	}
+
+	if b.config.CommandWrapper == "" {
+		b.config.CommandWrapper = "{{.Command}}"
+	}
+
+	if b.config.MountPath == "" {
+		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
+	}
+
+	if b.config.MountPartition == "" {
+		b.config.MountPartition = "1"
+	}
+
 	if b.config.OSDiskStorageAccountType == "" {
 		b.config.OSDiskStorageAccountType = string(compute.PremiumLRS)
+	}
+
+	if b.config.OSDiskCacheType == "" {
+		b.config.OSDiskCacheType = string(compute.CachingTypesReadOnly)
 	}
 
 	// checks, accumulate any errors or warnings
@@ -91,6 +133,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("the azure-chroot builder only works on Linux environments")
 	}
 
+	// todo: instantiate Azure client
 	var azcli client.AzureClientSet
 
 	wrappedCommand := func(command string) (string, error) {
@@ -104,6 +147,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("azureclient", azcli)
 	state.Put("wrappedCommand", chroot.CommandWrapper(wrappedCommand))
 
 	info, err := azcli.MetadataClient().GetComputeInfo()
@@ -142,11 +186,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps,
-		&StepAttachDisk{ // sets 'device' in stateBag
-			SubscriptionID: info.SubscriptionID,
-			ResourceGroup:  info.ResourceGroupName,
-			DiskName:       osDiskName,
-		},
+		&StepAttachDisk{}, // uses os_disk_resource_id and sets 'device' in stateBag
 		&chroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
@@ -166,6 +206,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&chroot.StepChrootProvision{},
 		&chroot.StepEarlyCleanup{},
+		&StepCreateImage{
+			ImageResourceID:          b.config.ImageResourceID,
+			ImageOSState:             b.config.ImageOSState,
+			OSDiskCacheType:          b.config.OSDiskCacheType,
+			OSDiskStorageAccountType: b.config.OSDiskStorageAccountType,
+		},
 	)
 
 	// Run!
