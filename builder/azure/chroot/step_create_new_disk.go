@@ -33,7 +33,7 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 
 	disk := compute.Disk{
 		Sku: &compute.DiskSku{
-			Name: "",
+			Name: compute.DiskStorageAccountTypes(s.DiskStorageAccountType),
 		},
 		//Zones: nil,
 		DiskProperties: &compute.DiskProperties{
