@@ -45,7 +45,7 @@ one, by using `global_id` instead of `source_box`.
 -  `global_id` (string) - the global id of a Vagrant box already added to Vagrant
    on your system. You can find the global id of your Vagrant boxes using the
    command `vagrant global-status`; your global_id will be a 7-digit number and
-   letter comination that you'll find in the leftmost column of the
+   letter combination that you'll find in the leftmost column of the
    global-status output.  If you choose to use `global_id` instead of
    `source_box`, Packer will skip the Vagrant initialize and add steps, and
    simply launch the box directly using the global id.
