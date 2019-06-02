@@ -175,13 +175,13 @@ func checkDiskCacheType(s string) interface{} {
 }
 
 func checkStorageAccountType(s string) interface{} {
-	for _, v := range compute.PossibleStorageAccountTypesValues() {
-		if compute.StorageAccountTypes(s) == v {
+	for _, v := range compute.PossibleDiskStorageAccountTypesValues() {
+		if compute.DiskStorageAccountTypes(s) == v {
 			return nil
 		}
 	}
 	return fmt.Errorf("%q is not a valid value (%v)",
-		s, compute.PossibleStorageAccountTypesValues())
+		s, compute.PossibleDiskStorageAccountTypesValues())
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
