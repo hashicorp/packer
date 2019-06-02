@@ -126,6 +126,14 @@ one, by using `global_id` instead of `source_box`.
 -   `skip_package` (bool) - if true, Packer will not call `vagrant package` to
     package your base box into its own standalone .box file.
 
+-   `output_vagrantfile` (string) - Equivalent to setting the
+    [`--vagrantfile`](https://www.vagrantup.com/docs/cli/package.html#vagrantfile-file) option 
+    in `vagrant package`; defaults to unset
+
+-   `package_include` (string) - Equivalent to setting the
+    [`--include`](https://www.vagrantup.com/docs/cli/package.html#include-x-y-z) option 
+    in `vagrant package`; defaults to unset
+
 ## Example
 
 Sample for `hashicorp/precise64` with virtualbox provider.
