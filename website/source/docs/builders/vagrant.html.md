@@ -45,7 +45,7 @@ one, by using `global_id` instead of `source_box`.
 -  `global_id` (string) - the global id of a Vagrant box already added to Vagrant
    on your system. You can find the global id of your Vagrant boxes using the
    command `vagrant global-status`; your global_id will be a 7-digit number and
-   letter comination that you'll find in the leftmost column of the
+   letter combination that you'll find in the leftmost column of the
    global-status output.  If you choose to use `global_id` instead of
    `source_box`, Packer will skip the Vagrant initialize and add steps, and
    simply launch the box directly using the global id.
@@ -125,6 +125,14 @@ one, by using `global_id` instead of `source_box`.
 
 -   `skip_package` (bool) - if true, Packer will not call `vagrant package` to
     package your base box into its own standalone .box file.
+
+-   `output_vagrantfile` (string) - Equivalent to setting the
+    [`--vagrantfile`](https://www.vagrantup.com/docs/cli/package.html#vagrantfile-file) option 
+    in `vagrant package`; defaults to unset
+
+-   `package_include` (string) - Equivalent to setting the
+    [`--include`](https://www.vagrantup.com/docs/cli/package.html#include-x-y-z) option 
+    in `vagrant package`; defaults to unset
 
 ## Example
 
