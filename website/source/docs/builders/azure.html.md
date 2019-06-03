@@ -130,7 +130,7 @@ a Shared Image Gallery**. When publishing to a Shared Image Gallery the followin
     
 - `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
     
-    Following is an example.
+Following is an example.
      
 <!-- -->
 
