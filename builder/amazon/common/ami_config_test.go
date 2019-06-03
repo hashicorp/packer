@@ -169,10 +169,9 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
 	}
-
 	c.AMIKmsKeyId = "89c3fb9a-de87-4f2a-aedc-fddc5138193c"
-	if err := c.Prepare(accessConf, nil); err == nil {
-		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
+	if err := c.Prepare(accessConf, nil); err != nil {
+		t.Fatal("should be able to share ami with encrypted boot volume")
 	}
 }
 
