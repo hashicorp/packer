@@ -20,9 +20,10 @@ import (
 
 type DiskAttacher interface {
 	AttachDisk(ctx context.Context, disk string) (lun int32, err error)
-	DetachDisk(ctx context.Context, disk string) (err error)
-	WaitForDevice(ctx context.Context, i int32) (device string, err error)
 	DiskPathForLun(lun int32) string
+	WaitForDevice(ctx context.Context, i int32) (device string, err error)
+	DetachDisk(ctx context.Context, disk string) (err error)
+	WaitForDetach(ctx context.Context, diskID string) error
 }
 
 func NewDiskAttacher(azureClient client.AzureClientSet) DiskAttacher {
@@ -89,7 +90,10 @@ func (da *diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
 		return err
 	}
 
-	// waiting for VM update to finish takes way to long
+	return nil
+}
+
+func (da *diskAttacher) WaitForDetach(ctx context.Context, diskID string) error {
 	for { // loop until disk is not attached, timeout or error
 		list, err := da.getDisks(ctx)
 		if err != nil {

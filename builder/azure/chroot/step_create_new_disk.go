@@ -83,9 +83,12 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 func (s StepCreateNewDisk) Cleanup(state multistep.StateBag) {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get("os_disk_resource_id")
+	diskResourceID := state.Get("os_disk_resource_id").(string)
 
-	ui.Say(fmt.Sprintf("Deleting disk '%s'", diskResourceID))
+	ui.Say(fmt.Sprintf("Waiting for disk %q detach to complete", diskResourceID))
+	err := NewDiskAttacher(azcli).WaitForDetach(context.Background(), diskResourceID)
+
+	ui.Say(fmt.Sprintf("Deleting disk %q", diskResourceID))
 
 	f, err := azcli.DisksClient().Delete(context.TODO(), s.ResourceGroup, s.DiskName)
 	if err == nil {
