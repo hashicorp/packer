@@ -120,5 +120,25 @@ func TestUpload(t *testing.T) {
 	if downloadedPayload != PAYLOAD {
 		t.Fatalf("files are not equal: expected [%s] length: %v, got [%s] length %v", PAYLOAD, len(PAYLOAD), downloadedPayload, len(downloadedPayload))
 	}
+}
 
+func TestUpload_nilFileInfo(t *testing.T) {
+	wrm := newMockWinRMServer(t)
+	defer wrm.Close()
+
+	c, err := New(&Config{
+		Host:     wrm.Host,
+		Port:     wrm.Port,
+		Username: "user",
+		Password: "pass",
+		Timeout:  30 * time.Second,
+	})
+	if err != nil {
+		t.Fatalf("error creating communicator: %s", err)
+	}
+	file := "C:\\Temp\\"
+	err = c.Upload(file, strings.NewReader(PAYLOAD), nil)
+	if err == nil {
+		t.Fatalf("Should have errored because of nil fileinfo")
+	}
 }
