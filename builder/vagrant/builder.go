@@ -50,9 +50,6 @@ type Config struct {
 
 	Communicator string `mapstructure:"communicator"`
 
-	// What vagrantfile to use
-	VagrantfileTpl string `mapstructure:"vagrantfile_template"`
-
 	// Whether to Halt, Suspend, or Destroy the box
 	TeardownMethod string `mapstructure:"teardown_method"`
 
