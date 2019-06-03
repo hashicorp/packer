@@ -21,17 +21,17 @@ import (
 )
 
 type VaultAWSEngineOptions struct {
-	Name       string `mapstructure:"name"`
-	RoleARN    string `mapstructure:"role_arn"`
+	Name    string `mapstructure:"name"`
+	RoleARN string `mapstructure:"role_arn"`
 	// Specifies the TTL for the use of the STS token. This
-    // is specified as a string with a duration suffix. Valid only when
-    // credential_type is assumed_role or federation_token. When not
-    // specified, the default_sts_ttl set for the role will be used. If that
-    // is also not set, then the default value of 3600s will be used. AWS
-    // places limits on the maximum TTL allowed. See the AWS documentation on
-    // the DurationSeconds parameter for AssumeRole (for assumed_role
-    // credential types) and GetFederationToken (for federation_token
-    // credential types) for more details.
+	// is specified as a string with a duration suffix. Valid only when
+	// credential_type is assumed_role or federation_token. When not
+	// specified, the default_sts_ttl set for the role will be used. If that
+	// is also not set, then the default value of 3600s will be used. AWS
+	// places limits on the maximum TTL allowed. See the AWS documentation on
+	// the DurationSeconds parameter for AssumeRole (for assumed_role
+	// credential types) and GetFederationToken (for federation_token
+	// credential types) for more details.
 	TTL        string `mapstructure:"ttl" required:"false"`
 	EngineName string `mapstructure:"engine_name"`
 }
@@ -43,55 +43,77 @@ func (v *VaultAWSEngineOptions) Empty() bool {
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	// The access key used to communicate with AWS. Learn
-    // how to set this
-	AccessKey             string `mapstructure:"access_key" required:"true"`
+	// The access key used to communicate with AWS. [Learn how  to set this]
+	// (/docs/builders/amazon.html#specifying-amazon-credentials). On EBS, this
+	// is not required if you are using `use_vault_aws_engine` for
+	// authentication instead.
+	AccessKey string `mapstructure:"access_key" required:"true"`
 	// This option is useful if you use a cloud
-    // provider whose API is compatible with aws EC2. Specify another endpoint
-    // like this https://ec2.custom.endpoint.com.
-	CustomEndpointEc2     string `mapstructure:"custom_endpoint_ec2" required:"false"`
-	// Enable automatic decoding of
-    // any encoded authorization (error) messages using the
-    // sts:DecodeAuthorizationMessage API. Note: requires that the effective
-    // user/role have permissions to sts:DecodeAuthorizationMessage on resource
-    // *. Default false.
-	DecodeAuthZMessages   bool   `mapstructure:"decode_authorization_messages" required:"false"`
+	// provider whose API is compatible with aws EC2. Specify another endpoint
+	// like this https://ec2.custom.endpoint.com.
+	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2" required:"false"`
+	// Enable automatic decoding of any encoded authorization (error) messages
+	// using the `sts:DecodeAuthorizationMessage` API. Note: requires that the
+	// effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+	// on resource `*`. Default `false`.
+	DecodeAuthZMessages bool `mapstructure:"decode_authorization_messages" required:"false"`
 	// This allows skipping TLS
-    // verification of the AWS EC2 endpoint. The default is false.
-	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify" required:"false"`
-	// The MFA
-    // TOTP
-    // code. This should probably be a user variable since it changes all the
-    // time.
-	MFACode               string `mapstructure:"mfa_code" required:"false"`
+	// verification of the AWS EC2 endpoint. The default is false.
+	InsecureSkipTLSVerify bool `mapstructure:"insecure_skip_tls_verify" required:"false"`
+	// The MFA TOTP code. This should probably be a user variable since it
+	// changes all the time.
+	MFACode string `mapstructure:"mfa_code" required:"false"`
 	// The profile to use in the shared credentials file for
-    // AWS. See Amazon's documentation on specifying
-    // profiles
-    // for more details.
-	ProfileName           string `mapstructure:"profile" required:"false"`
-	// The name of the region, such as us-east-1, in which
-    // to launch the EC2 instance to create the AMI.
-	RawRegion             string `mapstructure:"region" required:"true"`
-	// The secret key used to communicate with AWS. Learn
-    // how to set this
-	SecretKey             string `mapstructure:"secret_key" required:"true"`
+	// AWS. See Amazon's documentation on [specifying
+	// profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+	// for more details.
+	ProfileName string `mapstructure:"profile" required:"false"`
+	// The name of the region, such as `us-east-1`, in which
+	// to launch the EC2 instance to create the AMI.
+	// When chroot building, this value is guessed from environment.
+	RawRegion string `mapstructure:"region" required:"true"`
+	// The secret key used to communicate with AWS. [Learn how to set
+	// this](amazon.html#specifying-amazon-credentials). This is not required
+	// if you are using `use_vault_aws_engine` for authentication instead.
+	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// Set to true if you want to skip
-    // validation of the ami_regions configuration option. Default false.
-	SkipValidation        bool   `mapstructure:"skip_region_validation" required:"false"`
-	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
+	// validation of the ami_regions configuration option. Default false.
+	SkipValidation       bool `mapstructure:"skip_region_validation" required:"false"`
+	SkipMetadataApiCheck bool `mapstructure:"skip_metadata_api_check"`
 	// The access token to use. This is different from the
-    // access key and secret key. If you're not sure what this is, then you
-    // probably don't need it. This will also be read from the AWS_SESSION_TOKEN
-    // environmental variable.
-	Token                 string `mapstructure:"token" required:"false"`
-	session               *session.Session
+	// access key and secret key. If you're not sure what this is, then you
+	// probably don't need it. This will also be read from the AWS_SESSION_TOKEN
+	// environmental variable.
+	Token   string `mapstructure:"token" required:"false"`
+	session *session.Session
 	// Get credentials from Hashicorp Vault's aws
-    // secrets engine. You must already have created a role to use. For more
-    // information about generating credentials via the Vault engine, see the
-    // Vault
-    // docs.
-    // If you set this flag, you must also set the below options:
-	VaultAWSEngine        VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
+	// secrets engine. You must already have created a role to use. For more
+	// information about generating credentials via the Vault engine, see the
+	// Vault
+	// docs.
+	// If you set this flag, you must also set the below options:
+	//     -   `name` (string) - Required. Specifies the name of the role to generate
+	//         credentials against. This is part of the request URL.
+	//     -   `engine_name` (string) - The name of the aws secrets engine. In the
+	//         Vault docs, this is normally referred to as "aws", and Packer will
+	//         default to "aws" if `engine_name` is not set.
+	//     -   `role_arn` (string)- The ARN of the role to assume if credential\_type
+	//         on the Vault role is assumed\_role. Must match one of the allowed role
+	//         ARNs in the Vault role. Optional if the Vault role only allows a single
+	//         AWS role ARN; required otherwise.
+	//     -   `ttl` (string) - Specifies the TTL for the use of the STS token. This
+	//         is specified as a string with a duration suffix. Valid only when
+	//         credential\_type is assumed\_role or federation\_token. When not
+	//         specified, the default\_sts\_ttl set for the role will be used. If that
+	//         is also not set, then the default value of 3600s will be used. AWS
+	//         places limits on the maximum TTL allowed. See the AWS documentation on
+	//         the DurationSeconds parameter for AssumeRole (for assumed\_role
+	//         credential types) and GetFederationToken (for federation\_token
+	//         credential types) for more details.
+	//
+	//     Example:
+	//     `json   {   "vault_aws_engine": {       "name": "myrole",       "role_arn": "myarn",
+	VaultAWSEngine VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
 
 	getEC2Connection func() ec2iface.EC2API
 }
