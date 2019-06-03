@@ -128,8 +128,7 @@ Managed images can optionally be published to [Shared Image Gallery](https://azu
 as Shared Gallery Image version. Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
 a Shared Image Gallery**. When publishing to a Shared Image Gallery the following options are required.
     
-- `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will 
-    be published as Shared Gallery Image version.
+- `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
     
     Following is an example.
      
