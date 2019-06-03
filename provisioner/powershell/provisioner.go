@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -252,6 +253,14 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
 
 		log.Printf("Opening %s for reading", path)
+		fi, err := os.Stat(path)
+		if err != nil {
+			return fmt.Errorf("Error stating powershell script: %s", err)
+		}
+		if strings.HasSuffix(p.config.RemotePath, `\`) {
+			// path is a directory
+			p.config.RemotePath += filepath.Base((fi).Name())
+		}
 		f, err := os.Open(path)
 		if err != nil {
 			return fmt.Errorf("Error opening powershell script: %s", err)
@@ -272,7 +281,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
-			if err := comm.Upload(p.config.RemotePath, f, nil); err != nil {
+			if err := comm.Upload(p.config.RemotePath, f, &fi); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
