@@ -51,9 +51,12 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 			StorageProfile: &compute.ImageStorageProfile{
 				OsDisk: &compute.ImageOSDisk{
 					OsState: compute.OperatingSystemStateTypes(s.ImageOSState),
+					OsType:  compute.Linux,
 					ManagedDisk: &compute.SubResource{
 						ID: &diskResourceID,
 					},
+					StorageAccountType: compute.StorageAccountTypes(s.OSDiskStorageAccountType),
+					Caching:            compute.CachingTypes(s.OSDiskCacheType),
 				},
 				//	DataDisks:     nil,
 				//	ZoneResilient: nil,

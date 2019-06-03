@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/go-autorest/autorest/to"
 	"log"
 	"runtime"
 	"strings"
@@ -26,7 +27,8 @@ type Config struct {
 
 	ClientConfig client.Config `mapstructure:",squash"`
 
-	FromScratch bool `mapstructure:"from_scratch"`
+	FromScratch bool   `mapstructure:"from_scratch"`
+	Source      string `mapstructure:"source"`
 
 	CommandWrapper    string     `mapstructure:"command_wrapper"`
 	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
@@ -75,6 +77,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 
+	var errs *packer.MultiError
+	var warns []string
+
 	// Defaults
 	err = b.config.ClientConfig.SetDefaultValues()
 	if err != nil {
@@ -115,7 +120,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.TemporaryOSDiskName == "" {
-		b.config.TemporaryOSDiskName = "PackerTemp-{{timestamp}}"
+
+		if def, err := interpolate.Render("PackerTemp-{{timestamp}}", &b.config.ctx); err == nil {
+			b.config.TemporaryOSDiskName = def
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary disk name: %s", err))
+		}
 	}
 
 	if b.config.OSDiskStorageAccountType == "" {
@@ -135,10 +145,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// checks, accumulate any errors or warnings
-	var errs *packer.MultiError
-	var warns []string
 
 	if b.config.FromScratch {
+		if b.config.Source != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("source cannot be specified when building from_scratch"))
+		}
 		if b.config.OSDiskSizeGB == 0 {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("os_disk_size_gb is required with from_scratch"))
@@ -148,7 +160,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs, errors.New("pre_mount_commands is required with from_scratch"))
 		}
 	} else {
-		errs = packer.MultiErrorAppend(errors.New("only 'from_scratch'=true is supported right now"))
+		if _, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
+			log.Println("Source is platform image:", b.config.Source)
+		} else {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("source: %q is not a valid platform image specifier", b.config.Source))
+		}
 	}
 
 	if err := checkDiskCacheType(b.config.OSDiskCacheType); err != nil {
@@ -271,10 +288,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps
 	var steps []multistep.Step
 
-	if !b.config.FromScratch {
-		panic("Only from_scratch is currently implemented")
-		// create disk from PIR / managed image (warn on non-linux images)
-	} else {
+	if b.config.FromScratch {
 		steps = append(steps,
 			&StepCreateNewDisk{
 				SubscriptionID:         info.SubscriptionID,
@@ -285,6 +299,31 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				HyperVGeneration:       b.config.ImageHyperVGeneration,
 				Location:               info.Location,
 			})
+	} else {
+		if pi, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
+			if strings.EqualFold(pi.Version, "latest") {
+
+				vmi, err := azcli.VirtualMachineImagesClient().GetLatest(ctx, pi.Publisher, pi.Offer, pi.Sku, info.Location)
+				if err != nil {
+					return nil, fmt.Errorf("error retieving latest version of %q: %v", b.config.Source, err)
+				}
+				pi.Version = to.String(vmi.Name)
+				log.Println("Resolved latest version of source image:", pi.Version)
+			}
+			steps = append(steps,
+				&StepCreateNewDisk{
+					SubscriptionID:         info.SubscriptionID,
+					ResourceGroup:          info.ResourceGroupName,
+					DiskName:               b.config.TemporaryOSDiskName,
+					DiskSizeGB:             b.config.OSDiskSizeGB,
+					DiskStorageAccountType: b.config.OSDiskStorageAccountType,
+					HyperVGeneration:       b.config.ImageHyperVGeneration,
+					Location:               info.Location,
+					PlatformImage:          pi,
+				})
+		} else {
+			panic("Unknown image source: " + b.config.Source)
+		}
 	}
 
 	steps = append(steps,
