@@ -20,6 +20,7 @@ type StepCreateNewDisk struct {
 	DiskStorageAccountType                  string // from compute.DiskStorageAccountTypes
 	HyperVGeneration                        string
 	Location                                string
+	PlatformImage                           *client.PlatformImage
 }
 
 func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -42,16 +43,25 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 		DiskProperties: &compute.DiskProperties{
 			OsType:           "Linux",
 			HyperVGeneration: compute.HyperVGeneration(s.HyperVGeneration),
-			CreationData: &compute.CreationData{
-				CreateOption: compute.Empty,
-			},
-			DiskSizeGB: to.Int32Ptr(s.DiskSizeGB),
+			CreationData:     &compute.CreationData{},
+			DiskSizeGB:       to.Int32Ptr(s.DiskSizeGB),
 		},
 		//Tags: map[string]*string{
 	}
 
 	if s.DiskSizeGB > 0 {
 		disk.DiskProperties.DiskSizeGB = to.Int32Ptr(s.DiskSizeGB)
+	}
+
+	if s.PlatformImage == nil {
+		disk.CreationData.CreateOption = compute.Empty
+	} else {
+		disk.CreationData.CreateOption = compute.FromImage
+		disk.CreationData.ImageReference = &compute.ImageDiskReference{
+			ID: to.StringPtr(fmt.Sprintf(
+				"/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/artifacttypes/vmimage/offers/%s/skus/%s/versions/%s",
+				s.SubscriptionID, s.Location, s.PlatformImage.Publisher, s.PlatformImage.Offer, s.PlatformImage.Sku, s.PlatformImage.Version)),
+		}
 	}
 
 	f, err := azcli.DisksClient().CreateOrUpdate(ctx, s.ResourceGroup, s.DiskName, disk)
