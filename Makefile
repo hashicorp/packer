@@ -8,9 +8,6 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-# gofmt
-UNFORMATTED_FILES=$(shell find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
-
 EXECUTABLE_FILES=$(shell find . -type f -executable | egrep -v '^\./(website/[vendor|tmp]|vendor/|\.git|bin/|scripts/|pkg/)' | egrep -v '.*(\.sh|\.bats|\.git)' | egrep -v './provisioner/(ansible|inspec)/test-fixtures/exit1')
 
 # Get the git commit
@@ -21,21 +18,19 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)
 
 export GOLDFLAGS
 
-.PHONY: bin checkversion ci default deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace updatedeps
+.PHONY: bin checkversion ci default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace
 
-default: deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
+default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
-ci: testrace
+ci: testrace ## Test in continuous integration
 
-release: deps test releasebin package ## Build a release build
+release: install-build-deps test releasebin package ## Build a release build
 
-bin: deps ## Build debug/test build
-	@go get github.com/mitchellh/gox
+bin: install-build-deps ## Build debug/test build
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
 	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
 
-releasebin: deps
-	@go get github.com/mitchellh/gox
+releasebin: install-build-deps
 	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
@@ -46,12 +41,15 @@ package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
-deps:
-	@go get golang.org/x/tools/cmd/goimports
-	@go get golang.org/x/tools/cmd/stringer
-	@go get -u github.com/mna/pigeon
+install-build-deps: ## Install dependencies for bin build
+	@go get github.com/mitchellh/gox
 
-dev: deps ## Build and install a development build
+install-gen-deps: ## Install dependencies for code generation
+	@go get golang.org/x/tools/cmd/goimports
+	@go get -u github.com/mna/pigeon
+	@go get github.com/alvaroloes/enumer
+
+dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
@@ -63,17 +61,14 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s main.go $(UNFORMATTED_FILES)
+	@go fmt ./...
 
-fmt-check: ## Check go code formatting
-	@echo "==> Checking that code complies with gofmt requirements..."
-	@if [ ! -z "$(UNFORMATTED_FILES)" ]; then \
-		echo "gofmt needs to be run on the following files:"; \
-		echo "$(UNFORMATTED_FILES)" | xargs -n1; \
+fmt-check: fmt ## Check go code formatting
+	@echo "==> Checking that code complies with go fmt requirements..."
+	@git diff --exit-code; if [ $$? -eq 1 ]; then \
+		echo "Found files that are not fmt'ed."; \
 		echo "You can use the command: \`make fmt\` to reformat code."; \
 		exit 1; \
-	else \
-		echo "Check passed."; \
 	fi
 
 mode-check: ## Check that only certain files are executable
@@ -94,32 +89,37 @@ fmt-examples:
 
 # generate runs `go generate` to build the dynamically generated
 # source files.
-generate: deps ## Generate dynamically generated code
-	go generate .
-	gofmt -w common/bootcommand/boot_command.go
+generate: install-gen-deps ## Generate dynamically generated code
+	go generate ./...
+	go fmt common/bootcommand/boot_command.go
 	goimports -w common/bootcommand/boot_command.go
-	gofmt -w command/plugin.go
+	go fmt command/plugin.go
 
-test: fmt-check mode-check vet ## Run unit tests
+generate-check: generate ## Check go code generation is on par
+	@echo "==> Checking that auto-generated code is not changed..."
+	@git diff --exit-code; if [ $$? -eq 1 ]; then \
+		echo "Found diffs in go generated code."; \
+		echo "You can use the command: \`make generate\` to reformat code."; \
+		exit 1; \
+	fi
+
+test: mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
 
 # testacc runs acceptance tests
-testacc: deps generate ## Run acceptance tests
+testacc: install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace: fmt-check mode-check vet ## Test with race detection enabled
+testrace: mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
-check-vendor-vs-mod:
+check-vendor-vs-mod: ## Check that go modules and vendored code are on par
 	@GO111MODULE=on go mod vendor 
 	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: vendor dir is not on par with go modules definition." && \
 		exit 1; \
 	fi
-
-updatedeps:
-	@echo "INFO: Packer deps are managed by go modules. See .github/CONTRIBUTING.md"
 
 vet: ## Vet Go code
 	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \

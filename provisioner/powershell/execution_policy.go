@@ -1,3 +1,5 @@
+//go:generate enumer -transform snake -trimprefix ExecutionPolicy -type ExecutionPolicy
+
 package powershell
 
 import (
