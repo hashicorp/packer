@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
@@ -16,38 +18,43 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
-type VirtualMachinesClientAPI interface {
-	CreateOrUpdate(ctx context.Context, resourceGroupName string, VMName string, parameters compute.VirtualMachine) (
-		result compute.VirtualMachinesCreateOrUpdateFuture, err error)
-	Get(ctx context.Context, resourceGroupName string, VMName string, expand compute.InstanceViewTypes) (
-		result compute.VirtualMachine, err error)
-}
-
 type DiskAttacher interface {
 	AttachDisk(ctx context.Context, disk string) (lun int32, err error)
 	DetachDisk(ctx context.Context, disk string) (err error)
 	WaitForDevice(ctx context.Context, i int32) (device string, err error)
+	DiskPathForLun(lun int32) string
 }
 
 func NewDiskAttacher(azureClient client.AzureClientSet) DiskAttacher {
-	return diskAttacher{azureClient}
+	return &diskAttacher{
+		azcli: azureClient,
+	}
 }
 
 type diskAttacher struct {
 	azcli client.AzureClientSet
+
+	vm *client.ComputeInfo // store info about this VM so that we don't have to ask metadata service on every call
 }
 
-func (da diskAttacher) WaitForDevice(ctx context.Context, i int32) (device string, err error) {
-	path := fmt.Sprintf("/dev/disk/azure/scsi1/lun%d", i)
+func (diskAttacher) DiskPathForLun(lun int32) string {
+	return fmt.Sprintf("/dev/disk/azure/scsi1/lun%d", lun)
+}
+
+func (da diskAttacher) WaitForDevice(ctx context.Context, lun int32) (device string, err error) {
+	path := da.DiskPathForLun(lun)
 
 	for {
-		l, err := os.Readlink(path)
+		link, err := os.Readlink(path)
 		if err == nil {
-			return filepath.Abs("/dev/disk/azure/scsi1/" + l)
+			return filepath.Abs("/dev/disk/azure/scsi1/" + link)
 		}
 		if err != nil && err != os.ErrNotExist {
-			return "", err
+			if pe, ok := err.(*os.PathError); ok && pe.Err != syscall.ENOENT {
+				return "", err
+			}
 		}
+
 		select {
 		case <-time.After(100 * time.Millisecond):
 			// continue
@@ -57,13 +64,14 @@ func (da diskAttacher) WaitForDevice(ctx context.Context, i int32) (device strin
 	}
 }
 
-func (da diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
+func (da *diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
+	log.Println("Fetching list of disks currently attached to VM")
 	currentDisks, err := da.getDisks(ctx)
 	if err != nil {
 		return err
 	}
 
-	// copy all disks to new array that not match diskID
+	log.Printf("Removing %q from list of disks currently attached to VM", diskID)
 	newDisks := []compute.DataDisk{}
 	for _, disk := range currentDisks {
 		if disk.ManagedDisk != nil &&
@@ -75,71 +83,92 @@ func (da diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
 		return DiskNotFoundError
 	}
 
-	return da.setDisks(ctx, newDisks)
+	log.Println("Updating new list of disks attached to VM")
+	err = da.setDisks(ctx, newDisks)
+	if err != nil {
+		return err
+	}
+
+	// waiting for VM update to finish takes way to long
+	for { // loop until disk is not attached, timeout or error
+		list, err := da.getDisks(ctx)
+		if err != nil {
+			return err
+		}
+		if findDiskInList(list, diskID) == nil {
+			log.Println("Disk is no longer in VM model, assuming detached")
+			return nil
+		}
+
+		select {
+		case <-time.After(time.Second): //continue
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
 }
 
 var DiskNotFoundError = errors.New("Disk not found")
 
-func (da diskAttacher) AttachDisk(ctx context.Context, diskID string) (int32, error) {
+func (da *diskAttacher) AttachDisk(ctx context.Context, diskID string) (int32, error) {
 	dataDisks, err := da.getDisks(ctx)
 	if err != nil {
 		return -1, err
 	}
 
 	// check to see if disk is already attached, remember lun if found
+	if disk := findDiskInList(dataDisks, diskID); disk != nil {
+		// disk is already attached, just take this lun
+		if disk.Lun == nil {
+			return -1, errors.New("disk is attached, but lun was not set in VM model (possibly an error in the Azure APIs)")
+		}
+		return to.Int32(disk.Lun), nil
+	}
+
+	// disk was not found on VM, go and actually attach it
+
 	var lun int32 = -1
-	for _, disk := range dataDisks {
-		if disk.ManagedDisk != nil &&
-			strings.EqualFold(to.String(disk.ManagedDisk.ID), diskID) {
-			// disk is already attached, just take this lun
-			if disk.Lun != nil {
-				lun = to.Int32(disk.Lun)
-				break
+findFreeLun:
+	for lun = 0; lun < 64; lun++ {
+		for _, v := range dataDisks {
+			if to.Int32(v.Lun) == lun {
+				continue findFreeLun
 			}
 		}
+		// no datadisk is using this lun
+		break
 	}
 
-	if lun == -1 {
-		// disk was not found on VM, go and actually attach it
+	// append new data disk to collection
+	dataDisks = append(dataDisks, compute.DataDisk{
+		CreateOption: compute.DiskCreateOptionTypesAttach,
+		ManagedDisk: &compute.ManagedDiskParameters{
+			ID: to.StringPtr(diskID),
+		},
+		Lun: to.Int32Ptr(lun),
+	})
 
-	findFreeLun:
-		for lun = 0; lun < 64; lun++ {
-			for _, v := range dataDisks {
-				if to.Int32(v.Lun) == lun {
-					continue findFreeLun
-				}
-			}
-			// no datadisk is using this lun
-			break
-		}
-
-		// append new data disk to collection
-		dataDisks = append(dataDisks, compute.DataDisk{
-			CreateOption: compute.DiskCreateOptionTypesAttach,
-			ManagedDisk: &compute.ManagedDiskParameters{
-				ID: to.StringPtr(diskID),
-			},
-			Lun: to.Int32Ptr(lun),
-		})
-
-		// prepare resource object for update operation
-		err = da.setDisks(ctx, dataDisks)
-		if err != nil {
-			return -1, err
-		}
+	// prepare resource object for update operation
+	err = da.setDisks(ctx, dataDisks)
+	if err != nil {
+		return -1, err
 	}
+
 	return lun, nil
 }
 
-func (da diskAttacher) getThisVM(ctx context.Context) (compute.VirtualMachine, error) {
+func (da *diskAttacher) getThisVM(ctx context.Context) (compute.VirtualMachine, error) {
 	// getting resource info for this VM
-	vm, err := da.azcli.MetadataClient().GetComputeInfo()
-	if err != nil {
-		return compute.VirtualMachine{}, err
+	if da.vm == nil {
+		vm, err := da.azcli.MetadataClient().GetComputeInfo()
+		if err != nil {
+			return compute.VirtualMachine{}, err
+		}
+		da.vm = vm
 	}
 
 	// retrieve actual VM
-	vmResource, err := da.azcli.VirtualMachinesClient().Get(ctx, vm.ResourceGroupName, vm.Name, "")
+	vmResource, err := da.azcli.VirtualMachinesClient().Get(ctx, da.vm.ResourceGroupName, da.vm.Name, "")
 	if err != nil {
 		return compute.VirtualMachine{}, err
 	}
@@ -173,10 +202,18 @@ func (da diskAttacher) setDisks(ctx context.Context, disks []compute.DataDisk) e
 	vmResource.StorageProfile.DataDisks = &disks
 	vmResource.Resources = nil
 
-	// update the VM resource, attaching disk
-	f, err := da.azcli.VirtualMachinesClient().CreateOrUpdate(ctx, id.ResourceGroup, id.ResourceName, vmResource)
-	if err == nil {
-		err = f.WaitForCompletionRef(ctx, da.azcli.PollClient())
-	}
+	// update the VM resource, attach disk
+	_, err = da.azcli.VirtualMachinesClient().CreateOrUpdate(ctx, id.ResourceGroup, id.ResourceName, vmResource)
+
 	return err
+}
+
+func findDiskInList(list []compute.DataDisk, diskID string) *compute.DataDisk {
+	for _, disk := range list {
+		if disk.ManagedDisk != nil &&
+			strings.EqualFold(to.String(disk.ManagedDisk.ID), diskID) {
+			return &disk
+		}
+	}
+	return nil
 }

@@ -18,6 +18,8 @@ type StepCreateNewDisk struct {
 	SubscriptionID, ResourceGroup, DiskName string
 	DiskSizeGB                              int32  // optional, ignored if 0
 	DiskStorageAccountType                  string // from compute.DiskStorageAccountTypes
+	HyperVGeneration                        string
+	Location                                string
 }
 
 func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -32,13 +34,14 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 	ui.Say(fmt.Sprintf("Creating disk '%s'", diskResourceID))
 
 	disk := compute.Disk{
+		Location: to.StringPtr(s.Location),
 		Sku: &compute.DiskSku{
 			Name: compute.DiskStorageAccountTypes(s.DiskStorageAccountType),
 		},
 		//Zones: nil,
 		DiskProperties: &compute.DiskProperties{
-			OsType:           "",
-			HyperVGeneration: "",
+			OsType:           "Linux",
+			HyperVGeneration: compute.HyperVGeneration(s.HyperVGeneration),
 			CreationData: &compute.CreationData{
 				CreateOption: compute.Empty,
 			},
@@ -70,11 +73,8 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 func (s StepCreateNewDisk) Cleanup(state multistep.StateBag) {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
+	diskResourceID := state.Get("os_disk_resource_id")
 
-	diskResourceID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s",
-		s.SubscriptionID,
-		s.ResourceGroup,
-		s.DiskName)
 	ui.Say(fmt.Sprintf("Deleting disk '%s'", diskResourceID))
 
 	f, err := azcli.DisksClient().Delete(context.TODO(), s.ResourceGroup, s.DiskName)
@@ -83,6 +83,6 @@ func (s StepCreateNewDisk) Cleanup(state multistep.StateBag) {
 	}
 	if err != nil {
 		log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
-		ui.Error(fmt.Sprintf("Error deleting new disk '%s': %v.", diskResourceID, err))
+		ui.Error(fmt.Sprintf("error deleting new disk '%s': %v.", diskResourceID, err))
 	}
 }
