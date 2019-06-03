@@ -21,6 +21,8 @@ type StepCreateNewDisk struct {
 	HyperVGeneration                        string
 	Location                                string
 	PlatformImage                           *client.PlatformImage
+
+	SkipCleanup bool
 }
 
 func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -81,21 +83,23 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 }
 
 func (s StepCreateNewDisk) Cleanup(state multistep.StateBag) {
-	azcli := state.Get("azureclient").(client.AzureClientSet)
-	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get("os_disk_resource_id").(string)
+	if !s.SkipCleanup {
+		azcli := state.Get("azureclient").(client.AzureClientSet)
+		ui := state.Get("ui").(packer.Ui)
+		diskResourceID := state.Get("os_disk_resource_id").(string)
 
-	ui.Say(fmt.Sprintf("Waiting for disk %q detach to complete", diskResourceID))
-	err := NewDiskAttacher(azcli).WaitForDetach(context.Background(), diskResourceID)
+		ui.Say(fmt.Sprintf("Waiting for disk %q detach to complete", diskResourceID))
+		err := NewDiskAttacher(azcli).WaitForDetach(context.Background(), diskResourceID)
 
-	ui.Say(fmt.Sprintf("Deleting disk %q", diskResourceID))
+		ui.Say(fmt.Sprintf("Deleting disk %q", diskResourceID))
 
-	f, err := azcli.DisksClient().Delete(context.TODO(), s.ResourceGroup, s.DiskName)
-	if err == nil {
-		err = f.WaitForCompletionRef(context.TODO(), azcli.PollClient())
-	}
-	if err != nil {
-		log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
-		ui.Error(fmt.Sprintf("error deleting new disk '%s': %v.", diskResourceID, err))
+		f, err := azcli.DisksClient().Delete(context.TODO(), s.ResourceGroup, s.DiskName)
+		if err == nil {
+			err = f.WaitForCompletionRef(context.TODO(), azcli.PollClient())
+		}
+		if err != nil {
+			log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
+			ui.Error(fmt.Sprintf("error deleting new disk '%s': %v.", diskResourceID, err))
+		}
 	}
 }

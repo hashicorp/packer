@@ -43,6 +43,7 @@ type Config struct {
 	OSDiskSizeGB             int32  `mapstructure:"os_disk_size_gb"`
 	OSDiskStorageAccountType string `mapstructure:"os_disk_storage_account_type"`
 	OSDiskCacheType          string `mapstructure:"os_disk_cache_type"`
+	OSDiskSkipCleanup        bool   `mapstructure:"os_disk_skip_cleanup"`
 
 	ImageResourceID       string `mapstructure:"image_resource_id"`
 	ImageOSState          string `mapstructure:"image_os_state"`
@@ -320,6 +321,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 					HyperVGeneration:       b.config.ImageHyperVGeneration,
 					Location:               info.Location,
 					PlatformImage:          pi,
+
+					SkipCleanup: b.config.OSDiskSkipCleanup,
 				})
 		} else {
 			panic("Unknown image source: " + b.config.Source)
