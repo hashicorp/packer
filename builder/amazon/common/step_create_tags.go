@@ -105,12 +105,16 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
 			// Tag images and snapshots
-			_, err := regionConn.CreateTags(&ec2.CreateTagsInput{
-				Resources: resourceIds,
-				Tags:      amiTags,
-			})
-			if err != nil {
-				return err
+
+			var err error
+			if len(amiTags) > 0 {
+				_, err = regionConn.CreateTags(&ec2.CreateTagsInput{
+					Resources: resourceIds,
+					Tags:      amiTags,
+				})
+				if err != nil {
+					return err
+				}
 			}
 
 			// Override tags on snapshots
