@@ -22,6 +22,11 @@ func init() {
 				Meta: *CommandMeta,
 			}, nil
 		},
+		"console": func() (cli.Command, error) {
+			return &command.ConsoleCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
 
 		"fix": func() (cli.Command, error) {
 			return &command.FixCommand{
