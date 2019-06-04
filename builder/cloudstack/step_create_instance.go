@@ -149,6 +149,20 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	// Store the instance ID so we can remove it later.
 	state.Put("instance_id", instance.Id)
 
+	// Set instance tags
+	if len(config.Tags) > 0 {
+		resourceID := []string{instance.Id}
+		tp := client.Resourcetags.NewCreateTagsParams(resourceID, "UserVm", config.Tags)
+
+		_, err = client.Resourcetags.CreateTags(tp)
+
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	return multistep.ActionContinue
 }
 
