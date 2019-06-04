@@ -167,7 +167,7 @@ setting a valid `account_file` and `project_id`:
 ```
 
 -> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
-https://cloudywindows.io/post/winrm-for-provisioning---close-the-door-on-the-way-out-eh/
+https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-out-eh/
 
 This build can take up to 15 min.
 
