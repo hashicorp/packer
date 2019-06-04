@@ -59,6 +59,8 @@ type Config struct {
 	TemplateScalable        bool   `mapstructure:"template_scalable"`
 	TemplateTag             string `mapstructure:"template_tag"`
 
+	Tags map[string]string `mapstructure:"tags"`
+
 	ctx interpolate.Context
 }
 
