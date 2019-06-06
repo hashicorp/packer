@@ -146,7 +146,10 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	// Create an instance based on the configuration
 	ui.Say("Creating instance...")
 
-	instanceMetadata := config.createInstanceMetadata(string(config.Communicator.SSHPublicKey))
+	instanceMetadata, err := config.createInstanceMetadata(string(config.Communicator.SSHPublicKey))
+	if err != nil {
+		return stepHaltWithError(state, fmt.Errorf("Error preparing instance metadata: %s", err))
+	}
 
 	// TODO make part metadata prepare process
 	if config.UseIPv6 {
@@ -164,6 +167,9 @@ runcmd:
 		Labels:     config.Labels,
 		ZoneId:     config.Zone,
 		PlatformId: config.PlatformID,
+		SchedulingPolicy: &compute.SchedulingPolicy{
+			Preemptible: config.Preemptible,
+		},
 		ResourcesSpec: &compute.ResourcesSpec{
 			Memory: toBytes(config.InstanceMemory),
 			Cores:  int64(config.InstanceCores),
@@ -336,10 +342,18 @@ func (s *stepCreateInstance) writeSerialLogFile(ctx context.Context, state multi
 	return nil
 }
 
-func (c *Config) createInstanceMetadata(sshPublicKey string) map[string]string {
+func (c *Config) createInstanceMetadata(sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 
 	// Copy metadata from config.
+	for k, file := range c.MetadataFromFile {
+		contents, err := ioutil.ReadFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("error while read file '%s' with content for value of metadata key '%s': %s", file, k, err)
+		}
+		instanceMetadata[k] = string(contents)
+	}
+
 	for k, v := range c.Metadata {
 		instanceMetadata[k] = v
 	}
@@ -353,5 +367,5 @@ func (c *Config) createInstanceMetadata(sshPublicKey string) map[string]string {
 		instanceMetadata[sshMetaKey] = sshKeys
 	}
 
-	return instanceMetadata
+	return instanceMetadata, nil
 }
