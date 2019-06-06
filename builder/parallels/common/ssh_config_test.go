@@ -11,7 +11,9 @@ import (
 func testSSHConfig() *SSHConfig {
 	return &SSHConfig{
 		Comm: communicator.Config{
-			SSHUsername: "foo",
+			SSH: communicator.SSH{
+				SSHUsername: "foo",
+			},
 		},
 	}
 }

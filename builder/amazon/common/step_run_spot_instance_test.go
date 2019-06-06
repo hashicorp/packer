@@ -93,7 +93,9 @@ func getBasicStep() *StepRunSpotInstance {
 		BlockDurationMinutes: 0,
 		Debug:                false,
 		Comm: &communicator.Config{
-			SSHKeyPairName: "foo",
+			SSH: communicator.SSH{
+				SSHKeyPairName: "foo",
+			},
 		},
 		EbsOptimized:                      false,
 		ExpectedRootDevice:                "ebs",
