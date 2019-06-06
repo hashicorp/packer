@@ -1,11 +1,14 @@
 package command
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/chzyer/readline"
+	"github.com/hashicorp/packer/helper/wrappedreadline"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -70,6 +73,11 @@ func (c *ConsoleCommand) Run(args []string) int {
 		Core: core,
 	}
 
+	// Determine if stdin is a pipe. If so, we evaluate directly.
+	if c.StdinPiped() {
+		return c.modePiped(session)
+	}
+
 	return c.modeInteractive(session)
 }
 
@@ -105,12 +113,45 @@ func (*ConsoleCommand) AutocompleteFlags() complete.Flags {
 	}
 }
 
-func (c *ConsoleCommand) modeInteractive(session *REPLSession) int {
+func (c *ConsoleCommand) modePiped(session *REPLSession) int {
+	var lastResult string
+	scanner := bufio.NewScanner(wrappedreadline.Stdin())
+	for scanner.Scan() {
+		result, err := session.Handle(strings.TrimSpace(scanner.Text()))
+		if err != nil {
+			return 0
+		}
+		// Store the last result
+		lastResult = result
+	}
+
+	// Output the final result
+	c.Ui.Message(lastResult)
+	return 0
+}
+
+func (c *ConsoleCommand) modeInteractive(session *REPLSession) int { // Setup the UI so we can output directly to stdout
+	l, err := readline.NewEx(wrappedreadline.Override(&readline.Config{
+		Prompt:            "> ",
+		InterruptPrompt:   "^C",
+		EOFPrompt:         "exit",
+		HistorySearchFold: true,
+	}))
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error initializing console: %s",
+			err))
+		return 1
+	}
 	for {
 		// Read a line
-		line, err := c.Ui.Ask("> ")
-		if err == packer.ErrInterrupted {
-			break
+		line, err := l.Readline()
+		if err == readline.ErrInterrupt {
+			if len(line) == 0 {
+				break
+			} else {
+				continue
+			}
 		} else if err == io.EOF {
 			break
 		}
@@ -144,6 +185,8 @@ type REPLSession struct {
 // The return value is the output and the error to show.
 func (s *REPLSession) Handle(line string) (string, error) {
 	switch {
+	case strings.TrimSpace(line) == "":
+		return "", nil
 	case strings.TrimSpace(line) == "exit":
 		return "", ErrSessionExit
 	case strings.TrimSpace(line) == "help":
