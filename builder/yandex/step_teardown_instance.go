@@ -20,11 +20,22 @@ func (s *stepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 
 	instanceID := state.Get("instance_id").(string)
 
-	ui.Say("Deleting instance...")
+	ui.Say("Stopping instance...")
 	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
 	defer cancel()
+	op, err := sdk.WrapOperation(sdk.Compute().Instance().Stop(ctx, &compute.StopInstanceRequest{
+		InstanceId: instanceID,
+	}))
+	if err != nil {
+		return stepHaltWithError(state, fmt.Errorf("Error stopping instance: %s", err))
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return stepHaltWithError(state, fmt.Errorf("Error stopping instance: %s", err))
+	}
 
-	op, err := sdk.WrapOperation(sdk.Compute().Instance().Delete(ctx, &compute.DeleteInstanceRequest{
+	ui.Say("Deleting instance...")
+	op, err = sdk.WrapOperation(sdk.Compute().Instance().Delete(ctx, &compute.DeleteInstanceRequest{
 		InstanceId: instanceID,
 	}))
 	if err != nil {
