@@ -1,7 +1,7 @@
 ---
 description: |
     The `packer console` command allows you to experiment with Packer variable
-interpolations.
+    interpolations.
 layout: docs
 page_title: 'packer console - Commands'
 sidebar_current: 'docs-commands-console'
@@ -35,17 +35,16 @@ help output, which can be seen via `packer console -h`.
 	example: `-var-file myvars.json`
 
 ## REPL commands
-- `help` - displays help text for Packer console.
+-   `help` - displays help text for Packer console.
 
-- `exit` - exits the console
+-   `exit` - exits the console
 
-- `variables` - prints a list of all variables read into the console from the
-  `-var` option, `-var-files` option, and template.
+-   `variables` - prints a list of all variables read into the console from the
+    `-var` option, `-var-files` option, and template.
 
 ## Usage Examples
 
 Let's say you launch a console using a Packer template `example_template.json`:
-
 
 ```
 $ packer console example_template.json
