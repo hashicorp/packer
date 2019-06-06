@@ -59,13 +59,12 @@ type AMIConfig struct {
 	// documentation on enabling enhanced
 	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 	AMIENASupport *bool `mapstructure:"ena_support" required:"false"`
-	// Enable enhanced networking (SriovNetSupport but
-	// not ENA) on HVM-compatible AMIs. If true, add
-	// ec2:ModifyInstanceAttribute to your AWS IAM policy. Note: you must make
-	// sure enhanced networking is enabled on your instance. See Amazon's
-	// documentation on enabling enhanced
-	// networking.
-	// Default false.
+	// Enable enhanced networking (SriovNetSupport but not ENA) on
+	// HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
+	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
+	// on your instance. See [Amazon's documentation on enabling enhanced
+	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+	// Default `false`.
 	AMISriovNetSupport bool `mapstructure:"sriov_support" required:"false"`
 	// Force Packer to first deregister an existing
 	// AMI if one with the same name already exists. Default false.
@@ -87,20 +86,21 @@ type AMIConfig struct {
 	// This field is validated by Packer, when using an alias, you will have to
 	// prefix `kms_key_id` with `alias/`.
 	AMIKmsKeyId string `mapstructure:"kms_key_id" required:"false"`
-	// a map of regions to copy the ami to, along with the custom kms key id
-	// (alias or arn) to use for encryption for that region. Keys must match
-	// the regions provided in ami_regions. If you just want to encrypt using a
-	// default ID, you can stick with kms_key_id and ami_regions. If you want a
+	// regions to copy the ami to, along with the custom kms key id (alias or
+	// arn) to use for encryption for that region. Keys must match the regions
+	// provided in `ami_regions`. If you just want to encrypt using a default
+	// ID, you can stick with `kms_key_id` and `ami_regions`. If you want a
 	// region to be encrypted with that region's default key ID, you can use an
-	// empty string "" instead of a key id in this map. (e.g. "us-east-1": "")
-	// However, you cannot use default key IDs if you are using this in
-	// conjunction with snapshot_users -- in that situation you must use custom
-	// keys. For valid formats see KmsKeyId in the AWS API docs - CopyImage.
+	// empty string `""` instead of a key id in this map. (e.g. `"us-east-1":
+	// ""`) However, you cannot use default key IDs if you are using this in
+	// conjunction with `snapshot_users` -- in that situation you must use
+	// custom keys. For valid formats see *KmsKeyId* in the [AWS API docs -
+	// CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 	AMIRegionKMSKeyIDs map[string]string `mapstructure:"region_kms_key_ids" required:"false"`
 	// Tags to apply to snapshot.
 	// They will override AMI tags if already applied to snapshot. This is a
-	// template engine, see Build template
-	// data for more information.
+	// [template engine](../templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
 	SnapshotTags TagMap `mapstructure:"snapshot_tags" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional

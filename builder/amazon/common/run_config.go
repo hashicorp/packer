@@ -149,14 +149,14 @@ type RunConfig struct {
 	//     `security_group_ids`. Any filter described in the docs for
 	//     [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
 	//     is valid.
-
+	//
 	// `security_group_ids` take precedence over this.
 	SecurityGroupFilter SecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false"`
-	// Tags to apply to the instance
-	// that is launched to create the AMI. These tags are not applied to the
-	// resulting AMI unless they're duplicated in tags. This is a template
-	// engine, see Build template
-	// data for more information.
+	// Tags to apply to the instance that is *launched* to create the AMI.
+	// These tags are *not* applied to the resulting AMI unless they're
+	// duplicated in `tags`. This is a [template
+	// engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
@@ -173,8 +173,47 @@ type RunConfig struct {
 	// AMI with a root volume snapshot that you have access to. Note: this is not
 	// used when from_scratch is set to true.
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
-	// Filters used to populate the source_ami
+	// Filters used to populate the `source_ami`
 	// field. Example:
+	//
+	//   ``` json
+	//   {
+	//     "source_ami_filter": {
+	//       "filters": {
+	//         "virtualization-type": "hvm",
+	//         "name": "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*",
+	//         "root-device-type": "ebs"
+	//       },
+	//       "owners": ["099720109477"],
+	//       "most_recent": true
+	//     }
+	//   }
+	//   ```
+	//
+	//   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+	//   This will fail unless *exactly* one AMI is returned. In the above example,
+	//   `most_recent` will cause this to succeed by selecting the newest image.
+	//
+	//   -   `filters` (map of strings) - filters used to select a `source_ami`.
+	//       NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+	//       described in the docs for
+	//       [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+	//       is valid.
+	//
+	//   -   `owners` (array of strings) - Filters the images by their owner. You
+	//       may specify one or more AWS account IDs, "self" (which will use the
+	//       account whose credentials you are using to run Packer), or an AWS owner
+	//       alias: for example, `amazon`, `aws-marketplace`, or `microsoft`. This
+	//       option is required for security reasons.
+	//
+	//   -   `most_recent` (boolean) - Selects the newest created image when true.
+	//       This is most useful for selecting a daily distro build.
+	//
+	//   You may set this in place of `source_ami` or in conjunction with it. If you
+	//   set this in conjunction with `source_ami`, the `source_ami` will be added
+	//   to the filter. The provided `source_ami` must meet all of the filtering
+	//   criteria provided in `source_ami_filter`; this pins the AMI returned by the
+	//   filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
 	// a list of acceptable instance
 	// types to run your build on. We will request a spot instance using the max
@@ -203,8 +242,39 @@ type RunConfig struct {
 	// Requires spot_price to be
 	// set. This tells Packer to apply tags to the spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
-	// Filters used to populate the subnet_id field.
+	// Filters used to populate the `subnet_id` field.
 	// Example:
+	//
+	//   ``` json
+	//   {
+	//     "subnet_filter": {
+	//       "filters": {
+	//         "tag:Class": "build"
+	//       },
+	//       "most_free": true,
+	//       "random": false
+	//     }
+	//   }
+	//   ```
+	//
+	//   This selects the Subnet with tag `Class` with the value `build`, which has
+	//   the most free IP addresses. NOTE: This will fail unless *exactly* one
+	//   Subnet is returned. By using `most_free` or `random` one will be selected
+	//   from those matching the filter.
+	//
+	//   -   `filters` (map of strings) - filters used to select a `subnet_id`.
+	//       NOTE: This will fail unless *exactly* one Subnet is returned. Any
+	//       filter described in the docs for
+	//       [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html)
+	//       is valid.
+	//
+	//   -   `most_free` (boolean) - The Subnet with the most free IPv4 addresses
+	//       will be used if multiple Subnets matches the filter.
+	//
+	//   -   `random` (boolean) - A random Subnet will be used if multiple Subnets
+	//       matches the filter. `most_free` have precendence over this.
+	//
+	//   `subnet_id` take precedence over this.
 	SubnetFilter SubnetFilterOptions `mapstructure:"subnet_filter" required:"false"`
 	// If using VPC, the ID of the subnet, such as
 	// subnet-12345def, where Packer will launch the EC2 instance. This field is
@@ -212,10 +282,13 @@ type RunConfig struct {
 	SubnetId string `mapstructure:"subnet_id" required:"false"`
 	// The name of the temporary key pair to
 	// generate. By default, Packer generates a name that looks like
-	// packer_<UUID>, where <UUID> is a 36 character unique identifier.
+	// `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 	TemporaryKeyPairName string `mapstructure:"temporary_key_pair_name" required:"false"`
-	// A list of IPv4
-	// CIDR blocks to be authorized access to the instance, when packer is creating a temporary security group.
+	// A list of IPv4 CIDR blocks to be authorized access to the instance, when
+	// packer is creating a temporary security group.
+	//
+	// The default is [`0.0.0.0/0`] (i.e., allow any IPv4 source). This is only
+	// used when `security_group_id` or `security_group_ids` is not specified.
 	TemporarySGSourceCidrs []string `mapstructure:"temporary_security_group_source_cidrs" required:"false"`
 	// User data to apply when launching the instance. Note
 	// that you need to be careful about escaping characters due to the templates
