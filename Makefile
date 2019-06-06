@@ -48,6 +48,7 @@ install-gen-deps: ## Install dependencies for code generation
 	@go get golang.org/x/tools/cmd/goimports
 	@go get -u github.com/mna/pigeon
 	@go get github.com/alvaroloes/enumer
+	@go install ./cmd/struct-markdown
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
