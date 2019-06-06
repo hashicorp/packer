@@ -30,35 +30,37 @@ Packer builds on; a vMotion event will cause the Packer build to fail.
 To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
 the required `remote_*` configurations:
 
-### Required:
+-   `remote_type` - This must be set to "esx5".
 
--   `remote_type` (string) - This must be set to "esx5".
+-   `remote_host` - The host of the remote machine.
 
--   `remote_host` (string) - The host of the remote machine.
+Additionally, there are some optional configurations that you'll likely have to
+modify as well:
 
-### Optional:
+-   `remote_port` - The SSH port of the remote machine
 
--   `remote_port` (int) - The SSH port of the remote machine
-
--   `remote_datastore` (string) - The path to the datastore where the VM will be stored
+-   `remote_datastore` - The path to the datastore where the VM will be stored
     on the ESXi machine.
 
--   `remote_cache_datastore` (string) - The path to the datastore where supporting files
+-   `remote_cache_datastore` - The path to the datastore where supporting files
     will be stored during the build on the remote machine.
 
--   `remote_cache_directory` (string) - The path where the ISO and/or floppy files will
+-   `remote_cache_directory` - The path where the ISO and/or floppy files will
     be stored during the build on the remote machine. The path is relative to
     the `remote_cache_datastore` on the remote machine.
 
--   `remote_username` (string) - The SSH username used to access the remote machine.
+-   `remote_username` - The SSH username used to access the remote machine.
 
--   `remote_password` (string) - The SSH password for access to the remote machine.
+-   `remote_password` - The SSH password for access to the remote machine.
 
--   `remote_private_key_file` (string) - The SSH key for access to the remote machine.
+-   `remote_private_key_file` - The SSH key for access to the remote machine.
 
--   `format` (string) (string) - Either "ovf", "ova" or "vmx", this specifies the output
+-   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
     Before using this option, you need to install `ovftool`. This option
     currently only works when option remote_type is set to "esx5".
     Since ovftool is only capable of password based authentication
     `remote_password` must be set when exporting the VM.
+
+-   `vnc_disable_password` - This must be set to "true" when using VNC with
+    ESXi 6.5 or 6.7.
