@@ -10,8 +10,8 @@ import (
 // in the end of artifact build.
 type PrlctlPostConfig struct {
 	// Identical to prlctl, except
-    // that it is run after the virtual machine is shutdown, and before the virtual
-    // machine is exported.
+	// that it is run after the virtual machine is shutdown, and before the virtual
+	// machine is exported.
 	PrlctlPost [][]string `mapstructure:"prlctl_post" required:"false"`
 }
 

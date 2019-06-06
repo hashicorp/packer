@@ -120,8 +120,8 @@ type RunConfig struct {
 	// Unlimited - even for instances that would usually qualify for the
 	// [AWS Free Tier](https://aws.amazon.com/free/).
 	EnableT2Unlimited bool `mapstructure:"enable_t2_unlimited" required:"false"`
-	// The name of an IAM instance
-	// profile
+	// The name of an [IAM instance
+	// profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
 	// to launch the EC2 instance with.
 	IamInstanceProfile string `mapstructure:"iam_instance_profile" required:"false"`
 	// Automatically terminate instances on
@@ -131,8 +131,7 @@ type RunConfig struct {
 	// The EC2 instance type to use while building the
 	// AMI, such as t2.small.
 	InstanceType string `mapstructure:"instance_type" required:"true"`
-	// Filters used to populate the
-	// `security_group_ids` field. Example:
+	// Filters used to populate the `security_group_ids` field. Example:
 	//
 	// ``` json
 	// {
@@ -143,6 +142,15 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
+	//
+	// This selects the SG's with tag `Class` with the value `packer`.
+	//
+	// -   `filters` (map of strings) - filters used to select a
+	//     `security_group_ids`. Any filter described in the docs for
+	//     [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
+	//     is valid.
+
+	// `security_group_ids` take precedence over this.
 	SecurityGroupFilter SecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false"`
 	// Tags to apply to the instance
 	// that is launched to create the AMI. These tags are not applied to the

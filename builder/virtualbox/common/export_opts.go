@@ -8,10 +8,10 @@ import (
 
 type ExportOpts struct {
 	// Additional options to pass to the
-    // VBoxManage
-    // export. This
-    // can be useful for passing product information to include in the resulting
-    // appliance file. Packer JSON configuration file example:
+	// VBoxManage
+	// export. This
+	// can be useful for passing product information to include in the resulting
+	// appliance file. Packer JSON configuration file example:
 	ExportOpts []string `mapstructure:"export_opts" required:"false"`
 }
 

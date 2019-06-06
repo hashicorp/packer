@@ -10,7 +10,7 @@ import (
 
 type ExportConfig struct {
 	// Either ovf or ova, this specifies the output format
-    // of the exported virtual machine. This defaults to ovf.
+	// of the exported virtual machine. This defaults to ovf.
 	Format string `mapstructure:"format" required:"false"`
 }
 
