@@ -89,53 +89,76 @@ type Config struct {
 	// Capture
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
-	// Use a Shared Gallery
-	// image
-	// as the source for this build. VHD targets are incompatible with this build
-	// type - the target must be a Managed Image.
+	// Use a [Shared Gallery
+	// image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
+	// as the source for this build. *VHD targets are incompatible with this
+	// build type* - the target must be a *Managed Image*.
+	//
+	//     "shared_image_gallery": {
+	//         "subscription": "00000000-0000-0000-0000-00000000000",
+	//         "resource_group": "ResourceGroup",
+	//         "gallery_name": "GalleryName",
+	//         "image_name": "ImageName",
+	//         "image_version": "1.0.0"
+	//     }
+	//     "managed_image_name": "TargetImageName",
+	//     "managed_image_resource_group_name": "TargetResourceGroup"
 	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery" required:"false"`
 	// PublisherName for your base image. See
-	// documentation
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
+	//
+	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
 	// Offer for your base image. See
-	// documentation
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
+	//
+	// CLI example
+	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer" required:"true"`
 	// SKU for your base image. See
-	// documentation
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
+	//
+	// CLI example
+	// `az vm image list-skus --location westus --publisher Canonical --offer UbuntuServer`
 	ImageSku string `mapstructure:"image_sku" required:"true"`
 	// Specify a specific version of an OS to boot from.
-	// Defaults to latest. There may be a difference in versions available
+	// Defaults to `latest`. There may be a difference in versions available
 	// across regions due to image synchronization latency. To ensure a consistent
 	// version across regions set this value to one that is available in all
 	// regions where you are deploying.
+	//
+	// CLI example
+	// `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 	ImageVersion string `mapstructure:"image_version" required:"false"`
 	// Specify a custom VHD to use. If this value is set, do
 	// not set image_publisher, image_offer, image_sku, or image_version.
 	ImageUrl string `mapstructure:"image_url" required:"false"`
-	// Specify the source
-	// managed image's resource group used to use. If this value is set, do not
-	// set image_publisher, image_offer, image_sku, or image_version. If this
-	// value is set, the value custom_managed_image_name must also be set. See
-	// documentation
+	// Specify the source managed image's resource group used to use. If this
+	// value is set, do not set image\_publisher, image\_offer, image\_sku, or
+	// image\_version. If this value is set, the value
+	// `custom_managed_image_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.
 	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"false"`
-	// Specify the source managed image's
-	// name to use. If this value is set, do not set image_publisher,
-	// image_offer, image_sku, or image_version. If this value is set, the
-	// value custom_managed_image_resource_group_name must also be set. See
-	// documentation
+	// Specify the source managed image's name to use. If this value is set, do
+	// not set image\_publisher, image\_offer, image\_sku, or image\_version.
+	// If this value is set, the value
+	// `custom_managed_image_resource_group_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.
 	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"false"`
 	customManagedImageID   string
 
 	Location string `mapstructure:"location"`
-	// Size of the VM used for building. This can be changed
-	// when you deploy a VM from your VHD. See
-	// pricing
-	// information. Defaults to Standard_A1.
+	// Size of the VM used for building. This can be changed when you deploy a
+	// VM from your VHD. See
+	// [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
+	// information. Defaults to `Standard_A1`.
+	//
+	// CLI example `az vm list-sizes --location westus`
 	VMSize string `mapstructure:"vm_size" required:"false"`
 
 	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
@@ -155,8 +178,9 @@ type Config struct {
 	// captured.
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
 	manageImageLocation                string
-	// Store the image in zone-resilient storage. You need to create it
-	// in a region that supports availability zones.
+	// Store the image in zone-resilient storage. You need to create it in a
+	// region that supports [availability
+	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
 	ManagedImageZoneResilient bool `mapstructure:"managed_image_zone_resilient" required:"false"`
 	// the user can define up to 15
 	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
@@ -195,20 +219,48 @@ type Config struct {
 	// containing the virtual network. If the resource group cannot be found, or
 	// it cannot be disambiguated, this value should be set.
 	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name" required:"false"`
-	// Specify a file containing custom data to inject
-	// into the cloud-init process. The contents of the file are read and injected
-	// into the ARM template. The custom data will be passed to cloud-init for
-	// processing at the time of provisioning. See
-	// documentation
+	// Specify a file containing custom data to inject into the cloud-init
+	// process. The contents of the file are read and injected into the ARM
+	// template. The custom data will be passed to cloud-init for processing at
+	// the time of provisioning. See
+	// [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
 	// to learn more about custom data, and how it can be used to influence the
 	// provisioning process.
 	CustomDataFile string `mapstructure:"custom_data_file" required:"false"`
 	customData     string
-	// Used for creating images from Marketplace images.
-	// Please refer to Deploy an image with Marketplace
-	// terms for more details. Not
-	// all Marketplace images support programmatic deployment, and support is
-	// controlled by the image publisher.
+	// Used for creating images from Marketplace images. Please refer to
+	// [Deploy an image with Marketplace
+	// terms](https://aka.ms/azuremarketplaceapideployment) for more details.
+	// Not all Marketplace images support programmatic deployment, and support
+	// is controlled by the image publisher.
+	//
+	// An example plan\_info object is defined below.
+	//
+	// ``` json
+	// {
+	//   "plan_info": {
+	//       "plan_name": "rabbitmq",
+	//       "plan_product": "rabbitmq",
+	//       "plan_publisher": "bitnami"
+	//   }
+	// }
+	// ```
+	//
+	// `plan_name` (string) - The plan name, required. `plan_product` (string) -
+	// The plan product, required. `plan_publisher` (string) - The plan publisher,
+	// required. `plan_promotion_code` (string) - Some images accept a promotion
+	// code, optional.
+	//
+	// Images created from the Marketplace with `plan_info` **must** specify
+	// `plan_info` whenever the image is deployed. The builder automatically adds
+	// tags to the image to ensure this information is not lost. The following
+	// tags are added.
+	//
+	// 1.  PlanName
+	// 2.  PlanProduct
+	// 3.  PlanPublisher
+	// 4.  PlanPromotionCode
+	//
 	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
 	// If either Linux or Windows is specified Packer will
 	// automatically configure authentication credentials for the provisioned
@@ -218,14 +270,24 @@ type Config struct {
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
-	// The size(s) of any additional
-	// hard disks for the VM in gigabytes. If this is not specified then the VM
-	// will only contain an OS disk. The number of additional disks and maximum
-	// size of a disk depends on the configuration of your VM. See
-	// Windows
+	// The size(s) of any additional hard disks for the VM in gigabytes. If
+	// this is not specified then the VM will only contain an OS disk. The
+	// number of additional disks and maximum size of a disk depends on the
+	// configuration of your VM. See
+	// [Windows](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds)
 	// or
-	// Linux
+	// [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds)
 	// for more information.
+	//
+	// For VHD builds the final artifacts will be named
+	// `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture
+	// container along side the OS disk. The additional disks are included in
+	// the deployment template `PREFIX-vmTemplate.UUID`.
+	//
+	// For Managed build the final artifacts are included in the managed image.
+	// The additional disk will have the same storage account type as the OS
+	// disk, as specified with the `managed_image_storage_account_type`
+	// setting.
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size" required:"false"`
 	// Specify the disk caching type. Valid values
 	// are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
