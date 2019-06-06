@@ -49,6 +49,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
 github.com/NaverCloudPlatform/ncloud-sdk-go/common
 github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
+# github.com/PuerkitoBio/goquery v1.5.0
+github.com/PuerkitoBio/goquery
 # github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
@@ -66,6 +68,12 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/endpoints
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/signers
 # github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
+# github.com/andybalholm/cascadia v1.0.0
+github.com/andybalholm/cascadia
+# github.com/antchfx/htmlquery v1.0.0
+github.com/antchfx/htmlquery
+# github.com/antchfx/xmlquery v1.0.0
+github.com/antchfx/xmlquery
 # github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
 github.com/antchfx/xpath
 # github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607
@@ -156,12 +164,29 @@ github.com/dustin/go-humanize
 github.com/dylanmei/iso8601
 # github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 github.com/dylanmei/winrmtest
+# github.com/fatih/camelcase v1.0.0
+github.com/fatih/camelcase
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/fatih/structtag v1.0.0
+github.com/fatih/structtag
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
+# github.com/gobwas/glob v0.2.3
+github.com/gobwas/glob
+github.com/gobwas/glob/compiler
+github.com/gobwas/glob/syntax
+github.com/gobwas/glob/match
+github.com/gobwas/glob/syntax/ast
+github.com/gobwas/glob/util/runes
+github.com/gobwas/glob/syntax/lexer
+github.com/gobwas/glob/util/strings
+# github.com/gocolly/colly v1.2.0
+github.com/gocolly/colly
+github.com/gocolly/colly/debug
+github.com/gocolly/colly/storage
 # github.com/gofrs/flock v0.7.1
 github.com/gofrs/flock
 # github.com/golang/protobuf v1.3.1
@@ -297,6 +322,8 @@ github.com/joyent/triton-go/client
 github.com/json-iterator/go
 # github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 github.com/kardianos/osext
+# github.com/kennygrant/sanitize v1.2.4
+github.com/kennygrant/sanitize
 # github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77
 github.com/klauspost/compress/flate
 # github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817
@@ -387,6 +414,8 @@ github.com/renstrom/fuzzysearch/fuzzy
 github.com/rwtodd/Go.Sed/sed
 # github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735
 github.com/ryanuber/go-glob
+# github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
+github.com/saintfish/chardet
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
@@ -397,6 +426,8 @@ github.com/scaleway/scaleway-cli/pkg/sshcommand
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
+# github.com/temoto/robotstxt v0.0.0-20180810133444-97ee4a9ee6ea
+github.com/temoto/robotstxt
 # github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
@@ -508,13 +539,13 @@ golang.org/x/net/http2
 golang.org/x/net/html/charset
 golang.org/x/net/context
 golang.org/x/net/trace
+golang.org/x/net/html
 golang.org/x/net/internal/socks
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/publicsuffix
-golang.org/x/net/html
 golang.org/x/net/internal/timeseries
 golang.org/x/net/html/atom
 # golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
