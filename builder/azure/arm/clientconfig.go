@@ -17,8 +17,8 @@ import (
 // ClientConfig allows for various ways to authenticate Azure clients
 type ClientConfig struct {
 	// One of Public, China, Germany, or
-    // USGovernment. Defaults to Public. Long forms such as
-    // USGovernmentCloud and AzureUSGovernmentCloud are also supported.
+	// USGovernment. Defaults to Public. Long forms such as
+	// USGovernmentCloud and AzureUSGovernmentCloud are also supported.
 	CloudEnvironmentName string `mapstructure:"cloud_environment_name" required:"false"`
 	cloudEnvironment     *azure.Environment
 
@@ -31,11 +31,11 @@ type ClientConfig struct {
 	// Certificate path for client auth
 	ClientCertPath string `mapstructure:"client_cert_path"`
 	// JWT bearer token for client auth (RFC 7523, Sec. 2.2)
-	ClientJWT      string `mapstructure:"client_jwt"`
-	ObjectID       string `mapstructure:"object_id"`
+	ClientJWT string `mapstructure:"client_jwt"`
+	ObjectID  string `mapstructure:"object_id"`
 	// The account identifier with which your client_id and
-    // subscription_id are associated. If not specified, tenant_id will be
-    // looked up using subscription_id.
+	// subscription_id are associated. If not specified, tenant_id will be
+	// looked up using subscription_id.
 	TenantID       string `mapstructure:"tenant_id" required:"false"`
 	SubscriptionID string `mapstructure:"subscription_id"`
 }

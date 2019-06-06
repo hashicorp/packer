@@ -9,10 +9,10 @@ import (
 // PrlctlVersionConfig contains the configuration for `prlctl` version.
 type PrlctlVersionConfig struct {
 	// The path within the virtual machine to
-    // upload a file that contains the prlctl version that was used to create
-    // the machine. This information can be useful for provisioning. By default
-    // this is ".prlctl_version", which will generally upload it into the
-    // home directory.
+	// upload a file that contains the prlctl version that was used to create
+	// the machine. This information can be useful for provisioning. By default
+	// this is ".prlctl_version", which will generally upload it into the
+	// home directory.
 	PrlctlVersionFile string `mapstructure:"prlctl_version_file" required:"false"`
 }
 

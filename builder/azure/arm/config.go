@@ -73,11 +73,11 @@ type SharedImageGallery struct {
 	GalleryName   string `mapstructure:"gallery_name"`
 	ImageName     string `mapstructure:"image_name"`
 	// Specify a specific version of an OS to boot from.
-    // Defaults to latest. There may be a difference in versions available
-    // across regions due to image synchronization latency. To ensure a consistent
-    // version across regions set this value to one that is available in all
-    // regions where you are deploying.
-	ImageVersion  string `mapstructure:"image_version" required:"false"`
+	// Defaults to latest. There may be a difference in versions available
+	// across regions due to image synchronization latency. To ensure a consistent
+	// version across regions set this value to one that is available in all
+	// regions where you are deploying.
+	ImageVersion string `mapstructure:"image_version" required:"false"`
 }
 
 type Config struct {
@@ -90,147 +90,147 @@ type Config struct {
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 	// Use a Shared Gallery
-    // image
-    // as the source for this build. VHD targets are incompatible with this build
-    // type - the target must be a Managed Image.
+	// image
+	// as the source for this build. VHD targets are incompatible with this build
+	// type - the target must be a Managed Image.
 	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery" required:"false"`
 	// PublisherName for your base image. See
-    // documentation
-    // for details.
+	// documentation
+	// for details.
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
 	// Offer for your base image. See
-    // documentation
-    // for details.
-	ImageOffer     string `mapstructure:"image_offer" required:"true"`
+	// documentation
+	// for details.
+	ImageOffer string `mapstructure:"image_offer" required:"true"`
 	// SKU for your base image. See
-    // documentation
-    // for details.
-	ImageSku       string `mapstructure:"image_sku" required:"true"`
+	// documentation
+	// for details.
+	ImageSku string `mapstructure:"image_sku" required:"true"`
 	// Specify a specific version of an OS to boot from.
-    // Defaults to latest. There may be a difference in versions available
-    // across regions due to image synchronization latency. To ensure a consistent
-    // version across regions set this value to one that is available in all
-    // regions where you are deploying.
-	ImageVersion   string `mapstructure:"image_version" required:"false"`
+	// Defaults to latest. There may be a difference in versions available
+	// across regions due to image synchronization latency. To ensure a consistent
+	// version across regions set this value to one that is available in all
+	// regions where you are deploying.
+	ImageVersion string `mapstructure:"image_version" required:"false"`
 	// Specify a custom VHD to use. If this value is set, do
-    // not set image_publisher, image_offer, image_sku, or image_version.
-	ImageUrl       string `mapstructure:"image_url" required:"false"`
+	// not set image_publisher, image_offer, image_sku, or image_version.
+	ImageUrl string `mapstructure:"image_url" required:"false"`
 	// Specify the source
-    // managed image's resource group used to use. If this value is set, do not
-    // set image_publisher, image_offer, image_sku, or image_version. If this
-    // value is set, the value custom_managed_image_name must also be set. See
-    // documentation
-    // to learn more about managed images.
+	// managed image's resource group used to use. If this value is set, do not
+	// set image_publisher, image_offer, image_sku, or image_version. If this
+	// value is set, the value custom_managed_image_name must also be set. See
+	// documentation
+	// to learn more about managed images.
 	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"false"`
 	// Specify the source managed image's
-    // name to use. If this value is set, do not set image_publisher,
-    // image_offer, image_sku, or image_version. If this value is set, the
-    // value custom_managed_image_resource_group_name must also be set. See
-    // documentation
-    // to learn more about managed images.
-	CustomManagedImageName              string `mapstructure:"custom_managed_image_name" required:"false"`
-	customManagedImageID                string
+	// name to use. If this value is set, do not set image_publisher,
+	// image_offer, image_sku, or image_version. If this value is set, the
+	// value custom_managed_image_resource_group_name must also be set. See
+	// documentation
+	// to learn more about managed images.
+	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"false"`
+	customManagedImageID   string
 
 	Location string `mapstructure:"location"`
 	// Size of the VM used for building. This can be changed
-    // when you deploy a VM from your VHD. See
-    // pricing
-    // information. Defaults to Standard_A1.
-	VMSize   string `mapstructure:"vm_size" required:"false"`
+	// when you deploy a VM from your VHD. See
+	// pricing
+	// information. Defaults to Standard_A1.
+	VMSize string `mapstructure:"vm_size" required:"false"`
 
-	ManagedImageResourceGroupName      string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName                   string `mapstructure:"managed_image_name"`
+	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName              string `mapstructure:"managed_image_name"`
 	// Specify the storage account
-    // type for a managed image. Valid values are Standard_LRS and Premium_LRS.
-    // The default is Standard_LRS.
-	ManagedImageStorageAccountType     string `mapstructure:"managed_image_storage_account_type" required:"false"`
-	managedImageStorageAccountType     compute.StorageAccountTypes
+	// type for a managed image. Valid values are Standard_LRS and Premium_LRS.
+	// The default is Standard_LRS.
+	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type" required:"false"`
+	managedImageStorageAccountType compute.StorageAccountTypes
 	// If
-    // managed_image_os_disk_snapshot_name is set, a snapshot of the OS disk
-    // is created with the same name as this value before the VM is captured.
-	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name" required:"false"`
+	// managed_image_os_disk_snapshot_name is set, a snapshot of the OS disk
+	// is created with the same name as this value before the VM is captured.
+	ManagedImageOSDiskSnapshotName string `mapstructure:"managed_image_os_disk_snapshot_name" required:"false"`
 	// If
-    // managed_image_data_disk_snapshot_prefix is set, snapshot of the data
-    // disk(s) is created with the same prefix as this value before the VM is
-    // captured.
+	// managed_image_data_disk_snapshot_prefix is set, snapshot of the data
+	// disk(s) is created with the same prefix as this value before the VM is
+	// captured.
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
 	manageImageLocation                string
 	// Store the image in zone-resilient storage. You need to create it
-    // in a region that supports availability zones.
-	ManagedImageZoneResilient          bool `mapstructure:"managed_image_zone_resilient" required:"false"`
+	// in a region that supports availability zones.
+	ManagedImageZoneResilient bool `mapstructure:"managed_image_zone_resilient" required:"false"`
 	// the user can define up to 15
-    // tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
-    // 256 characters. Tags are applied to every resource deployed by a Packer
-    // build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
-	AzureTags                         map[string]*string `mapstructure:"azure_tags" required:"false"`
-	ResourceGroupName                 string             `mapstructure:"resource_group_name"`
-	StorageAccount                    string             `mapstructure:"storage_account"`
+	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
+	// 256 characters. Tags are applied to every resource deployed by a Packer
+	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+	AzureTags         map[string]*string `mapstructure:"azure_tags" required:"false"`
+	ResourceGroupName string             `mapstructure:"resource_group_name"`
+	StorageAccount    string             `mapstructure:"storage_account"`
 	// temporary name assigned to the VM. If this
-    // value is not set, a random value will be assigned. Knowing the resource
-    // group and VM name allows one to execute commands to update the VM during a
-    // Packer build, e.g. attach a resource disk to the VM.
-	TempComputeName                   string             `mapstructure:"temp_compute_name" required:"false"`
-	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
-	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
-	storageAccountBlobEndpoint        string
+	// value is not set, a random value will be assigned. Knowing the resource
+	// group and VM name allows one to execute commands to update the VM during a
+	// Packer build, e.g. attach a resource disk to the VM.
+	TempComputeName            string `mapstructure:"temp_compute_name" required:"false"`
+	TempResourceGroupName      string `mapstructure:"temp_resource_group_name"`
+	BuildResourceGroupName     string `mapstructure:"build_resource_group_name"`
+	storageAccountBlobEndpoint string
 	// This value allows you to
-    // set a virtual_network_name and obtain a public IP. If this value is not
-    // set and virtual_network_name is defined Packer is only allowed to be
-    // executed from a host on the same subnet / virtual network.
-	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip" required:"false"`
+	// set a virtual_network_name and obtain a public IP. If this value is not
+	// set and virtual_network_name is defined Packer is only allowed to be
+	// executed from a host on the same subnet / virtual network.
+	PrivateVirtualNetworkWithPublicIp bool `mapstructure:"private_virtual_network_with_public_ip" required:"false"`
 	// Use a pre-existing virtual network for the
-    // VM. This option enables private communication with the VM, no public IP
-    // address is used or provisioned (unless you set
-    // private_virtual_network_with_public_ip).
-	VirtualNetworkName                string `mapstructure:"virtual_network_name" required:"false"`
+	// VM. This option enables private communication with the VM, no public IP
+	// address is used or provisioned (unless you set
+	// private_virtual_network_with_public_ip).
+	VirtualNetworkName string `mapstructure:"virtual_network_name" required:"false"`
 	// If virtual_network_name is set,
-    // this value may also be set. If virtual_network_name is set, and this
-    // value is not set the builder attempts to determine the subnet to use with
-    // the virtual network. If the subnet cannot be found, or it cannot be
-    // disambiguated, this value should be set.
-	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name" required:"false"`
+	// this value may also be set. If virtual_network_name is set, and this
+	// value is not set the builder attempts to determine the subnet to use with
+	// the virtual network. If the subnet cannot be found, or it cannot be
+	// disambiguated, this value should be set.
+	VirtualNetworkSubnetName string `mapstructure:"virtual_network_subnet_name" required:"false"`
 	// If virtual_network_name is
-    // set, this value may also be set. If virtual_network_name is set, and
-    // this value is not set the builder attempts to determine the resource group
-    // containing the virtual network. If the resource group cannot be found, or
-    // it cannot be disambiguated, this value should be set.
-	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name" required:"false"`
+	// set, this value may also be set. If virtual_network_name is set, and
+	// this value is not set the builder attempts to determine the resource group
+	// containing the virtual network. If the resource group cannot be found, or
+	// it cannot be disambiguated, this value should be set.
+	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name" required:"false"`
 	// Specify a file containing custom data to inject
-    // into the cloud-init process. The contents of the file are read and injected
-    // into the ARM template. The custom data will be passed to cloud-init for
-    // processing at the time of provisioning. See
-    // documentation
-    // to learn more about custom data, and how it can be used to influence the
-    // provisioning process.
-	CustomDataFile                    string `mapstructure:"custom_data_file" required:"false"`
-	customData                        string
+	// into the cloud-init process. The contents of the file are read and injected
+	// into the ARM template. The custom data will be passed to cloud-init for
+	// processing at the time of provisioning. See
+	// documentation
+	// to learn more about custom data, and how it can be used to influence the
+	// provisioning process.
+	CustomDataFile string `mapstructure:"custom_data_file" required:"false"`
+	customData     string
 	// Used for creating images from Marketplace images.
-    // Please refer to Deploy an image with Marketplace
-    // terms for more details. Not
-    // all Marketplace images support programmatic deployment, and support is
-    // controlled by the image publisher.
-	PlanInfo                          PlanInformation `mapstructure:"plan_info" required:"false"`
+	// Please refer to Deploy an image with Marketplace
+	// terms for more details. Not
+	// all Marketplace images support programmatic deployment, and support is
+	// controlled by the image publisher.
+	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
 	// If either Linux or Windows is specified Packer will
-    // automatically configure authentication credentials for the provisioned
-    // machine. For Linux this configures an SSH authorized key. For Windows
-    // this configures a WinRM certificate.
-	OSType       string `mapstructure:"os_type" required:"false"`
+	// automatically configure authentication credentials for the provisioned
+	// machine. For Linux this configures an SSH authorized key. For Windows
+	// this configures a WinRM certificate.
+	OSType string `mapstructure:"os_type" required:"false"`
 	// Specify the size of the OS disk in GB
-    // (gigabytes). Values of zero or less than zero are ignored.
-	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb" required:"false"`
+	// (gigabytes). Values of zero or less than zero are ignored.
+	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
 	// The size(s) of any additional
-    // hard disks for the VM in gigabytes. If this is not specified then the VM
-    // will only contain an OS disk. The number of additional disks and maximum
-    // size of a disk depends on the configuration of your VM. See
-    // Windows
-    // or
-    // Linux
-    // for more information.
+	// hard disks for the VM in gigabytes. If this is not specified then the VM
+	// will only contain an OS disk. The number of additional disks and maximum
+	// size of a disk depends on the configuration of your VM. See
+	// Windows
+	// or
+	// Linux
+	// for more information.
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size" required:"false"`
 	// Specify the disk caching type. Valid values
-    // are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
-	DiskCachingType    string  `mapstructure:"disk_caching_type" required:"false"`
-	diskCachingType    compute.CachingTypes
+	// are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
+	DiskCachingType string `mapstructure:"disk_caching_type" required:"false"`
+	diskCachingType compute.CachingTypes
 
 	// Runtime Values
 	UserName               string
@@ -257,9 +257,9 @@ type Config struct {
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  interpolate.Context
 	// If you want packer to delete the
-    // temporary resource group asynchronously set this value. It's a boolean
-    // value and defaults to false. Important Setting this true means that
-    // your builds are faster, however any failed deletes are not reported.
+	// temporary resource group asynchronously set this value. It's a boolean
+	// value and defaults to false. Important Setting this true means that
+	// your builds are faster, however any failed deletes are not reported.
 	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete" required:"false"`
 }
 

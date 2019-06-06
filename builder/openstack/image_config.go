@@ -13,23 +13,23 @@ import (
 // ImageConfig is for common configuration related to creating Images.
 type ImageConfig struct {
 	// The name of the resulting image.
-	ImageName       string                       `mapstructure:"image_name" required:"true"`
+	ImageName string `mapstructure:"image_name" required:"true"`
 	// Glance metadata that will be
-    // applied to the image.
-	ImageMetadata   map[string]string            `mapstructure:"metadata" required:"false"`
+	// applied to the image.
+	ImageMetadata map[string]string `mapstructure:"metadata" required:"false"`
 	// One of "public", "private", "shared", or
-    // "community".
+	// "community".
 	ImageVisibility imageservice.ImageVisibility `mapstructure:"image_visibility" required:"false"`
 	// List of members to add to the image
-    // after creation. An image member is usually a project (also called the
-    // "tenant") with whom the image is shared.
-	ImageMembers    []string                     `mapstructure:"image_members" required:"false"`
+	// after creation. An image member is usually a project (also called the
+	// "tenant") with whom the image is shared.
+	ImageMembers []string `mapstructure:"image_members" required:"false"`
 	// Disk format of the resulting image. This
-    // option works if use_blockstorage_volume is true.
-	ImageDiskFormat string                       `mapstructure:"image_disk_format" required:"false"`
+	// option works if use_blockstorage_volume is true.
+	ImageDiskFormat string `mapstructure:"image_disk_format" required:"false"`
 	// List of tags to add to the image after
-    // creation.
-	ImageTags       []string                     `mapstructure:"image_tags" required:"false"`
+	// creation.
+	ImageTags []string `mapstructure:"image_tags" required:"false"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {

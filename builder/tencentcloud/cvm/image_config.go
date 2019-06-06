@@ -11,28 +11,28 @@ import (
 
 type TencentCloudImageConfig struct {
 	// The name you want to create your customize image,
-    // it should be composed of no more than 20 characters, of letters, numbers
-    // or minus sign.
-	ImageName          string   `mapstructure:"image_name" required:"true"`
+	// it should be composed of no more than 20 characters, of letters, numbers
+	// or minus sign.
+	ImageName string `mapstructure:"image_name" required:"true"`
 	// Image description.
-	ImageDescription   string   `mapstructure:"image_description" required:"false"`
+	ImageDescription string `mapstructure:"image_description" required:"false"`
 	// Whether shutdown cvm to create Image. Default value is
-    // false.
-	Reboot             bool     `mapstructure:"reboot" required:"false"`
+	// false.
+	Reboot bool `mapstructure:"reboot" required:"false"`
 	// Whether to force power off cvm when create image.
-    // Default value is false.
-	ForcePoweroff      bool     `mapstructure:"force_poweroff" required:"false"`
+	// Default value is false.
+	ForcePoweroff bool `mapstructure:"force_poweroff" required:"false"`
 	// Whether enable Sysprep during creating windows image.
-	Sysprep            bool     `mapstructure:"sysprep" required:"false"`
-	ImageForceDelete   bool     `mapstructure:"image_force_delete"`
+	Sysprep          bool `mapstructure:"sysprep" required:"false"`
+	ImageForceDelete bool `mapstructure:"image_force_delete"`
 	// regions that will be copied to after
-    // your image created.
-	ImageCopyRegions   []string `mapstructure:"image_copy_regions" required:"false"`
+	// your image created.
+	ImageCopyRegions []string `mapstructure:"image_copy_regions" required:"false"`
 	// accounts that will be shared to
-    // after your image created.
+	// after your image created.
 	ImageShareAccounts []string `mapstructure:"image_share_accounts" required:"false"`
 	// Do not check region and zone when validate.
-	SkipValidation     bool     `mapstructure:"skip_region_validation" required:"false"`
+	SkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
 }
 
 func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {

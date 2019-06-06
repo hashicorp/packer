@@ -14,11 +14,11 @@ import (
 // OutputConfig contains the configuration for builder's output.
 type OutputConfig struct {
 	// This is the path to the directory where the
-    // resulting virtual machine will be created. This may be relative or absolute.
-    // If relative, the path is relative to the working directory when packer
-    // is executed. This directory must not exist or be empty prior to running
-    // the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
-    // name of the build.
+	// resulting virtual machine will be created. This may be relative or absolute.
+	// If relative, the path is relative to the working directory when packer
+	// is executed. This directory must not exist or be empty prior to running
+	// the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
+	// name of the build.
 	OutputDir string `mapstructure:"output_directory" required:"false"`
 }
 
