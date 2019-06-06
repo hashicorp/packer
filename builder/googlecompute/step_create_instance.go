@@ -45,10 +45,11 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
 	}
 
-	if c.UserdataFile != "" {
+	// Read metadata from files specified with metadata_files
+	for key, value := range c.MetadataFiles {
 		var content []byte
-		content, err = ioutil.ReadFile(c.UserdataFile)
-		instanceMetadata["user-data"] = string(content)
+		content, err = ioutil.ReadFile(value)
+		instanceMetadata[key] = string(content)
 	}
 
 	if sourceImage.IsWindows() {
