@@ -19,7 +19,6 @@ type StepCreateInstance struct {
 func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
-
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
 		instanceMetadata[k] = v
@@ -45,6 +44,13 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
 		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
 	}
+
+	if c.UserdataFile != "" {
+		var content []byte
+		content, err = ioutil.ReadFile(c.UserdataFile)
+		instanceMetadata["user-data"] = string(content)
+	}
+
 	if sourceImage.IsWindows() {
 		// Windows startup script support is not yet implemented.
 		// Mark the startup script as done.
