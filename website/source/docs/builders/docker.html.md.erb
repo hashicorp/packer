@@ -138,107 +138,13 @@ standard [communicators](/docs/templates/communicator.html).
 
 You must specify (only) one of `commit`, `discard`, or `export_path`.
 
--   `commit` (boolean) - If true, the container will be committed to an image
-    rather than exported.
 
--   `discard` (boolean) - Throw away the container when the build is complete.
-    This is useful for the [artifice
-    post-processor](https://www.packer.io/docs/post-processors/artifice.html).
-
--   `export_path` (string) - The path where the final container will be
-    exported as a tar file.
-
--   `image` (string) - The base image for the Docker container that will be
-    started. This image will be pulled from the Docker registry if it doesn't
-    already exist.
+<%= partial "partials/builder/docker/Config-required" %>
 
 ### Optional:
 
--   `author` (string) - Set the author (e-mail) of a commit.
-
--   `aws_access_key` (string) - The AWS access key used to communicate with
-    AWS. [Learn how to set
-    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `aws_secret_key` (string) - The AWS secret key used to communicate with
-    AWS. [Learn how to set
-    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `aws_token` (string) - The AWS access token to use. This is different from
-    the access key and secret key. If you're not sure what this is, then you
-    probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
-    environmental variable.
-
--   `aws_profile` (string) - The AWS shared credentials profile used to
-    communicate with AWS. [Learn how to set
-    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
-
--   `changes` (array of strings) - Dockerfile instructions to add to the
-    commit. Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and
-    `EXPOSE`. Example: `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
-
--   `ecr_login` (boolean) - Defaults to false. If true, the builder will login
-    in order to pull the image from [Amazon EC2 Container Registry
-    (ECR)](https://aws.amazon.com/ecr/). The builder only logs in for the
-    duration of the pull. If true `login_server` is required and `login`,
-    `login_username`, and `login_password` will be ignored. For more
-    information see the [section on ECR](#amazon-ec2-container-registry).
-
--   `exec_user` (string) - Username (UID) to run remote commands with. You can
-    also set the group name/ID if you want: (UID or UID:GID).
-    You may need this if you get permission errors trying to run the `shell` or
-    other provisioners.
-
--   `login` (boolean) - Defaults to false. If true, the builder will login in
-    order to pull the image. The builder only logs in for the duration of the
-    pull. It always logs out afterwards. For log into ECR see `ecr_login`.
-
--   `login_username` (string) - The username to use to authenticate to login.
-
--   `login_password` (string) - The password to use to authenticate to login.
-
--   `login_server` (string) - The server address to login to.
-
--   `message` (string) - Set a message for the commit.
-
--   `privileged` (boolean) - If true, run the docker container with the
-    `--privileged` flag. This defaults to false if not set.
-
--   `pull` (boolean) - If true, the configured image will be pulled using
-    `docker pull` prior to use. Otherwise, it is assumed the image already
-    exists and can be used. This defaults to true if not set.
-
--   `run_command` (array of strings) - An array of arguments to pass to
-    `docker run` in order to run the container. By default this is set to
-    `["-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"]` if you are
-    using a linux container, and
-    `["-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"]` if you
-    are running a windows container. {{.Image}} is a template variable that
-    corresponds to the `image` template option. Passing the entrypoint option
-    this way will make it the default entrypoint of the resulting image, so
-    running `docker run -it --rm $IMAGE` will start the docker image from the
-    `/bin/sh` shell interpreter; you could run a script or another shell by
-    running `docker run -it --rm $IMAGE -c /bin/bash`. If your docker image
-    embeds a binary intended to be run often, you should consider changing the
-    default entrypoint to point to it.
-
--   `volumes` (map of strings to strings) - A mapping of additional volumes to
-    mount into this container. The key of the object is the host path, the
-    value is the container path.
-
--  `windows_container` (bool) - If "true", tells Packer that you are building a
-    Windows container running on a windows host. This is necessary for building
-    Windows containers, because our normal docker bindings do not work for them.
-
--   `container_dir` (string) - The directory inside container to mount temp
-    directory from host server for work [file
-    provisioner](/docs/provisioners/file.html). This defaults to
-    `c:/packer-files` on windows and `/packer-files` on other systems.
-
--   `fix_upload_owner` (boolean) - If true, files uploaded to the container
-    will be owned by the user the container is running as. If false, the owner
-    will depend on the version of docker installed in the system. Defaults to
-    true.
+<%= partial "partials/builder/docker/AwsAccessConfig-not-required" %>
+<%= partial "partials/builder/docker/Config-not-required" %>
 
 ## Using the Artifact: Export
 
