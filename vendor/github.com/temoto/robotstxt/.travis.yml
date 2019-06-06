@@ -1,0 +1,30 @@
+language: go
+sudo: false
+
+cache:
+  go: true
+  directories:
+  - "$HOME/.cache"
+go:
+- master
+- 1.10.x
+- 1.9
+- 1.8
+- 1.7
+- 1.6
+
+matrix:
+  include:
+  - go: 1.10.x
+    env: task=bench
+  - go: 1.7
+    env: task=bench
+  - go: master
+    env: task=bench
+  - go: master
+    env: task=clean
+
+install:
+  - go get -u github.com/alecthomas/gometalinter
+script: ./script/${task:-test}
+after_success: if [[ -z "$task" ]] ; then bash <(curl -s https://codecov.io/bash) ; fi
