@@ -1,0 +1,21 @@
+<!-- Code generated from the comments of the TencentCloudImageConfig struct in builder/tencentcloud/cvm/image_config.go; DO NOT EDIT MANUALLY -->
+
+-   `image_description` (string) - Image description.
+    
+-   `reboot` (bool) - Whether shutdown cvm to create Image. Default value is
+    false.
+    
+-   `force_poweroff` (bool) - Whether to force power off cvm when create image.
+    Default value is false.
+    
+-   `sysprep` (bool) - Whether enable Sysprep during creating windows image.
+    
+-   `image_force_delete` (bool) - Image Force Delete
+-   `image_copy_regions` ([]string) - regions that will be copied to after
+    your image created.
+    
+-   `image_share_accounts` ([]string) - accounts that will be shared to
+    after your image created.
+    
+-   `skip_region_validation` (bool) - Do not check region and zone when validate.
+    
