@@ -1,6 +1,6 @@
 ---
 description: |
-    The `packer fix` command allows you to experiment with Packer variable
+    The `packer console` command allows you to experiment with Packer variable
 interpolations.
 layout: docs
 page_title: 'packer console - Commands'
