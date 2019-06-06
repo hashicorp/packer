@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 // The amazonebs package contains a packer.Builder implementation that
 // builds AMIs for Amazon EC2.
 //
@@ -28,7 +30,12 @@ type Config struct {
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	VolumeRunTags          awscommon.TagMap `mapstructure:"run_volume_tags"`
+	// Tags to apply to the volumes that are *launched* to create the AMI.
+	// These tags are *not* applied to the resulting AMI unless they're
+	// duplicated in `tags`. This is a [template
+	// engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
+	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
