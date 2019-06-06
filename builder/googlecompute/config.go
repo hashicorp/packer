@@ -62,6 +62,7 @@ type Config struct {
 	Subnetwork                   string                         `mapstructure:"subnetwork"`
 	Tags                         []string                       `mapstructure:"tags"`
 	UseInternalIP                bool                           `mapstructure:"use_internal_ip"`
+	UserdataFile                 string                         `mapstructure:"userdata_file"`
 	Zone                         string                         `mapstructure:"zone"`
 
 	Account            AccountFile
