@@ -191,6 +191,8 @@ func (s *REPLSession) Handle(line string) (string, error) {
 		return "", ErrSessionExit
 	case strings.TrimSpace(line) == "help":
 		return s.handleHelp()
+	case strings.TrimSpace(line) == "variables":
+		return s.handleVariables()
 	default:
 		return s.handleEval(line)
 	}
@@ -203,6 +205,15 @@ func (s *REPLSession) handleEval(line string) (string, error) {
 		return "", fmt.Errorf("Error interpolating: %s", err)
 	}
 	return rendered, nil
+}
+
+func (s *REPLSession) handleVariables() (string, error) {
+	varsstring := "\n"
+	for k, v := range s.Core.Context().UserVariables {
+		varsstring += fmt.Sprintf("%s: %+v,\n", k, v)
+	}
+
+	return varsstring, nil
 }
 
 func (s *REPLSession) handleHelp() (string, error) {
