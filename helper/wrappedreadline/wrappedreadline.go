@@ -118,8 +118,3 @@ var (
 	wrappedStdout *os.File
 	wrappedStderr *os.File
 )
-
-func init() {
-	// Initialize the platform-specific code
-	initPlatform()
-}

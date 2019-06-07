@@ -44,7 +44,7 @@ func getWidthFd(stdoutFd int) int {
 	return int(ws.Col)
 }
 
-func initPlatform() {
+func init() {
 	// The standard streams are passed in via extra file descriptors.
 	wrappedStdin = os.NewFile(uintptr(3), "stdin")
 	wrappedStdout = os.NewFile(uintptr(4), "stdout")

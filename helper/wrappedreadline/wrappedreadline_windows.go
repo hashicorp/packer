@@ -13,7 +13,7 @@ func getWidth() int {
 	return 0
 }
 
-func initPlatform() {
+func init() {
 	wrappedStdin = openConsole("CONIN$", os.Stdin)
 	wrappedStdout = openConsole("CONOUT$", os.Stdout)
 	wrappedStderr = wrappedStdout
