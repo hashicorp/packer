@@ -524,6 +524,8 @@ func TestCoreValidate(t *testing.T) {
 	}
 }
 
+// Tests that we can properly interpolate user variables defined within the
+// packer template
 func TestCore_InterpolateUserVars(t *testing.T) {
 	cases := []struct {
 		File     string
@@ -531,7 +533,7 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 		Err      bool
 	}{
 		{
-			"variables.json",
+			"build-variables-interpolate.json",
 			map[string]string{
 				"foo":  "bar",
 				"bar":  "bar",
@@ -541,7 +543,7 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 			false,
 		},
 		{
-			"variables2.json",
+			"build-variables-interpolate2.json",
 			map[string]string{},
 			true,
 		},
@@ -576,6 +578,74 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 	}
 }
 
+// Tests that we can properly interpolate user variables defined within a
+// var-file provided alongside the Packer template
+func TestCore_InterpolateUserVars_VarFile(t *testing.T) {
+	cases := []struct {
+		File      string
+		Variables map[string]string
+		Expected  map[string]string
+		Err       bool
+	}{
+		{
+			// tests that we can interpolate from var files when var isn't set in
+			// originating template
+			"build-basic-interpolated.json",
+			map[string]string{
+				"name":   "gotta-{{user `my_var`}}",
+				"my_var": "interpolate-em-all",
+			},
+			map[string]string{
+				"name":   "gotta-interpolate-em-all",
+				"my_var": "interpolate-em-all"},
+			false,
+		},
+		{
+			// tests that we can interpolate from var files when var is set in
+			// originating template as required
+			"build-basic-interpolated-required.json",
+			map[string]string{
+				"name":   "gotta-{{user `my_var`}}",
+				"my_var": "interpolate-em-all",
+			},
+			map[string]string{
+				"name":   "gotta-interpolate-em-all",
+				"my_var": "interpolate-em-all"},
+			false,
+		},
+	}
+	for _, tc := range cases {
+		f, err := os.Open(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		ccf, err := NewCore(&CoreConfig{
+			Template:  tpl,
+			Version:   "1.0.0",
+			Variables: tc.Variables,
+		})
+
+		if (err != nil) != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+		if !tc.Err {
+			for k, v := range ccf.variables {
+				if tc.Expected[k] != v {
+					t.Fatalf("Expected value %s for key %s but got %s",
+						tc.Expected[k], k, v)
+				}
+			}
+		}
+	}
+}
+
 func TestSensitiveVars(t *testing.T) {
 	cases := []struct {
 		File          string
@@ -595,9 +665,10 @@ func TestSensitiveVars(t *testing.T) {
 		// interpolated
 		{
 			"sensitive-variables.json",
-			map[string]string{"foo": "{{build_name}}"},
-			[]string{"foo"},
-			"test",
+			map[string]string{"foo": "bar",
+				"bang": "{{ user `foo`}}"},
+			[]string{"bang"},
+			"bar",
 			false,
 		},
 	}
