@@ -12,6 +12,7 @@ contrib.go.opencensus.io/exporter/ocagent
 github.com/1and1/oneandone-cloudserver-sdk-go
 # github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
+github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
 github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network
 github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources
 github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage
