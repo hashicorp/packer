@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	newCompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
@@ -41,6 +42,7 @@ type AzureClient struct {
 	armStorage.AccountsClient
 	compute.DisksClient
 	compute.SnapshotsClient
+	newCompute.Gallery
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
