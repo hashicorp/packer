@@ -66,7 +66,7 @@ object Build : BuildType({
 
         password("env.VPN_PASSWORD", "credentialsJSON:8c355e81-9a26-4788-8fea-c854cd646c35")
         param   ("env.VSPHERE_USERNAME", """vsphere65.test\teamcity""")
-        password("env.VSPHERE_PASSWORD", "credentialsJSON:3e99d6c8-b66f-410a-a865-eaf1b12664ad")
+        password("env.VSPHERE_PASSWORD", "credentialsJSON:d5e7ac7f-357b-464a-b2fa-ddd4c433b22b")
     }
 
     steps {
