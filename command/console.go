@@ -39,7 +39,7 @@ func (c *ConsoleCommand) Run(args []string) int {
 
 	args = flags.Args()
 	if len(args) < 1 {
-		// If user has not definied a builder, create a tiny null placeholder
+		// If user has not defined a builder, create a tiny null placeholder
 		// builder so that we can properly initialize the core
 		tpl, err := template.Parse(strings.NewReader(TiniestBuilder))
 		if err != nil {
