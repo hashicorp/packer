@@ -174,7 +174,7 @@ func (c *ConsoleCommand) modeInteractive(session *REPLSession) int { // Setup th
 // from Handle to signal a graceful exit.
 var ErrSessionExit = errors.New("Session exit")
 
-// Session represents the state for a single REPL session.
+// Session represents the state for a single Read-Evaluate-Print-Loop (REPL) session.
 type REPLSession struct {
 	// Core is used for constructing interpolations based off packer templates
 	Core *packer.Core
