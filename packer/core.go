@@ -2,7 +2,6 @@ package packer
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	ttmp "text/template"
@@ -345,13 +344,11 @@ func (c *Core) init() error {
 
 	allVariables := make(map[string]string)
 	// load in template variables
-	log.Printf("\n\n\n\nMegan template.Variables is %#v", c.Template.Variables)
 	for k, v := range c.Template.Variables {
 		allVariables[k] = v.Default
 	}
 
 	// overwrite template variables with command-line-read variables
-	log.Printf("Megan c.variables is %#v", c.variables)
 	for k, v := range c.variables {
 		allVariables[k] = v
 	}
@@ -362,7 +359,6 @@ func (c *Core) init() error {
 		for k, v := range allVariables {
 			// Interpolate the default
 			renderedV, err := interpolate.Render(v, ctx)
-			log.Printf("Megan k is %s, renderedV is %s and err is %s", k, renderedV, err)
 			switch err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
@@ -393,7 +389,6 @@ func (c *Core) init() error {
 			"required.", failedInterpolation)
 	}
 
-	log.Printf("Megan rendering sensitive variables now...")
 	for _, v := range c.Template.SensitiveVariables {
 		// log.Printf("k is %#v, v is %#v", k, v)
 		secret := ctx.UserVariables[v.Key]
@@ -404,7 +399,6 @@ func (c *Core) init() error {
 	if _, err := interpolate.RenderInterface(&c.Template.Push, c.Context()); err != nil {
 		return fmt.Errorf("Error interpolating 'push': %s", err)
 	}
-	log.Printf("Megan ctx.UserVariables is %#v", ctx.UserVariables)
 
 	return nil
 }
