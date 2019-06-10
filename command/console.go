@@ -180,7 +180,7 @@ type REPLSession struct {
 	Core *packer.Core
 }
 
-// Handle handles a single line of input from the REPL.
+// Handle a single line of input from the REPL.
 //
 // The return value is the output and the error to show.
 func (s *REPLSession) Handle(line string) (string, error) {
