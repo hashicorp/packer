@@ -306,7 +306,6 @@ func (c *Core) init() error {
 	if c.variables == nil {
 		c.variables = make(map[string]string)
 	}
-
 	// Go through the variables and interpolate the environment and
 	// user variables
 
@@ -314,7 +313,6 @@ func (c *Core) init() error {
 	ctx.EnableEnv = true
 	ctx.UserVariables = make(map[string]string)
 	shouldRetry := true
-	tryCount := 0
 	changed := false
 	failedInterpolation := ""
 
@@ -337,32 +335,40 @@ func (c *Core) init() error {
 	// interpolating them.  Please don't actually nest your variables in 100
 	// layers of other variables. Please.
 
-	for shouldRetry == true {
+	// c.Template.Variables is populated by variables defined within the Template
+	// itself
+	// c.variables is populated by variables read in from the command line and
+	// var-files.
+	// We need to read the keys from both, then loop over all of them to figure
+	// out the appropriate interpolations.
+
+	allVariables := make(map[string]string)
+	// load in template variables
+	for k, v := range c.Template.Variables {
+		allVariables[k] = v.Default
+	}
+
+	// overwrite template variables with command-line-read variables
+	for k, v := range c.variables {
+		allVariables[k] = v
+	}
+
+	for i := 0; i < 100; i++ {
 		shouldRetry = false
-		for k, v := range c.Template.Variables {
-			// Ignore variables that are required
-			if v.Required {
-				continue
-			}
-
-			// Ignore variables that have a value already
-			if _, ok := c.variables[k]; ok {
-				continue
-			}
-
+		// First, loop over the variables in the template
+		for k, v := range allVariables {
 			// Interpolate the default
-			def, err := interpolate.Render(v.Default, ctx)
+			renderedV, err := interpolate.Render(v, ctx)
 			switch err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
 				// different in this loop than in the last one.
 				changed = true
-				c.variables[k] = def
+				c.variables[k] = renderedV
 				ctx.UserVariables = c.variables
 			case ttmp.ExecError:
 				shouldRetry = true
-				tryCount++
-				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v.Default)
+				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v)
 				continue
 			default:
 				return fmt.Errorf(
@@ -371,10 +377,9 @@ func (c *Core) init() error {
 					k, err)
 			}
 		}
-		if tryCount >= 100 {
+		if !shouldRetry {
 			break
 		}
-
 	}
 
 	if (changed == false) && (shouldRetry == true) {
@@ -385,13 +390,8 @@ func (c *Core) init() error {
 	}
 
 	for _, v := range c.Template.SensitiveVariables {
-		def, err := interpolate.Render(v.Default, ctx)
-		if err != nil {
-			return fmt.Errorf(
-				"error interpolating default value for '%#v': %s",
-				v, err)
-		}
-		c.secrets = append(c.secrets, def)
+		secret := ctx.UserVariables[v.Key]
+		c.secrets = append(c.secrets, secret)
 	}
 
 	// Interpolate the push configuration
