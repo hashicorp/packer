@@ -390,7 +390,6 @@ func (c *Core) init() error {
 	}
 
 	for _, v := range c.Template.SensitiveVariables {
-		// log.Printf("k is %#v, v is %#v", k, v)
 		secret := ctx.UserVariables[v.Key]
 		c.secrets = append(c.secrets, secret)
 	}
