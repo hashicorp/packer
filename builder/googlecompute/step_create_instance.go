@@ -16,9 +16,11 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
+func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string, state multistep.StateBag) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
+	ui := state.Get("ui").(packer.Ui)
+
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
 		instanceMetadata[k] = v
@@ -40,6 +42,11 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	if c.StartupScriptFile != "" {
 		var content []byte
 		content, err = ioutil.ReadFile(c.StartupScriptFile)
+		if err != nil {
+			err = fmt.Errorf("Error reading startup script file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+		}
 		instanceMetadata[StartupWrappedScriptKey] = string(content)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
 		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
@@ -49,6 +56,11 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	for key, value := range c.MetadataFiles {
 		var content []byte
 		content, err = ioutil.ReadFile(value)
+		if err != nil {
+			err = fmt.Errorf("Error getting %s metadata from %s: %s", key, value, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+		}
 		instanceMetadata[key] = string(content)
 	}
 
@@ -105,7 +117,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	var errCh <-chan error
 	var metadata map[string]string
-	metadata, err = c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
+	metadata, err = c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey), state)
 	errCh, err = d.RunInstance(&InstanceConfig{
 		AcceleratorType:              c.AcceleratorType,
 		AcceleratorCount:             c.AcceleratorCount,
