@@ -16,7 +16,7 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, *packer.MultiError) {
+func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
 	var errs *packer.MultiError
@@ -43,7 +43,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		var content []byte
 		content, err = ioutil.ReadFile(c.StartupScriptFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			return nil, err
 		}
 		instanceMetadata[StartupWrappedScriptKey] = string(content)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
@@ -70,7 +70,10 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
 
-	return instanceMetadata, errs
+	if errs != nil && len(errs.Errors) > 0 {
+		return instanceMetadata, errs
+	}
+	return instanceMetadata, nil
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
@@ -114,9 +117,10 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	var errCh <-chan error
 	var metadata map[string]string
 	metadata, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
-	if errs != nil && len(errs.Errors) > 0 {
+	if errs != nil {
 		state.Put("error", errs.Error())
 		ui.Error(errs.Error())
+		return multistep.ActionHalt
 	}
 
 	errCh, err = d.RunInstance(&InstanceConfig{
