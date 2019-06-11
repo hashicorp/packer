@@ -247,6 +247,32 @@ func (c *ClientWrapper) WaitForImageStatus(regionId string, imageId string, expe
 	})
 }
 
+func (c *ClientWrapper) WaitForSnapshotStatus(regionId string, snapshotId string, expectedStatus string, timeout time.Duration) (responses.AcsResponse, error) {
+	return c.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			request := ecs.CreateDescribeSnapshotsRequest()
+			request.RegionId = regionId
+			request.SnapshotIds = fmt.Sprintf("[\"%s\"]", snapshotId)
+			return c.DescribeSnapshots(request)
+		},
+		EvalFunc: func(response responses.AcsResponse, err error) WaitForExpectEvalResult {
+			if err != nil {
+				return WaitForExpectToRetry
+			}
+
+			snapshotsResponse := response.(*ecs.DescribeSnapshotsResponse)
+			snapshots := snapshotsResponse.Snapshots.Snapshot
+			for _, snapshot := range snapshots {
+				if snapshot.Status == expectedStatus {
+					return WaitForExpectSuccess
+				}
+			}
+			return WaitForExpectToRetry
+		},
+		RetryTimeout: timeout,
+	})
+}
+
 type EvalErrorType bool
 
 const (
