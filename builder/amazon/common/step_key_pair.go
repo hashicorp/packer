@@ -60,7 +60,7 @@ func (s *StepKeyPair) Run(ctx context.Context, state multistep.StateBag) multist
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
 	err := retry.Config{
 		Tries:      11,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30, Multiplier: 2}).Linear,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		var err error
 		keyResp, err = ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
