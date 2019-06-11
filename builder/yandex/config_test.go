@@ -158,8 +158,8 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 
 	_, _, errs := NewConfig(config)
 
-	if errs == nil || !strings.Contains(errs.Error(), "cannot access file 'file_not_exist' with content for value of metadata "+
-		"key 'key': stat file_not_exist: no such file or directory") {
+	if errs == nil || !strings.Contains(errs.Error(), "cannot access file 'file_not_exist' with content "+
+		"for value of metadata key 'key':") {
 		t.Fatalf("should error: metadata_from_file")
 	}
 }
