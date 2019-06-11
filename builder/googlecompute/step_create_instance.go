@@ -16,10 +16,10 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string, state multistep.StateBag) (map[string]string, error) {
+func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, *packer.MultiError) {
 	instanceMetadata := make(map[string]string)
 	var err error
-	ui := state.Get("ui").(packer.Ui)
+	var errs *packer.MultiError
 
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
@@ -43,9 +43,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string,
 		var content []byte
 		content, err = ioutil.ReadFile(c.StartupScriptFile)
 		if err != nil {
-			err = fmt.Errorf("Error reading startup script file: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 		instanceMetadata[StartupWrappedScriptKey] = string(content)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
@@ -57,9 +55,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string,
 		var content []byte
 		content, err = ioutil.ReadFile(value)
 		if err != nil {
-			err = fmt.Errorf("Error getting %s metadata from %s: %s", key, value, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 		instanceMetadata[key] = string(content)
 	}
@@ -74,7 +70,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string,
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
 
-	return instanceMetadata, err
+	return instanceMetadata, errs
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
@@ -117,7 +113,12 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	var errCh <-chan error
 	var metadata map[string]string
-	metadata, err = c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey), state)
+	metadata, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
+	if errs != nil && len(errs.Errors) > 0 {
+		state.Put("error", errs.Error())
+		ui.Error(errs.Error())
+	}
+
 	errCh, err = d.RunInstance(&InstanceConfig{
 		AcceleratorType:              c.AcceleratorType,
 		AcceleratorCount:             c.AcceleratorCount,

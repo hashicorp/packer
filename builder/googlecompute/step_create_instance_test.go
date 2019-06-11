@@ -303,7 +303,7 @@ func TestCreateInstanceMetadata(t *testing.T) {
 	key := "abcdefgh12345678"
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, key, state)
+	metadata, err := c.createInstanceMetadata(image, key)
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
@@ -318,7 +318,7 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	sshKeys := c.Metadata["sshKeys"]
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, "", state)
+	metadata, err := c.createInstanceMetadata(image, "")
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
@@ -335,7 +335,7 @@ func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
 	c.MetadataFiles["user-data"] = fileName
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, "", state)
+	metadata, err := c.createInstanceMetadata(image, "")
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
