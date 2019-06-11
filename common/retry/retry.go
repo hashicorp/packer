@@ -94,9 +94,6 @@ type Backoff struct {
 //  n = n * Multiplier.
 // the first value of n is InitialBackoff. n is maxed by MaxBackoff.
 func (lb *Backoff) Linear() time.Duration {
-	if lb.InitialBackoff > lb.MaxBackoff {
-		panic("InitialBackoff > MaxBackoff, did you forgot setting the seconds ?")
-	}
 	wait := lb.InitialBackoff
 	lb.InitialBackoff = time.Duration(lb.Multiplier * float64(lb.InitialBackoff))
 	if lb.MaxBackoff != 0 && lb.InitialBackoff > lb.MaxBackoff {
