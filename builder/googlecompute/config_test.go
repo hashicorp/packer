@@ -431,7 +431,8 @@ func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile st
 		"image_licenses": []string{
 			"test-license",
 		},
-		"zone": "us-east1-a",
+		"metadata_files": map[string]string{},
+		"zone":           "us-east1-a",
 	}
 
 	return config, tempAccountFile
@@ -478,6 +479,21 @@ func testAccountFile(t *testing.T) string {
 	defer tf.Close()
 
 	if _, err := tf.Write([]byte(testAccountContent)); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	return tf.Name()
+}
+
+const testMetadataFileContent = `testMetadata`
+
+func testMetadataFile(t *testing.T) string {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+	if _, err := tf.Write([]byte(testMetadataFileContent)); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
