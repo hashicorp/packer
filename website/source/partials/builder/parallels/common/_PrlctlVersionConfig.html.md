@@ -1,0 +1,2 @@
+<!-- Code generated from the comments of the PrlctlVersionConfig struct in builder/parallels/common/prlctl_version_config.go; DO NOT EDIT MANUALLY -->
+PrlctlVersionConfig contains the configuration for `prlctl` version.

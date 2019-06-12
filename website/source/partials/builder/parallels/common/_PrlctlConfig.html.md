@@ -1,0 +1,3 @@
+<!-- Code generated from the comments of the PrlctlConfig struct in builder/parallels/common/prlctl_config.go; DO NOT EDIT MANUALLY -->
+PrlctlConfig contains the configuration for running "prlctl" commands
+before the VM start.
