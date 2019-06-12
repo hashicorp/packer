@@ -48,7 +48,17 @@ leading to corruption of files or lost changes. As such, it is important to
 add a `shutdown_command`. This tells Packer how to safely shutdown and
 power off the VM.
 
-<%= partial "partials/builders/iso-config" %>
+## ISO Configuration Reference
+
+<%= partial "partials/common/ISOConfig" %>
+
+### Required:
+
+<%= partial "partials/common/ISOConfig-required" %>
+
+### Optional:
+
+<%= partial "partials/common/ISOConfig-not-required" %>
 
 ## Configuration Reference
 
