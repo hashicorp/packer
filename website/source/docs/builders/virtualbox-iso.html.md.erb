@@ -45,7 +45,17 @@ It is important to add a `shutdown_command`. By default Packer halts the virtual
 machine and the file system may not be sync'd. Thus, changes made in a
 provisioner might not be saved.
 
-<%= partial "partials/builders/iso-config" %>
+## ISO Configuration Reference
+
+<%= partial "partials/common/ISOConfig" %>
+
+### Required:
+
+<%= partial "partials/common/ISOConfig-required" %>
+
+### Optional:
+
+<%= partial "partials/common/ISOConfig-not-required" %>
 
 ## Configuration Reference
 
