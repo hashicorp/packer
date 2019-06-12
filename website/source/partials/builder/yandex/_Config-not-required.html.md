@@ -36,8 +36,11 @@
     
 -   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to standard-v1.
     
--   `metadata` (map[string]string) - Metadata applied to the launched
-    instance.
+-   `metadata` (map[string]string) - Metadata applied to the launched instance.
+    
+-   `metadata_from_file` (map[string]string) - Metadata applied to the launched instance. Value are file paths.
+    
+-   `preemptible` (bool) - Launch a preemptible instance. This defaults to `false`.
     
 -   `serial_log_file` (string) - File path to save serial port output of the launched instance.
     
