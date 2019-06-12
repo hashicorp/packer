@@ -4,13 +4,27 @@
     curl block device. This defaults to false.
     
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may be none, kvm, tcg, hax, hvf, whpx, or xen. The appropriate
+    This may be `none`, `kvm`, `tcg`, `hax`, `hvf`, `whpx`, or `xen`. The appropriate
     software must have already been installed on your build machine to use the
     accelerator you specified. When no accelerator is specified, Packer will try
-    to use kvm if it is available but will default to tcg otherwise.
+    to use `kvm` if it is available but will default to `tcg` otherwise.
+    
+    -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
+    upstream issue which can be tracked
+    [here](https://github.com/intel/haxm/issues/20).
+    
+    -&gt; The `hvf` and `whpx` accelerator are new and experimental as of
+    [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
+    You may encounter issues unrelated to Packer when using these.  You may need to
+    add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
+    guest operating system.
+    
+    -&gt; For `whpx`, note that [Stefan Weil's QEMU for Windows distribution](https://qemu.weilnetz.de/w64/)
+    does not include WHPX support and users may need to compile or source a
+    build of QEMU for Windows themselves with WHPX support.
     
 -   `cpus` (int) - The number of cpus to use when building the VM.
-     The default is 1 CPU.
+     The default is `1` CPU.
     
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
     values include any of ide, scsi, virtio or virtio-scsi*. Note
@@ -21,9 +35,9 @@
 -   `disk_size` (uint) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40960 (40 GB).
     
--   `disk_cache` (string) - The cache mode to use for disk. Allowed values
-    include any of writethrough, writeback, none, unsafe
-    or directsync. By default, this is set to writeback.
+-   `disk_cache` (string) - The cache mode to use for disk. Allowed values include any of
+    `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
+    default, this is set to `writeback`.
     
 -   `disk_discard` (string) - The discard mode to use for disk. Allowed values
     include any of unmap or ignore. By default, this is set to ignore.
@@ -47,11 +61,11 @@
     launching a GUI that shows the console of the machine being built. When this
     value is set to true, the machine will start without a console.
     
--   `disk_image` (bool) - Packer defaults to building from an ISO file, this
-    parameter controls whether the ISO URL supplied is actually a bootable
-    QEMU image. When this value is set to true, the machine will either clone
-    the source or use it as a backing file (if use_backing_file is true);
-    then, it will resize the image according to disk_size and boot it.
+-   `disk_image` (bool) - Packer defaults to building from an ISO file, this parameter controls
+    whether the ISO URL supplied is actually a bootable QEMU image. When
+    this value is set to `true`, the machine will either clone the source or
+    use it as a backing file (if `use_backing_file` is `true`); then, it
+    will resize the image according to `disk_size` and boot it.
     
 -   `use_backing_file` (bool) - Only applicable when disk_image is true
     and format is qcow2, set this option to true to create a new QCOW2
@@ -91,16 +105,6 @@
     some platforms. For example qemu-kvm, or qemu-system-i386 may be a
     better choice for some systems.
     
--   `shutdown_command` (string) - The command to use to gracefully shut down the
-    machine once all the provisioning is done. By default this is an empty
-    string, which tells Packer to just forcefully shut down the machine unless a
-    shutdown command takes place inside script so this may safely be omitted. It
-    is important to add a shutdown_command. By default Packer halts the virtual
-    machine and the file system may not be sync'd. Thus, changes made in a
-    provisioner might not be saved. If one or more scripts require a reboot it is
-    suggested to leave this blank since reboots may fail and specify the final
-    shutdown command in your last script.
-    
 -   `ssh_host_port_min` (int) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
@@ -132,9 +136,4 @@
     TODO(@mitchellh): remove
     
 -   `run_once` (bool) - TODO(mitchellh): deprecate
-    
--   `shutdown_timeout` (string) - The amount of time to wait after executing the
-    shutdown_command for the virtual machine to actually shut down. If it
-    doesn't shut down in this time, it is an error. By default, the timeout is
-    5m or five minutes.
     
