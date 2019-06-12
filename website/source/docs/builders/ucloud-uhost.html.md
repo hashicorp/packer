@@ -1,6 +1,6 @@
 ---
 description: |
-    The `ucloud-uhost` Packer builder plugin provide the capability to build
+    The `ucloud-uhost` Packer builder plugin provides the capability to build
     customized images based on an existing base images.
 layout: docs
 page_title: UCloud Image Builder
@@ -11,7 +11,7 @@ sidebar_current: 'docs-builders-ucloud-uhost'
 
 Type: `ucloud-uhost`
 
-The `ucloud-uhost` Packer builder plugin provide the capability to build
+The `ucloud-uhost` Packer builder plugin provides the capability to build
 customized images based on an existing base images.
 
 This builder builds an UCloud image by launching an UHost instance from a source image,
@@ -42,37 +42,37 @@ builder.
 
 -   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only support Chinese, English, numbers, '-_,.:[]'.
 
--   `source_image_id` (string) - This is the base image id which you want to create your customized images.
+-   `source_image_id` (string) - This is the ID of base image which you want to create your customized images with.
 
 ### Optional:
 
--   `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance through private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
+-   `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance through a private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
 
 -   `internet_bandwidth` - (string) Maximum bandwidth to the EIP (elastic public ip), measured in Mbps (Mega bit per second). 
-    The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwith. (Default: `1`).
+    The ranges for bandwidth are: 1-200 to pay by traffic, 1-800 to pay by bandwith. (Default: `1`).
     
 -   `internet_charge_mode` -(Optional) The EIP (elastic public ip) charge mode associated to UHost instance. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth. (Default: `traffic`).
 
 -   `vpc_id` - (string) The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 
--   `subnet_id` - (string) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
+-   `subnet_id` - (string) The ID of subnet under VPC. If  `vpc_id` is defined, the `subnet_id` is mandatory required. If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
 
--   `security_group` - (string) The ID of the fire wall associate to UHost instance. If not defined `security_group`, 
-    the instance will use the recommend non web fire wall, which default opened port include 22, 3389. 
+-   `security_group` - (string) The ID of the fire wall associated to UHost instance. If `security_group` is not defined, 
+    the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default. It is supported by ICMP fire wall protocols.
     You may refer to [security group](https://docs.ucloud.cn/network/firewall/firewall.html).
 
--   `image_description` (string) - The description of the image.
+-   `image_description` (string) - The description of the image usage.
 
 -   `instance_name` (string) -  The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'.
 
--   `boot_disk_type` - (string) The type of boot disk about UHost instance. 
+-   `boot_disk_type` - (string) The type of boot disk associated to UHost instance. 
     Possible values are: `cloud_normal` and `cloud_ssd` for cloud boot disk. (Default: `cloud_ssd`).
-    The  `local_ssd`, `cloud_normal` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
+    The  `local_ssd`, `cloud_normal` and `cloud_ssd` are not fully supported by all regions as boot disk type, please proceed to UCloud console for more details.
 
--   `image_copy_mappings` (array of copied image mappings) - The array of mappings about copy to the destination regions under the project.
-    -   `image_copy_project_id` (string) - The the UCloud project id, where copying image in.
+-   `image_copy_mappings` (array of copied image mappings) - The array of mappings regarding the copied images to the destination regions and projects.
+    -   `image_copy_project_id` (string) - The destination project id, where copying image in.
 
-    -   `image_copy_region` (string) -  The the UCloud region, where copying image in.
+    -   `image_copy_region` (string) -  The destination region, where copying image in.
 
     -   `image_copy_name` (string) - The copied image name.
 
