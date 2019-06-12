@@ -97,7 +97,6 @@ func NewCore(c *CoreConfig) (*Core, error) {
 
 		result.builds[v] = b
 	}
-
 	return result, nil
 }
 
