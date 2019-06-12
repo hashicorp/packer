@@ -429,6 +429,8 @@ github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/temoto/robotstxt v0.0.0-20180810133444-97ee4a9ee6ea
+github.com/temoto/robotstxt
 # github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
