@@ -15,6 +15,7 @@ type Struct struct {
 	SourcePath string
 	Name       string
 	Filename   string
+	Header     string
 	Fields     []Field
 }
 
@@ -23,6 +24,7 @@ var structDocsTemplate = template.Must(template.New("structDocsTemplate").
 		"indent": indent,
 	}).
 	Parse(`<!-- Code generated from the comments of the {{ .Name }} struct in {{ .SourcePath }}; DO NOT EDIT MANUALLY -->
+{{ .Header -}}
 {{range .Fields}}
 -   ` + "`" + `{{ .Name}}` + "`" + ` ({{ .Type }}) - {{ .Docs | indent 4 }}
 {{- end -}}`))
