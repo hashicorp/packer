@@ -60,6 +60,12 @@ func main() {
 		}
 
 		fields := structDecl.Fields.List
+		header := Struct{
+			SourcePath: paths[1],
+			Name:       typeSpec.Name.Name,
+			Filename:   "_" + typeSpec.Name.Name + ".html.md",
+			Header:     typeDecl.Doc.Text(),
+		}
 		required := Struct{
 			SourcePath: paths[1],
 			Name:       typeSpec.Name.Name,
@@ -115,8 +121,8 @@ func main() {
 		dir := filepath.Join(packerDir, "website", "source", "partials", builderName)
 		os.MkdirAll(dir, 0755)
 
-		for _, str := range []Struct{required, notRequired} {
-			if len(str.Fields) == 0 {
+		for _, str := range []Struct{header, required, notRequired} {
+			if len(str.Fields) == 0 && len(str.Header) == 0 {
 				continue
 			}
 			outputPath := filepath.Join(dir, str.Filename)
