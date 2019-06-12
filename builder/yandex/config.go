@@ -27,6 +27,7 @@ var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Communicator        communicator.Config `mapstructure:",squash"`
+
 	// Non standard api endpoint URL.
 	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// The folder ID that will be used to launch instances and store images.
@@ -69,9 +70,12 @@ type Config struct {
 	Labels map[string]string `mapstructure:"labels" required:"false"`
 	// Identifier of the hardware platform configuration for the instance. This defaults to standard-v1.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
-	// Metadata applied to the launched
-	// instance.
+	// Metadata applied to the launched instance.
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
+	// Metadata applied to the launched instance. Value are file paths.
+	MetadataFromFile map[string]string `mapstructure:"metadata_from_file"`
+	// Launch a preemptible instance. This defaults to `false`.
+	Preemptible bool `mapstructure:"preemptible"`
 	// File path to save serial port output of the launched instance.
 	SerialLogFile string `mapstructure:"serial_log_file" required:"false"`
 	// The source image family to create the new image
@@ -237,6 +241,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.FolderID == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a folder_id must be specified"))
+	}
+
+	for key, file := range c.MetadataFromFile {
+		if _, err := os.Stat(file); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("cannot access file '%s' with content for value of metadata key '%s': %s", file, key, err))
+		}
 	}
 
 	if c.StateTimeout == 0 {

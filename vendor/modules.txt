@@ -148,6 +148,8 @@ github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/trace/v1
 # github.com/cheggaaa/pb v1.0.27
 github.com/cheggaaa/pb
+# github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
+github.com/chzyer/readline
 # github.com/creack/goselect v0.1.0
 github.com/creack/goselect
 # github.com/davecgh/go-spew v1.1.1
@@ -426,8 +428,7 @@ github.com/scaleway/scaleway-cli/pkg/sshcommand
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
-# github.com/temoto/robotstxt v0.0.0-20180810133444-97ee4a9ee6ea
-github.com/temoto/robotstxt
+github.com/stretchr/testify/require
 # github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile

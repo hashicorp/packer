@@ -57,7 +57,7 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test-basic_{{timestamp}}"
@@ -81,7 +81,7 @@ const testBuilderAccWithDiskSettings = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test-withDiskSettings_{{timestamp}}",
@@ -189,6 +189,69 @@ func checkImageDisksSettings() builderT.TestCheckFunc {
 	}
 }
 
+func TestBuilderAcc_withIgnoreDataDisks(t *testing.T) {
+	t.Parallel()
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Builder:  &Builder{},
+		Template: testBuilderAccIgnoreDataDisks,
+		Check:    checkIgnoreDataDisks(),
+	})
+}
+
+const testBuilderAccIgnoreDataDisks = `
+{	"builders": [{
+		"type": "test",
+		"region": "cn-beijing",
+		"instance_type": "ecs.gn5-c8g1.2xlarge",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
+		"io_optimized":"true",
+		"ssh_username":"root",
+		"image_name": "packer-test-ignoreDataDisks_{{timestamp}}",
+		"image_ignore_data_disks": true
+	}]
+}`
+
+func checkIgnoreDataDisks() builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			return fmt.Errorf("more than 1 artifact")
+		}
+
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+		imageId := artifact.AlicloudImages[defaultTestRegion]
+
+		// describe the image, get block devices with a snapshot
+		client, _ := testAliyunClient()
+
+		describeImagesRequest := ecs.CreateDescribeImagesRequest()
+		describeImagesRequest.RegionId = defaultTestRegion
+		describeImagesRequest.ImageId = imageId
+		imagesResponse, err := client.DescribeImages(describeImagesRequest)
+		if err != nil {
+			return fmt.Errorf("describe images failed due to %s", err)
+		}
+
+		if len(imagesResponse.Images.Image) == 0 {
+			return fmt.Errorf("image %s generated can not be found", imageId)
+		}
+
+		image := imagesResponse.Images.Image[0]
+		if len(image.DiskDeviceMappings.DiskDeviceMapping) != 1 {
+			return fmt.Errorf("image %s should only contain one disks", imageId)
+		}
+
+		return nil
+	}
+}
+
 func TestBuilderAcc_windows(t *testing.T) {
 	t.Parallel()
 	builderT.Test(t, builderT.TestCase{
@@ -234,7 +297,7 @@ const testBuilderAccRegionCopy = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test-regionCopy_{{timestamp}}",
@@ -338,7 +401,7 @@ const testBuilderAccForceDelete = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_force_delete": "%s",
@@ -366,7 +429,7 @@ const testBuilderAccSharing = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test-ECSImageSharing_{{timestamp}}",
@@ -461,7 +524,7 @@ const testBuilderAccForceDeleteSnapshot = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_force_delete_snapshots": "%s",
@@ -513,7 +576,7 @@ const testBuilderAccImageTags = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"ssh_username": "root",
 		"io_optimized":"true",
 		"image_name": "packer-test-imageTags_{{timestamp}}",
@@ -627,7 +690,7 @@ const testBuilderAccDataDiskEncrypted = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test-dataDiskEncrypted_{{timestamp}}",
@@ -744,7 +807,7 @@ const testBuilderAccSystemDiskEncrypted = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_18_04_64_20G_alibase_20190223.vhd",
+		"source_image":"ubuntu_18_04_64_20G_alibase_20190509.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test_{{timestamp}}",
