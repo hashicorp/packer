@@ -336,6 +336,12 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
 		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
 		args[i] = strings.Replace(args[i], "\n", "\\n", -1)
+		// Use LogSecretFilter to scrub out sensitive variables
+		for s := range LogSecretFilter.s {
+			if s != "" {
+				args[i] = strings.Replace(args[i], s, "<sensitive>", -1)
+			}
+		}
 	}
 	argsString := strings.Join(args, ",")
 
