@@ -34,9 +34,9 @@ type Config struct {
 	// The project ID that will be used to launch instances and store images.
 	ProjectId string `mapstructure:"project_id" required:"true"`
 	// Full or partial URL of the guest accelerator type. GPU accelerators can
-	// only be used with "on_host_maintenance": "TERMINATE" option set.
+	// only be used with `"on_host_maintenance": "TERMINATE"` option set.
 	// Example:
-	// "projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"
+	// `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
 	AcceleratorType string `mapstructure:"accelerator_type" required:"false"`
 	// Number of guest accelerator cards to add to the launched instance.
 	AcceleratorCount int64 `mapstructure:"accelerator_count" required:"false"`
@@ -60,6 +60,16 @@ type Config struct {
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	// Image encryption key to apply to the created image. Possible values:
+	// * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
+	// * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
+	//
+	// example:
+	//
+	//  ``` json
+	//  {
+	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+	//  }
+	//  ```
 	ImageEncryptionKey *compute.CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
 	// The name of the image family to which the resulting image belongs. You
 	// can create disks by specifying an image family instead of a specific
@@ -83,7 +93,8 @@ type Config struct {
 	MetadataFiles map[string]string `mapstructure:"metadata_files"`
 	// A Minimum CPU Platform for VM Instance. Availability and default CPU
 	// platforms vary across zones, based on the hardware available in each GCP
-	// zone. Details
+	// zone.
+	// [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
 	MinCpuPlatform string `mapstructure:"min_cpu_platform" required:"false"`
 	// The Google Compute network id or URL to use for the launched instance.
 	// Defaults to "default". If the value is not a URL, it will be
@@ -97,10 +108,12 @@ type Config struct {
 	// If true, the instance will not have an external IP. use_internal_ip must
 	// be true if this property is true.
 	OmitExternalIP bool `mapstructure:"omit_external_ip" required:"false"`
-	// Sets Host Maintenance Option. Valid choices are MIGRATE and TERMINATE.
-	// Please see GCE Instance Scheduling Options, as not all machine_types
-	// support MIGRATE (i.e. machines with GPUs). If preemptible is true this
-	// can only be TERMINATE. If preemptible is false, it defaults to MIGRATE
+	// Sets Host Maintenance Option. Valid choices are `MIGRATE` and
+	// `TERMINATE`. Please see [GCE Instance Scheduling
+	// Options](https://cloud.google.com/compute/docs/instances/setting-instance-scheduling-options),
+	// as not all machine\_types support `MIGRATE` (i.e. machines with GPUs).
+	// If preemptible is true this can only be `TERMINATE`. If preemptible is
+	// false, it defaults to `MIGRATE`
 	OnHostMaintenance string `mapstructure:"on_host_maintenance" required:"false"`
 	// If true, launch a preemptible instance.
 	Preemptible bool `mapstructure:"preemptible" required:"false"`
@@ -109,7 +122,16 @@ type Config struct {
 	// The region in which to launch the instance. Defaults to the region
 	// hosting the specified zone.
 	Region string `mapstructure:"region" required:"false"`
-	// The service account scopes for launched instance. Defaults to:
+	// The service account scopes for launched
+	// instance. Defaults to:
+	//
+	// ``` json
+	// [
+	//   "https://www.googleapis.com/auth/userinfo.email",
+	//   "https://www.googleapis.com/auth/compute",
+	//   "https://www.googleapis.com/auth/devstorage.full_control"
+	// ]
+	// ```
 	Scopes []string `mapstructure:"scopes" required:"false"`
 	// The service account to be used for launched instance. Defaults to the
 	// project's default service account unless disable_default_service_account
