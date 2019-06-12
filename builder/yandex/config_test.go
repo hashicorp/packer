@@ -5,15 +5,16 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const TestServiceAccountKeyFile = "./test_data/fake-sa-key.json"
 
 func TestConfigPrepare(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+	require.NoError(t, err, "create temporary file failed")
+
 	defer os.Remove(tf.Name())
 	tf.Close()
 
@@ -144,6 +145,25 @@ func TestConfigPrepare(t *testing.T) {
 	}
 }
 
+func TestConfigPrepareStartupScriptFile(t *testing.T) {
+	config := testConfig(t)
+
+	config["metadata"] = map[string]string{
+		"key": "value",
+	}
+
+	config["metadata_from_file"] = map[string]string{
+		"key": "file_not_exist",
+	}
+
+	_, _, errs := NewConfig(config)
+
+	if errs == nil || !strings.Contains(errs.Error(), "cannot access file 'file_not_exist' with content "+
+		"for value of metadata key 'key':") {
+		t.Fatalf("should error: metadata_from_file")
+	}
+}
+
 func TestConfigDefaults(t *testing.T) {
 	cases := []struct {
 		Read  func(c *Config) interface{}
@@ -210,6 +230,17 @@ func testConfig(t *testing.T) (config map[string]interface{}) {
 	}
 
 	return config
+}
+
+func testConfigStruct(t *testing.T) *Config {
+	raw := testConfig(t)
+
+	c, warns, errs := NewConfig(raw)
+
+	require.True(t, len(warns) == 0, "bad: %#v", warns)
+	require.NoError(t, errs, "should not have error: %s", errs)
+
+	return c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error, extra string) {

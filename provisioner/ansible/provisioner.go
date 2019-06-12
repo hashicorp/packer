@@ -241,6 +241,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 			return nil, nil
 		},
+		IsUserAuthority: func(k ssh.PublicKey) bool { return true },
 	}
 
 	config := &ssh.ServerConfig{

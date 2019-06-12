@@ -1,5 +1,29 @@
 ## 1.4.2 (upcoming)
 
+### IMPROVEMENTS:
+* builder/amazon: Enable encrypted AMI sharing across accounts [GH-7707]
+* builder/amazon: New SpotInstanceTypes feature for spot instance users.
+    [GH-7682]
+* builder/azure: Update Azure SDK for Go to v30.0.0 [GH-7706]
+* builder/cloudstack: Add tags to instance upon creation [GH0-7526]
+* builder/docker: Better windows defaults [GH-7678]
+* builder/openstack: Add image filtering on properties. [GH-7597]
+* provisioner/powershell: Fix null file descriptor error that occurred when
+    remote_path provided is a directory and not a file. [GH-7705]
+
+
+### BUG FIXES:
+* builder/amazon: Fix bug in region copy which produced badly-named AMIs in the
+    build region. [GH-7691]
+* builder/amazon: Fix failure that happened when spot_tags was set but ami_tags
+    wasn't [GH-7699]
+* builder/cloudstack: Update go-cloudstack sdk, fixing compatability with
+    CloudStack v 4.12 [GH-7694]
+* provisioner/chef: Accept chef license by default to prevent hangs in latest
+    Chef [GH-7653]
+* provisioner/powershell: Fix crash caused by error in retry logic check in
+    powershell provisioner [GH-7657]
+
 ## 1.4.1 (May 15, 2019)
 
 ### IMPROVEMENTS:

@@ -18,6 +18,8 @@ import (
 	getter "github.com/hashicorp/go-getter"
 )
 
+var ErrInterrupted = errors.New("interrupted")
+
 type UiColor uint
 
 const (
@@ -190,7 +192,7 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 	defer rw.l.Unlock()
 
 	if rw.interrupted {
-		return "", errors.New("interrupted")
+		return "", ErrInterrupted
 	}
 
 	if rw.TTY == nil {
@@ -228,13 +230,20 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		// Mark that we were interrupted so future Ask calls fail.
 		rw.interrupted = true
 
-		return "", errors.New("interrupted")
+		return "", ErrInterrupted
 	}
 }
 
 func (rw *BasicUi) Say(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
+
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
 
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
