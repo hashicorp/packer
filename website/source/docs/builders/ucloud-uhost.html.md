@@ -36,7 +36,7 @@ builder.
 
 -   `region` - (string) This is the UCloud region. It must be provided, but it can also be sourced from the `UCLOUD_REGION` environment variables.
   
--   `availability_zone` - (string) This is the UCloud availability zone where UHost instance is located. such as: `cn-bj2-02`. You may refer to [list of c zone](https://docs.ucloud.cn/api/summary/regionlist)
+-   `availability_zone` - (string) This is the UCloud availability zone where UHost instance is located. such as: `cn-bj2-02`. You may refer to [list of availability_zone](https://docs.ucloud.cn/api/summary/regionlist)
 
 -   `instance_type` - (string) The type of UHost instance. You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/instance)
 
@@ -46,7 +46,9 @@ builder.
 
 ### Optional:
 
--   `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance through a private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
+-   `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance via a private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
+
+\~&gt; **Note:**  By default (`use_ssh_private_ip` is `false`), the launched uhost instance will be connecting with extranet by bounding with an EIP  (elastic public ip) automatically, which bandwidth is 30 Mb by default and paid by traffic.
 
 -   `internet_bandwidth` - (string) Maximum bandwidth to the EIP (elastic public ip), measured in Mbps (Mega bit per second). 
     The ranges for bandwidth are: 1-200 to pay by traffic, 1-800 to pay by bandwith. (Default: `1`).
@@ -61,22 +63,24 @@ builder.
     the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default. It is supported by ICMP fire wall protocols.
     You may refer to [security group](https://docs.ucloud.cn/network/firewall/firewall.html).
 
--   `image_description` (string) - The description of the image usage.
+-   `image_description` (string) - The description of the image.
 
 -   `instance_name` (string) -  The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'.
 
 -   `boot_disk_type` - (string) The type of boot disk associated to UHost instance. 
-    Possible values are: `cloud_normal` and `cloud_ssd` for cloud boot disk. (Default: `cloud_ssd`).
-    The  `local_ssd`, `cloud_normal` and `cloud_ssd` are not fully supported by all regions as boot disk type, please proceed to UCloud console for more details.
+    Possible values are: `cloud_ssd` for cloud boot disk, `local_normal` and `local_ssd` for local boot disk. (Default: `cloud_ssd`).
+    The  `cloud_ssd` and `local_ssd` are not fully supported by all regions as boot disk type, please proceed to UCloud console for more details.
 
--   `image_copy_mappings` (array of copied image mappings) - The array of mappings regarding the copied images to the destination regions and projects.
-    -   `image_copy_project_id` (string) - The destination project id, where copying image in.
+\~&gt; **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
 
-    -   `image_copy_region` (string) -  The destination region, where copying image in.
+-   `image_copy_to_mappings` (array of copied image mappings) - The array of mappings regarding the copied images to the destination regions and projects.
+    -   `project_id` (string) - The destination project id, where copying image in.
 
-    -   `image_copy_name` (string) - The copied image name.
+    -   `region` (string) -  The destination region, where copying image in.
 
-    -   `image_copy_description` (number) - The copied image description.
+    -   `name` (string) - The copied image name. If not defined, builder will use `image_name` as default name.  
+
+    -   `description` (number) - The copied image description.
 
 ## Basic Example
 
