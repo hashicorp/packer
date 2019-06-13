@@ -322,6 +322,51 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 	}
 }
 
+func TestCloneBuilderAcc_network(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: networkConfig(),
+		Check:    checkNetwork(t, "VM Network 2"),
+	})
+}
+
+func networkConfig() string {
+	config := defaultConfig()
+	config["template"] = "alpine-host4"
+	config["host"] = "esxi-4.vsphere65.test"
+	config["datastore"] = "datastore4"
+	config["network"] = "VM Network 2"
+	return commonT.RenderConfig(config)
+}
+
+func checkNetwork(t *testing.T, name string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("network")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		n := len(vmInfo.Network)
+		if n != 1 {
+			t.Fatalf("VM should have 1 network, got %v", n)
+		}
+
+		ds := d.NewNetwork(&vmInfo.Network[0])
+		info, err := ds.Info("name")
+		if err != nil {
+			t.Fatalf("Cannot read network properties: %v", err)
+		}
+		if info.Name != name {
+			t.Errorf("Wrong network. expected: %v, got: %v", name, info.Name)
+		}
+
+		return nil
+	}
+}
+
 func TestCloneBuilderAcc_hardware(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
