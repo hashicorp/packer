@@ -78,7 +78,7 @@ const testBuilderAccUbuntu = `
 		"instance_type": "n-basic-2",
 		"source_image_id":"uimage-irofn4",
 		"ssh_username":"ubuntu",
-		"image_name": "packer-test-basic_{{timestamp}}"
+		"image_name": "packer-test-ubuntu_{{timestamp}}"
 	}]
 }`
 
@@ -90,16 +90,17 @@ func TestBuilderAcc_regionCopy(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		Builder:  &Builder{},
-		Template: testBuilderAccRegionCopy,
+		Template: testBuilderAccRegionCopy(projectId),
 		Check: checkRegionCopy(
 			projectId,
 			[]ImageDestination{
-				{"org-fthbzm", "cn-sh2", "packer-test-regionCopy-sh", "test"},
+				{projectId, "cn-sh2", "packer-test-regionCopy-sh", "test"},
 			}),
 	})
 }
 
-const testBuilderAccRegionCopy = `
+func testBuilderAccRegionCopy(projectId string) string {
+	return fmt.Sprintf(`
 {
 	"builders": [{
 		"type": "test",
@@ -108,15 +109,16 @@ const testBuilderAccRegionCopy = `
 		"instance_type": "n-basic-2",
 		"source_image_id":"uimage-f1chxn",
 		"ssh_username":"root",
-		"image_name": "packer-test-regionCopy_{{timestamp}}",
-		"image_copy_mappings": [{
-			"image_copy_project_id":  "org-fthbzm",
-			"image_copy_region":		"cn-sh2",
-			"image_copy_name":		"packer-test-regionCopy-sh",
-			"image_copy_description": "test"
+		"image_name": "packer-test-regionCopy-bj",
+		"image_copy_to_mappings": [{
+			"project_id":  	%q,
+			"region":		"cn-sh2",
+			"name":			"packer-test-regionCopy-sh",
+			"description": 	"test"
 		}]
 	}]
-}`
+}`, projectId)
+}
 
 func checkRegionCopy(projectId string, imageDst []ImageDestination) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
