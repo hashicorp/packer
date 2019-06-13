@@ -283,10 +283,23 @@ Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ 
 	return final, nil
 }
 
+func CheckVMName(vmName string) error {
+	// Check that no vm with the same name is registered, to prevent
+	// namespace collisions
+	var gs powershell.PowerShellCmd
+	getVMCmd := fmt.Sprintf(`Hyper-V\Get-VM -Name "%s"`, vmName)
+	if err := gs.Run(getVMCmd); err == nil {
+		return fmt.Errorf("A virtual machine with the name %s is already"+
+			" defined in Hyper-V. To avoid a name collision, please set your "+
+			"vm_name to a unique value", vmName)
+	}
+
+	return nil
+}
+
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
-
 	opts := scriptOptions{
 		Version:            version,
 		VMName:             vmName,
