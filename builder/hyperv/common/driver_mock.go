@@ -110,6 +110,9 @@ type DriverMock struct {
 	DeleteVirtualSwitch_SwitchName string
 	DeleteVirtualSwitch_Err        error
 
+	CheckVMName_Called bool
+	CheckVMName_Err    error
+
 	CreateVirtualSwitch_Called     bool
 	CreateVirtualSwitch_SwitchName string
 	CreateVirtualSwitch_SwitchType string
@@ -419,6 +422,11 @@ func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, v
 	d.AddVirtualMachineHardDrive_VhdSizeBytes = vhdDiskBlockSize
 	d.AddVirtualMachineHardDrive_ControllerType = controllerType
 	return d.AddVirtualMachineHardDrive_Err
+}
+
+func (d *DriverMock) CheckVMName(vmName string) error {
+	d.CheckVMName_Called = true
+	return d.CheckVMName_Err
 }
 
 func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string,
