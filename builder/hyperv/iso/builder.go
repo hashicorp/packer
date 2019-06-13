@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/common/bootcommand"
 	powershell "github.com/hashicorp/packer/common/powershell"
 	"github.com/hashicorp/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -52,14 +53,14 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig         `mapstructure:",squash"`
-	common.HTTPConfig           `mapstructure:",squash"`
-	common.ISOConfig            `mapstructure:",squash"`
-	common.FloppyConfig         `mapstructure:",squash"`
-	bootcommand.BootConfig      `mapstructure:",squash"`
-	hypervcommon.OutputConfig   `mapstructure:",squash"`
-	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.ShutdownConfig `mapstructure:",squash"`
+	common.PackerConfig            `mapstructure:",squash"`
+	common.HTTPConfig              `mapstructure:",squash"`
+	common.ISOConfig               `mapstructure:",squash"`
+	common.FloppyConfig            `mapstructure:",squash"`
+	bootcommand.BootConfig         `mapstructure:",squash"`
+	hypervcommon.OutputConfig      `mapstructure:",squash"`
+	hypervcommon.SSHConfig         `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
 	// The size, in megabytes, of the hard disk to create
 	// for the VM. By default, this is 40 GB.
 	DiskSize uint `mapstructure:"disk_size" required:"false"`

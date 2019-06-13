@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -91,12 +92,13 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig   `mapstructure:",squash"`
-	common.HTTPConfig     `mapstructure:",squash"`
-	common.ISOConfig      `mapstructure:",squash"`
-	bootcommand.VNCConfig `mapstructure:",squash"`
-	Comm                  communicator.Config `mapstructure:",squash"`
-	common.FloppyConfig   `mapstructure:",squash"`
+	common.PackerConfig            `mapstructure:",squash"`
+	common.HTTPConfig              `mapstructure:",squash"`
+	common.ISOConfig               `mapstructure:",squash"`
+	bootcommand.VNCConfig          `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
+	Comm                           communicator.Config `mapstructure:",squash"`
+	common.FloppyConfig            `mapstructure:",squash"`
 	// Use iso from provided url. Qemu must support
 	// curl block device. This defaults to `false`.
 	ISOSkipCache bool `mapstructure:"iso_skip_cache" required:"false"`
@@ -268,16 +270,6 @@ type Config struct {
 	// some platforms. For example qemu-kvm, or qemu-system-i386 may be a
 	// better choice for some systems.
 	QemuBinary string `mapstructure:"qemu_binary" required:"false"`
-	// The command to use to gracefully shut down the
-	// machine once all the provisioning is done. By default this is an empty
-	// string, which tells Packer to just forcefully shut down the machine unless a
-	// shutdown command takes place inside script so this may safely be omitted. It
-	// is important to add a shutdown_command. By default Packer halts the virtual
-	// machine and the file system may not be sync'd. Thus, changes made in a
-	// provisioner might not be saved. If one or more scripts require a reboot it is
-	// suggested to leave this blank since reboots may fail and specify the final
-	// shutdown command in your last script.
-	ShutdownCommand string `mapstructure:"shutdown_command" required:"false"`
 	// The minimum and
 	// maximum port to use for the SSH port on the host machine which is forwarded
 	// to the SSH port on the guest machine. Because Packer often runs in parallel,
@@ -312,14 +304,8 @@ type Config struct {
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
-	// The amount of time to wait after executing the
-	// shutdown_command for the virtual machine to actually shut down. If it
-	// doesn't shut down in this time, it is an error. By default, the timeout is
-	// 5m or five minutes.
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout" required:"false"`
 
-	shutdownTimeout time.Duration ``
-	ctx             interpolate.Context
+	ctx interpolate.Context
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -339,6 +325,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
+
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40960
@@ -506,16 +494,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
-	}
-
-	if b.config.RawShutdownTimeout == "" {
-		b.config.RawShutdownTimeout = "5m"
-	}
-
-	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
 
 	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {

@@ -11,26 +11,27 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
-	common.PackerConfig      `mapstructure:",squash"`
-	common.HTTPConfig        `mapstructure:",squash"`
-	common.ISOConfig         `mapstructure:",squash"`
-	common.FloppyConfig      `mapstructure:",squash"`
-	bootcommand.VNCConfig    `mapstructure:",squash"`
-	vmwcommon.DriverConfig   `mapstructure:",squash"`
-	vmwcommon.HWConfig       `mapstructure:",squash"`
-	vmwcommon.OutputConfig   `mapstructure:",squash"`
-	vmwcommon.RunConfig      `mapstructure:",squash"`
-	vmwcommon.ShutdownConfig `mapstructure:",squash"`
-	vmwcommon.SSHConfig      `mapstructure:",squash"`
-	vmwcommon.ToolsConfig    `mapstructure:",squash"`
-	vmwcommon.VMXConfig      `mapstructure:",squash"`
-	vmwcommon.ExportConfig   `mapstructure:",squash"`
+	common.PackerConfig            `mapstructure:",squash"`
+	common.HTTPConfig              `mapstructure:",squash"`
+	common.ISOConfig               `mapstructure:",squash"`
+	common.FloppyConfig            `mapstructure:",squash"`
+	bootcommand.VNCConfig          `mapstructure:",squash"`
+	vmwcommon.DriverConfig         `mapstructure:",squash"`
+	vmwcommon.HWConfig             `mapstructure:",squash"`
+	vmwcommon.OutputConfig         `mapstructure:",squash"`
+	vmwcommon.RunConfig            `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig            `mapstructure:",squash"`
+	vmwcommon.ToolsConfig          `mapstructure:",squash"`
+	vmwcommon.VMXConfig            `mapstructure:",squash"`
+	vmwcommon.ExportConfig         `mapstructure:",squash"`
 	// The size(s) of any additional
 	// hard disks for the VM in megabytes. If this is not specified then the VM
 	// will only contain a primary hard disk. The builder uses expandable, not

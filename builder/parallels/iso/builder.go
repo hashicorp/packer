@@ -10,6 +10,7 @@ import (
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -35,7 +36,7 @@ type Config struct {
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
-	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig      `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 	// The size, in megabytes, of the hard disk to create
