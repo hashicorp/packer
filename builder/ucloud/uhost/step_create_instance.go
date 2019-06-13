@@ -53,7 +53,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		if err != nil {
 			return err
 		}
-		if inst == nil || inst.State != "Running" {
+		if inst == nil || inst.State != instanceStateRunning {
 			return newExpectedStateError("instance", instanceId)
 		}
 
@@ -73,7 +73,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	s.instanceId = instanceId
 	state.Put("instance", instance)
 
-	if instance.BootDiskState == "Initializing" {
+	if instance.BootDiskState == bootDiskStateInitializing {
 		ui.Say(fmt.Sprintf("Waiting for boot disk of instance initialized when boot_disk_type is %q", s.BootDiskType))
 
 		err = retry.Config{
@@ -87,7 +87,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			if err != nil {
 				return err
 			}
-			if inst.BootDiskState != "Normal" {
+			if inst.BootDiskState != bootDiskStateNormal {
 				return newExpectedStateError("boot_disk of instance", instanceId)
 			}
 
@@ -136,7 +136,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	if instance.State != "Stopped" {
+	if instance.State != instanceStateStopped {
 		err = retry.Config{
 			Tries: 5,
 			ShouldRetry: func(err error) bool {
@@ -168,7 +168,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 				return err
 			}
 
-			if instance.State != "Stopped" {
+			if instance.State != instanceStateStopped {
 				return newExpectedStateError("instance", s.instanceId)
 			}
 

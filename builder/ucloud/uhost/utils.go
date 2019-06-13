@@ -8,28 +8,28 @@ import (
 	"strings"
 )
 
-func checkStringIn(val string, availables []string) error {
-	for _, choice := range availables {
+func checkStringIn(val string, available []string) error {
+	for _, choice := range available {
 		if val == choice {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("should be one of %q, got %q", strings.Join(availables, ","), val)
+	return fmt.Errorf("should be one of %q, got %q", strings.Join(available, ","), val)
 }
 
-func checkIntIn(val int, availables []int) error {
-	for _, choice := range availables {
+func checkIntIn(val int, available []int) error {
+	for _, choice := range available {
 		if val == choice {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("should be one of %v, got %d", availables, val)
+	return fmt.Errorf("should be one of %v, got %d", available, val)
 }
 
-func isStringIn(val string, availables []string) bool {
-	for _, choice := range availables {
+func isStringIn(val string, available []string) bool {
+	for _, choice := range available {
 		if val == choice {
 			return true
 		}

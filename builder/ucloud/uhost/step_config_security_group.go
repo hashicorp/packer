@@ -52,7 +52,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 		}
 
 		for _, item := range resp.DataSet {
-			if item.Type == "recommend non web" {
+			if item.Type == securityGroupNonWeb {
 				securityGroupId = item.FWId
 				break
 			}

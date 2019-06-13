@@ -46,7 +46,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		if err != nil {
 			return err
 		}
-		if inst == nil || inst.State != "Available" {
+		if inst == nil || inst.State != imageStateAvailable {
 			return newExpectedStateError("image", resp.ImageId)
 		}
 
