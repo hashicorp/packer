@@ -87,6 +87,23 @@ import (
 //     " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 //  ]
 // ```
+//
+// The example shown below is a working boot command used to start an Ubuntu
+// 12.04 installer:
+//
+// ``` json
+// [
+//   "<esc><esc><enter><wait>",
+//   "/install/vmlinuz noapic ",
+//   "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+//   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+//   "hostname={{ .Name }} ",
+//   "fb=false debconf/frontend=noninteractive ",
+//   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+//   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+//   "initrd=/install/initrd.gz -- <enter>"
+// ]
+// ```
 // For more examples of various boot commands, see the sample projects from our
 // [community templates page](/community-tools.html#templates).
 type BootConfig struct {
