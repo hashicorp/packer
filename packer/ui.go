@@ -350,6 +350,7 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 			panic(err)
 		}
 	}
+	log.Printf("%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 }
 
 // TimestampedUi is a UI that wraps another UI implementation and
