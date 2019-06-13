@@ -1,7 +1,7 @@
 <!-- Code generated from the comments of the Config struct in builder/qemu/builder.go; DO NOT EDIT MANUALLY -->
 
 -   `iso_skip_cache` (bool) - Use iso from provided url. Qemu must support
-    curl block device. This defaults to false.
+    curl block device. This defaults to `false`.
     
 -   `accelerator` (string) - The accelerator type to use when running the VM.
     This may be `none`, `kvm`, `tcg`, `hax`, `hvf`, `whpx`, or `xen`. The appropriate
@@ -26,11 +26,17 @@
 -   `cpus` (int) - The number of cpus to use when building the VM.
      The default is `1` CPU.
     
--   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of ide, scsi, virtio or virtio-scsi*. Note
-    also that any boot commands or kickstart type scripts must have proper
-    adjustments for resulting device names. The Qemu builder uses virtio by
-    default.
+-   `disk_interface` (string) - The interface to use for the disk. Allowed values include any of `ide`,
+    `scsi`, `virtio` or `virtio-scsi`^\*. Note also that any boot commands
+    or kickstart type scripts must have proper adjustments for resulting
+    device names. The Qemu builder uses `virtio` by default.
+    
+    ^\* Please be aware that use of the `scsi` disk interface has been
+    disabled by Red Hat due to a bug described
+    [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220). If you are
+    running Qemu on RHEL or a RHEL variant such as CentOS, you *must* choose
+    one of the other listed interfaces. Using the `scsi` interface under
+    these circumstances will cause the build to fail.
     
 -   `disk_size` (uint) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40960 (40 GB).
@@ -54,12 +60,15 @@
 -   `disk_compression` (bool) - Apply compression to the QCOW2 disk file
     using qemu-img convert. Defaults to false.
     
--   `format` (string) - Either qcow2 or raw, this specifies the output
-    format of the virtual machine image. This defaults to qcow2.
+-   `format` (string) - Either `qcow2` or `raw`, this specifies the output format of the virtual
+    machine image. This defaults to `qcow2`.
     
 -   `headless` (bool) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
-    value is set to true, the machine will start without a console.
+    value is set to `true`, the machine will start without a console.
+    
+    You can still see the console if you make a note of the VNC display
+    number chosen, and then connect using `vncviewer -Shared <host>:<display>`
     
 -   `disk_image` (bool) - Packer defaults to building from an ISO file, this parameter controls
     whether the ISO URL supplied is actually a bootable QEMU image. When
@@ -73,18 +82,18 @@
     will only contain blocks that have changed compared to the backing file, so
     enabling this option can significantly reduce disk usage.
     
--   `machine_type` (string) - The type of machine emulation to use. Run your
-    qemu binary with the flags -machine help to list available types for
-    your system. This defaults to pc.
+-   `machine_type` (string) - The type of machine emulation to use. Run your qemu binary with the
+    flags `-machine help` to list available types for your system. This
+    defaults to `pc`.
     
 -   `memory` (int) - The amount of memory to use when building the VM
     in megabytes. This defaults to 512 megabytes.
     
--   `net_device` (string) - The driver to use for the network interface. Allowed
-    values ne2k_pci, i82551, i82557b, i82559er, rtl8139, e1000,
-    pcnet, virtio, virtio-net, virtio-net-pci, usb-net, i82559a,
-    i82559b, i82559c, i82550, i82562, i82557a, i82557c, i82801,
-    vmxnet3, i82558a or i82558b. The Qemu builder uses virtio-net by
+-   `net_device` (string) - The driver to use for the network interface. Allowed values `ne2k_pci`,
+    `i82551`, `i82557b`, `i82559er`, `rtl8139`, `e1000`, `pcnet`, `virtio`,
+    `virtio-net`, `virtio-net-pci`, `usb-net`, `i82559a`, `i82559b`,
+    `i82559c`, `i82550`, `i82562`, `i82557a`, `i82557c`, `i82801`,
+    `vmxnet3`, `i82558a` or `i82558b`. The Qemu builder uses `virtio-net` by
     default.
     
 -   `output_directory` (string) - This is the path to the directory where the
@@ -94,11 +103,68 @@
     the builder. By default this is output-BUILDNAME where "BUILDNAME" is the
     name of the build.
     
--   `qemuargs` ([][]string) - Allows complete control over the
-    qemu command line (though not, at this time, qemu-img). Each array of
-    strings makes up a command line switch that overrides matching default
-    switch/value pairs. Any value specified as an empty string is ignored. All
-    values after the switch are concatenated with no separator.
+-   `qemuargs` ([][]string) - Allows complete control over the qemu command line (though not, at this
+    time, qemu-img). Each array of strings makes up a command line switch
+    that overrides matching default switch/value pairs. Any value specified
+    as an empty string is ignored. All values after the switch are
+    concatenated with no separator.
+    
+    ~&gt; **Warning:** The qemu command line allows extreme flexibility, so
+    beware of conflicting arguments causing failures of your run. For
+    instance, using --no-acpi could break the ability to send power signal
+    type commands (e.g., shutdown -P now) to the virtual machine, thus
+    preventing proper shutdown. To see the defaults, look in the packer.log
+    file and search for the qemu-system-x86 command. The arguments are all
+    printed for review.
+    
+    The following shows a sample usage:
+    
+    ``` json {
+      "qemuargs": [
+        [ "-m", "1024M" ],
+        [ "--no-acpi", "" ],
+        [
+          "-netdev",
+          "user,id=mynet0,",
+          "hostfwd=hostip:hostport-guestip:guestport",
+          ""
+        ],
+        [ "-device", "virtio-net,netdev=mynet0" ]
+      ]
+    } ```
+    
+    would produce the following (not including other defaults supplied by
+    the builder and not otherwise conflicting with the qemuargs):
+    
+    ``` text qemu-system-x86 -m 1024m --no-acpi -netdev
+    user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device
+    virtio-net,netdev=mynet0" ```
+    
+    ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
+    builds are available though an environmental variable does need to be
+    set for QEMU for Windows to redirect stdout to the console instead of
+    stdout.txt.
+    
+    The following shows the environment variable that needs to be set for
+    Windows QEMU support:
+    
+    ``` text setx SDL_STDIO_REDIRECT=0 ```
+    
+    You can also use the `SSHHostPort` template variable to produce a packer
+    template that can be invoked by `make` in parallel:
+    
+    ``` json {
+      "qemuargs": [
+        [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+        [ "-device", "virtio-net,netdev=forward,id=net0"]
+      ]
+    } ```
+    
+    `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
+    of which will bind to their own SSH port as determined by each process.
+    This will also work with WinRM, just change the port forward in
+    `qemuargs` to map to WinRM's default port of `5985` or whatever value
+    you have the service set to listen on.
     
 -   `qemu_binary` (string) - The name of the Qemu binary to look for. This
     defaults to qemu-system-x86_64, but may need to be changed for
