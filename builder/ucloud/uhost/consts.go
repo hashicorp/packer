@@ -7,6 +7,16 @@ const (
 	defaultPasswordSpe = "-_"
 )
 
+const (
+	osTypeWindows             = "Windows"
+	securityGroupNonWeb       = "recommend non web"
+	instanceStateRunning      = "Running"
+	instanceStateStopped      = "Stopped"
+	bootDiskStateInitializing = "Initializing"
+	bootDiskStateNormal       = "Normal"
+	imageStateAvailable       = "Available"
+)
+
 var bootDiskTypeMap = map[string]string{
 	"cloud_ssd":    "CLOUD_SSD",
 	"local_normal": "LOCAL_NORMAL",
