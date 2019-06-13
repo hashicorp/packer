@@ -231,11 +231,11 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 	}
 
 	if config.Network != "" {
-		net, err := template.driver.finder.Network(ctx, config.Network)
+		net, err := template.driver.FindNetwork(config.Network)
 		if err != nil {
 			return nil, err
 		}
-		backing, err := net.EthernetCardBackingInfo(ctx)
+		backing, err := net.network.EthernetCardBackingInfo(ctx)
 		if err != nil {
 			return nil, err
 		}
