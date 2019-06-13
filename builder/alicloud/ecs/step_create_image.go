@@ -52,16 +52,17 @@ func (s *stepCreateAlicloudImage) Run(ctx context.Context, state multistep.State
 	imageId := createImageResponse.(*ecs.CreateImageResponse).ImageId
 
 	imagesResponse, err := client.WaitForImageStatus(config.AlicloudRegion, imageId, ImageStatusAvailable, time.Duration(s.WaitSnapshotReadyTimeout)*time.Second)
-	if err != nil {
-		return halt(state, err, "Timeout waiting for image to be created")
-	}
 
+	// save image first for cleaning up if timeout
 	images := imagesResponse.(*ecs.DescribeImagesResponse).Images.Image
 	if len(images) == 0 {
 		return halt(state, err, "Unable to find created image")
 	}
-
 	s.image = &images[0]
+
+	if err != nil {
+		return halt(state, err, "Timeout waiting for image to be created")
+	}
 
 	var snapshotIds []string
 	for _, device := range images[0].DiskDeviceMappings.DiskDeviceMapping {
