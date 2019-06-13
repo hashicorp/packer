@@ -9,6 +9,7 @@ import (
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -23,7 +24,7 @@ type Config struct {
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
-	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig      `mapstructure:",squash"`
 	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 	// The path to a PVM directory that acts as the source

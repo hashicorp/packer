@@ -9,6 +9,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -16,18 +17,18 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig      `mapstructure:",squash"`
-	common.HTTPConfig        `mapstructure:",squash"`
-	common.FloppyConfig      `mapstructure:",squash"`
-	bootcommand.VNCConfig    `mapstructure:",squash"`
-	vmwcommon.DriverConfig   `mapstructure:",squash"`
-	vmwcommon.OutputConfig   `mapstructure:",squash"`
-	vmwcommon.RunConfig      `mapstructure:",squash"`
-	vmwcommon.ShutdownConfig `mapstructure:",squash"`
-	vmwcommon.SSHConfig      `mapstructure:",squash"`
-	vmwcommon.ToolsConfig    `mapstructure:",squash"`
-	vmwcommon.VMXConfig      `mapstructure:",squash"`
-	vmwcommon.ExportConfig   `mapstructure:",squash"`
+	common.PackerConfig            `mapstructure:",squash"`
+	common.HTTPConfig              `mapstructure:",squash"`
+	common.FloppyConfig            `mapstructure:",squash"`
+	bootcommand.VNCConfig          `mapstructure:",squash"`
+	vmwcommon.DriverConfig         `mapstructure:",squash"`
+	vmwcommon.OutputConfig         `mapstructure:",squash"`
+	vmwcommon.RunConfig            `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
+	vmwcommon.SSHConfig            `mapstructure:",squash"`
+	vmwcommon.ToolsConfig          `mapstructure:",squash"`
+	vmwcommon.VMXConfig            `mapstructure:",squash"`
+	vmwcommon.ExportConfig         `mapstructure:",squash"`
 	// By default Packer creates a 'full' clone of
 	// the virtual machine specified in source_path. The resultant virtual
 	// machine is fully independant from the parent it was cloned from.

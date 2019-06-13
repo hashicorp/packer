@@ -1,6 +1,4 @@
-//go:generate struct-markdown
-
-package common
+package shutdowncommand
 
 import (
 	"fmt"
