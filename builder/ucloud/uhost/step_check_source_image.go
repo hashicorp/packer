@@ -24,8 +24,8 @@ func (s *stepCheckSourceImageId) Run(ctx context.Context, state multistep.StateB
 		return halt(state, err, "Error on querying source_image_id")
 	}
 
-	if imageSet.OsType == "Windows" {
-		return halt(state, err, "The builder of ucloud-uhost not support make Windows image yet")
+	if imageSet.OsType == osTypeWindows {
+		return halt(state, err, "The builder of ucloud-uhost not support build Windows image yet")
 	}
 
 	state.Put("source_image", imageSet)

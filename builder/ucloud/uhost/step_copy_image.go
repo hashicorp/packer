@@ -70,7 +70,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 				return err
 			}
 
-			if imageSet.State == "Available" {
+			if imageSet.State == imageStateAvailable {
 				expectedImages.Remove(v.Id())
 				continue
 			}
