@@ -14,7 +14,7 @@ import (
 type RunConfig struct {
 	AssociatePublicIpAddress bool   `mapstructure:"associate_public_ip_address"`
 	ZoneId                   string `mapstructure:"zone_id"`
-	IOOptimized              bool   `mapstructure:"io_optimized"`
+	IOOptimized              *bool  `mapstructure:"io_optimized"`
 	InstanceType             string `mapstructure:"instance_type"`
 	Description              string `mapstructure:"description"`
 	AlicloudSourceImage      string `mapstructure:"source_image"`
