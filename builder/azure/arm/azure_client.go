@@ -42,7 +42,7 @@ type AzureClient struct {
 	armStorage.AccountsClient
 	compute.DisksClient
 	compute.SnapshotsClient
-	newCompute.Gallery
+	newCompute.GalleryImageVersionsClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -203,6 +203,12 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.AccountsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.AccountsClient.UserAgent)
+
+	azureClient.GalleryImageVersionsClient = newCompute.NewGalleryImageVersionsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.GalleryImageVersionsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.GalleryImageVersionsClient.RequestInspector = withInspection(maxlen)
+	azureClient.GalleryImageVersionsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.GalleryImageVersionsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImageVersionsClient.UserAgent)
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

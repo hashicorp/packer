@@ -198,6 +198,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepSnapshotOSDisk(azureClient, ui, b.config),
 			NewStepSnapshotDataDisks(azureClient, ui, b.config),
 			NewStepCaptureImage(azureClient, ui),
+			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
@@ -236,6 +237,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepSnapshotOSDisk(azureClient, ui, b.config),
 			NewStepSnapshotDataDisks(azureClient, ui, b.config),
 			NewStepCaptureImage(azureClient, ui),
+			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
@@ -369,6 +371,14 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
 	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
+	if  b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
+		stateBag.Put(constants.ArmManagedImageSigPublishSubscription, b.config.SharedGalleryDestination.SigDestinationSubscription)
+		stateBag.Put(constants.ArmManagedImageSigPublishResourceGroup, b.config.SharedGalleryDestination.SigDestinationResourceGroup)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
+	}
 }
 
 // Parameters that are only known at runtime after querying Azure.
