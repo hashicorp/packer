@@ -3,12 +3,14 @@ package common
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestVBoxManageConfigPrepare_VBoxManage(t *testing.T) {
 	// Test with empty
 	c := new(VBoxManageConfig)
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -22,7 +24,7 @@ func TestVBoxManageConfigPrepare_VBoxManage(t *testing.T) {
 	c.VBoxManage = [][]string{
 		{"foo", "bar", "baz"},
 	}
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}

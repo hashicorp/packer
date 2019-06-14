@@ -2,6 +2,8 @@ package common
 
 import (
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestDriverConfigPrepare(t *testing.T) {
@@ -9,7 +11,7 @@ func TestDriverConfigPrepare(t *testing.T) {
 
 	// Test a default boot_wait
 	c = new(DriverConfig)
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
@@ -20,7 +22,7 @@ func TestDriverConfigPrepare(t *testing.T) {
 	// Test with a good one
 	c = new(DriverConfig)
 	c.FusionAppPath = "foo"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
