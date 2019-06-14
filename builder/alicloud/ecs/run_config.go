@@ -21,12 +21,11 @@ type RunConfig struct {
 	// provided, the value will be determined by product API according to what
 	// `instance_type` is used.
 	IOOptimized *bool `mapstructure:"io_optimized" required:"false"`
-	// Type of the instance. For values, see Instance
-	// Type
-	// Table.
+	// Type of the instance. For values, see [Instance Type
+	// Table](https://www.alibabacloud.com/help/doc-detail/25378.htm?spm=a3c0i.o25499en.a3.9.14a36ac8iYqKRA).
 	// You can also obtain the latest instance type table by invoking the
-	// Querying Instance Type
-	// Table
+	// [Querying Instance Type
+	// Table](https://intl.aliyun.com/help/doc-detail/25620.htm?spm=a3c0i.o25499en.a3.6.Dr1bik)
 	// interface.
 	InstanceType string `mapstructure:"instance_type" required:"true"`
 	Description  string `mapstructure:"description"`
@@ -34,7 +33,10 @@ type RunConfig struct {
 	// create your customized images.
 	AlicloudSourceImage string `mapstructure:"source_image" required:"true"`
 	// Whether to force shutdown upon device
-	// restart. The default value is false.
+	// restart. The default value is `false`.
+	//
+	// If it is set to `false`, the system is shut down normally; if it is set to
+	// `true`, the system is forced to shut down.
 	ForceStopInstance bool `mapstructure:"force_stop_instance" required:"false"`
 	// If this option is set to true, Packer
 	// will not stop the instance for you, and you need to make sure the instance
@@ -79,19 +81,31 @@ type RunConfig struct {
 	// The ID of the VSwitch to be used.
 	VSwitchId string `mapstructure:"vswitch_id" required:"false"`
 	// The ID of the VSwitch to be used.
-	VSwitchName string `mapstructure:"vswitch_id" required:"false"`
-	// Display name of the instance, which is a string
-	// of 2 to 128 Chinese or English characters. It must begin with an
-	// uppercase/lowercase letter or a Chinese character and can contain numerals,
-	// ., _, or -. The instance name is displayed on the Alibaba Cloud
-	// console. If this parameter is not specified, the default value is
-	// InstanceId of the instance. It cannot begin with http:// or https://.
+	VSwitchName string `mapstructure:"vswitch_name" required:"false"`
+	// Display name of the instance, which is a string of 2 to 128 Chinese or
+	// English characters. It must begin with an uppercase/lowercase letter or
+	// a Chinese character and can contain numerals, `.`, `_`, or `-`. The
+	// instance name is displayed on the Alibaba Cloud console. If this
+	// parameter is not specified, the default value is InstanceId of the
+	// instance. It cannot begin with `http://` or `https://`.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
 	// Internet charge type, which can be
-	// PayByTraffic or PayByBandwidth. Optional values:
+	// `PayByTraffic` or `PayByBandwidth`. Optional values:
+	// -   `PayByBandwidth`
+	// -   `PayByTraffic`
+	//
+	// If this parameter is not specified, the default value is `PayByBandwidth`.
+	// For the regions out of China, currently only support `PayByTraffic`, you
+	// must set it manfully.
 	InternetChargeType string `mapstructure:"internet_charge_type" required:"false"`
 	// Maximum outgoing bandwidth to the
 	// public network, measured in Mbps (Mega bits per second).
+	//
+	// Value range:
+	// -   `PayByBandwidth`: \[0, 100\]. If this parameter is not specified, API
+	//     automatically sets it to 0 Mbps.
+	// -   `PayByTraffic`: \[1, 100\]. If this parameter is not specified, an
+	//     error is returned.
 	InternetMaxBandwidthOut int `mapstructure:"internet_max_bandwidth_out" required:"false"`
 	// Timeout of creating snapshot(s).
 	// The default timeout is 3600 seconds if this option is not set or is set

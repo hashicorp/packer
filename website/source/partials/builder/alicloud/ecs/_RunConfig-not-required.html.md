@@ -3,12 +3,16 @@
 -   `associate_public_ip_address` (bool) - Associate Public Ip Address
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
     
--   `io_optimized` (bool) - Whether an ECS instance is I/O optimized or not.
-    The default value is false.
+-   `io_optimized` (*bool) - Whether an ECS instance is I/O optimized or not. If this option is not
+    provided, the value will be determined by product API according to what
+    `instance_type` is used.
     
 -   `description` (string) - Description
 -   `force_stop_instance` (bool) - Whether to force shutdown upon device
-    restart. The default value is false.
+    restart. The default value is `false`.
+    
+    If it is set to `false`, the system is shut down normally; if it is set to
+    `true`, the system is forced to shut down.
     
 -   `disable_stop_instance` (bool) - If this option is set to true, Packer
     will not stop the instance for you, and you need to make sure the instance
@@ -52,20 +56,32 @@
     
 -   `vswitch_id` (string) - The ID of the VSwitch to be used.
     
--   `vswitch_id` (string) - The ID of the VSwitch to be used.
+-   `vswitch_name` (string) - The ID of the VSwitch to be used.
     
--   `instance_name` (string) - Display name of the instance, which is a string
-    of 2 to 128 Chinese or English characters. It must begin with an
-    uppercase/lowercase letter or a Chinese character and can contain numerals,
-    ., _, or -. The instance name is displayed on the Alibaba Cloud
-    console. If this parameter is not specified, the default value is
-    InstanceId of the instance. It cannot begin with http:// or https://.
+-   `instance_name` (string) - Display name of the instance, which is a string of 2 to 128 Chinese or
+    English characters. It must begin with an uppercase/lowercase letter or
+    a Chinese character and can contain numerals, `.`, `_`, or `-`. The
+    instance name is displayed on the Alibaba Cloud console. If this
+    parameter is not specified, the default value is InstanceId of the
+    instance. It cannot begin with `http://` or `https://`.
     
 -   `internet_charge_type` (string) - Internet charge type, which can be
-    PayByTraffic or PayByBandwidth. Optional values:
+    `PayByTraffic` or `PayByBandwidth`. Optional values:
+    -   `PayByBandwidth`
+    -   `PayByTraffic`
+    
+    If this parameter is not specified, the default value is `PayByBandwidth`.
+    For the regions out of China, currently only support `PayByTraffic`, you
+    must set it manfully.
     
 -   `internet_max_bandwidth_out` (int) - Maximum outgoing bandwidth to the
     public network, measured in Mbps (Mega bits per second).
+    
+    Value range:
+    -   `PayByBandwidth`: \[0, 100\]. If this parameter is not specified, API
+        automatically sets it to 0 Mbps.
+    -   `PayByTraffic`: \[1, 100\]. If this parameter is not specified, an
+        error is returned.
     
 -   `wait_snapshot_ready_timeout` (int) - Timeout of creating snapshot(s).
     The default timeout is 3600 seconds if this option is not set or is set
