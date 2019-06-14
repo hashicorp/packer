@@ -77,6 +77,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps
 	steps = []multistep.Step{
 		&stepPreValidate{
+			ProjectId:         b.config.ProjectId,
 			Region:            b.config.Region,
 			Zone:              b.config.Zone,
 			ImageDestinations: b.config.ImageDestinations,
