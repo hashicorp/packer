@@ -218,7 +218,8 @@ builder.
         error is returned.
 
 -   `io_optimized` (boolean) - Whether an ECS instance is I/O optimized or not.
-    The default value is `false`.
+    If this option is not provided, the value will be determined by product API 
+    according to what `instance_type` is used.
 
 -   `security_group_id` (string) - ID of the security group to which a newly
     created instance belongs. Mutual access is allowed between instances in one
