@@ -17,8 +17,6 @@ customized images based on an existing base images.
 This builder builds an UCloud image by launching an UHost instance from a source image,
 provisioning that running machine, and then creating an image from that machine.
 
-\~&gt; **Note:**  This builder only support ssh authenticating with username and given password.
-
 ## Configuration Reference
 
 The following configuration options available for building UCloud images. They are
@@ -27,6 +25,8 @@ segmented below into two categories: required and optional parameters.
 In addition to the options listed here, a
 [communicator](../templates/communicator.html) can be configured for this
 builder.
+
+\~&gt; **Note:**  This builder only support ssh authenticating with username and given password.
 
 ### Required:
 

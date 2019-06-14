@@ -117,7 +117,7 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190425145619-16072639606e
 	golang.org/x/text v0.3.1 // indirect
-	golang.org/x/tools v0.0.0-20190612232758-d4e310b4a8a5 // indirect
+	golang.org/x/tools v0.0.0-20190613204242-ed0dc450797f // indirect
 	google.golang.org/api v0.3.1
 	google.golang.org/grpc v1.19.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
