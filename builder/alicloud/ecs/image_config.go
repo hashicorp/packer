@@ -53,9 +53,83 @@ type AlicloudDiskDevice struct {
 type AlicloudDiskDevices struct {
 	// Image disk mapping for system
 	// disk.
+	// -   `disk_category` (string) - Category of the system disk. Optional values
+	//     are:
+	//         -   `cloud` - general cloud disk
+	//         -   `cloud_efficiency` - efficiency cloud disk
+	//         -   `cloud_ssd` - cloud SSD
+	//
+	//         For phased-out instance types and non-I/O optimized instances, the
+	//         default value is cloud. Otherwise, the default value is
+	//         cloud\_efficiency.
+	//
+	// -   `disk_description` (string) - The value of disk description is blank by
+	//     default. \[2, 256\] characters. The disk description will appear on the
+	//     console. It cannot begin with `http://` or `https://`.
+	//
+	// -   `disk_name` (string) - The value of disk name is blank by default. \[2,
+	//     128\] English or Chinese characters, must begin with an
+	//     uppercase/lowercase letter or Chinese character. Can contain numbers,
+	//     `.`, `_` and `-`. The disk name will appear on the console. It cannot
+	//     begin with `http://` or `https://`.
+	//
+	// -   `disk_size` (number) - Size of the system disk, measured in GiB. Value
+	//     range: \[20, 500\]. The specified value must be equal to or greater
+	//     than max{20, ImageSize}. Default value: max{40, ImageSize}.
+	//
 	ECSSystemDiskMapping AlicloudDiskDevice `mapstructure:"system_disk_mapping" required:"false"`
 	// Add one or more data
 	// disks to the image.
+	//
+	// -   `disk_category` (string) - Category of the data disk. Optional values
+	//     are:
+	//     -   `cloud` - general cloud disk
+	//     -   `cloud_efficiency` - efficiency cloud disk
+	//     -   `cloud_ssd` - cloud SSD
+	//
+	//     Default value: cloud.
+	//
+	// -   `disk_delete_with_instance` (boolean) - Whether or not the disk is
+	//     released along with the instance:
+	//     -   True indicates that when the instance is released, this disk will
+	//         be released with it
+	//     -   False indicates that when the instance is released, this disk will
+	//         be retained.
+	// -   `disk_description` (string) - The value of disk description is blank by
+	//     default. \[2, 256\] characters. The disk description will appear on the
+	//     console. It cannot begin with `http://` or `https://`.
+	//
+	// -   `disk_device` (string) - Device information of the related instance:
+	//     such as `/dev/xvdb` It is null unless the Status is In\_use.
+	//
+	// -   `disk_name` (string) - The value of disk name is blank by default. \[2,
+	//     128\] English or Chinese characters, must begin with an
+	//     uppercase/lowercase letter or Chinese character. Can contain numbers,
+	//     `.`, `_` and `-`. The disk name will appear on the console. It cannot
+	//     begin with `http://` or `https://`.
+	//
+	// -   `disk_size` (number) - Size of the data disk, in GB, values range:
+	//     -   `cloud` - 5 \~ 2000
+	//     -   `cloud_efficiency` - 20 \~ 2048
+	//     -   `cloud_ssd` - 20 \~ 2048
+	//
+	//     The value should be equal to or greater than the size of the specific
+	//     SnapshotId.
+	//
+	// -   `disk_snapshot_id` (string) - Snapshots are used to create the data
+	//     disk After this parameter is specified, Size is ignored. The actual
+	//     size of the created disk is the size of the specified snapshot.
+	//
+	//     Snapshots from on or before July 15, 2013 cannot be used to create a
+	//     disk.
+	//
+	// -   `disk_encrypted` (boolean) - Whether or not to encrypt the data disk.
+	//     If this option is set to true, the data disk will be encryped and corresponding snapshot in the target image will also be encrypted. By
+	//     default, if this is an extra data disk, Packer will not encrypt the
+	//     data disk. Otherwise, Packer will keep the encryption setting to what
+	//     it was in the source image. Please refer to Introduction of [ECS disk encryption](https://www.alibabacloud.com/help/doc-detail/59643.htm)
+	//     for more details.
+	//
 	ECSImagesDiskMappings []AlicloudDiskDevice `mapstructure:"image_disk_mappings" required:"false"`
 }
 
@@ -90,19 +164,20 @@ type AlicloudImageConfig struct {
 	// same region. By default, Packer will keep the encryption setting to what
 	// it was in the source image.
 	ImageEncrypted *bool `mapstructure:"image_encrypted" required:"false"`
-	// If this value is true, when the target
-	// image names including those copied are duplicated with existing images, it
-	// will delete the existing images and then create the target images,
-	// otherwise, the creation will fail. The default value is false. Check
-	// image_name and image_copy_names options for names of target images. If
-	// -force option is
-	// provided in build command, this option can be omitted and taken as true.
+	// If this value is true, when the target image names including those
+	// copied are duplicated with existing images, it will delete the existing
+	// images and then create the target images, otherwise, the creation will
+	// fail. The default value is false. Check `image_name` and
+	// `image_copy_names` options for names of target images. If
+	// [-force](https://packer.io/docs/commands/build.html#force) option is
+	// provided in `build` command, this option can be omitted and taken as
+	// true.
 	AlicloudImageForceDelete bool `mapstructure:"image_force_delete" required:"false"`
-	// If this value is true, when
-	// delete the duplicated existing images, the source snapshots of those images
-	// will be delete either. If
-	// -force option is
-	// provided in build command, this option can be omitted and taken as true.
+	// If this value is true, when delete the duplicated existing images, the
+	// source snapshots of those images will be delete either. If
+	// [-force](https://packer.io/docs/commands/build.html#force) option is
+	// provided in `build` command, this option can be omitted and taken as
+	// true.
 	AlicloudImageForceDeleteSnapshots bool `mapstructure:"image_force_delete_snapshots" required:"false"`
 	AlicloudImageForceDeleteInstances bool `mapstructure:"image_force_delete_instances"`
 	// If this value is true, the image
