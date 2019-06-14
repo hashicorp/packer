@@ -85,6 +85,22 @@ func (c *AccessConfig) Config() error {
 
 }
 
+func (c *AccessConfig) ValidateProjectId(projectId string) error {
+
+	supportedProjectIds, err := c.getSupportedProjectIds()
+	if err != nil {
+		return err
+	}
+
+	for _, supportedProjectId := range supportedProjectIds {
+		if projectId == supportedProjectId {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("%q is invalid, should be an valid ucloud project_id, got %q", "project_id", projectId)
+}
+
 func (c *AccessConfig) ValidateRegion(region string) error {
 
 	supportedRegions, err := c.getSupportedRegions()
@@ -98,7 +114,7 @@ func (c *AccessConfig) ValidateRegion(region string) error {
 		}
 	}
 
-	return fmt.Errorf("%q is valid, should be an valid ucloud region, got %q", "region", region)
+	return fmt.Errorf("%q is invalid, should be an valid ucloud region, got %q", "region", region)
 }
 
 func (c *AccessConfig) ValidateZone(region, zone string) error {
@@ -114,7 +130,30 @@ func (c *AccessConfig) ValidateZone(region, zone string) error {
 		}
 	}
 
-	return fmt.Errorf("%q is valid, should be an valid ucloud zone, got %q", "availability_zone", zone)
+	return fmt.Errorf("%q is invalid, should be an valid ucloud zone, got %q", "availability_zone", zone)
+}
+
+func (c *AccessConfig) getSupportedProjectIds() ([]string, error) {
+	client, err := c.Client()
+	conn := client.uaccountconn
+	if err != nil {
+		return nil, err
+	}
+
+	req := conn.NewGetProjectListRequest()
+	resp, err := conn.GetProjectList(req)
+	if err != nil {
+		return nil, err
+	}
+
+	validProjectIds := make([]string, len(resp.ProjectSet))
+	for _, val := range resp.ProjectSet {
+		if !isStringIn(val.ProjectId, validProjectIds) {
+			validProjectIds = append(validProjectIds, val.ProjectId)
+		}
+	}
+
+	return validProjectIds, nil
 }
 
 func (c *AccessConfig) getSupportedRegions() ([]string, error) {
