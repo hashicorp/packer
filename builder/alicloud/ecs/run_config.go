@@ -17,9 +17,10 @@ type RunConfig struct {
 	AssociatePublicIpAddress bool `mapstructure:"associate_public_ip_address"`
 	// ID of the zone to which the disk belongs.
 	ZoneId string `mapstructure:"zone_id" required:"false"`
-	// Whether an ECS instance is I/O optimized or not.
-	// The default value is false.
-	IOOptimized bool `mapstructure:"io_optimized" required:"false"`
+	// Whether an ECS instance is I/O optimized or not. If this option is not
+	// provided, the value will be determined by product API according to what
+	// `instance_type` is used.
+	IOOptimized *bool `mapstructure:"io_optimized" required:"false"`
 	// Type of the instance. For values, see Instance
 	// Type
 	// Table.
