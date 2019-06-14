@@ -3,12 +3,14 @@ package common
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 	// Test with empty
 	c := new(VBoxBundleConfig)
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -20,7 +22,7 @@ func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 	// Test with a good one
 	c = new(VBoxBundleConfig)
 	c.BundleISO = true
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
