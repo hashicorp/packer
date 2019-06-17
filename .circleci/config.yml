@@ -21,7 +21,7 @@ jobs:
     steps:
       - checkout
       - run: wget -O packer141.zip https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_amd64.zip
-      - run: unzip packer
+      - run: unzip packer141.zip
       - run: ls -alh
       - run: ./packer build repro_6190.json
 #   check-vendor-vs-mod:
