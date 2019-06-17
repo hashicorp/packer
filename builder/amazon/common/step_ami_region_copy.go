@@ -21,8 +21,9 @@ type StepAMIRegionCopy struct {
 	Name              string
 	OriginalRegion    string
 
-	toDelete      string
-	getRegionConn func(*AccessConfig, string) (ec2iface.EC2API, error)
+	toDelete           string
+	getRegionConn      func(*AccessConfig, string) (ec2iface.EC2API, error)
+	AMISkipBuildRegion bool
 }
 
 func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -33,7 +34,9 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 	ami := amis[s.OriginalRegion]
 	// Always copy back into original region to preserve the ami name
 	s.toDelete = ami
-	s.Regions = append(s.Regions, s.OriginalRegion)
+	if !s.AMISkipBuildRegion {
+		s.Regions = append(s.Regions, s.OriginalRegion)
+	}
 
 	if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
 		// encrypt_boot is true, so we have to copy the temporary
