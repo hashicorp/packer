@@ -57,7 +57,23 @@ provisioner might not be saved.
 
 <%= partial "partials/common/ISOConfig-not-required" %>
 
-## Configuration Reference
+## Http directory configuration reference
+
+<%= partial "partials/common/HTTPConfig" %>
+### Optional:
+
+<%= partial "partials/common/HTTPConfig-not-required" %>
+
+
+## Floppy configuration reference
+
+<%= partial "partials/common/FloppyConfig" %>
+
+### Optional:
+
+<%= partial "partials/common/FloppyConfig-not-required" %>
+
+## Virtualbox ISO Configuration Reference
 
 There are many configuration options available for the VirtualBox builder. They
 are organized below into two categories: required and optional. Within each
@@ -84,9 +100,6 @@ builder.
 
 -   `cpus` (number) - The number of cpus to use for building the VM.
     Defaults to `1`.
-
--   `disk_size` (number) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is `40000` (about 40 GB).
 
 -   `export_opts` (array of strings) - Additional options to pass to the
     [VBoxManage
@@ -130,105 +143,13 @@ builder.
         "packer_conf.json"
     ```
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
-
--   `floppy_files` (array of strings) - A list of files to place onto a floppy
-    disk that is attached when the VM is booted. This is most useful for
-    unattended Windows installs, which look for an `Autounattend.xml` file on
-    removable media. By default, no floppy will be attached. All files listed in
-    this setting get placed into the root directory of the floppy and the floppy
-    is attached as the first floppy device. Currently, no support exists for
-    creating sub-directories on the floppy. Wildcard characters (\*, ?,
-    and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
-
 -   `format` (string) - Either `ovf` or `ova`, this specifies the output format
     of the exported virtual machine. This defaults to `ovf`.
-
--   `guest_additions_interface` (string) - The interface type to use to mount
-    guest additions when `guest_additions_mode` is set to `attach`. Will
-    default to the value set in `iso_interface`, if `iso_interface` is set.
-    Will default to "ide", if `iso_interface` is not set. Options are "ide" and
-    "sata".
-
--   `guest_additions_mode` (string) - The method by which guest additions are
-    made available to the guest for installation. Valid options are `upload`,
-    `attach`, or `disable`. If the mode is `attach` the guest additions ISO will
-    be attached as a CD device to the virtual machine. If the mode is `upload`
-    the guest additions ISO will be uploaded to the path specified by
-    `guest_additions_path`. The default value is `upload`. If `disable` is used,
-    guest additions won't be downloaded, either.
-
--   `guest_additions_path` (string) - The path on the guest virtual machine
-    where the VirtualBox guest additions ISO will be uploaded. By default this
-    is `VBoxGuestAdditions.iso` which should upload into the login directory of
-    the user. This is a [configuration
-    template](/docs/templates/engine.html) where the `Version`
-    variable is replaced with the VirtualBox version.
-
--   `guest_additions_sha256` (string) - The SHA256 checksum of the guest
-    additions ISO that will be uploaded to the guest VM. By default the
-    checksums will be downloaded from the VirtualBox website, so this only needs
-    to be set if you want to be explicit about the checksum.
-
--   `guest_additions_url` (string) - The URL to the guest additions ISO
-    to upload. This can also be a file URL if the ISO is at a local path. By
-    default, the VirtualBox builder will attempt to find the guest additions ISO
-    on the local file system. If it is not available locally, the builder will
-    download the proper guest additions ISO from the internet.
-
--   `guest_os_type` (string) - The guest OS type being installed. By default
-    this is `other`, but you can get *dramatic* performance improvements by
-    setting this to the proper value. To view all available values for this run
-    `VBoxManage list ostypes`. Setting the correct value hints to VirtualBox how
-    to optimize the virtual hardware to work best with that operating system.
-
--   `hard_drive_interface` (string) - The type of controller that the primary
-    hard drive is attached to, defaults to `ide`. When set to `sata`, the drive
-    is attached to an AHCI SATA controller. When set to `scsi`, the drive is
-    attached to an LsiLogic SCSI controller.
-
--   `sata_port_count` (number) - The number of ports available on any SATA
-    controller created, defaults to `1`. VirtualBox supports up to 30 ports on a
-    maximum of 1 SATA controller. Increasing this value can be useful if you
-    want to attach additional drives.
-
--   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
-    to treat disks as SSDs and stops them from performing disk fragmentation.
-    Also set `hard_drive_discard` to `true` to enable TRIM support.
-
--   `hard_drive_discard` (boolean) - When this value is set to `true`, a VDI
-    image will be shrunk in response to the trim command from the guest OS.
-    The size of the cleared area must be at least 1MB. Also set
-    `hard_drive_nonrotational` to `true` to enable TRIM support.
 
 -   `headless` (boolean) - Packer defaults to building VirtualBox virtual
     machines by launching a GUI that shows the console of the machine
     being built. When this value is set to `true`, the machine will start
     without a console.
-
--   `http_directory` (string) - Path to a directory to serve using an
-    HTTP server. The files in this directory will be available over HTTP that
-    will be requestable from the virtual machine. This is useful for hosting
-    kickstart files and so on. By default this is an empty string, which means
-    no HTTP server will be started. The address and port of the HTTP server will
-    be available as variables in `boot_command`. This is covered in more detail
-    below.
-
--   `http_port_min` and `http_port_max` (number) - These are the minimum and
-    maximum port to use for the HTTP server started to serve the
-    `http_directory`. Because Packer often runs in parallel, Packer will choose
-    a randomly available port in this range to run the HTTP server. If you want
-    to force the HTTP server to be on one port, make this minimum and maximum
-    port the same. By default the values are `8000` and `9000`, respectively.
-
--   `iso_interface` (string) - The type of controller that the ISO is attached
-    to, defaults to `ide`. When set to `sata`, the drive is attached to an AHCI
-    SATA controller.
 
 -   `iso_target_extension` (string) - The extension of the iso file after
     download. This defaults to `iso`.
@@ -242,9 +163,6 @@ builder.
     download or while downloading a single URL, it will move on to the next. All
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
-
--   `keep_registered` (boolean) - Set this to `true` if you would like to keep
-    the VM registered with virtualbox. Defaults to `false`.
 
 -   `memory` (number) - The amount of memory to use for building the VM
     in megabytes. Defaults to `512` megabytes.
@@ -273,10 +191,6 @@ builder.
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     `5m` or five minutes.
-
--   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
-    not export the VM. Useful if the build output is not the resultant image,
-    but created inside the VM.
 
 -  `sound` (string) - Defaults to `none`. The type of audio device to use for
     sound when building the VM. Some of the options that are available are
@@ -322,10 +236,6 @@ builder.
     home directory. Set to an empty string to skip uploading this file, which
     can be useful when using the `none` communicator.
 
--   `vm_name` (string) - This is the name of the OVF file for the new virtual
-    machine, without the file extension. By default this is `packer-BUILDNAME`,
-    where "BUILDNAME" is the name of the build.
-
 -   `vrdp_bind_address` (string / IP address) - The IP address that should be
     binded to for VRDP. By default packer will use `127.0.0.1` for this. If you
     wish to bind to all interfaces use `0.0.0.0`.
@@ -335,16 +245,9 @@ builder.
     port in this range that appears available. By default this is `5900` to
     `6000`. The minimum and maximum ports are inclusive.
 
-## Boot Command
+## Boot Configuration Reference
 
-The `boot_command` configuration is very important: it specifies the keys to
-type when the virtual machine is first booted in order to start the OS
-installer. This command is typed after `boot_wait`, which gives the virtual
-machine some time to actually load the ISO.
-
-As documented above, the `boot_command` is an array of strings. The strings are
-all typed in sequence. It is an array only to improve readability within the
-template.
+<%= partial "partials/common/bootcommand/BootConfig" %>
 
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
@@ -363,6 +266,10 @@ contention. If you notice missing keys, you can tune this delay by specifying
   ]
 }
 ```
+
+### Optional:
+
+<%= partial "partials/common/bootcommand/BootConfig-not-required" %>
 
 <%= partial "partials/builders/boot-command" %>
 
