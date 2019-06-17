@@ -497,6 +497,8 @@ func (c *Client) GetNextID(currentID int) (nextID int, err error) {
 			}
 		}
 		nextID, err = strconv.Atoi(data["data"].(string))
+	} else if strings.HasPrefix(err.Error(), "400 ") {
+		return c.GetNextID(currentID + 1)
 	}
 	return
 }
