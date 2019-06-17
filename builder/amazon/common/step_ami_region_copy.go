@@ -33,19 +33,25 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	ami := amis[s.OriginalRegion]
 	// Always copy back into original region to preserve the ami name
-	s.toDelete = ami
-	if !s.AMISkipBuildRegion {
-		s.Regions = append(s.Regions, s.OriginalRegion)
+	if s.EncryptBootVolume != nil || s.AMISkipBuildRegion {
+		// if we haven't specificed encryption and we aren't skipping the save
+		// to the build region, we don't have anything to delete
+		s.toDelete = ami
 	}
 
-	if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
-		// encrypt_boot is true, so we have to copy the temporary
-		// AMI with required encryption setting.
-		// temp image was created by stepCreateAMI.
-		if s.RegionKeyIds == nil {
-			s.RegionKeyIds = make(map[string]string)
+	if s.EncryptBootVolume != nil {
+		if !s.AMISkipBuildRegion {
+			s.Regions = append(s.Regions, s.OriginalRegion)
 		}
-		s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+		if *s.EncryptBootVolume {
+			// encrypt_boot is true, so we have to copy the temporary
+			// AMI with required encryption setting.
+			// temp image was created by stepCreateAMI.
+			if s.RegionKeyIds == nil {
+				s.RegionKeyIds = make(map[string]string)
+			}
+			s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+		}
 	}
 
 	if len(s.Regions) == 0 {
@@ -98,6 +104,10 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+
+	if len(s.toDelete) == 0 {
+		return
+	}
 
 	// Delete the unencrypted amis and snapshots
 	ui.Say("Deregistering the AMI and deleting unencrypted temporary " +
