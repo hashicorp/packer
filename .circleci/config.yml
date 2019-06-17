@@ -7,9 +7,6 @@ defaults: &golang
     - run: go build -ldflags="-s -w" -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
     - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH).zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
-    - run: curl -O https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_386.zip
-    - run: tar -xvf packer_1.4.1_linux_386.tar.gz
-
     - persist_to_workspace:
         root: .
         paths:
@@ -23,6 +20,8 @@ jobs:
     <<: *golang
     steps:
       - checkout
+      - run: curl -O https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_386.zip
+      - run: tar -xvf packer_1.4.1_linux_386.tar.gz
       - run: ls -alh packer
       - run: ./packer/packer build repro_6190.json
 #   check-vendor-vs-mod:
