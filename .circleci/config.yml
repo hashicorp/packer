@@ -1,6 +1,6 @@
 defaults: &golang
   docker:
-    - image: docker:17.05.0-ce-git
+    - image: docker:18.09.6-git
   working_directory: /go/src/github.com/hashicorp/packer
   steps:
     - checkout
@@ -20,12 +20,9 @@ jobs:
     <<: *golang
     steps:
       - checkout
-      - run: uname -i
-      - run: apt-get update; apt-get install curl
-      - run: curl -O https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_386.zip
-      - run: tar -xvf packer_1.4.1_linux_386.tar.gz
-      - run: ls -alh packer
-      - run: ./packer/packer build repro_6190.json
+      - run: wget -O packer141.zip https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_amd64.zip
+      - run: unzip packer
+      - run: ./packer build repro_6190.json
 #   check-vendor-vs-mod:
 #     <<: *golang
 #     steps:
