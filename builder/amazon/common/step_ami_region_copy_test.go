@@ -158,3 +158,28 @@ func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 		t.Fatalf("Should have added original ami to Regions")
 	}
 }
+
+func TestStepAmiRegionCopy_true_AMISkipBuildRegion(t *testing.T) {
+	// create step
+	stepAMIRegionCopy := StepAMIRegionCopy{
+		AccessConfig:       testAccessConfig(),
+		Regions:            make([]string, 0),
+		AMIKmsKeyId:        "",
+		RegionKeyIds:       make(map[string]string),
+		Name:               "fake-ami-name",
+		OriginalRegion:     "us-east-1",
+		AMISkipBuildRegion: true,
+	}
+	// mock out the region connection code
+	stepAMIRegionCopy.getRegionConn = getMockConn
+
+	state := tState()
+	stepAMIRegionCopy.Run(context.Background(), state)
+
+	if stepAMIRegionCopy.toDelete == "" {
+		t.Fatalf("Should delete original AMI if skip_save_build_region=true")
+	}
+	if len(stepAMIRegionCopy.Regions) == 0 {
+		t.Fatalf("Should not have added original ami to Regions")
+	}
+}
