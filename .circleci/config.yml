@@ -20,7 +20,8 @@ jobs:
     <<: *golang
     steps:
       - checkout
-      - run:  packer build repro_6190.json
+      - run: make dev
+      - run: packer build repro_6190.json
 #   check-vendor-vs-mod:
 #     <<: *golang
 #     steps:
