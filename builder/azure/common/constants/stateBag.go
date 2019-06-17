@@ -40,6 +40,7 @@ const (
 	ArmManagedImageSharedGalleryImageName                   string = "arm.ManagedImageSharedGalleryImageName"
 	ArmManagedImageSharedGalleryImageVersion                   string = "arm.ManagedImageSharedGalleryImageVersion"
 	ArmManagedImageSharedGalleryReplicationRegions                   string = "arm.ManagedImageSharedGalleryReplicationRegions"
+	ArmManagedImageSubscription                   string = "arm.ArmManagedImageSubscription"
 	ArmAsyncResourceGroupDelete           string = "arm.AsyncResourceGroupDelete"
 	ArmManagedImageOSDiskSnapshotName     string = "arm.ManagedImageOSDiskSnapshotName"
 	ArmManagedImageDataDiskSnapshotPrefix string = "arm.ManagedImageDataDiskSnapshotPrefix"
