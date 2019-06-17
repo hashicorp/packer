@@ -295,6 +295,12 @@ builder.
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Default `false`.
 
+-   `skip_save_build_region` (boolean) - If true, Packer will not check whether
+    an AMI with the `ami_name` exists in the region it is building in. It will
+    use an intermediary AMI name, which it will not convert to an AMI in the
+    build region. It will copy the intermediary AMI into any regions provided
+    in `ami_regions`, then delete the intermediary AMI. Default `false`.
+
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission
     to create volumes from the snapshot(s). `all` will make the snapshot
