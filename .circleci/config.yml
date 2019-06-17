@@ -1,12 +1,18 @@
 defaults: &golang
   docker:
-    - image: circleci/golang:1.12
+    - image: docker:17.05.0-ce-git
   working_directory: /go/src/github.com/hashicorp/packer
   steps:
     - checkout
     - run: go build -ldflags="-s -w" -o ./pkg/packer_$(go env GOOS)_$(go env GOARCH) .
     - run: zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH).zip ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
     - run: rm ./pkg/packer_$(go env GOOS)_$(go env GOARCH)
+    - run: curl -O https://storage.googleapis.com/golang/go1.12.4.linux-amd64.tar.gz
+    - run: tar -xvf go1.12.4.linux-amd64.tar.gz
+    - run: sudo chown -R root:root ./go
+    - run: sudo mv go /usr/local
+    - run: export GOPATH=$HOME/go; export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
     - persist_to_workspace:
         root: .
         paths:
