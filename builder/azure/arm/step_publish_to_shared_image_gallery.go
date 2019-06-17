@@ -98,6 +98,10 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, miSi
 }
 
 func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
+	if !s.toSIG() {
+		return multistep.ActionContinue
+	}
+
 	s.say("Publishing to Shared Image Gallery ...")
 
 	var miSigPubSubscription = stateBag.Get(constants.ArmManagedImageSigPublishSubscription).(string)
