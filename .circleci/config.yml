@@ -20,6 +20,7 @@ jobs:
     <<: *golang
     steps:
       - checkout
+      - run: uname -i
       - run: apt-get update; apt-get install curl
       - run: curl -O https://releases.hashicorp.com/packer/1.4.1/packer_1.4.1_linux_386.zip
       - run: tar -xvf packer_1.4.1_linux_386.tar.gz
