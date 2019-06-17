@@ -23,8 +23,8 @@ jobs:
     <<: *golang
     steps:
       - checkout
-      - run: ls -alh
-      - run: ./packer build repro_6190.json
+      - run: ls -alh packer
+      - run: ./packer/packer build repro_6190.json
 #   check-vendor-vs-mod:
 #     <<: *golang
 #     steps:
