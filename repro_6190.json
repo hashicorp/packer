@@ -1,0 +1,16 @@
+{
+  "builders": [{
+    "name": "ubuntu-docker",
+    "type": "docker",
+    "image": "ubuntu:16.04",
+    "commit": true
+  }],
+  "provisioners": [{
+    "type": "file",
+    "source": "./test.txt",
+    "destination": "/tmp/test.txt"
+  },{
+    "type": "shell",
+    "script": "./shell_local_dummy.sh"
+  }]
+}
