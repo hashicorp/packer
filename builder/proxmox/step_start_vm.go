@@ -21,9 +21,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	client := state.Get("proxmoxClient").(*proxmox.Client)
 	c := state.Get("config").(*Config)
 
-	agent := "1"
+	agent := 1
 	if c.Agent == false {
-		agent = "0"
+		agent = 0
 	}
 
 	ui.Say("Creating VM")
