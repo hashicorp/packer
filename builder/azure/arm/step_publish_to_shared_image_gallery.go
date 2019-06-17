@@ -3,9 +3,6 @@ package arm
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"time"
-
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -61,15 +58,7 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 		},
 	}
 
-	timeStamp := time.Now().Unix() // returns 64 bit value
-	versionName := "0."
-	// get the higher 16 bits
-	minorVersion := timeStamp >> 16
-	// get the lower 16 bits
-	patch := timeStamp & 0xffff
-	versionName += strconv.FormatInt(minorVersion, 10) + "." + strconv.FormatInt(patch, 10)
-
-	f, err := s.client.GalleryImageVersionsClient.CreateOrUpdate(ctx, miSigPubRg, miSIGalleryName, miSGImageName, versionName, galleryImageVersion)
+	f, err := s.client.GalleryImageVersionsClient.CreateOrUpdate(ctx, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, galleryImageVersion)
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
@@ -90,7 +79,6 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 		return err
 	}
 
-	// TODO: compare and contrast to see if Amrita needs to add this to artifact id
 	s.say(fmt.Sprintf(" -> Shared Gallery Image Version ID : '%s'", *(createdSGImageVersion.ID)))
 	return nil
 }
