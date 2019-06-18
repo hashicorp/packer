@@ -95,7 +95,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	var miSIGalleryName = stateBag.Get(constants.ArmManagedImageSharedGalleryName).(string)
 	var miSGImageName = stateBag.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
 	var miSGImageVersion = stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
-	var location = stateBag.Get(constants.ArmLocation).(string)
+	var location = stateBag.Get(constants.ArmManagedImageLocation).(string)
 	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
 	var miSigReplicationRegions = stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
 	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)

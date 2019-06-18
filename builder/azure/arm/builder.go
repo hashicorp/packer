@@ -157,7 +157,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			}
 		}
 		if foundMandatoryReplicationRegion == false {
-			return nil, fmt.Errorf("SIG requires that replication regions %v include the region %s in which the Managed Image resides", b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
+			// return nil, fmt.Errorf("SIG requires that replication regions %v include the region %s in which the Managed Image resides", b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
+			b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, append(b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation))
+			ui.Say(fmt.Sprintf("Adding Managed Image region SIG replications regions %v", b.config.SharedGalleryDestination.SigDestinationReplicationRegions))
 		}
 	}
 
@@ -398,7 +400,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
-		stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
 		stateBag.Put(constants.ArmManagedImageSubscription, b.config.SubscriptionID)
 	}
 }
