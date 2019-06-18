@@ -1,6 +1,6 @@
 //go:generate struct-markdown
 
-package common
+package ebssurrogate
 
 import (
 	"fmt"
@@ -8,45 +8,26 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// TODO(adrien): doc correctly
 type BlockDevice struct {
-	// Indicates whether the EBS volume is deleted on instance termination.
-	// Default false. NOTE: If this value is not explicitly set to true and
-	// volumes are not cleaned up by an alternative method, additional volumes
-	// will accumulate after every build.
-	DeleteOnTermination bool `mapstructure:"delete_on_termination" required:"false"`
-	// The device name exposed to the instance (for example, /dev/sdh or xvdh).
-	// Required for every device in the block device mapping.
-	DeviceName string `mapstructure:"device_name" required:"false"`
-	// Indicates whether or not to encrypt the volume. By default, Packer will
-	// keep the encryption setting to what it was in the source image. Setting
-	// false will result in an unencrypted device, and true will result in an
-	// encrypted one.
-	Encrypted *bool `mapstructure:"encrypted" required:"false"`
-	// The number of I/O operations per second (IOPS) that the volume supports.
-	// See the documentation on IOPs for more information
-	IOPS int64 `mapstructure:"iops" required:"false"`
-	// Suppresses the specified device included in the block device mapping of
-	// the AMI.
-	NoDevice bool `mapstructure:"no_device" required:"false"`
-	// The ID of the snapshot.
-	SnapshotId string `mapstructure:"snapshot_id" required:"false"`
-	// The virtual device name. See the documentation on Block Device Mapping
-	// for more information.
-	VirtualName string `mapstructure:"virtual_name" required:"false"`
-	// The volume type. gp2 for General Purpose (SSD) volumes, io1 for
-	// Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD, sc1
-	// for Cold HDD, and standard for Magnetic volumes.
-	VolumeType string `mapstructure:"volume_type" required:"false"`
-	// The size of the volume, in GiB. Required if not specifying a
-	// snapshot_id.
-	VolumeSize int64 `mapstructure:"volume_size" required:"false"`
+	awscommon.BlockDevice `mapstructure:",squash"`
+
+	// ebssurrogate only
+	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
 
 type BlockDevices []BlockDevice
+
+func (bds BlockDevices) Common() []awscommon.BlockDevice {
+	res := []awscommon.BlockDevice{}
+	for _, bd := range bds {
+		res = append(res, bd.BlockDevice)
+	} 
+	return res
+}
 
 func (bds BlockDevices) BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
@@ -117,4 +98,14 @@ func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 		}
 	}
 	return errs
+}
+
+func (b BlockDevices) GetOmissions() map[string]bool {
+	omitMap := make(map[string]bool)
+
+	for _, blockDevice := range b {
+		omitMap[blockDevice.DeviceName] = blockDevice.OmitFromArtifact
+	}
+
+	return omitMap
 }

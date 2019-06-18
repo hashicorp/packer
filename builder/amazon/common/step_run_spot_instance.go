@@ -21,9 +21,13 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+type EC2BlockDeviceMappingsBuilder interface {
+	BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping
+}
+
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	LaunchMappings                    BlockDevices
+	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	BlockDurationMinutes              int64
 	Debug                             bool
 	Comm                              *communicator.Config

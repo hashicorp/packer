@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 
-// The ebsvolume package contains a packer.Builder implementation that
-// builds EBS volumes for Amazon EC2 using an ephemeral instance,
+// The ebsvolume package contains a packer.Builder implementation that builds
+// EBS volumes for Amazon EC2 using an ephemeral instance,
 package ebsvolume
 
 import (
@@ -24,9 +24,9 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	// Add the block device
-	// mappings to the AMI. The block device mappings allow for keys:
-	VolumeMappings []BlockDevice `mapstructure:"ebs_volumes" required:"false"`
+	// Add the block device mappings to the AMI. The block device mappings
+	// allow for keys:
+	VolumeMappings BlockDevices `mapstructure:"ebs_volumes" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add ec2:ModifyInstanceAttribute to your AWS
 	// IAM policy. If false, this will disable enhanced networking in the final
@@ -42,7 +42,7 @@ type Config struct {
 	// Default `false`.
 	AMISriovNetSupport bool `mapstructure:"sriov_support" required:"false"`
 
-	launchBlockDevices awscommon.BlockDevices
+	launchBlockDevices BlockDevices
 	ctx                interpolate.Context
 }
 
@@ -84,7 +84,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	b.config.launchBlockDevices, err = commonBlockDevices(b.config.VolumeMappings, &b.config.ctx)
+	b.config.launchBlockDevices = b.config.VolumeMappings
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
 	}

@@ -82,7 +82,7 @@ func tStateSpot() multistep.StateBag {
 func getBasicStep() *StepRunSpotInstance {
 	stepRunSpotInstance := StepRunSpotInstance{
 		AssociatePublicIpAddress: false,
-		LaunchMappings:           []BlockDevice(nil),
+		LaunchMappings:           BlockDevices{},
 		BlockDurationMinutes:     0,
 		Debug:                    false,
 		Comm: &communicator.Config{
