@@ -91,7 +91,6 @@ func TestBlockDevice(t *testing.T) {
 				VolumeSize:          8,
 				DeleteOnTermination: true,
 				Encrypted:           aws.Bool(true),
-				KmsKeyId:            "2Fa48a521f-3aff-4b34-a159-376ac5d37812",
 			},
 
 			Result: &ec2.BlockDeviceMapping{
@@ -101,7 +100,6 @@ func TestBlockDevice(t *testing.T) {
 					VolumeSize:          aws.Int64(8),
 					DeleteOnTermination: aws.Bool(true),
 					Encrypted:           aws.Bool(true),
-					KmsKeyId:            aws.String("2Fa48a521f-3aff-4b34-a159-376ac5d37812"),
 				},
 			},
 		},
