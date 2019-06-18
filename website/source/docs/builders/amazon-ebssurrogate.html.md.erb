@@ -25,27 +25,72 @@ instance while the image is being created.
 
 ## Configuration Reference
 
-There are many configuration options available for this builder. They are
-segmented below into two categories: required and optional parameters. Within
-each category, the available configuration keys are alphabetized.
-
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration),
+[Access](#acces-configuration),
+[Run](#run-configuration) and
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
 
 ### Required:
 
-<%= partial "partials/builder/amazon/common/AccessConfig-required" %>
-<%= partial "partials/builder/amazon/common/RunConfig-required" %>
 <%= partial "partials/builder/amazon/ebssurrogate/Config-required" %>
 
 ### Optional:
 
 <%= partial "partials/builder/amazon/ebssurrogate/Config-not-required" %>
-<%= partial "partials/builder/amazon/common/AMIBlockDevices-not-required" %>
-<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
+
+
+### AMI Configuration
+
+#### Optional:
 <%= partial "partials/builder/amazon/common/AMIConfig-not-required" %>
+
+### Acces Configuration
+
+#### Required:
+
+<%= partial "partials/builder/amazon/common/AccessConfig-required" %>
+
+#### Optional:
+
+<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
+
+### Run Configuration
+
+#### Required:
+
+<%= partial "partials/builder/amazon/common/RunConfig-required" %>
+
+#### Optional:
+
 <%= partial "partials/builder/amazon/common/RunConfig-not-required" %>
+
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) array.
+
+
+<%= partial "partials/builder/amazon/common/BlockDevice" %>
+
+#### Optional only for [launch_block_device_mappings](#launch_block_device_mappings) 
+
+<%= partial "partials/builder/amazon/ebssurrogate/BlockDevice-not-required" %>
+
+#### Optional:
+<%= partial "partials/builder/amazon/common/BlockDevice-not-required" %>
+
+
+
+### Communicator Configuration
+
+#### Optional:
+
 <%= partial "partials/helper/communicator/Config-not-required" %>
 
 ## Basic Example

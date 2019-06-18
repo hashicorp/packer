@@ -25,9 +25,24 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
-	LaunchMappings         BlockDevices           `mapstructure:"launch_block_device_mappings" required:"false"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
+
+	// Add one or more block device mappings to the AMI. These will be attached
+	// when booting a new instance from your AMI. To add a block device during
+	// the Packer build see `launch_block_device_mappings` below. Your options
+	// here may vary depending on the type of VM you use. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	AMIMappings awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	// Add one or more block devices before the Packer build starts. If you add
+	// instance store volumes or EBS volumes in addition to the root device
+	// volume, the created AMI will contain block device mapping information
+	// for those volumes. Amazon creates snapshots of the source instance's
+	// root volume and any other EBS volumes described here. When you launch an
+	// instance from this new AMI, the instance automatically launches with
+	// these additional volumes, and will restore them from snapshots taken
+	// from the source instance. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	LaunchMappings BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
 	// A block device mapping describing the root device of the AMI. This looks
 	// like the mappings in `ami_block_device_mapping`, except with an
 	// additional field:

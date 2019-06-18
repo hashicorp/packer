@@ -15,7 +15,11 @@ import (
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
 
-	// ebssurrogate only
+	// If true, this block device will not be snapshotted and the created AMI
+	// will not contain block device mapping information for this volume. If
+	// false, the block device will be mapped into the final created AMI. Set
+	// this option to true if you need a block device mounted in the surrogate
+	// AMI but not in the final created AMI.
 	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
 
@@ -25,7 +29,7 @@ func (bds BlockDevices) Common() []awscommon.BlockDevice {
 	res := []awscommon.BlockDevice{}
 	for _, bd := range bds {
 		res = append(res, bd.BlockDevice)
-	} 
+	}
 	return res
 }
 
