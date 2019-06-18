@@ -36,13 +36,13 @@ type DescribeUHostInstanceRequest struct {
 	// 返回数据长度，默认为20，最大100
 	Limit *int `required:"false"`
 
-	// 硬件隔离组id
+	// 硬件隔离组id。通过硬件隔离组筛选主机。
 	IsolationGroup *string `required:"false"`
 
-	// 云主机ip对应的vpc id
+	// vpc id。通过VPC筛选主机。
 	VPCId *string `required:"false"`
 
-	// 云主机ip对应的子网id
+	// 子网id。通过子网筛选主机。
 	SubnetId *string `required:"false"`
 }
 
