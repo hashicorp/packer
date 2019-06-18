@@ -160,7 +160,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			// return nil, fmt.Errorf("SIG requires that replication regions %v include the region %s in which the Managed Image resides", b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
 			b.config.SharedGalleryDestination.SigDestinationReplicationRegions = append(b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
 			b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
-			ui.Say(fmt.Sprintf("Adding Managed Image region SIG replications regions %v", b.config.SharedGalleryDestination.SigDestinationReplicationRegions))
+			ui.Say(fmt.Sprintf("Adding Managed Image region SIG replications regions %v", b.stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions)))
 		}
 	}
 
