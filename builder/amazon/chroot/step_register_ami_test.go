@@ -92,11 +92,9 @@ func TestStepRegisterAmi_buildRegisterOptsFromScratch(t *testing.T) {
 	config := Config{
 		FromScratch:  true,
 		PackerConfig: common.PackerConfig{},
-		AMIBlockDevices: amazon.AMIBlockDevices{
-			AMIMappings: []amazon.BlockDevice{
-				{
-					DeviceName: rootDeviceName,
-				},
+		AMIMappings: []amazon.BlockDevice{
+			{
+				DeviceName: rootDeviceName,
 			},
 		},
 		RootDeviceName: rootDeviceName,
@@ -169,11 +167,9 @@ func TestStepRegisterAmi_buildRegisterOptFromExistingImageWithBlockDeviceMapping
 	config := Config{
 		FromScratch:  false,
 		PackerConfig: common.PackerConfig{},
-		AMIBlockDevices: amazon.AMIBlockDevices{
-			AMIMappings: []amazon.BlockDevice{
-				{
-					DeviceName: rootDeviceName,
-				},
+		AMIMappings: []amazon.BlockDevice{
+			{
+				DeviceName: rootDeviceName,
 			},
 		},
 		RootDeviceName: rootDeviceName,

@@ -124,7 +124,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.launchBlockDevices,
+			LaunchMappings:                    b.config.launchBlockDevices,
 			BlockDurationMinutes:              b.config.BlockDurationMinutes,
 			Ctx:                               b.config.ctx,
 			Comm:                              &b.config.RunConfig.Comm,
@@ -146,7 +146,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.launchBlockDevices,
+			LaunchMappings:                    b.config.launchBlockDevices,
 			Comm:                              &b.config.RunConfig.Comm,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,

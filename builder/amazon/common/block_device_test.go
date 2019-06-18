@@ -145,23 +145,19 @@ func TestBlockDevice(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		amiBlockDevices := AMIBlockDevices{
-			AMIMappings: []BlockDevice{*tc.Config},
-		}
+		var amiBlockDevices BlockDevices = []BlockDevice{*tc.Config}
 
-		launchBlockDevices := LaunchBlockDevices{
-			LaunchMappings: []BlockDevice{*tc.Config},
-		}
+		var launchBlockDevices BlockDevices = []BlockDevice{*tc.Config}
 
 		expected := []*ec2.BlockDeviceMapping{tc.Result}
 
-		amiResults := amiBlockDevices.BuildAMIDevices()
+		amiResults := amiBlockDevices.Build()
 		if !reflect.DeepEqual(expected, amiResults) {
 			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
 				expected, amiResults)
 		}
 
-		launchResults := launchBlockDevices.BuildLaunchDevices()
+		launchResults := launchBlockDevices.Build()
 		if !reflect.DeepEqual(expected, launchResults) {
 			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
 				expected, launchResults)

@@ -56,23 +56,12 @@ type BlockDevice struct {
 	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
 
-type BlockDevices struct {
-	AMIBlockDevices    `mapstructure:",squash"`
-	LaunchBlockDevices `mapstructure:",squash"`
-}
+type BlockDevices []BlockDevice
 
-type AMIBlockDevices struct {
-	AMIMappings []BlockDevice `mapstructure:"ami_block_device_mappings" required:"false"`
-}
-
-type LaunchBlockDevices struct {
-	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings" required:"false"`
-}
-
-func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
+func (bds BlockDevices) Build() []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
 
-	for _, blockDevice := range b {
+	for _, blockDevice := range bds {
 		mapping := &ec2.BlockDeviceMapping{
 			DeviceName: aws.String(blockDevice.DeviceName),
 		}
@@ -133,32 +122,19 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	return nil
 }
 
-func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
-	for _, d := range b.AMIMappings {
-		if err := d.Prepare(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
-		}
-	}
-	for _, d := range b.LaunchMappings {
-		if err := d.Prepare(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("LaunchMapping: %s", err.Error()))
+func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
+	for _, block := range bds {
+		if err := block.Prepare(ctx); err != nil {
+			errs = append(errs, err)
 		}
 	}
 	return errs
 }
 
-func (b *AMIBlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
-	return buildBlockDevices(b.AMIMappings)
-}
-
-func (b *LaunchBlockDevices) BuildLaunchDevices() []*ec2.BlockDeviceMapping {
-	return buildBlockDevices(b.LaunchMappings)
-}
-
-func (b *LaunchBlockDevices) GetOmissions() map[string]bool {
+func (b BlockDevices) GetOmissions() map[string]bool {
 	omitMap := make(map[string]bool)
 
-	for _, blockDevice := range b.LaunchMappings {
+	for _, blockDevice := range b {
 		omitMap[blockDevice.DeviceName] = blockDevice.OmitFromArtifact
 	}
 

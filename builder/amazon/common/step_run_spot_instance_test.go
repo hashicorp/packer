@@ -71,7 +71,7 @@ func tStateSpot() multistep.StateBag {
 	state.Put("ui", &packer.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
-	})
+	}) 
 	state.Put("availability_zone", "us-east-1c")
 	state.Put("securityGroupIds", []string{"sg-0b8984db72f213dc3"})
 	state.Put("subnet_id", "subnet-077fde4e")
@@ -82,16 +82,9 @@ func tStateSpot() multistep.StateBag {
 func getBasicStep() *StepRunSpotInstance {
 	stepRunSpotInstance := StepRunSpotInstance{
 		AssociatePublicIpAddress: false,
-		BlockDevices: BlockDevices{
-			AMIBlockDevices: AMIBlockDevices{
-				AMIMappings: []BlockDevice(nil),
-			},
-			LaunchBlockDevices: LaunchBlockDevices{
-				LaunchMappings: []BlockDevice(nil),
-			},
-		},
-		BlockDurationMinutes: 0,
-		Debug:                false,
+		LaunchMappings:           []BlockDevice(nil),
+		BlockDurationMinutes:     0,
+		Debug:                    false,
 		Comm: &communicator.Config{
 			SSH: communicator.SSH{
 				SSHKeyPairName: "foo",

@@ -26,9 +26,5 @@ func commonBlockDevices(mappings []BlockDevice, ctx *interpolate.Context) (awsco
 		result[i] = *interpolateBlockDev.(*awscommon.BlockDevice)
 	}
 
-	return awscommon.BlockDevices{
-		LaunchBlockDevices: awscommon.LaunchBlockDevices{
-			LaunchMappings: result,
-		},
-	}, nil
+	return result, nil
 }
