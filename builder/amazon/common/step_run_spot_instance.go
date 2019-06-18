@@ -106,7 +106,7 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	// LaunchTemplateEbsBlockDeviceRequest structs are themselves
 	// identical except for the struct's name, so you can cast one directly
 	// into the other.
-	blockDeviceMappings := s.LaunchMappings.Build()
+	blockDeviceMappings := s.LaunchMappings.BuildEC2BlockDeviceMappings()
 	var launchMappingRequests []*ec2.LaunchTemplateBlockDeviceMappingRequest
 	for _, mapping := range blockDeviceMappings {
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{

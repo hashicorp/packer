@@ -21,7 +21,7 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
-	LaunchMappings                      BlockDevices
+	LaunchMappings                    BlockDevices
 	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
 	Debug                             bool
@@ -111,7 +111,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		MaxCount:            aws.Int64(1),
 		MinCount:            aws.Int64(1),
 		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-		BlockDeviceMappings: s.LaunchMappings.Build(),
+		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
 		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
 	}

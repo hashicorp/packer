@@ -58,7 +58,7 @@ type BlockDevice struct {
 
 type BlockDevices []BlockDevice
 
-func (bds BlockDevices) Build() []*ec2.BlockDeviceMapping {
+func (bds BlockDevices) BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping
 
 	for _, blockDevice := range bds {

@@ -26,7 +26,7 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 	registerOpts := &ec2.RegisterImageInput{
 		ImageLocation:       &manifestPath,
 		Name:                aws.String(config.AMIName),
-		BlockDeviceMappings: config.AMIMappings.Build(),
+		BlockDeviceMappings: config.AMIMappings.BuildEC2BlockDeviceMappings(),
 	}
 
 	if config.AMIVirtType != "" {
