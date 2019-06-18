@@ -35,7 +35,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	createOpts := &ec2.CreateImageInput{
 		InstanceId:          instance.InstanceId,
 		Name:                &amiName,
-		BlockDeviceMappings: config.AMIMappings.Build(),
+		BlockDeviceMappings: config.AMIMappings.BuildEC2BlockDeviceMappings(),
 	}
 
 	createResp, err := ec2conn.CreateImage(createOpts)

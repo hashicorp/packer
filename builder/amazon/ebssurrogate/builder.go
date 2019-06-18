@@ -198,8 +198,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		}
 	}
 
-	amiDevices := b.config.AMIMappings.Build()
-	launchDevices := b.config.LaunchMappings.Build()
+	amiDevices := b.config.AMIMappings.BuildEC2BlockDeviceMappings()
+	launchDevices := b.config.LaunchMappings.BuildEC2BlockDeviceMappings()
 
 	// Build the steps
 	steps := []multistep.Step{
