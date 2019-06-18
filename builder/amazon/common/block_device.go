@@ -24,6 +24,8 @@ import (
 //     }]
 //  }
 // ```
+// Documentation for Block Devices Mappings can be found here:
+// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html
 type BlockDevice struct {
 	// Indicates whether the EBS volume is deleted on instance termination.
 	// Default false. NOTE: If this value is not explicitly set to true and
