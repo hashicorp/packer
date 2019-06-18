@@ -21,7 +21,7 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
-	LaunchMappings                    BlockDevices
+	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
 	Debug                             bool

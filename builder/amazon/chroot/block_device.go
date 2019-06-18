@@ -65,13 +65,3 @@ func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 	}
 	return errs
 }
-
-func (b BlockDevices) GetOmissions() map[string]bool {
-	omitMap := make(map[string]bool)
-
-	for _, blockDevice := range b {
-		omitMap[blockDevice.DeviceName] = blockDevice.OmitFromArtifact
-	}
-
-	return omitMap
-}

@@ -26,7 +26,7 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
-	LaunchMappings         awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
+	LaunchMappings         BlockDevices           `mapstructure:"launch_block_device_mappings" required:"false"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	// A block device mapping describing the root device of the AMI. This looks
 	// like the mappings in `ami_block_device_mapping`, except with an
@@ -235,7 +235,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
 		},
 		&awscommon.StepCleanupVolumes{
-			LaunchMappings: b.config.LaunchMappings,
+			LaunchMappings: b.config.LaunchMappings.Common(),
 		},
 		instanceStep,
 		&awscommon.StepGetPassword{
