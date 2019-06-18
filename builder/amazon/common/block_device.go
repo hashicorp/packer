@@ -11,7 +11,19 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// TODO(adrien): doc correctly
+// These will be attached when booting a new instance from your AMI.
+// Your options here may vary depending on the type of VM you use. Example:
+//
+// ``` json
+// "builders":[{
+// "type":"...",
+// "ami_block_device_mappings":[{
+//           "device_name":"xvda",
+//           "delete_on_termination":true,
+//           "volume_type":"gp2"
+//     }]
+//  }
+// ```
 type BlockDevice struct {
 	// Indicates whether the EBS volume is deleted on instance termination.
 	// Default false. NOTE: If this value is not explicitly set to true and
