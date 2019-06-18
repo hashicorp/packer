@@ -56,7 +56,7 @@ dev: ## Build and install a development build
 	fi
 	@mkdir -p pkg/$(GOOS)_$(GOARCH)
 	@mkdir -p bin
-	@go install -mod=vendor -ldflags '$(GOLDFLAGS)'
+	@go install -ldflags '$(GOLDFLAGS)'
 	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
