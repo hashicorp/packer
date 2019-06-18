@@ -15,17 +15,18 @@
     "instance_type": "n-basic-2",
     "source_image_id":"uimage-f1chxn",
     "ssh_username":"root",
-    "image_name": "packer-test-regionCopy-bj",
+    "image_name": "packer-test-basic-bj",
     "image_copy_to_mappings": [{
-      "project_id":  "org-fthbzm",
+      "project_id":  "{{user `ucloud_project_id`}}",
       "region":		"cn-sh2",
-      "description": "test"
+      "description": "test",
+      "name": "packer-test-basic-sh"
     }]
   }],
   "provisioners": [{
     "type": "shell",
     "inline": [
-      "yum install mysql -y"
+      "yum install -y mysql"
     ]
   }]
 }

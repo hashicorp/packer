@@ -3,7 +3,7 @@ description: |
     The `ucloud-uhost` Packer builder plugin provides the capability to build
     customized images based on an existing base images.
 layout: docs
-page_title: UCloud Image Builder
+page_title: 'UCloud Image Builder'
 sidebar_current: 'docs-builders-ucloud-uhost'
 ---
 
