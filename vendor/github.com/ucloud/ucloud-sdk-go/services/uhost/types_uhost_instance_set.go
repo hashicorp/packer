@@ -14,8 +14,11 @@ type UHostInstanceSet struct {
 	// UHost实例ID
 	UHostId string
 
-	// 云主机机型。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	// 【建议不再使用】云主机机型（旧）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	UHostType string
+
+	// 云主机机型（新）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	MachineType string
 
 	// 【建议不再使用】主机磁盘类型。 枚举值为：\\ > LocalDisk，本地磁盘; \\ > UDisk 云盘。\\只要有一块磁盘为本地盘，即返回LocalDisk。
 	StorageType string
