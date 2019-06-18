@@ -141,7 +141,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// validate that Shared Gallery Image exists before publishing to SIG
-	if b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
+	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		_, err = azureClient.GalleryImagesClient.Get(ctx, b.config.SharedGalleryDestination.SigDestinationResourceGroup, b.config.SharedGalleryDestination.SigDestinationGalleryName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		if err != nil {
 			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exists in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
@@ -428,9 +428,15 @@ func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) strin
 
 func verifyAndUpdateReplicationRegions(regions []string, mustHaveRegion string) []string {
 	for _, region := range regions {
-		if strings.EqualFold(region, mustHaveRegion) {
+		// change region to lower-case and strip spaces
+		normalizedRegion := normalizeAzureRegion(region)
+		if strings.EqualFold(normalizedRegion, mustHaveRegion) {
 			return regions
 		}
 	}
 	return append(regions, mustHaveRegion)
+}
+
+func normalizeAzureRegion(name string) string {
+	return strings.ToLower(strings.Replace(name, " ", "", -1))
 }
