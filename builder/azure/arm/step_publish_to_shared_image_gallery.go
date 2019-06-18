@@ -10,11 +10,11 @@ import (
 )
 
 type StepPublishToSharedImageGallery struct {
-	client              *AzureClient
-	publish             func(ctx context.Context, mdiID, miSigPubSubscription, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error
-	say                 func(message string)
-	error               func(e error)
-	toSIG               func() bool
+	client  *AzureClient
+	publish func(ctx context.Context, mdiID, miSigPubSubscription, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error
+	say     func(message string)
+	error   func(e error)
+	toSIG   func() bool
 }
 
 func NewStepPublishToSharedImageGallery(client *AzureClient, ui packer.Ui, config *Config) *StepPublishToSharedImageGallery {
@@ -45,7 +45,7 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 
 	galleryImageVersion := compute.GalleryImageVersion{
 		Location: &location,
-		Tags: tags,
+		Tags:     tags,
 		GalleryImageVersionProperties: &compute.GalleryImageVersionProperties{
 			PublishingProfile: &compute.GalleryImageVersionPublishingProfile{
 				Source: &compute.GalleryArtifactSource{
