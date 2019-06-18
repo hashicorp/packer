@@ -33,29 +33,65 @@ your account, it is up to you to use, delete, etc. the AMI.
 prefix `packer`. This can be useful if you want to restrict the security groups
 and key pairs Packer is able to operate on.
 
-## Configuration Reference
+## EBS Specific Configuration Reference
 
-There are many configuration options available for the builder. They are
-segmented below into two categories: required and optional parameters. Within
-each category, the available configuration keys are alphabetized.
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration),
+[Access](#acces-configuration),
+[Run](#run-configuration) and
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
 
-In addition to the options listed here, a
-[communicator](../templates/communicator.html) can be configured for this
-builder.
+#### Optional:
 
-### Required:
+<%= partial "partials/builder/amazon/ebs/Config-not-required" %>
+
+
+### AMI Configuration
+
+#### Optional:
+<%= partial "partials/builder/amazon/common/AMIConfig-not-required" %>
+
+### Acces Configuration
+
+#### Required:
 
 <%= partial "partials/builder/amazon/common/AccessConfig-required" %>
-<%= partial "partials/builder/amazon/common/AMIConfig-required" %>
+
+#### Optional:
+
+<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
+
+### Run Configuration
+
+#### Required:
+
 <%= partial "partials/builder/amazon/common/RunConfig-required" %>
 
-### Optional:
+#### Optional:
 
-<%= partial "partials/builder/amazon/common/AMIBlockDevices-not-required" %>
-<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
-<%= partial "partials/builder/amazon/common/AMIConfig-not-required" %>
 <%= partial "partials/builder/amazon/common/RunConfig-not-required" %>
-<%= partial "partials/builder/amazon/common/LaunchBlockDevices-not-required" %>
+
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) or the 
+[launch_block_device_mappings](#launch_block_device_mappings)array.
+
+<%= partial "partials/builder/amazon/common/BlockDevice" %>
+
+
+#### Optional:
+<%= partial "partials/builder/amazon/common/BlockDevice-not-required" %>
+
+### Communicator Configuration
+
+#### Optional:
+
 <%= partial "partials/helper/communicator/Config-not-required" %>
 
 ## Basic Example
