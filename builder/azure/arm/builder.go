@@ -140,15 +140,25 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ui.Error("Warning: You are using Azure Packer Builder to create VHDs which is being deprecated, consider using Managed Images. Learn more http://aka.ms/packermanagedimage")
 	}
 
-	// validate that Shared Gallery Image exists before publishing to SIG
+	// for Managed Images, validate that Shared Gallery Image exists before publishing to SIG
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		_, err = azureClient.GalleryImagesClient.Get(ctx, b.config.SharedGalleryDestination.SigDestinationResourceGroup, b.config.SharedGalleryDestination.SigDestinationGalleryName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		if err != nil {
 			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exists in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
 		}
 		// SIG requires that replication regions include the region in which the Managed Image resides
-		replicationRegions := verifyAndUpdateReplicationRegions(b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
-		b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, replicationRegions)
+		foundMandatoryReplicationRegion := false
+		for _, region := range b.config.SharedGalleryDestination.SigDestinationReplicationRegions {
+			// change region to lower-case and strip spaces
+			normalizedRegion := normalizeAzureRegion(region)
+			if strings.EqualFold(normalizedRegion, b.config.manageImageLocation) {
+				foundMandatoryReplicationRegion = true
+				break
+			}
+		}
+		if foundMandatoryReplicationRegion == false {
+			return nil, fmt.Errorf("SIG requires that replication regions %v include the region %s in which the Managed Image resides", b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
+		}
 	}
 
 	if b.config.BuildResourceGroupName != "" {
@@ -388,6 +398,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
 		stateBag.Put(constants.ArmManagedImageSubscription, b.config.SubscriptionID)
 	}
 }
@@ -424,17 +435,6 @@ func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) strin
 	}
 	return claims["oid"].(string)
 
-}
-
-func verifyAndUpdateReplicationRegions(regions []string, mustHaveRegion string) []string {
-	for _, region := range regions {
-		// change region to lower-case and strip spaces
-		normalizedRegion := normalizeAzureRegion(region)
-		if strings.EqualFold(normalizedRegion, mustHaveRegion) {
-			return regions
-		}
-	}
-	return append(regions, mustHaveRegion)
 }
 
 func normalizeAzureRegion(name string) string {
