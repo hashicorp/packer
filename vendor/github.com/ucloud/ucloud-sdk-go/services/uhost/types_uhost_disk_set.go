@@ -14,9 +14,6 @@ type UHostDiskSet struct {
 	// 是否是系统盘。枚举值：\\ > True，是系统盘 \\ > False，是数据盘（默认）。Disks数组中有且只能有一块盘是系统盘。
 	IsBoot string
 
-	// true: 加密盘 false：非加密盘
-	Encrypted bool
-
 	// 【建议不再使用】磁盘类型。系统盘: Boot，数据盘: Data,网络盘：Udisk
 	Type string
 

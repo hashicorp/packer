@@ -14,7 +14,7 @@ func ToQueryMap(req Common) (map[string]string, error) {
 		v = v.Elem()
 	}
 
-	return encode(&v)
+	return encode(&v, "")
 }
 
 func encodeOne(v *reflect.Value) (string, error) {
@@ -42,15 +42,32 @@ func encodeOne(v *reflect.Value) (string, error) {
 	}
 }
 
-func encode(v *reflect.Value) (map[string]string, error) {
+func encode(v *reflect.Value, prefix string) (map[string]string, error) {
 	result := make(map[string]string)
 
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		name := v.Type().Field(i).Name
+		if prefix != "" && prefix != "CommonBase" {
+			name = fmt.Sprintf("%s.%s", prefix, name)
+		}
 
 		// skip unexported field
 		if !f.CanSet() {
+			continue
+		}
+
+		// find the real value of pointer
+		// such as **struct to struct
+		for f.Kind() == reflect.Ptr {
+			if f.IsNil() {
+				break
+			}
+			f = f.Elem()
+		}
+
+		// check if non-pointer
+		if f.Kind() == reflect.Ptr && f.IsNil() {
 			continue
 		}
 
@@ -65,16 +82,14 @@ func encode(v *reflect.Value) (map[string]string, error) {
 				keyPrefix := fmt.Sprintf("%s.%v", name, i)
 
 				if item.Kind() == reflect.Struct {
-					kv, err := encode(&item)
+					kv, err := encode(&item, keyPrefix)
 					if err != nil {
 						return result, err
 					}
 
 					for k, v := range kv {
-						name := fmt.Sprintf("%s.%s", keyPrefix, k)
-
 						if v != "" {
-							result[name] = v
+							result[k] = v
 						}
 					}
 				} else {
@@ -89,7 +104,7 @@ func encode(v *reflect.Value) (map[string]string, error) {
 				}
 			}
 		case reflect.Struct:
-			m, err := encode(&f)
+			m, err := encode(&f, name)
 			if err != nil {
 				return result, err
 			}
@@ -99,10 +114,6 @@ func encode(v *reflect.Value) (map[string]string, error) {
 				result[k] = v
 			}
 		default:
-			if f.Kind() == reflect.Ptr && f.IsNil() {
-				continue
-			}
-
 			s, err := encodeOne(&f)
 			if err != nil {
 				return result, err

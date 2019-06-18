@@ -110,6 +110,57 @@ type CreateUHostInstanceRequest struct {
 
 	// 最低cpu平台，枚举值["Intel/Auto", "Intel/LvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake", "Intel/Cascadelake"(只有O型云主机可选)]
 	MinimalCpuPlatform *string `required:"false"`
+
+	// NetworkInterface
+	NetworkInterface []CreateUHostInstanceParamNetworkInterface
+}
+
+/*
+CreateUHostInstanceParamNetworkInterface is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterface struct {
+
+	// EIP
+	EIP *CreateUHostInstanceParamNetworkInterfaceEIP
+}
+
+/*
+CreateUHostInstanceParamNetworkInterfaceEIP is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterfaceEIP struct {
+
+	// 弹性IP的计费模式. 枚举值: "Traffic", 流量计费; "Bandwidth", 带宽计费; "ShareBandwidth",共享带宽模式. "Free":免费带宽模式.默认为 "Bandwidth".
+	PayMode *string
+
+	// 当前EIP代金券id。请通过DescribeCoupon接口查询，或登录用户中心查看
+	CouponId *string
+
+	// 【如果绑定EIP这个参数必填】弹性IP的外网带宽, 单位为Mbps. 共享带宽模式必须指定0M带宽, 非共享带宽模式必须指定非0Mbps带宽. 各地域非共享带宽的带宽范围如下： 流量计费[1-300]，带宽计费[1-800]
+	Bandwidth *int
+
+	// 绑定的共享带宽Id，仅当PayMode为ShareBandwidth时有效
+	ShareBandwidthId *string
+
+	// GlobalSSH
+	GlobalSSH *CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH
+
+	// 【如果绑定EIP这个参数必填】弹性IP的线路如下: 国际: International BGP: Bgp 各地域允许的线路参数如下: cn-sh1: Bgp cn-sh2: Bgp cn-gd: Bgp cn-bj1: Bgp cn-bj2: Bgp hk: International us-ca: International th-bkk: International kr-seoul:International us-ws:International ge-fra:International sg:International tw-kh:International.其他海外线路均为 International
+	OperatorName *string
+}
+
+/*
+CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH struct {
+
+	// 填写支持SSH访问IP的地区名称，如“洛杉矶”，“新加坡”，“香港”，“东京”，“华盛顿”，“法兰克福”。Area和AreaCode两者必填一个
+	Area *string
+
+	// AreaCode, 区域航空港国际通用代码。Area和AreaCode两者必填一个
+	AreaCode *string
+
+	// SSH端口，1-65535且不能使用80，443端口
+	Port *int
 }
 
 // CreateUHostInstanceResponse is response schema for CreateUHostInstance action

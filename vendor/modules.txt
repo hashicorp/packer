@@ -408,7 +408,7 @@ github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
-# github.com/ucloud/ucloud-sdk-go v0.8.6
+# github.com/ucloud/ucloud-sdk-go v0.8.7
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/uhost
 github.com/ucloud/ucloud-sdk-go/services/unet
