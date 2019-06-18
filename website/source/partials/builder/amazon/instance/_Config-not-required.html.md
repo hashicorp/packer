@@ -1,5 +1,7 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/instance/builder.go; DO NOT EDIT MANUALLY -->
 
+-   `ami_block_device_mappings` (awscommon.BlockDevices) - AMI Mappings
+-   `launch_block_device_mappings` (awscommon.BlockDevices) - Launch Mappings
 -   `bundle_destination` (string) - The directory on the running instance where
     the bundled AMI will be saved prior to uploading. By default this is
     /tmp. This directory must exist and be writable.

@@ -1,7 +1,7 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/ebsvolume/builder.go; DO NOT EDIT MANUALLY -->
 
--   `ebs_volumes` ([]BlockDevice) - Add the block device
-    mappings to the AMI. The block device mappings allow for keys:
+-   `ebs_volumes` (BlockDevices) - Add the block device mappings to the AMI. The block device mappings
+    allow for keys:
     
 -   `ena_support` (*bool) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add ec2:ModifyInstanceAttribute to your AWS

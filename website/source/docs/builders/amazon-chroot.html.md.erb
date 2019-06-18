@@ -31,7 +31,7 @@ builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in
 your account, it is up to you to use, delete, etc., the AMI.
 
-## How Does it Work?
+### How Does it Work?
 
 This builder works by creating a new EBS volume from an existing source AMI and
 attaching it into an already-running EC2 instance. Once attached, a
@@ -49,23 +49,53 @@ expensive because the EC2 instance must be kept running persistently in order
 to build AMIs, whereas the other AMI builders start instances on-demand to
 build AMIs as needed.
 
-## Configuration Reference
+## Chroot Specific Configuration Reference
 
-There are many configuration options available for the builder. They are
-segmented below into two categories: required and optional parameters. Within
-each category, the available configuration keys are alphabetized.
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration) and
+[Access](#acces-config-configuration) configuration references, which are
+necessary for this build to succeed and can be found further down the page.
 
-### Required:
+#### Required:
 
-<%= partial "partials/builder/amazon/common/AccessConfig-required" %>
 <%= partial "partials/builder/amazon/chroot/Config-required" %>
 
-### Optional:
-
+#### Optional:
 <%= partial "partials/builder/amazon/chroot/Config-not-required" %>
-<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
+
+## General Common Configuration Reference
+
+Following will be a set of fields that are also settable for other aws
+builders.
+
+### AMI Configuration
+
+#### Optional:
 <%= partial "partials/builder/amazon/common/AMIConfig-not-required" %>
-<%= partial "partials/builder/amazon/common/AMIBlockDevices-not-required" %>
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) array.
+
+<%= partial "partials/builder/amazon/common/BlockDevice" %>
+
+
+#### Optional:
+<%= partial "partials/builder/amazon/common/BlockDevice-not-required" %>
+<%= partial "partials/builder/amazon/chroot/BlockDevice-not-required" %>
+
+### Acces Config Configuration
+
+#### Required:
+
+<%= partial "partials/builder/amazon/common/AccessConfig-required" %>
+
+#### Optional:
+
+<%= partial "partials/builder/amazon/common/AccessConfig-not-required" %>
 
 ## Basic Example
 
