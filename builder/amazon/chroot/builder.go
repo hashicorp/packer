@@ -26,10 +26,11 @@ const BuilderId = "mitchellh.amazon.chroot"
 // Config is the configuration that is chained through the steps and
 // settable from the template.
 type Config struct {
-	common.PackerConfig       `mapstructure:",squash"`
-	awscommon.AMIBlockDevices `mapstructure:",squash"`
-	awscommon.AMIConfig       `mapstructure:",squash"`
-	awscommon.AccessConfig    `mapstructure:",squash"`
+	common.PackerConfig    `mapstructure:",squash"`
+	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	LaunchMappings         awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
+	awscommon.AMIConfig    `mapstructure:",squash"`
+	awscommon.AccessConfig `mapstructure:",squash"`
 	// This is a list of devices to
 	// mount into the chroot environment. This configuration parameter requires
 	// some additional documentation which is in the Chroot

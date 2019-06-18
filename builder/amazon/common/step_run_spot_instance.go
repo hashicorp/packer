@@ -23,7 +23,7 @@ import (
 
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	BlockDevices                      BlockDevices
+	LaunchMappings                    BlockDevices
 	BlockDurationMinutes              int64
 	Debug                             bool
 	Comm                              *communicator.Config
@@ -106,7 +106,7 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	// LaunchTemplateEbsBlockDeviceRequest structs are themselves
 	// identical except for the struct's name, so you can cast one directly
 	// into the other.
-	blockDeviceMappings := s.BlockDevices.BuildLaunchDevices()
+	blockDeviceMappings := s.LaunchMappings.Build()
 	var launchMappingRequests []*ec2.LaunchTemplateBlockDeviceMappingRequest
 	for _, mapping := range blockDeviceMappings {
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{

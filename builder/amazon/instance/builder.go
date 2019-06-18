@@ -30,7 +30,8 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
-	awscommon.BlockDevices `mapstructure:",squash"`
+	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	LaunchMappings         awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 	// Your AWS account ID. This is required for bundling
 	// the AMI. This is not the same as the access key. You can find your
@@ -157,7 +158,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
@@ -222,7 +224,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			BlockDevices:             b.config.BlockDevices,
+			LaunchMappings:           b.config.LaunchMappings,
 			BlockDurationMinutes:     b.config.BlockDurationMinutes,
 			Ctx:                      b.config.ctx,
 			Comm:                     &b.config.RunConfig.Comm,
@@ -242,7 +244,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			BlockDevices:             b.config.BlockDevices,
+			LaunchMappings:           b.config.LaunchMappings,
 			Comm:                     &b.config.RunConfig.Comm,
 			Ctx:                      b.config.ctx,
 			Debug:                    b.config.PackerDebug,

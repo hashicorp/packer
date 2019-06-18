@@ -25,7 +25,8 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	awscommon.BlockDevices `mapstructure:",squash"`
+	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	LaunchMappings         awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	// A block device mapping describing the root device of the AMI. This looks
 	// like the mappings in `ami_block_device_mapping`, except with an
@@ -83,7 +84,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
 
 	if b.config.AMIVirtType == "" {
@@ -91,7 +93,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	foundRootVolume := false
-	for _, launchDevice := range b.config.BlockDevices.LaunchMappings {
+	for _, launchDevice := range b.config.LaunchMappings {
 		if launchDevice.DeviceName == b.config.RootDevice.SourceDeviceName {
 			foundRootVolume = true
 			if launchDevice.OmitFromArtifact {
@@ -154,7 +156,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.BlockDevices,
+			LaunchMappings:                    b.config.LaunchMappings,
 			BlockDurationMinutes:              b.config.BlockDurationMinutes,
 			Ctx:                               b.config.ctx,
 			Comm:                              &b.config.RunConfig.Comm,
@@ -177,7 +179,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.BlockDevices,
+			LaunchMappings:                    b.config.LaunchMappings,
 			Comm:                              &b.config.RunConfig.Comm,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
@@ -196,8 +198,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		}
 	}
 
-	amiDevices := b.config.BuildAMIDevices()
-	launchDevices := b.config.BuildLaunchDevices()
+	amiDevices := b.config.AMIMappings.Build()
+	launchDevices := b.config.LaunchMappings.Build()
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -233,7 +235,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
 		},
 		&awscommon.StepCleanupVolumes{
-			BlockDevices: b.config.BlockDevices,
+			LaunchMappings: b.config.LaunchMappings,
 		},
 		instanceStep,
 		&awscommon.StepGetPassword{
@@ -263,7 +265,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepSnapshotVolumes{
 			LaunchDevices:   launchDevices,
-			SnapshotOmitMap: b.config.GetOmissions(),
+			SnapshotOmitMap: b.config.LaunchMappings.GetOmissions(),
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -279,7 +281,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			Architecture:             b.config.Architecture,
-			LaunchOmitMap:            b.config.GetOmissions(),
+			LaunchOmitMap:            b.config.LaunchMappings.GetOmissions(),
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
