@@ -31,6 +31,7 @@ require (
 	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
+	github.com/exoscale/egoscale v0.18.1
 	github.com/go-ini/ini v1.25.4
 	github.com/gofrs/flock v0.7.1
 	github.com/google/go-cmp v0.2.0
