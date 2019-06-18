@@ -24,6 +24,7 @@ jobs:
       - run: mkdir packer141
       - run: unzip packer141.zip -d packer141
       - run: ls -alh
+      - run: docker info
       - run: ./packer141/packer build repro_6190.json
 #   check-vendor-vs-mod:
 #     <<: *golang
