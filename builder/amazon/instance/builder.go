@@ -24,52 +24,64 @@ import (
 // The unique ID for this builder
 const BuilderId = "mitchellh.amazon.instance"
 
-// Config is the configuration that is chained through the steps and
-// settable from the template.
+// Config is the configuration that is chained through the steps and settable
+// from the template.
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
-	AMIMappings            awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
-	LaunchMappings         awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	// Your AWS account ID. This is required for bundling
-	// the AMI. This is not the same as the access key. You can find your
-	// account ID in the security credentials page of your AWS account.
+
+	// Add one or more block device mappings to the AMI. These will be attached
+	// when booting a new instance from your AMI. To add a block device during
+	// the Packer build see `launch_block_device_mappings` below. Your options
+	// here may vary depending on the type of VM you use. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	AMIMappings awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	// Add one or more block devices before the Packer build starts. If you add
+	// instance store volumes or EBS volumes in addition to the root device
+	// volume, the created AMI will contain block device mapping information
+	// for those volumes. Amazon creates snapshots of the source instance's
+	// root volume and any other EBS volumes described here. When you launch an
+	// instance from this new AMI, the instance automatically launches with
+	// these additional volumes, and will restore them from snapshots taken
+	// from the source instance. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	LaunchMappings awscommon.BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
+	// Your AWS account ID. This is required for bundling the AMI. This is not
+	// the same as the access key. You can find your account ID in the security
+	// credentials page of your AWS account.
 	AccountId string `mapstructure:"account_id" required:"true"`
-	// The directory on the running instance where
-	// the bundled AMI will be saved prior to uploading. By default this is
-	// /tmp. This directory must exist and be writable.
+	// The directory on the running instance where the bundled AMI will be
+	// saved prior to uploading. By default this is /tmp. This directory must
+	// exist and be writable.
 	BundleDestination string `mapstructure:"bundle_destination" required:"false"`
-	// The prefix for files created from bundling the
-	// root volume. By default this is image-{{timestamp}}. The timestamp
-	// variable should be used to make sure this is unique, otherwise it can
-	// collide with other created AMIs by Packer in your account.
+	// The prefix for files created from bundling the root volume. By default
+	// this is image-{{timestamp}}. The timestamp variable should be used to
+	// make sure this is unique, otherwise it can collide with other created
+	// AMIs by Packer in your account.
 	BundlePrefix string `mapstructure:"bundle_prefix" required:"false"`
-	// The command to use to upload the bundled
-	// volume. See the "custom bundle commands" section below for more
-	// information.
+	// The command to use to upload the bundled volume. See the "custom bundle
+	// commands" section below for more information.
 	BundleUploadCommand string `mapstructure:"bundle_upload_command" required:"false"`
-	// The command to use to bundle the volume.
-	// See the "custom bundle commands" section below for more information.
+	// The command to use to bundle the volume. See the "custom bundle
+	// commands" section below for more information.
 	BundleVolCommand string `mapstructure:"bundle_vol_command" required:"false"`
-	// The name of the S3 bucket to upload the AMI. This
-	// bucket will be created if it doesn't exist.
+	// The name of the S3 bucket to upload the AMI. This bucket will be created
+	// if it doesn't exist.
 	S3Bucket string `mapstructure:"s3_bucket" required:"true"`
-	// The local path to a valid X509 certificate for
-	// your AWS account. This is used for bundling the AMI. This X509 certificate
-	// must be registered with your account from the security credentials page in
-	// the AWS console.
+	// The local path to a valid X509 certificate for your AWS account. This is
+	// used for bundling the AMI. This X509 certificate must be registered with
+	// your account from the security credentials page in the AWS console.
 	X509CertPath string `mapstructure:"x509_cert_path" required:"true"`
-	// The local path to the private key for the X509
-	// certificate specified by x509_cert_path. This is used for bundling the
-	// AMI.
+	// The local path to the private key for the X509 certificate specified by
+	// x509_cert_path. This is used for bundling the AMI.
 	X509KeyPath string `mapstructure:"x509_key_path" required:"true"`
-	// The path on the remote machine where the X509
-	// certificate will be uploaded. This path must already exist and be writable.
-	// X509 certificates are uploaded after provisioning is run, so it is
-	// perfectly okay to create this directory as part of the provisioning
-	// process. Defaults to /tmp.
+	// The path on the remote machine where the X509 certificate will be
+	// uploaded. This path must already exist and be writable. X509
+	// certificates are uploaded after provisioning is run, so it is perfectly
+	// okay to create this directory as part of the provisioning process.
+	// Defaults to /tmp.
 	X509UploadPath string `mapstructure:"x509_upload_path" required:"false"`
 
 	ctx interpolate.Context
