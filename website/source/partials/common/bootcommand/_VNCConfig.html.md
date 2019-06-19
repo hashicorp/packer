@@ -5,14 +5,4 @@ the machine, simulating a human actually typing the keyboard.
 Keystrokes are typed as separate key up/down events over VNC with a default
 100ms delay. The delay alleviates issues with latency and CPU contention.
 You can tune this delay on a per-builder basis by specifying
-"boot_key_interval" in your Packer template, example:
-
-``` json
-   "builders": [
-        {
-           "type": "...",
-           "boot_key_interval": "10ms"
-           ...
-        }
-  ]
-```
+"boot_key_interval" in your Packer template.
