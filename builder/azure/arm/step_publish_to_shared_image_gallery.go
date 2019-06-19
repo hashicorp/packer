@@ -108,8 +108,6 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG image name     : '%s'", miSGImageName))
 	s.say(fmt.Sprintf(" -> SIG image version     : '%s'", miSGImageVersion))
 	s.say(fmt.Sprintf(" -> SIG replication regions    : '%v'", miSigReplicationRegions))
-	s.say(fmt.Sprintf(" -> SIG publish location     : '%s'", location))
-	s.say(fmt.Sprintf(" -> SIG publish tags     : '%v'", tags))
 	err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, location, tags)
 
 	if err != nil {
