@@ -45,209 +45,105 @@ It is important to add a `shutdown_command`. By default Packer halts the virtual
 machine and the file system may not be sync'd. Thus, changes made in a
 provisioner might not be saved.
 
-## ISO Configuration Reference
+## VirtualBox-ISO Builder Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Export](#export-configuration),
+[Boot](#boot-configuration),
+[Shutdown](#shutdown-configuration),
+[Run](#run-configuration),
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/iso/Config-not-required" %>
+<%= partial "partials/builder/virtualbox/common/VBoxVersionConfig-not-required" %>
+<%= partial "partials/builder/virtualbox/common/VBoxBundleConfig-not-required" %>
+<%= partial "partials/builder/virtualbox/common/GuestAdditionsConfig-not-required" %>
+
+### ISO Configuration
 
 <%= partial "partials/common/ISOConfig" %>
 
-### Required:
+#### Required:
 
 <%= partial "partials/common/ISOConfig-required" %>
 
-### Optional:
+#### Optional:
 
 <%= partial "partials/common/ISOConfig-not-required" %>
 
-## Http directory configuration reference
+### Http directory configuration
 
 <%= partial "partials/common/HTTPConfig" %>
-### Optional:
+#### Optional:
 
 <%= partial "partials/common/HTTPConfig-not-required" %>
 
-
-## Floppy configuration reference
+### Floppy configuration
 
 <%= partial "partials/common/FloppyConfig" %>
 
-### Optional:
+#### Optional:
 
 <%= partial "partials/common/FloppyConfig-not-required" %>
 
-## Virtualbox ISO Configuration Reference
+### Export configuration
 
-There are many configuration options available for the VirtualBox builder. They
-are organized below into two categories: required and optional. Within each
-category, the available options are alphabetized and described.
+#### Optional:
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+<%= partial "partials/builder/virtualbox/common/ExportConfig-not-required" %>
 
-### Optional:
+### Output configuration
 
--   `boot_command` (array of strings) - This is an array of commands to type
-    when the virtual machine is first booted. The goal of these commands should
-    be to type just enough to initialize the operating system installer. Special
-    keys can be typed as well, and are covered in the section below on the
-    boot command. If this is not specified, it is assumed the installer will
-    start itself.
+#### Optional:
 
--   `boot_wait` (string) - The time to wait after booting the initial virtual
-    machine before typing the `boot_command`. The value of this should be
-    a duration. Examples are `5s` and `1m30s` which will cause Packer to wait
-    five seconds and one minute 30 seconds, respectively. If this isn't
-    specified, the default is `10s` or 10 seconds.
+<%= partial "partials/builder/virtualbox/common/OutputConfig-not-required" %>
 
--   `cpus` (number) - The number of cpus to use for building the VM.
-    Defaults to `1`.
+### Run configuration
 
--   `export_opts` (array of strings) - Additional options to pass to the
-    [VBoxManage
-    export](https://www.virtualbox.org/manual/ch09.html#vboxmanage-export). This
-    can be useful for passing product information to include in the resulting
-    appliance file. Packer JSON configuration file example:
+#### Optional:
 
-    ``` json
-    {
-      "type": "virtualbox-iso",
-      "export_opts":
-      [
-        "--manifest",
-        "--vsys", "0",
-        "--description", "{{user `vm_description`}}",
-        "--version", "{{user `vm_version`}}"
-      ],
-      "format": "ova",
-    }
-    ```
+<%= partial "partials/builder/virtualbox/common/RunConfig-not-required" %>
 
-    A VirtualBox [VM
-    description](https://www.virtualbox.org/manual/ch09.html#vboxmanage-export-ovf)
-    may contain arbitrary strings; the GUI interprets HTML formatting. However,
-    the JSON format does not allow arbitrary newlines within a value. Add a
-    multi-line description by preparing the string in the shell before the
-    packer call like this (shell `>` continuation character snipped for easier
-    copy & paste):
+### Shutdown configuration
 
-    ``` {.shell}
+#### Optional:
 
-    vm_description='some
-    multiline
-    description'
+<%= partial "partials/builder/virtualbox/common/ShutdownConfig-not-required" %>
 
-    vm_version='0.2.0'
+### Hardware configuration
 
-    packer build \
-        -var "vm_description=${vm_description}" \
-        -var "vm_version=${vm_version}"         \
-        "packer_conf.json"
-    ```
+#### Optional:
 
--   `format` (string) - Either `ovf` or `ova`, this specifies the output format
-    of the exported virtual machine. This defaults to `ovf`.
+<%= partial "partials/builder/virtualbox/common/HWConfig-not-required" %>
 
--   `headless` (boolean) - Packer defaults to building VirtualBox virtual
-    machines by launching a GUI that shows the console of the machine
-    being built. When this value is set to `true`, the machine will start
-    without a console.
+### VBox Manage configuration
 
--   `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to `iso`.
+#### Optional:
 
--   `iso_target_path` (string) - The path where the iso should be saved
-    after download. By default will go in the packer cache, with a hash of the
-    original filename as its name.
+<%= partial "partials/builder/virtualbox/common/VBoxManageConfig-not-required" %>
 
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
-    Packer will try these in order. If anything goes wrong attempting to
-    download or while downloading a single URL, it will move on to the next. All
-    URLs must point to the same file (same checksum). By default this is empty
-    and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
+### Communicator configuration
 
--   `memory` (number) - The amount of memory to use for building the VM
-    in megabytes. Defaults to `512` megabytes.
+#### Optional:
 
--   `output_directory` (string) - This is the path to the directory where the
-    resulting virtual machine will be created. This may be relative or absolute.
-    If relative, the path is relative to the working directory when `packer`
-    is executed. This directory must not exist or be empty prior to running
-    the builder. By default this is `output-BUILDNAME` where "BUILDNAME" is the
-    name of the build.
+<%= partial "partials/helper/communicator/Config-not-required" %>
+<%= partial "partials/helper/communicator/SSH-not-required" %>
+<%= partial "partials/builder/virtualbox/common/SSHConfig-not-required" %>
+<%= partial "partials/helper/communicator/WinRM-not-required" %>
 
--   `post_shutdown_delay` (string) - The amount of time to wait after shutting
-    down the virtual machine. If you get the error
-    `Error removing floppy controller`, you might need to set this to `5m`
-    or so. By default, the delay is `0s` or disabled.
-
--   `shutdown_command` (string) - The command to use to gracefully shut down the
-    machine once all the provisioning is done. By default this is an empty
-    string, which tells Packer to just forcefully shut down the machine unless a
-    shutdown command takes place inside script so this may safely be omitted. If
-    one or more scripts require a reboot it is suggested to leave this blank
-    since reboots may fail and specify the final shutdown command in your
-    last script.
-
--   `shutdown_timeout` (string) - The amount of time to wait after executing the
-    `shutdown_command` for the virtual machine to actually shut down. If it
-    doesn't shut down in this time, it is an error. By default, the timeout is
-    `5m` or five minutes.
-
--  `sound` (string) - Defaults to `none`. The type of audio device to use for
-    sound when building the VM. Some of the options that are available are
-    `dsound`, `oss`, `alsa`, `pulse`, `coreaudio`, `null`.
-
--   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
-    maximum port to use for the SSH port on the host machine which is forwarded
-    to the SSH port on the guest machine. Because Packer often runs in parallel,
-    Packer will choose a randomly available port in this range to use as the
-    host port. By default this is `2222` to `4444`.
-
--   `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
-    does not setup forwarded port mapping for SSH requests and uses `ssh_port`
-    on the host to communicate to the virtual machine.
-
--   `usb` (boolean) - Specifies whether or not to enable the USB bus when
-    building the VM. Defaults to `false`.
-
--   `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
-    execute in order to further customize the virtual machine being created. The
-    value of this is an array of commands to execute. The commands are executed
-    in the order defined in the template. For each command, the command is
-    defined itself as an array of strings, where each string represents a single
-    argument on the command-line to `VBoxManage` (but excluding
-    `VBoxManage` itself). Each arg is treated as a [configuration
-    template](/docs/templates/engine.html), where the `Name`
-    variable is replaced with the VM name. More details on how to use
-    `VBoxManage` are below.
-
--   `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
-    except that it is run after the virtual machine is shutdown, and before the
-    virtual machine is exported.
-
--   `bundle_iso` (boolean) - Defaults to `false`. When enabled, Packer includes
-    any attached ISO disc devices into the final virtual machine. Useful for
-    some live distributions that require installation media to continue to be
-    attached after installation.
-
--   `virtualbox_version_file` (string) - The path within the virtual machine to
-    upload a file that contains the VirtualBox version that was used to create
-    the machine. This information can be useful for provisioning. By default
-    this is `.vbox_version`, which will generally be upload it into the
-    home directory. Set to an empty string to skip uploading this file, which
-    can be useful when using the `none` communicator.
-
--   `vrdp_bind_address` (string / IP address) - The IP address that should be
-    binded to for VRDP. By default packer will use `127.0.0.1` for this. If you
-    wish to bind to all interfaces use `0.0.0.0`.
-
--   `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
-    to use for VRDP access to the virtual machine. Packer uses a randomly chosen
-    port in this range that appears available. By default this is `5900` to
-    `6000`. The minimum and maximum ports are inclusive.
-
-## Boot Configuration Reference
+### Boot Configuration
 
 <%= partial "partials/common/bootcommand/BootConfig" %>
+<%= partial "partials/common/bootcommand/VNCConfig" %>
 
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
@@ -267,8 +163,9 @@ contention. If you notice missing keys, you can tune this delay by specifying
 }
 ```
 
-### Optional:
+#### Optional:
 
+<%= partial "partials/common/bootcommand/VNCConfig-not-required" %>
 <%= partial "partials/common/bootcommand/BootConfig-not-required" %>
 
 <%= partial "partials/builders/boot-command" %>
