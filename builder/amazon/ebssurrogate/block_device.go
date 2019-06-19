@@ -3,7 +3,6 @@
 package ebssurrogate
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -84,15 +83,6 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 	mapping.Ebs = ebsBlockDevice
 
 	return mapping
-}
-
-func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
-	if b.DeviceName == "" {
-		return fmt.Errorf("The `device_name` must be specified " +
-			"for every device in the block device mapping.")
-	}
-
-	return nil
 }
 
 func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
