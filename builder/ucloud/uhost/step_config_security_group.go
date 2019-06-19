@@ -25,7 +25,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 				err = fmt.Errorf("the specified security group %q not exist", s.SecurityGroupId)
 				return halt(state, err, "")
 			}
-			return halt(state, err, "Error on querying security group")
+			return halt(state, err, fmt.Sprintf("Error on querying specified security group %q", s.SecurityGroupId))
 		}
 
 		state.Put("security_group_id", securityGroupSet.FWId)
@@ -44,7 +44,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 
 		resp, err := conn.DescribeFirewall(req)
 		if err != nil {
-			return halt(state, err, "Error on querying security group")
+			return halt(state, err, "Error on querying default security group")
 		}
 
 		if resp == nil || len(resp.DataSet) < 1 {
@@ -65,10 +65,11 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 		offset = offset + limit
 	}
 
-	if securityGroupId != "" {
-		state.Put("security_group_id", securityGroupId)
-		return multistep.ActionContinue
+	if securityGroupId == "" {
+		return halt(state, fmt.Errorf("the default security group not exist"), "")
 	}
+
+	state.Put("security_group_id", securityGroupId)
 	return multistep.ActionContinue
 }
 

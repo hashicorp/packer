@@ -49,7 +49,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.BootDiskType == "" {
 		c.BootDiskType = "cloud_ssd"
 	} else if err := checkStringIn(c.BootDiskType,
-		[]string{"local_normal", "local_ssd", "cloud_normal", "cloud_ssd"}); err != nil {
+		[]string{"local_normal", "local_ssd", "cloud_ssd"}); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -63,9 +63,50 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("%q must be set when use_ssh_private_ip is true", "vpc_id"))
 	}
 
+	if c.Comm.SSHPassword != "" && len(validateInstancePassword(c.Comm.SSHPassword)) != 0 {
+		for _, v := range validateInstancePassword(c.Comm.SSHPassword) {
+			errs = append(errs, v)
+		}
+	}
+
 	if len(errs) > 0 {
 		return errs
 	}
 
 	return nil
+}
+
+var instancePasswordUpperPattern = regexp.MustCompile(`[A-Z]`)
+var instancePasswordLowerPattern = regexp.MustCompile(`[a-z]`)
+var instancePasswordNumPattern = regexp.MustCompile(`[0-9]`)
+var instancePasswordSpecialPattern = regexp.MustCompile(`[` + "`" + `()~!@#$%^&*-+=_|{}\[\]:;'<>,.?/]`)
+var instancePasswordPattern = regexp.MustCompile(`^[A-Za-z0-9` + "`" + `()~!@#$%^&*-+=_|{}\[\]:;'<>,.?/]{8,30}$`)
+
+func validateInstancePassword(password string) (errors []error) {
+	if !instancePasswordPattern.MatchString(password) {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have between 8-30 characters and any characters must be legal, got %q", "ssh_password", password))
+	}
+
+	categoryCount := 0
+	if instancePasswordUpperPattern.MatchString(password) {
+		categoryCount++
+	}
+
+	if instancePasswordLowerPattern.MatchString(password) {
+		categoryCount++
+	}
+
+	if instancePasswordNumPattern.MatchString(password) {
+		categoryCount++
+	}
+
+	if instancePasswordSpecialPattern.MatchString(password) {
+		categoryCount++
+	}
+
+	if categoryCount < 2 {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have least 2 items of capital letters, lower case letters, numbers and special characters, got %q", "ssh_password", password))
+	}
+
+	return
 }

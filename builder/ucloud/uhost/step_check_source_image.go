@@ -2,6 +2,7 @@ package uhost
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -21,7 +22,7 @@ func (s *stepCheckSourceImageId) Run(ctx context.Context, state multistep.StateB
 		if isNotFoundError(err) {
 			return halt(state, err, "")
 		}
-		return halt(state, err, "Error on querying source_image_id")
+		return halt(state, err, fmt.Sprintf("Error on querying specified source_image_id %q", s.SourceUHostImageId))
 	}
 
 	if imageSet.OsType == osTypeWindows {

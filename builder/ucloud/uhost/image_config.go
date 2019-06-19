@@ -35,6 +35,7 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 			if imageDestination.Name == "" {
 				imageDestination.Name = imageName
 			}
+
 			errs = append(errs, imageDestination.validate()...)
 		}
 	}
