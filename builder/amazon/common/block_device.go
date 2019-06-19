@@ -11,18 +11,15 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// These will be attached when booting a new instance from your AMI.
-// Your options here may vary depending on the type of VM you use. Example:
+// These will be attached when booting a new instance from your AMI. Your
+// options here may vary depending on the type of VM you use. Example value:
 //
 // ``` json
-// "builders":[{
-// "type":"...",
-// "ami_block_device_mappings":[{
-//           "device_name":"xvda",
-//           "delete_on_termination":true,
-//           "volume_type":"gp2"
-//     }]
-//  }
+// [{
+//      "device_name":"xvda",
+//      "delete_on_termination":true,
+//      "volume_type":"gp2"
+// }]
 // ```
 // Documentation for Block Devices Mappings can be found here:
 // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html
