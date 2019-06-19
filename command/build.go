@@ -156,12 +156,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 					// Add a newline between the color output and the actual output
 					c.Ui.Say("")
 				}
-				// Now add timestamps if requested
-				if cfg.Timestamp {
-					ui = &packer.TimestampedUi{
-						Ui: ui,
-					}
-				}
+			}
+		}
+		// Now add timestamps if requested
+		if cfg.Timestamp {
+			ui = &packer.TimestampedUi{
+				Ui: ui,
 			}
 		}
 
