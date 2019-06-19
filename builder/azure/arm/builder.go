@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/net/html/atom"
 	"log"
 	"os"
 	"runtime"
