@@ -32,7 +32,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 
 	resp, err := conn.CreateCustomImage(req)
 	if err != nil {
-		return halt(state, err, "")
+		return halt(state, err, "Error on creating image")
 	}
 
 	err = retry.Config{
@@ -54,12 +54,12 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	})
 
 	if err != nil {
-		return halt(state, err, "Error on waiting for image to available")
+		return halt(state, err, fmt.Sprintf("Error on waiting for image %q available", resp.ImageId))
 	}
 
 	imageSet, err := client.DescribeImageById(resp.ImageId)
 	if err != nil {
-		return halt(state, err, "Error on reading image")
+		return halt(state, err, fmt.Sprintf("Error on reading image when creating %q", resp.ImageId))
 	}
 
 	s.image = imageSet
@@ -74,7 +74,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	state.Put("ucloud_images", newImageInfoSet(images))
-	ui.Message(fmt.Sprintf("Create image %q complete", imageSet.ImageId))
+	ui.Message(fmt.Sprintf("Creating image %q complete", imageSet.ImageId))
 	return multistep.ActionContinue
 }
 
@@ -99,5 +99,5 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error on deleting image %q", s.image.ImageId))
 	}
-	ui.Message(fmt.Sprintf("Delete image %q complete", s.image.ImageId))
+	ui.Message(fmt.Sprintf("Deleting image %q complete", s.image.ImageId))
 }

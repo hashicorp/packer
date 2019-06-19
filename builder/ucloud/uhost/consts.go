@@ -8,13 +8,13 @@ const (
 )
 
 const (
-	osTypeWindows             = "Windows"
-	securityGroupNonWeb       = "recommend non web"
-	instanceStateRunning      = "Running"
-	instanceStateStopped      = "Stopped"
-	bootDiskStateInitializing = "Initializing"
-	bootDiskStateNormal       = "Normal"
-	imageStateAvailable       = "Available"
+	osTypeWindows        = "Windows"
+	securityGroupNonWeb  = "recommend non web"
+	instanceStateRunning = "Running"
+	instanceStateStopped = "Stopped"
+	bootDiskStateNormal  = "Normal"
+	imageStateAvailable  = "Available"
+	ipTypePrivate        = "Private"
 )
 
 var bootDiskTypeMap = map[string]string{
