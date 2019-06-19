@@ -23,7 +23,7 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 
 	instance, err := client.describeUHostById(instance.UHostId)
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on reading instance when stop %q", instance.UHostId))
+		return halt(state, err, fmt.Sprintf("Error on reading instance when stopping %q", instance.UHostId))
 	}
 
 	if instance.State != instanceStateStopped {
@@ -67,10 +67,10 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 		})
 
 		if err != nil {
-			return halt(state, err, fmt.Sprintf("Error on waiting for instance %q to stopped", instance.UHostId))
+			return halt(state, err, fmt.Sprintf("Error on waiting for stopping instance when stopping %q", instance.UHostId))
 		}
 
-		ui.Message(fmt.Sprintf("Stop instance %q complete", instance.UHostId))
+		ui.Message(fmt.Sprintf("Stopping instance %q complete", instance.UHostId))
 	}
 
 	return multistep.ActionContinue

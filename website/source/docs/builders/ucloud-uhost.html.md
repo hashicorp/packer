@@ -26,7 +26,7 @@ In addition to the options listed here, a
 [communicator](../templates/communicator.html) can be configured for this
 builder.
 
-\~&gt; **Note:**  This builder only support ssh authenticating with username and given password.
+\~&gt; **Note:**  This builder not support build Windows image yet and only support ssh authenticating with `ssh_user_name` (Required) and `ssh_password` (Optional). There into, `ssh_user_name` can be set `root` for CentoOS image, `ubuntu` for Ubuntu image. `ssh_password` contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
 
 ### Required:
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/packer/common/retry"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -29,34 +30,34 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 	srcImageId := state.Get("image_id").(string)
 	artifactImages := state.Get("ucloud_images").(*imageInfoSet)
 	expectedImages := newImageInfoSet(nil)
-
 	ui.Say(fmt.Sprintf("Copying image with %q...", srcImageId))
-	for _, imageDestination := range s.ImageDestinations {
-		if imageDestination.ProjectId == s.ProjectId && imageDestination.Region == s.RegionId {
+	for _, v := range s.ImageDestinations {
+		if v.ProjectId == s.ProjectId && v.Region == s.RegionId {
 			continue
 		}
 
 		req := conn.NewCopyCustomImageRequest()
-		req.TargetProjectId = ucloud.String(imageDestination.ProjectId)
-		req.TargetRegion = ucloud.String(imageDestination.Region)
+		req.TargetProjectId = ucloud.String(v.ProjectId)
+		req.TargetRegion = ucloud.String(v.Region)
 		req.SourceImageId = ucloud.String(srcImageId)
-		req.TargetImageName = ucloud.String(imageDestination.Name)
+		req.TargetImageName = ucloud.String(v.Name)
+		req.TargetImageDescription = ucloud.String(v.Description)
 
 		resp, err := conn.CopyCustomImage(req)
 		if err != nil {
-			return halt(state, err, "Error on copying images")
+			return halt(state, err, fmt.Sprintf("Error on copying image %q to %s:%s", srcImageId, v.ProjectId, v.Region))
 		}
 
 		image := imageInfo{
-			Region:    imageDestination.Region,
-			ProjectId: imageDestination.ProjectId,
+			Region:    v.Region,
+			ProjectId: v.ProjectId,
 			ImageId:   resp.TargetImageId,
 		}
 		expectedImages.Set(image)
 		artifactImages.Set(image)
 
 		ui.Message(fmt.Sprintf("Copying image from %s:%s:%s to %s:%s:%s)",
-			s.ProjectId, s.RegionId, srcImageId, imageDestination.ProjectId, imageDestination.Region, resp.TargetImageId))
+			s.ProjectId, s.RegionId, srcImageId, v.ProjectId, v.Region, resp.TargetImageId))
 	}
 
 	err := retry.Config{
@@ -67,7 +68,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 		for _, v := range expectedImages.GetAll() {
 			imageSet, err := client.describeImageByInfo(v.ProjectId, v.Region, v.ImageId)
 			if err != nil {
-				return err
+				return fmt.Errorf("reading %s:%s:%s failed, %s", v.ProjectId, v.Region, v.ImageId, err)
 			}
 
 			if imageSet.State == imageStateAvailable {
@@ -84,10 +85,15 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 	})
 
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on waiting for copying image finished"))
+		var s []string
+		for _, v := range expectedImages.GetAll() {
+			s = append(s, fmt.Sprintf("%s:%s:%s", v.ProjectId, v.Region, v.ImageId))
+		}
+
+		return halt(state, err, fmt.Sprintf("Error on waiting for copying images %q available", strings.Join(s, ",")))
 	}
 
-	ui.Message(fmt.Sprintf("Copy image complete"))
+	ui.Message(fmt.Sprintf("Copying image complete"))
 	return multistep.ActionContinue
 }
 
@@ -128,5 +134,5 @@ func (s *stepCopyUCloudImage) Cleanup(state multistep.StateBag) {
 		}
 	}
 
-	ui.Message("Delete copied image complete")
+	ui.Message("Deleting copied image complete")
 }
