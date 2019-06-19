@@ -88,6 +88,16 @@ builder.
     -  LOCAL_BASIC: 50
     -  Other: 50 ~ 1000 (need whitelist if > 50)
 
+-   `data_disks` (array of data disks) - Add one or more data disks to the instance before creating the
+    image. Note that if the source image has data disk snapshots, this argument will be ignored, and
+    the running instance will use source image data disk settings, in such case, `disk_type`
+    argument will be used as disk type for all data disks, and each data disk size will use the
+    origin value in source image.
+    The data disks allow for the following argument:
+    -  `disk_type` - Type of the data disk. Valid choices: `CLOUD_BASIC`, `CLOUD_PREMIUM` and `CLOUD_SSD`.
+    -  `disk_size` - Size of the data disk.
+    -  `disk_snapshot_id` - Id of the snapshot for a data disk.
+
 -   `vpc_id` (string) - Specify vpc your cvm will be launched by.
 
 -   `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, packer will
