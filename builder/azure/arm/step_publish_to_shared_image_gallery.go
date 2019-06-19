@@ -97,7 +97,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	var location = stateBag.Get(constants.ArmLocation).(string)
 	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
 	var miSigReplicationRegions = stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
-	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmLocation).(string)
+	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
 	var targetManagedImageName = stateBag.Get(constants.ArmManagedImageName).(string)
 	var managedImageSubscription = stateBag.Get(constants.ArmManagedImageSubscription).(string)
 	var mdiID = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", managedImageSubscription, targetManagedImageResourceGroupName, targetManagedImageName)
