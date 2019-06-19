@@ -24,8 +24,15 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	// Add the block device mappings to the AMI. The block device mappings
-	// allow for keys:
+	// Add the block device mappings to the AMI. If you add instance store
+	// volumes or EBS volumes in addition to the root device volume, the
+	// created AMI will contain block device mapping information for those
+	// volumes. Amazon creates snapshots of the source instance's root volume
+	// and any other EBS volumes described here. When you launch an instance
+	// from this new AMI, the instance automatically launches with these
+	// additional volumes, and will restore them from snapshots taken from the
+	// source instance. See the [BlockDevices](#block-devices-configuration)
+	// documentation for fields.
 	VolumeMappings BlockDevices `mapstructure:"ebs_volumes" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add ec2:ModifyInstanceAttribute to your AWS

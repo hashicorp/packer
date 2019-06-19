@@ -10,8 +10,6 @@ import (
 
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
-
-	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 	// Tags applied to the AMI. This is a
 	// template engine, see Build template
 	// data for more information.
@@ -36,14 +34,4 @@ func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 		}
 	}
 	return errs
-}
-
-func (b BlockDevices) GetOmissions() map[string]bool {
-	omitMap := make(map[string]bool)
-
-	for _, blockDevice := range b {
-		omitMap[blockDevice.DeviceName] = blockDevice.OmitFromArtifact
-	}
-
-	return omitMap
 }
