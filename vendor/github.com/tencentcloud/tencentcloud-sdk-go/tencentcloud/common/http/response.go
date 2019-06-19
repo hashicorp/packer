@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	//"log"
+	"log"
 	"net/http"
 
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -69,5 +69,8 @@ func ParseFromHttpResponse(hr *http.Response, response Response) (err error) {
 		return
 	}
 	err = json.Unmarshal(body, &response)
+	if err != nil {
+		log.Printf("Unexpected Error occurs when parsing API response\n%s\n", string(body[:]))
+	}
 	return
 }

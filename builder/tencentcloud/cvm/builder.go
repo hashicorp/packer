@@ -104,6 +104,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceName:             b.config.InstanceName,
 			DiskType:                 b.config.DiskType,
 			DiskSize:                 b.config.DiskSize,
+			DataDisks:                b.config.DataDisks,
 			HostName:                 b.config.HostName,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
