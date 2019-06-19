@@ -11,7 +11,7 @@ import (
 
 type StepPublishToSharedImageGallery struct {
 	client  *AzureClient
-	publish func(ctx context.Context, mdiID, miSigPubSubscription, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error
+	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error
 	say     func(message string)
 	error   func(e error)
 	toSIG   func() bool
@@ -35,7 +35,7 @@ func NewStepPublishToSharedImageGallery(client *AzureClient, ui packer.Ui, confi
 	return step
 }
 
-func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubSubscription string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error {
+func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error {
 
 	replicationRegions := make([]compute.TargetRegion, len(miSigReplicationRegions))
 	for i, v := range miSigReplicationRegions {
@@ -90,21 +90,19 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 
 	s.say("Publishing to Shared Image Gallery ...")
 
-	var miSigPubSubscription = stateBag.Get(constants.ArmManagedImageSigPublishSubscription).(string)
 	var miSigPubRg = stateBag.Get(constants.ArmManagedImageSigPublishResourceGroup).(string)
 	var miSIGalleryName = stateBag.Get(constants.ArmManagedImageSharedGalleryName).(string)
 	var miSGImageName = stateBag.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
 	var miSGImageVersion = stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
-	var location = stateBag.Get(constants.ArmManagedImageLocation).(string)
+	var location = stateBag.Get(constants.ArmLocation).(string)
 	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
 	var miSigReplicationRegions = stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
-	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
+	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmLocation).(string)
 	var targetManagedImageName = stateBag.Get(constants.ArmManagedImageName).(string)
 	var managedImageSubscription = stateBag.Get(constants.ArmManagedImageSubscription).(string)
 	var mdiID = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", managedImageSubscription, targetManagedImageResourceGroupName, targetManagedImageName)
 
 	s.say(fmt.Sprintf(" -> MDI ID used for SIG publish     : '%s'", mdiID))
-	s.say(fmt.Sprintf(" -> SIG publish subscription     : '%s'", miSigPubSubscription))
 	s.say(fmt.Sprintf(" -> SIG publish resource group     : '%s'", miSigPubRg))
 	s.say(fmt.Sprintf(" -> SIG gallery name     : '%s'", miSIGalleryName))
 	s.say(fmt.Sprintf(" -> SIG image name     : '%s'", miSGImageName))
@@ -112,7 +110,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG replication regions    : '%v'", miSigReplicationRegions))
 	s.say(fmt.Sprintf(" -> SIG publish location     : '%s'", location))
 	s.say(fmt.Sprintf(" -> SIG publish tags     : '%v'", tags))
-	err := s.publish(ctx, mdiID, miSigPubSubscription, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, location, tags)
+	err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, location, tags)
 
 	if err != nil {
 		stateBag.Put(constants.Error, err)

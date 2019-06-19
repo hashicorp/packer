@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/net/html/atom"
 	"log"
 	"os"
 	"runtime"
@@ -140,30 +141,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ui.Error("Warning: You are using Azure Packer Builder to create VHDs which is being deprecated, consider using Managed Images. Learn more http://aka.ms/packermanagedimage")
 	}
 
-	// for Managed Images, validate that Shared Gallery Image exists before publishing to SIG
-	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
-		_, err = azureClient.GalleryImagesClient.Get(ctx, b.config.SharedGalleryDestination.SigDestinationResourceGroup, b.config.SharedGalleryDestination.SigDestinationGalleryName, b.config.SharedGalleryDestination.SigDestinationImageName)
-		if err != nil {
-			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exists in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
-		}
-		// SIG requires that replication regions include the region in which the Managed Image resides
-		foundMandatoryReplicationRegion := false
-		for _, region := range b.config.SharedGalleryDestination.SigDestinationReplicationRegions {
-			// change region to lower-case and strip spaces
-			normalizedRegion := normalizeAzureRegion(region)
-			if strings.EqualFold(normalizedRegion, b.config.manageImageLocation) {
-				foundMandatoryReplicationRegion = true
-				break
-			}
-		}
-		if foundMandatoryReplicationRegion == false {
-			// return nil, fmt.Errorf("SIG requires that replication regions %v include the region %s in which the Managed Image resides", b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
-			b.config.SharedGalleryDestination.SigDestinationReplicationRegions = append(b.config.SharedGalleryDestination.SigDestinationReplicationRegions, b.config.manageImageLocation)
-			b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
-			ui.Say(fmt.Sprintf("Adding Managed Image region SIG replications regions %v", b.stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions)))
-		}
-	}
-
 	if b.config.BuildResourceGroupName != "" {
 		group, err := azureClient.GroupsClient.Get(ctx, b.config.BuildResourceGroupName)
 		if err != nil {
@@ -200,6 +177,33 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	var steps []multistep.Step
 
 	deploymentName := b.stateBag.Get(constants.ArmDeploymentName).(string)
+
+	// For Managed Images, validate that Shared Gallery Image exists before publishing to SIG
+	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
+		_, err = azureClient.GalleryImagesClient.Get(ctx, b.config.SharedGalleryDestination.SigDestinationResourceGroup, b.config.SharedGalleryDestination.SigDestinationGalleryName, b.config.SharedGalleryDestination.SigDestinationImageName)
+		if err != nil {
+			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exists in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
+		}
+		// SIG requires that replication regions include the region in which the Managed Image resides
+		managedImageLocation := normalizeAzureRegion(b.stateBag.Get(constants.ArmLocation).(string))
+		foundMandatoryReplicationRegion := false
+		var normalizedReplicationRegions []string
+		for _, region := range b.config.SharedGalleryDestination.SigDestinationReplicationRegions {
+			// change region to lower-case and strip spaces
+			normalizedRegion := normalizeAzureRegion(region)
+			normalizedReplicationRegions = append(normalizedReplicationRegions, normalizedRegion)
+			if strings.EqualFold(normalizedRegion, managedImageLocation) {
+				foundMandatoryReplicationRegion = true
+				continue
+			}
+		}
+		if foundMandatoryReplicationRegion == false {
+			b.config.SharedGalleryDestination.SigDestinationReplicationRegions = append(normalizedReplicationRegions, managedImageLocation)
+		}
+		b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
+		// TODO: amrita remove this log line
+		ui.Say(fmt.Sprintf("Managed Image region to SIG replications regions %v", b.stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions)))
+	}
 
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
@@ -396,7 +400,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
-		stateBag.Put(constants.ArmManagedImageSigPublishSubscription, b.config.SharedGalleryDestination.SigDestinationSubscription)
 		stateBag.Put(constants.ArmManagedImageSigPublishResourceGroup, b.config.SharedGalleryDestination.SigDestinationResourceGroup)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)

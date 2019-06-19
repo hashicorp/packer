@@ -74,7 +74,6 @@ type SharedImageGallery struct {
 }
 
 type SharedImageGalleryDestination struct {
-	SigDestinationSubscription       string   `mapstructure:"subscription"`
 	SigDestinationResourceGroup      string   `mapstructure:"resource_group"`
 	SigDestinationGalleryName        string   `mapstructure:"gallery_name"`
 	SigDestinationImageName          string   `mapstructure:"image_name"`
@@ -636,9 +635,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if c.SharedGalleryDestination.SigDestinationGalleryName != "" {
-		if c.SharedGalleryDestination.SigDestinationSubscription == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription must be specified for shared_image_gallery_destination"))
-		}
 		if c.SharedGalleryDestination.SigDestinationResourceGroup == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group must be specified for shared_image_gallery_destination"))
 		}

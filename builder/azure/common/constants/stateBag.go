@@ -34,7 +34,6 @@ const (
 	ArmManagedImageResourceGroupName               string = "arm.ManagedImageResourceGroupName"
 	ArmManagedImageLocation                        string = "arm.ManagedImageLocation"
 	ArmManagedImageName                            string = "arm.ManagedImageName"
-	ArmManagedImageSigPublishSubscription          string = "arm.ManagedImageSigPublishSubscription"
 	ArmManagedImageSigPublishResourceGroup         string = "arm.ManagedImageSigPublishResourceGroup"
 	ArmManagedImageSharedGalleryName               string = "arm.ManagedImageSharedGalleryName"
 	ArmManagedImageSharedGalleryImageName          string = "arm.ManagedImageSharedGalleryImageName"
