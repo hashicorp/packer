@@ -27,7 +27,6 @@ func (c *UCloudClient) describeFirewallById(sgId string) (*unet.FirewallDataSet,
 
 	resp, err := conn.DescribeFirewall(req)
 
-	// [API-STYLE] Fire wall api has not found err code, but others don't have
 	if err != nil {
 		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 54002 {
 			return nil, newNotFoundError("security group", sgId)
@@ -93,9 +92,6 @@ func (c *UCloudClient) DescribeImageById(imageId string) (*uhost.UHostImageSet, 
 
 	resp, err := c.uhostconn.DescribeImage(req)
 	if err != nil {
-		//if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 8889 {
-		//	return nil, newNotFoundError("image", imageId)
-		//}
 		return nil, err
 	}
 
@@ -132,9 +128,6 @@ func (c *UCloudClient) describeImageByInfo(projectId, regionId, imageId string) 
 
 	resp, err := c.uhostconn.DescribeImage(req)
 	if err != nil {
-		//if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 8889 {
-		//	return nil, newNotFoundError("image", imageId)
-		//}
 		return nil, err
 	}
 

@@ -46,17 +46,18 @@ func SSHHost(usePrivateIp bool) func(multistep.StateBag) (string, error) {
 		var privateIp, publicIp string
 
 		for _, v := range instance.IPSet {
-			if v.Type == "Private" {
+			if v.Type == ipTypePrivate {
 				privateIp = v.IP
 			} else {
 				publicIp = v.IP
 			}
 		}
+
 		if usePrivateIp {
 			return privateIp, nil
-		} else {
-			return publicIp, nil
 		}
+
+		return publicIp, nil
 	}
 }
 

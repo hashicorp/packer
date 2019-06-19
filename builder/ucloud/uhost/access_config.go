@@ -86,7 +86,6 @@ func (c *AccessConfig) Config() error {
 }
 
 func (c *AccessConfig) ValidateProjectId(projectId string) error {
-
 	supportedProjectIds, err := c.getSupportedProjectIds()
 	if err != nil {
 		return err
@@ -102,7 +101,6 @@ func (c *AccessConfig) ValidateProjectId(projectId string) error {
 }
 
 func (c *AccessConfig) ValidateRegion(region string) error {
-
 	supportedRegions, err := c.getSupportedRegions()
 	if err != nil {
 		return err
@@ -118,7 +116,6 @@ func (c *AccessConfig) ValidateRegion(region string) error {
 }
 
 func (c *AccessConfig) ValidateZone(region, zone string) error {
-
 	supportedZones, err := c.getSupportedZones(region)
 	if err != nil {
 		return err

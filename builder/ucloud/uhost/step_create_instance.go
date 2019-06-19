@@ -31,12 +31,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating Instance...")
-	req, err := s.buildCreateInstanceRequest(state)
-	if err != nil {
-		return halt(state, err, "")
-	}
-
-	resp, err := conn.CreateUHostInstance(req)
+	resp, err := conn.CreateUHostInstance(s.buildCreateInstanceRequest(state))
 	if err != nil {
 		return halt(state, err, "Error on creating instance")
 	}
@@ -53,6 +48,15 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		if err != nil {
 			return err
 		}
+
+		if inst.State == "ResizeFail" {
+			return fmt.Errorf("resizing instance failed")
+		}
+
+		if inst.State == "Install Fail" {
+			return fmt.Errorf("install failed")
+		}
+
 		if inst == nil || inst.State != instanceStateRunning {
 			return newExpectedStateError("instance", instanceId)
 		}
@@ -61,20 +65,23 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	})
 
 	if err != nil {
-		return halt(state, err, "Error on waiting for instance to available")
+		return halt(state, err, fmt.Sprintf("Error on waiting for instance %q available", instanceId))
 	}
 
-	ui.Message(fmt.Sprintf("Create instance %q complete", instanceId))
+	ui.Message(fmt.Sprintf("Creating instance %q complete", instanceId))
 	instance, err := client.describeUHostById(instanceId)
 	if err != nil {
-		return halt(state, err, "")
+		return halt(state, err, fmt.Sprintf("Error on reading instance when creating %q", instanceId))
 	}
 
 	s.instanceId = instanceId
 	state.Put("instance", instance)
 
-	if instance.BootDiskState == bootDiskStateInitializing {
-		ui.Say(fmt.Sprintf("Waiting for boot disk of instance initialized when boot_disk_type is %q", s.BootDiskType))
+	if instance.BootDiskState != bootDiskStateNormal {
+		ui.Say("Waiting for boot disk of instance initialized")
+		if s.BootDiskType == "local_normal" || s.BootDiskType == "local_ssd" {
+			ui.Message(fmt.Sprintf("Warning: It takes around 10 mins for boot disk initialization when `boot_disk_type` is %q", s.BootDiskType))
+		}
 
 		err = retry.Config{
 			Tries: 200,
@@ -95,10 +102,10 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		})
 
 		if err != nil {
-			return halt(state, err, "Error on waiting for boot disk of instance initialized")
+			return halt(state, err, fmt.Sprintf("Error on waiting for boot disk of instance %q initialized", instanceId))
 		}
 
-		ui.Message(fmt.Sprintf("Waite for boot disk of instance %q initialized complete", instanceId))
+		ui.Message(fmt.Sprintf("Waiting for boot disk of instance %q initialized complete", instanceId))
 	}
 
 	return multistep.ActionContinue
@@ -123,35 +130,21 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*UCloudClient)
 	conn := client.uhostconn
 
-	stopReq := conn.NewPoweroffUHostInstanceRequest()
-	stopReq.UHostId = ucloud.String(s.instanceId)
-
 	instance, err := client.describeUHostById(s.instanceId)
 	if err != nil {
 		if isNotFoundError(err) {
 			return
 		}
-		ui.Error(fmt.Sprintf("Error on reading instance when delete %q, %s",
+		ui.Error(fmt.Sprintf("Error on reading instance when deleting %q, %s",
 			s.instanceId, err.Error()))
 		return
 	}
 
 	if instance.State != instanceStateStopped {
-		err = retry.Config{
-			Tries: 5,
-			ShouldRetry: func(err error) bool {
-				return err != nil
-			},
-			RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			if _, err = conn.PoweroffUHostInstance(stopReq); err != nil {
-				return err
-			}
-			return nil
-		})
-
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error on stopping instance when delete %q, %s",
+		stopReq := conn.NewPoweroffUHostInstanceRequest()
+		stopReq.UHostId = ucloud.String(s.instanceId)
+		if _, err = conn.PoweroffUHostInstance(stopReq); err != nil {
+			ui.Error(fmt.Sprintf("Error on stopping instance when deleting %q, %s",
 				s.instanceId, err.Error()))
 			return
 		}
@@ -176,7 +169,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		})
 
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error on waiting for instance %q to stopped, %s",
+			ui.Error(fmt.Sprintf("Error on waiting for stopping instance when deleting %q, %s",
 				s.instanceId, err.Error()))
 			return
 		}
@@ -187,20 +180,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	deleteReq.ReleaseUDisk = ucloud.Bool(true)
 	deleteReq.ReleaseEIP = ucloud.Bool(true)
 
-	err = retry.Config{
-		Tries: 5,
-		ShouldRetry: func(err error) bool {
-			return err != nil
-		},
-		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		if _, err = conn.TerminateUHostInstance(deleteReq); err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err != nil {
+	if _, err = conn.TerminateUHostInstance(deleteReq); err != nil {
 		ui.Error(fmt.Sprintf("Error on deleting instance %q, %s",
 			s.instanceId, err.Error()))
 		return
@@ -221,10 +201,10 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Message(fmt.Sprintf("Delete instance %q complete", s.instanceId))
+	ui.Message(fmt.Sprintf("Deleting instance %q complete", s.instanceId))
 }
 
-func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag) (*uhost.CreateUHostInstanceRequest, error) {
+func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag) *uhost.CreateUHostInstanceRequest {
 	client := state.Get("client").(*UCloudClient)
 	conn := client.uhostconn
 	srcImage := state.Get("source_image").(*uhost.UHostImageSet)
@@ -292,7 +272,7 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 
 		req.NetworkInterface = append(req.NetworkInterface, networkInterface)
 	}
-	return req, nil
+	return req
 }
 
 func (s *stepCreateInstance) randStringFromCharSet(strlen int, charSet string) string {
