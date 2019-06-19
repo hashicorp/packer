@@ -51,7 +51,7 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
 # github.com/PuerkitoBio/goquery v1.5.0
 github.com/PuerkitoBio/goquery
-# github.com/Telmate/proxmox-api-go v0.0.0-20190410200643-f08824d5082d
+# github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors

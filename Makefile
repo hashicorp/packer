@@ -28,14 +28,14 @@ release: install-build-deps test releasebin package ## Build a release build
 
 bin: install-build-deps ## Build debug/test build
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
-	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
+	@GO111MODULE=auto sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: install-build-deps
 	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
 	fi
-	@GO111MODULE=off sh -c "$(CURDIR)/scripts/build.sh"
+	@GO111MODULE=auto sh -c "$(CURDIR)/scripts/build.sh"
 
 package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
@@ -118,7 +118,7 @@ testrace: mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 check-vendor-vs-mod: ## Check that go modules and vendored code are on par
-	@GO111MODULE=on go mod vendor 
+	@GO111MODULE=on go mod vendor
 	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: vendor dir is not on par with go modules definition." && \
 		exit 1; \
