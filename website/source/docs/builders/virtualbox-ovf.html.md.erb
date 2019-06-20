@@ -117,6 +117,21 @@ necessary for this build to succeed and can be found further down the page.
 
 <%= partial "partials/builder/virtualbox/common/ShutdownConfig-not-required" %>
 
+### Communicator configuration
+
+#### Optional common fields:
+
+<%= partial "partials/helper/communicator/Config-not-required" %>
+
+#### Optional SSH fields:
+
+<%= partial "partials/helper/communicator/SSH-not-required" %>
+<%= partial "partials/builder/virtualbox/common/SSHConfig-not-required" %>
+
+#### Optional WinRM fields:
+
+<%= partial "partials/helper/communicator/WinRM-not-required" %>
+
 ### Boot Configuration
 
 <%= partial "partials/common/bootcommand/BootConfig" %>
