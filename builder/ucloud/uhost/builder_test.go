@@ -98,18 +98,18 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 func TestBuilderPrepare_ImageDestinations(t *testing.T) {
 	var b Builder
 	config := testBuilderConfig()
-	config["image_copy_mappings"] = []map[string]interface{}{
+	config["image_copy_to_mappings"] = []map[string]interface{}{
 		{
-			"image_copy_project_id":  "project1",
-			"image_copy_region":      "region1",
-			"image_copy_name":        "bar",
-			"image_copy_description": "foo",
+			"project_id":  "project1",
+			"region":      "region1",
+			"name":        "bar",
+			"description": "foo",
 		},
 		{
-			"image_copy_project_id":  "project2",
-			"image_copy_region":      "region2",
-			"image_copy_name":        "foo",
-			"image_copy_description": "bar",
+			"project_id":  "project2",
+			"region":      "region2",
+			"name":        "foo",
+			"description": "bar",
 		},
 	}
 	warnings, err := b.Prepare(config)

@@ -45,6 +45,8 @@ github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e h1:/8w
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e/go.mod h1:T9M45xf79ahXVelWoOBmH0y4aC1t5kXO5BxwyakgIGA=
 github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f h1:jI4DIE5Vf4oRaHfthB0oRhU+yuYuoOTurDzwAlskP00=
 github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f/go.mod h1:T/Aws4fEfogEE9v+HPhhw+CntffsBHJ8nXQCwKr0/g8=
+github.com/alvaroloes/enumer v1.1.2 h1:5khqHB33TZy1GWCO/lZwcroBFh7u+0j40T83VUbfAMY=
+github.com/alvaroloes/enumer v1.1.2/go.mod h1:FxrjvuXoDAx9isTJrv4c+T410zFi0DtXIT0m65DJ+Wo=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd h1:S3Fr6QnkpW9VRjiEY4psQHhhbbahASuNVj52YIce7lI=
 github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd/go.mod h1:Yee4kTMuNiPYJ7nSNorELQMr1J33uOpXDMByNYhvtNk=
@@ -336,6 +338,8 @@ github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a h1:A3QMut
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a/go.mod h1:f6Izs6JvFTdnRbziASagjZ2vmf55NSIkC/weStxCHqk=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c h1:Lgl0gzECD8GnQ5QCWA8o6BtfL6mDH5rQgM4/fX3avOs=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
+github.com/pascaldekloe/name v0.0.0-20180628100202-0fd16699aae1 h1:/I3lTljEEDNYLho3/FUB7iD/oc2cEFgVmbHzV+O0PtU=
+github.com/pascaldekloe/name v0.0.0-20180628100202-0fd16699aae1/go.mod h1:eD5JxqMiuNYyFNmyY9rkJ/slN8y59oEu4Ei7F8OoKWQ=
 github.com/pierrec/lz4 v2.0.5+incompatible h1:2xWsjqPFWcplujydGg4WmhC/6fZqK42wMM8aXeqhl0I=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
@@ -523,8 +527,11 @@ golang.org/x/tools v0.0.0-20190114222345-bf090417da8b/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20190226205152-f727befe758c/go.mod h1:9Yl7xja0Znq3iFh3HoIrodX9oNMXvdceNzlUR8zjMvY=
 golang.org/x/tools v0.0.0-20190311212946-11955173bddd/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
 golang.org/x/tools v0.0.0-20190312170243-e65039ee4138/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
+golang.org/x/tools v0.0.0-20190524210228-3d17549cdc6b/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
 golang.org/x/tools v0.0.0-20190530184349-ce1a3806b557 h1:WFdP1eIY3AwGUPgVua5UIX4C7BzCIK8TOwm6RA+0vAQ=
 golang.org/x/tools v0.0.0-20190530184349-ce1a3806b557/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
+golang.org/x/tools v0.0.0-20190619215442-4adf7a708c2d h1:LQ06Vbju+Kwbcd94hb+6CgDsWoj/e7GOLPcYzHrG+iI=
+golang.org/x/tools v0.0.0-20190619215442-4adf7a708c2d/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
 google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf/go.mod h1:4mhQ8q/RsB7i+udVvVy5NUi08OU8ZlA0gRVgrF7VFY0=
 google.golang.org/api v0.0.0-20181030000543-1d582fd0359e/go.mod h1:4mhQ8q/RsB7i+udVvVy5NUi08OU8ZlA0gRVgrF7VFY0=
 google.golang.org/api v0.1.0 h1:K6z2u68e86TPdSdefXdzvXgR1zEMa+459vBSfWYAZkI=
