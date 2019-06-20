@@ -12,6 +12,7 @@ require (
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
+	github.com/alvaroloes/enumer v1.1.2 // indirect
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6 // indirect
@@ -122,7 +123,7 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190425145619-16072639606e
 	golang.org/x/text v0.3.1 // indirect
-	golang.org/x/tools v0.0.0-20190530184349-ce1a3806b557 // indirect
+	golang.org/x/tools v0.0.0-20190619215442-4adf7a708c2d // indirect
 	google.golang.org/api v0.4.0
 	google.golang.org/grpc v1.20.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
