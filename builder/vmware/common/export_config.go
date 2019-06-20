@@ -16,23 +16,21 @@ type ExportConfig struct {
 	// Since ovftool is only capable of password based authentication
 	// remote_password must be set when exporting the VM.
 	Format string `mapstructure:"format" required:"false"`
-	// Extra options to pass to ovftool
-	// during export. Each item in the array is a new argument. The options
-	// --noSSLVerify, --skipManifestCheck, and --targetType are reserved,
-	// and should not be passed to this argument.
-	// Currently, exporting the build VM (with ovftool) is only supported when
-	// building on ESXi e.g. when remote_type is set to esx5. See the
-	// Building on a Remote vSphere
-	// Hypervisor
+	// Extra options to pass to ovftool during export. Each item in the array
+	// is a new argument. The options `--noSSLVerify`, `--skipManifestCheck`,
+	// and `--targetType` are reserved, and should not be passed to this
+	// argument. Currently, exporting the build VM (with ovftool) is only
+	// supported when building on ESXi e.g. when `remote_type` is set to
+	// `esx5`. See the [Building on a Remote vSphere
+	// Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
 	// section below for more info.
 	OVFToolOptions []string `mapstructure:"ovftool_options" required:"false"`
-	// Defaults to false. When enabled, Packer will
-	// not export the VM. Useful if the build output is not the resultant
-	// image, but created inside the VM.
-	// Currently, exporting the build VM is only supported when building on
-	// ESXi e.g. when remote_type is set to esx5. See the Building on a
+	// Defaults to `false`. When enabled, Packer will not export the VM. Useful
+	// if the build output is not the resultant image, but created inside the
+	// VM. Currently, exporting the build VM is only supported when building on
+	// ESXi e.g. when `remote_type` is set to `esx5`. See the [Building on a
 	// Remote vSphere
-	// Hypervisor
+	// Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
 	// section below for more info.
 	SkipExport bool `mapstructure:"skip_export" required:"false"`
 	// Set this to true if you would like to keep
