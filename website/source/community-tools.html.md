@@ -54,4 +54,4 @@ power of Packer templates.
 ## Other
 
 - [suitcase](https://github.com/tmclaugh/suitcase) - Packer based build system for CentOS OS images
-- [Undo-WinRMConfig](https://cloudywindows.io/post/winrm-for-provisioning---close-the-door-on-the-way-out-eh/) - Open source automation to stage WinRM reset to pristine state at next shtudown
+- [Undo-WinRMConfig](https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-out-eh/) - Open source automation to stage WinRM reset to pristine state at next shtudown

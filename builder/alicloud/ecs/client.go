@@ -161,6 +161,7 @@ func (c *ClientWrapper) WaitForExpected(args *WaitForExpectArgs) (responses.AcsR
 		timeoutPoint = time.Now().Add(args.RetryTimeout)
 	}
 
+	var lastResponse responses.AcsResponse
 	var lastError error
 
 	for i := 0; ; i++ {
@@ -173,6 +174,7 @@ func (c *ClientWrapper) WaitForExpected(args *WaitForExpectArgs) (responses.AcsR
 		}
 
 		response, err := args.RequestFunc()
+		lastResponse = response
 		lastError = err
 
 		evalResult := args.EvalFunc(response, err)
@@ -180,17 +182,21 @@ func (c *ClientWrapper) WaitForExpected(args *WaitForExpectArgs) (responses.AcsR
 			return response, nil
 		}
 		if evalResult.stopRetry {
-			return nil, err
+			return response, err
 		}
 
 		time.Sleep(args.RetryInterval)
 	}
 
-	if args.RetryTimeout > 0 {
-		return nil, fmt.Errorf("evaluate failed after %d seconds timeout with %d seconds retry interval: %s", int(args.RetryTimeout.Seconds()), int(args.RetryInterval.Seconds()), lastError)
+	if lastError == nil {
+		lastError = fmt.Errorf("<no error>")
 	}
 
-	return nil, fmt.Errorf("evaluate failed after %d times retry with %d seconds retry interval: %s", args.RetryTimes, int(args.RetryInterval.Seconds()), lastError)
+	if args.RetryTimeout > 0 {
+		return lastResponse, fmt.Errorf("evaluate failed after %d seconds timeout with %d seconds retry interval: %s", int(args.RetryTimeout.Seconds()), int(args.RetryInterval.Seconds()), lastError)
+	}
+
+	return lastResponse, fmt.Errorf("evaluate failed after %d times retry with %d seconds retry interval: %s", args.RetryTimes, int(args.RetryInterval.Seconds()), lastError)
 }
 
 func (c *ClientWrapper) WaitForInstanceStatus(regionId string, instanceId string, expectedStatus string) (responses.AcsResponse, error) {
@@ -241,6 +247,32 @@ func (c *ClientWrapper) WaitForImageStatus(regionId string, imageId string, expe
 				}
 			}
 
+			return WaitForExpectToRetry
+		},
+		RetryTimeout: timeout,
+	})
+}
+
+func (c *ClientWrapper) WaitForSnapshotStatus(regionId string, snapshotId string, expectedStatus string, timeout time.Duration) (responses.AcsResponse, error) {
+	return c.WaitForExpected(&WaitForExpectArgs{
+		RequestFunc: func() (responses.AcsResponse, error) {
+			request := ecs.CreateDescribeSnapshotsRequest()
+			request.RegionId = regionId
+			request.SnapshotIds = fmt.Sprintf("[\"%s\"]", snapshotId)
+			return c.DescribeSnapshots(request)
+		},
+		EvalFunc: func(response responses.AcsResponse, err error) WaitForExpectEvalResult {
+			if err != nil {
+				return WaitForExpectToRetry
+			}
+
+			snapshotsResponse := response.(*ecs.DescribeSnapshotsResponse)
+			snapshots := snapshotsResponse.Snapshots.Snapshot
+			for _, snapshot := range snapshots {
+				if snapshot.Status == expectedStatus {
+					return WaitForExpectSuccess
+				}
+			}
 			return WaitForExpectToRetry
 		},
 		RetryTimeout: timeout,

@@ -76,12 +76,23 @@ func (cfg Config) Run(ctx context.Context, fn func(context.Context) error) error
 	}
 }
 
+// Backoff is a self contained backoff time calculator. This struct should be
+// passed around as a copy as it changes its own fields upon any Backoff call.
+// Backoff is not thread safe. For now only a Linear backoff call is
+// implemented and the Exponential call will be implemented when needed.
 type Backoff struct {
+	// Initial time to wait. A Backoff call will change this value.
 	InitialBackoff time.Duration
-	MaxBackoff     time.Duration
-	Multiplier     float64
+	// Maximum time returned.
+	MaxBackoff time.Duration
+	// For a Linear backoff, InitialBackoff will be multiplied by Multiplier
+	// after each call.
+	Multiplier float64
 }
 
+// Linear Backoff returns a linearly increasing Duration.
+//  n = n * Multiplier.
+// the first value of n is InitialBackoff. n is maxed by MaxBackoff.
 func (lb *Backoff) Linear() time.Duration {
 	wait := lb.InitialBackoff
 	lb.InitialBackoff = time.Duration(lb.Multiplier * float64(lb.InitialBackoff))
@@ -89,4 +100,9 @@ func (lb *Backoff) Linear() time.Duration {
 		lb.InitialBackoff = lb.MaxBackoff
 	}
 	return wait
+}
+
+// Exponential backoff panics: not implemented, yet.
+func (lb *Backoff) Exponential() time.Duration {
+	panic("not implemented, yet")
 }

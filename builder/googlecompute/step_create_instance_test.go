@@ -325,3 +325,20 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	// ensure the ssh metadata hasn't changed
 	assert.Equal(t, metadata["sshKeys"], sshKeys, "Instance metadata should not have been modified")
 }
+
+func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
+	state := testState(t)
+	c := state.Get("config").(*Config)
+	image := StubImage("test-image", "test-project", []string{}, 100)
+	content := testMetadataFileContent
+	fileName := testMetadataFile(t)
+	c.MetadataFiles["user-data"] = fileName
+
+	// create our metadata
+	metadata, err := c.createInstanceMetadata(image, "")
+
+	assert.True(t, err == nil, "Metadata creation should have succeeded.")
+
+	// ensure the user-data key in metadata is updated with file content
+	assert.Equal(t, metadata["user-data"], content, "user-data field of the instance metadata should have been updated.")
+}
