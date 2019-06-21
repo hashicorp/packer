@@ -18,8 +18,9 @@ import (
 // the build before actually doing any time consuming work
 //
 type StepPreValidate struct {
-	DestAmiName     string
-	ForceDeregister bool
+	DestAmiName        string
+	ForceDeregister    bool
+	AMISkipBuildRegion bool
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -74,6 +75,10 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 
 	if s.ForceDeregister {
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")
+		return multistep.ActionContinue
+	}
+	if s.AMISkipBuildRegion {
+		ui.Say("skip_build_region was set; not prevalidating AMI name")
 		return multistep.ActionContinue
 	}
 

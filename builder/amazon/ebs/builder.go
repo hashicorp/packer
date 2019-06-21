@@ -154,8 +154,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
-			DestAmiName:     b.config.AMIName,
-			ForceDeregister: b.config.AMIForceDeregister,
+			DestAmiName:        b.config.AMIName,
+			ForceDeregister:    b.config.AMIForceDeregister,
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -220,15 +221,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AMIName:             b.config.AMIName,
 			Regions:             b.config.AMIRegions,
 		},
-		&stepCreateAMI{},
+		&stepCreateAMI{
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
+		},
 		&awscommon.StepAMIRegionCopy{
-			AccessConfig:      &b.config.AccessConfig,
-			Regions:           b.config.AMIRegions,
-			AMIKmsKeyId:       b.config.AMIKmsKeyId,
-			RegionKeyIds:      b.config.AMIRegionKMSKeyIDs,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-			OriginalRegion:    *ec2conn.Config.Region,
+			AccessConfig:       &b.config.AccessConfig,
+			Regions:            b.config.AMIRegions,
+			AMIKmsKeyId:        b.config.AMIKmsKeyId,
+			RegionKeyIds:       b.config.AMIRegionKMSKeyIDs,
+			EncryptBootVolume:  b.config.AMIEncryptBootVolume,
+			Name:               b.config.AMIName,
+			OriginalRegion:     *ec2conn.Config.Region,
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:    b.config.AMIDescription,
