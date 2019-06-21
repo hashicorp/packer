@@ -1679,7 +1679,7 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err != nil {
-		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err)
+		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err) // TODO: remove this, this error is coming from check in line # 537 in config.go file!
 	}
 }
 
