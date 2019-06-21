@@ -11,7 +11,7 @@ import (
 
 type StepPublishToSharedImageGallery struct {
 	client  *AzureClient
-	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error
+	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) (string, error)
 	say     func(message string)
 	error   func(e error)
 	toSIG   func() bool
@@ -35,7 +35,7 @@ func NewStepPublishToSharedImageGallery(client *AzureClient, ui packer.Ui, confi
 	return step
 }
 
-func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) error {
+func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, location string, tags map[string]*string) (string, error) {
 
 	replicationRegions := make([]compute.TargetRegion, len(miSigReplicationRegions))
 	for i, v := range miSigReplicationRegions {
@@ -62,25 +62,25 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
-		return err
+		return "", err
 	}
 
 	err = f.WaitForCompletionRef(ctx, s.client.GalleryImageVersionsClient.Client)
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
-		return err
+		return "", err
 	}
 
 	createdSGImageVersion, err := f.Result(s.client.GalleryImageVersionsClient)
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
-		return err
+		return "", err
 	}
 
 	s.say(fmt.Sprintf(" -> Shared Gallery Image Version ID : '%s'", *(createdSGImageVersion.ID)))
-	return nil
+	return *(createdSGImageVersion.ID), nil
 }
 
 func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
@@ -108,7 +108,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG image name     : '%s'", miSGImageName))
 	s.say(fmt.Sprintf(" -> SIG image version     : '%s'", miSGImageVersion))
 	s.say(fmt.Sprintf(" -> SIG replication regions    : '%v'", miSigReplicationRegions))
-	err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, location, tags)
+	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, location, tags)
 
 	if err != nil {
 		stateBag.Put(constants.Error, err)
@@ -117,6 +117,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 		return multistep.ActionHalt
 	}
 
+	stateBag.Put(constants.ArmManagedImageSharedGalleryId, createdGalleryImageVersionID)
 	return multistep.ActionContinue
 }
 
