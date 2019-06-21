@@ -102,7 +102,7 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 				}
 				return false
 			},
-			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30, Multiplier: 2}).Linear,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
 			// Tag images and snapshots
 

@@ -44,7 +44,9 @@ type Config struct {
 	InstanceName        string            `mapstructure:"instance_name"`
 	Labels              map[string]string `mapstructure:"labels"`
 	PlatformID          string            `mapstructure:"platform_id"`
+	Preemptible         bool              `mapstructure:"preemptible"`
 	Metadata            map[string]string `mapstructure:"metadata"`
+	MetadataFromFile    map[string]string `mapstructure:"metadata_from_file"`
 	SerialLogFile       string            `mapstructure:"serial_log_file"`
 	SourceImageFamily   string            `mapstructure:"source_image_family"`
 	SourceImageFolderID string            `mapstructure:"source_image_folder_id"`
@@ -190,6 +192,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.FolderID == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a folder_id must be specified"))
+	}
+
+	for key, file := range c.MetadataFromFile {
+		if _, err := os.Stat(file); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("cannot access file '%s' with content for value of metadata key '%s': %s", file, key, err))
+		}
 	}
 
 	if c.StateTimeout == 0 {

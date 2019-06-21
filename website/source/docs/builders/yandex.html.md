@@ -72,18 +72,14 @@ can be configured for this builder.
 
 ### Optional:
 
--   `endpoint` (string) - Non standard api endpoint URL.
-
--   `instance_cores` (number) - The number of cores available to the instance. 
-
--   `instance_mem_gb` (number) - The amount of memory available to the instance, specified in gigabytes.
-
 -   `disk_name` (string) - The name of the disk, if unset the instance name
     will be used.
-    
+
 -   `disk_size_gb` (number) - The size of the disk in GB. This defaults to `10`, which is 10GB.
 
 -   `disk_type` (string) - Specify disk type for the launched instance. Defaults to `network-hdd`.
+
+-   `endpoint` (string) - Non standard api endpoint URL.
 
 -   `image_description` (string) - The description of the resulting image.
 
@@ -97,15 +93,21 @@ can be configured for this builder.
 
 -   `image_product_ids` (list) - License IDs that indicate which licenses are attached to resulting image.
 
+-   `instance_cores` (number) - The number of cores available to the instance. 
+
+-   `instance_mem_gb` (number) - The amount of memory available to the instance, specified in gigabytes.    
+
 -   `instance_name` (string) - The name assigned to the instance.
                 
 -   `labels` (object of key/value strings) - Key/value pair labels to apply to
     the launched instance.
     
--   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
-
 -   `metadata` (object of key/value strings) - Metadata applied to the launched
     instance.
+
+-   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
+
+-   `preemptible` (boolean) - Launch a preemptible instance. This defaults to `false`.
 
 -   `serial_log_file` (string) - File path to save serial port output of the launched instance.
 
@@ -122,6 +124,9 @@ can be configured for this builder.
     the new image from. The image family always returns its latest image that
     is not deprecated. Example: `ubuntu-1804-lts`.
 
+-   `state_timeout` (string) - The time to wait for instance state changes.
+    Defaults to `5m`.
+
 -   `subnet_id` (string) - The Yandex VPC subnet id to use for 
     the launched instance. Note, the zone of the subnet must match the
     `zone` in which the VM is launched. 
@@ -135,8 +140,5 @@ can be configured for this builder.
 -   `use_ipv6` (boolean) - Set to `true` to enable IPv6 for the instance being
     created. This defaults to `false`, or not enabled.
 -&gt; **Note:** ~> Usage of IPv6 will be available in the future.
-
--   `state_timeout` (string) - The time to wait for instance state changes.
-    Defaults to `5m`.
 
 -   `zone` (string) - The name of the zone to launch the instance.  This defaults to `ru-central1-a`.

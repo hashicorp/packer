@@ -48,6 +48,14 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		path = v.(string)
 	}
 
+	err := driver.CheckVMName(s.VMName)
+	if err != nil {
+		s.KeepRegistered = true
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
 	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
@@ -66,7 +74,7 @@ func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	diskSize := int64(s.DiskSize) * 1024 * 1024
 	diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
+	err = driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
 		s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)

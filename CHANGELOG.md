@@ -1,5 +1,40 @@
 ## 1.4.2 (upcoming)
 
+### IMPROVEMENTS:
+* **new feature:** Packer console [GH-7726]
+* builder/alicloud: let product API determine the default value of io_optimized
+  [GH-7747]
+* builder/alicloud: cleanup image and snapshot if target image is still not
+  available after timeout [GH-7744]
+* builder/amazon: Enable encrypted AMI sharing across accounts [GH-7707]
+* builder/amazon: New SpotInstanceTypes feature for spot instance users.
+    [GH-7682]
+* builder/azure: Update Azure SDK for Go to v30.0.0 [GH-7706]
+* builder/cloudstack: Add tags to instance upon creation [GH0-7526]
+* builder/docker: Better windows defaults [GH-7678]
+* builder/google: Add feature to import user-data from a file [GH-7720]
+* builder/hyperv: Abort build if there's a name collision [GH-7746]
+* builder/openstack: Add image filtering on properties. [GH-7597]
+* core: scrub out sensitive variables in scrub out sensitive variables logs
+  [GH-7743]
+* provisioner/powershell: Fix null file descriptor error that occurred when
+    remote_path provided is a directory and not a file. [GH-7705]
+
+
+### BUG FIXES:
+* builder/amazon: Fix bug in region copy which produced badly-named AMIs in the
+    build region. [GH-7691]
+* builder/amazon: Fix failure that happened when spot_tags was set but ami_tags
+    wasn't [GH-7699]
+* builder/cloudstack: Update go-cloudstack sdk, fixing compatability with
+    CloudStack v 4.12 [GH-7694]
+* provisioner/ansible: prevent nil pointer dereference after a language change
+  [GH-7738]
+* provisioner/chef: Accept chef license by default to prevent hangs in latest
+    Chef [GH-7653]
+* provisioner/powershell: Fix crash caused by error in retry logic check in
+    powershell provisioner [GH-7657]
+
 ## 1.4.1 (May 15, 2019)
 
 ### IMPROVEMENTS:

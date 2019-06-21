@@ -26,7 +26,7 @@ type ConfigQemu struct {
 	Name         string      `json:"name"`
 	Description  string      `json:"desc"`
 	Onboot       bool        `json:"onboot"`
-	Agent        string      `json:"agent"`
+	Agent        int         `json:"agent"`
 	Memory       int         `json:"memory"`
 	QemuOs       string      `json:"os"`
 	QemuCores    int         `json:"cores"`
@@ -251,9 +251,16 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	if _, isSet := vmConfig["onboot"]; isSet {
 		onboot = Itob(int(vmConfig["onboot"].(float64)))
 	}
-	agent := "1"
+
+	agent := 0
 	if _, isSet := vmConfig["agent"]; isSet {
-		agent = vmConfig["agent"].(string)
+		switch vmConfig["agent"].(type) {
+		case float64:
+			agent = int(vmConfig["agent"].(float64))
+		case string:
+			agent, _ = strconv.Atoi(vmConfig["agent"].(string))
+		}
+
 	}
 	ostype := "other"
 	if _, isSet := vmConfig["ostype"]; isSet {
@@ -299,6 +306,9 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	if _, isSet := vmConfig["searchdomain"]; isSet {
 		config.Searchdomain = vmConfig["searchdomain"].(string)
 	}
+	if _, isSet := vmConfig["nameserver"]; isSet {
+		config.Nameserver = vmConfig["nameserver"].(string)
+	}
 	if _, isSet := vmConfig["sshkeys"]; isSet {
 		config.Sshkeys, _ = url.PathUnescape(vmConfig["sshkeys"].(string))
 	}
@@ -330,6 +340,7 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 
 		//
 		diskConfMap := QemuDevice{
+			"id":      diskID,
 			"type":    diskType,
 			"storage": storageName,
 			"file":    fileName,
@@ -345,11 +356,10 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	}
 
 	// Add networks.
-	nicNameRe := regexp.MustCompile(`net\d+`)
 	nicNames := []string{}
 
 	for k, _ := range vmConfig {
-		if nicName := nicNameRe.FindStringSubmatch(k); len(nicName) > 0 {
+		if nicName := rxNicName.FindStringSubmatch(k); len(nicName) > 0 {
 			nicNames = append(nicNames, nicName[0])
 		}
 	}
@@ -358,13 +368,13 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		nicConfStr := vmConfig[nicName]
 		nicConfList := strings.Split(nicConfStr.(string), ",")
 
-		//
 		id := rxDeviceID.FindStringSubmatch(nicName)
 		nicID, _ := strconv.Atoi(id[0])
 		model, macaddr := ParseSubConf(nicConfList[0], "=")
 
 		// Add model and MAC address.
 		nicConfMap := QemuDevice{
+			"id":      nicID,
 			"model":   model,
 			"macaddr": macaddr,
 		}
@@ -441,7 +451,7 @@ func RemoveSshForwardUsernet(vmr *VmRef, client *Client) (err error) {
 func MaxVmId(client *Client) (max int, err error) {
 	resp, err := client.GetVmList()
 	vms := resp["data"].([]interface{})
-	max = 0
+	max = 100
 	for vmii := range vms {
 		vm := vms[vmii].(map[string]interface{})
 		vmid := int(vm["vmid"].(float64))
@@ -524,6 +534,7 @@ func (c ConfigQemu) CreateQemuNetworksParams(vmID int, params map[string]interfa
 	// For backward compatibility.
 	if len(c.QemuNetworks) == 0 && len(c.QemuNicModel) > 0 {
 		deprecatedStyleMap := QemuDevice{
+			"id":      0,
 			"model":   c.QemuNicModel,
 			"bridge":  c.QemuBrige,
 			"macaddr": c.QemuMacAddr,
@@ -602,6 +613,7 @@ func (c ConfigQemu) CreateQemuDisksParams(
 			}
 		}
 		deprecatedStyleMap := QemuDevice{
+			"id":           0,
 			"type":         dType,
 			"storage":      c.Storage,
 			"size":         c.DiskSize,

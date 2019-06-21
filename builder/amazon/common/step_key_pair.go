@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -53,10 +55,19 @@ func (s *StepKeyPair) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+	var keyResp *ec2.CreateKeyPairOutput
 
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
-		KeyName: &s.Comm.SSHTemporaryKeyPairName})
+	err := retry.Config{
+		Tries:      11,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		var err error
+		keyResp, err = ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
+			KeyName: &s.Comm.SSHTemporaryKeyPairName})
+		return err
+	})
+
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
