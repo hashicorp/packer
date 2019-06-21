@@ -200,8 +200,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			b.config.SharedGalleryDestination.SigDestinationReplicationRegions = append(normalizedReplicationRegions, managedImageLocation)
 		}
 		b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
-		// TODO: amrita remove this log line
-		ui.Say(fmt.Sprintf("Managed Image region to SIG replications regions %v", b.stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions)))
 	}
 
 	if b.config.OSType == constants.Target_Linux {
@@ -304,7 +302,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", b.config.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
-		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix)
+		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix, b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string))
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),

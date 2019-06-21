@@ -634,7 +634,7 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
-	if c.SharedGalleryDestination.SigDestinationGalleryName != "" {
+	if c.ManagedImageName != "" && c.ManagedImageResourceGroupName != "" && c.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		if c.SharedGalleryDestination.SigDestinationResourceGroup == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group must be specified for shared_image_gallery_destination"))
 		}
