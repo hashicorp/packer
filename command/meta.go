@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
 	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
+	"github.com/hashicorp/packer/helper/wrappedreadline"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 )
@@ -139,4 +141,15 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 func (m *Meta) ValidateFlags() error {
 	// TODO
 	return nil
+}
+
+// StdinPiped returns true if the input is piped.
+func (m *Meta) StdinPiped() bool {
+	fi, err := wrappedreadline.Stdin().Stat()
+	if err != nil {
+		// If there is an error, let's just say its not piped
+		return false
+	}
+
+	return fi.Mode()&os.ModeNamedPipe != 0
 }

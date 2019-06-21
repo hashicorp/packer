@@ -186,6 +186,10 @@ func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile stri
 		diskBlockSize, controllerType)
 }
 
+func (d *HypervPS4Driver) CheckVMName(vmName string) error {
+	return hyperv.CheckVMName(vmName)
+}
+
 func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool,
 	fixedVHD bool, version string) error {

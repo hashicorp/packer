@@ -17,7 +17,7 @@ import (
 )
 
 type stepCreateAlicloudInstance struct {
-	IOOptimized             bool
+	IOOptimized             *bool
 	InstanceType            string
 	UserData                string
 	UserDataFile            string
@@ -142,11 +142,13 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 	request.InternetChargeType = s.InternetChargeType
 	request.InternetMaxBandwidthOut = requests.Integer(convertNumber(s.InternetMaxBandwidthOut))
 
-	ioOptimized := IOOptimizedNone
-	if s.IOOptimized {
-		ioOptimized = IOOptimizedOptimized
+	if s.IOOptimized != nil {
+		if *s.IOOptimized {
+			request.IoOptimized = IOOptimizedOptimized
+		} else {
+			request.IoOptimized = IOOptimizedNone
+		}
 	}
-	request.IoOptimized = ioOptimized
 
 	config := state.Get("config").(*Config)
 	password := config.Comm.SSHPassword

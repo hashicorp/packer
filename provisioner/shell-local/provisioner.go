@@ -27,11 +27,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Communicator) error {
 	_, retErr := sl.Run(ctx, ui, &p.config)
-	if retErr != nil {
-		return retErr
-	}
 
-	return nil
+	return retErr
 }
 
 func (p *Provisioner) Cancel() {
