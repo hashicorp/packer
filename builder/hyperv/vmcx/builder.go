@@ -23,7 +23,7 @@ import (
 const (
 	DefaultRamSize                 = 1 * 1024  // 1GB
 	MinRamSize                     = 32        // 32MB
-	MaxRamSize                     = 32 * 1024 // 32GB
+	MaxRamSize                     = 64 * 1024 // 64GB
 	MinNestedVirtualizationRamSize = 4 * 1024  // 4GB
 
 	LowRam = 256 // 256MB
