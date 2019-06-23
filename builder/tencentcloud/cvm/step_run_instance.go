@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
@@ -143,15 +144,23 @@ func (s *stepRunInstance) Cleanup(state multistep.StateBag) {
 	if s.instanceId == "" {
 		return
 	}
-	MessageClean(state, "instance")
+	MessageClean(state, "Instance")
 	client := state.Get("cvm_client").(*cvm.Client)
 	ui := state.Get("ui").(packer.Ui)
 	req := cvm.NewTerminateInstancesRequest()
 	req.InstanceIds = []*string{&s.instanceId}
-	_, err := client.TerminateInstances(req)
-	// The binding relation between instance and vpc would last few minutes after
-	// instance terminate, we sleep here to give more time
-	time.Sleep(2 * time.Minute)
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 60,
+		RetryDelay: (&retry.Backoff{
+			InitialBackoff: 5 * time.Second,
+			MaxBackoff:     5 * time.Second,
+			Multiplier:     2,
+		}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := client.TerminateInstances(req)
+		return err
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("terminate instance(%s) failed: %s", s.instanceId, err.Error()))
 	}
