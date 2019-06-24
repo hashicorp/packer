@@ -33,7 +33,7 @@ Import from folder:
 ``` json
 {
   "type": "hyperv-vmcx",
-  "clone_from_vmcx_path": "c:/virtual machines/ubuntu-12.04.5-server-amd64",
+  "clone_from_vmcx_path": "c:/path/to/ubuntu-12.04.5-server-amd64",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
@@ -76,6 +76,10 @@ builder.
 -   `clone_from_vmcx_path` (string) - The path to a directory containing a
     previously exported virtual machine. The exported machine will be used
     as the source for new VM.
+
+    note: You should provide the named directory that contains the
+    "Virtual Machines", "Snapshots", and/or "Virtual Hard Disks" subdirectories,
+    not the .vmcx file itself.
 
 
 ### Required for virtual machine clone:
