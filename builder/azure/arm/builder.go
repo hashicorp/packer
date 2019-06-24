@@ -181,7 +181,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		_, err = azureClient.GalleryImagesClient.Get(ctx, b.config.SharedGalleryDestination.SigDestinationResourceGroup, b.config.SharedGalleryDestination.SigDestinationGalleryName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		if err != nil {
-			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exists in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
+			return nil, fmt.Errorf("the Shared Gallery Image to which to publish the managed image version to does not exist in the resource group %s", b.config.SharedGalleryDestination.SigDestinationResourceGroup)
 		}
 		// SIG requires that replication regions include the region in which the Managed Image resides
 		managedImageLocation := normalizeAzureRegion(b.stateBag.Get(constants.ArmLocation).(string))
