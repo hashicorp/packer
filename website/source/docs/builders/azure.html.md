@@ -135,7 +135,6 @@ Following is an example.
 <!-- -->
 
     "shared_image_gallery_destination": {
-        "subscription": "00000000-0000-0000-0000-00000000000",
         "resource_group": "ResourceGroup",
         "gallery_name": "GalleryName",
         "image_name": "ImageName",
