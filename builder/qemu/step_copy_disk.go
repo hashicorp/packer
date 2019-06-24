@@ -19,7 +19,6 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s", config.VMName))
-	name := config.VMName
 
 	command := []string{
 		"convert",
@@ -39,8 +38,6 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	state.Put("disk_filename", name)
 
 	return multistep.ActionContinue
 }

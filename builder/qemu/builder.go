@@ -99,6 +99,7 @@ type Config struct {
 	ISOSkipCache      bool       `mapstructure:"iso_skip_cache"`
 	Accelerator       string     `mapstructure:"accelerator"`
 	CpuCount          int        `mapstructure:"cpus"`
+	AdditionalDiskSize []string  `mapstructure:"disk_additional_size"`
 	DiskInterface     string     `mapstructure:"disk_interface"`
 	DiskSize          uint       `mapstructure:"disk_size"`
 	DiskCache         string     `mapstructure:"disk_cache"`
@@ -284,6 +285,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.UseBackingFile && !(b.config.DiskImage && b.config.Format == "qcow2") {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
+	}
+
+	if b.config.DiskImage && len(b.config.AdditionalDiskSize) > 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
 	}
 
 	if _, ok := accels[b.config.Accelerator]; !ok {
@@ -500,7 +506,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		state: make(map[string]interface{}),
 	}
 
-	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskName"] = b.config.VMName
+	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
+	if ok {
+		artifact.state["diskPaths"] = diskpaths
+	}
 	artifact.state["diskType"] = b.config.Format
 	artifact.state["diskSize"] = uint64(b.config.DiskSize)
 	artifact.state["domainType"] = b.config.Accelerator
