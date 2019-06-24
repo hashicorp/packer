@@ -106,7 +106,7 @@ func (s *stepConfigSecurityGroup) Cleanup(state multistep.StateBag) {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
 
-	MessageClean(state, "VPC")
+	MessageClean(state, "Security Group")
 	req := vpc.NewDeleteSecurityGroupRequest()
 	req.SecurityGroupId = &s.SecurityGroupId
 	err := retry.Config{
