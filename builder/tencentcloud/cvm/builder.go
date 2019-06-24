@@ -115,9 +115,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.TencentCloudRunConfig.Comm},
+			Comm: &b.config.TencentCloudRunConfig.Comm,
+		},
+		// We need this step to detach temporary key from instance, otherwise
+		// it always fails to delete the key.
+		&stepDetachTempKeyPair{},
 		&stepCreateImage{},
-		&stepShareImage{b.config.ImageShareAccounts},
+		&stepShareImage{
+			b.config.ImageShareAccounts,
+		},
 		&stepCopyImage{
 			DesinationRegions: b.config.ImageCopyRegions,
 			SourceRegion:      b.config.Region,
