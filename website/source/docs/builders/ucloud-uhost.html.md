@@ -92,17 +92,20 @@ Here is a basic example for build UCloud image.
 {
   "variables": {
     "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
-    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}"
+    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
   },
   "builders": [{
     "type":"ucloud-uhost",
     "public_key":"{{user `ucloud_public_key`}}",
     "private_key":"{{user `ucloud_private_key`}}",
+    "project_id": "{{user `ucloud_project_id`}}",
     "region":"cn-bj2",
-    "image_name":"packer_test_{{timestamp}}",
-    "source_image":"uimage-u3d50m",
-    "ssh_username":"root",
+    "availability_zone": "cn-bj2-02",
     "instance_type":"n-basic-2",
+    "source_image_id":"uimage-f1chxn",
+    "ssh_username":"root",
+    "image_name":"packer_test_{{timestamp}}"
   }]
 }
 ```
