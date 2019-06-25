@@ -36,8 +36,6 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
-	config.Comm.SSHUsername = sshConfig.User
 	config.Comm.SSHHost = sshConfig.Hostname
 	port, err := strconv.Atoi(sshConfig.Port)
 	if err != nil {
@@ -45,6 +43,14 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 	config.Comm.SSHPort = port
+
+	if config.Comm.SSHUsername != "" {
+		// If user has set the username within the communicator, use the
+		// auth provided there.
+		return multistep.ActionContinue
+	}
+	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
+	config.Comm.SSHUsername = sshConfig.User
 
 	return multistep.ActionContinue
 }
