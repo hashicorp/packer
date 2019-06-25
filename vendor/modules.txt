@@ -403,11 +403,11 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 # github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5
