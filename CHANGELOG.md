@@ -1,4 +1,4 @@
-## 1.4.2 (upcoming)
+## 1.4.2 (June 26, 2019)
 
 ### IMPROVEMENTS:
 * **new feature:** Packer console [GH-7726]
