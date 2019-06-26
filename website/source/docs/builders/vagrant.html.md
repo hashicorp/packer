@@ -62,7 +62,7 @@ one, by using `global_id` instead of `source_box`.
     "packer_" plus your buildname.
 
 -   `provider` (string) - The vagrant [provider](docs/post-processors/vagrant.html).
-    This parameter is required when `source_path` have more than one provider, 
+    This parameter is required when `source_path` have more than one provider,
     or when using `vagrant-cloud` post-processor. Defaults to unset.
 
 -   `checksum` (string) - The checksum for the .box file. The type of the
@@ -127,11 +127,11 @@ one, by using `global_id` instead of `source_box`.
     package your base box into its own standalone .box file.
 
 -   `output_vagrantfile` (string) - Equivalent to setting the
-    [`--vagrantfile`](https://www.vagrantup.com/docs/cli/package.html#vagrantfile-file) option 
+    [`--vagrantfile`](https://www.vagrantup.com/docs/cli/package.html#vagrantfile-file) option
     in `vagrant package`; defaults to unset
 
 -   `package_include` (string) - Equivalent to setting the
-    [`--include`](https://www.vagrantup.com/docs/cli/package.html#include-x-y-z) option 
+    [`--include`](https://www.vagrantup.com/docs/cli/package.html#include-x-y-z) option
     in `vagrant package`; defaults to unset
 
 ## Example
@@ -151,3 +151,19 @@ Sample for `hashicorp/precise64` with virtualbox provider.
   ]
 }
 ```
+
+
+## A note on SSH connections
+
+Currently this builder only works for SSH connections, and automatically fills
+in all information needed for the ssh communicator using vagrant's ssh-config.
+
+If you would like to connect via a different username or authentication method
+than is produced when you call `vagrant ssh-config`, then you must provide the
+
+`ssh_username` and all other relevant authentication information (e.g.
+`ssh_password` or `ssh_private_key_file`)
+
+By providing the `ssh_username`, you're telling Packer not to use the vagrant
+ssh config, except for determining the host and port for the virtual machine to
+connect to.
