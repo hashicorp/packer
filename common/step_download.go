@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -108,6 +109,14 @@ func init() {
 }
 
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+	if runtime.GOOS == "windows" {
+		// Check that the user specified a UNC path, and promote it to an smb:// uri.
+		if strings.HasPrefix(source, "\\\\") && len(source) > 2 && source[2] != '?' {
+			source = filepath.ToSlash(source[2:])
+			source = fmt.Sprintf("smb://%s", source)
+		}
+	}
+
 	u, err := urlhelper.Parse(source)
 	if err != nil {
 		return "", fmt.Errorf("url parse: %s", err)
