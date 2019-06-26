@@ -2,7 +2,6 @@ package cvm
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -26,11 +25,6 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("image_name must be set"))
 	} else if len(cf.ImageName) > 20 {
 		errs = append(errs, fmt.Errorf("image_num length should not exceed 20 characters"))
-	} else {
-		regex := regexp.MustCompile("^[0-9a-zA-Z\\-]+$")
-		if !regex.MatchString(cf.ImageName) {
-			errs = append(errs, fmt.Errorf("image_name can only be composed of letters, numbers and minus sign"))
-		}
 	}
 
 	if len(cf.ImageDescription) > 60 {
