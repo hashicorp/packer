@@ -94,19 +94,42 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	if qemuVersion.GreaterThanOrEqual(v2) {
 		if config.DiskInterface == "virtio-scsi" {
-			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
-			driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
-			if config.DetectZeroes != "off" {
-				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			if config.DiskImage {
+				deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
+				driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
+				if config.DetectZeroes != "off" {
+					driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+				}
+				driveArgs = append(driveArgs, driveArgumentString)
+			} else {
+				deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0")
+				diskFullPaths := state.Get("qemu_disk_paths").([]string)
+				for i, diskFullPath := range diskFullPaths {
+					deviceArgs = append(deviceArgs, fmt.Sprintf("scsi-hd,bus=scsi0.0,drive=drive%d", i))
+					driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive%d,cache=%s,discard=%s,format=%s", diskFullPath, i, config.DiskCache, config.DiskDiscard, config.Format)
+					if config.DetectZeroes != "off" {
+						driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+					}
+					driveArgs = append(driveArgs, driveArgumentString)
+				}
 			}
-			driveArgs = append(driveArgs, driveArgumentString)
 		} else {
-			driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
-			if config.DetectZeroes != "off" {
-				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			if config.DiskImage {
+				driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
+				if config.DetectZeroes != "off" {
+					driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+				}
+				driveArgs = append(driveArgs, driveArgumentString)
+			} else {
+				diskFullPaths := state.Get("qemu_disk_paths").([]string)
+				for _, diskFullPath := range diskFullPaths {
+					driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", diskFullPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
+					if config.DetectZeroes != "off" {
+						driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+					}
+					driveArgs = append(driveArgs, driveArgumentString)
+				}
 			}
-			driveArgs = append(driveArgs, driveArgumentString)
-
 		}
 	} else {
 		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.Format))

@@ -142,6 +142,16 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `cpus` (number) - The number of cpus to use when building the VM.
      The default is `1` CPU.
 
+-   `disk_additional_size` (array of strings) - Additional disks to create.
+     Uses `vm_name` as the disk name template and appends `-#` where `#` is
+     the position in the array. `#` starts at 1 since 0 is the default disk.
+     Each string represents the disk image size in bytes. Optional suffixes
+     'k' or 'K' (kilobyte, 1024), 'M' (megabyte, 1024k), 'G' (gigabyte, 1024M),
+     'T' (terabyte, 1024G), 'P' (petabyte, 1024T) and 'E' (exabyte, 1024P)  are
+     supported. 'b' is ignored. Per qemu-img documentation.
+     Each additional disk uses the same disk parameters as the default disk.
+     Unset by default.
+
 -   `disk_cache` (string) - The cache mode to use for disk. Allowed values
     include any of `writethrough`, `writeback`, `none`, `unsafe`
     or `directsync`. By default, this is set to `writeback`.
