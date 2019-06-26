@@ -29,6 +29,7 @@ type AMIConfig struct {
 	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
+	AMISkipBuildRegion      bool              `mapstructure:"skip_save_build_region"`
 }
 
 func stringInSlice(s []string, searchstr string) bool {

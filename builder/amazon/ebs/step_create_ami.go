@@ -14,7 +14,8 @@ import (
 )
 
 type stepCreateAMI struct {
-	image *ec2.Image
+	image              *ec2.Image
+	AMISkipBuildRegion bool
 }
 
 func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -25,9 +26,9 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Create the image
 	amiName := config.AMIName
-	if config.AMIEncryptBootVolume != nil {
-		// encrypt_boot was set, so we will create a temporary image
-		// and then create a copy of it with the correct encrypt_boot
+	if config.AMIEncryptBootVolume != nil || s.AMISkipBuildRegion {
+		// Create a temporary image and then create a copy of it with the
+		// correct encrypt_boot
 		amiName = random.AlphaNum(7)
 	}
 

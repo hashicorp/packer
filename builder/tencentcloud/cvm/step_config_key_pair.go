@@ -70,6 +70,7 @@ func (s *stepConfigKeyPair) Run(ctx context.Context, state multistep.StateBag) m
 
 	// set keyId to delete when Cleanup
 	s.keyID = *resp.Response.KeyPair.KeyId
+	state.Put("temporary_key_pair_id", resp.Response.KeyPair.KeyId)
 
 	s.Comm.SSHKeyPairName = *resp.Response.KeyPair.KeyId
 	s.Comm.SSHPrivateKey = []byte(*resp.Response.KeyPair.PrivateKey)
