@@ -29,8 +29,6 @@
     create preemptible instance type [GH-7734]
 * core: scrub out sensitive variables in scrub out sensitive variables logs
     [GH-7743]
-* provisioner/powershell: Fix null file descriptor error that occurred when
-    remote_path provided is a directory and not a file. [GH-7705]
 
 ### BUG FIXES:
 * builder/alicloud: Fix describing snapshots issue when image_ignore_data_disks
@@ -58,6 +56,8 @@
     Chef [GH-7653]
 * provisioner/powershell: Fix crash caused by error in retry logic check in
     powershell provisioner [GH-7657]
+* provisioner/powershell: Fix null file descriptor error that occurred when
+    remote_path provided is a directory and not a file. [GH-7705]
 
 ## 1.4.1 (May 15, 2019)
 
