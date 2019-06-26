@@ -1,24 +1,59 @@
 ## 1.4.2 (upcoming)
 
 ### IMPROVEMENTS:
+* **new feature:** Packer console [GH-7726]
+* builder/alicloud: cleanup image and snapshot if target image is still not
+    available after timeout [GH-7744]
+* builder/alicloud: let product API determine the default value of io_optimized
+    [GH-7747]
+* builder/amazon: Add new `skip_save_build_region` option to fix naming
+    conflicts when building in a region you don't want the final image saved
+    in. [GH-7759]
+* builder/amazon: Add retry for temp key-pair generation in amazon-ebs
+    [GH-7731]
 * builder/amazon: Enable encrypted AMI sharing across accounts [GH-7707]
 * builder/amazon: New SpotInstanceTypes feature for spot instance users.
     [GH-7682]
+* builder/azure: Allow users to publish Managed Images to Azure Shared Image
+    Gallery (same Subscription) [GH-7778]
 * builder/azure: Update Azure SDK for Go to v30.0.0 [GH-7706]
-* builder/cloudstack: Add tags to instance upon creation [GH0-7526]
+* builder/cloudstack: Add tags to instance upon creation [GH-7526]
 * builder/docker: Better windows defaults [GH-7678]
+* builder/google: Add feature to import user-data from a file [GH-7720]
+* builder/hyperv: Abort build if there's a name collision [GH-7746]
+* builder/hyperv: Clarify pathing requirements for hyperv-vmcx [GH-7790]
+* builder/hyperv: Increase MaxRamSize to match modern Windows [GH-7785]
 * builder/openstack: Add image filtering on properties. [GH-7597]
+* builder/vagrant: Allow user to override vagrant ssh-config details [GH-7782]
+* builder/yandex: Gracefully shutdown instance, allow metadata from file, and
+    create preemptible instance type [GH-7734]
+* core: scrub out sensitive variables in scrub out sensitive variables logs
+    [GH-7743]
 * provisioner/powershell: Fix null file descriptor error that occurred when
     remote_path provided is a directory and not a file. [GH-7705]
 
-
 ### BUG FIXES:
+* builder/alicloud: Fix describing snapshots issue when image_ignore_data_disks
+    is provided [GH-7736]
 * builder/amazon: Fix bug in region copy which produced badly-named AMIs in the
     build region. [GH-7691]
 * builder/amazon: Fix failure that happened when spot_tags was set but ami_tags
-    wasn't [GH-7699]
+    wasn't [GH-7712]
 * builder/cloudstack: Update go-cloudstack sdk, fixing compatability with
     CloudStack v 4.12 [GH-7694]
+* builder/proxmox: Update proxmox-api-go dependency, fixing issue calculating
+    VMIDs. [GH-7755]
+* builder/tencent: Correctly remove tencentcloud temporary keypair. [GH-7787]
+* core: Allow timestamped AND colorless ui messages [GH-7769]
+* core: Apply logSecretFilter to output from ui.Say [GH-7739]
+* core: Fix "make bin" command to use reasonbale defaults. [GH-7752]
+* core: Fix user var interpolation for variables set via -var-file and from
+    command line [GH-7733]
+* core: machine-readable UI now writes UI calls to logs. [GH-7745]
+* core: Switch makefile to use "GO111MODULE=auto" to allow for modern gomodule
+    usage. [GH-7753]
+* provisioner/ansible: prevent nil pointer dereference after a language change
+    [GH-7738]
 * provisioner/chef: Accept chef license by default to prevent hangs in latest
     Chef [GH-7653]
 * provisioner/powershell: Fix crash caused by error in retry logic check in
