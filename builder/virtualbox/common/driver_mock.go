@@ -126,7 +126,7 @@ func (d *DriverMock) Version() (string, error) {
 	return d.VersionResult, d.VersionErr
 }
 
-func (d *DriverMock) LoadSnapshots(string vmName) (*VBoxSnapshot, error) {
+func (d *DriverMock) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
@@ -135,7 +135,7 @@ func (d *DriverMock) LoadSnapshots(string vmName) (*VBoxSnapshot, error) {
 	return d.LoadSnapshotsResult, nil
 }
 
-func (d *DriverMock) CreateSnapshot(string vmName, string snapshotName) error {
+func (d *DriverMock) CreateSnapshot(vmName string, snapshotName string) error {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
@@ -147,7 +147,7 @@ func (d *DriverMock) CreateSnapshot(string vmName, string snapshotName) error {
 	return d.CreateSnapshotError
 }
 
-func (d *DriverMock) HasSnapshots(string vmName) (bool, error) {
+func (d *DriverMock) HasSnapshots(vmName string) (bool, error) {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
@@ -156,7 +156,7 @@ func (d *DriverMock) HasSnapshots(string vmName) (bool, error) {
 	return d.HasSnapshotsResult, nil
 }
 
-func (d *DriverMock) GetCurrentSnapshot(string vmName) (*VBoxSnapshot, error) {
+func (d *DriverMock) GetCurrentSnapshot(vmName string) (*VBoxSnapshot, error) {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
@@ -165,7 +165,7 @@ func (d *DriverMock) GetCurrentSnapshot(string vmName) (*VBoxSnapshot, error) {
 	return d.GetCurrentSnapshotResult, nil
 }
 
-func (d *DriverMock) SetSnapshot(string vmName, *VBoxSnapshot snapshot) error {
+func (d *DriverMock) SetSnapshot(vmName string, snapshot *VBoxSnapshot) error {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
@@ -177,7 +177,7 @@ func (d *DriverMock) SetSnapshot(string vmName, *VBoxSnapshot snapshot) error {
 	return nil
 }
 
-func (d *DriverMock) DeleteSnapshot(string vmName, *VBoxSnapshot snapshot) error {
+func (d *DriverMock) DeleteSnapshot(vmName string, snapshot *VBoxSnapshot) error {
 	if vmName == "" {
 		panic("Argument empty exception: vmName")
 	}
