@@ -24,6 +24,7 @@
 * builder/hyperv: Clarify pathing requirements for hyperv-vmcx [GH-7790]
 * builder/hyperv: Increase MaxRamSize to match modern Windows [GH-7785]
 * builder/openstack: Add image filtering on properties. [GH-7597]
+* builder/qemu: Add additional disk support [GH-7791]
 * builder/vagrant: Allow user to override vagrant ssh-config details [GH-7782]
 * builder/yandex: Gracefully shutdown instance, allow metadata from file, and
     create preemptible instance type [GH-7734]
