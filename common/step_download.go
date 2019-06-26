@@ -101,6 +101,9 @@ func init() {
 			// can leave the source file where it is & tell us where it is.
 			Copy: true,
 		}
+		getters["smb"] = &getter.FileGetter{
+			Copy: true,
+		}
 	}
 }
 
