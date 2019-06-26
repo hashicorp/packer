@@ -46,16 +46,16 @@ type DriverMock struct {
 	VersionResult string
 	VersionErr    error
 
-	LoadSnapshotsCalled []string
-	LoadSnapshotsResult *VBoxSnapshot
-	CreateSnapshotCalled []string
-	CreateSnapshotError error
-	HasSnapshotsCalled []string
-	HasSnapshotsResult bool
+	LoadSnapshotsCalled      []string
+	LoadSnapshotsResult      *VBoxSnapshot
+	CreateSnapshotCalled     []string
+	CreateSnapshotError      error
+	HasSnapshotsCalled       []string
+	HasSnapshotsResult       bool
 	GetCurrentSnapshotCalled []string
 	GetCurrentSnapshotResult *VBoxSnapshot
-	SetSnapshotCalled []*VBoxSnapshot
-	DeleteSnapshotCalled []*VBoxSnapshot
+	SetSnapshotCalled        []*VBoxSnapshot
+	DeleteSnapshotCalled     []*VBoxSnapshot
 }
 
 func (d *DriverMock) CreateSATAController(vm string, controller string, portcount int) error {
