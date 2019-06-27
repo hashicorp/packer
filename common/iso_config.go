@@ -1,10 +1,15 @@
 package common
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
+	"net/url"
+	"os"
 	"strings"
 
+	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -64,6 +69,28 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 
 	if c.ISOChecksum == "" {
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
+	}
+	if c.ISOChecksumType == "file" {
+		u, err := url.Parse(c.ISOUrls[0])
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Printf("get working directory: %v", err)
+			// here we ignore the error in case the
+			// working directory is not needed.
+		}
+		gc := getter.Client{
+			Dst:     "no-op",
+			Src:     u.String(),
+			Pwd:     wd,
+			Dir:     false,
+			Getters: getter.Getters,
+		}
+		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+		}
+		c.ISOChecksumType = cksum.Type
+		c.ISOChecksum = hex.EncodeToString(cksum.Value)
 	}
 
 	return warnings, errs
