@@ -26,7 +26,7 @@
   "provisioners": [{
     "type": "shell",
     "inline": [
-      "yum install -y mysql"
+      "yum install -y nginx"
     ]
   }]
 }
