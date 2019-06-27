@@ -1,30 +1,30 @@
 {
-"variables": {
-  "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
-  "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
-  "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
-},
+  "variables": {
+    "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
+  },
 
-"builders": [{
-  "type": "ucloud-uhost",
-  "public_key":"{{user `ucloud_public_key`}}",
-  "private_key":"{{user `ucloud_private_key`}}",
-  "project_id": "{{user `ucloud_project_id`}}",
-  "region": "cn-bj2",
-  "availability_zone": "cn-bj2-02",
-  "instance_type": "n-basic-2",
-  "source_image_id":"uimage-irofn4",
-  "ssh_password": "ucloud_2019",
-  "ssh_username":"ubuntu",
-  "image_name": "packer-test-ubuntu-bj"
-}],
+  "builders": [{
+    "type": "ucloud-uhost",
+    "public_key": "{{user `ucloud_public_key`}}",
+    "private_key": "{{user `ucloud_private_key`}}",
+    "project_id": "{{user `ucloud_project_id`}}",
+    "region": "cn-bj2",
+    "availability_zone": "cn-bj2-02",
+    "instance_type": "n-basic-2",
+    "source_image_id": "uimage-irofn4",
+    "ssh_password": "ucloud_2019",
+    "ssh_username": "ubuntu",
+    "image_name": "packer-test-ubuntu-bj"
+  }],
 
-"provisioners": [{
-  "type": "shell",
-  "inline": [
-    "sleep 30",
-    "echo 'ucloud_2019' | sudo -S apt update",
-    "sudo apt install nginx -y"
-  ]
-}]
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "echo 'ucloud_2019' | sudo -S apt update",
+      "sudo apt install nginx -y"
+    ]
+  }]
 }
