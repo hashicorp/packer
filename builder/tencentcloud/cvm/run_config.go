@@ -11,26 +11,27 @@ import (
 )
 
 type TencentCloudRunConfig struct {
-	AssociatePublicIpAddress bool   `mapstructure:"associate_public_ip_address"`
-	SourceImageId            string `mapstructure:"source_image_id"`
-	InstanceType             string `mapstructure:"instance_type"`
-	InstanceName             string `mapstructure:"instance_name"`
-	DiskType                 string `mapstructure:"disk_type"`
-	DiskSize                 int64  `mapstructure:"disk_size"`
-	VpcId                    string `mapstructure:"vpc_id"`
-	VpcName                  string `mapstructure:"vpc_name"`
-	VpcIp                    string `mapstructure:"vpc_ip"`
-	SubnetId                 string `mapstructure:"subnet_id"`
-	SubnetName               string `mapstructure:"subnet_name"`
-	CidrBlock                string `mapstructure:"cidr_block"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
-	SubnectCidrBlock         string `mapstructure:"subnect_cidr_block"`
-	InternetChargeType       string `mapstructure:"internet_charge_type"`
-	InternetMaxBandwidthOut  int64  `mapstructure:"internet_max_bandwidth_out"`
-	SecurityGroupId          string `mapstructure:"security_group_id"`
-	SecurityGroupName        string `mapstructure:"security_group_name"`
-	UserData                 string `mapstructure:"user_data"`
-	UserDataFile             string `mapstructure:"user_data_file"`
-	HostName                 string `mapstructure:"host_name"`
+	AssociatePublicIpAddress bool              `mapstructure:"associate_public_ip_address"`
+	SourceImageId            string            `mapstructure:"source_image_id"`
+	InstanceType             string            `mapstructure:"instance_type"`
+	InstanceName             string            `mapstructure:"instance_name"`
+	DiskType                 string            `mapstructure:"disk_type"`
+	DiskSize                 int64             `mapstructure:"disk_size"`
+	VpcId                    string            `mapstructure:"vpc_id"`
+	VpcName                  string            `mapstructure:"vpc_name"`
+	VpcIp                    string            `mapstructure:"vpc_ip"`
+	SubnetId                 string            `mapstructure:"subnet_id"`
+	SubnetName               string            `mapstructure:"subnet_name"`
+	CidrBlock                string            `mapstructure:"cidr_block"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
+	SubnectCidrBlock         string            `mapstructure:"subnect_cidr_block"`
+	InternetChargeType       string            `mapstructure:"internet_charge_type"`
+	InternetMaxBandwidthOut  int64             `mapstructure:"internet_max_bandwidth_out"`
+	SecurityGroupId          string            `mapstructure:"security_group_id"`
+	SecurityGroupName        string            `mapstructure:"security_group_name"`
+	UserData                 string            `mapstructure:"user_data"`
+	UserDataFile             string            `mapstructure:"user_data_file"`
+	HostName                 string            `mapstructure:"host_name"`
+	RunTags                  map[string]string `mapstructure:"run_tags"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`
@@ -118,6 +119,10 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if cf.HostName == "" {
 		cf.HostName = cf.InstanceName[:15]
+	}
+
+	if cf.RunTags == nil {
+		cf.RunTags = make(map[string]string)
 	}
 
 	return errs
