@@ -54,7 +54,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	})
 
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on waiting for image %q available", resp.ImageId))
+		return halt(state, err, fmt.Sprintf("Error on waiting for image %q to become available", resp.ImageId))
 	}
 
 	imageSet, err := client.DescribeImageById(resp.ImageId)
