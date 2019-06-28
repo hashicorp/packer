@@ -196,7 +196,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	})
 
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error on waiting for deleting instance %q completed, %s",
+		ui.Error(fmt.Sprintf("Error on waiting for instance %q to be deleted: %s",
 			s.instanceId, err.Error()))
 		return
 	}
