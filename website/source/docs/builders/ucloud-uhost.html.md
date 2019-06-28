@@ -19,7 +19,7 @@ provisioning that running machine, and then creating an image from that machine.
 
 ## Configuration Reference
 
-The following configuration options available for building UCloud images. They are
+The following configuration options are available for building UCloud images. They are
 segmented below into two categories: required and optional parameters.
 
 In addition to the options listed here, a
