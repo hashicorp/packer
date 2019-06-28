@@ -75,11 +75,16 @@ func TestISOConfigPrepare_ISOChecksum(t *testing.T) {
 func TestISOConfigPrepare_ISOChecksumURLBad(t *testing.T) {
 	i := testISOConfig()
 	i.ISOChecksumURL = "file:///not_read"
+	i.ISOChecksum = "shouldoverride"
 
 	// Test ISOChecksum overrides url
 	warns, err := i.Prepare(nil)
-	if len(warns) > 0 && len(err) > 0 {
-		t.Fatalf("bad: %#v, %#v", warns, err)
+	if len(warns) != 1 {
+		t.Fatalf("Bad: should have warned because both checksum and " +
+			"checksumURL are set.")
+	}
+	if len(err) > 0 {
+		t.Fatalf("Bad; should have warned but not errored.")
 	}
 
 	// Test that we won't try to read an iso into memory because of a user
