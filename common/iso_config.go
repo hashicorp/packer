@@ -58,13 +58,19 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 	}
 
 	if c.ISOChecksumURL != "" {
-		if strings.HasSuffix(strings.ToLower(c.ISOChecksumURL), ".iso") {
-			errs = append(errs, fmt.Errorf("Error parsing checksum:"+
-				" .iso is not a valid checksum extension"))
+		if c.ISOChecksum != "" {
+			warnings = append(warnings, "You have provided both an "+
+				"iso_checksum and an iso_checksum_url. Discarding the "+
+				"iso_checksum_url and using the checksum.")
+		} else {
+			if strings.HasSuffix(strings.ToLower(c.ISOChecksumURL), ".iso") {
+				errs = append(errs, fmt.Errorf("Error parsing checksum:"+
+					" .iso is not a valid checksum extension"))
+			}
+			// go-getter auto-parses checksum files
+			c.ISOChecksumType = "file"
+			c.ISOChecksum = c.ISOChecksumURL
 		}
-		// go-getter auto-parses checksum files
-		c.ISOChecksumType = "file"
-		c.ISOChecksum = c.ISOChecksumURL
 	}
 
 	if c.ISOChecksum == "" {
@@ -86,11 +92,12 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 			Getters: getter.Getters,
 		}
 		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
-		if err != nil {
+		if cksum == nil || err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+		} else {
+			c.ISOChecksumType = cksum.Type
+			c.ISOChecksum = hex.EncodeToString(cksum.Value)
 		}
-		c.ISOChecksumType = cksum.Type
-		c.ISOChecksum = hex.EncodeToString(cksum.Value)
 	}
 
 	return warnings, errs
