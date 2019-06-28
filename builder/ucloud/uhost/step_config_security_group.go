@@ -66,7 +66,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 	}
 
 	if securityGroupId == "" {
-		return halt(state, fmt.Errorf("the default security group not exist"), "")
+		return halt(state, fmt.Errorf("the default security group does not exist"), "")
 	}
 
 	state.Put("security_group_id", securityGroupId)
