@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -35,7 +34,6 @@ type StepRunSpotInstance struct {
 	InstanceType                      string
 	SourceAMI                         string
 	SpotPrice                         string
-	SpotPriceProduct                  string
 	SpotTags                          TagMap
 	SpotInstanceTypes                 []string
 	Tags                              TagMap
@@ -46,55 +44,6 @@ type StepRunSpotInstance struct {
 
 	instanceId  string
 	spotRequest *ec2.SpotInstanceRequest
-}
-
-func (s *StepRunSpotInstance) CalculateSpotPrice(az string, ec2conn ec2iface.EC2API) (string, error) {
-	// Calculate the spot price for a given availability zone
-	spotPrice := s.SpotPrice
-
-	if spotPrice == "auto" {
-		// Detect the spot price
-		startTime := time.Now().Add(-1 * time.Hour)
-		resp, err := ec2conn.DescribeSpotPriceHistory(&ec2.DescribeSpotPriceHistoryInput{
-			InstanceTypes:       []*string{&s.InstanceType},
-			ProductDescriptions: []*string{&s.SpotPriceProduct},
-			AvailabilityZone:    &az,
-			StartTime:           &startTime,
-		})
-		if err != nil {
-			return "", fmt.Errorf("Error finding spot price: %s", err)
-		}
-
-		var price float64
-		for _, history := range resp.SpotPriceHistory {
-			log.Printf("[INFO] Candidate spot price: %s", *history.SpotPrice)
-			current, err := strconv.ParseFloat(*history.SpotPrice, 64)
-			if err != nil {
-				log.Printf("[ERR] Error parsing spot price: %s", err)
-				continue
-			}
-			if price == 0 || current < price {
-				price = current
-				if az == "" {
-					az = *history.AvailabilityZone
-				}
-			}
-		}
-		if price == 0 {
-			return "", fmt.Errorf("No candidate spot prices found!")
-		} else {
-			// Add 0.5 cents to minimum spot bid to ensure capacity will be available
-			// Avoids price-too-low error in active markets which can fluctuate
-			price = price + 0.005
-		}
-
-		spotPrice = strconv.FormatFloat(price, 'f', -1, 64)
-	}
-
-	s.SpotPrice = spotPrice
-
-	return spotPrice, nil
-
 }
 
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
@@ -213,17 +162,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 	az := azConfig
 
-	ui.Message(fmt.Sprintf("Finding spot price for %s %s...",
-		s.SpotPriceProduct, s.InstanceType))
-	spotPrice, err := s.CalculateSpotPrice(az, ec2conn)
-	if err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	ui.Message(fmt.Sprintf("Determined spot instance price of: %s.", spotPrice))
-
 	var instanceId string
 
 	ui.Say("Interpolating tags for spot instance...")
@@ -247,8 +185,10 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// instance yet
 	ec2Tags.Report(ui)
 
-	spotOptions := ec2.LaunchTemplateSpotMarketOptionsRequest{
-		MaxPrice: &s.SpotPrice,
+	spotOptions := ec2.LaunchTemplateSpotMarketOptionsRequest{}
+	// The default is to set the maximum price to the OnDemand price.
+	if s.SpotPrice != "auto" {
+		spotOptions.SetMaxPrice(s.SpotPrice)
 	}
 	if s.BlockDurationMinutes != 0 {
 		spotOptions.BlockDurationMinutes = &s.BlockDurationMinutes

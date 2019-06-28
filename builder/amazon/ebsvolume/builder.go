@@ -59,6 +59,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	var errs *packer.MultiError
+	var warns []string
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
@@ -81,12 +82,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"you use an AMI that already has either SR-IOV or ENA enabled."))
 	}
 
+	if b.config.RunConfig.SpotPriceAutoProduct != "" {
+		warns = append(warns, "spot_price_auto_product is deprecated and no "+
+			"longer necessary for Packer builds. In future versions of "+
+			"Packer, inclusion of spot_price_auto_product will error your "+
+			"builds. Please take a look at our current documentation to "+
+			"understand how Packer requests Spot instances.")
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return nil, nil
+	return warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -121,7 +130,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
 			SpotPrice:                         b.config.SpotPrice,
-			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
 			SpotTags:                          b.config.SpotTags,
 			Tags:                              b.config.RunTags,

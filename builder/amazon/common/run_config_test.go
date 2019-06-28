@@ -117,7 +117,6 @@ func TestRunConfigPrepare_EnableT2UnlimitedBadWithSpotInstanceRequest(t *testing
 	c.InstanceType = "t2.micro"
 	c.EnableT2Unlimited = true
 	c.SpotPrice = "auto"
-	c.SpotPriceAutoProduct = "Linux/UNIX"
 	err := c.Prepare(nil)
 	if len(err) != 1 {
 		t.Fatalf("Should error if T2 Unlimited has been used in conjuntion with a Spot Price request")
@@ -127,19 +126,8 @@ func TestRunConfigPrepare_EnableT2UnlimitedBadWithSpotInstanceRequest(t *testing
 func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 	c := testConfig()
 	c.SpotPrice = "auto"
-	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("Should error if spot_price_auto_product is not set and spot_price is set to auto")
-	}
-
-	// Good - SpotPrice and SpotPriceAutoProduct are correctly set
-	c.SpotPriceAutoProduct = "foo"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
-	}
-
-	c.SpotPrice = ""
-	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("Should error if spot_price is not set to auto and spot_price_auto_product is set")
 	}
 }
 
