@@ -22,7 +22,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 		securityGroupSet, err := client.describeFirewallById(s.SecurityGroupId)
 		if err != nil {
 			if isNotFoundError(err) {
-				err = fmt.Errorf("the specified security group %q not exist", s.SecurityGroupId)
+				err = fmt.Errorf("the specified security group %q does not exist", s.SecurityGroupId)
 				return halt(state, err, "")
 			}
 			return halt(state, err, fmt.Sprintf("Error on querying specified security group %q", s.SecurityGroupId))
