@@ -2,7 +2,8 @@
   "variables": {
     "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
     "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
-    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}",
+    "password": "ucloud_2019"
   },
 
   "builders": [{
@@ -14,16 +15,17 @@
     "availability_zone": "cn-bj2-02",
     "instance_type": "n-basic-2",
     "source_image_id": "uimage-irofn4",
-    "ssh_password": "ucloud_2019",
+    "ssh_password": "{{user `password`}}",
     "ssh_username": "ubuntu",
     "image_name": "packer-test-ubuntu-bj"
   }],
 
   "provisioners": [{
     "type": "shell",
+    "execute_command": "echo '{{user `password`}}' | sudo -S '{{.Path}}'",
     "inline": [
       "sleep 30",
-      "echo 'ucloud_2019' | sudo -S apt update",
+      "sudo apt update",
       "sudo apt install nginx -y"
     ]
   }]
