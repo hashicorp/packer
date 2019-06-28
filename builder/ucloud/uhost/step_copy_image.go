@@ -117,7 +117,7 @@ func (s *stepCopyUCloudImage) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*UCloudClient)
 	conn := client.uhostconn
-	ui.Say(fmt.Sprintf("Deleting copied image because cancellation or error..."))
+	ui.Say(fmt.Sprintf("Deleting copied image because of cancellation or error..."))
 
 	for _, v := range imageInfos {
 		if v.ImageId == srcImageId {
