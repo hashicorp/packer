@@ -16,9 +16,15 @@
     this to `auto` for Packer to automatically discover the best spot price or
     to "0" to use an on demand instance (default).
 
--   `spot_price_auto_product` (string) - Required if `spot_price` is set to
-    `auto`. This tells Packer what sort of AMI you're launching to find the
-    best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`,
+-   `spot_price_auto_product` (string) - Deprecated. Prior to v1.4.3, was
+    required if `spot_price` is set to `auto`.
+
+    If you are using Packer v1.4.3 or later, simply remove this from your
+    template; it is no longer necessary based on recent changes to how Amazon
+    calculates spot prices.
+
+    Prior to version 1.4.3, This told Packer what sort of AMI you're launching
+    to find the best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`,
     `Windows`, `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`,
     `Windows (Amazon VPC)`
 
