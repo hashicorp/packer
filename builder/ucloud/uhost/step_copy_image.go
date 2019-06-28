@@ -90,7 +90,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 			s = append(s, fmt.Sprintf("%s:%s:%s", v.ProjectId, v.Region, v.ImageId))
 		}
 
-		return halt(state, err, fmt.Sprintf("Error on waiting for copying images %q available", strings.Join(s, ",")))
+		return halt(state, err, fmt.Sprintf("Error on waiting for copying images %q to become available", strings.Join(s, ",")))
 	}
 
 	ui.Message(fmt.Sprintf("Copying image complete"))
