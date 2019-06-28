@@ -129,6 +129,12 @@ func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
+
+	// Shouldn't error (YET) even though SpotPriceAutoProduct is deprecated
+	c.SpotPriceAutoProduct = "Linux/Unix"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
 }
 
 func TestRunConfigPrepare_SSHPort(t *testing.T) {
