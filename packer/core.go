@@ -88,6 +88,14 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	// to do this at this point with the variables.
 	result.builds = make(map[string]*template.Builder)
 	for _, b := range c.Template.Builders {
+		t, err := interpolate.Render(b.Type, result.Context())
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error interpolating builder '%s': %s",
+				b.Type, err)
+		}
+		b.Type = t
+
 		v, err := interpolate.Render(b.Name, result.Context())
 		if err != nil {
 			return nil, fmt.Errorf(
