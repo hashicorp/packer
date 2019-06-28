@@ -65,7 +65,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	})
 
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on waiting for instance %q available", instanceId))
+		return halt(state, err, fmt.Sprintf("Error on waiting for instance %q to become available", instanceId))
 	}
 
 	ui.Message(fmt.Sprintf("Creating instance %q complete", instanceId))
