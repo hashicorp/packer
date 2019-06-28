@@ -26,6 +26,7 @@ type stepRunInstance struct {
 	HostName                 string
 	InternetMaxBandwidthOut  int64
 	AssociatePublicIpAddress bool
+	Tags                     map[string]string
 }
 
 func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -89,6 +90,22 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ClientToken = &s.InstanceName
 	req.HostName = &s.HostName
 	req.UserData = &userData
+	var tags []*cvm.Tag
+	for k, v := range s.Tags {
+		tags = append(tags, &cvm.Tag{
+			Key:   &k,
+			Value: &v,
+		})
+	}
+	resourceType := "instance"
+	if len(tags) > 0 {
+		req.TagSpecification = []*cvm.TagSpecification{
+			&cvm.TagSpecification{
+				ResourceType: &resourceType,
+				Tags:         tags,
+			},
+		}
+	}
 
 	resp, err := client.RunInstances(req)
 	if err != nil {

@@ -116,6 +116,9 @@ builder.
 
 -   `host_name` (string) - host name.
 
+-   `run_tags` (map of strings) - Tags to apply to the instance that is *launched* to create the image.
+    These tags are *not* applied to the resulting image.
+
 ## Basic Example
 
 Here is a basic example for Tencentcloud.
@@ -137,7 +140,10 @@ Here is a basic example for Tencentcloud.
     "ssh_username" : "root",
     "image_name": "packerTest2",
     "packer_debug": true,
-    "associate_public_ip_address": true
+    "associate_public_ip_address": true,
+    "run_tags": {
+      "good": "luck"
+    }
   }],
   "provisioners": [{
     "type": "shell",

@@ -107,6 +107,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HostName:                 b.config.HostName,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			Tags:                     b.config.RunTags,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.TencentCloudRunConfig.Comm,
