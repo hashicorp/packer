@@ -246,18 +246,16 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	// enables it to work with directories. We don't actually support
 	// directories in Download() but we still need to handle the tar format.
 
-	stderrOut, err := ioutil.ReadAll(stderrP)
-	if err != nil {
-		return err
-	}
-
-	if string(stderrOut) != "" {
-		return fmt.Errorf("Error downloading file: %s", string(stderrOut))
-	}
-
 	archive := tar.NewReader(pipe)
 	_, err = archive.Next()
 	if err != nil {
+		// see if we can get a useful error message from stderr, since stdout
+		// is messed up.
+		if stderrOut, err := ioutil.ReadAll(stderrP); err == nil {
+			if string(stderrOut) != "" {
+				return fmt.Errorf("Error downloading file: %s", string(stderrOut))
+			}
+		}
 		return fmt.Errorf("Failed to read header from tar stream: %s", err)
 	}
 
