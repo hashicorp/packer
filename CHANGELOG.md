@@ -1,3 +1,12 @@
+## 1.4.3 (upcoming)
+
+### IMPROVEMENTS:
+**new builder** UCloud builder [GH-7775]
+* builder/tencent: Remove unnecessary image name validation check. [GH-7786]
+
+### BUG FIXES:
+* core: Fix regression where we could no longer access isos on SMB shares. [GH-7800]
+
 ## 1.4.2 (June 26, 2019)
 
 ### IMPROVEMENTS:
