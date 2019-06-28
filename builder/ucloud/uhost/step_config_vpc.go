@@ -22,7 +22,7 @@ func (s *stepConfigVPC) Run(ctx context.Context, state multistep.StateBag) multi
 		vpcSet, err := client.describeVPCById(s.VPCId)
 		if err != nil {
 			if isNotFoundError(err) {
-				err = fmt.Errorf("the specified vpc %q not exist", s.VPCId)
+				err = fmt.Errorf("the specified vpc %q does not exist", s.VPCId)
 				return halt(state, err, "")
 			}
 			return halt(state, err, fmt.Sprintf("Error on querying specified vpc %q", s.VPCId))
