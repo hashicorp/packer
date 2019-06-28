@@ -396,7 +396,7 @@ github.com/satori/go.uuid
 github.com/scaleway/scaleway-cli/pkg/api
 github.com/scaleway/scaleway-cli/pkg/utils
 github.com/scaleway/scaleway-cli/pkg/sshcommand
-# github.com/sirupsen/logrus v1.2.0
+# github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
@@ -408,6 +408,20 @@ github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
+# github.com/ucloud/ucloud-sdk-go v0.8.7
+github.com/ucloud/ucloud-sdk-go/services/uaccount
+github.com/ucloud/ucloud-sdk-go/services/uhost
+github.com/ucloud/ucloud-sdk-go/services/unet
+github.com/ucloud/ucloud-sdk-go/services/vpc
+github.com/ucloud/ucloud-sdk-go/ucloud
+github.com/ucloud/ucloud-sdk-go/ucloud/auth
+github.com/ucloud/ucloud-sdk-go/ucloud/error
+github.com/ucloud/ucloud-sdk-go/ucloud/request
+github.com/ucloud/ucloud-sdk-go/ucloud/response
+github.com/ucloud/ucloud-sdk-go/private/utils
+github.com/ucloud/ucloud-sdk-go/ucloud/log
+github.com/ucloud/ucloud-sdk-go/private/protocol/http
+github.com/ucloud/ucloud-sdk-go/ucloud/version
 # github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5
