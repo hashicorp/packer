@@ -20,7 +20,7 @@ func (s *stepConfigSubnet) Run(ctx context.Context, state multistep.StateBag) mu
 		subnetSet, err := client.describeSubnetById(s.SubnetId)
 		if err != nil {
 			if isNotFoundError(err) {
-				err = fmt.Errorf("the specified subnet %q not exist", s.SubnetId)
+				err = fmt.Errorf("the specified subnet %q does not exist", s.SubnetId)
 				return halt(state, err, "")
 			}
 			return halt(state, err, fmt.Sprintf("Error on querying specified subnet %q", s.SubnetId))
