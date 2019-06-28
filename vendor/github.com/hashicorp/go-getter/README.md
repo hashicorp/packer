@@ -280,6 +280,16 @@ None
   * `depth` - The Git clone depth. The provided number specifies the last `n`
     revisions to clone from the repository.
 
+
+The `git` getter accepts both URL-style SSH addresses like
+`git::ssh://git@example.com/foo/bar`, and "scp-style" addresses like
+`git::git@example.com/foo/bar`. In the latter case, omitting the `git::`
+force prefix is allowed if the username prefix is exactly `git@`.
+
+The "scp-style" addresses _cannot_ be used in conjunction with the `ssh://`
+scheme prefix, because in that case the colon is used to mark an optional
+port number to connect on, rather than to delimit the path from the host.
+
 ### Mercurial (`hg`)
 
   * `rev` - The Mercurial revision to checkout.
