@@ -175,9 +175,9 @@ for Packer to work:
 
 Note that if you'd like to create a spot instance, you must also add:
 
-    ec2:RequestSpotInstances,
-    ec2:CancelSpotInstanceRequests,
-    ec2:DescribeSpotInstanceRequests
+    ec2:CreateLaunchTemplate,
+    ec2:DeleteLaunchTemplate,
+    ec2:CreateFleet
 
 If you have the `spot_price` parameter set to `auto`, you must also add:
 
