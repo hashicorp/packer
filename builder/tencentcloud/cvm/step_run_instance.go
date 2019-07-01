@@ -27,6 +27,7 @@ type stepRunInstance struct {
 	InternetMaxBandwidthOut  int64
 	AssociatePublicIpAddress bool
 	Tags                     map[string]string
+	DataDisks                []tencentCloudDataDisk
 }
 
 func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -62,9 +63,45 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ImageId = source_image.ImageId
 	req.InstanceChargeType = &POSTPAID_BY_HOUR
 	req.InstanceType = &s.InstanceType
+	// TODO: Add check for system disk size, it should be larger than image system disk size.
 	req.SystemDisk = &cvm.SystemDisk{
 		DiskType: &s.DiskType,
 		DiskSize: &s.DiskSize,
+	}
+	// System disk snapshot is mandatory, so if there are additional data disks,
+	// length will be larger than 1.
+	if source_image.SnapshotSet != nil && len(source_image.SnapshotSet) > 1 {
+		ui.Say("Use source image snapshot data disks, ignore user data disk settings.")
+		var dataDisks []*cvm.DataDisk
+		for _, snapshot := range source_image.SnapshotSet {
+			if *snapshot.DiskUsage == "DATA_DISK" {
+				var dataDisk cvm.DataDisk
+				// FIXME: Currently we have no way to get original disk type
+				// from data disk snapshots, and we don't allow user to overwrite
+				// snapshot settings, and we cannot guarantee a certain hard-coded type
+				// is not sold out, so here we use system disk type as a workaround.
+				//
+				// Eventually, we need to allow user to overwrite snapshot disk
+				// settings.
+				dataDisk.DiskType = &s.DiskType
+				dataDisk.DiskSize = snapshot.DiskSize
+				dataDisk.SnapshotId = snapshot.SnapshotId
+				dataDisks = append(dataDisks, &dataDisk)
+			}
+		}
+		req.DataDisks = dataDisks
+	} else {
+		var dataDisks []*cvm.DataDisk
+		for _, disk := range s.DataDisks {
+			var dataDisk cvm.DataDisk
+			dataDisk.DiskType = &disk.DiskType
+			dataDisk.DiskSize = &disk.DiskSize
+			if disk.SnapshotId != "" {
+				dataDisk.SnapshotId = &disk.SnapshotId
+			}
+			dataDisks = append(dataDisks, &dataDisk)
+		}
+		req.DataDisks = dataDisks
 	}
 	req.VirtualPrivateCloud = &cvm.VirtualPrivateCloud{
 		VpcId:    &vpc_id,
