@@ -229,7 +229,7 @@ func (c *Client) WithSignatureMethod(method string) *Client {
 	return c
 }
 
-func (c *Client) WithHttpTransport(transport http.RoundTripper) *Client {
+func (c *Client) WithHttpTransport (transport http.RoundTripper) *Client {
 	c.httpClient.Transport = transport
 	return c
 }
