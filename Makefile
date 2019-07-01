@@ -46,7 +46,12 @@ install-build-deps: ## Install dependencies for bin build
 
 install-gen-deps: ## Install dependencies for code generation
 	@go get golang.org/x/tools/cmd/goimports
-	@go get -u github.com/mna/pigeon
+	@./scripts/off_gopath.sh; if [ $$? -eq 0 ]; then \
+		go get github.com/mna/pigeon@master; \
+	else \
+		go get -u github.com/mna/pigeon; \
+	fi
+
 	@go get github.com/alvaroloes/enumer
 
 dev: ## Build and install a development build
