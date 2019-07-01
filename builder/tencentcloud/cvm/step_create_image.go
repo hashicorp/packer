@@ -28,6 +28,15 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ImageName = &config.ImageName
 	req.ImageDescription = &config.ImageDescription
 	req.InstanceId = instance.InstanceId
+	// TODO: We should allow user to specify which data disk should be
+	// included into created image.
+	var dataDiskIds []*string
+	for _, disk := range instance.DataDisks {
+		dataDiskIds = append(dataDiskIds, disk.DiskId)
+	}
+	if len(dataDiskIds) > 0 {
+		req.DataDiskIds = dataDiskIds
+	}
 
 	True := "True"
 	False := "False"
