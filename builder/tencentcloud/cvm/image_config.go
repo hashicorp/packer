@@ -22,13 +22,13 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	cf.ForcePoweroff = true
 	if cf.ImageName == "" {
-		errs = append(errs, fmt.Errorf("image_name must be set"))
+		errs = append(errs, fmt.Errorf("image_name must be specified"))
 	} else if len(cf.ImageName) > 20 {
-		errs = append(errs, fmt.Errorf("image_num length should not exceed 20 characters"))
+		errs = append(errs, fmt.Errorf("image_name must less than 20 letters"))
 	}
 
 	if len(cf.ImageDescription) > 60 {
-		errs = append(errs, fmt.Errorf("image_description length should not exceed 60 characters"))
+		errs = append(errs, fmt.Errorf("image_description must less than 60 letters"))
 	}
 
 	if len(cf.ImageCopyRegions) > 0 {
