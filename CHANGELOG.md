@@ -2,10 +2,23 @@
 
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
+* build: Change Makefile to behave differently inside and outside the gopath
+    when generating code. [GH-7827]
+* builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
+* builder/tencent: Support data disks for tencentcloud builder [GH-7815]
 
 ### BUG FIXES:
-* core: Fix regression where we could no longer access isos on SMB shares. [GH-7800]
+* builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
+    [GH-7818]
+* builder/docker: Fix file download hang caused by blocking ReadAll call
+    [GH-7814]
+* builder/vmware: Fix validation regression that occurred when user provided a
+    checksum file [GH-7804]
+* core: Fix regression where we could no longer access isos on SMB shares.
+    [GH-7800]
+* provisioner/salt-masterless: Make salt-masterless provisioner respect
+    disable_sudo directive for all commands [GH-7774]
 
 ## 1.4.2 (June 26, 2019)
 
