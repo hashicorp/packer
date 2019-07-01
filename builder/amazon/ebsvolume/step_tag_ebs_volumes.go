@@ -24,6 +24,9 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			if configVolumeMapping.DeviceName == *instanceBlockDevices.DeviceName {
+				if configVolumeMapping.DeleteOnTermination {
+					continue
+				}
 				volumes[*ec2conn.Config.Region] = append(
 					volumes[*ec2conn.Config.Region],
 					*instanceBlockDevices.Ebs.VolumeId)
