@@ -5,7 +5,7 @@
     "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
     "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
-    "object_id": "{{env `ARM_OJBECT_ID`}}"
+    "object_id": "{{env `ARM_OBJECT_ID`}}"
   },
   "builders": [
     {
