@@ -1,14 +1,18 @@
 package googlecompute
 
 import (
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func commHost(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(*Config)
-	if config.Comm.SSHHost != "" {
-		return config.Comm.SSHHost, nil
+func commHost(host string) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
+		}
+		ipAddress := state.Get("instance_ip").(string)
+		return ipAddress, nil
 	}
-	ipAddress := state.Get("instance_ip").(string)
-	return ipAddress, nil
 }
