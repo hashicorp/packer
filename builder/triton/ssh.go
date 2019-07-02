@@ -1,17 +1,26 @@
 package triton
 
 import (
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func commHost(state multistep.StateBag) (string, error) {
-	driver := state.Get("driver").(Driver)
-	machineID := state.Get("machine").(string)
+func commHost(host string) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
+		}
 
-	machine, err := driver.GetMachineIP(machineID)
-	if err != nil {
-		return "", err
+		driver := state.Get("driver").(Driver)
+		machineID := state.Get("machine").(string)
+
+		machine, err := driver.GetMachineIP(machineID)
+		if err != nil {
+			return "", err
+		}
+
+		return machine, nil
 	}
-
-	return machine, nil
 }

@@ -61,7 +61,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepInstanceInfo{},
 		&communicator.StepConnect{
 			Config:    &b.config.Communicator,
-			Host:      commHost,
+			Host:      commHost(b.config.Communicator.SSHHost),
 			SSHConfig: b.config.Communicator.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
