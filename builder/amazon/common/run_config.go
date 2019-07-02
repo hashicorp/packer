@@ -153,20 +153,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			"block_duration_minutes must be multiple of 60"))
 	}
 
-	if c.SpotPrice == "auto" {
-		if c.SpotPriceAutoProduct == "" {
-			errs = append(errs, fmt.Errorf(
-				"spot_price_auto_product must be specified when spot_price is auto"))
-		}
-	}
-
-	if c.SpotPriceAutoProduct != "" {
-		if c.SpotPrice != "auto" {
-			errs = append(errs, fmt.Errorf(
-				"spot_price should be set to auto when spot_price_auto_product is specified"))
-		}
-	}
-
 	if c.SpotTags != nil {
 		if c.SpotPrice == "" || c.SpotPrice == "0" {
 			errs = append(errs, fmt.Errorf(
