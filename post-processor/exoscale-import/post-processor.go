@@ -15,9 +15,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/exoscale/egoscale"
+	"github.com/hashicorp/packer/builder/file"
+	"github.com/hashicorp/packer/builder/qemu"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -31,8 +34,8 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	SkipClean           bool `mapstructure:"skip_clean"`
 
-	APIEndpoint             string `mapstructure:"api_endpoint"`
 	SOSEndpoint             string `mapstructure:"sos_endpoint"`
+	APIEndpoint             string `mapstructure:"api_endpoint"`
 	APIKey                  string `mapstructure:"api_key"`
 	APISecret               string `mapstructure:"api_secret"`
 	ImageBucket             string `mapstructure:"image_bucket"`
@@ -97,6 +100,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+	switch a.BuilderId() {
+	case qemu.BuilderId, file.BuilderId, artifice.BuilderId:
+		break
+
+	default:
+		err := fmt.Errorf(
+			"Unknown artifact type: %s\nCan only import from QEMU/file builders and Artifice post-processor artifacts.",
+			a.BuilderId())
+		return nil, false, false, err
+	}
+
 	ui.Message("Uploading template image")
 	url, md5sum, err := p.uploadImage(ctx, ui, a)
 	if err != nil {
