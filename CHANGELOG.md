@@ -7,8 +7,12 @@
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
 * builder/tencent: Support data disks for tencentcloud builder [GH-7815]
+* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
+    no longer require this. [GH-7813]
 
 ### BUG FIXES:
+* builder/amazon: No longer store names of volumes which get deleted on
+    termination inside ebssurrogate artifact. [GH-7829]
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
 * builder/docker: Fix file download hang caused by blocking ReadAll call
