@@ -134,8 +134,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Config: &b.config.RunConfig.Comm,
 			Host: CommHost(
 				computeClient,
-				b.config.Comm.SSHInterface,
-				b.config.Comm.SSHIPVersion),
+				b.config.SSHInterface,
+				b.config.SSHIPVersion),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
