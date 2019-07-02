@@ -375,6 +375,11 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+Please note that for the Virtuabox builder, the IP address of the HTTP server
+Packer launches for you to access files like the preseed file in the example
+above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
+of your VM you must guarantee that you can still access this HTTP server.
+
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools.html#templates).
 
