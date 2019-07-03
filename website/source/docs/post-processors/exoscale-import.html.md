@@ -12,7 +12,7 @@ sidebar_current: 'docs-post-processors-exoscale-import'
 Type: `exoscale-import`
 
 The Packer Exoscale Import post-processor takes an image artifact from
-various builders and imports it to Exoscale.
+the QEMU, Artifice, or File builders and imports it to Exoscale.
 
 ## How Does it Work?
 
