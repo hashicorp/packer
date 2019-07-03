@@ -88,7 +88,8 @@ type RunConfig struct {
 	WindowsPasswordTimeout            time.Duration              `mapstructure:"windows_password_timeout"`
 
 	// Communicator settings
-	Comm communicator.Config `mapstructure:",squash"`
+	Comm         communicator.Config `mapstructure:",squash"`
+	SSHInterface string              `mapstructure:"ssh_interface"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -114,12 +115,12 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := c.Comm.Prepare(ctx)
 
 	// Validating ssh_interface
-	if c.Comm.SSHInterface != "public_ip" &&
-		c.Comm.SSHInterface != "private_ip" &&
-		c.Comm.SSHInterface != "public_dns" &&
-		c.Comm.SSHInterface != "private_dns" &&
-		c.Comm.SSHInterface != "" {
-		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.Comm.SSHInterface))
+	if c.SSHInterface != "public_ip" &&
+		c.SSHInterface != "private_ip" &&
+		c.SSHInterface != "public_dns" &&
+		c.SSHInterface != "private_dns" &&
+		c.SSHInterface != "" {
+		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
 	}
 
 	if c.Comm.SSHKeyPairName != "" {
