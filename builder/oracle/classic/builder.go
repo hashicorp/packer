@@ -129,7 +129,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
 				StepConnectSSH: &communicator.StepConnectSSH{
 					Config:    &b.config.BuilderComm,
-					Host:      ocommon.CommHost(b.config.Comm.SSHHost),
+					Host:      communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
 					SSHConfig: b.config.BuilderComm.SSHConfigFunc(),
 				},
 			},
