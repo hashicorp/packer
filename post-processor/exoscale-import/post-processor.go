@@ -73,13 +73,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	requiredArgs := map[string]*string{
-		"api_key":       &p.config.APIKey,
-		"api_secret":    &p.config.APISecret,
-		"api_endpoint":  &p.config.APIEndpoint,
-		"sos_endpoint":  &p.config.SOSEndpoint,
-		"image_bucket":  &p.config.ImageBucket,
-		"template_zone": &p.config.TemplateZone,
-		"template_name": &p.config.TemplateName,
+		"api_key":              &p.config.APIKey,
+		"api_secret":           &p.config.APISecret,
+		"api_endpoint":         &p.config.APIEndpoint,
+		"sos_endpoint":         &p.config.SOSEndpoint,
+		"image_bucket":         &p.config.ImageBucket,
+		"template_zone":        &p.config.TemplateZone,
+		"template_name":        &p.config.TemplateName,
+		"template_description": &p.config.TemplateDescription,
 	}
 
 	errs := new(packer.MultiError)
