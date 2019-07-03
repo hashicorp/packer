@@ -33,7 +33,7 @@ func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	// With the pending state over, verify that we're in the active state
 	ui.Say("Waiting for snapshot to complete...")
 	if err := waitForActionState(godo.ActionCompleted, dropletId, action.ID,
-		client, 20*time.Minute); err != nil {
+		client, 60*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)
