@@ -44,6 +44,8 @@ Required:
 
 -   `template_name` (string) - The name to be used for registering the template.
 
+-   `template_description` (string) - The description for the registered template.
+
 Optional:
 
 -   `api_endpoint` (string) - The API endpoint used to communicate with the
@@ -54,9 +56,6 @@ Optional:
 
 -   `template_zone` (string) - The Exoscale [zone](https://www.exoscale.com/datacenters/)
     in which to register the template. Defaults to `ch-gva-2`.
-
--   `template_description` (string) - An optional text description for the
-    registered template.
 
 -   `template_username` (string) - An optional username to be used to log into
     Compute instances using this template.
@@ -84,6 +83,7 @@ Here is a basic example:
   "api_secret": "{{user `exoscale_api_secret`}}",
   "image_bucket": "my-templates",
   "template_name": "myapp",
+  "template_description": "myapp v1.2.3",
   "template_username": "admin"
 }
 ```
