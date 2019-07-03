@@ -14,10 +14,16 @@ import (
 
 // CommHost looks up the host for the communicator.
 func CommHost(
+	host string,
 	client *gophercloud.ServiceClient,
 	sshinterface string,
 	sshipversion string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
+		}
+
 		s := state.Get("server").(*servers.Server)
 
 		// If we have a specific interface, try that
