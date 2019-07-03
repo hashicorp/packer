@@ -2,7 +2,6 @@ package cloudstack
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/packer/helper/multistep"
 )
