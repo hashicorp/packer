@@ -30,27 +30,63 @@ func (s *stepConfigureQMP) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionContinue
 	}
 
-	msg := fmt.Sprintf("Opening QMP socket at: %s", config.QMPSocketPath)
+	msg := fmt.Sprintf("QMP socket at: %s", config.QMPSocketPath)
 	ui.Say(msg)
 	log.Print(msg)
 
-	// Open QMP socket
-	var err error
-	s.monitor, err = qmp.NewSocketMonitor("unix", config.QMPSocketPath, 2*time.Second)
-	if err != nil {
-		err := fmt.Errorf("Error opening QMP socket: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	// Only initialize and open QMP when we have a use for it.
+	// Handles cases where user may want the socket, but we don't
+	if config.VNCUsePassword {
+		// Open QMP socket
+		var err error
+		var cmd []byte
+		var result []byte
+		s.monitor, err = qmp.NewSocketMonitor("unix", config.QMPSocketPath, 2*time.Second)
+		if err != nil {
+			err := fmt.Errorf("Error opening QMP socket: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		QMPMonitor := s.monitor
+		vncPassword := state.Get("vnc_password")
+
+		// Connect to QMP
+		// function automatically calls capabilities so is immediately ready for commands
+		err = QMPMonitor.Connect()
+		if err != nil {
+			err := fmt.Errorf("Error connecting to QMP socket: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		log.Printf("QMP socket open SUCCESS")
+
+		cmd = []byte(fmt.Sprintf("{ \"execute\": \"change-vnc-password\", \"arguments\": { \"password\": \"%s\" } }",
+			vncPassword))
+		result, err = QMPMonitor.Run(cmd)
+		if err != nil {
+			err := fmt.Errorf("Error connecting to QMP socket: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		msg = fmt.Sprintf("QMP Command: %s\nResult: %s", cmd, result)
+		log.Printf(msg)
+
+		// Put QMP monitor in statebag in case there is a use in a following step
+		// Uncomment for future case as it is unused for now
+		//state.Put("qmp_monitor", QMPMonitor)
 	}
-	QMPMonitor := s.monitor
-
-	log.Printf("QMP socket open SUCCESS")
-
-	state.Put("qmp_monitor", QMPMonitor)
 
 	return multistep.ActionContinue
 }
 
 func (s *stepConfigureQMP) Cleanup(multistep.StateBag) {
+	if s.monitor != nil {
+		err := s.monitor.Disconnect()
+		if err != nil {
+			log.Printf("failed to disconnect QMP: %v", err)
+		}
+	}
 }
