@@ -117,6 +117,8 @@ type Config struct {
 	OutputDir          string     `mapstructure:"output_directory"`
 	QemuArgs           [][]string `mapstructure:"qemuargs"`
 	QemuBinary         string     `mapstructure:"qemu_binary"`
+	QMPEnable          bool       `mapstructure:"qmp_enable"`
+	QMPSocketPath      string     `mapstructure:"qmp_socket_path"`
 	ShutdownCommand    string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin     int        `mapstructure:"ssh_host_port_min"`
 	SSHHostPortMax     int        `mapstructure:"ssh_host_port_max"`
@@ -344,6 +346,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
+
 	if b.config.SSHHostPortMin < 0 {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be positive"))
@@ -352,6 +355,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+
+	if b.config.QMPEnable && b.config.QMPSocketPath == "" {
+		socketName := fmt.Sprintf("%s.monitor", b.config.VMName)
+		b.config.QMPSocketPath = filepath.Join(b.config.OutputDir, socketName)
 	}
 
 	if b.config.QemuArgs == nil {
@@ -425,6 +433,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
+		new(stepConfigureQMP),
 		&stepTypeBootCommand{},
 	)
 
