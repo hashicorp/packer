@@ -113,6 +113,25 @@ func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_VNCPassword(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default boot_wait
+	config["vnc_use_password"] = true
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !b.config.QMPEnable {
+		t.Fatalf("QMP should be enabled.")
+	}
+}
+
 func TestBuilderPrepare_DiskCompaction(t *testing.T) {
 	var b Builder
 	config := testConfig()
