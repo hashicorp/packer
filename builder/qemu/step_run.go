@@ -85,6 +85,10 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
 	}
 
+	if config.QMPEnable {
+		defaultArgs["-qmp"] = fmt.Sprintf("unix:%s,server,nowait", config.QMPSocketPath)
+	}
+
 	rawVersion, err := driver.Version()
 	if err != nil {
 		return nil, err
