@@ -282,6 +282,13 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
+-   `qmp_enable` (bool) - Enable QMP socket. Location is specified by
+    `qmp_socket_path`.
+    Defaults to false.    
+
+-   `qmp_socket_path` (string) - QMP Socket Path when `qmp_enable` is true.
+    Defaults to `output_directory`/`vm_name`.monitor.
+
 ~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
