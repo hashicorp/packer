@@ -126,6 +126,7 @@ type Config struct {
 	VNCBindAddress     string     `mapstructure:"vnc_bind_address"`
 	VNCPortMin         int        `mapstructure:"vnc_port_min"`
 	VNCPortMax         int        `mapstructure:"vnc_port_max"`
+	VNCUsePassword     bool       `mapstructure:"vnc_use_password"`
 	VMName             string     `mapstructure:"vm_name"`
 
 	// These are deprecated, but we keep them around for BC
@@ -355,6 +356,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+
+	if b.config.VNCUsePassword && !b.config.QMPEnable {
+		b.config.QMPEnable = true
 	}
 
 	if b.config.QMPEnable && b.config.QMPSocketPath == "" {
