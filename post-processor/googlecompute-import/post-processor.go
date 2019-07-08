@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/storage/v1"
 
@@ -34,7 +35,7 @@ type Config struct {
 	ImageName            string            `mapstructure:"image_name"`
 	SkipClean            bool              `mapstructure:"skip_clean"`
 
-	Account googlecompute.AccountFile
+	Account *jwt.Config
 	ctx     interpolate.Context
 }
 
@@ -70,9 +71,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
-		if err := googlecompute.ProcessAccountFile(&p.config.Account, p.config.AccountFile); err != nil {
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
+		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+		p.config.Account = cfg
 	}
 
 	templates := map[string]*string{
@@ -95,7 +98,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	client, err := googlecompute.NewClientGCE(&p.config.Account)
+	client, err := googlecompute.NewClientGCE(p.config.Account)
 	if err != nil {
 		return nil, false, false, err
 	}

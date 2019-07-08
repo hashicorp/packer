@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"golang.org/x/oauth2/jwt"
 )
 
 type Config struct {
@@ -26,7 +27,7 @@ type Config struct {
 	Subnetwork  string   `mapstructure:"subnetwork"`
 	Zone        string   `mapstructure:"zone"`
 
-	Account googlecompute.AccountFile
+	Account *jwt.Config
 	ctx     interpolate.Context
 }
 
@@ -96,16 +97,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Set up credentials for GCE driver.
 	if builderAccountFile != "" {
-		err := googlecompute.ProcessAccountFile(&p.config.Account, builderAccountFile)
+		cfg, err := googlecompute.ProcessAccountFile(builderAccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
+		p.config.Account = cfg
 	}
 	if p.config.AccountFile != "" {
-		err := googlecompute.ProcessAccountFile(&p.config.Account, p.config.AccountFile)
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
+		p.config.Account = cfg
 	}
 
 	// Set up exporter instance configuration.
@@ -139,7 +142,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	exporterConfig.CalcTimeout()
 
-	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId, &p.config.Account)
+	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId, p.config.Account)
 	if err != nil {
 		return nil, false, false, err
 	}
