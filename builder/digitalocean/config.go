@@ -33,6 +33,7 @@ type Config struct {
 	SnapshotName      string        `mapstructure:"snapshot_name"`
 	SnapshotRegions   []string      `mapstructure:"snapshot_regions"`
 	StateTimeout      time.Duration `mapstructure:"state_timeout"`
+	SnapshotTimeout   time.Duration `mapstructure:"snapshot_timeout"`
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 	UserDataFile      string        `mapstructure:"user_data_file"`
@@ -86,6 +87,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
 		c.StateTimeout = 6 * time.Minute
+	}
+
+	if c.SnapshotTimeout == 0 {
+		// Default to 60 minutes timeout, waiting for snapshot action to finish
+		c.SnapshotTimeout = 60 * time.Minute
 	}
 
 	var errs *packer.MultiError
