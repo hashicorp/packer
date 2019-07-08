@@ -60,7 +60,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 		UserName: c.Comm.WinRMUser,
 		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
 		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
-		Email:    c.Account.ClientEmail,
+		Email:    c.Account.Email,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
 
