@@ -57,7 +57,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				SetOrder: false,
 			},
 			&common.StepWaitForIp{
-				&b.config.WaitIpConfig,
+				Config: &b.config.WaitIpConfig,
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,

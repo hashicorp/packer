@@ -41,14 +41,14 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
 
-	find_vm, err := d.FindVM(s.Location.VMName)
+	vm, err := d.FindVM(s.Location.VMName)
 
 	if s.Force == false && err == nil {
 		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", s.Location.VMName, err))
 		return multistep.ActionHalt
 	} else if s.Force == true && err == nil {
 		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", s.Location.VMName))
-		err := find_vm.Destroy()
+		err := vm.Destroy()
 		if err != nil {
 			state.Put("error", fmt.Errorf("error destroying %s: %v", s.Location.VMName, err))
 		}
@@ -61,7 +61,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 
-	vm, err := template.Clone(ctx, &driver.CloneConfig{
+	vm, err = template.Clone(ctx, &driver.CloneConfig{
 		Name:         s.Location.VMName,
 		Folder:       s.Location.Folder,
 		Cluster:      s.Location.Cluster,

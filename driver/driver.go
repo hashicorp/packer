@@ -31,14 +31,14 @@ type ConnectConfig struct {
 func NewDriver(config *ConnectConfig) (*Driver, error) {
 	ctx := context.TODO()
 
-	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
+	vcenterUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {
 		return nil, err
 	}
 	credentials := url.UserPassword(config.Username, config.Password)
-	vcenter_url.User = credentials
+	vcenterUrl.User = credentials
 
-	soapClient := soap.NewClient(vcenter_url, config.InsecureConnection)
+	soapClient := soap.NewClient(vcenterUrl, config.InsecureConnection)
 	vimClient, err := vim25.NewClient(ctx, soapClient)
 	if err != nil {
 		return nil, err
