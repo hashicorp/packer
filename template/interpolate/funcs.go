@@ -47,13 +47,7 @@ var FuncGens = map[string]FuncGenerator{
 	"lower": funcGenPrimitive(strings.ToLower),
 }
 
-type ErrVariableNotSet struct {
-	Var string // Name of template.
-}
-
-func (e ErrVariableNotSet) Error() string {
-	return fmt.Sprintf("variable %s not set", e.Var)
-}
+var ErrVariableNotSetString = "Error: variable not set:"
 
 // FuncGenerator is a function that given a context generates a template
 // function for the template.
@@ -176,7 +170,7 @@ func funcGenUser(ctx *Context) interface{} {
 			// error and retry if we're interpolating UserVariables. But if
 			// we're elsewhere in the template, just return the empty string.
 			if !ok {
-				return "", ErrVariableNotSet{k}
+				return "", fmt.Errorf("%s %s", ErrVariableNotSetString, k)
 			}
 		}
 		return val, nil

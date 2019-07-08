@@ -3,6 +3,7 @@ package packer
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	ttmp "text/template"
 
@@ -367,12 +368,10 @@ func (c *Core) init() error {
 				ctx.UserVariables = c.variables
 			case ttmp.ExecError:
 				castError := err.(ttmp.ExecError)
-				switch castError.Err.(type) {
-				case interpolate.ErrVariableNotSet:
+				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
 					shouldRetry = true
 					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
-					continue
-				default:
+				} else {
 					return err
 				}
 			default:
