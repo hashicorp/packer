@@ -366,9 +366,15 @@ func (c *Core) init() error {
 				c.variables[k] = renderedV
 				ctx.UserVariables = c.variables
 			case ttmp.ExecError:
-				shouldRetry = true
-				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v)
-				continue
+				castError := err.(ttmp.ExecError)
+				switch castError.Err.(type) {
+				case interpolate.ErrVariableNotSet:
+					shouldRetry = true
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
+					continue
+				default:
+					return err
+				}
 			default:
 				return fmt.Errorf(
 					// unexpected interpolation error: abort the run
