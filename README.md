@@ -73,6 +73,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `RAM_hot_plug`(boolean) - Enable RAM hot plug setting for virtual machine. Defaults to `false`.
 * `video_ram`(number) - Amount of video memory in MB.
 * `disk_size`(number) - The size of the disk in MB.
+* `network`(string) - Set network VM will be connected to.
 * `NestedHV`(boolean) - Enable nested hardware virtualization for VM. Defaults to `false`.
 * `configuration_parameters`(map) - Custom parameters.
 * `boot_order`(string) - Priority of boot devices. Defaults to `disk,cdrom`
@@ -83,7 +84,6 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `guest_os_type`(string) - Set VM OS type. Defaults to `otherGuest`. See [here](https://pubs.vmware.com/vsphere-6-5/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestOsDescriptor.GuestOsIdentifier.html) for a full list of possible values.
 * `disk_controller_type`(string) - Set VM disk controller type. Example `pvscsi`.
 * `disk_thin_provisioned`(boolean) - Enable VMDK thin provisioning for VM. Defaults to `false`.
-* `network`(string) - Set network VM will be connected to.
 * `network_card`(string) - Set VM network card type. Example `vmxnet3`.
 * `usb_controller`(boolean) - Create USB controller for virtual machine. Defaults to `false`.
 * `cdrom_type`(string) - Which controller to use. Example `sata`. Defaults to `ide`.
