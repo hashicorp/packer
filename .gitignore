@@ -6,3 +6,4 @@ bin/
 test*.json
 crash.log
 packer_cache/
+vendor/
