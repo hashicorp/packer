@@ -27,28 +27,28 @@ func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		remotepath := fmt.Sprintf("packer_cache/%s", filename)
-		remotedirectory := fmt.Sprintf("[%s] packer_cache/", ds.Name())
-		final_remotepath := fmt.Sprintf("%s/%s", remotedirectory, filename)
+		remotePath := fmt.Sprintf("packer_cache/%s", filename)
+		remoteDirectory := fmt.Sprintf("[%s] packer_cache/", ds.Name())
+		fullRemotePath := fmt.Sprintf("%s/%s", remoteDirectory, filename)
 
-		ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotepath))
+		ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
 
-		if exists := ds.FileExists(remotepath); exists == true {
+		if exists := ds.FileExists(remotePath); exists == true {
 			ui.Say("File already upload")
-			state.Put("iso_remote_path", final_remotepath)
+			state.Put("iso_remote_path", fullRemotePath)
 			return multistep.ActionContinue
 		}
 
-		if err := ds.MakeDirectory(remotedirectory); err != nil {
+		if err := ds.MakeDirectory(remoteDirectory); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		if err := ds.UploadFile(path.(string), remotepath, s.Host); err != nil {
+		if err := ds.UploadFile(path.(string), remotePath, s.Host); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
-		state.Put("iso_remote_path", final_remotepath)
+		state.Put("iso_remote_path", fullRemotePath)
 	}
 
 	return multistep.ActionContinue

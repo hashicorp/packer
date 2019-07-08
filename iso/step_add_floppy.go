@@ -86,8 +86,8 @@ func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		err_del := ds.Delete(UploadedFloppyPath.(string))
-		if err_del != nil {
+		err = ds.Delete(UploadedFloppyPath.(string))
+		if err != nil {
 			state.Put("error", err)
 			return
 		}

@@ -183,22 +183,22 @@ func (vm *VirtualMachine) Devices() (object.VirtualDeviceList, error) {
 	return vmInfo.Config.Hardware.Device, nil
 }
 
-func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*VirtualMachine, error) {
-	folder, err := template.driver.FindFolder(config.Folder)
+func (vm *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*VirtualMachine, error) {
+	folder, err := vm.driver.FindFolder(config.Folder)
 	if err != nil {
 		return nil, err
 	}
 
 	var relocateSpec types.VirtualMachineRelocateSpec
 
-	pool, err := template.driver.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
+	pool, err := vm.driver.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
 	if err != nil {
 		return nil, err
 	}
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
-	datastore, err := template.driver.FindDatastore(config.Datastore, config.Host)
+	datastore, err := vm.driver.FindDatastore(config.Datastore, config.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 	if config.LinkedClone == true {
 		cloneSpec.Location.DiskMoveType = "createNewChildDiskBacking"
 
-		tpl, err := template.Info("snapshot")
+		tpl, err := vm.Info("snapshot")
 		if err != nil {
 			return nil, err
 		}
@@ -231,7 +231,7 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 	}
 
 	if config.Network != "" {
-		net, err := template.driver.FindNetwork(config.Network)
+		net, err := vm.driver.FindNetwork(config.Network)
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +240,7 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 			return nil, err
 		}
 
-		devices, err := template.vm.Device(ctx)
+		devices, err := vm.vm.Device(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +260,7 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 		configSpec.DeviceChange = append(configSpec.DeviceChange, config)
 	}
 
-	task, err := template.vm.Clone(template.driver.ctx, folder.folder, config.Name, cloneSpec)
+	task, err := vm.vm.Clone(vm.driver.ctx, folder.folder, config.Name, cloneSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -276,8 +276,8 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 	}
 
 	vmRef := info.Result.(types.ManagedObjectReference)
-	vm := template.driver.NewVM(&vmRef)
-	return vm, nil
+	created := vm.driver.NewVM(&vmRef)
+	return created, nil
 }
 
 func (vm *VirtualMachine) Destroy() error {
@@ -543,16 +543,6 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 	}
 
 	return append(devices, device), nil
-}
-
-func addIDE(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
-	ideDevice, err := devices.CreateIDEController()
-	if err != nil {
-		return nil, err
-	}
-	devices = append(devices, ideDevice)
-
-	return devices, nil
 }
 
 func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {

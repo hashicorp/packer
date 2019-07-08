@@ -8,6 +8,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterBuilder(new(clone.Builder))
+	err = server.RegisterBuilder(new(clone.Builder))
+	if err != nil {
+		panic(err)
+	}
 	server.Serve()
 }

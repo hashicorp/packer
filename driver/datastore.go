@@ -39,6 +39,9 @@ func (d *Driver) FindDatastore(name string, host string) (*Datastore, error) {
 
 		ds := d.NewDatastore(&i.Datastore[0])
 		inf, err := ds.Info("name")
+		if err != nil {
+			return nil, err
+		}
 		name = inf.Name
 	}
 
