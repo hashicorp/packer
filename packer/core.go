@@ -3,6 +3,7 @@ package packer
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	ttmp "text/template"
 
@@ -366,9 +367,13 @@ func (c *Core) init() error {
 				c.variables[k] = renderedV
 				ctx.UserVariables = c.variables
 			case ttmp.ExecError:
-				shouldRetry = true
-				failedInterpolation = fmt.Sprintf(`"%s": "%s"`, k, v)
-				continue
+				castError := err.(ttmp.ExecError)
+				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
+					shouldRetry = true
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
+				} else {
+					return err
+				}
 			default:
 				return fmt.Errorf(
 					// unexpected interpolation error: abort the run
