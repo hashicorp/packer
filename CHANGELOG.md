@@ -2,6 +2,7 @@
 
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
+**new post-processor** Exoscale Import post-processor [GH-7822]
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
@@ -11,16 +12,26 @@
     no longer require this. [GH-7813]
 
 ### BUG FIXES:
-* builder/amazon: No longer store names of volumes which get deleted on
-    termination inside ebssurrogate artifact. [GH-7829]
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
+* builder/amazon: No longer store names of volumes which get deleted on
+    termination inside ebssurrogate artifact. [GH-7829]
+* builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
+    [GH-7841]
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
+* builder/google: Fix outdated oauth URL. [GH-7835]
 * builder/vmware: Fix validation regression that occurred when user provided a
     checksum file [GH-7804]
+* buildere/azure: Fix crash with managed images not published to shared image
+    gallery. [GH-7837]
+* communicator/ssh: Move ssh_interface back into individual builders from ssh
+    communicator to prevent validation issues where it isn't implemented.
+    [GH-7831]
 * core: Fix regression where we could no longer access isos on SMB shares.
     [GH-7800]
+* core: Make ssh_host template option always override all builders' IP
+    discovery. [GH-7832]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
 
