@@ -42,7 +42,7 @@ func TestArtifactIdVHD(t *testing.T) {
 }
 
 func TestArtifactIDManagedImage(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGalleryId")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -56,7 +56,6 @@ ManagedImageId: fakeID
 ManagedImageLocation: fakeLocation
 ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
 ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
-ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 `
 
 	result := artifact.String()
@@ -66,7 +65,7 @@ ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 }
 
 func TestArtifactIDManagedImageWithoutOSDiskSnapshotName(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGalleryId")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -79,7 +78,6 @@ ManagedImageName: fakeName
 ManagedImageId: fakeID
 ManagedImageLocation: fakeLocation
 ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
-ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 `
 
 	result := artifact.String()
@@ -89,7 +87,7 @@ ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 }
 
 func TestArtifactIDManagedImageWithoutDataDiskSnapshotPrefix(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "", "fakeSharedImageGalleryId")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -102,7 +100,6 @@ ManagedImageName: fakeName
 ManagedImageId: fakeID
 ManagedImageLocation: fakeLocation
 ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
-ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 `
 
 	result := artifact.String()
@@ -111,8 +108,8 @@ ManagedImageSharedImageGalleryId: fakeSharedImageGalleryId
 	}
 }
 
-func TestArtifactIDManagedImageWithoutSharedImageGalleryId(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "")
+func TestArtifactIDManagedImageWithSharedImageGalleryId(t *testing.T) {
+	artifact, err := NewManagedImageArtifactWithSIGAsDestination("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGallery")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -126,6 +123,7 @@ ManagedImageId: fakeID
 ManagedImageLocation: fakeLocation
 ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
 ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+ManagedImageSharedImageGalleryId: fakeSharedImageGallery
 `
 
 	result := artifact.String()
