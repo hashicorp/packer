@@ -5,6 +5,10 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+var (
+	ErrNoSataController = errors.New("no available SATA controller")
+)
+
 func (vm *VirtualMachine) AddSATAController() error {
 	sata := &types.VirtualAHCIController{}
 	return vm.addDevice(sata)
@@ -18,7 +22,7 @@ func (vm *VirtualMachine) FindSATAController() (*types.VirtualAHCIController, er
 
 	c := l.PickController((*types.VirtualAHCIController)(nil))
 	if c == nil {
-		return nil, errors.New("no available SATA controller")
+		return nil, ErrNoSataController
 	}
 
 	return c.(*types.VirtualAHCIController), nil
