@@ -20,7 +20,7 @@ func TestStepCreateVagrantfile_Impl(t *testing.T) {
 func TestCreateFile(t *testing.T) {
 	testy := StepCreateVagrantfile{
 		OutputDir: "./",
-		SourceBox: "bananas",
+		BoxName:   "bananas",
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
