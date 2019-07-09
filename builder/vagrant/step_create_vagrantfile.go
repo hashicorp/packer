@@ -14,10 +14,10 @@ import (
 
 type StepCreateVagrantfile struct {
 	Template     string
-	SourceBox    string
 	OutputDir    string
 	SyncedFolder string
 	GlobalID     string
+	BoxName      string
 }
 
 var DEFAULT_TEMPLATE = `Vagrant.configure("2") do |config|
@@ -56,7 +56,7 @@ func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
 
 	opts := &VagrantfileOptions{
 		SyncedFolder: s.SyncedFolder,
-		BoxName:      s.SourceBox,
+		BoxName:      s.BoxName,
 	}
 
 	err = tpl.Execute(templateFile, opts)
