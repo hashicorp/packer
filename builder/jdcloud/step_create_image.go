@@ -49,6 +49,7 @@ func ImageStatusWaiter(imageId string) error {
 			return NonRetryableError(err)
 		}
 	})
+
 }
 
 func (s *stepCreateJDCloudImage) Cleanup(state multistep.StateBag) {
