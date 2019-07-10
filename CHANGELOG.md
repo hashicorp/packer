@@ -21,6 +21,8 @@
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
 * builder/google: Fix outdated oauth URL. [GH-7835]
+* builder/vagrant: Fix bug where source_path was being used instead of box_name
+    when generating the Vagrantfile. [GH-7859]
 * builder/vmware: Fix validation regression that occurred when user provided a
     checksum file [GH-7804]
 * buildere/azure: Fix crash with managed images not published to shared image
@@ -28,6 +30,8 @@
 * communicator/ssh: Move ssh_interface back into individual builders from ssh
     communicator to prevent validation issues where it isn't implemented.
     [GH-7831]
+* core: Fix bug in template parsing where function errors were getting
+    swallowed. [GH-7854]
 * core: Fix regression where we could no longer access isos on SMB shares.
     [GH-7800]
 * core: Make ssh_host template option always override all builders' IP
