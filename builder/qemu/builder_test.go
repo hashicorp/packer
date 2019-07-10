@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -634,7 +635,7 @@ func TestBuilderPrepare_QMP(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	expected := "not-a-real-directory/packer-foo.monitor"
+	expected := filepath.Join("not-a-real-directory","packer-foo.monitor")
 	if !reflect.DeepEqual(b.config.QMPSocketPath, expected) {
 		t.Fatalf("Bad QMP socket Path: %s", b.config.QMPSocketPath)
 	}
