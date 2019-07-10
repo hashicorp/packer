@@ -291,7 +291,7 @@ github.com/hetznercloud/hcloud-go/hcloud
 github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
 github.com/hyperonecom/h1-client-go
-# github.com/jdcloud-api/jdcloud-sdk-go v1.9.0
+# github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 github.com/jdcloud-api/jdcloud-sdk-go/core
 github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis
 github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client

@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 	"bytes"
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 const (
