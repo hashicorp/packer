@@ -29,6 +29,7 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
+	jdcloudbuilder "github.com/hashicorp/packer/builder/jdcloud"
 	linodebuilder "github.com/hashicorp/packer/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
@@ -128,6 +129,7 @@ var Builders = map[string]packer.Builder{
 	"qemu":                new(qemubuilder.Builder),
 	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
+	"jdcloud":             new(jdcloudbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
 	"vagrant":             new(vagrantbuilder.Builder),
