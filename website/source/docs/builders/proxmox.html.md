@@ -55,6 +55,8 @@ builder.
 ### Optional:
 -   `insecure_skip_tls_verify` (bool) - Skip validating the certificate.
 
+-   `pool` (string) - Name of resource pool to create virtual machine in.
+
 -   `vm_name` (string) - Name of the virtual machine during creation. If not
     given, a random uuid will be used.
 
