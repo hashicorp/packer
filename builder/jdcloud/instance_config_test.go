@@ -51,8 +51,4 @@ func TestJDCloudInstanceSpecConfig_Prepare(t *testing.T) {
 		t.Fatalf("Test shouldn't pass when private key pair path is wrong ")
 	}
 
-	specs.Comm.SSHPrivateKeyFile = "/Users/mac/.ssh/id_rsa"
-	if err := specs.Prepare(nil); err != nil {
-		t.Fatalf("Test shouldn't fail when private everything is given properly")
-	}
 }
