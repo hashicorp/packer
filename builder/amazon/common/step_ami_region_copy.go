@@ -26,6 +26,26 @@ type StepAMIRegionCopy struct {
 	AMISkipBuildRegion bool
 }
 
+func (s *StepAMIRegionCopy) DeduplicateRegions() {
+	// Deduplicates regions by looping over the list of regions and storing
+	// the regions as keys in a map. This saves users from accidentally copying
+	// regions twice if they've added a region to a map twice.
+
+	RegionMap := map[string]bool{}
+	RegionSlice := []string{}
+
+	for _, r := range s.Regions {
+		RegionMap[r] = true
+	}
+
+	// Now print all those keys into the region slice again
+	for k, _ := range RegionMap {
+		RegionSlice = append(RegionSlice, k)
+	}
+
+	s.Regions = RegionSlice
+}
+
 func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
@@ -43,6 +63,10 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		if !s.AMISkipBuildRegion {
 			s.Regions = append(s.Regions, s.OriginalRegion)
 		}
+		// Now that we've added OriginalRegion, best to make sure there aren't
+		// any duplicates hanging around; duplicates will waste time.
+		s.DeduplicateRegions()
+
 		if *s.EncryptBootVolume {
 			// encrypt_boot is true, so we have to copy the temporary
 			// AMI with required encryption setting.
@@ -50,7 +74,11 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			if s.RegionKeyIds == nil {
 				s.RegionKeyIds = make(map[string]string)
 			}
-			s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+
+			// Make sure the kms_key_id for the original region is in the map
+			if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
+				s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+			}
 		}
 	}
 
