@@ -6,6 +6,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/hashicorp/packer/helper/config"
 )
 
 // A provisioner is responsible for installing and configuring software
@@ -60,9 +62,12 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 	}
 
 	generatedData := NewProvisionHookData()
-	if data != nil {
-		generatedData = data.(ProvisionHookData)
+	err := config.Decode(&generatedData, &config.DecodeOpts{Interpolate: false}, data)
+	if err != nil {
+		log.Printf("Failed to decode provisioner generated data: %s", err)
 	}
+
+	log.Printf("Megan decoded data: %#v", generatedData)
 
 	if comm == nil {
 		return fmt.Errorf(
