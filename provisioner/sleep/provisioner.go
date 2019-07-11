@@ -20,7 +20,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return config.Decode(&p, &config.DecodeOpts{}, raws...)
 }
 
-func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Communicator, _ *packer.ProvisionHookData) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
