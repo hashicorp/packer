@@ -238,7 +238,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ *packer.ProvisionHookData) error {
 	ui.Say("Provisioning with chef-solo")
 
 	if !p.config.SkipInstall {

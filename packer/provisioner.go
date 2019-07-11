@@ -20,7 +20,7 @@ type Provisioner interface {
 	// given for cancellation, a UI is given to communicate with the user, and
 	// a communicator is given that is guaranteed to be connected to some
 	// machine so that provisioning can be done.
-	Provision(context.Context, Ui, Communicator) error
+	Provision(context.Context, Ui, Communicator, *ProvisionHookData) error
 }
 
 // A HookedProvisioner represents a provisioner and information describing it
@@ -37,11 +37,31 @@ type ProvisionHook struct {
 	Provisioners []*HookedProvisioner
 }
 
+type ProvisionHookData struct {
+	WinRMPassword string
+}
+
+func NewProvisionHookData() ProvisionHookData {
+	// this is the function we use to create the provisionhookdata, and as a
+	// bonus the initialized state applies defaults that act as passthroughs so
+	// that when prepare is called the first time, we can save interpolating
+	// these values until provisioner run time.
+	hookData := ProvisionHookData{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
+	return hookData
+}
+
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
 	if len(h.Provisioners) == 0 {
 		return nil
+	}
+
+	generatedData := NewProvisionHookData()
+	if data != nil {
+		generatedData = data.(ProvisionHookData)
 	}
 
 	if comm == nil {
@@ -53,7 +73,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
-		err := p.Provisioner.Provision(ctx, ui, comm)
+		err := p.Provisioner.Provision(ctx, ui, comm, &generatedData)
 
 		ts.End(err)
 		if err != nil {
@@ -75,7 +95,7 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData *ProvisionHookData) error {
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
@@ -85,7 +105,7 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communica
 		return ctx.Err()
 	}
 
-	return p.Provisioner.Provision(ctx, ui, comm)
+	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
 // DebuggedProvisioner is a Provisioner implementation that waits until a key
@@ -102,7 +122,7 @@ func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData *ProvisionHookData) error {
 	// Use a select to determine if we get cancelled during the wait
 	message := "Pausing before the next provisioner . Press enter to continue."
 
@@ -122,5 +142,5 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communi
 		return ctx.Err()
 	}
 
-	return p.Provisioner.Provision(ctx, ui, comm)
+	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }

@@ -156,7 +156,7 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ *packer.ProvisionHookData) error {
 	ui.Say(fmt.Sprintf("Provisioning with windows-shell..."))
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
