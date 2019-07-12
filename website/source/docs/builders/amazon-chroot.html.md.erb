@@ -198,6 +198,10 @@ each category, the available configuration keys are alphabetized.
     *KmsKeyId* in the [AWS API docs -
     CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
+    This option supercedes the `kms_key_id` option -- if you set both, and they
+    are different, Packer will respect the value in `region_kms_key_ids` for
+    your build region and silently disregard the value provided in `kms_key_id`.
+
 -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
 -   `mfa_code` (string) - The MFA
