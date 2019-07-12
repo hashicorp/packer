@@ -11,7 +11,10 @@ import (
 )
 
 type WaitIpConfig struct {
+	WaitTimeout   time.Duration `mapstructure:"ip_wait_timeout"`
 	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
+
+	// WaitTimeout is a total timeout, so even if VM changes IP frequently and it doesn't settle down we will end waiting.
 }
 
 type StepWaitForIp struct {
@@ -24,6 +27,10 @@ func (c *WaitIpConfig) Prepare() []error {
 	if c.SettleTimeout == 0 {
 		c.SettleTimeout = 5 * time.Second
 	}
+	if c.WaitTimeout == 0 {
+		// Same default value as default timeout for 'ssh_timeout' in StepConnect
+		c.SettleTimeout = 5 * time.Minute
+	}
 
 	return errs
 }
@@ -32,22 +39,37 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	ui.Say("Waiting for IP...")
+	var ip string
+	var err error
 
-	ipChan := make(chan string)
-	errChan := make(chan error)
+	sub, cancel := context.WithCancel(ctx)
+	waitDone := make(chan bool, 1)
+
 	go func() {
-		doGetIp(vm, ctx, s.Config, errChan, ipChan)
+		ui.Say("Waiting for IP...")
+		ip, err = doGetIp(vm, sub, s.Config)
+		waitDone <- true
 	}()
 
+	log.Printf("[INFO] Waiting for IP, up to total timeout: %s, settle timeout: %s", s.Config.WaitTimeout, s.Config.SettleTimeout)
+	timeout := time.After(s.Config.WaitTimeout)
 	for {
 		select {
-		case err := <-errChan:
+		case <-timeout:
+			err := fmt.Errorf("Timeout waiting for IP.")
 			state.Put("error", err)
+			ui.Error(err.Error())
+			cancel()
 			return multistep.ActionHalt
 		case <-ctx.Done():
+			cancel()
+			log.Println("[WARN] Interrupt detected, quitting waiting for IP.")
 			return multistep.ActionHalt
-		case ip := <-ipChan:
+		case <-waitDone:
+			if err != nil {
+				state.Put("error", err)
+				return multistep.ActionHalt
+			}
 			state.Put("ip", ip)
 			ui.Say(fmt.Sprintf("IP address: %v", ip))
 			return multistep.ActionContinue
@@ -59,7 +81,7 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 }
 
-func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig, errChan chan error, ipChan chan string) {
+func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig) (string, error) {
 	var prevIp = ""
 	var stopTime time.Time
 	var interval time.Duration
@@ -75,8 +97,7 @@ func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig, er
 loop:
 	ip, err := vm.WaitForIP(ctx)
 	if err != nil {
-		errChan <- err
-		return
+		return "", err
 	}
 	if prevIp == "" || prevIp != ip {
 		if prevIp == "" {
@@ -91,12 +112,11 @@ loop:
 		log.Printf("VM IP is still the same: %s", prevIp)
 		if time.Now().After(stopTime) {
 			log.Printf("VM IP seems stable enough: %s", ip)
-			ipChan <- ip
-			return
+			return ip, nil
 		}
 		select {
 		case <-ctx.Done():
-			return
+			return "", fmt.Errorf("IP wait cancelled")
 		case <-time.After(interval):
 			goto loop
 		}
