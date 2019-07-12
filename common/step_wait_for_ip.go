@@ -28,8 +28,7 @@ func (c *WaitIpConfig) Prepare() []error {
 		c.SettleTimeout = 5 * time.Second
 	}
 	if c.WaitTimeout == 0 {
-		// Same default value as default timeout for 'ssh_timeout' in StepConnect
-		c.WaitTimeout = 5 * time.Minute
+		c.WaitTimeout = 30 * time.Minute
 	}
 
 	return errs
