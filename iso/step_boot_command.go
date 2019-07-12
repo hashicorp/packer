@@ -18,11 +18,9 @@ import (
 )
 
 type BootConfig struct {
-	BootCommand []string `mapstructure:"boot_command"`
-	RawBootWait string   `mapstructure:"boot_wait"` // example: "1m30s"; default: "10s"
-	HTTPIP      string   `mapstructure:"http_ip"`
-
-	bootWait time.Duration
+	BootCommand []string      `mapstructure:"boot_command"`
+	BootWait    time.Duration `mapstructure:"boot_wait"` // example: "1m30s"; default: "10s"
+	HTTPIP      string        `mapstructure:"http_ip"`
 }
 
 type bootCommandTemplateData struct {
@@ -34,14 +32,8 @@ type bootCommandTemplateData struct {
 func (c *BootConfig) Prepare() []error {
 	var errs []error
 
-	if c.RawBootWait == "" {
-		c.RawBootWait = "10s"
-	}
-
-	var err error
-	c.bootWait, err = time.ParseDuration(c.RawBootWait)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("failed parsing boot_wait: %s", err))
+	if c.BootWait == 0 {
+		c.BootWait = 10 * time.Second
 	}
 
 	return errs
@@ -98,8 +90,8 @@ func (s *StepBootCommand) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
-	ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.bootWait))
-	wait := time.After(s.Config.bootWait)
+	ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.BootWait))
+	wait := time.After(s.Config.BootWait)
 WAITLOOP:
 	for {
 		select {
