@@ -11,9 +11,7 @@ import (
 )
 
 type WaitIpConfig struct {
-	SettleTimeout string `mapstructure:"ip_settle_timeout"`
-
-	settleTimeout time.Duration
+	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
 }
 
 type StepWaitForIp struct {
@@ -23,14 +21,8 @@ type StepWaitForIp struct {
 func (c *WaitIpConfig) Prepare() []error {
 	var errs []error
 
-	if c.SettleTimeout == "" {
-		c.SettleTimeout = "5s"
-	}
-
-	var err error
-	c.settleTimeout, err = time.ParseDuration(c.SettleTimeout)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("failed parsing ip_settle_timeout: %s", err))
+	if c.SettleTimeout == 0 {
+		c.SettleTimeout = 5 * time.Second
 	}
 
 	return errs
@@ -71,11 +63,11 @@ func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig, er
 	var prevIp = ""
 	var stopTime time.Time
 	var interval time.Duration
-	if c.settleTimeout.Seconds() >= 120 {
+	if c.SettleTimeout.Seconds() >= 120 {
 		interval = 30 * time.Second
-	} else if c.settleTimeout.Seconds() >= 60 {
+	} else if c.SettleTimeout.Seconds() >= 60 {
 		interval = 15 * time.Second
-	} else if c.settleTimeout.Seconds() >= 10 {
+	} else if c.SettleTimeout.Seconds() >= 10 {
 		interval = 5 * time.Second
 	} else {
 		interval = 1 * time.Second
@@ -93,7 +85,7 @@ loop:
 			log.Printf("VM IP changed from %s to %s", prevIp, ip)
 		}
 		prevIp = ip
-		stopTime = time.Now().Add(c.settleTimeout)
+		stopTime = time.Now().Add(c.SettleTimeout)
 		goto loop
 	} else {
 		log.Printf("VM IP is still the same: %s", prevIp)
