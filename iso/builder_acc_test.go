@@ -369,10 +369,16 @@ func checkNetworkCard(t *testing.T) builderT.TestCheckFunc {
 func TestISOBuilderAcc_createFloppy(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "packer-vsphere-iso-test")
 	if err != nil {
-		t.Fatalf("Error creating temp file ")
+		t.Fatalf("Error creating temp file: %v", err)
 	}
-	fmt.Fprint(tmpFile, "Hello, World!")
-	tmpFile.Close()
+	_, err = fmt.Fprint(tmpFile, "Hello, World!")
+	if err != nil {
+		t.Fatalf("Error creating temp file: %v", err)
+	}
+	err = tmpFile.Close()
+	if err != nil {
+		t.Fatalf("Error creating temp file: %v", err)
+	}
 
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},

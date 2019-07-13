@@ -122,7 +122,10 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 		MemoryHotAddEnabled: true,
 		CpuHotAddEnabled:    true,
 	}
-	vm.Configure(hwConfig)
+	err := vm.Configure(hwConfig)
+	if err != nil {
+		t.Fatalf("Failed to configure VM: %v", err)
+	}
 
 	log.Printf("[DEBUG] Running checks")
 	vmInfo, err := vm.Info("config")
@@ -168,7 +171,10 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 
 func configureRAMReserveAllCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	log.Printf("[DEBUG] Configuring the vm")
-	vm.Configure(&HardwareConfig{RAMReserveAll: true})
+	err := vm.Configure(&HardwareConfig{RAMReserveAll: true})
+	if err != nil {
+		t.Fatalf("Failed to configure VM: %v", err)
+	}
 
 	log.Printf("[DEBUG] Running checks")
 	vmInfo, err := vm.Info("config")
@@ -235,16 +241,25 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 		t.Errorf("'%v' is not a valid ip address", ip)
 	}
 
-	vm.StartShutdown()
+	err := vm.StartShutdown()
+	if err != nil {
+		t.Fatalf("Failed to initiate guest shutdown: %v", err)
+	}
 	log.Printf("[DEBUG] Waiting max 1m0s for shutdown to complete")
-	vm.WaitForShutdown(context.TODO(), 1*time.Minute)
+	err = vm.WaitForShutdown(context.TODO(), 1*time.Minute)
+	if err != nil {
+		t.Fatalf("Failed to wait for giest shutdown: %v", err)
+	}
 }
 
 func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	stopper := startVM(t, vm, config.Name)
 	defer stopper()
 
-	vm.CreateSnapshot("test-snapshot")
+	err := vm.CreateSnapshot("test-snapshot")
+	if err != nil {
+		t.Fatalf("Failed to create snapshot: %v", err)
+	}
 
 	vmInfo, err := vm.Info("layoutEx.disk")
 	if err != nil {
@@ -258,7 +273,10 @@ func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 }
 
 func templateCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
-	vm.ConvertToTemplate()
+	err := vm.ConvertToTemplate()
+	if err != nil {
+		t.Fatalf("Failed to convert to template: %v", err)
+	}
 	vmInfo, err := vm.Info("config.template")
 	if err != nil {
 		t.Errorf("Cannot read VM properties: %v", err)
