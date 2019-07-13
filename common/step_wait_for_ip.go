@@ -43,6 +43,11 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 
 	sub, cancel := context.WithCancel(ctx)
 	waitDone := make(chan bool, 1)
+	defer func() {
+		cancel()
+		for range waitDone {
+		}
+	}()
 
 	go func() {
 		ui.Say("Waiting for IP...")
