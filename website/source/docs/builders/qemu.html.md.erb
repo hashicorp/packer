@@ -282,6 +282,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
+-   `qmp_socket_path` (string) - QMP Socket Path when `vnc_use_password` is true.
+    Defaults to `output_directory`/`vm_name`.monitor.
+
 ~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
@@ -389,6 +392,10 @@ default port of `5985` or whatever value you have the service set to listen on.
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
     default this is `5900` to `6000`. The minimum and maximum ports are inclusive.
+
+-   `vnc_use_password` (bool) - Whether or not to set a password on the VNC server.
+    This option automatically enables the QMP socket. See `qmp_socket_path`.
+    Defaults to `false`.
 
 ## Boot Command
 
