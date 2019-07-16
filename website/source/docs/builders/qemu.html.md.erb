@@ -282,11 +282,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
--   `qmp_enable` (bool) - Enable QMP socket. Location is specified by
-    `qmp_socket_path`.
-    Defaults to false.    
-
--   `qmp_socket_path` (string) - QMP Socket Path when `qmp_enable` is true.
+-   `qmp_socket_path` (string) - QMP Socket Path when `vnc_use_password` is true.
     Defaults to `output_directory`/`vm_name`.monitor.
 
 ~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
@@ -398,7 +394,7 @@ default port of `5985` or whatever value you have the service set to listen on.
     default this is `5900` to `6000`. The minimum and maximum ports are inclusive.
 
 -   `vnc_use_password` (bool) - Whether or not to set a password on the VNC server.
-    This option automatically sets `qmp_enable` to true.
+    This option automatically enables the QMP socket. See `qmp_socket_path`.
     Defaults to `false`.
 
 ## Boot Command

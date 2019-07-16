@@ -117,7 +117,6 @@ type Config struct {
 	OutputDir          string     `mapstructure:"output_directory"`
 	QemuArgs           [][]string `mapstructure:"qemuargs"`
 	QemuBinary         string     `mapstructure:"qemu_binary"`
-	QMPEnable          bool       `mapstructure:"qmp_enable"`
 	QMPSocketPath      string     `mapstructure:"qmp_socket_path"`
 	ShutdownCommand    string     `mapstructure:"shutdown_command"`
 	SSHHostPortMin     int        `mapstructure:"ssh_host_port_min"`
@@ -358,11 +357,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
-	if b.config.VNCUsePassword && !b.config.QMPEnable {
-		b.config.QMPEnable = true
-	}
-
-	if b.config.QMPEnable && b.config.QMPSocketPath == "" {
+	if b.config.VNCUsePassword && b.config.QMPSocketPath == "" {
 		socketName := fmt.Sprintf("%s.monitor", b.config.VMName)
 		b.config.QMPSocketPath = filepath.Join(b.config.OutputDir, socketName)
 	}

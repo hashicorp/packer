@@ -79,6 +79,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		vnc = fmt.Sprintf("%s:%d", vncIP, vncPort-5900)
 	} else {
 		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort-5900)
+		defaultArgs["-qmp"] = fmt.Sprintf("unix:%s,server,nowait", config.QMPSocketPath)
 	}
 
 	defaultArgs["-name"] = vmName
@@ -88,10 +89,6 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
 	} else {
 		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
-	}
-
-	if config.QMPEnable {
-		defaultArgs["-qmp"] = fmt.Sprintf("unix:%s,server,nowait", config.QMPSocketPath)
 	}
 
 	rawVersion, err := driver.Version()
