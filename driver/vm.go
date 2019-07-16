@@ -7,6 +7,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"log"
 	"strings"
 	"time"
 )
@@ -575,6 +576,7 @@ func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error 
 		devices.InsertIso(cdrom, isoPath)
 	}
 
+	log.Printf("Creating CD-ROM on controller '%v' with iso '%v'", controller, isoPath)
 	return vm.addDevice(cdrom)
 }
 
