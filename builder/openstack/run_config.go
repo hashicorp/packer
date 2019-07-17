@@ -28,6 +28,7 @@ type RunConfig struct {
 	ReuseIPs           bool              `mapstructure:"reuse_ips"`
 	SecurityGroups     []string          `mapstructure:"security_groups"`
 	Networks           []string          `mapstructure:"networks"`
+	InstanceFloatingIPNet       string            `mapstructure:"instance_floating_ip_net"`
 	Ports              []string          `mapstructure:"ports"`
 	UserData           string            `mapstructure:"user_data"`
 	UserDataFile       string            `mapstructure:"user_data_file"`
