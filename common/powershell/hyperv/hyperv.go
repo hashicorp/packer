@@ -35,7 +35,7 @@ param([string]$switchName, [int]$addressIndex)
 
 $HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
 if ($HostVMAdapter){
-    $HostNetAdapter = Get-NetAdapter | ?{ $HostVMAdapter.DeviceId.Contains($_.DeviceID) }
+    $HostNetAdapter = Get-NetAdapter | ?{ $_.DeviceId -eq $HostVMAdapter.DeviceId }
     if ($HostNetAdapter){
         $HostNetAdapterIfIndex = @()
         $HostNetAdapterIfIndex +=  $HostNetAdapter.ifIndex
