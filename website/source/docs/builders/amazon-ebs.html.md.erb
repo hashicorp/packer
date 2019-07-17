@@ -244,6 +244,10 @@ builder.
     *KmsKeyId* in the [AWS API docs -
     CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
+    This option supercedes the `kms_key_id` option -- if you set both, and they
+    are different, Packer will respect the value in `region_kms_key_ids` for
+    your build region and silently disregard the value provided in `kms_key_id`.
+
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a [template
