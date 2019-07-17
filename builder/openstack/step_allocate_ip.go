@@ -11,10 +11,10 @@ import (
 )
 
 type StepAllocateIp struct {
-	FloatingIPNetwork string
-	FloatingIP        string
-	ReuseIPs          bool
-	InstanceFloatingIPNet			string
+	FloatingIPNetwork     string
+	FloatingIP            string
+	ReuseIPs              bool
+	InstanceFloatingIPNet string
 }
 
 func (s *StepAllocateIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

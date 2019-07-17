@@ -86,12 +86,11 @@ func GetInstancePortID(client *gophercloud.ServiceClient, id string, instance_fl
 	for i := 0; i < len(interfaces); i++ {
 		log.Printf("Instance interface: %v: %+v\n", i, interfaces[i])
 		if interfaces[i].NetID == instance_float_net {
-			   log.Printf("Found preferred interface: %v\n", i)
-				 selected_interface = i
-				 log.Printf("Using interface value: %v", selected_interface)
+			log.Printf("Found preferred interface: %v\n", i)
+			selected_interface = i
+			log.Printf("Using interface value: %v", selected_interface)
 		}
 	}
-
 
 	return interfaces[selected_interface].PortID, nil
 }
