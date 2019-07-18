@@ -22,7 +22,7 @@ func listOAPIRegions(oapiconn oapi.OAPIClient) ([]string, error) {
 	return regions, nil
 }
 
-// ValidateRegion returns true if the supplied region is a valid AWS
+// ValidateRegion returns true if the supplied region is a valid Outscale
 // region and false if it's not.
 func (c *AccessConfig) ValidateRegion(regions ...string) error {
 	oapiconn, err := c.NewOAPIConnection()
