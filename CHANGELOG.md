@@ -3,17 +3,25 @@
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
 **new post-processor** Exoscale Import post-processor [GH-7822]
+**new builder** Outscale [GH-7459]
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
+* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
+    no longer require this. [GH-7813]
+* builder/qemu: Implement VNC password functionality [GH-7836]
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
 * builder/tencent: Support data disks for tencentcloud builder [GH-7815]
-* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
-    no longer require this. [GH-7813]
+* builder/vmware: Fix intense CPU usage because of poorly handled errors.
+    [GH-7877]
+* provisioner/salt-masterless: Modify file upload to handle non-root case.
+    [GH-7833]
 
 ### BUG FIXES:
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
+* builder/amazon: Fix failures and duplication in Amazon region copy and
+    encryption step. [GH-7870]
 * builder/amazon: No longer store names of volumes which get deleted on
     termination inside ebssurrogate artifact. [GH-7829]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
@@ -21,6 +29,7 @@
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
 * builder/google: Fix outdated oauth URL. [GH-7835]
+* builder/hyperv: Improve code for detecting IP address [GH-7880]
 * builder/vagrant: Fix bug where source_path was being used instead of box_name
     when generating the Vagrantfile. [GH-7859]
 * builder/vmware: Fix validation regression that occurred when user provided a
