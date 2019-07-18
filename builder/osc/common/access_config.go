@@ -11,7 +11,7 @@ import (
 	"github.com/outscale/osc-go/oapi"
 )
 
-// AccessConfig is for common configuration related to AWS access
+// AccessConfig is for common configuration related to Outscale API access
 type AccessConfig struct {
 	AccessKey             string `mapstructure:"access_key"`
 	CustomEndpointOAPI    string `mapstructure:"custom_endpoint_oapi"`
@@ -28,7 +28,7 @@ type AccessConfig struct {
 	getOAPIConnection func() oapi.OAPIClient
 }
 
-// Config returns a valid aws.Config object for access to AWS services, or
+// Config returns a valid oapi.Config object for access to Outscale services, or
 // an error if the authentication and region couldn't be resolved
 func (c *AccessConfig) Config() (*oapi.Config, error) {
 	if c.clientConfig != nil {

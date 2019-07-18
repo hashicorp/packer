@@ -48,7 +48,7 @@ func TestRunConfigPrepare_VmType(t *testing.T) {
 	c := testConfig()
 	c.VmType = ""
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("Should error if an instance_type is not specified")
+		t.Fatalf("Should error if an vm_type is not specified")
 	}
 }
 
@@ -56,7 +56,7 @@ func TestRunConfigPrepare_SourceOmi(t *testing.T) {
 	c := testConfig()
 	c.SourceOmi = ""
 	if err := c.Prepare(nil); len(err) != 2 {
-		t.Fatalf("Should error if a source_ami (or source_ami_filter) is not specified")
+		t.Fatalf("Should error if a source_omi (or source_omi_filter) is not specified")
 	}
 }
 
@@ -91,7 +91,7 @@ func TestRunConfigPrepare_SourceOmiFilterGood(t *testing.T) {
 
 func TestRunConfigPrepare_EnableT2UnlimitedGood(t *testing.T) {
 	c := testConfig()
-	// Must have a T2 instance type if T2 Unlimited is enabled
+	// Must have a T2 vm type if T2 Unlimited is enabled
 	c.VmType = "t2.micro"
 	c.EnableT2Unlimited = true
 	err := c.Prepare(nil)
@@ -102,12 +102,12 @@ func TestRunConfigPrepare_EnableT2UnlimitedGood(t *testing.T) {
 
 func TestRunConfigPrepare_EnableT2UnlimitedBadVmType(t *testing.T) {
 	c := testConfig()
-	// T2 Unlimited cannot be used with instance types other than T2
+	// T2 Unlimited cannot be used with vm types other than T2
 	c.VmType = "m5.large"
 	c.EnableT2Unlimited = true
 	err := c.Prepare(nil)
 	if len(err) != 1 {
-		t.Fatalf("Should error if T2 Unlimited is enabled with non-T2 instance_type")
+		t.Fatalf("Should error if T2 Unlimited is enabled with non-T2 vm_type")
 	}
 }
 

@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -89,23 +88,4 @@ func (c *OMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 		c.OMIRegions = regions
 	}
 	return errs
-}
-
-func validateKmsKey(kmsKey string) (valid bool) {
-	kmsKeyIdPattern := `[a-f0-9-]+$`
-	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
-	kmsArnStartPattern := `^arn:aws:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
-	if regexp.MustCompile(fmt.Sprintf("^%s", kmsKeyIdPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("^%s", aliasPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("%skey/%s", kmsArnStartPattern, kmsKeyIdPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("%s%s", kmsArnStartPattern, aliasPattern)).MatchString(kmsKey) {
-		return true
-	}
-	return false
 }

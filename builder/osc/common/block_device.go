@@ -20,8 +20,6 @@ type BlockDevice struct {
 	VirtualName        string `mapstructure:"virtual_name"`
 	VolumeType         string `mapstructure:"volume_type"`
 	VolumeSize         int64  `mapstructure:"volume_size"`
-	// Encrypted          bool   `mapstructure:"encrypted"`
-	// KmsKeyId           string `mapstructure:"kms_key_id"`
 }
 
 type BlockDevices struct {
@@ -117,10 +115,6 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 				bsu.SnapshotId = blockDevice.SnapshotId
 			}
 
-			//missing
-			//BlockDevice Encrypted
-			//KmsKeyId
-
 			mapping.Bsu = bsu
 		}
 
@@ -134,11 +128,6 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		return fmt.Errorf("The `device_name` must be specified " +
 			"for every device in the block device mapping.")
 	}
-	// Warn that encrypted must be true when setting kms_key_id
-	// if b.KmsKeyId != "" && b.Encrypted == false {
-	// 	return fmt.Errorf("The device %v, must also have `encrypted: "+
-	// 		"true` when setting a kms_key_id.", b.DeviceName)
-	// }
 	return nil
 }
 
