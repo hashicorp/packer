@@ -117,7 +117,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		}
 	}
 
-	u, err := urlhelper.Parse(source)
+	u, err := urlhelper.Parse(filepath.Clean(source))
 	if err != nil {
 		return "", fmt.Errorf("url parse: %s", err)
 	}

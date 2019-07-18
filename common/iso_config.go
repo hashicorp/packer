@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	getter "github.com/hashicorp/go-getter"
@@ -77,7 +78,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
 	}
 	if c.ISOChecksumType == "file" {
-		u, err := url.Parse(c.ISOUrls[0])
+		u, err := url.Parse(filepath.Clean(c.ISOUrls[0]))
 		wd, err := os.Getwd()
 		if err != nil {
 			log.Printf("get working directory: %v", err)
