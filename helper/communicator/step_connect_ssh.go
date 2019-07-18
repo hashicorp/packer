@@ -36,17 +36,17 @@ func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	var comm packer.Communicator
 	var err error
 
-	cancel := make(chan struct{})
+	subCtx, cancel := context.WithCancel(ctx)
 	waitDone := make(chan bool, 1)
 	go func() {
 		ui.Say("Waiting for SSH to become available...")
-		comm, err = s.waitForSSH(state, cancel)
+		comm, err = s.waitForSSH(state, subCtx)
+		cancel() // just to make 'possible context leak' analysis happy
 		waitDone <- true
 	}()
 
 	log.Printf("[INFO] Waiting for SSH, up to timeout: %s", s.Config.SSHTimeout)
 	timeout := time.After(s.Config.SSHTimeout)
-WaitLoop:
 	for {
 		// Wait for either SSH to become available, a timeout to occur,
 		// or an interrupt to come through.
@@ -60,31 +60,28 @@ WaitLoop:
 
 			ui.Say("Connected to SSH!")
 			state.Put("communicator", comm)
-			break WaitLoop
+			return multistep.ActionContinue
 		case <-timeout:
 			err := fmt.Errorf("Timeout waiting for SSH.")
 			state.Put("error", err)
 			ui.Error(err.Error())
-			close(cancel)
+			cancel()
+			return multistep.ActionHalt
+		case <-ctx.Done():
+			// The step sequence was cancelled, so cancel waiting for SSH
+			// and just start the halting process.
+			cancel()
+			log.Println("[WARN] Interrupt detected, quitting waiting for SSH.")
 			return multistep.ActionHalt
 		case <-time.After(1 * time.Second):
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				// The step sequence was cancelled, so cancel waiting for SSH
-				// and just start the halting process.
-				close(cancel)
-				log.Println("[WARN] Interrupt detected, quitting waiting for SSH.")
-				return multistep.ActionHalt
-			}
 		}
 	}
-
-	return multistep.ActionContinue
 }
 
 func (s *StepConnectSSH) Cleanup(multistep.StateBag) {
 }
 
-func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan struct{}) (packer.Communicator, error) {
+func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Context) (packer.Communicator, error) {
 	// Determine if we're using a bastion host, and if so, retrieve
 	// that configuration. This configuration doesn't change so we
 	// do this one before entering the retry loop.
@@ -123,7 +120,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		// Don't check for cancel or wait on first iteration
 		if !first {
 			select {
-			case <-cancel:
+			case <-ctx.Done():
 				log.Println("[DEBUG] SSH wait cancelled. Exiting loop.")
 				return nil, errors.New("SSH wait cancelled")
 			case <-time.After(5 * time.Second):
