@@ -52,6 +52,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("scw_%s.pem", b.config.PackerBuildName),
 		},
+		new(stepRemoveVolume),
 		new(stepCreateServer),
 		new(stepServerInfo),
 		&communicator.StepConnect{
