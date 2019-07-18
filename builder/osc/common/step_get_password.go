@@ -96,7 +96,10 @@ WaitLoop:
 	}
 	// store so that we can access this later during provisioning
 
-	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	err = commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	if err != nil {
+		log.Printf("[WARN] commonhelper.SetSharedState returned error: %s", err)
+	}
 	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue

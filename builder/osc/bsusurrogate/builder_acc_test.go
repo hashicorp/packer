@@ -1,7 +1,3 @@
-/*
-Deregister the test image with
-aws ec2 deregister-image --image-id $(aws ec2 describe-images --output text --filters "Name=name,Values=packer-test-packer-test-dereg" --query 'Images[*].{ID:ImageId}')
-*/
 package bsusurrogate
 
 import (
