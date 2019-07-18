@@ -64,6 +64,15 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+		err = volumeactions.SetImageMetadata(blockStorageClient, volume, volumeactions.ImageMetadataOpts{
+			Metadata: config.ImageMetadata,
+		}).ExtractErr()
+		if err != nil {
+			err := fmt.Errorf("Error setting image metadata: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 		imageId = image.ImageID
 	} else {
 		imageId, err = servers.CreateImage(computeClient, server.ID, servers.CreateImageOpts{
