@@ -178,6 +178,11 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		// does, go-getter will read this as a specialized go-getter-specific
 		// subdirectory command, which it most likely isn't.
 		src = filepath.Clean(u.String())
+		if _, err := os.Stat(filepath.Clean(u.Path)); err != nil {
+			// Cleaned path isn't actually present on system so it must be some
+			// other weird thing; see if go-getter can figure it out.
+			src = u.String()
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Trying %s", u.String()))
