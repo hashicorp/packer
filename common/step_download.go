@@ -171,12 +171,20 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		// could guess it only in cases it is
 		// necessary.
 	}
+	src := u.String()
+	if u.Scheme == "" || strings.ToLower(u.Scheme) == "file" {
+		// If a local filepath, then we need to preprocess to make sure the
+		// path doens't have any multiple successive path separators; if it
+		// does, go-getter will read this as a specialized go-getter-specific
+		// subdirectory command, which it most likely isn't.
+		src = filepath.Clean(u.String())
+	}
 
 	ui.Say(fmt.Sprintf("Trying %s", u.String()))
 	gc := getter.Client{
 		Ctx:              ctx,
 		Dst:              targetPath,
-		Src:              u.String(),
+		Src:              src,
 		ProgressListener: ui,
 		Pwd:              wd,
 		Dir:              false,
