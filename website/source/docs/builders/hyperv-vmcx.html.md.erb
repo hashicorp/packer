@@ -171,6 +171,11 @@ builder.
     (`*`, `?`, and `[]`) are allowed. Directory names are also allowed, which
     will add all the files found in the directory to the floppy.
 
+-   `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init
+    installs, which look for Nocloud floppy with 'cidata' label.
+    By default, th floppy label will be 'packer'.
+
 -   `guest_additions_mode` (string) - If set to `attach` then attach and
     mount the ISO image specified in `guest_additions_path`. If set to
     `none` then guest additions are not attached and mounted; This is the

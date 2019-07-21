@@ -111,6 +111,11 @@ builder.
     your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
+-   `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init
+    installs, which look for Nocloud floppy with 'cidata' label.
+    By default, th floppy label will be 'packer'.
+
 -   `guest_os_type` (string) - The guest OS type being installed. By default
     this is "other", but you can get *dramatic* performance improvements by
     setting this to the proper value. To view all available values for this run

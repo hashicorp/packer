@@ -134,6 +134,11 @@ builder.
     (`*`, `?`, and `[]`) are allowed. Directory names are also allowed, which
     will add all the files found in the directory to the floppy.
 
+-   `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init
+    installs, which look for Nocloud floppy with 'cidata' label.
+    By default, th floppy label will be 'packer'.
+
 -   `generation` (number) - The Hyper-V generation for the virtual machine. By
     default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
