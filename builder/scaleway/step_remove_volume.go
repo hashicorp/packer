@@ -18,6 +18,12 @@ func (s *stepRemoveVolume) Run(ctx context.Context, state multistep.StateBag) mu
 }
 
 func (s *stepRemoveVolume) Cleanup(state multistep.StateBag) {
+	if _, ok := state.GetOk("snapshot_name"); !ok {
+		// volume will be detached to server only after sharpshooting ... so we don't
+		// need to remove volume before snapshot step.
+		return
+	}
+
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
