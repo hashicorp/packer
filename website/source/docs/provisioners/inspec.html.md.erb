@@ -67,15 +67,15 @@ Optional Parameters:
     ```
 
 -   `attributes` (array of strings) - Attribute Files used by InSpec which will
-    be passed to the `--attrs` argument of the `inspec` command when this
+    be passed to the `--input-file` argument of the `inspec` command when this
     provisioner runs InSpec. Specify this if you want a different location.
-    Note using also `"--attrs"` in `extra_arguments` will override this
+    Note using also `"--input-file"` in `extra_arguments` will override this
     setting.
 
 -   `attributes_directory` (string) - The directory in which to place the
     temporary generated InSpec Attributes file. By default, this is the
     system-specific temporary file location. The fully-qualified name of this
-    temporary file will be passed to the `--attrs` argument of the `inspec`
+    temporary file will be passed to the `--input-file` argument of the `inspec`
     command when this provisioner runs InSpec. Specify this if you want a
     different location.
 
