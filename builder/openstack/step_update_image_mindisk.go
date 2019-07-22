@@ -26,7 +26,7 @@ func (s *stepUpdateImageMinDisk) Run(_ context.Context, state multistep.StateBag
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Updatind image min disk to %d", config.ImageMinDisk))
+	ui.Say(fmt.Sprintf("Updating image min disk to %d", config.ImageMinDisk))
 
 	r := images.Update(
 		imageClient,
