@@ -8,12 +8,17 @@
     when generating code. [GH-7827]
 * builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
     no longer require this. [GH-7813]
+* builder/openstack: New `image_min_disk` option [GH-7290]
+* builder/openstack: New option `use_blockstorage_volume` to set openstack
+    image metadata [GH-7792]
 * builder/qemu: Implement VNC password functionality [GH-7836]
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
 * builder/tencent: Support data disks for tencentcloud builder [GH-7815]
 * builder/vmware: Fix intense CPU usage because of poorly handled errors.
     [GH-7877]
+* communicator: Use context for timeouts, interruption in ssh and winrm
+    communicators [GH-7868]
 * provisioner/salt-masterless: Modify file upload to handle non-root case.
     [GH-7833]
 
@@ -41,10 +46,14 @@
     [GH-7831]
 * core: Fix bug in template parsing where function errors were getting
     swallowed. [GH-7854]
+* core: Fix regression where a local filepath containing `//` was no longer
+    properly resolving to `/`. [GH-7888]
 * core: Fix regression where we could no longer access isos on SMB shares.
     [GH-7800]
 * core: Make ssh_host template option always override all builders' IP
     discovery. [GH-7832]
+* provisioner/inspec: Use --input-file instead of --attrs to avoid deprecation
+    warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
 
