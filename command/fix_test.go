@@ -71,10 +71,10 @@ func TestFix_allFixersEnabled(t *testing.T) {
 		t.Fatalf("Fixers length (%d) does not match FixerOrder length (%d)", len(f), len(o))
 	}
 
-	for fixer, _ := range(f) {
+	for fixer, _ := range f {
 		found := false
 
-		for _, orderedFixer := range(o) {
+		for _, orderedFixer := range o {
 			if orderedFixer == fixer {
 				found = true
 				break
