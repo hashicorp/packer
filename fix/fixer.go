@@ -66,6 +66,8 @@ func init() {
 		"docker-email",
 		"powershell-escapes",
 		"vmware-compaction",
+		"hyperv-deprecations",
+		"hyperv-vmxc-typo",
 		"hyperv-cpu-and-ram",
 		"clean-image-name",
 		"spot-price-auto-product",
