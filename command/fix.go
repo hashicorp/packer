@@ -126,7 +126,7 @@ Fixes that are run (in order):
 
 	for _, name := range fix.FixerOrder {
 		helpText += fmt.Sprintf(
-			"\t%-30s\t%s\n",name, fix.Fixers[name].Synopsis())
+			"  %-27s%s\n", name, fix.Fixers[name].Synopsis())
 	}
 
 	helpText += `
