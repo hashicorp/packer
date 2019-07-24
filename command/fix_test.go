@@ -1,6 +1,7 @@
 package command
 
 import (
+	"github.com/hashicorp/packer/fix"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -59,5 +60,14 @@ func TestFix_invalidTemplateDisableValidation(t *testing.T) {
 	}
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
+	}
+}
+
+func TestFix_allFixersEnabled(t *testing.T) {
+	f := fix.Fixers
+	o := fix.FixerOrder
+
+	if len(f) != len(o) {
+		t.Fatalf("Fixers length (%d) does not match FixerOrder length (%d)", len(f), len(o))
 	}
 }
