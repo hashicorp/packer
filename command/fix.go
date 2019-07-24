@@ -120,46 +120,16 @@ Usage: packer fix [options] TEMPLATE
   If the template cannot be fixed due to an error, the command will exit
   with a non-zero exit status. Error messages will appear on standard error.
 
-Fixes that are run:
+Fixes that are run (in order):
 
-  iso-md5                    Replaces "iso_md5" in builders with newer
-                             "iso_checksum"
-  createtime                 Replaces ".CreateTime" in builder configs with
-                             "{{timestamp}}"
-  virtualbox-gaattach        Updates VirtualBox builders using
-                             "guest_additions_attach" to use
-                             "guest_additions_mode"
-  pp-vagrant-override        Replaces old-style provider overrides for the
-                             Vagrant post-processor to new-style as of Packer
-                             0.5.0.
-  virtualbox-rename          Updates "virtualbox" builders to "virtualbox-iso"
-  vmware-rename              Updates "vmware" builders to "vmware-iso"
-  parallels-headless         Removes unused "headless" setting from Parallels
-                             builders
-  parallels-deprecations     Removes deprecated "parallels_tools_host_path" from
-                             Parallels builders
-  sshkeypath                 Updates builders using "ssh_key_path" to use
-                             "ssh_private_key_file"
-  sshdisableagent            Updates builders using "ssh_disable_agent" to use
-                             "ssh_disable_agent_forwarding"
-  manifest-filename          Updates "manifest" post-processor so any "filename"
-                             field is renamed to "output"
-  amazon-shutdown_behavior   Changes "shutdown_behaviour" to "shutdown_behavior"
-                             in Amazon builders
-  amazon-enhanced-networking Replaces "enhanced_networking" in builders with
-                             "ena_support"
-  amazon-private-ip          Replaces "ssh_private_ip": true in amazon builders
-                             with "ssh_interface": "private_ip"
-  docker-email               Removes "login_email" from the Docker builder
-  powershell-escapes         Removes PowerShell escapes from user env vars and
-                             elevated username and password strings
-  hyperv-deprecations        Removes the deprecated "vhd_temp_path" setting from
-                             Hyper-V ISO builder templates
-  hyperv-vmxc-typo           Corrects a typo in the "clone_from_vmxc_path"
-                             setting. Replaces with "clone_from_vmcx_path".
-  vmware-compaction          Adds "skip_compaction = true" to "vmware-iso"
-                             builders with incompatible disk_type_id
+`
 
+	for _, name := range fix.FixerOrder {
+		helpText += fmt.Sprintf(
+			"  %-27s%s\n", name, fix.Fixers[name].Synopsis())
+	}
+
+	helpText += `
 Options:
 
   -validate=true      If true (default), validates the fixed template.
