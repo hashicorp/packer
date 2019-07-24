@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -18,22 +19,32 @@ type StepTempDir struct {
 
 // ConfigTmpDir returns the configuration tmp directory for Docker
 func ConfigTmpDir() (string, error) {
-	if tmpdir := os.Getenv("PACKER_TMP_DIR"); tmpdir != "" {
-		return filepath.Abs(tmpdir)
-	}
 	configdir, err := packer.ConfigDir()
 	if err != nil {
 		return "", err
 	}
+	if tmpdir := os.Getenv("PACKER_TMP_DIR"); tmpdir != "" {
+		// override the config dir with tmp dir. Still stat it and mkdirall if
+		// necessary.
+		fp, err := filepath.Abs(tmpdir)
+		log.Printf("found PACKER_TMP_DIR env variable; setting tmpdir to %s", fp)
+		if err != nil {
+			return "", err
+		}
+		configdir = fp
+	}
+
 	td := filepath.Join(configdir, "tmp")
 	_, err = os.Stat(td)
 	if os.IsNotExist(err) {
+		log.Printf("Creating tempdir in %s", td)
 		if err = os.MkdirAll(td, 0755); err != nil {
 			return "", err
 		}
 	} else if err != nil {
 		return "", err
 	}
+	log.Printf("Set Packer temp dir to %s", td)
 	return td, nil
 }
 
