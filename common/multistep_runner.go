@@ -71,17 +71,29 @@ func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
+	_, alreadyLogged := state.GetOk("abort_step_logged")
 	err, ok := state.GetOk("error")
-	if ok {
+	if ok && !alreadyLogged {
 		s.ui.Error(fmt.Sprintf("%s", err))
+		state.Put("abort_step_logged", true)
 	}
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		s.ui.Error("Interrupted, aborting...")
-		os.Exit(1)
+		if !alreadyLogged {
+			s.ui.Error("Interrupted, aborting...")
+			state.Put("abort_step_logged", true)
+		} else {
+			s.ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", typeName(s.step)))
+		}
+		return
 	}
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		s.ui.Error(fmt.Sprintf("Step %q failed, aborting...", typeName(s.step)))
-		os.Exit(1)
+		if !alreadyLogged {
+			s.ui.Error(fmt.Sprintf("Step %q failed, aborting...", typeName(s.step)))
+			state.Put("abort_step_logged", true)
+		} else {
+			s.ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", typeName(s.step)))
+		}
+		return
 	}
 	s.step.Cleanup(state)
 }
