@@ -237,49 +237,57 @@ func TestKeyPairFromPrivateKey(t *testing.T) {
 		pemRsa1024: {
 			t: Rsa,
 			d: expectedData{
-				bits: 1024,
+				bits:    1024,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemRsa2048: {
 			t: Rsa,
 			d: expectedData{
-				bits: 2048,
+				bits:    2048,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemOpenSshRsa1024: {
 			t: Rsa,
 			d: expectedData{
-				bits: 1024,
+				bits:    1024,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemOpenSshRsa2048: {
 			t: Rsa,
 			d: expectedData{
-				bits: 2048,
+				bits:    2048,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemDsa: {
 			t: Dsa,
 			d: expectedData{
-				bits: 1024,
+				bits:    1024,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemEcdsa384: {
 			t: Ecdsa,
 			d: expectedData{
-				bits: 384,
+				bits:    384,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemEcdsa521: {
 			t: Ecdsa,
 			d: expectedData{
-				bits: 521,
+				bits:    521,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 		pemOpenSshEd25519: {
 			t: Ed25519,
 			d: expectedData{
-				bits: 256,
+				bits:    256,
+				comment: uuid.TimeOrderedUUID(),
 			},
 		},
 	}
@@ -287,6 +295,7 @@ func TestKeyPairFromPrivateKey(t *testing.T) {
 	for rawPrivateKey, expected := range m {
 		kp, err := KeyPairFromPrivateKey(FromPrivateKeyConfig{
 			RawPrivateKeyPemBlock: []byte(rawPrivateKey),
+			Comment:               expected.d.comment,
 		})
 		if err != nil {
 			t.Fatal(err.Error())
@@ -340,6 +349,11 @@ func verifyEcdsaKeyPair(kp KeyPair, e expectedData) error {
 		return err
 	}
 
+	if kp.Comment != e.comment {
+		return fmt.Errorf("key pair comment should be:\n'%s'\nGot:\n'%s'",
+			e.comment, kp.Comment)
+	}
+
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
 	if len(e.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
@@ -374,6 +388,11 @@ func verifyRsaKeyPair(kp KeyPair, e expectedData) error {
 		return err
 	}
 
+	if kp.Comment != e.comment {
+		return fmt.Errorf("key pair comment should be:\n'%s'\nGot:\n'%s'",
+			e.comment, kp.Comment)
+	}
+
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
 	if len(e.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
@@ -404,6 +423,11 @@ func verifyDsaKeyPair(kp KeyPair, e fromPrivateExpectedData) error {
 		return err
 	}
 
+	if kp.Comment != e.d.comment {
+		return fmt.Errorf("key pair comment should be:\n'%s'\nGot:\n'%s'",
+			e.d.comment, kp.Comment)
+	}
+
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))
 	if len(e.d.comment) > 0 {
 		expectedBytes = append(expectedBytes, ' ')
@@ -432,6 +456,11 @@ func verifyEd25519KeyPair(kp KeyPair, e fromPrivateExpectedData) error {
 	publicKey, err := gossh.NewPublicKey(pk.Public())
 	if err != nil {
 		return err
+	}
+
+	if kp.Comment != e.d.comment {
+		return fmt.Errorf("key pair comment should be:\n'%s'\nGot:\n'%s'",
+			e.d.comment, kp.Comment)
 	}
 
 	expectedBytes := bytes.TrimSuffix(gossh.MarshalAuthorizedKey(publicKey), []byte("\n"))

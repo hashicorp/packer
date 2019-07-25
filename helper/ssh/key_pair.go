@@ -77,6 +77,7 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 			return KeyPair{}, err
 		}
 		return KeyPair{
+			Comment:                     config.Comment,
 			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
 			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Comment),
 		}, nil
@@ -86,6 +87,7 @@ func KeyPairFromPrivateKey(config FromPrivateKeyConfig) (KeyPair, error) {
 			return KeyPair{}, err
 		}
 		return KeyPair{
+			Comment:                     config.Comment,
 			PrivateKeyPemBlock:          config.RawPrivateKeyPemBlock,
 			PublicKeyAuthorizedKeysLine: authorizedKeysLine(publicKey, config.Comment),
 		}, nil
