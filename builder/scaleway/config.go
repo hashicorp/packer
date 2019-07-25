@@ -33,6 +33,8 @@ type Config struct {
 	Bootscript   string `mapstructure:"bootscript"`
 	BootType     string `mapstructure:"boottype"`
 
+	RemoveVolume bool `mapstructure:"remove_volume"`
+
 	UserAgent string
 	ctx       interpolate.Context
 }
