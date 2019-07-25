@@ -52,7 +52,7 @@ later, it will take precedence over one found earlier.
 
 1.  The directory where `packer` is, or the executable directory.
 
-2.  The `$HOME/packer.d/plugins` directory, if `$HOME` is defined (unix)
+2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
 
 3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
 
