@@ -130,8 +130,7 @@ There are two steps involved in creating a plugin:
     plugin, implement the `packer.Builder` interface.
 
 2.  Serve the interface by calling the appropriate plugin serving method in
-    your main method. In the case of a builder, this is
-    `plugin.RegisterBuilder`.
+    your main method.
 
 A basic example is shown below. In this example, assume the `Builder` struct
 implements the `packer.Builder` interface:
@@ -145,11 +144,16 @@ import (
 type Builder struct{}
 
 func main() {
-  plugin.RegisterBuilder(new(Builder))
+ 	server, err := plugin.Server()
+	if err != nil {
+		panic(err)
+	}
+	server.RegisterBuilder(new(Builder))
+	server.Serve() 
 }
 ```
 
-**That's it!** `plugin.RegisterBuilder` handles all the nitty gritty of
+**That's it!** `plugin.Server` handles all the nitty gritty of
 communicating with Packer core and serving your builder over RPC. It can't get
 much easier than that.
 
