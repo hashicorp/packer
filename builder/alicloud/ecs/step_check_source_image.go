@@ -28,7 +28,7 @@ func (s *stepCheckAlicloudSourceImage) Run(ctx context.Context, state multistep.
 
 	images := imagesResponse.Images.Image
 
-	// Describe markerplace image
+	// Describe marketplace image
 	describeImagesRequest.ImageOwnerAlias = "marketplace"
 	marketImagesResponse, err := client.DescribeImages(describeImagesRequest)
 	if err != nil {

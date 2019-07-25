@@ -18,7 +18,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// ** DEPRECATED: USE INLINE INSTEAD **
-	// ** Only Present for backwards compatibiltiy **
+	// ** Only Present for backwards compatibility **
 	// Command is the command to execute
 	Command string
 
