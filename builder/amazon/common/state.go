@@ -35,7 +35,7 @@ type StateChangeConf struct {
 }
 
 // Following are wrapper functions that use Packer's environment-variables to
-// determing retry logic, then call the AWS SDK's built-in waiters.
+// determine retry logic, then call the AWS SDK's built-in waiters.
 
 func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string) error {
 	imageInput := ec2.DescribeImagesInput{
