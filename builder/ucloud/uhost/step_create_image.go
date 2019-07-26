@@ -23,7 +23,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
-	ui.Say(fmt.Sprintf("Creating image %s", config.ImageName))
+	ui.Say(fmt.Sprintf("Creating image %s...", config.ImageName))
 
 	req := conn.NewCreateCustomImageRequest()
 	req.ImageName = ucloud.String(config.ImageName)
@@ -34,6 +34,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	if err != nil {
 		return halt(state, err, "Error on creating image")
 	}
+	ui.Message(fmt.Sprintf("Waiting for the created image %q to become available...", resp.ImageId))
 
 	err = retry.Config{
 		Tries: 200,

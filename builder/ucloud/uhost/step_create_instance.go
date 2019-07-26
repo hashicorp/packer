@@ -141,9 +141,9 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	if instance.State != instanceStateStopped {
-		stopReq := conn.NewPoweroffUHostInstanceRequest()
+		stopReq := conn.NewStopUHostInstanceRequest()
 		stopReq.UHostId = ucloud.String(s.instanceId)
-		if _, err = conn.PoweroffUHostInstance(stopReq); err != nil {
+		if _, err = conn.StopUHostInstance(stopReq); err != nil {
 			ui.Error(fmt.Sprintf("Error on stopping instance when deleting %q, %s",
 				s.instanceId, err.Error()))
 			return
