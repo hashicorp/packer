@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -20,7 +19,18 @@ func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	if s.TargetSnapshot != "" {
-		time.Sleep(10 * time.Second) // Wait after the Vm has been shutdown, otherwise creating the snapshot might make the VM unstartable
+		running, err := driver.IsRunning(s.Name)
+		if err != nil {
+			err = fmt.Errorf("Failed to test if VM %s is still running: %s", s.Name, err)
+		} else if running {
+			err = fmt.Errorf("VM %s is still running. Unable to create snapshot %s", s.Name, s.TargetSnapshot)
+		}
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
 		ui.Say(fmt.Sprintf("Creating snapshot %s on virtual machine %s", s.TargetSnapshot, s.Name))
 		snapshotTree, err := driver.LoadSnapshots(s.Name)
 		if err != nil {
@@ -56,19 +66,4 @@ func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateSnapshot) Cleanup(state multistep.StateBag) {
-	/*
-		driver := state.Get("driver").(vboxcommon.Driver)
-		if s.TargetSnapshot != "" {
-			ui := state.Get("ui").(packer.Ui)
-			ui.Say(fmt.Sprintf("Deleting snapshot %s on virtual machine %s", s.TargetSnapshot, s.Name))
-			err := driver.DeleteSnapshot(s.Name, s.TargetSnapshot)
-			if err != nil {
-				err := fmt.Errorf("Error cleaning up created snaphot VM: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return
-			}
-		}
-	*/
-}
+func (s *StepCreateSnapshot) Cleanup(state multistep.StateBag) {}
