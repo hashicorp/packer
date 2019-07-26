@@ -30,7 +30,3 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Comm
 
 	return retErr
 }
-
-func (p *Provisioner) Cancel() {
-	// Just do nothing. When the process ends, so will our provisioner
-}
