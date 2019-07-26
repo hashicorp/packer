@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -71,28 +70,8 @@ func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
-	_, alreadyLogged := state.GetOk("abort_step_logged")
-	err, ok := state.GetOk("error")
-	if ok && !alreadyLogged {
-		s.ui.Error(fmt.Sprintf("%s", err))
-		state.Put("abort_step_logged", true)
-	}
-	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		if !alreadyLogged {
-			s.ui.Error("Interrupted, aborting...")
-			state.Put("abort_step_logged", true)
-		} else {
-			s.ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", typeName(s.step)))
-		}
-		return
-	}
-	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		if !alreadyLogged {
-			s.ui.Error(fmt.Sprintf("Step %q failed, aborting...", typeName(s.step)))
-			state.Put("abort_step_logged", true)
-		} else {
-			s.ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", typeName(s.step)))
-		}
+	shouldCleanup := handleAbortsAndInterupts(state, s.ui, typeName(s.step))
+	if !shouldCleanup {
 		return
 	}
 	s.step.Cleanup(state)
@@ -124,7 +103,8 @@ func (s askStep) Run(ctx context.Context, state multistep.StateBag) (action mult
 		case askCleanup:
 			return
 		case askAbort:
-			os.Exit(1)
+			state.Put("aborted", true)
+			return
 		case askRetry:
 			continue
 		}
@@ -132,6 +112,12 @@ func (s askStep) Run(ctx context.Context, state multistep.StateBag) (action mult
 }
 
 func (s askStep) Cleanup(state multistep.StateBag) {
+	if _, ok := state.GetOk("aborted"); ok {
+		shouldCleanup := handleAbortsAndInterupts(state, s.ui, typeName(s.step))
+		if !shouldCleanup {
+			return
+		}
+	}
 	s.step.Cleanup(state)
 }
 
@@ -181,4 +167,34 @@ func askPrompt(ui packer.Ui) askResponse {
 		}
 		ui.Say(fmt.Sprintf("Incorrect input: %#v", line))
 	}
+}
+
+func handleAbortsAndInterupts(state multistep.StateBag, ui packer.Ui, stepName string) bool {
+	// if returns false, don't run cleanup. If true, do run cleanup.
+	_, alreadyLogged := state.GetOk("abort_step_logged")
+
+	err, ok := state.GetOk("error")
+	if ok && !alreadyLogged {
+		ui.Error(fmt.Sprintf("%s", err))
+		state.Put("abort_step_logged", true)
+	}
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		if !alreadyLogged {
+			ui.Error("Interrupted, aborting...")
+			state.Put("abort_step_logged", true)
+		} else {
+			ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", stepName))
+		}
+		return false
+	}
+	if _, ok := state.GetOk(multistep.StateHalted); ok {
+		if !alreadyLogged {
+			ui.Error(fmt.Sprintf("Step %q failed, aborting...", stepName))
+			state.Put("abort_step_logged", true)
+		} else {
+			ui.Error(fmt.Sprintf("aborted: skipping cleanup of step %q", stepName))
+		}
+		return false
+	}
+	return true
 }
