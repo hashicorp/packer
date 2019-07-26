@@ -26,7 +26,7 @@ In addition to the options listed here, a
 [communicator](../templates/communicator.html) can be configured for this
 builder.
 
-\~&gt; **Note:** The bulider doesn't support Windows images for now and only supports CentoOS and ubuntu images via SSH anthentication with `ssh_username` (Required) and `ssh_password` (Optional).  The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must be consisted with at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
+\~&gt; **Note:** The bulider doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH anthentication with `ssh_username` (Required) and `ssh_password` (Optional).  The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
 
 ### Required:
 
@@ -84,9 +84,9 @@ builder.
 
     -   `description` (number) - The copied image description.
 
-## Basic Example
+## Examples
 
-Here is a basic example for build UCloud image.
+Here is a basic example for build UCloud CentOS image:
 
 ``` json
 {
@@ -95,6 +95,7 @@ Here is a basic example for build UCloud image.
     "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
     "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
   },
+  
   "builders": [{
     "type":"ucloud-uhost",
     "public_key":"{{user `ucloud_public_key`}}",
@@ -109,6 +110,44 @@ Here is a basic example for build UCloud image.
   }]
 }
 ```
+
+Here is a example for build UCloud Ubuntu image:
+
+``` json
+{
+  "variables": {
+    "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}",
+    "password": "ucloud_2019"
+  },
+  
+  "builders": [{
+      "type": "ucloud-uhost",
+      "public_key": "{{user `ucloud_public_key`}}",
+      "private_key": "{{user `ucloud_private_key`}}",
+      "project_id": "{{user `ucloud_project_id`}}",
+      "region": "cn-bj2",
+      "availability_zone": "cn-bj2-02",
+      "instance_type": "n-basic-2",
+      "source_image_id": "uimage-irofn4",
+      "ssh_password": "{{user `password`}}",
+      "ssh_username": "ubuntu",
+      "image_name": "packer-test-ubuntu-bj"
+    }],
+  
+    "provisioners": [{
+      "type": "shell",
+      "execute_command": "echo '{{user `password`}}' | sudo -S '{{.Path}}'",
+      "inline": [
+        "sleep 30",
+        "sudo apt update",
+        "sudo apt install nginx -y"
+      ]
+    }]
+}
+```
+
 
 -&gt; **Note:** Packer can also read the public key and private key from
 environmental variables. See the configuration reference in the section above
