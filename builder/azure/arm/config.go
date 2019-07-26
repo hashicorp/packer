@@ -96,6 +96,7 @@ type Config struct {
 
 	// Shared Gallery Destination
 	SharedGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination"`
+	SharedGalleryTimeout     time.Duration                 `mapstructure:"shared_image_gallery_timeout"`
 
 	// Compute
 	ImagePublisher string `mapstructure:"image_publisher"`
@@ -647,6 +648,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		if len(c.SharedGalleryDestination.SigDestinationReplicationRegions) == 0 {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A list of replication_regions must be specified for shared_image_gallery_destination"))
 		}
+	}
+	if c.SharedGalleryTimeout == 0 {
+		// default to a one-hour timeout. In the sdk, the default is 15 m.
+		c.SharedGalleryTimeout = 60 * time.Minute
 	}
 
 	if c.ManagedImageOSDiskSnapshotName != "" {
