@@ -90,6 +90,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
 		b.config.cloudEnvironment,
+		b.config.SharedGalleryTimeout,
 		spnCloud,
 		spnKeyVault)
 
