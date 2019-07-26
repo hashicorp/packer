@@ -61,6 +61,10 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
+	GalaxyFile           string   `mapstructure:"galaxy_file"`
+	GalaxyCommand        string   `mapstructure:"galaxy_command"`
+	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
+	RolesDir             string   `mapstructure:"roles_dir"`
 }
 
 type Provisioner struct {
@@ -100,6 +104,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Command = "ansible-playbook"
 	}
 
+	if p.config.GalaxyCommand == "" {
+		p.config.GalaxyCommand = "ansible-galaxy"
+	}
+
+	if p.config.RolesDir == "" {
+		p.config.RolesDir = "~/.ansible/roles"
+	}
+
 	if p.config.HostAlias == "" {
 		p.config.HostAlias = "default"
 	}
@@ -108,6 +120,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	// Check that the galaxy file exists, if configured
+	if len(p.config.GalaxyFile) > 0 {
+		err = validateFileConfig(p.config.GalaxyFile, "galaxy_file", true)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	// Check that the authorized key file exists
@@ -343,12 +363,75 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
+func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
+	rolesDir := filepath.ToSlash(p.config.RolesDir)
+	galaxyFile := filepath.ToSlash(p.config.GalaxyFile)
+
+	// ansible-galaxy install -r requirements.yml -p roles/
+	args := []string{"install", "-r", galaxyFile, "-p", rolesDir}
+	// Add force to arguments
+	if p.config.GalaxyForceInstall {
+		args = append(args, "-f")
+	}
+
+	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
+	cmd := exec.Command(p.config.GalaxyCommand, args...)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	wg := sync.WaitGroup{}
+	repeat := func(r io.ReadCloser) {
+		reader := bufio.NewReader(r)
+		for {
+			line, err := reader.ReadString('\n')
+			if line != "" {
+				line = strings.TrimRightFunc(line, unicode.IsSpace)
+				ui.Message(line)
+			}
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					ui.Error(err.Error())
+					break
+				}
+			}
+		}
+		wg.Done()
+	}
+	wg.Add(2)
+	go repeat(stdout)
+	go repeat(stderr)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	wg.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("Non-zero exit status: %s", err)
+	}
+	return nil
+}
+
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
 
 	var envvars []string
 
+	// Fetch external dependencies
+	if len(p.config.GalaxyFile) > 0 {
+		if err := p.executeGalaxy(ui, comm); err != nil {
+			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
+	}
 	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s -o IdentitiesOnly=yes",
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
