@@ -3,7 +3,6 @@ package breakpoint
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"golang.org/x/sync/errgroup"
 
@@ -78,9 +77,4 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		return err
 	}
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit.
-	os.Exit(0)
 }
