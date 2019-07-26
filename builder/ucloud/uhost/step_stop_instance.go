@@ -27,7 +27,7 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	if instance.State != instanceStateStopped {
-		stopReq := conn.NewPoweroffUHostInstanceRequest()
+		stopReq := conn.NewStopUHostInstanceRequest()
 		stopReq.UHostId = ucloud.String(instance.UHostId)
 		ui.Say(fmt.Sprintf("Stopping instance %q", instance.UHostId))
 		err = retry.Config{
@@ -37,7 +37,7 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 			},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
-			if _, err = conn.PoweroffUHostInstance(stopReq); err != nil {
+			if _, err = conn.StopUHostInstance(stopReq); err != nil {
 				return err
 			}
 			return nil
