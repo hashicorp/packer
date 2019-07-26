@@ -26,5 +26,3 @@ func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Commu
 		return nil
 	}
 }
-
-func (p *Provisioner) Cancel() {}
