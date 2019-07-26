@@ -148,7 +148,6 @@ Here is a example for build UCloud Ubuntu image:
 }
 ```
 
-
 -&gt; **Note:** Packer can also read the public key and private key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.

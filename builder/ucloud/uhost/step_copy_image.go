@@ -30,7 +30,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 	srcImageId := state.Get("image_id").(string)
 	artifactImages := state.Get("ucloud_images").(*imageInfoSet)
 	expectedImages := newImageInfoSet(nil)
-	ui.Say(fmt.Sprintf("Copying images form %q...", srcImageId))
+	ui.Say(fmt.Sprintf("Copying images from %q...", srcImageId))
 	for _, v := range s.ImageDestinations {
 		if v.ProjectId == s.ProjectId && v.Region == s.RegionId {
 			continue
