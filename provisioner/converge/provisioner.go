@@ -234,9 +234,3 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 
 	return nil
 }
-
-// Cancel the provisioning process
-func (p *Provisioner) Cancel() {
-	// there's not an awful lot we can do to cancel Converge at the moment.
-	// The default semantics are fine.
-}
