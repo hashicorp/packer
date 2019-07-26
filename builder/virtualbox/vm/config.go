@@ -36,6 +36,7 @@ type Config struct {
 	VMName               string `mapstructure:"vm_name"`
 	AttachSnapshot       string `mapstructure:"attach_snapshot"`
 	TargetSnapshot       string `mapstructure:"target_snapshot"`
+	DeleteTargetSnapshot bool   `mapstructure:"force_delete_snapshot"`
 	KeepRegistered       bool   `mapstructure:"keep_registered"`
 	SkipExport           bool   `mapstructure:"skip_export"`
 
@@ -70,6 +71,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
 	}
 
+	if c.RawPostShutdownDelay == "" {
+		c.RawPostShutdownDelay = "2s"
+	}
+
 	// Prepare the errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
@@ -84,6 +89,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
+
+	log.Printf("PostShutdownDelay: %f", c.PostShutdownDelay.Seconds())
 
 	if c.VMName == "" {
 		errs = packer.MultiErrorAppend(errs,
@@ -164,21 +171,30 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 				if nil == snapshotTree {
 					log.Printf("Currently no snapshots defined in VM %s", c.VMName)
 				} else {
-					snapshots := snapshotTree.GetSnapshotsByName(c.TargetSnapshot)
-					if 0 < len(snapshots) {
-						if nil == attachSnapshot {
-							panic("Internal error. Expecting a handle to a VBoxSnapshot")
-						}
-						isChild := false
-						for _, snapshot := range snapshots {
-							log.Printf("Checking if target snaphot %s/%s is child of %s/%s", snapshot.Name, snapshot.UUID, attachSnapshot.Name, attachSnapshot.UUID)
-							isChild = nil != snapshot.Parent && snapshot.Parent.UUID == attachSnapshot.UUID
-						}
-						if !isChild {
-							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
-						}
+					if c.TargetSnapshot == attachSnapshot.Name {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s cannot be the same as the snapshot to which the builder shall attach: %s", c.TargetSnapshot, attachSnapshot.Name))
 					} else {
-						log.Printf("No snapshot with name %s defined in VM %s", c.TargetSnapshot, c.VMName)
+						snapshots := snapshotTree.GetSnapshotsByName(c.TargetSnapshot)
+						if 0 < len(snapshots) {
+							if nil == attachSnapshot {
+								panic("Internal error. Expecting a handle to a VBoxSnapshot")
+							}
+							isChild := false
+							for _, snapshot := range snapshots {
+								log.Printf("Checking if target snaphot %s/%s is child of %s/%s", snapshot.Name, snapshot.UUID, attachSnapshot.Name, attachSnapshot.UUID)
+								isChild = nil != snapshot.Parent && snapshot.Parent.UUID == attachSnapshot.UUID
+							}
+							if !isChild {
+								errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
+							} else if !c.DeleteTargetSnapshot {
+								errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists as direct child of %s for VM %s. Use force_delete_snapshot = true to overwrite snapshot",
+									c.TargetSnapshot,
+									attachSnapshot.Name,
+									c.VMName))
+							}
+						} else {
+							log.Printf("No snapshot with name %s defined in VM %s", c.TargetSnapshot, c.VMName)
+						}
 					}
 				}
 			}
