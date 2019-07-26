@@ -48,7 +48,7 @@ func ParseSnapshotData(snapshotData string) (*VBoxSnapshot, error) {
 							parentStack.Push(node)
 						} else if pathLen < pathLenCur {
 							currentIndicator = matches[2]
-							for i := 0; i < pathLenCur-1; i++ {
+							for i := 0; i < pathLenCur-pathLen; i++ {
 								parentStack.Pop()
 							}
 						}
@@ -123,6 +123,21 @@ func (sn *VBoxSnapshot) GetRoot() *VBoxSnapshot {
 		node = node.Parent
 	}
 	return node
+}
+
+// GetSnapshots returns an array of all snapshots defined
+func (sn *VBoxSnapshot) GetSnapshots() []*VBoxSnapshot {
+	var result []*VBoxSnapshot
+	root := sn.GetRoot()
+	ch := walker(root)
+	for {
+		node, ok := <-ch
+		if !ok {
+			break
+		}
+		result = append(result, node)
+	}
+	return result
 }
 
 // GetSnapshotsByName find all snapshots with a given name
