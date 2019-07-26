@@ -35,6 +35,24 @@ type comm struct {
 	address string
 }
 
+// TunnelDirection is the supported tunnel directions
+type TunnelDirection int
+
+const (
+	UnsetTunnel TunnelDirection = iota
+	RemoteTunnel
+	LocalTunnel
+)
+
+// TunnelSpec represents a request to map a port on one side of the SSH connection to the other
+type TunnelSpec struct {
+	Direction   TunnelDirection
+	ListenType  string
+	ListenAddr  string
+	ForwardType string
+	ForwardAddr string
+}
+
 // Config is the structure used to configure the SSH communicator.
 type Config struct {
 	// The configuration of the Go SSH connection
@@ -64,6 +82,8 @@ type Config struct {
 
 	// Timeout is how long to wait for a read or write to succeed.
 	Timeout time.Duration
+
+	Tunnels []TunnelSpec
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -344,8 +364,67 @@ func (c *comm) reconnect() (err error) {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
 	c.connectToAgent()
+	c.connectTunnels(sshConn)
 
 	return
+}
+
+func (c *comm) connectTunnels(sshConn ssh.Conn) {
+	if c.client == nil {
+		return
+	}
+
+	// Start remote forwards of ports to ourselves.
+	log.Printf("[DEBUG] Tunnel Configuration: %v", c.config.Tunnels)
+	for _, v := range c.config.Tunnels {
+		done := make(chan struct{})
+		switch v.Direction {
+		case RemoteTunnel:
+			// This requests the sshd Host to bind a port and send traffic back to us
+			listener, err := c.client.Listen(v.ListenType, v.ListenAddr)
+			// TODO How can we get this failure to ui.Error?
+			if err != nil {
+				log.Printf("[ERROR] Tunnel: unable to bind remote tunnel ('%v'): %s", v, err)
+				return
+			}
+			log.Printf("[INFO] Tunnel: Remote bound on %s forwarding to %s", v.ListenAddr, v.ForwardAddr)
+			connectFunc := ConnectFunc(v.ForwardType, v.ForwardAddr)
+			go ProxyServe(listener, done, connectFunc)
+			// Wait for our sshConn to be shutdown
+			// FIXME: Is there a better "on-shutdown" we can wait on?
+			go shutdownProxyTunnel(sshConn, done, listener)
+		case LocalTunnel:
+			// This binds locally and sends traffic back to the sshd host
+			listener, err := net.Listen(v.ListenType, v.ListenAddr)
+			if err != nil {
+				// TODO How can we get this failure to ui.Error?
+				log.Printf("[ERROR] Tunnel: unable to bind local tunnel ('%v'): %s", v, err)
+				return
+			}
+			log.Printf("[INFO] Tunnel: Local bound on %s forwarding to %s", v.ListenAddr, v.ForwardAddr)
+			connectFunc := func() (net.Conn, error) {
+				// This Dial occurs on the SSH server's side
+				return c.client.Dial(v.ForwardType, v.ForwardAddr)
+			}
+			go ProxyServe(listener, done, connectFunc)
+			// FIXME: Is there a better "on-shutdown" we can wait on?
+			go shutdownProxyTunnel(sshConn, done, listener)
+		default:
+			log.Printf("[ERROR] Tunnel: Unknown tunnel type ('%v'): %v", v, v.Direction)
+			continue
+		}
+	}
+
+	return
+}
+
+// shutdownProxyTunnel waits for our sshConn to be shutdown and closes the listeners
+func shutdownProxyTunnel(sshConn ssh.Conn, done chan struct{}, listener net.Listener) {
+	sshConn.Wait()
+	log.Printf("[INFO] Tunnel: Shutting down listener %v", listener)
+	done <- struct{}{}
+	close(done)
+	listener.Close()
 }
 
 func (c *comm) connectToAgent() {
