@@ -64,7 +64,7 @@ type Config struct {
 	GalaxyFile           string   `mapstructure:"galaxy_file"`
 	GalaxyCommand        string   `mapstructure:"galaxy_command"`
 	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
-	RolesDir             string   `mapstructure:"roles_dir"`
+	RolesPath            string   `mapstructure:"roles_path"`
 }
 
 type Provisioner struct {
@@ -106,10 +106,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.GalaxyCommand == "" {
 		p.config.GalaxyCommand = "ansible-galaxy"
-	}
-
-	if p.config.RolesDir == "" {
-		p.config.RolesDir = "~/.ansible/roles"
 	}
 
 	if p.config.HostAlias == "" {
@@ -364,14 +360,17 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 }
 
 func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
-	rolesDir := filepath.ToSlash(p.config.RolesDir)
 	galaxyFile := filepath.ToSlash(p.config.GalaxyFile)
 
-	// ansible-galaxy install -r requirements.yml -p roles/
-	args := []string{"install", "-r", galaxyFile, "-p", rolesDir}
+	// ansible-galaxy install -r requirements.yml
+	args := []string{"install", "-r", galaxyFile}
 	// Add force to arguments
 	if p.config.GalaxyForceInstall {
 		args = append(args, "-f")
+	}
+	// Add roles_path argument if specified
+	if p.config.RolesPath != "" {
+		args = append(args, "-p", filepath.ToSlash(p.config.RolesPath))
 	}
 
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
