@@ -64,7 +64,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
-	intermediary := state.Get("intermediary_image").(bool)
+	intermediary, _ := state.Get("intermediary_image").(bool)
 
 	s.DeduplicateRegions(intermediary)
 	ami := amis[s.OriginalRegion]

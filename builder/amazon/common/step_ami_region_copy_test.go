@@ -271,6 +271,31 @@ func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 	}
 }
 
+func TestStepAmiRegionCopy_nil_intermediary(t *testing.T) {
+	// create step
+	stepAMIRegionCopy := StepAMIRegionCopy{
+		AccessConfig:      testAccessConfig(),
+		Regions:           make([]string, 0),
+		AMIKmsKeyId:       "",
+		RegionKeyIds:      make(map[string]string),
+		EncryptBootVolume: aws.Bool(false),
+		Name:              "fake-ami-name",
+		OriginalRegion:    "us-east-1",
+	}
+	// mock out the region connection code
+	stepAMIRegionCopy.getRegionConn = getMockConn
+
+	state := tState()
+	stepAMIRegionCopy.Run(context.Background(), state)
+
+	if stepAMIRegionCopy.toDelete != "" {
+		t.Fatalf("Should not delete original AMI if no intermediary")
+	}
+	if len(stepAMIRegionCopy.Regions) != 0 {
+		t.Fatalf("Should not have added original ami to Regions")
+	}
+}
+
 func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 	// ------------------------------------------------------------------------
 	// skip build region is true
