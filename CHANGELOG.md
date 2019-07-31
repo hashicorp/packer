@@ -11,7 +11,11 @@
 * builder/openstack: New `image_min_disk` option [GH-7290]
 * builder/openstack: New option `use_blockstorage_volume` to set openstack
     image metadata [GH-7792]
+* builder/openstack: Select instance network on which to assign floating ip
+    [GH-7884]
 * builder/qemu: Implement VNC password functionality [GH-7836]
+* builder/scaleway: Allow removing volume after image creation for Scaleway
+    builder [GH-7887]
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
 * builder/tencent: Support data disks for tencentcloud builder [GH-7815]
@@ -19,6 +23,8 @@
     [GH-7877]
 * communicator: Use context for timeouts, interruption in ssh and winrm
     communicators [GH-7868]
+* core: Change how on-error=abort is handled to prevent EOF errors that mask
+    real issues [GH-7913]
 * provisioner/salt-masterless: Modify file upload to handle non-root case.
     [GH-7833]
 
@@ -31,10 +37,14 @@
     termination inside ebssurrogate artifact. [GH-7829]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
     [GH-7841]
+* builder/docker: Fix bug where PACKER_TMP_DIR was created with root perms on
+    linux [GH-7905]
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
 * builder/google: Fix outdated oauth URL. [GH-7835]
 * builder/hyperv: Improve code for detecting IP address [GH-7880]
+* builder/ucloud: Update the api about stop instance to fix the read-only image
+    build by ucloud-uhost [GH-7914]
 * builder/vagrant: Fix bug where source_path was being used instead of box_name
     when generating the Vagrantfile. [GH-7859]
 * builder/vmware: Fix validation regression that occurred when user provided a
@@ -52,6 +62,8 @@
     [GH-7800]
 * core: Make ssh_host template option always override all builders' IP
     discovery. [GH-7832]
+* fix: clean up help text and fixer order to make sure all fixers are called
+    [GH-7903]
 * provisioner/inspec: Use --input-file instead of --attrs to avoid deprecation
     warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
