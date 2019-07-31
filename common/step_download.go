@@ -54,7 +54,7 @@ type StepDownload struct {
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	defer ui.Say(fmt.Sprintf("leaving retrieve loop for %s", s.Description))
+	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
