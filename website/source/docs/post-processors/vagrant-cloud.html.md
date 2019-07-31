@@ -104,7 +104,7 @@ post-processor.
 ``` json
 {
   "variables": {
-    "cloud_token": "{{ env `ATLAS_TOKEN` }}",
+    "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
     "version": "1.0.{{timestamp}}"
   },
   "post-processors": [
