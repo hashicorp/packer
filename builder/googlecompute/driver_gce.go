@@ -184,6 +184,7 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"rhel-sap-cloud",
 		"suse-cloud",
 		"suse-sap-cloud",
+		"suse-byos-cloud",
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",
