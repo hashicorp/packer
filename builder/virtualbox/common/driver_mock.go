@@ -45,6 +45,17 @@ type DriverMock struct {
 	VersionCalled bool
 	VersionResult string
 	VersionErr    error
+
+	LoadSnapshotsCalled      []string
+	LoadSnapshotsResult      *VBoxSnapshot
+	CreateSnapshotCalled     []string
+	CreateSnapshotError      error
+	HasSnapshotsCalled       []string
+	HasSnapshotsResult       bool
+	GetCurrentSnapshotCalled []string
+	GetCurrentSnapshotResult *VBoxSnapshot
+	SetSnapshotCalled        []*VBoxSnapshot
+	DeleteSnapshotCalled     []*VBoxSnapshot
 }
 
 func (d *DriverMock) CreateSATAController(vm string, controller string, portcount int) error {
@@ -113,4 +124,66 @@ func (d *DriverMock) Verify() error {
 func (d *DriverMock) Version() (string, error) {
 	d.VersionCalled = true
 	return d.VersionResult, d.VersionErr
+}
+
+func (d *DriverMock) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+
+	d.LoadSnapshotsCalled = append(d.LoadSnapshotsCalled, vmName)
+	return d.LoadSnapshotsResult, nil
+}
+
+func (d *DriverMock) CreateSnapshot(vmName string, snapshotName string) error {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+	if snapshotName == "" {
+		panic("Argument empty exception: snapshotName")
+	}
+
+	d.CreateSnapshotCalled = append(d.CreateSnapshotCalled, snapshotName)
+	return d.CreateSnapshotError
+}
+
+func (d *DriverMock) HasSnapshots(vmName string) (bool, error) {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+
+	d.HasSnapshotsCalled = append(d.HasSnapshotsCalled, vmName)
+	return d.HasSnapshotsResult, nil
+}
+
+func (d *DriverMock) GetCurrentSnapshot(vmName string) (*VBoxSnapshot, error) {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+
+	d.GetCurrentSnapshotCalled = append(d.GetCurrentSnapshotCalled, vmName)
+	return d.GetCurrentSnapshotResult, nil
+}
+
+func (d *DriverMock) SetSnapshot(vmName string, snapshot *VBoxSnapshot) error {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+	if snapshot == nil {
+		panic("Argument empty exception: snapshot")
+	}
+
+	d.SetSnapshotCalled = append(d.SetSnapshotCalled, snapshot)
+	return nil
+}
+
+func (d *DriverMock) DeleteSnapshot(vmName string, snapshot *VBoxSnapshot) error {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+	if snapshot == nil {
+		panic("Argument empty exception: snapshot")
+	}
+	d.DeleteSnapshotCalled = append(d.DeleteSnapshotCalled, snapshot)
+	return nil
 }
