@@ -3,7 +3,6 @@ package docker
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
