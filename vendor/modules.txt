@@ -177,6 +177,8 @@ github.com/go-ini/ini
 github.com/gofrs/flock
 # github.com/gofrs/uuid v3.2.0+incompatible
 github.com/gofrs/uuid
+# github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
+github.com/golang-collections/collections/stack
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
