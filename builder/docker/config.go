@@ -125,7 +125,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ContainerDir == "" {
-		if runtime.GOOS == "windows" {
+		if c.WindowsContainer {
 			c.ContainerDir = "c:/packer-files"
 		} else {
 			c.ContainerDir = "/packer-files"
