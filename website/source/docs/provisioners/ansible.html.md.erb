@@ -96,6 +96,17 @@ Optional Parameters:
       ]
     ```
 
+-   `galaxy_file` (string) - A requirements file which provides a way to
+    install roles with the [ansible-galaxy
+    cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+    on the local machine before executing `ansible-playbook`. By default, this is empty.
+
+-   `galaxy_command` (string) - The command to invoke ansible-galaxy. By
+    default, this is `ansible-galaxy`.
+
+-   `galaxy_force_install` (string) - Force overwriting an existing role.
+    Adds `--force` option to `ansible-galaxy` command. By default, this is empty.
+
 -   `groups` (array of strings) - The groups into which the Ansible host should
     be placed. When unspecified, the host is not associated with any groups.
 
@@ -120,6 +131,11 @@ Optional Parameters:
     listen for SSH connections on the first available of ten ports, starting at
     `local_port`. A system-chosen port is used when `local_port` is missing or
     empty.
+
+-   `roles_path` (string) - The path to the directory on your local system to
+    install the roles in. Adds `--roles-path /path/to/your/roles` to
+    `ansible-galaxy` command. By default, this is empty, and thus `--roles-path`
+    option is not added to the command.
 
 -   `sftp_command` (string) - The command to run on the machine being
     provisioned by Packer to handle the SFTP protocol that Ansible will use to
