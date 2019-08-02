@@ -77,6 +77,7 @@ type Provisioner struct {
 
 type PassthroughTemplate struct {
 	WinRMPassword string
+	SSHUsername   string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -86,6 +87,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// it
 	p.config.ctx.Data = &PassthroughTemplate{
 		WinRMPassword: `{{.WinRMPassword}}`,
+		SSHUsername:   `{{.SSHUsername}}`,
 	}
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -217,7 +219,15 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	// Interpolate env vars to check for .WinRMPassword
 	p.config.ctx.Data = &PassthroughTemplate{
 		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
+		SSHUsername:   getSSHUsername(p.config.PackerBuildName),
 	}
+	// FIXME: This doesn't do what I want it to. So how do I get the right value?
+	sshUser, err := interpolate.Render("{{.SSHUsername}}", &p.config.ctx)
+	if err != nil && sshUser != "" {
+		log.Printf("ssh_username is set to ('%s')", sshUser)
+		p.config.User = sshUser
+	}
+
 	for i, envVar := range p.config.AnsibleEnvVars {
 		envVar, err := interpolate.Render(envVar, &p.config.ctx)
 		if err != nil {
@@ -632,4 +642,9 @@ func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
 	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
+}
+
+func getSSHUsername(buildName string) string {
+	username, _ := commonhelper.RetrieveSharedState("ssh_username", buildName)
+	return username
 }
