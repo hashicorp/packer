@@ -222,9 +222,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		SSHUsername:   getSSHUsername(p.config.PackerBuildName),
 	}
 	// FIXME: This doesn't do what I want it to. So how do I get the right value?
-	sshUser, err := interpolate.Render("{{.SSHUsername}}", &p.config.ctx)
-	if err != nil && sshUser != "" {
-		log.Printf("ssh_username is set to ('%s')", sshUser)
+	sshUser := getSSHUsername(p.config.PackerBuildName)
+	if sshUser != "" {
+		log.Printf("ssh_username is set, overriding ansible user from ('%s') to ('%s')", p.config.User, sshUser)
 		p.config.User = sshUser
 	}
 
