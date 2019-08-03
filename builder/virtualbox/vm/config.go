@@ -122,11 +122,18 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Warnings
 	var warnings []string
+	if c.TargetSnapshot == "" && c.SkipExport {
+		warnings = append(warnings,
+			"No target snapshot is specified (target_snapshot empty) and no export will be created (skip_export=true).\n"+
+				"You might lose all changes applied by this run, the next time you execute packer.")
+	}
+
 	if c.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
+
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
