@@ -137,11 +137,16 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	var p PostProcessor
+
+	if err := p.Configure(c); err != nil {
+		t.Fatal("no error expected as vagrantfile_template exists")
+	}
+
 	if err := os.Remove(name); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	var p PostProcessor
 	if err := p.Configure(c); err == nil {
 		t.Fatal("expected an error since vagrantfile_template does not exist")
 	}
