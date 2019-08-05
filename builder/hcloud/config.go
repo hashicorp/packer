@@ -25,10 +25,11 @@ type Config struct {
 	Endpoint     string        `mapstructure:"endpoint"`
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 
-	ServerName string `mapstructure:"server_name"`
-	Location   string `mapstructure:"location"`
-	ServerType string `mapstructure:"server_type"`
-	Image      string `mapstructure:"image"`
+	ServerName  string       `mapstructure:"server_name"`
+	Location    string       `mapstructure:"location"`
+	ServerType  string       `mapstructure:"server_type"`
+	Image       string       `mapstructure:"image"`
+	ImageFilter *imageFilter `mapstructure:"image_filter"`
 
 	SnapshotName   string            `mapstructure:"snapshot_name"`
 	SnapshotLabels map[string]string `mapstructure:"snapshot_labels"`
@@ -39,6 +40,11 @@ type Config struct {
 	RescueMode string `mapstructure:"rescue"`
 
 	ctx interpolate.Context
+}
+
+type imageFilter struct {
+	WithSelector []string `mapstructure:"with_selector"`
+	MostRecent   bool     `mapstructure:"most_recent"`
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -108,9 +114,18 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("server type is required"))
 	}
 
-	if c.Image == "" {
+	if c.Image == "" && c.ImageFilter == nil {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("image is required"))
+			errs, errors.New("image or image_filter is required"))
+	}
+	if c.ImageFilter != nil {
+		if len(c.ImageFilter.WithSelector) == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("image_filter.with_selector is required when specifying filter"))
+		} else if c.Image != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("only one of image or image_filter can be specified"))
+		}
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
