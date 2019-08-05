@@ -18,11 +18,11 @@ the QEMU, Artifice, or File builders and imports it to Exoscale.
 
 The import process operates uploading a temporary copy of the image to
 Exoscale's [Object Storage](https://www.exoscale.com/object-storage/) (SOS)
-and then importing it as a Private Template via the Exoscale API. The
+and then importing it as a Custom Template via the Exoscale API. The
 temporary copy in SOS can be discarded after the import is complete.
 
-For more information about Exoscale Private Templates, see the
-[documentation](https://community.exoscale.com/documentation/compute/private-templates/).
+For more information about Exoscale Custom Templates, see the
+[documentation](https://community.exoscale.com/documentation/compute/custom-templates/).
 
 ## Configuration
 
