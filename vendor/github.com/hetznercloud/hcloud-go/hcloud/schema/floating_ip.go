@@ -1,9 +1,12 @@
 package schema
 
+import "time"
+
 // FloatingIP defines the schema of a Floating IP.
 type FloatingIP struct {
 	ID           int                  `json:"id"`
 	Description  *string              `json:"description"`
+	Created      time.Time            `json:"created"`
 	IP           string               `json:"ip"`
 	Type         string               `json:"type"`
 	Server       *int                 `json:"server"`

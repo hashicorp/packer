@@ -295,7 +295,7 @@ github.com/hashicorp/vault/helper/compressutil
 github.com/hashicorp/vault/helper/strutil
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/hetznercloud/hcloud-go v1.12.0
+# github.com/hetznercloud/hcloud-go v1.15.1
 github.com/hetznercloud/hcloud-go/hcloud
 github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
