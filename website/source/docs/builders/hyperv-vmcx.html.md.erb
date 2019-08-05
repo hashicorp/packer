@@ -134,7 +134,7 @@ builder.
 -   `configuration_version` (string) - This allows you to set the vm version when
      calling New-VM to generate the vm.
 
--   `cpu` (number) - The number of CPUs the virtual machine should use. If
+-   `cpus` (number) - The number of CPUs the virtual machine should use. If
     this isn't specified, the default is 1 CPU.
 
 -   `enable_dynamic_memory` (boolean) - If `true` enable dynamic memory for
@@ -401,7 +401,7 @@ Packer config:
       "winrm_timeout" : "4h",
       "shutdown_command": "f:\\run-sysprep.cmd",
       "memory": 4096,
-      "cpu": 4,
+      "cpus": 4,
       "generation": 2,
       "switch_name":"LAN",
       "enable_secure_boot":true
