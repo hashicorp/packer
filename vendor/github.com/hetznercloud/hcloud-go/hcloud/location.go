@@ -18,6 +18,7 @@ type Location struct {
 	City        string
 	Latitude    float64
 	Longitude   float64
+	NetworkZone NetworkZone
 }
 
 // LocationClient is a client for the location API.
@@ -45,22 +46,11 @@ func (c *LocationClient) GetByID(ctx context.Context, id int) (*Location, *Respo
 
 // GetByName retrieves an location by its name. If the location does not exist, nil is returned.
 func (c *LocationClient) GetByName(ctx context.Context, name string) (*Location, *Response, error) {
-	path := "/locations?name=" + url.QueryEscape(name)
-	req, err := c.client.NewRequest(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, nil, err
+	locations, response, err := c.List(ctx, LocationListOpts{Name: name})
+	if len(locations) == 0 {
+		return nil, response, err
 	}
-
-	var body schema.LocationListResponse
-	resp, err := c.client.Do(req, &body)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if len(body.Locations) == 0 {
-		return nil, resp, nil
-	}
-	return LocationFromSchema(body.Locations[0]), resp, nil
+	return locations[0], response, err
 }
 
 // Get retrieves a location by its ID if the input can be parsed as an integer, otherwise it
@@ -75,11 +65,20 @@ func (c *LocationClient) Get(ctx context.Context, idOrName string) (*Location, *
 // LocationListOpts specifies options for listing location.
 type LocationListOpts struct {
 	ListOpts
+	Name string
+}
+
+func (l LocationListOpts) values() url.Values {
+	vals := l.ListOpts.values()
+	if l.Name != "" {
+		vals.Add("name", l.Name)
+	}
+	return vals
 }
 
 // List returns a list of locations for a specific page.
 func (c *LocationClient) List(ctx context.Context, opts LocationListOpts) ([]*Location, *Response, error) {
-	path := "/locations?" + valuesForListOpts(opts.ListOpts).Encode()
+	path := "/locations?" + opts.values().Encode()
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err

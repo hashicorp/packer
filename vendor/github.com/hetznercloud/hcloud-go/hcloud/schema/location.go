@@ -9,6 +9,7 @@ type Location struct {
 	City        string  `json:"city"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
+	NetworkZone string  `json:"network_zone"`
 }
 
 // LocationGetResponse defines the schema of the response when retrieving a single location.
