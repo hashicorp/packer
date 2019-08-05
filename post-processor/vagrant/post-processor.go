@@ -42,11 +42,12 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	CompressionLevel    int      `mapstructure:"compression_level"`
-	Include             []string `mapstructure:"include"`
-	OutputPath          string   `mapstructure:"output"`
-	Override            map[string]interface{}
-	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+	CompressionLevel             int      `mapstructure:"compression_level"`
+	Include                      []string `mapstructure:"include"`
+	OutputPath                   string   `mapstructure:"output"`
+	Override                     map[string]interface{}
+	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
+	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
 
 	ctx interpolate.Context
 }
@@ -217,7 +218,7 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	}
 
 	var errs *packer.MultiError
-	if c.VagrantfileTemplate != "" {
+	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
