@@ -199,6 +199,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepCreateVagrantfile{
 			Template:     b.config.Template,
 			SyncedFolder: b.config.SyncedFolder,
+			SourceBox:    b.config.SourceBox,
 			BoxName:      b.config.BoxName,
 			OutputDir:    b.config.OutputDir,
 			GlobalID:     b.config.GlobalID,

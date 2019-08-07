@@ -20,7 +20,8 @@ func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.St
 
 	ui.Say("Calling Vagrant Up...")
 
-	var args []string
+	// start only the source box
+	args := []string{"source"}
 	if s.GlobalID != "" {
 		args = append(args, s.GlobalID)
 	}
