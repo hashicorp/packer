@@ -44,7 +44,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	vm, err := d.FindVM(s.Location.VMName)
 
 	if s.Force == false && err == nil {
-		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", s.Location.VMName, err))
+		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it", s.Location.VMName))
 		return multistep.ActionHalt
 	} else if s.Force == true && err == nil {
 		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", s.Location.VMName))
