@@ -45,8 +45,6 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 	waitDone := make(chan bool, 1)
 	defer func() {
 		cancel()
-		for range waitDone {
-		}
 	}()
 
 	go func() {
