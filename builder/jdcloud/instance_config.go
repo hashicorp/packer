@@ -16,6 +16,7 @@ type JDCloudInstanceSpecConfig struct {
 	InstanceId      string
 	ArtifactId      string
 	PublicIpAddress string
+	PublicIpId      string
 }
 
 func (jd *JDCloudInstanceSpecConfig) Prepare(ctx *interpolate.Context) []error {

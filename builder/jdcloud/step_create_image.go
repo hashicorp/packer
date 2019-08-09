@@ -25,13 +25,12 @@ func (s *stepCreateJDCloudImage) Run(_ context.Context, state multistep.StateBag
 		return multistep.ActionHalt
 	}
 
-	imageId := resp.Result.ImageId
-	if err := ImageStatusWaiter(imageId); err != nil {
+	s.InstanceSpecConfig.ArtifactId = resp.Result.ImageId
+	if err := ImageStatusWaiter(s.InstanceSpecConfig.ArtifactId); err != nil {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	s.InstanceSpecConfig.ArtifactId = imageId
 	return multistep.ActionContinue
 }
 
@@ -52,6 +51,24 @@ func ImageStatusWaiter(imageId string) error {
 
 }
 
+// Delete created instance image on error
 func (s *stepCreateJDCloudImage) Cleanup(state multistep.StateBag) {
-	return
+
+	if s.InstanceSpecConfig.ArtifactId != "" {
+
+		req := apis.NewDeleteImageRequest(Region,s.InstanceSpecConfig.ArtifactId)
+
+		_ = Retry(time.Minute, func() *RetryError {
+			_, err := VmClient.DeleteImage(req)
+			if err == nil {
+				return nil
+			}
+			if connectionError(err) {
+				return RetryableError(err)
+			} else {
+				return NonRetryableError(err)
+			}
+		})
+	}
+
 }

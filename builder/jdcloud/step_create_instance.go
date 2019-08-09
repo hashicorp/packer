@@ -58,33 +58,32 @@ func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.State
 		return multistep.ActionHalt
 	}
 
-	instanceId := resp.Result.InstanceIds[0]
-	instanceInterface, err := InstanceStatusRefresher(instanceId, []string{VM_PENDING, VM_STARTING}, []string{VM_RUNNING})
+	s.InstanceSpecConfig.InstanceId = resp.Result.InstanceIds[0]
+	instanceInterface, err := InstanceStatusRefresher(s.InstanceSpecConfig.InstanceId, []string{VM_PENDING, VM_STARTING}, []string{VM_RUNNING})
 	if err != nil {
 		s.ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	s.InstanceSpecConfig.InstanceId = instanceId
 	instance := instanceInterface.(vm.Instance)
 	privateIpAddress := instance.PrivateIpAddress
 	networkInterfaceId := instance.PrimaryNetworkInterface.NetworkInterface.NetworkInterfaceId
 
 	s.ui.Message("Creating public-ip")
-	publicIpId, err := createElasticIp(state)
+	s.InstanceSpecConfig.PublicIpId, err = createElasticIp(state)
 	if err != nil {
 		s.ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	s.ui.Message("Associating public-ip with instance")
-	err = associatePublicIp(networkInterfaceId, publicIpId, privateIpAddress)
+	err = associatePublicIp(networkInterfaceId, s.InstanceSpecConfig.PublicIpId, privateIpAddress)
 	if err != nil {
 		s.ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	req_ := vpcApis.NewDescribeElasticIpRequest(Region, publicIpId)
+	req_ := vpcApis.NewDescribeElasticIpRequest(Region, s.InstanceSpecConfig.PublicIpId)
 	eip, err := VpcClient.DescribeElasticIp(req_)
 	if err != nil || eip.Error.Code != FINE {
 		s.ui.Error(fmt.Sprintf("[ERROR] Failed in getting eip,error:%v \n response:%v", err, eip))
@@ -96,12 +95,45 @@ func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.State
 	s.ui.Message(fmt.Sprintf(
 		"Hi, we have created the instance, its name=%v , "+
 			"its id=%v, "+
-			"and its eip=%v  :) ", instance.InstanceName, instanceId, eip.Result.ElasticIp.ElasticIpAddress))
+			"and its eip=%v  :) ", instance.InstanceName, s.InstanceSpecConfig.InstanceId, eip.Result.ElasticIp.ElasticIpAddress))
 	return multistep.ActionContinue
 }
 
+// Delete created resources {instance,ip} on error
 func (s *stepCreateJDCloudInstance) Cleanup(state multistep.StateBag) {
 
+	if s.InstanceSpecConfig.PublicIpId != "" {
+
+		req := vpcApis.NewDeleteElasticIpRequest(Region, s.InstanceSpecConfig.PublicIpId)
+
+		_ = Retry(time.Minute, func() *RetryError {
+			_, err := VpcClient.DeleteElasticIp(req)
+			if err == nil {
+				return nil
+			}
+			if connectionError(err) {
+				return RetryableError(err)
+			} else {
+				return NonRetryableError(err)
+			}
+		})
+	}
+
+	if s.InstanceSpecConfig.InstanceId != "" {
+
+		req := apis.NewDeleteInstanceRequest(Region,s.InstanceSpecConfig.InstanceId)
+		_ = Retry(time.Minute, func() *RetryError {
+			_, err := VmClient.DeleteInstance(req)
+			if err == nil {
+				return nil
+			}
+			if connectionError(err) {
+				return RetryableError(err)
+			} else {
+				return NonRetryableError(err)
+			}
+		})
+	}
 }
 
 func createElasticIp(state multistep.StateBag) (string, error) {
