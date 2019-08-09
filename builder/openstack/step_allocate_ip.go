@@ -11,9 +11,10 @@ import (
 )
 
 type StepAllocateIp struct {
-	FloatingIPNetwork string
-	FloatingIP        string
-	ReuseIPs          bool
+	FloatingIPNetwork     string
+	FloatingIP            string
+	ReuseIPs              bool
+	InstanceFloatingIPNet string
 }
 
 func (s *StepAllocateIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -114,7 +115,7 @@ func (s *StepAllocateIp) Run(ctx context.Context, state multistep.StateBag) mult
 		ui.Say(fmt.Sprintf("Associating floating IP '%s' (%s) with instance port...",
 			instanceIP.ID, instanceIP.FloatingIP))
 
-		portID, err := GetInstancePortID(computeClient, server.ID)
+		portID, err := GetInstancePortID(computeClient, server.ID, s.InstanceFloatingIPNet)
 		if err != nil {
 			err := fmt.Errorf("Error getting interfaces of the instance '%s': %s", server.ID, err)
 			state.Put("error", err)

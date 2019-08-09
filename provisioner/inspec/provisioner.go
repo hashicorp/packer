@@ -317,15 +317,6 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 	return nil
 }
-func (p *Provisioner) Cancel() {
-	if p.done != nil {
-		close(p.done)
-	}
-	if p.adapter != nil {
-		p.adapter.Shutdown()
-	}
-	os.Exit(0)
-}
 
 func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	var envvars []string
@@ -342,7 +333,7 @@ func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, priv
 		args = append(args, "--port", strconv.Itoa(p.config.LocalPort))
 	}
 
-	args = append(args, "--attrs")
+	args = append(args, "--input-file")
 	args = append(args, p.config.AttributesFiles...)
 	args = append(args, p.config.ExtraArguments...)
 

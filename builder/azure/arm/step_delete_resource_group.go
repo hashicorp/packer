@@ -56,7 +56,7 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state
 		f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
 		if err == nil {
 			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
-				// No need to wait for the complition for delete if request is Accepted
+				// No need to wait for the completion for delete if request is Accepted
 				s.say(fmt.Sprintf("\nResource Group is being deleted, not waiting for deletion due to config. Resource Group Name '%s'", resourceGroupName))
 			} else {
 				f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)

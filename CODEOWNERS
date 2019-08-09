@@ -18,6 +18,7 @@
 /builder/hyperone                       @m110 @gregorybrzeski @ad-m
 /builder/ucloud/                        @shawnmssu
 /builder/yandex                         @GennadySpb @alexanderKhaustov @seukyaso
+/builder/osc                            @marinsalinas
 
 # provisioners
 

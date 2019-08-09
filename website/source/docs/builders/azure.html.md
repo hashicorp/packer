@@ -122,16 +122,16 @@ When creating a managed image the following options are required.
     `managed_image_name` must also be set. See
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
-    
-    
+
+
 Managed images can optionally be published to [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
 as Shared Gallery Image version. Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
 a Shared Image Gallery**. When publishing to a Shared Image Gallery the following options are required.
-    
+
 - `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
-    
+
 Following is an example.
-     
+
 <!-- -->
 
     "shared_image_gallery_destination": {
@@ -302,6 +302,14 @@ Providing `temp_resource_group_name` or `location` in combination with
     }
     "managed_image_name": "TargetImageName",
     "managed_image_resource_group_name": "TargetResourceGroup"
+
+-   `shared_image_gallery_timeout` (time.Duration) How long to wait for an image
+    to be published to the shared image gallery before timing out. If your
+    Packer build is failing on the Publishing to Shared Image Gallery step
+    with the error `Original Error: context deadline exceeded`, but the image
+    is present when you check your Azure dashboard, then you probably need to
+    increase this timeout from its default of "60m" (valid time units include
+    `s` for seconds, `m` for minutes, and `h` for hours.)
 
 -   `temp_compute_name` (string) temporary name assigned to the VM. If this
     value is not set, a random value will be assigned. Knowing the resource

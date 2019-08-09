@@ -3,24 +3,50 @@
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
 **new post-processor** Exoscale Import post-processor [GH-7822]
+**new builder** Outscale [GH-7459]
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
+* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
+    no longer require this. [GH-7813]
+* builder/openstack: New `image_min_disk` option [GH-7290]
+* builder/openstack: New option `use_blockstorage_volume` to set openstack
+    image metadata [GH-7792]
+* builder/openstack: Select instance network on which to assign floating ip
+    [GH-7884]
+* builder/qemu: Implement VNC password functionality [GH-7836]
+* builder/scaleway: Allow removing volume after image creation for Scaleway
+    builder [GH-7887]
 * builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
 * builder/tencent: Remove unnecessary image name validation check. [GH-7786]
 * builder/tencent: Support data disks for tencentcloud builder [GH-7815]
-* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
-    no longer require this. [GH-7813]
+* builder/vmware: Fix intense CPU usage because of poorly handled errors.
+    [GH-7877]
+* communicator: Use context for timeouts, interruption in ssh and winrm
+    communicators [GH-7868]
+* core: Change how on-error=abort is handled to prevent EOF errors that mask
+    real issues [GH-7913]
+* provisioner/salt-masterless: Modify file upload to handle non-root case.
+    [GH-7833]
 
 ### BUG FIXES:
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
+* builder/amazon: Fix failures and duplication in Amazon region copy and
+    encryption step. [GH-7870]
 * builder/amazon: No longer store names of volumes which get deleted on
     termination inside ebssurrogate artifact. [GH-7829]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
     [GH-7841]
+* builder/docker: Fix bug where PACKER_TMP_DIR was created with root perms on
+    linux [GH-7905]
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
 * builder/google: Fix outdated oauth URL. [GH-7835]
+* builder/hyperv: Improve code for detecting IP address [GH-7880]
+* builder/ucloud: Update the api about stop instance to fix the read-only image
+    build by ucloud-uhost [GH-7914]
+* builder/vagrant: Fix bug where source_path was being used instead of box_name
+    when generating the Vagrantfile. [GH-7859]
 * builder/vmware: Fix validation regression that occurred when user provided a
     checksum file [GH-7804]
 * buildere/azure: Fix crash with managed images not published to shared image
@@ -28,10 +54,18 @@
 * communicator/ssh: Move ssh_interface back into individual builders from ssh
     communicator to prevent validation issues where it isn't implemented.
     [GH-7831]
+* core: Fix bug in template parsing where function errors were getting
+    swallowed. [GH-7854]
+* core: Fix regression where a local filepath containing `//` was no longer
+    properly resolving to `/`. [GH-7888]
 * core: Fix regression where we could no longer access isos on SMB shares.
     [GH-7800]
 * core: Make ssh_host template option always override all builders' IP
     discovery. [GH-7832]
+* fix: clean up help text and fixer order to make sure all fixers are called
+    [GH-7903]
+* provisioner/inspec: Use --input-file instead of --attrs to avoid deprecation
+    warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
 

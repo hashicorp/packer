@@ -45,31 +45,6 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 			return multistep.ActionHalt
 		}
 
-		// Wait for the machine to actually shut down
-		log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
-		shutdownTimer := time.After(s.Timeout)
-		for {
-			running, _ := driver.IsRunning(vmName)
-			if !running {
-
-				if s.Delay.Nanoseconds() > 0 {
-					log.Printf("Delay for %s after shutdown to allow locks to clear...", s.Delay)
-					time.Sleep(s.Delay)
-				}
-
-				break
-			}
-
-			select {
-			case <-shutdownTimer:
-				err := errors.New("Timeout while waiting for machine to shut down.")
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			default:
-				time.Sleep(500 * time.Millisecond)
-			}
-		}
 	} else {
 		ui.Say("Halting the virtual machine...")
 		if err := driver.Stop(vmName); err != nil {
@@ -77,6 +52,32 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+	}
+
+	// Wait for the machine to actually shut down
+	log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
+	shutdownTimer := time.After(s.Timeout)
+	for {
+		running, _ := driver.IsRunning(vmName)
+		if !running {
+
+			if s.Delay.Nanoseconds() > 0 {
+				log.Printf("Delay for %s after shutdown to allow locks to clear...", s.Delay)
+				time.Sleep(s.Delay)
+			}
+
+			break
+		}
+
+		select {
+		case <-shutdownTimer:
+			err := errors.New("Timeout while waiting for machine to shut down.")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		default:
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 

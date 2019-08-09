@@ -41,7 +41,7 @@ func NewClientGCE(conf *jwt.Config) (*http.Client, error) {
 	var client *http.Client
 
 	// Auth with AccountFile first if provided
-	if len(conf.PrivateKey) > 0 {
+	if conf != nil && len(conf.PrivateKey) > 0 {
 		log.Printf("[INFO] Requesting Google token via account_file...")
 		log.Printf("[INFO]   -- Email: %s", conf.Email)
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
@@ -184,6 +184,7 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"rhel-sap-cloud",
 		"suse-cloud",
 		"suse-sap-cloud",
+		"suse-byos-cloud",
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",

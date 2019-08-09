@@ -17,23 +17,24 @@ type RunConfig struct {
 	SSHInterface string              `mapstructure:"ssh_interface"`
 	SSHIPVersion string              `mapstructure:"ssh_ip_version"`
 
-	SourceImage        string            `mapstructure:"source_image"`
-	SourceImageName    string            `mapstructure:"source_image_name"`
-	SourceImageFilters ImageFilter       `mapstructure:"source_image_filter"`
-	Flavor             string            `mapstructure:"flavor"`
-	AvailabilityZone   string            `mapstructure:"availability_zone"`
-	RackconnectWait    bool              `mapstructure:"rackconnect_wait"`
-	FloatingIPNetwork  string            `mapstructure:"floating_ip_network"`
-	FloatingIP         string            `mapstructure:"floating_ip"`
-	ReuseIPs           bool              `mapstructure:"reuse_ips"`
-	SecurityGroups     []string          `mapstructure:"security_groups"`
-	Networks           []string          `mapstructure:"networks"`
-	Ports              []string          `mapstructure:"ports"`
-	UserData           string            `mapstructure:"user_data"`
-	UserDataFile       string            `mapstructure:"user_data_file"`
-	InstanceName       string            `mapstructure:"instance_name"`
-	InstanceMetadata   map[string]string `mapstructure:"instance_metadata"`
-	ForceDelete        bool              `mapstructure:"force_delete"`
+	SourceImage           string            `mapstructure:"source_image"`
+	SourceImageName       string            `mapstructure:"source_image_name"`
+	SourceImageFilters    ImageFilter       `mapstructure:"source_image_filter"`
+	Flavor                string            `mapstructure:"flavor"`
+	AvailabilityZone      string            `mapstructure:"availability_zone"`
+	RackconnectWait       bool              `mapstructure:"rackconnect_wait"`
+	FloatingIPNetwork     string            `mapstructure:"floating_ip_network"`
+	FloatingIP            string            `mapstructure:"floating_ip"`
+	ReuseIPs              bool              `mapstructure:"reuse_ips"`
+	SecurityGroups        []string          `mapstructure:"security_groups"`
+	Networks              []string          `mapstructure:"networks"`
+	InstanceFloatingIPNet string            `mapstructure:"instance_floating_ip_net"`
+	Ports                 []string          `mapstructure:"ports"`
+	UserData              string            `mapstructure:"user_data"`
+	UserDataFile          string            `mapstructure:"user_data_file"`
+	InstanceName          string            `mapstructure:"instance_name"`
+	InstanceMetadata      map[string]string `mapstructure:"instance_metadata"`
+	ForceDelete           bool              `mapstructure:"force_delete"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 

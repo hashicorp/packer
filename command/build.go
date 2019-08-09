@@ -241,9 +241,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
-				artifacts.Lock()
-				artifacts.m[name] = runArtifacts
-				artifacts.Unlock()
+				if nil != runArtifacts {
+					artifacts.Lock()
+					artifacts.m[name] = runArtifacts
+					artifacts.Unlock()
+				}
 			}
 		}()
 

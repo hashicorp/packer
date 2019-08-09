@@ -149,6 +149,12 @@ github.com/creack/goselect
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
+# github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437
+github.com/digitalocean/go-libvirt
+github.com/digitalocean/go-libvirt/internal/constants
+github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
+# github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
+github.com/digitalocean/go-qemu/qmp
 # github.com/digitalocean/godo v1.11.1
 github.com/digitalocean/godo
 # github.com/docker/docker v0.0.0-20180422163414-57142e89befe
@@ -171,6 +177,8 @@ github.com/go-ini/ini
 github.com/gofrs/flock
 # github.com/gofrs/uuid v3.2.0+incompatible
 github.com/gofrs/uuid
+# github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
+github.com/golang-collections/collections/stack
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
@@ -200,7 +208,7 @@ github.com/google/shlex
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.3
 github.com/googleapis/gax-go/v2
-# github.com/gophercloud/gophercloud v0.0.0-20180903124057-ea7289ebdf06
+# github.com/gophercloud/gophercloud v0.2.0
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
@@ -381,6 +389,9 @@ github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk v1.8.0
 github.com/oracle/oci-go-sdk/common
 github.com/oracle/oci-go-sdk/core
+# github.com/outscale/osc-go v0.0.1
+github.com/outscale/osc-go/oapi
+github.com/outscale/osc-go/utils
 # github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 github.com/packer-community/winrmcp/winrmcp
 # github.com/pierrec/lz4 v2.0.5+incompatible

@@ -39,6 +39,10 @@ import (
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
+	oscbsubuilder "github.com/hashicorp/packer/builder/osc/bsu"
+	oscbsusurrogatebuilder "github.com/hashicorp/packer/builder/osc/bsusurrogate"
+	oscbsuvolumebuilder "github.com/hashicorp/packer/builder/osc/bsuvolume"
+	oscchrootbuilder "github.com/hashicorp/packer/builder/osc/chroot"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -51,6 +55,7 @@ import (
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
+	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
@@ -123,6 +128,10 @@ var Builders = map[string]packer.Builder{
 	"openstack":           new(openstackbuilder.Builder),
 	"oracle-classic":      new(oracleclassicbuilder.Builder),
 	"oracle-oci":          new(oracleocibuilder.Builder),
+	"osc-bsu":             new(oscbsubuilder.Builder),
+	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
+	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
+	"osc-chroot":          new(oscchrootbuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
@@ -135,6 +144,7 @@ var Builders = map[string]packer.Builder{
 	"vagrant":             new(vagrantbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
+	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
