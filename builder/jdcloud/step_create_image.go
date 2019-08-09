@@ -56,7 +56,7 @@ func (s *stepCreateJDCloudImage) Cleanup(state multistep.StateBag) {
 
 	if s.InstanceSpecConfig.ArtifactId != "" {
 
-		req := apis.NewDeleteImageRequest(Region,s.InstanceSpecConfig.ArtifactId)
+		req := apis.NewDeleteImageRequest(Region, s.InstanceSpecConfig.ArtifactId)
 
 		_ = Retry(time.Minute, func() *RetryError {
 			_, err := VmClient.DeleteImage(req)

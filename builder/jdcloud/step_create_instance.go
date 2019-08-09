@@ -121,7 +121,7 @@ func (s *stepCreateJDCloudInstance) Cleanup(state multistep.StateBag) {
 
 	if s.InstanceSpecConfig.InstanceId != "" {
 
-		req := apis.NewDeleteInstanceRequest(Region,s.InstanceSpecConfig.InstanceId)
+		req := apis.NewDeleteInstanceRequest(Region, s.InstanceSpecConfig.InstanceId)
 		_ = Retry(time.Minute, func() *RetryError {
 			_, err := VmClient.DeleteInstance(req)
 			if err == nil {

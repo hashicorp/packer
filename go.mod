@@ -36,8 +36,8 @@ require (
 	github.com/exoscale/egoscale v0.18.1
 	github.com/go-ini/ini v1.25.4
 	github.com/gofrs/flock v0.7.1
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.0.0
