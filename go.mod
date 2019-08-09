@@ -36,8 +36,8 @@ require (
 	github.com/exoscale/egoscale v0.18.1
 	github.com/go-ini/ini v1.25.4
 	github.com/gofrs/flock v0.7.1
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.0.0
@@ -62,6 +62,7 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 	github.com/hetznercloud/hcloud-go v1.12.0
 	github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
+	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
@@ -126,6 +127,7 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190425145619-16072639606e
 	golang.org/x/text v0.3.1 // indirect
+	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
 	google.golang.org/api v0.4.0
 	google.golang.org/grpc v1.20.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
