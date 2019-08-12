@@ -68,18 +68,29 @@ Optional parameters:
     it is necessary below.
 
 -   `execute_command` (array of strings) - The command used to execute the
-    script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
-    on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows. This is
-    treated as a [template engine](/docs/templates/engine.html). There are two
-    available variables: `Script`, which is the path to the script to run, and
-    `Vars`, which is the list of `environment_vars`, if configured. If you
-    choose to set this option, make sure that the first element in the array is
-    the shell program you want to use (for example, "sh" or
-    "/usr/local/bin/zsh" or even "powershell.exe" although anything other than
-    a flavor of the shell command language is not explicitly supported and may
-    be broken by assumptions made within Packer). It's worth noting that if you
-    choose to try to use shell-local for Powershell or other Windows commands,
-    the environment variables will not be set properly for your environment.
+    script. By default, on *nix systems this is:
+
+    ```
+    ["/bin/sh", "-c", "{{.Vars}} {{.Script}}"]
+    ```
+
+    While on Windows, `execute_command` defaults to:
+
+    ```
+    ["cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"]
+    ```
+
+    This is treated as a [template engine](/docs/templates/engine.html).
+    There are two available variables: `Script`, which is the path to the
+    script to run, and `Vars`, which is the list of `environment_vars`, if
+    configured. If you choose to set this option, make sure that the first
+    element in the array is the shell program you want to use (for example,
+    "sh" or "/usr/local/bin/zsh" or even "powershell.exe" although anything
+    other than a flavor of the shell command language is not explicitly
+    supported and may be broken by assumptions made within Packer). It's
+    worth noting that if you choose to try to use shell-local for
+    Powershell or other Windows commands, the environment variables will
+    not be set properly for your environment.
 
     For backwards compatibility, `execute_command` will accept a string instead
     of an array of strings. If a single string or an array of strings with only
