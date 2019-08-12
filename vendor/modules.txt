@@ -299,6 +299,17 @@ github.com/hetznercloud/hcloud-go/hcloud
 github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
 github.com/hyperonecom/h1-client-go
+# github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
+github.com/jdcloud-api/jdcloud-sdk-go/core
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/common/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/charge/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/disk/models
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
