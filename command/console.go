@@ -99,7 +99,7 @@ Options:
 }
 
 func (*ConsoleCommand) Synopsis() string {
-	return "check that a template is valid"
+	return "creates a console for testing variable interpolation"
 }
 
 func (*ConsoleCommand) AutocompleteArgs() complete.Predictor {
