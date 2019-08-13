@@ -2,12 +2,16 @@
 
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
-**new post-processor** Exoscale Import post-processor [GH-7822]
 **new builder** Outscale [GH-7459]
+**new builder** VirtualBox Snapshot [GH-7780]
+**bew builder** JDCloud [GH-7962]
+**new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
 * builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
     no longer require this. [GH-7813]
+* builder/google: Add suse-byos-cloud to list of public GCP cloud image
+    projects [GH-7935]
 * builder/openstack: New `image_min_disk` option [GH-7290]
 * builder/openstack: New option `use_blockstorage_volume` to set openstack
     image metadata [GH-7792]
@@ -25,6 +29,12 @@
     communicators [GH-7868]
 * core: Change how on-error=abort is handled to prevent EOF errors that mask
     real issues [GH-7913]
+* core: Clean up logging vs ui call in step download [GH-7936]
+* core: Remove obsolete Cancel functions from builtin provisioners [GH-7917]
+* post-processor/vagrant:  Add option to allow box Vagrantfiles to be generated
+    during the build [GH-7951]
+* provisioner/ansible: Add support for installing roles with ansible-galaxy
+    [GH-7916
 * provisioner/salt-masterless: Modify file upload to handle non-root case.
     [GH-7833]
 
@@ -32,21 +42,27 @@
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
 * builder/amazon: Fix failures and duplication in Amazon region copy and
-    encryption step. [GH-7870]
+    encryption step. [GH-7870] [GH-7923]
 * builder/amazon: No longer store names of volumes which get deleted on
     termination inside ebssurrogate artifact. [GH-7829]
+* builder/azure: Create configurable polling duration and set higher default
+    for image copies to prevent timeouts on successful copies [GH-7920]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
     [GH-7841]
+* builder/docker: Check container os, not host os, when creating container dir
+    default [GH-7939]
 * builder/docker: Fix bug where PACKER_TMP_DIR was created with root perms on
     linux [GH-7905]
 * builder/docker: Fix file download hang caused by blocking ReadAll call
     [GH-7814]
-* builder/google: Fix outdated oauth URL. [GH-7835]
+* builder/google: Fix outdated oauth URL. [GH-7835] [GH-7927]
 * builder/hyperv: Improve code for detecting IP address [GH-7880]
 * builder/ucloud: Update the api about stop instance to fix the read-only image
     build by ucloud-uhost [GH-7914]
 * builder/vagrant: Fix bug where source_path was being used instead of box_name
     when generating the Vagrantfile. [GH-7859]
+* builder/virtualbox: Honor value of 'Comment' field in ssh keypair generation.
+    [GH-7922]
 * builder/vmware: Fix validation regression that occurred when user provided a
     checksum file [GH-7804]
 * buildere/azure: Fix crash with managed images not published to shared image
@@ -54,6 +70,7 @@
 * communicator/ssh: Move ssh_interface back into individual builders from ssh
     communicator to prevent validation issues where it isn't implemented.
     [GH-7831]
+* console: Fix console help text [GH-7960]
 * core: Fix bug in template parsing where function errors were getting
     swallowed. [GH-7854]
 * core: Fix regression where a local filepath containing `//` was no longer
@@ -62,12 +79,14 @@
     [GH-7800]
 * core: Make ssh_host template option always override all builders' IP
     discovery. [GH-7832]
+* core: Regenerate boot_command PEG code [GH-7977]
 * fix: clean up help text and fixer order to make sure all fixers are called
     [GH-7903]
 * provisioner/inspec: Use --input-file instead of --attrs to avoid deprecation
     warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
+* Update aws-sdk-go to v1.22.2, resolving some AssumeRole issues [GH-7967]
 
 ## 1.4.2 (June 26, 2019)
 
