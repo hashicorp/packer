@@ -83,6 +83,15 @@ more details about certain options in following sections.
 -   `vagrantfile_template` (string) - Path to a template to use for the
     Vagrantfile that is packaged with the box.
 
+-   `vagrantfile_template_generated` (boolean) - By default, Packer will
+    exit with an error if the file specified using the
+    `vagrantfile_template` variable is not found. However, under certain
+    circumstances, it may be desirable to dynamically generate the
+    Vagrantfile during the course of the build. Setting this variable to
+    `true` skips the start up check and allows the user to script the
+    creation of the Vagrantfile at some previous point in the build.
+    Defaults to `false`.
+
 ## Provider-Specific Overrides
 
 If you have a Packer template with multiple builder types within it, you may
