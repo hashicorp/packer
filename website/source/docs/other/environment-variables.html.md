@@ -16,6 +16,8 @@ each can be found below:
     of the configuration file is basic JSON. See the [core configuration
     page](/docs/other/core-configuration.html).
 
+-   `PACKER_CONFIG_DIR` - The location of the `.packer.d` config directory
+
 -   `PACKER_LOG` - Setting this to any value other than "" (empty string) or
     "0" will enable the logger. See the [debugging
     page](/docs/other/debugging.html).
