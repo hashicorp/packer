@@ -155,10 +155,18 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.SpotTags != nil {
-		if c.SpotPrice == "" || c.SpotPrice == "0" {
-			errs = append(errs, fmt.Errorf(
-				"spot_tags should not be set when not requesting a spot instance"))
-		}
+		errs = append(errs, fmt.Errorf("the spot_tags option has suffered a"+
+			"regression in this "+
+			"version of Packer and will no longer properly tag the spot "+
+			"request; we hope to restore this functionality soon but if you "+
+			"need spot tags in the meantime, please revert to Packer v1.4.1 "+
+			"or lower. If you don't need spot_tags, just remove the spot_tags"+
+			"option from your Packer template and run again."+
+			"We're so sorry for the inconvenience."))
+		// if c.SpotPrice == "" || c.SpotPrice == "0" {
+		// 	errs = append(errs, fmt.Errorf(
+		// 		"spot_tags should not be set when not requesting a spot instance"))
+		// }
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
