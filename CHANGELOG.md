@@ -30,6 +30,8 @@
 * core: Change how on-error=abort is handled to prevent EOF errors that mask
     real issues [GH-7913]
 * core: Clean up logging vs ui call in step download [GH-7936]
+* core: New environment var option to allow user to set location of config
+    directory [GH-7912]
 * core: Remove obsolete Cancel functions from builtin provisioners [GH-7917]
 * post-processor/vagrant:  Add option to allow box Vagrantfiles to be generated
     during the build [GH-7951]
@@ -39,12 +41,15 @@
     [GH-7833]
 
 ### BUG FIXES:
+* builder/amazon: Add error to warn users of spot_tags regression. [GH-7989]
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
 * builder/amazon: Fix failures and duplication in Amazon region copy and
     encryption step. [GH-7870] [GH-7923]
 * builder/amazon: No longer store names of volumes which get deleted on
     termination inside ebssurrogate artifact. [GH-7829]
+* builder/amazon: Update aws-sdk-go to v1.22.2, resolving some AssumeRole
+    issues [GH-7967]
 * builder/azure: Create configurable polling duration and set higher default
     for image copies to prevent timeouts on successful copies [GH-7920]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
@@ -86,7 +91,6 @@
     warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
-* Update aws-sdk-go to v1.22.2, resolving some AssumeRole issues [GH-7967]
 
 ## 1.4.2 (June 26, 2019)
 
