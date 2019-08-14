@@ -40,8 +40,7 @@ type StepRunSpotInstance struct {
 	UserDataFile                      string
 	Ctx                               interpolate.Context
 
-	instanceId  string
-	spotRequest *ec2.SpotInstanceRequest
+	instanceId string
 }
 
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
@@ -267,39 +266,53 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	spotTags.Report(ui)
 
 	if len(spotTags) > 0 && s.SpotTags.IsSet() {
-		err = retry.Config{
-			Tries:       11,
-			ShouldRetry: func(error) bool { return false },
-			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-				Tags:      spotTags,
-				Resources: []*string{aws.String(req.RequestID)},
-			})
-			return err
-		})
-		if err != nil {
-			err := fmt.Errorf("Error tagging spot request: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+		ui.Error("the spot_tags option has suffered a regression in this " +
+			"version of Packer and will no longer properly tag the spot " +
+			"request; we hope to restore this functionality soon but if you " +
+			"need spot tags in the meantime, please revert to Packer v1.4.1 " +
+			"or lower. Sorry for the inconvenience.")
+
+		// TODO: restore spot tag functionality or revert fleet functionality.
+		// Investigate whether we can do what we need using an async fleet
+		// instead of an "instant" one.
+
+		// spotTags.Report(ui)
+		// err = retry.Config{
+		// 	Tries:       11,
+		// 	ShouldRetry: func(error) bool { return false },
+		// 	RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		// }.Run(ctx, func(ctx context.Context) error {
+		// 	_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+		// 		Tags:      spotTags,
+		// 		Resources: []*string{aws.String(req.RequestID)},
+		// 	})
+		// 	return err
+		// })
+		// if err != nil {
+		// 	err := fmt.Errorf("Error tagging spot request: %s", err)
+		// 	state.Put("error", err)
+		// 	ui.Error(err.Error())
+		// 	return multistep.ActionHalt
+		// }
 	}
 
 	// Actually send the spot connection request.
 	err = req.Send()
 	if err != nil {
-		err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", req.RequestID, err)
+		err := fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	if len(createOutput.Errors) > 0 {
-		err := fmt.Errorf("error sending spot request: %s", *createOutput.Errors[0])
+		errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
+		for _, outErr := range createOutput.Errors {
+			errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+		}
+		err = fmt.Errorf(errString)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -404,28 +417,9 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 }
 
 func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
-
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	launchTemplateName := state.Get("launchTemplateName").(string)
-
-	// Cancel the spot request if it exists
-	if s.spotRequest != nil {
-		ui.Say("Cancelling the spot request...")
-		input := &ec2.CancelSpotInstanceRequestsInput{
-			SpotInstanceRequestIds: []*string{s.spotRequest.SpotInstanceRequestId},
-		}
-		if _, err := ec2conn.CancelSpotInstanceRequests(input); err != nil {
-			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
-			return
-		}
-
-		err := WaitUntilSpotRequestFulfilled(aws.BackgroundContext(), ec2conn, *s.spotRequest.SpotInstanceRequestId)
-		if err != nil {
-			ui.Error(err.Error())
-		}
-
-	}
 
 	// Terminate the source instance if it exists
 	if s.instanceId != "" {
