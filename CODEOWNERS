@@ -17,6 +17,7 @@
 /builder/hcloud/                        @LKaemmerling
 /builder/hyperone                       @m110 @gregorybrzeski @ad-m
 /builder/ucloud/                        @shawnmssu
+/builder/vultr/                         @ddymko @afady
 /builder/yandex                         @GennadySpb @alexanderKhaustov @seukyaso
 /builder/osc                            @marinsalinas
 
