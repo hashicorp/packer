@@ -4,7 +4,7 @@
 **new builder** UCloud builder [GH-7775]
 **new builder** Outscale [GH-7459]
 **new builder** VirtualBox Snapshot [GH-7780]
-**bew builder** JDCloud [GH-7962]
+**new builder** JDCloud [GH-7962]
 **new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
 
 * build: Change Makefile to behave differently inside and outside the gopath
