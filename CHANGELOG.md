@@ -1,4 +1,4 @@
-## 1.4.3 (upcoming)
+## 1.4.3 (August 14, 2019)
 
 ### IMPROVEMENTS:
 **new builder** UCloud builder [GH-7775]
@@ -6,6 +6,7 @@
 **new builder** VirtualBox Snapshot [GH-7780]
 **bew builder** JDCloud [GH-7962]
 **new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
+
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
 * builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
