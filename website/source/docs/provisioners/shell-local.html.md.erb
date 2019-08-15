@@ -41,9 +41,9 @@ Exactly *one* of the following is required:
 
 -   `command` (string) - This is a single command to execute. It will be
     written to a temporary file and run using the `execute_command` call below.
-    If you are building a windows vm on AWS, Azure or Google Compute and would
-    like to access the generated password that Packer uses to connect to the
-    instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
+    If you are building a windows vm on AWS, Azure, Google Compute, or OpenStack
+    and would like to access the generated password that Packer uses to connect
+    to the instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
     to set this as an environment variable.
 
 -   `inline` (array of strings) - This is an array of commands to execute. The
@@ -68,10 +68,10 @@ Optional parameters:
     inject prior to the `execute_command`. The format should be `key=value`.
     Packer injects some environmental variables by default into the
     environment, as well, which are covered in the section below. If you are
-    building a windows vm on AWS, Azure or Google Compute and would like to
-    access the generated password that Packer uses to connect to the instance
-    via WinRM, you can use the template variable `{{.WinRMPassword}}` to set
-    this as an environment variable. For example:
+    building a windows vm on AWS, Azure, Google Compute, or OpenStack and would
+    like to access the generated password that Packer uses to connect to the
+    instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
+    to set this as an environment variable. For example:
     `"environment_vars": "WINRMPASS={{.WinRMPassword}}"`
 
 -   `env_var_format` (string) - When we parse the environment\_vars that you
@@ -103,9 +103,9 @@ Optional parameters:
     sake of clarity, as even when you set only a single `command` to run,
     Packer writes it to a temporary file and then runs it as a script.
 
-    If you are building a windows vm on AWS, Azure or Google Compute and would
-    like to access the generated password that Packer uses to connect to the
-    instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
+    If you are building a windows vm on AWS, Azure, Google Compute, or OpenStack
+    and would like to access the generated password that Packer uses to connect
+    to the instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
     to set this as an environment variable.
 
 -   `inline_shebang` (string) - The

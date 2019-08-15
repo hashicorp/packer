@@ -60,8 +60,8 @@ Optional Parameters:
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
     ```
 
-    If you are running a Windows build on AWS, Azure or Google Compute and
-    would like to access the auto-generated password that Packer uses to
+    If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
+    and would like to access the auto-generated password that Packer uses to
     connect to a Windows instance via WinRM, you can use the template variable
     {{.WinRMPassword}} in this option. For example:
 
@@ -85,8 +85,8 @@ Optional Parameters:
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
     ```
 
-    If you are running a Windows build on AWS, Azure or Google Compute and
-    would like to access the auto-generated password that Packer uses to
+    If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
+    and would like to access the auto-generated password that Packer uses to
     connect to a Windows instance via WinRM, you can use the template variable
     {{.WinRMPassword}} in this option. For example:
 
