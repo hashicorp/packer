@@ -257,47 +257,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// Create the request for the spot instance.
 	req, createOutput := ec2conn.CreateFleetRequest(createFleetInput)
 	ui.Message(fmt.Sprintf("Sending spot request (%s)...", req.RequestID))
-
-	// Tag the spot instance request (not the eventual spot instance)
-	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
-	if err != nil {
-		err := fmt.Errorf("Error generating tags for spot request: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if len(spotTags) > 0 && s.SpotTags.IsSet() {
-		ui.Error("the spot_tags option has suffered a regression in this " +
-			"version of Packer and will no longer properly tag the spot " +
-			"request; we hope to restore this functionality soon but if you " +
-			"need spot tags in the meantime, please revert to Packer v1.4.1 " +
-			"or lower. Sorry for the inconvenience.")
-
-		// TODO: restore spot tag functionality or revert fleet functionality.
-		// Investigate whether we can do what we need using an async fleet
-		// instead of an "instant" one.
-
-		// spotTags.Report(ui)
-		// err = retry.Config{
-		// 	Tries:       11,
-		// 	ShouldRetry: func(error) bool { return false },
-		// 	RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-		// }.Run(ctx, func(ctx context.Context) error {
-		// 	_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-		// 		Tags:      spotTags,
-		// 		Resources: []*string{aws.String(req.RequestID)},
-		// 	})
-		// 	return err
-		// })
-		// if err != nil {
-		// 	err := fmt.Errorf("Error tagging spot request: %s", err)
-		// 	state.Put("error", err)
-		// 	ui.Error(err.Error())
-		// 	return multistep.ActionHalt
-		// }
-	}
-
 	// Actually send the spot connection request.
 	err = req.Send()
 	if err != nil {
@@ -319,6 +278,62 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	instanceId = *createOutput.Instances[0].InstanceIds[0]
+	// Tag the spot instance request (not the eventual spot instance)
+	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error generating tags for spot request: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if len(spotTags) > 0 && s.SpotTags.IsSet() {
+		spotTags.Report(ui)
+
+		// Use the instance ID to find out the SIR, so that we can tag the spot
+		// request associated with this instance.
+
+		err = retry.Config{
+			Tries:       11,
+			ShouldRetry: func(error) bool { return true },
+			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			_, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+				InstanceIds: []*string{aws.String(instanceId)},
+			})
+			return err
+		})
+		if err != nil {
+			err := fmt.Errorf("Error describing instance for spot request tags: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		describeOutput, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{aws.String(instanceId)},
+		})
+		sir := describeOutput.Reservations[0].Instances[0].SpotInstanceRequestId
+
+		// Apply tags to the spot request.
+		err = retry.Config{
+			Tries:       11,
+			ShouldRetry: func(error) bool { return false },
+			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      spotTags,
+				Resources: []*string{sir},
+			})
+			return err
+		})
+		if err != nil {
+			err := fmt.Errorf("Error tagging spot request: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
 
 	// Set the instance ID so that the cleanup works properly
 	s.instanceId = instanceId
