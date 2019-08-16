@@ -1,3 +1,12 @@
+## 1.4.4 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+
+### BUG FIXES:
+* core: Fix bug where sensitive variables contianing commas were not being
+    properly sanitized in UI calls. [GH-7997]
+
 ## 1.4.3 (August 14, 2019)
 
 ### IMPROVEMENTS:
