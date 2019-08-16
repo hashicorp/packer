@@ -157,6 +157,26 @@ func TestPostProcessor_PostProcess_checkArtifactType(t *testing.T) {
 	}
 }
 
+func TestPostProcessor_PostProcess_checkArtifactFileIsBox(t *testing.T) {
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant", // good
+		FilesValue:     []string{"invalid.boxfile"},        // should have .box extension
+	}
+
+	config := testGoodConfig()
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
+	var p PostProcessor
+
+	p.Configure(config)
+	_, _, _, err := p.PostProcess(context.Background(), testUi(), artifact)
+	if !strings.Contains(err.Error(), "Unknown files in artifact") {
+		t.Fatalf("Should error with message 'Unknown files in artifact...' with artifact file: %s",
+			artifact.FilesValue[0])
+	}
+}
+
 func testUi() *packer.BasicUi {
 	return &packer.BasicUi{
 		Reader: new(bytes.Buffer),
