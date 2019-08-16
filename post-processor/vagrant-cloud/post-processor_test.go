@@ -2,10 +2,12 @@ package vagrantcloud
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -134,6 +136,24 @@ func TestPostProcessor_Configure_Bad(t *testing.T) {
 	var p PostProcessor
 	if err := p.Configure(config); err == nil {
 		t.Fatalf("should have err")
+	}
+}
+
+func TestPostProcessor_PostProcess_checkArtifactType(t *testing.T) {
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: "invalid.builder",
+	}
+
+	config := testGoodConfig()
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
+	var p PostProcessor
+
+	p.Configure(config)
+	_, _, _, err := p.PostProcess(context.Background(), testUi(), artifact)
+	if !strings.Contains(err.Error(), "Unknown artifact type") {
+		t.Fatalf("Should error with message 'Unknown artifact type...' with BuilderId: %s", artifact.BuilderIdValue)
 	}
 }
 
