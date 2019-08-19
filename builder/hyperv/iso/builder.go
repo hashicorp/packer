@@ -449,7 +449,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 
 		&hypervcommon.StepRun{
-			Headless: b.config.Headless,
+			Headless:   b.config.Headless,
+			SwitchName: b.config.SwitchName,
 		},
 
 		&hypervcommon.StepTypeBootCommand{
