@@ -158,7 +158,6 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context
 	downStep := &common.StepDownload{
 		Description: "Guest additions checksums",
 		ResultKey:   "guest_additions_checksums_path",
-		TargetPath:  checksumsFile.Name(),
 		Url:         []string{checksumsUrl},
 	}
 
