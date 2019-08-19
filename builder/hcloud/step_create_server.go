@@ -3,8 +3,9 @@ package hcloud
 import (
 	"context"
 	"fmt"
-
 	"io/ioutil"
+	"sort"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -50,10 +51,24 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 		sshKeys = append(sshKeys, sshKey)
 	}
 
+	var image *hcloud.Image
+	if c.Image != "" {
+		image = &hcloud.Image{Name: c.Image}
+	} else {
+		var err error
+		image, err = getImageWithSelectors(ctx, client, c)
+		if err != nil {
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		ui.Message(fmt.Sprintf("Using image %s with ID %d", image.Description, image.ID))
+	}
+
 	serverCreateResult, _, err := client.Server.Create(ctx, hcloud.ServerCreateOpts{
 		Name:       c.ServerName,
 		ServerType: &hcloud.ServerType{Name: c.ServerType},
-		Image:      &hcloud.Image{Name: c.Image},
+		Image:      image,
 		SSHKeys:    sshKeys,
 		Location:   &hcloud.Location{Name: c.Location},
 		UserData:   userData,
@@ -184,4 +199,33 @@ func waitForAction(ctx context.Context, client *hcloud.Client, action *hcloud.Ac
 		return err
 	}
 	return nil
+}
+
+func getImageWithSelectors(ctx context.Context, client *hcloud.Client, c *Config) (*hcloud.Image, error) {
+	var allImages []*hcloud.Image
+
+	var selector = strings.Join(c.ImageFilter.WithSelector, ",")
+	opts := hcloud.ImageListOpts{
+		ListOpts: hcloud.ListOpts{LabelSelector: selector},
+		Status:   []hcloud.ImageStatus{hcloud.ImageStatusAvailable},
+	}
+
+	allImages, err := client.Image.AllWithOpts(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	if len(allImages) == 0 {
+		return nil, fmt.Errorf("no image found for selector %q", selector)
+	}
+	if len(allImages) > 1 {
+		if !c.ImageFilter.MostRecent {
+			return nil, fmt.Errorf("more than one image found for selector %q", selector)
+		}
+
+		sort.Slice(allImages, func(i, j int) bool {
+			return allImages[i].Created.After(allImages[j].Created)
+		})
+	}
+
+	return allImages[0], nil
 }
