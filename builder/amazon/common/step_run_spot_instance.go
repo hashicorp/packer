@@ -260,7 +260,11 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// Actually send the spot connection request.
 	err = req.Send()
 	if err != nil {
-		err := fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
+		if createOutput.FleetId != nil {
+			err = fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
+		} else {
+			err = fmt.Errorf("Error waiting for fleet request: %s", err)
+		}
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
