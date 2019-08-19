@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -19,17 +20,21 @@ type AMIConfig struct {
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AMITags                 TagMap            `mapstructure:"tags"`
-	AMIENASupport           *bool             `mapstructure:"ena_support"`
+	RawAMIENASupport        config.Trilean    `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
-	AMIEncryptBootVolume    *bool             `mapstructure:"encrypt_boot"`
+	RawAMIEncryptBootVolume config.Trilean    `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 	AMISkipBuildRegion      bool              `mapstructure:"skip_save_build_region"`
+
+	// parsed from RawAMIENASupport above. Used in steps.
+	AMIENASupport        *bool
+	AMIEncryptBootVolume *bool
 }
 
 func stringInSlice(s []string, searchstr string) bool {
@@ -60,6 +65,8 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	errs = append(errs, c.prepareRegions(accessConfig)...)
 
+	c.AMIENASupport = c.RawAMIENASupport.ToBoolPointer()
+	c.AMIEncryptBootVolume = c.RawAMIEncryptBootVolume.ToBoolPointer()
 	// Prevent sharing of default KMS key encrypted volumes with other aws users
 	if len(c.AMIUsers) > 0 {
 		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
