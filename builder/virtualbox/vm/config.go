@@ -97,11 +97,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			fmt.Errorf("vm_name is required"))
 	}
 
-	if c.TargetSnapshot == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("target_snapshot is required"))
-	}
-
 	validMode := false
 	validModes := []string{
 		vboxcommon.GuestAdditionsModeDisable,
