@@ -226,5 +226,11 @@ func providerFromBuilderName(name string) string {
 // Returns the Vagrant provider the box is intended for use with by
 // reading the metadata file packaged inside the box
 func providerFromVagrantBox(boxfile string) (providerName string, err error) {
+	f, err := os.Open(boxfile)
+	if err != nil {
+		return "", fmt.Errorf("Error attempting to open box file: %s", err)
+	}
+	defer f.Close()
+
 	return "", nil
 }
