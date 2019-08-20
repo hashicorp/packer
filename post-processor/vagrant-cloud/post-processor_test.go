@@ -197,3 +197,12 @@ func TestProviderFromBuilderName(t *testing.T) {
 		t.Fatal("should convert provider")
 	}
 }
+
+func TestProviderFromVagrantBox_missing_box(t *testing.T) {
+	boxfile := "i_dont_exist.box"
+	_, err := providerFromVagrantBox(boxfile)
+	if err == nil {
+		t.Fatal("Should have error as box file does not exist")
+	}
+	t.Logf("%s", err)
+}
