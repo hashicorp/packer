@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -199,10 +200,26 @@ func TestProviderFromBuilderName(t *testing.T) {
 }
 
 func TestProviderFromVagrantBox_missing_box(t *testing.T) {
+	// Bad: Box does not exist
 	boxfile := "i_dont_exist.box"
 	_, err := providerFromVagrantBox(boxfile)
 	if err == nil {
 		t.Fatal("Should have error as box file does not exist")
+	}
+	t.Logf("%s", err)
+}
+
+func TestProviderFromVagrantBox_empty_box(t *testing.T) {
+	// Bad: Empty box file
+	boxfile, err := ioutil.TempFile(os.TempDir(), "test*.box")
+	if err != nil {
+		t.Fatalf("Error creating test box file: %s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	_, err = providerFromVagrantBox(boxfile.Name())
+	if err == nil {
+		t.Fatal("Should have error as box file is empty")
 	}
 	t.Logf("%s", err)
 }
