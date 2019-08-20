@@ -5,8 +5,13 @@
 package vagrantcloud
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -231,6 +236,35 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 		return "", fmt.Errorf("Error attempting to open box file: %s", err)
 	}
 	defer f.Close()
+
+	// Vagrant boxes are gzipped tar archives
+	ar, err := gzip.NewReader(f)
+	if err != nil {
+		return "", fmt.Errorf("Error unzipping box archive: %s", err)
+	}
+	tr := tar.NewReader(ar)
+
+	// Loop through the files in the archive and read the provider
+	// information from the boxes metadata.json file
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("%s", err)
+		}
+
+		if hdr.Name == "metadata.json" {
+			contents, err := ioutil.ReadAll(tr)
+			if err != nil {
+				return "", fmt.Errorf("Error reading contents of metadata.json file from box file: %s", err)
+			}
+			// TODO: Parse the json for the provider
+			log.Printf("Contents: %s", contents)
+			break
+		}
+	}
 
 	return "", nil
 }
