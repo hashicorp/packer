@@ -19,6 +19,7 @@ import (
 
 var builtins = map[string]string{
 	"mitchellh.post-processor.vagrant": "vagrant",
+	"packer.post-processor.artifice":   "artifice",
 	"vagrant":                          "vagrant",
 }
 
@@ -133,13 +134,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		ui.Message("Warning: Using Vagrant Cloud token found in ATLAS_TOKEN. Please make sure it is correct, or set VAGRANT_CLOUD_TOKEN")
 	}
 
-	// The name of the provider for vagrant cloud, and vagrant
-	providerName := providerFromBuilderName(artifact.Id())
+	// Determine the name of the provider for Vagrant Cloud, and Vagrant
+	providerName, err := getProvider(artifact.Id(), artifact.Files()[0], builtins[artifact.BuilderId()])
 
 	p.config.ctx.Data = &boxDownloadUrlTemplate{
 		ArtifactId: artifact.Id(),
 		Provider:   providerName,
 	}
+
 	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
 	if err != nil {
 		return nil, false, false, fmt.Errorf("Error processing box_download_url: %s", err)
@@ -187,8 +189,21 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	return NewArtifact(providerName, p.config.Tag), true, false, nil
 }
 
-// converts a packer builder name to the corresponding vagrant
-// provider
+func getProvider(builderName, boxfile, builderId string) (providerName string, err error) {
+	if builderId == "artifice" {
+		// The artifice post processor cannot embed any data in the
+		// supplied artifact so the provider information must be extracted
+		// from the box file directly
+		providerName, err = providerFromVagrantBox(boxfile)
+	} else {
+		// For the Vagrant builder and Vagrant post processor the provider can
+		// be determined from information embedded in the artifact
+		providerName = providerFromBuilderName(builderName)
+	}
+	return providerName, err
+}
+
+// Converts a packer builder name to the corresponding vagrant provider
 func providerFromBuilderName(name string) string {
 	switch name {
 	case "aws":
@@ -206,4 +221,10 @@ func providerFromBuilderName(name string) string {
 	default:
 		return name
 	}
+}
+
+// Returns the Vagrant provider the box is intended for use with by
+// reading the metadata file packaged inside the box
+func providerFromVagrantBox(boxfile string) (providerName string, err error) {
+	return "", nil
 }
