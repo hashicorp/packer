@@ -364,27 +364,35 @@ func (c *comm) reconnect() (err error) {
 		c.client = ssh.NewClient(sshConn, sshChan, req)
 	}
 	c.connectToAgent()
-	c.connectTunnels(sshConn)
+	err = c.connectTunnels(sshConn)
+	if err != nil {
+		return
+	}
 
 	return
 }
 
-func (c *comm) connectTunnels(sshConn ssh.Conn) {
+func (c *comm) connectTunnels(sshConn ssh.Conn) (err error) {
 	if c.client == nil {
 		return
 	}
 
+	if len(c.config.Tunnels) == 0 {
+		// No Tunnels to configure
+		return
+	}
+
 	// Start remote forwards of ports to ourselves.
-	log.Printf("[DEBUG] Tunnel Configuration: %v", c.config.Tunnels)
+	log.Printf("[DEBUG] Tunnel configuration: %v", c.config.Tunnels)
 	for _, v := range c.config.Tunnels {
 		done := make(chan struct{})
+		var listener net.Listener
 		switch v.Direction {
 		case RemoteTunnel:
 			// This requests the sshd Host to bind a port and send traffic back to us
-			listener, err := c.client.Listen(v.ListenType, v.ListenAddr)
-			// TODO How can we get this failure to ui.Error?
+			listener, err = c.client.Listen(v.ListenType, v.ListenAddr)
 			if err != nil {
-				log.Printf("[ERROR] Tunnel: unable to bind remote tunnel ('%v'): %s", v, err)
+				err = fmt.Errorf("Tunnel: Failed to bind remote ('%v'): %s", v, err)
 				return
 			}
 			log.Printf("[INFO] Tunnel: Remote bound on %s forwarding to %s", v.ListenAddr, v.ForwardAddr)
@@ -395,10 +403,9 @@ func (c *comm) connectTunnels(sshConn ssh.Conn) {
 			go shutdownProxyTunnel(sshConn, done, listener)
 		case LocalTunnel:
 			// This binds locally and sends traffic back to the sshd host
-			listener, err := net.Listen(v.ListenType, v.ListenAddr)
+			listener, err = net.Listen(v.ListenType, v.ListenAddr)
 			if err != nil {
-				// TODO How can we get this failure to ui.Error?
-				log.Printf("[ERROR] Tunnel: unable to bind local tunnel ('%v'): %s", v, err)
+				err = fmt.Errorf("Tunnel: Failed to bind local ('%v'): %s", v, err)
 				return
 			}
 			log.Printf("[INFO] Tunnel: Local bound on %s forwarding to %s", v.ListenAddr, v.ForwardAddr)
@@ -410,8 +417,8 @@ func (c *comm) connectTunnels(sshConn ssh.Conn) {
 			// FIXME: Is there a better "on-shutdown" we can wait on?
 			go shutdownProxyTunnel(sshConn, done, listener)
 		default:
-			log.Printf("[ERROR] Tunnel: Unknown tunnel type ('%v'): %v", v, v.Direction)
-			continue
+			err = fmt.Errorf("Tunnel: Unknown tunnel direction ('%v'): %v", v, v.Direction)
+			return
 		}
 	}
 
