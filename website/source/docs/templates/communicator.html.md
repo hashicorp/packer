@@ -108,9 +108,9 @@ The SSH communicator has the following options:
 
 -   `ssh_local_tunnels` (array of strings) - An array of OpenSSH-style tunnels to
     create. The port is bound on the *local packer host* and connections are
-    forwarded to the remote destinations. Note unless `GatewayPorts=yes` is set
-    in SSHD dameon, the target *must* be `localhost`. Example value:
-    `8080:localhost:8000`
+    forwarded to the remote destination. Note unless `GatewayPorts=yes` is set
+    in SSHD daemon, the target *must* be `localhost`. Example value:
+    `3306:localhost:3306`
 
 -   `ssh_password` (string) - A plaintext password to use to authenticate with
     SSH.
@@ -139,7 +139,7 @@ The SSH communicator has the following options:
     connection after a reboot. Example: `5m`. Disabled by default.
 
 -   `ssh_remote_tunnels` (array of strings) - An array of OpenSSH-style tunnels
-    to create. The port is bound on the *remote build host* and connections are
+    to create. The port is bound on the *remote build host* and connections to it are
     forwarded to the packer host's network. Non-localhost destinations may be set here.
     Example value: `8443:git.example.com:443`
 
