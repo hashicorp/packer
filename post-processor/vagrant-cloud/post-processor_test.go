@@ -16,6 +16,10 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+type tarFiles []struct {
+	Name, Body string
+}
+
 func testGoodConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"access_token":        "foo",
@@ -249,28 +253,35 @@ func TestProviderFromVagrantBox_gzip_only_box(t *testing.T) {
 }
 
 func TestProviderFromVagrantBox_no_files_in_archive(t *testing.T) {
-	boxfile, err := newBoxFile()
+	// Bad: Box contains no files
+	boxfile, err := createBox(tarFiles{})
 	if err != nil {
-		t.Fatalf("%s", err)
+		t.Fatalf("Error creating test box: %s", err)
 	}
 	defer os.Remove(boxfile.Name())
-
-	// Bad: box contains no files in the archive
-	aw := gzip.NewWriter(boxfile)
-	tw := tar.NewWriter(aw)
-	// Flush and close each writer creating an empty gzipped tar archive
-	err = tw.Close()
-	if err != nil {
-		t.Fatalf("Error flushing tar file contents: %s", err)
-	}
-	err = aw.Close()
-	if err != nil {
-		t.Fatalf("Error flushing gzip file contents: %s", err)
-	}
 
 	_, err = providerFromVagrantBox(boxfile.Name())
 	if err == nil {
 		t.Fatalf("Should have error as box file has no contents")
+	}
+	t.Logf("%s", err)
+}
+
+func TestProviderFromVagrantBox_no_metadata(t *testing.T) {
+	// Bad: Box contains no metadata/metadata.json file
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("Error creating test box: %s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	_, err = providerFromVagrantBox(boxfile.Name())
+	if err == nil {
+		t.Fatalf("Should have error as box file does not include metadata.json file")
 	}
 	t.Logf("%s", err)
 }
@@ -280,5 +291,46 @@ func newBoxFile() (boxfile *os.File, err error) {
 	if err != nil {
 		return boxfile, fmt.Errorf("Error creating test box file: %s", err)
 	}
+	return boxfile, nil
+}
+
+func createBox(files tarFiles) (boxfile *os.File, err error) {
+	boxfile, err = newBoxFile()
+	if err != nil {
+		return boxfile, err
+	}
+
+	// Box files are gzipped tar archives
+	aw := gzip.NewWriter(boxfile)
+	tw := tar.NewWriter(aw)
+
+	// Add each file to the box
+	for _, file := range files {
+		// Create and write the tar file header
+		hdr := &tar.Header{
+			Name: file.Name,
+			Mode: 0644,
+			Size: int64(len(file.Body)),
+		}
+		err = tw.WriteHeader(hdr)
+		if err != nil {
+			return boxfile, fmt.Errorf("Error writing box tar file header: %s", err)
+		}
+		// Write the file contents
+		_, err = tw.Write([]byte(file.Body))
+		if err != nil {
+			return boxfile, fmt.Errorf("Error writing box tar file contents: %s", err)
+		}
+	}
+	// Flush and close each writer
+	err = tw.Close()
+	if err != nil {
+		return boxfile, fmt.Errorf("Error flushing tar file contents: %s", err)
+	}
+	err = aw.Close()
+	if err != nil {
+		return boxfile, fmt.Errorf("Error flushing gzip file contents: %s", err)
+	}
+
 	return boxfile, nil
 }
