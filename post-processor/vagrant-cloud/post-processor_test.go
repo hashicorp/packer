@@ -2,6 +2,7 @@ package vagrantcloud
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -211,9 +212,9 @@ func TestProviderFromVagrantBox_missing_box(t *testing.T) {
 
 func TestProviderFromVagrantBox_empty_box(t *testing.T) {
 	// Bad: Empty box file
-	boxfile, err := ioutil.TempFile(os.TempDir(), "test*.box")
+	boxfile, err := newBoxFile()
 	if err != nil {
-		t.Fatalf("Error creating test box file: %s", err)
+		t.Fatalf("%s", err)
 	}
 	defer os.Remove(boxfile.Name())
 
@@ -222,4 +223,34 @@ func TestProviderFromVagrantBox_empty_box(t *testing.T) {
 		t.Fatal("Should have error as box file is empty")
 	}
 	t.Logf("%s", err)
+}
+
+func TestProviderFromVagrantBox_gzip_only_box(t *testing.T) {
+	boxfile, err := newBoxFile()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	// Bad: Box is just a plain gzip file
+	aw := gzip.NewWriter(boxfile)
+	_, err = aw.Write([]byte("foo content"))
+	if err != nil {
+		t.Fatal("Error zipping test box file")
+	}
+	aw.Close() // Flush the gzipped contents to file
+
+	_, err = providerFromVagrantBox(boxfile.Name())
+	if err == nil {
+		t.Fatalf("Should have error as box file is a plain gzip file: %s", err)
+	}
+	t.Logf("%s", err)
+}
+
+func newBoxFile() (boxfile *os.File, err error) {
+	boxfile, err = ioutil.TempFile(os.TempDir(), "test*.box")
+	if err != nil {
+		return boxfile, fmt.Errorf("Error creating test box file: %s", err)
+	}
+	return boxfile, nil
 }

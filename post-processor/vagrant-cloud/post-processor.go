@@ -252,7 +252,7 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 			break
 		}
 		if err != nil {
-			return "", fmt.Errorf("%s", err)
+			return "", fmt.Errorf("Error reading header info from box tar archive: %s", err)
 		}
 
 		if hdr.Name == "metadata.json" {
