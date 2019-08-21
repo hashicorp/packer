@@ -287,9 +287,28 @@ func TestProviderFromVagrantBox_no_metadata(t *testing.T) {
 	t.Logf("%s", err)
 }
 
+func TestProviderFromVagrantBox_metadata_empty(t *testing.T) {
+	// Bad: Create a box with an empty metadata.json file
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", ""},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("Error creating test box: %s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	_, err = providerFromVagrantBox(boxfile.Name())
+	if err == nil {
+		t.Fatalf("Should have error as box files metadata.json file is empty")
+	}
+	t.Logf("%s", err)
+}
+
 func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
-	// Good: The box contains the metadata.json file with the required
-	// 'provider' key/value
+	// Good: The boxes metadata.json file has the 'provider' key/value pair
 	expectedProvider := "virtualbox"
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
