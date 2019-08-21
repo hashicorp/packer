@@ -404,6 +404,14 @@ func TestGetProvider_artifice(t *testing.T) {
 	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }
 
+func TestGetProvider_other(t *testing.T) {
+	expectedProvider := "virtualbox"
+
+	provider, _ := getProvider(expectedProvider, "foo.box", "other")
+	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
+	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
+}
+
 func newBoxFile() (boxfile *os.File, err error) {
 	boxfile, err = ioutil.TempFile(os.TempDir(), "test*.box")
 	if err != nil {
