@@ -74,6 +74,19 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 
 	err := retry.Config{
 		RetryDelay: func() time.Duration { return 1 * time.Millisecond },
+		ShouldRetry: func(err error) bool {
+			_, ok := err.(ErrPortFileLocked)
+			if ok {
+				if portRange > 0 {
+					// there are other ports to try
+					return true
+				}
+				// this port is locked and we have no other ports to try
+				return false
+			}
+			// try again if the error isn't that the port is locked.
+			return true
+		},
 	}.Run(ctx, func(context.Context) error {
 		port := lc.Min
 		if portRange > 0 {
