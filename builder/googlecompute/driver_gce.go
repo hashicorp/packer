@@ -35,24 +35,17 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewClientGCE(a *AccountFile) (*http.Client, error) {
+func NewClientGCE(conf *jwt.Config) (*http.Client, error) {
 	var err error
 
 	var client *http.Client
 
 	// Auth with AccountFile first if provided
-	if a.PrivateKey != "" {
-		log.Printf("[INFO] Requesting Google token via AccountFile...")
-		log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
+	if conf != nil && len(conf.PrivateKey) > 0 {
+		log.Printf("[INFO] Requesting Google token via account_file...")
+		log.Printf("[INFO]   -- Email: %s", conf.Email)
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-		log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
-
-		conf := jwt.Config{
-			Email:      a.ClientEmail,
-			PrivateKey: []byte(a.PrivateKey),
-			Scopes:     DriverScopes,
-			TokenURL:   "https://accounts.google.com/o/oauth2/token",
-		}
+		log.Printf("[INFO]   -- Private Key Length: %d", len(conf.PrivateKey))
 
 		// Initiate an http.Client. The following GET request will be
 		// authorized and authenticated on the behalf of
@@ -82,8 +75,8 @@ func NewClientGCE(a *AccountFile) (*http.Client, error) {
 	return client, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
-	client, err := NewClientGCE(a)
+func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config) (Driver, error) {
+	client, err := NewClientGCE(conf)
 	if err != nil {
 		return nil, err
 	}
@@ -191,6 +184,7 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"rhel-sap-cloud",
 		"suse-cloud",
 		"suse-sap-cloud",
+		"suse-byos-cloud",
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",

@@ -4,23 +4,25 @@ import (
 	"bytes"
 	"fmt"
 	"go/token"
-	"io"
 	"os"
+	"sync"
 	"unicode/utf8"
 )
 
 type byteScanner struct {
-	ErrorCount int
-	Quiet      bool
-
-	buf           []byte
 	pos           token.Position
-	lastChunk     bool
+	buf           []byte
+	ErrorCount    int
 	ch            rune
+	Quiet         bool
 	keyTokenFound bool
+	lastChunk     bool
 }
 
+const tokEOL = "\n"
+
 var WhitespaceChars = []rune{' ', '\t', '\v'}
+var tokBuffers = sync.Pool{New: func() interface{} { return bytes.NewBuffer(make([]byte, 32)) }}
 
 func newByteScanner(srcname string, quiet bool) *byteScanner {
 	return &byteScanner{
@@ -30,7 +32,7 @@ func newByteScanner(srcname string, quiet bool) *byteScanner {
 	}
 }
 
-func (s *byteScanner) Feed(input []byte, end bool) error {
+func (s *byteScanner) feed(input []byte, end bool) {
 	s.buf = input
 	s.pos.Offset = 0
 	s.pos.Line = 1
@@ -38,8 +40,8 @@ func (s *byteScanner) Feed(input []byte, end bool) error {
 	s.lastChunk = end
 
 	// Read first char into look-ahead buffer `s.ch`.
-	if err := s.nextChar(); err != nil {
-		return err
+	if !s.nextChar() {
+		return
 	}
 
 	// Skip UTF-8 byte order mark
@@ -47,63 +49,50 @@ func (s *byteScanner) Feed(input []byte, end bool) error {
 		s.nextChar()
 		s.pos.Column = 1
 	}
-
-	return nil
 }
 
 func (s *byteScanner) GetPosition() token.Position {
 	return s.pos
 }
 
-func (s *byteScanner) Scan() (string, error) {
-	//println("--- Scan(). Offset / len(s.buf): ", s.pos.Offset, len(s.buf))
-
-	for {
-		// Note Offset > len, not >=, so we can Scan last character.
-		if s.lastChunk && s.pos.Offset > len(s.buf) {
-			return "", io.EOF
-		}
-
-		s.skipSpace()
-
-		if s.ch == -1 {
-			return "", io.EOF
-		}
-
-		// EOL
-		if s.isEol() {
-			s.keyTokenFound = false
-			// skip subsequent newline chars
-			for s.ch != -1 && s.isEol() {
-				s.nextChar()
-			}
-			// emit newline as separate token
-			return "\n", nil
-		}
-
-		// skip comments
-		if s.ch == '#' {
-			s.keyTokenFound = false
-			s.skipUntilEol()
-			//            s.state = "start"
-			if s.ch == -1 {
-				return "", io.EOF
-			}
-			// emit newline as separate token
-			return "\n", nil
-		}
-
-		// else we found something
-		break
+func (s *byteScanner) scan() string {
+	// Note Offset > len, not >=, so we can scan last character.
+	if s.lastChunk && s.pos.Offset > len(s.buf) {
+		return ""
 	}
 
-	/*
-	   if s.state == "start" {
-	       s.state = "key"
-	   }
-	*/
+	s.skipSpace()
 
-	var tok bytes.Buffer
+	if s.ch == -1 {
+		return ""
+	}
+
+	// EOL
+	if s.isEol() {
+		s.keyTokenFound = false
+		// skip subsequent newline chars
+		for s.ch != -1 && s.isEol() {
+			s.nextChar()
+		}
+		// emit newline as separate token
+		return tokEOL
+	}
+
+	// skip comments
+	if s.ch == '#' {
+		s.keyTokenFound = false
+		s.skipUntilEol()
+		if s.ch == -1 {
+			return ""
+		}
+		// emit newline as separate token
+		return tokEOL
+	}
+
+	// else we found something
+	tok := tokBuffers.Get().(*bytes.Buffer)
+	defer tokBuffers.Put(tok)
+	tok.Reset()
 	tok.WriteRune(s.ch)
 	s.nextChar()
 	for s.ch != -1 && !s.isSpace() && !s.isEol() {
@@ -111,7 +100,6 @@ func (s *byteScanner) Scan() (string, error) {
 		// has already been found on this line (avoid cutting an absolute URL
 		// after the "http:")
 		if s.ch == ':' && !s.keyTokenFound {
-			//            s.state = "pre-value"
 			s.nextChar()
 			s.keyTokenFound = true
 			break
@@ -120,24 +108,20 @@ func (s *byteScanner) Scan() (string, error) {
 		tok.WriteRune(s.ch)
 		s.nextChar()
 	}
-	return tok.String(), nil
+	return tok.String()
 }
 
-func (s *byteScanner) ScanAll() ([]string, error) {
-	var results []string
+func (s *byteScanner) scanAll() []string {
+	results := make([]string, 0, 64) // random guess of average tokens length
 	for {
-		t, err := s.Scan()
-		if t != "" {
-			results = append(results, t)
-		}
-		if err == io.EOF {
+		token := s.scan()
+		if token != "" {
+			results = append(results, token)
+		} else {
 			break
 		}
-		if err != nil {
-			return results, err
-		}
 	}
-	return results, nil
+	return results
 }
 
 func (s *byteScanner) error(pos token.Position, msg string) {
@@ -161,14 +145,12 @@ func (s *byteScanner) isSpace() bool {
 }
 
 func (s *byteScanner) skipSpace() {
-	//println("--- string(ch): ", s.ch, ".")
 	for s.ch != -1 && s.isSpace() {
 		s.nextChar()
 	}
 }
 
 func (s *byteScanner) skipUntilEol() {
-	//println("--- string(ch): ", s.ch, ".")
 	for s.ch != -1 && !s.isEol() {
 		s.nextChar()
 	}
@@ -179,12 +161,10 @@ func (s *byteScanner) skipUntilEol() {
 }
 
 // Reads next Unicode char.
-func (s *byteScanner) nextChar() error {
-	//println("--- nextChar(). Offset / len(s.buf): ", s.pos.Offset, len(s.buf))
-
+func (s *byteScanner) nextChar() bool {
 	if s.pos.Offset >= len(s.buf) {
 		s.ch = -1
-		return io.EOF
+		return false
 	}
 	s.pos.Column++
 	if s.ch == '\n' {
@@ -201,5 +181,5 @@ func (s *byteScanner) nextChar() error {
 	s.pos.Column++
 	s.pos.Offset += w
 	s.ch = r
-	return nil
+	return true
 }

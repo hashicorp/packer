@@ -15,7 +15,7 @@ Parameters common to all provisioners:
       "script": "script.sh",
       "override": {
         "vmware-iso": {
-        "execute_command": "echo 'password' | sudo -S bash {{.Path}}"
+          "execute_command": "echo 'password' | sudo -S bash {{.Path}}"
         }
       }
     }

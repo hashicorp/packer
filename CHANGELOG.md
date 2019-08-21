@@ -1,28 +1,167 @@
-## 1.4.2 (upcoming)
+## 1.4.4 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+
+### BUG FIXES:
+* core: Fix bug where sensitive variables contianing commas were not being
+    properly sanitized in UI calls. [GH-7997]
+
+## 1.4.3 (August 14, 2019)
+
+### IMPROVEMENTS:
+* **new builder** UCloud builder [GH-7775]
+* **new builder** Outscale [GH-7459]
+* **new builder** VirtualBox Snapshot [GH-7780]
+* **new builder** JDCloud [GH-7962]
+* **new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
+* build: Change Makefile to behave differently inside and outside the gopath
+    when generating code. [GH-7827]
+* builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
+    no longer require this. [GH-7813]
+* builder/google: Add suse-byos-cloud to list of public GCP cloud image
+    projects [GH-7935]
+* builder/openstack: New `image_min_disk` option [GH-7290]
+* builder/openstack: New option `use_blockstorage_volume` to set openstack
+    image metadata [GH-7792]
+* builder/openstack: Select instance network on which to assign floating ip
+    [GH-7884]
+* builder/qemu: Implement VNC password functionality [GH-7836]
+* builder/scaleway: Allow removing volume after image creation for Scaleway
+    builder [GH-7887]
+* builder/tencent: Add `run_tags` to option to tag instance. [GH-7810]
+* builder/tencent: Remove unnecessary image name validation check. [GH-7786]
+* builder/tencent: Support data disks for tencentcloud builder [GH-7815]
+* builder/vmware: Fix intense CPU usage because of poorly handled errors.
+    [GH-7877]
+* communicator: Use context for timeouts, interruption in ssh and winrm
+    communicators [GH-7868]
+* core: Change how on-error=abort is handled to prevent EOF errors that mask
+    real issues [GH-7913]
+* core: Clean up logging vs ui call in step download [GH-7936]
+* core: New environment var option to allow user to set location of config
+    directory [GH-7912]
+* core: Remove obsolete Cancel functions from builtin provisioners [GH-7917]
+* post-processor/vagrant:  Add option to allow box Vagrantfiles to be generated
+    during the build [GH-7951]
+* provisioner/ansible: Add support for installing roles with ansible-galaxy
+    [GH-7916
+* provisioner/salt-masterless: Modify file upload to handle non-root case.
+    [GH-7833]
+
+### BUG FIXES:
+* builder/amazon: Add error to warn users of spot_tags regression. [GH-7989]
+* builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
+    [GH-7818]
+* builder/amazon: Fix failures and duplication in Amazon region copy and
+    encryption step. [GH-7870] [GH-7923]
+* builder/amazon: No longer store names of volumes which get deleted on
+    termination inside ebssurrogate artifact. [GH-7829]
+* builder/amazon: Update aws-sdk-go to v1.22.2, resolving some AssumeRole
+    issues [GH-7967]
+* builder/azure: Create configurable polling duration and set higher default
+    for image copies to prevent timeouts on successful copies [GH-7920]
+* builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
+    [GH-7841]
+* builder/docker: Check container os, not host os, when creating container dir
+    default [GH-7939]
+* builder/docker: Fix bug where PACKER_TMP_DIR was created with root perms on
+    linux [GH-7905]
+* builder/docker: Fix file download hang caused by blocking ReadAll call
+    [GH-7814]
+* builder/google: Fix outdated oauth URL. [GH-7835] [GH-7927]
+* builder/hyperv: Improve code for detecting IP address [GH-7880]
+* builder/ucloud: Update the api about stop instance to fix the read-only image
+    build by ucloud-uhost [GH-7914]
+* builder/vagrant: Fix bug where source_path was being used instead of box_name
+    when generating the Vagrantfile. [GH-7859]
+* builder/virtualbox: Honor value of 'Comment' field in ssh keypair generation.
+    [GH-7922]
+* builder/vmware: Fix validation regression that occurred when user provided a
+    checksum file [GH-7804]
+* buildere/azure: Fix crash with managed images not published to shared image
+    gallery. [GH-7837]
+* communicator/ssh: Move ssh_interface back into individual builders from ssh
+    communicator to prevent validation issues where it isn't implemented.
+    [GH-7831]
+* console: Fix console help text [GH-7960]
+* core: Fix bug in template parsing where function errors were getting
+    swallowed. [GH-7854]
+* core: Fix regression where a local filepath containing `//` was no longer
+    properly resolving to `/`. [GH-7888]
+* core: Fix regression where we could no longer access isos on SMB shares.
+    [GH-7800]
+* core: Make ssh_host template option always override all builders' IP
+    discovery. [GH-7832]
+* core: Regenerate boot_command PEG code [GH-7977]
+* fix: clean up help text and fixer order to make sure all fixers are called
+    [GH-7903]
+* provisioner/inspec: Use --input-file instead of --attrs to avoid deprecation
+    warning [GH-7893]
+* provisioner/salt-masterless: Make salt-masterless provisioner respect
+    disable_sudo directive for all commands [GH-7774]
+
+## 1.4.2 (June 26, 2019)
+
+### IMPROVEMENTS:
+* **new feature:** Packer console [GH-7726]
+* builder/alicloud: cleanup image and snapshot if target image is still not
+    available after timeout [GH-7744]
+* builder/alicloud: let product API determine the default value of io_optimized
+    [GH-7747]
+* builder/amazon: Add new `skip_save_build_region` option to fix naming
+    conflicts when building in a region you don't want the final image saved
+    in. [GH-7759]
+* builder/amazon: Add retry for temp key-pair generation in amazon-ebs
+    [GH-7731]
 * builder/amazon: Enable encrypted AMI sharing across accounts [GH-7707]
 * builder/amazon: New SpotInstanceTypes feature for spot instance users.
     [GH-7682]
+* builder/azure: Allow users to publish Managed Images to Azure Shared Image
+    Gallery (same Subscription) [GH-7778]
 * builder/azure: Update Azure SDK for Go to v30.0.0 [GH-7706]
-* builder/cloudstack: Add tags to instance upon creation [GH0-7526]
+* builder/cloudstack: Add tags to instance upon creation [GH-7526]
 * builder/docker: Better windows defaults [GH-7678]
+* builder/google: Add feature to import user-data from a file [GH-7720]
+* builder/hyperv: Abort build if there's a name collision [GH-7746]
+* builder/hyperv: Clarify pathing requirements for hyperv-vmcx [GH-7790]
+* builder/hyperv: Increase MaxRamSize to match modern Windows [GH-7785]
 * builder/openstack: Add image filtering on properties. [GH-7597]
-* provisioner/powershell: Fix null file descriptor error that occurred when
-    remote_path provided is a directory and not a file. [GH-7705]
-
+* builder/qemu: Add additional disk support [GH-7791]
+* builder/vagrant: Allow user to override vagrant ssh-config details [GH-7782]
+* builder/yandex: Gracefully shutdown instance, allow metadata from file, and
+    create preemptible instance type [GH-7734]
+* core: scrub out sensitive variables in scrub out sensitive variables logs
+    [GH-7743]
 
 ### BUG FIXES:
+* builder/alicloud: Fix describing snapshots issue when image_ignore_data_disks
+    is provided [GH-7736]
 * builder/amazon: Fix bug in region copy which produced badly-named AMIs in the
     build region. [GH-7691]
 * builder/amazon: Fix failure that happened when spot_tags was set but ami_tags
-    wasn't [GH-7699]
+    wasn't [GH-7712]
 * builder/cloudstack: Update go-cloudstack sdk, fixing compatability with
     CloudStack v 4.12 [GH-7694]
+* builder/proxmox: Update proxmox-api-go dependency, fixing issue calculating
+    VMIDs. [GH-7755]
+* builder/tencent: Correctly remove tencentcloud temporary keypair. [GH-7787]
+* core: Allow timestamped AND colorless ui messages [GH-7769]
+* core: Apply logSecretFilter to output from ui.Say [GH-7739]
+* core: Fix "make bin" command to use reasonbale defaults. [GH-7752]
+* core: Fix user var interpolation for variables set via -var-file and from
+    command line [GH-7733]
+* core: machine-readable UI now writes UI calls to logs. [GH-7745]
+* core: Switch makefile to use "GO111MODULE=auto" to allow for modern gomodule
+    usage. [GH-7753]
+* provisioner/ansible: prevent nil pointer dereference after a language change
+    [GH-7738]
 * provisioner/chef: Accept chef license by default to prevent hangs in latest
     Chef [GH-7653]
 * provisioner/powershell: Fix crash caused by error in retry logic check in
     powershell provisioner [GH-7657]
+* provisioner/powershell: Fix null file descriptor error that occurred when
+    remote_path provided is a directory and not a file. [GH-7705]
 
 ## 1.4.1 (May 15, 2019)
 

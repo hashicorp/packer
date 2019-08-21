@@ -1,30 +1,35 @@
-language: go
-sudo: false
-
 cache:
   go: true
   directories:
-  - "$HOME/.cache"
+  - $HOME/.cache
+  - $HOME/bin
+  - $HOME/gopath/pkg/mod
+language: go
 go:
+- 1.11
+- 1.12
 - master
-- 1.10.x
-- 1.9
-- 1.8
-- 1.7
-- 1.6
+install: true
+script: GO111MODULE=on go test -race
 
 matrix:
   include:
-  - go: 1.10.x
-    env: task=bench
   - go: 1.7
+    install: go get -t
+  - go: 1.8
+    install: go get -t
+  - go: 1.9
+    install: go get -t
+  - go: 1.10.x
+    install: go get -t
+  - go: 1.x
+    env: task=coverage
+    script: GO111MODULE=on go test -race -covermode=atomic -coverprofile=coverage.txt
+    after_success: bash <(curl -s https://codecov.io/bash)
+  - go: 1.x
     env: task=bench
-  - go: master
-    env: task=bench
-  - go: master
+    script: GO111MODULE=on ./script/bench
+  - go: 1.x
+    install: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $HOME/bin v1.16.0
     env: task=clean
-
-install:
-  - go get -u github.com/alecthomas/gometalinter
-script: ./script/${task:-test}
-after_success: if [[ -z "$task" ]] ; then bash <(curl -s https://codecov.io/bash) ; fi
+    script: GO111MODULE=on ./script/clean

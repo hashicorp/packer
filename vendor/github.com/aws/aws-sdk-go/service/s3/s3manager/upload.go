@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
@@ -144,8 +145,13 @@ type Uploader struct {
 	// MaxUploadParts is the max number of parts which will be uploaded to S3.
 	// Will be used to calculate the partsize of the object to be uploaded.
 	// E.g: 5GB file, with MaxUploadParts set to 100, will upload the file
-	// as 100, 50MB parts.
-	// With a limited of s3.MaxUploadParts (10,000 parts).
+	// as 100, 50MB parts. With a limited of s3.MaxUploadParts (10,000 parts).
+	//
+	// MaxUploadParts must not be used to limit the total number of bytes uploaded.
+	// Use a type like to io.LimitReader (https://golang.org/pkg/io/#LimitedReader)
+	// instead. An io.LimitReader is helpful when uploading an unbounded reader
+	// to S3, and you know its maximum size. Otherwise the reader's io.EOF returned
+	// error must be used to signal end of stream.
 	//
 	// Defaults to package const's MaxUploadParts value.
 	MaxUploadParts int
@@ -357,7 +363,9 @@ type uploader struct {
 // internal logic for deciding whether to upload a single part or use a
 // multipart upload.
 func (u *uploader) upload() (*UploadOutput, error) {
-	u.init()
+	if err := u.init(); err != nil {
+		return nil, awserr.New("ReadRequestBody", "unable to initialize upload", err)
+	}
 
 	if u.cfg.PartSize < MinUploadPartSize {
 		msg := fmt.Sprintf("part size must be at least %d bytes", MinUploadPartSize)
@@ -377,7 +385,7 @@ func (u *uploader) upload() (*UploadOutput, error) {
 }
 
 // init will initialize all default options.
-func (u *uploader) init() {
+func (u *uploader) init() error {
 	if u.cfg.Concurrency == 0 {
 		u.cfg.Concurrency = DefaultUploadConcurrency
 	}
@@ -393,19 +401,19 @@ func (u *uploader) init() {
 	}
 
 	// Try to get the total size for some optimizations
-	u.initSize()
+	return u.initSize()
 }
 
 // initSize tries to detect the total stream size, setting u.totalSize. If
 // the size is not known, totalSize is set to -1.
-func (u *uploader) initSize() {
+func (u *uploader) initSize() error {
 	u.totalSize = -1
 
 	switch r := u.in.Body.(type) {
 	case io.Seeker:
 		n, err := aws.SeekerLen(r)
 		if err != nil {
-			return
+			return err
 		}
 		u.totalSize = n
 
@@ -417,6 +425,8 @@ func (u *uploader) initSize() {
 			u.cfg.PartSize = (u.totalSize / int64(u.cfg.MaxUploadParts)) + 1
 		}
 	}
+
+	return nil
 }
 
 // nextReader returns a seekable reader representing the next packet of data.
@@ -541,21 +551,6 @@ func (u *multiuploader) upload(firstBuf io.ReadSeeker, firstPart []byte) (*Uploa
 
 	// Read and queue the rest of the parts
 	for u.geterr() == nil && err == nil {
-		num++
-		// This upload exceeded maximum number of supported parts, error now.
-		if num > int64(u.cfg.MaxUploadParts) || num > int64(MaxUploadParts) {
-			var msg string
-			if num > int64(u.cfg.MaxUploadParts) {
-				msg = fmt.Sprintf("exceeded total allowed configured MaxUploadParts (%d). Adjust PartSize to fit in this limit",
-					u.cfg.MaxUploadParts)
-			} else {
-				msg = fmt.Sprintf("exceeded total allowed S3 limit MaxUploadParts (%d). Adjust PartSize to fit in this limit",
-					MaxUploadParts)
-			}
-			u.seterr(awserr.New("TotalPartsExceeded", msg, nil))
-			break
-		}
-
 		var reader io.ReadSeeker
 		var nextChunkLen int
 		var part []byte
@@ -576,6 +571,21 @@ func (u *multiuploader) upload(firstBuf io.ReadSeeker, firstPart []byte) (*Uploa
 			break
 		}
 
+		num++
+		// This upload exceeded maximum number of supported parts, error now.
+		if num > int64(u.cfg.MaxUploadParts) || num > int64(MaxUploadParts) {
+			var msg string
+			if num > int64(u.cfg.MaxUploadParts) {
+				msg = fmt.Sprintf("exceeded total allowed configured MaxUploadParts (%d). Adjust PartSize to fit in this limit",
+					u.cfg.MaxUploadParts)
+			} else {
+				msg = fmt.Sprintf("exceeded total allowed S3 limit MaxUploadParts (%d). Adjust PartSize to fit in this limit",
+					MaxUploadParts)
+			}
+			u.seterr(awserr.New("TotalPartsExceeded", msg, nil))
+			break
+		}
+
 		ch <- chunk{buf: reader, part: part, num: num}
 	}
 
@@ -593,8 +603,18 @@ func (u *multiuploader) upload(firstBuf io.ReadSeeker, firstPart []byte) (*Uploa
 			uploadID: u.uploadID,
 		}
 	}
+
+	// Create a presigned URL of the S3 Get Object in order to have parity with
+	// single part upload.
+	getReq, _ := u.cfg.S3.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: u.in.Bucket,
+		Key:    u.in.Key,
+	})
+	getReq.Config.Credentials = credentials.AnonymousCredentials
+	uploadLocation, _, _ := getReq.PresignRequest(1)
+
 	return &UploadOutput{
-		Location:  aws.StringValue(complete.Location),
+		Location:  uploadLocation,
 		VersionID: complete.VersionId,
 		UploadID:  u.uploadID,
 	}, nil

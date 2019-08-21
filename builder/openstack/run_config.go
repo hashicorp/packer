@@ -16,6 +16,15 @@ import (
 // and details on how to access that launched image.
 type RunConfig struct {
 	Comm communicator.Config `mapstructure:",squash"`
+	// The type of interface to connect via SSH. Values useful for Rackspace
+	// are "public" or "private", and the default behavior is to connect via
+	// whichever is returned first from the OpenStack API.
+	SSHInterface string `mapstructure:"ssh_interface" required:"false"`
+	// The IP version to use for SSH connections, valid values are `4` and `6`.
+	// Useful on dual stacked instances where the default behavior is to
+	// connect via whichever IP address is returned first from the OpenStack
+	// API.
+	SSHIPVersion string `mapstructure:"ssh_ip_version" required:"false"`
 	// The ID or full URL to the base image to use. This is the image that will
 	// be used to launch a new server and provision it. Unless you specify
 	// completely custom SSH settings, the source image must have cloud-init
@@ -86,6 +95,13 @@ type RunConfig struct {
 	// The ID or name of an external network that can be used for creation of a
 	// new floating IP.
 	FloatingIPNetwork string `mapstructure:"floating_ip_network" required:"false"`
+	// The ID of the network to which the instance is attached and which should
+	// be used to associate with the floating IP. This provides control over
+	// the floating ip association on multi-homed instances. The association
+	// otherwise depends on a first-returned-interface policy which could fail
+	// if the network to which it is connected is unreachable from the floating
+	// IP network.
+	InstanceFloatingIPNet string `mapstructure:"instance_floating_ip_net" required:"false"`
 	// A specific floating IP to assign to this instance.
 	FloatingIP string `mapstructure:"floating_ip" required:"false"`
 	// Whether or not to attempt to reuse existing unassigned floating ips in
@@ -239,7 +255,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("A flavor must be specified"))
 	}
 
-	if c.Comm.SSHIPVersion != "" && c.Comm.SSHIPVersion != "4" && c.Comm.SSHIPVersion != "6" {
+	if c.SSHIPVersion != "" && c.SSHIPVersion != "4" && c.SSHIPVersion != "6" {
 		errs = append(errs, errors.New("SSH IP version must be either 4 or 6"))
 	}
 

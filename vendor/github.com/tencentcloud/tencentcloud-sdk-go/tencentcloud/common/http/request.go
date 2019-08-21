@@ -92,7 +92,7 @@ func (r *BaseRequest) GetService() string {
 
 func (r *BaseRequest) GetUrl() string {
 	if r.httpMethod == GET {
-		return "https://" + r.domain + r.path + "?" + getUrlQueriesEncoded(r.params)
+		return "https://" + r.domain + r.path + "?" + GetUrlQueriesEncoded(r.params)
 	} else if r.httpMethod == POST {
 		return "https://" + r.domain + r.path
 	} else {
@@ -104,7 +104,7 @@ func (r *BaseRequest) GetVersion() string {
 	return r.version
 }
 
-func getUrlQueriesEncoded(params map[string]string) string {
+func GetUrlQueriesEncoded(params map[string]string) string {
 	values := url.Values{}
 	for key, value := range params {
 		if value != "" {
@@ -116,8 +116,7 @@ func getUrlQueriesEncoded(params map[string]string) string {
 
 func (r *BaseRequest) GetBodyReader() io.Reader {
 	if r.httpMethod == POST {
-		s := getUrlQueriesEncoded(r.params)
-		//log.Printf("[DEBUG] body: %s", s)
+		s := GetUrlQueriesEncoded(r.params)
 		return strings.NewReader(s)
 	} else {
 		return strings.NewReader("")
@@ -153,7 +152,7 @@ func CompleteCommonParams(request Request, region string) {
 	params["Action"] = request.GetAction()
 	params["Timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
 	params["Nonce"] = strconv.Itoa(rand.Int())
-	params["RequestClient"] = "SDK_GO_3.0.42"
+	params["RequestClient"] = "SDK_GO_3.0.71"
 }
 
 func ConstructParams(req Request) (err error) {
@@ -196,9 +195,8 @@ func flatStructure(value reflect.Value, request Request, prefix string) (err err
 		} else if kind == reflect.Float64 {
 			request.GetParams()[key] = strconv.FormatFloat(field.Float(), 'f', -1, 64)
 		} else if kind == reflect.Slice {
-			list := value.Field(i)
-			for j := 0; j < list.Len(); j++ {
-				vj := list.Index(j)
+			for j := 0; j < field.Len(); j++ {
+				vj := field.Index(j)
 				key := prefix + nameTag + "." + strconv.Itoa(j)
 				kind = vj.Kind()
 				if kind == reflect.Ptr && vj.IsNil() {
@@ -219,11 +217,11 @@ func flatStructure(value reflect.Value, request Request, prefix string) (err err
 				} else if kind == reflect.Float64 {
 					request.GetParams()[key] = strconv.FormatFloat(vj.Float(), 'f', -1, 64)
 				} else {
-					flatStructure(vj, request, key+".")
+					return flatStructure(vj, request, key+".")
 				}
 			}
 		} else {
-			flatStructure(reflect.ValueOf(field.Interface()), request, prefix+nameTag+".")
+			return flatStructure(reflect.ValueOf(field.Interface()), request, prefix+nameTag+".")
 		}
 	}
 	return

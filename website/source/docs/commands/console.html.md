@@ -14,9 +14,9 @@ interpolations. You may access variables in the Packer config you called the
 console with, or provide variables when you call console using the -var or
 -var-file command line options.
 
-Type in the interpolation to test and hit <enter> to see the result.
+Type in the interpolation to test and hit \<enter\> to see the result.
 
-To exit the console, type "exit" and hit <enter>, or use Control-C.
+To exit the console, type "exit" and hit \<enter\>, or use Control-C.
 
 ``` shell
 $ packer console my_template.json

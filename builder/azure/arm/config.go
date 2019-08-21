@@ -80,6 +80,14 @@ type SharedImageGallery struct {
 	ImageVersion string `mapstructure:"image_version" required:"false"`
 }
 
+type SharedImageGalleryDestination struct {
+	SigDestinationResourceGroup      string   `mapstructure:"resource_group"`
+	SigDestinationGalleryName        string   `mapstructure:"gallery_name"`
+	SigDestinationImageName          string   `mapstructure:"image_name"`
+	SigDestinationImageVersion       string   `mapstructure:"image_version"`
+	SigDestinationReplicationRegions []string `mapstructure:"replication_regions"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -104,6 +112,30 @@ type Config struct {
 	//     "managed_image_name": "TargetImageName",
 	//     "managed_image_resource_group_name": "TargetResourceGroup"
 	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery" required:"false"`
+	// The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
+	//
+	// Following is an example.
+	//
+	// <!-- -->
+	//
+	//     "shared_image_gallery_destination": {
+	//         "resource_group": "ResourceGroup",
+	//         "gallery_name": "GalleryName",
+	//         "image_name": "ImageName",
+	//         "image_version": "1.0.0",
+	//         "replication_regions": ["regionA", "regionB", "regionC"]
+	//     }
+	//     "managed_image_name": "TargetImageName",
+	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	SharedGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination"`
+	// How long to wait for an image to be published to the shared image
+	// gallery before timing out. If your Packer build is failing on the
+	// Publishing to Shared Image Gallery step with the error `Original Error:
+	// context deadline exceeded`, but the image is present when you check your
+	// Azure dashboard, then you probably need to increase this timeout from
+	// its default of "60m" (valid time units include `s` for seconds, `m` for
+	// minutes, and `h` for hours.)
+	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
 	// PublisherName for your base image. See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
@@ -721,16 +753,16 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	} else if c.ImageUrl == "" && c.ImagePublisher == "" {
 		if c.CustomManagedImageResourceGroupName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An custom_managed_image_resource_group_name must be specified"))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_resource_group_name must be specified"))
 		}
 		if c.CustomManagedImageName == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_name must be specified"))
 		}
 		if c.ManagedImageResourceGroupName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed_image_resource_group_name must be specified"))
 		}
 		if c.ManagedImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_name must be specified"))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed_image_name must be specified"))
 		}
 	} else {
 		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
@@ -783,6 +815,25 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		if ok, err := assertManagedImageName(c.ManagedImageName, "managed_image_name"); !ok {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if c.ManagedImageName != "" && c.ManagedImageResourceGroupName != "" && c.SharedGalleryDestination.SigDestinationGalleryName != "" {
+		if c.SharedGalleryDestination.SigDestinationResourceGroup == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group must be specified for shared_image_gallery_destination"))
+		}
+		if c.SharedGalleryDestination.SigDestinationImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_name must be specified for shared_image_gallery_destination"))
+		}
+		if c.SharedGalleryDestination.SigDestinationImageVersion == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_version must be specified for shared_image_gallery_destination"))
+		}
+		if len(c.SharedGalleryDestination.SigDestinationReplicationRegions) == 0 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A list of replication_regions must be specified for shared_image_gallery_destination"))
+		}
+	}
+	if c.SharedGalleryTimeout == 0 {
+		// default to a one-hour timeout. In the sdk, the default is 15 m.
+		c.SharedGalleryTimeout = 60 * time.Minute
 	}
 
 	if c.ManagedImageOSDiskSnapshotName != "" {

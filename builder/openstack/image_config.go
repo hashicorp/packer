@@ -27,6 +27,8 @@ type ImageConfig struct {
 	ImageDiskFormat string `mapstructure:"image_disk_format" required:"false"`
 	// List of tags to add to the image after creation.
 	ImageTags []string `mapstructure:"image_tags" required:"false"`
+	// Minimum disk size needed to boot image, in gigabytes.
+	ImageMinDisk int `mapstructure:"image_min_disk" required:"false"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
@@ -61,6 +63,10 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 		if !valid {
 			errs = append(errs, fmt.Errorf("Unknown visibility value %s", c.ImageVisibility))
 		}
+	}
+
+	if c.ImageMinDisk < 0 {
+		errs = append(errs, fmt.Errorf("An image min disk size must be greater than or equal to 0"))
 	}
 
 	if len(errs) > 0 {

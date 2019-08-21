@@ -1,5 +1,14 @@
 <!-- Code generated from the comments of the RunConfig struct in builder/openstack/run_config.go; DO NOT EDIT MANUALLY -->
 
+-   `ssh_interface` (string) - The type of interface to connect via SSH. Values useful for Rackspace
+    are "public" or "private", and the default behavior is to connect via
+    whichever is returned first from the OpenStack API.
+    
+-   `ssh_ip_version` (string) - The IP version to use for SSH connections, valid values are `4` and `6`.
+    Useful on dual stacked instances where the default behavior is to
+    connect via whichever IP address is returned first from the OpenStack
+    API.
+    
 -   `availability_zone` (string) - The availability zone to launch the server in. If this isn't specified,
     the default enforced by your OpenStack cluster will be used. This may be
     required for some OpenStack clusters.
@@ -9,6 +18,13 @@
     
 -   `floating_ip_network` (string) - The ID or name of an external network that can be used for creation of a
     new floating IP.
+    
+-   `instance_floating_ip_net` (string) - The ID of the network to which the instance is attached and which should
+    be used to associate with the floating IP. This provides control over
+    the floating ip association on multi-homed instances. The association
+    otherwise depends on a first-returned-interface policy which could fail
+    if the network to which it is connected is unreachable from the floating
+    IP network.
     
 -   `floating_ip` (string) - A specific floating IP to assign to this instance.
     

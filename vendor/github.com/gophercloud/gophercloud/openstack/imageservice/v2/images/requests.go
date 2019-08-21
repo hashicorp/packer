@@ -321,6 +321,20 @@ func (r ReplaceImageTags) ToImagePatchMap() map[string]interface{} {
 	}
 }
 
+// ReplaceImageMinDisk represents an updated min_disk property request.
+type ReplaceImageMinDisk struct {
+	NewMinDisk int
+}
+
+// ToImagePatchMap assembles a request body based on ReplaceImageTags.
+func (r ReplaceImageMinDisk) ToImagePatchMap() map[string]interface{} {
+	return map[string]interface{}{
+		"op":    "replace",
+		"path":  "/min_disk",
+		"value": r.NewMinDisk,
+	}
+}
+
 // UpdateOp represents a valid update operation.
 type UpdateOp string
 

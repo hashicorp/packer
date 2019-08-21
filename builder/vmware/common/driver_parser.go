@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"net"
@@ -1962,7 +1961,9 @@ func consumeFile(fd *os.File) (chan byte, sentinelSignaller) {
 		b := make([]byte, 1)
 		for {
 			_, err := fd.Read(b)
-			if err == io.EOF {
+			if err != nil {
+				// In case of any error we must stop
+				// ErrClosed may appear since file is closed and this goroutine still left running
 				break
 			}
 			fromfile <- b[0]

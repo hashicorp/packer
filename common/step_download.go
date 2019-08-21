@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -52,9 +53,9 @@ type StepDownload struct {
 }
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
-	defer ui.Say(fmt.Sprintf("leaving retrieve loop for %s", s.Description))
+	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
+	ui := state.Get("ui").(packer.Ui)
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	var errs []error
@@ -101,10 +102,21 @@ func init() {
 			// can leave the source file where it is & tell us where it is.
 			Copy: true,
 		}
+		getters["smb"] = &getter.FileGetter{
+			Copy: true,
+		}
 	}
 }
 
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+	if runtime.GOOS == "windows" {
+		// Check that the user specified a UNC path, and promote it to an smb:// uri.
+		if strings.HasPrefix(source, "\\\\") && len(source) > 2 && source[2] != '?' {
+			source = filepath.ToSlash(source[2:])
+			source = fmt.Sprintf("smb://%s", source)
+		}
+	}
+
 	u, err := urlhelper.Parse(source)
 	if err != nil {
 		return "", fmt.Errorf("url parse: %s", err)
@@ -159,12 +171,26 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		// could guess it only in cases it is
 		// necessary.
 	}
+	src := u.String()
+	if u.Scheme == "" || strings.ToLower(u.Scheme) == "file" {
+		// If a local filepath, then we need to preprocess to make sure the
+		// path doens't have any multiple successive path separators; if it
+		// does, go-getter will read this as a specialized go-getter-specific
+		// subdirectory command, which it most likely isn't.
+		src = filepath.Clean(u.String())
+		if _, err := os.Stat(filepath.Clean(u.Path)); err != nil {
+			// Cleaned path isn't present on system so it must be some other
+			// scheme. Don't error right away; see if go-getter can figure it
+			// out.
+			src = u.String()
+		}
+	}
 
 	ui.Say(fmt.Sprintf("Trying %s", u.String()))
 	gc := getter.Client{
 		Ctx:              ctx,
 		Dst:              targetPath,
-		Src:              u.String(),
+		Src:              src,
 		ProgressListener: ui,
 		Pwd:              wd,
 		Dir:              false,

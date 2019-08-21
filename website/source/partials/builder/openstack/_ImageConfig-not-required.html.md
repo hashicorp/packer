@@ -13,3 +13,5 @@
     
 -   `image_tags` ([]string) - List of tags to add to the image after creation.
     
+-   `image_min_disk` (int) - Minimum disk size needed to boot image, in gigabytes.
+    

@@ -18,6 +18,30 @@
         "managed_image_name": "TargetImageName",
         "managed_image_resource_group_name": "TargetResourceGroup"
     
+-   `shared_image_gallery_destination` (SharedImageGalleryDestination) - The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
+    
+    Following is an example.
+    
+    <!-- -->
+    
+        "shared_image_gallery_destination": {
+            "resource_group": "ResourceGroup",
+            "gallery_name": "GalleryName",
+            "image_name": "ImageName",
+            "image_version": "1.0.0",
+            "replication_regions": ["regionA", "regionB", "regionC"]
+        }
+        "managed_image_name": "TargetImageName",
+        "managed_image_resource_group_name": "TargetResourceGroup"
+    
+-   `shared_image_gallery_timeout` (time.Duration) - How long to wait for an image to be published to the shared image
+    gallery before timing out. If your Packer build is failing on the
+    Publishing to Shared Image Gallery step with the error `Original Error:
+    context deadline exceeded`, but the image is present when you check your
+    Azure dashboard, then you probably need to increase this timeout from
+    its default of "60m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
 -   `image_version` (string) - Specify a specific version of an OS to boot from.
     Defaults to `latest`. There may be a difference in versions available
     across regions due to image synchronization latency. To ensure a consistent

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -12,6 +13,7 @@ import (
 type StepRun struct {
 	GuiCancelFunc context.CancelFunc
 	Headless      bool
+	SwitchName    string
 	vmName        string
 }
 
@@ -20,9 +22,29 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	ui.Say("Determine Host IP for HyperV machine...")
+	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
+	if err != nil {
+		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
+	common.SetHTTPIP(hostIp)
+
+	if !s.Headless {
+		ui.Say("Attempting to connect with vmconnect...")
+		s.GuiCancelFunc, err = driver.Connect(vmName)
+		if err != nil {
+			log.Printf(fmt.Sprintf("Non-fatal error starting vmconnect: %s. continuing...", err))
+		}
+	}
+
 	ui.Say("Starting the virtual machine...")
 
-	err := driver.Start(vmName)
+	err = driver.Start(vmName)
 	if err != nil {
 		err := fmt.Errorf("Error starting vm: %s", err)
 		state.Put("error", err)
@@ -32,13 +54,6 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 
 	s.vmName = vmName
 
-	if !s.Headless {
-		ui.Say("Attempting to connect with vmconnect...")
-		s.GuiCancelFunc, err = driver.Connect(vmName)
-		if err != nil {
-			log.Printf(fmt.Sprintf("Non-fatal error starting vmconnect: %s. continuing...", err))
-		}
-	}
 	return multistep.ActionContinue
 }
 

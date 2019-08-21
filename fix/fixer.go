@@ -43,6 +43,7 @@ func init() {
 		"hyperv-cpu-and-ram":         new(FizerHypervCPUandRAM),
 		"vmware-compaction":          new(FixerVMwareCompaction),
 		"clean-image-name":           new(FixerCleanImageName),
+		"spot-price-auto-product":    new(FixerAmazonSpotPriceProductDeprecation),
 	}
 
 	FixerOrder = []string{
@@ -65,7 +66,10 @@ func init() {
 		"docker-email",
 		"powershell-escapes",
 		"vmware-compaction",
+		"hyperv-deprecations",
+		"hyperv-vmxc-typo",
 		"hyperv-cpu-and-ram",
 		"clean-image-name",
+		"spot-price-auto-product",
 	}
 }

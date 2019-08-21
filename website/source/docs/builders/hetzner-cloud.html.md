@@ -38,7 +38,8 @@ builder.
 -   `token` (string) - The client TOKEN to use to access your account. It can
     also be specified via environment variable `HCLOUD_TOKEN`, if set.
 
--   `image` (string) - ID or name of image to launch server from.
+-   `image` (string) - ID or name of image to launch server from. Alternatively
+    you can use `image_filter`.
 
 -   `location` (string) - The name of the location to launch the server in.
 
@@ -50,6 +51,34 @@ builder.
 -   `endpoint` (string) - Non standard api endpoint URL. Set this if you are
     using a Hetzner Cloud API compatible service. It can also be specified via
     environment variable `HCLOUD_ENDPOINT`.
+
+-   `image_filter` (object) - Filters used to populate the `filter`
+    field. Example:
+
+    ``` json
+    {
+      "image_filter": {
+      "with_selector": [
+        "name==my-image"
+      ],
+      "most_recent": true
+    }
+    ```
+
+    This selects the most recent image with the label `name==my-image`. NOTE:
+    This will fail unless *exactly* one AMI is returned. In the above example,
+    `most_recent` will cause this to succeed by selecting the newest image.
+
+    -   `with_selector` (list of strings) - label selectors used to select an
+        `image`. NOTE: This will fail unless *exactly* one image is returned.
+        Check the official hcloud docs on
+        [Label Selectors](https://docs.hetzner.cloud/#overview-label-selector)
+        for more info.
+
+    -   `most_recent` (boolean) - Selects the newest created image when true.
+        This is most useful if you base your image on another packer build image.
+
+    You may set this in place of `image`, but not both.
 
 -   `server_name` (string) - The name assigned to the server. The Hetzner Cloud
     sets the hostname of the machine to this value.

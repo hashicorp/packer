@@ -64,6 +64,14 @@ type Config struct {
 	// droplet to enter a desired state (such as "active") before timing out. The
 	// default state timeout is "6m".
 	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
+	// How long to wait for an image to be published to the shared image
+	// gallery before timing out. If your Packer build is failing on the
+	// Publishing to Shared Image Gallery step with the error `Original Error:
+	// context deadline exceeded`, but the image is present when you check your
+	// Azure dashboard, then you probably need to increase this timeout from
+	// its default of "60m" (valid time units include `s` for seconds, `m` for
+	// minutes, and `h` for hours.)
+	SnapshotTimeout time.Duration `mapstructure:"snapshot_timeout" required:"false"`
 	// The name assigned to the droplet. DigitalOcean
 	// sets the hostname of the machine to this value.
 	DropletName string `mapstructure:"droplet_name" required:"false"`
@@ -125,6 +133,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
 		c.StateTimeout = 6 * time.Minute
+	}
+
+	if c.SnapshotTimeout == 0 {
+		// Default to 60 minutes timeout, waiting for snapshot action to finish
+		c.SnapshotTimeout = 60 * time.Minute
 	}
 
 	var errs *packer.MultiError

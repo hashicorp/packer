@@ -64,8 +64,6 @@ type Config struct {
 }
 
 type SSH struct {
-	// SSH
-
 	// The address to SSH to. This usually is automatically configured by the
 	// builder.
 	SSHHost string `mapstructure:"ssh_host"`
@@ -96,19 +94,6 @@ type SSH struct {
 	// The `~` can be used in path and will be expanded to the home directory
 	// of current user.
 	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file"`
-	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
-	// set, either the public IP address, private IP address, public DNS name
-	// or private DNS name will used as the host for SSH. The default behaviour
-	// if inside a VPC is to use the public IP address if available, otherwise
-	// the private IP address will be used. If not in a VPC the public DNS name
-	// will be used. Also works for WinRM.
-	//
-	// Where Packer is configured for an outbound proxy but WinRM traffic
-	// should be direct, `ssh_interface` must be set to `private_dns` and
-	// `<region>.compute.internal` included in the `NO_PROXY` environment
-	// variable.
-	SSHInterface string `mapstructure:"ssh_interface"`
-	SSHIPVersion string `mapstructure:"ssh_ip_version"`
 	// If `true`, a PTY will be requested for the SSH connection. This defaults
 	// to `false`.
 	SSHPty bool `mapstructure:"ssh_pty"`
@@ -166,6 +151,26 @@ type SSH struct {
 	// SSH Internals
 	SSHPublicKey  []byte
 	SSHPrivateKey []byte
+}
+
+type SSHInterface struct {
+	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
+	// set, either the public IP address, private IP address, public DNS name
+	// or private DNS name will used as the host for SSH. The default behaviour
+	// if inside a VPC is to use the public IP address if available, otherwise
+	// the private IP address will be used. If not in a VPC the public DNS name
+	// will be used. Also works for WinRM.
+	//
+	// Where Packer is configured for an outbound proxy but WinRM traffic
+	// should be direct, `ssh_interface` must be set to `private_dns` and
+	// `<region>.compute.internal` included in the `NO_PROXY` environment
+	// variable.
+	SSHInterface string `mapstructure:"ssh_interface"`
+	// The IP version to use for SSH connections, valid values are `4` and `6`.
+	// Useful on dual stacked instances where the default behavior is to
+	// connect via whichever IP address is returned first from the OpenStack
+	// API.
+	SSHIPVersion string `mapstructure:"ssh_ip_version"`
 }
 
 type WinRM struct {

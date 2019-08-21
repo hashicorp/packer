@@ -6,15 +6,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func commHost(state multistep.StateBag) (string, error) {
-	ip, hasIP := state.Get("ipaddress").(string)
-	if !hasIP {
-		return "", fmt.Errorf("Failed to retrieve IP address")
-	}
-
-	return ip, nil
-}
-
 func commPort(state multistep.StateBag) (int, error) {
 	commPort, hasPort := state.Get("commPort").(int)
 	if !hasPort {

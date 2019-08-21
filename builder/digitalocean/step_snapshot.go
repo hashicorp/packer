@@ -12,7 +12,9 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepSnapshot struct{}
+type stepSnapshot struct {
+	snapshotTimeout time.Duration
+}
 
 func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
@@ -31,9 +33,11 @@ func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	// With the pending state over, verify that we're in the active state
+	// because action can take a long time and may depend on the size of the final snapshot,
+	// the timeout is parameterized
 	ui.Say("Waiting for snapshot to complete...")
 	if err := waitForActionState(godo.ActionCompleted, dropletId, action.ID,
-		client, 20*time.Minute); err != nil {
+		client, s.snapshotTimeout); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)

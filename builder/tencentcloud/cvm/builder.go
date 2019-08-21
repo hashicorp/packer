@@ -104,9 +104,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceName:             b.config.InstanceName,
 			DiskType:                 b.config.DiskType,
 			DiskSize:                 b.config.DiskSize,
+			DataDisks:                b.config.DataDisks,
 			HostName:                 b.config.HostName,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			Tags:                     b.config.RunTags,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.TencentCloudRunConfig.Comm,
@@ -115,9 +117,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.TencentCloudRunConfig.Comm},
+			Comm: &b.config.TencentCloudRunConfig.Comm,
+		},
+		// We need this step to detach temporary key from instance, otherwise
+		// it always fails to delete the key.
+		&stepDetachTempKeyPair{},
 		&stepCreateImage{},
-		&stepShareImage{b.config.ImageShareAccounts},
+		&stepShareImage{
+			b.config.ImageShareAccounts,
+		},
 		&stepCopyImage{
 			DesinationRegions: b.config.ImageCopyRegions,
 			SourceRegion:      b.config.Region,

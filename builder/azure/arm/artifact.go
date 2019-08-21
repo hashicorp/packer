@@ -35,6 +35,8 @@ type Artifact struct {
 	ManagedImageId                     string
 	ManagedImageOSDiskSnapshotName     string
 	ManagedImageDataDiskSnapshotPrefix string
+	// ARM resource id for Shared Image Gallery
+	ManagedImageSharedImageGalleryId string
 
 	// Additional Disks
 	AdditionalDisks *[]AdditionalDiskArtifact
@@ -49,6 +51,19 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		OSType:                             osType,
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
+	}, nil
+}
+
+func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix, destinationSharedImageGalleryId string) (*Artifact, error) {
+	return &Artifact{
+		ManagedImageResourceGroupName:      resourceGroup,
+		ManagedImageName:                   name,
+		ManagedImageLocation:               location,
+		ManagedImageId:                     id,
+		OSType:                             osType,
+		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
+		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
+		ManagedImageSharedImageGalleryId:   destinationSharedImageGalleryId,
 	}, nil
 }
 
@@ -167,6 +182,9 @@ func (a *Artifact) String() string {
 		}
 		if a.ManagedImageDataDiskSnapshotPrefix != "" {
 			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
+		}
+		if a.ManagedImageSharedImageGalleryId != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageSharedImageGalleryId: %s\n", a.ManagedImageSharedImageGalleryId))
 		}
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))

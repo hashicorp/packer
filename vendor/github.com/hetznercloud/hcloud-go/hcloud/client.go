@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -55,6 +56,7 @@ type Client struct {
 	applicationName    string
 	applicationVersion string
 	userAgent          string
+	debugWriter        io.Writer
 
 	Action     ActionClient
 	Datacenter DatacenterClient
@@ -62,6 +64,7 @@ type Client struct {
 	Image      ImageClient
 	ISO        ISOClient
 	Location   LocationClient
+	Network    NetworkClient
 	Pricing    PricingClient
 	Server     ServerClient
 	ServerType ServerTypeClient
@@ -111,6 +114,14 @@ func WithApplication(name, version string) ClientOption {
 	}
 }
 
+// WithDebugWriter configures a Client to print debug information to the given
+// writer. To, for example, print debug information on stderr, set it to os.Stderr.
+func WithDebugWriter(debugWriter io.Writer) ClientOption {
+	return func(client *Client) {
+		client.debugWriter = debugWriter
+	}
+}
+
 // NewClient creates a new client.
 func NewClient(options ...ClientOption) *Client {
 	client := &Client{
@@ -132,6 +143,7 @@ func NewClient(options ...ClientOption) *Client {
 	client.Image = ImageClient{client: client}
 	client.ISO = ISOClient{client: client}
 	client.Location = LocationClient{client: client}
+	client.Network = NetworkClient{client: client}
 	client.Pricing = PricingClient{client: client}
 	client.Server = ServerClient{client: client}
 	client.ServerType = ServerTypeClient{client: client}
@@ -167,7 +179,6 @@ func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 			return nil, err
 		}
 		response := &Response{Response: resp}
-
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			resp.Body.Close()
@@ -175,6 +186,20 @@ func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 		}
 		resp.Body.Close()
 		resp.Body = ioutil.NopCloser(bytes.NewReader(body))
+
+		if c.debugWriter != nil {
+			dumpReq, err := httputil.DumpRequest(r, true)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Fprintf(c.debugWriter, "--- Request:\n%s\n\n", dumpReq)
+
+			dumpResp, err := httputil.DumpResponse(resp, true)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Fprintf(c.debugWriter, "--- Response:\n%s\n\n", dumpResp)
+		}
 
 		if err = response.readMeta(body); err != nil {
 			return response, fmt.Errorf("hcloud: error reading response meta data: %s", err)
@@ -314,16 +339,16 @@ type ListOpts struct {
 	LabelSelector string // Label selector for filtering by labels
 }
 
-func valuesForListOpts(opts ListOpts) url.Values {
+func (l ListOpts) values() url.Values {
 	vals := url.Values{}
-	if opts.Page > 0 {
-		vals.Add("page", strconv.Itoa(opts.Page))
+	if l.Page > 0 {
+		vals.Add("page", strconv.Itoa(l.Page))
 	}
-	if opts.PerPage > 0 {
-		vals.Add("per_page", strconv.Itoa(opts.PerPage))
+	if l.PerPage > 0 {
+		vals.Add("per_page", strconv.Itoa(l.PerPage))
 	}
-	if len(opts.LabelSelector) > 0 {
-		vals.Add("label_selector", opts.LabelSelector)
+	if len(l.LabelSelector) > 0 {
+		vals.Add("label_selector", l.LabelSelector)
 	}
 	return vals
 }

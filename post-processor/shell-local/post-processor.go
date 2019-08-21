@@ -47,7 +47,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	// Force shell-local pp to keep the input artifact, because otherwise we'll
-	// lose it instead of being able to pass it through. If oyu want to delete
+	// lose it instead of being able to pass it through. If you want to delete
 	// the input artifact for a shell local pp, use the artifice pp to create a
 	// new artifact
 	return artifact, true, true, retErr

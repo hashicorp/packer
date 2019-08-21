@@ -12,6 +12,7 @@ contrib.go.opencensus.io/exporter/ocagent
 github.com/1and1/oneandone-cloudserver-sdk-go
 # github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
+github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
 github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network
 github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources
 github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage
@@ -88,7 +89,7 @@ github.com/approvals/go-approval-tests/utils
 github.com/armon/go-metrics
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.16.24
+# github.com/aws/aws-sdk-go v1.22.2
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/ec2metadata
 github.com/aws/aws-sdk-go/aws/session
@@ -126,10 +127,11 @@ github.com/aws/aws-sdk-go/private/protocol/eventstream
 github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
 github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restxml
+github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/s3/s3iface
+github.com/aws/aws-sdk-go/service/sts/stsiface
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
-github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
@@ -156,6 +158,12 @@ github.com/creack/goselect
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
+# github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437
+github.com/digitalocean/go-libvirt
+github.com/digitalocean/go-libvirt/internal/constants
+github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
+# github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
+github.com/digitalocean/go-qemu/qmp
 # github.com/digitalocean/godo v1.11.1
 github.com/digitalocean/godo
 # github.com/docker/docker v0.0.0-20180422163414-57142e89befe
@@ -166,6 +174,8 @@ github.com/dustin/go-humanize
 github.com/dylanmei/iso8601
 # github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 github.com/dylanmei/winrmtest
+# github.com/exoscale/egoscale v0.18.1
+github.com/exoscale/egoscale
 # github.com/fatih/camelcase v1.0.0
 github.com/fatih/camelcase
 # github.com/fatih/color v1.7.0
@@ -191,6 +201,10 @@ github.com/gocolly/colly/debug
 github.com/gocolly/colly/storage
 # github.com/gofrs/flock v0.7.1
 github.com/gofrs/flock
+# github.com/gofrs/uuid v3.2.0+incompatible
+github.com/gofrs/uuid
+# github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
+github.com/golang-collections/collections/stack
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
@@ -220,7 +234,7 @@ github.com/google/shlex
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.3
 github.com/googleapis/gax-go/v2
-# github.com/gophercloud/gophercloud v0.0.0-20180903124057-ea7289ebdf06
+# github.com/gophercloud/gophercloud v0.2.0
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
 github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions
@@ -259,7 +273,7 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.0
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-getter v1.2.0
+# github.com/hashicorp/go-getter v1.3.1-0.20190627223108-da0323b9545e
 github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
 # github.com/hashicorp/go-immutable-radix v1.0.0
@@ -306,11 +320,22 @@ github.com/hashicorp/vault/helper/compressutil
 github.com/hashicorp/vault/helper/strutil
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/hetznercloud/hcloud-go v1.12.0
+# github.com/hetznercloud/hcloud-go v1.15.1
 github.com/hetznercloud/hcloud-go/hcloud
 github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/hyperonecom/h1-client-go v0.0.0-20190122232013-cf38e8387775
 github.com/hyperonecom/h1-client-go
+# github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
+github.com/jdcloud-api/jdcloud-sdk-go/core
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client
+github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client
+github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/common/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/charge/models
+github.com/jdcloud-api/jdcloud-sdk-go/services/disk/models
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
@@ -392,6 +417,9 @@ github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk v1.8.0
 github.com/oracle/oci-go-sdk/common
 github.com/oracle/oci-go-sdk/core
+# github.com/outscale/osc-go v0.0.1
+github.com/outscale/osc-go/oapi
+github.com/outscale/osc-go/utils
 # github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 github.com/packer-community/winrmcp/winrmcp
 # github.com/pierrec/lz4 v2.0.5+incompatible
@@ -424,20 +452,34 @@ github.com/satori/go.uuid
 github.com/scaleway/scaleway-cli/pkg/api
 github.com/scaleway/scaleway-cli/pkg/utils
 github.com/scaleway/scaleway-cli/pkg/sshcommand
-# github.com/sirupsen/logrus v1.2.0
+# github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/temoto/robotstxt v0.0.0-20180810133444-97ee4a9ee6ea
+# github.com/temoto/robotstxt v1.1.1
 github.com/temoto/robotstxt
-# github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346
+# github.com/tencentcloud/tencentcloud-sdk-go v3.0.71+incompatible
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
+# github.com/ucloud/ucloud-sdk-go v0.8.7
+github.com/ucloud/ucloud-sdk-go/services/uaccount
+github.com/ucloud/ucloud-sdk-go/services/uhost
+github.com/ucloud/ucloud-sdk-go/services/unet
+github.com/ucloud/ucloud-sdk-go/services/vpc
+github.com/ucloud/ucloud-sdk-go/ucloud
+github.com/ucloud/ucloud-sdk-go/ucloud/auth
+github.com/ucloud/ucloud-sdk-go/ucloud/error
+github.com/ucloud/ucloud-sdk-go/ucloud/request
+github.com/ucloud/ucloud-sdk-go/ucloud/response
+github.com/ucloud/ucloud-sdk-go/private/utils
+github.com/ucloud/ucloud-sdk-go/ucloud/log
+github.com/ucloud/ucloud-sdk-go/private/protocol/http
+github.com/ucloud/ucloud-sdk-go/ucloud/version
 # github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5

@@ -104,20 +104,19 @@ When creating a managed image the following options are required.
     `managed_image_name` must also be set. See
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
-    
-    
+
+
 Managed images can optionally be published to [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
 as Shared Gallery Image version. Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
 a Shared Image Gallery**. When publishing to a Shared Image Gallery the following options are required.
-    
+
 - `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
-    
+
 Following is an example.
-     
+
 <!-- -->
 
     "shared_image_gallery_destination": {
-        "subscription": "00000000-0000-0000-0000-00000000000",
         "resource_group": "ResourceGroup",
         "gallery_name": "GalleryName",
         "image_name": "ImageName",

@@ -11,9 +11,9 @@ func TestTencentCloudImageConfig_Prepare(t *testing.T) {
 		t.Fatalf("shouldn't have err: %v", err)
 	}
 
-	cf.ImageName = "foo:"
-	if err := cf.Prepare(nil); err == nil {
-		t.Fatal("should have error")
+	cf.ImageName = "foo.:"
+	if err := cf.Prepare(nil); err != nil {
+		t.Fatal("shouldn't have error")
 	}
 
 	cf.ImageName = "foo"

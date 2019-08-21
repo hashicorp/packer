@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -184,6 +185,36 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["disk_additional_size"] = []string{"1M"}
+	config["disk_image"] = true
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+
+	delete(config, "disk_image")
+	config["disk_additional_size"] = []string{"1M"}
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.AdditionalDiskSize[0] != "1M" {
+		t.Fatalf("bad size: %s", b.config.AdditionalDiskSize)
 	}
 }
 
@@ -566,5 +597,26 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 
 	if !reflect.DeepEqual(b.config.QemuArgs, expected) {
 		t.Fatalf("bad: %#v", b.config.QemuArgs)
+	}
+}
+
+func TestBuilderPrepare_VNCPassword(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["vnc_use_password"] = true
+	config["output_directory"] = "not-a-real-directory"
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	expected := filepath.Join("not-a-real-directory", "packer-foo.monitor")
+	if !reflect.DeepEqual(b.config.QMPSocketPath, expected) {
+		t.Fatalf("Bad QMP socket Path: %s", b.config.QMPSocketPath)
 	}
 }

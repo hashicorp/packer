@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
+	"time"
 
 	"github.com/hetznercloud/hcloud-go/hcloud/schema"
 )
@@ -15,6 +17,7 @@ import (
 type FloatingIP struct {
 	ID           int
 	Description  string
+	Created      time.Time
 	IP           net.IP
 	Network      *net.IPNet
 	Type         FloatingIPType
@@ -74,9 +77,13 @@ type FloatingIPListOpts struct {
 	ListOpts
 }
 
+func (l FloatingIPListOpts) values() url.Values {
+	return l.ListOpts.values()
+}
+
 // List returns a list of Floating IPs for a specific page.
 func (c *FloatingIPClient) List(ctx context.Context, opts FloatingIPListOpts) ([]*FloatingIP, *Response, error) {
-	path := "/floating_ips?" + valuesForListOpts(opts.ListOpts).Encode()
+	path := "/floating_ips?" + opts.values().Encode()
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err

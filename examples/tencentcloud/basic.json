@@ -8,13 +8,17 @@
     "secret_id": "{{user `secret_id`}}",
     "secret_key": "{{user `secret_key`}}",
     "region": "ap-guangzhou",
-    "zone": "ap-guangzhou-3",
-    "instance_type": "S3.SMALL1",
+    "zone": "ap-guangzhou-4",
+    "instance_type": "S4.SMALL1",
     "source_image_id": "img-oikl1tzv",
     "ssh_username" : "root",
-    "image_name": "packerTest2",
+    "image_name": "PackerTest",
+    "disk_type": "CLOUD_PREMIUM",
     "packer_debug": true,
-    "associate_public_ip_address": true
+    "associate_public_ip_address": true,
+    "run_tags": {
+      "good": "luck"
+    }
   }],
   "provisioners": [{
     "type": "shell",

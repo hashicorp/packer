@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"strconv"
 	"testing"
 	"time"
 
@@ -97,7 +96,6 @@ func getBasicStep() *StepRunSpotInstance {
 		InstanceType:                      "t2.micro",
 		SourceAMI:                         "",
 		SpotPrice:                         "auto",
-		SpotPriceProduct:                  "Linux/UNIX",
 		SpotTags:                          TagMap(nil),
 		Tags:                              TagMap{},
 		VolumeTags:                        TagMap(nil),
@@ -107,20 +105,31 @@ func getBasicStep() *StepRunSpotInstance {
 
 	return &stepRunSpotInstance
 }
-func TestCalculateSpotPrice(t *testing.T) {
+
+func TestCreateTemplateData(t *testing.T) {
+	state := tStateSpot()
 	stepRunSpotInstance := getBasicStep()
-	// Set spot price and spot price product
-	stepRunSpotInstance.SpotPrice = "auto"
-	stepRunSpotInstance.SpotPriceProduct = "Linux/UNIX"
-	ec2conn := getMockConnSpot()
-	// state := tStateSpot()
-	spotPrice, err := stepRunSpotInstance.CalculateSpotPrice("", ec2conn)
-	if err != nil {
-		t.Fatalf("Should not have had an error calculating spot price")
+	template := stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
+		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
+
+	// expected := []*ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{
+	// 	&ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{
+	// 		DeleteOnTermination: aws.Bool(true),
+	// 		DeviceIndex:         aws.Int64(0),
+	// 		Groups:              aws.StringSlice([]string{"sg-0b8984db72f213dc3"}),
+	// 		SubnetId:            aws.String("subnet-077fde4e"),
+	// 	},
+	// }
+	// if expected != template.NetworkInterfaces {
+	if template.NetworkInterfaces == nil {
+		t.Fatalf("Template should have contained a networkInterface object: recieved %#v", template.NetworkInterfaces)
 	}
-	sp, _ := strconv.ParseFloat(spotPrice, 64)
-	expected := 0.008500
-	if sp != expected { // 0.003500 (from spot history) + .005
-		t.Fatalf("Expected spot price of \"0.008500\", not %s", spotPrice)
+
+	// Rerun, this time testing that we set security group IDs
+	state.Put("subnet_id", "")
+	template = stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
+		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
+	if template.NetworkInterfaces != nil {
+		t.Fatalf("Template shouldn't contain network interfaces object if subnet_id is unset.")
 	}
 }

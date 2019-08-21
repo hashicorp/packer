@@ -111,12 +111,8 @@ func FromBytes(body []byte) (r *RobotsData, err error) {
 
 	sc := newByteScanner("bytes", true)
 	//sc.Quiet = !print_errors
-	sc.Feed(body, true)
-	var tokens []string
-	tokens, err = sc.ScanAll()
-	if err != nil {
-		return nil, err
-	}
+	sc.feed(body, true)
+	tokens := sc.scanAll()
 
 	// special case worth optimization
 	if len(tokens) == 0 {
