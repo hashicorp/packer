@@ -249,6 +249,9 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
+			if providerName == "" {
+				return "", fmt.Errorf("Error: Provider info was not found in box: %s", boxfile)
+			}
 			break
 		}
 		if err != nil {

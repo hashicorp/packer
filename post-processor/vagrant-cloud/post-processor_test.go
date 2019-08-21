@@ -1,6 +1,7 @@
 package vagrantcloud
 
 import (
+	"archive/tar"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -243,6 +244,33 @@ func TestProviderFromVagrantBox_gzip_only_box(t *testing.T) {
 	_, err = providerFromVagrantBox(boxfile.Name())
 	if err == nil {
 		t.Fatalf("Should have error as box file is a plain gzip file: %s", err)
+	}
+	t.Logf("%s", err)
+}
+
+func TestProviderFromVagrantBox_no_files_in_archive(t *testing.T) {
+	boxfile, err := newBoxFile()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	// Bad: box contains no files in the archive
+	aw := gzip.NewWriter(boxfile)
+	tw := tar.NewWriter(aw)
+	// Flush and close each writer creating an empty gzipped tar archive
+	err = tw.Close()
+	if err != nil {
+		t.Fatalf("Error flushing tar file contents: %s", err)
+	}
+	err = aw.Close()
+	if err != nil {
+		t.Fatalf("Error flushing gzip file contents: %s", err)
+	}
+
+	_, err = providerFromVagrantBox(boxfile.Name())
+	if err == nil {
+		t.Fatalf("Should have error as box file has no contents")
 	}
 	t.Logf("%s", err)
 }
