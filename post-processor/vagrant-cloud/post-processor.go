@@ -8,10 +8,10 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
@@ -244,12 +244,18 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 	}
 	tr := tar.NewReader(ar)
 
+	// The metadata.json file in the tar archive contains a 'provider' key
+	type metadata struct {
+		ProviderName string `json:"provider"`
+	}
+	md := metadata{}
+
 	// Loop through the files in the archive and read the provider
 	// information from the boxes metadata.json file
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
-			if providerName == "" {
+			if md.ProviderName == "" {
 				return "", fmt.Errorf("Error: Provider info was not found in box: %s", boxfile)
 			}
 			break
@@ -263,11 +269,12 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 			if err != nil {
 				return "", fmt.Errorf("Error reading contents of metadata.json file from box file: %s", err)
 			}
-			// TODO: Parse the json for the provider
-			log.Printf("Contents: %s", contents)
+			err = json.Unmarshal(contents, &md)
+			if err != nil {
+				return "", fmt.Errorf("Error parsing metadata.json file: %s", err)
+			}
 			break
 		}
 	}
-
-	return "", nil
+	return md.ProviderName, nil
 }

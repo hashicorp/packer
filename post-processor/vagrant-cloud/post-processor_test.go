@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 type tarFiles []struct {
@@ -284,6 +285,26 @@ func TestProviderFromVagrantBox_no_metadata(t *testing.T) {
 		t.Fatalf("Should have error as box file does not include metadata.json file")
 	}
 	t.Logf("%s", err)
+}
+
+func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
+	// Good: The box contains the metadata.json file with the required
+	// 'provider' key/value
+	expectedProvider := "virtualbox"
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider":"` + expectedProvider + `"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("Error creating test box: %s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	provider, err := providerFromVagrantBox(boxfile.Name())
+	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
+	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }
 
 func newBoxFile() (boxfile *os.File, err error) {
