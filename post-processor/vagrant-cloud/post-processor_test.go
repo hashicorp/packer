@@ -386,6 +386,24 @@ func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
 	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }
 
+func TestGetProvider_artifice(t *testing.T) {
+	expectedProvider := "virtualbox"
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider":"` + expectedProvider + `"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("Error creating test box: %s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	provider, err := getProvider("", boxfile.Name(), "artifice")
+	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
+	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
+}
+
 func newBoxFile() (boxfile *os.File, err error) {
 	boxfile, err = ioutil.TempFile(os.TempDir(), "test*.box")
 	if err != nil {
