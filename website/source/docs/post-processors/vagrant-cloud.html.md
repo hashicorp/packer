@@ -1,9 +1,7 @@
 ---
 description: |
-    The Packer Vagrant Cloud post-processor receives a Vagrant box from the
-    `vagrant` post-processor or vagrant builder and pushes it to Vagrant Cloud.
-    Vagrant Cloud hosts and serves boxes to Vagrant, allowing you to version and
-    distribute boxes to an organization in a simple way.
+    The Vagrant Cloud post-processor enables the upload of Vagrant boxes to
+    Vagrant Cloud.
 layout: docs
 page_title: 'Vagrant Cloud - Post-Processors'
 sidebar_current: 'docs-post-processors-vagrant-cloud'
@@ -13,11 +11,15 @@ sidebar_current: 'docs-post-processors-vagrant-cloud'
 
 Type: `vagrant-cloud`
 
-The Packer Vagrant Cloud post-processor receives a Vagrant box from the
-`vagrant` post-processor or vagrant builder and pushes it to Vagrant Cloud.
 [Vagrant Cloud](https://app.vagrantup.com/boxes/search) hosts and serves boxes
 to Vagrant, allowing you to version and distribute boxes to an organization in a
 simple way.
+
+The Vagrant Cloud post-processor enables the upload of Vagrant boxes to Vagrant
+Cloud. Currently, the Vagrant Cloud post-processor will accept and upload boxes
+supplied to it from the [Vagrant](/docs/post-processors/vagrant.html) or
+[Artifice](/docs/post-processors/artifice.html) post-processors and the
+[Vagrant](/docs/builders/vagrant.html) builder.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand
@@ -94,12 +96,18 @@ on Vagrant Cloud, as well as authentication and version information.
 -   `box_download_url` (string) - Optional URL for a self-hosted box. If this
     is set the box will not be uploaded to the Vagrant Cloud.
 
-## Use with Vagrant Post-Processor
+## Use with the Vagrant Post-Processor
 
-You'll need to use the Vagrant post-processor before using this post-processor.
-An example configuration is below. Note the use of a doubly-nested array, which
-ensures that the Vagrant Cloud post-processor is run after the Vagrant
-post-processor.
+An example configuration is shown below. Note the use of the nested array that
+wraps both the Vagrant and Vagrant Cloud post-processors within the
+post-processor section. Chaining the post-processors together in this way tells
+Packer that the artifact produced by the Vagrant post-processor should be passed
+directly to the Vagrant Cloud Post-Processor. It also sets the order in which
+the post-processors should run.
+
+Failure to chain the post-processors together in this way will result in the
+wrong artifact being supplied to the Vagrant Cloud post-processor. This will
+likely cause the Vagrant Cloud post-processor to error and fail.
 
 ``` json
 {
@@ -108,6 +116,10 @@ post-processor.
     "version": "1.0.{{timestamp}}"
   },
   "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo Doing stuff..."]
+    },
     [
       {
         "type": "vagrant",
@@ -120,6 +132,59 @@ post-processor.
         "box_tag": "hashicorp/precise64",
         "access_token": "{{user `cloud_token`}}",
         "version": "{{user `version`}}"
+      }
+    ]
+  ]
+}
+```
+
+## Use with the Artifice Post-Processor
+
+An example configuration is shown below. Note the use of the nested array that
+wraps both the Artifice and Vagrant Cloud post-processors within the
+post-processor section. Chaining the post-processors together in this way tells
+Packer that the artifact produced by the Artifice post-processor should be
+passed directly to the Vagrant Cloud Post-Processor. It also sets the order in
+which the post-processors should run.
+
+Failure to chain the post-processors together in this way will result in the
+wrong artifact being supplied to the Vagrant Cloud post-processor. This will
+likely cause the Vagrant Cloud post-processor to error and fail.
+
+Note that the Vagrant box specified in the Artifice post-processor `files` array
+must end in the `.box` extension. It must also be the first file in the array.
+Additional files bundled by the Artifice post-processor will be ignored.
+
+```json
+{
+  "variables": {
+    "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
+  },
+
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo Doing stuff..."]
+    },
+    [
+      {
+        "type": "artifice",
+        "files": [
+          "./path/to/my.box"
+        ]
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "myorganisation/mybox",
+        "access_token": "{{user `cloud_token`}}",
+        "version": "0.1.0",
       }
     ]
   ]
