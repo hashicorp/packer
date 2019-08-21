@@ -273,6 +273,9 @@ func providerFromVagrantBox(boxfile string) (providerName string, err error) {
 			if err != nil {
 				return "", fmt.Errorf("Error parsing metadata.json file: %s", err)
 			}
+			if md.ProviderName == "" {
+				return "", fmt.Errorf("Error: Could not determine Vagrant provider from box metadata.json file")
+			}
 			break
 		}
 	}
