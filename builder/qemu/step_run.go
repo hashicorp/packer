@@ -62,12 +62,10 @@ func (s *stepRun) Cleanup(state multistep.StateBag) {
 func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error) {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
-	vncIP := state.Get("vnc_ip").(string)
+	vncIP := config.VNCBindAddress
 	vncPort := state.Get("vnc_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
-
-	vnc := fmt.Sprintf("%s:%d", vncIP, vncPort-5900)
 	vmName := config.VMName
 	imgPath := filepath.Join(config.OutputDir, vmName)
 
@@ -75,6 +73,14 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	var deviceArgs []string
 	var driveArgs []string
 	var sshHostPort int
+	var vnc string
+
+	if !config.VNCUsePassword {
+		vnc = fmt.Sprintf("%s:%d", vncIP, vncPort-5900)
+	} else {
+		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort-5900)
+		defaultArgs["-qmp"] = fmt.Sprintf("unix:%s,server,nowait", config.QMPSocketPath)
+	}
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
@@ -94,19 +100,42 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	if qemuVersion.GreaterThanOrEqual(v2) {
 		if config.DiskInterface == "virtio-scsi" {
-			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
-			driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
-			if config.DetectZeroes != "off" {
-				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			if config.DiskImage {
+				deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
+				driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
+				if config.DetectZeroes != "off" {
+					driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+				}
+				driveArgs = append(driveArgs, driveArgumentString)
+			} else {
+				deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0")
+				diskFullPaths := state.Get("qemu_disk_paths").([]string)
+				for i, diskFullPath := range diskFullPaths {
+					deviceArgs = append(deviceArgs, fmt.Sprintf("scsi-hd,bus=scsi0.0,drive=drive%d", i))
+					driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive%d,cache=%s,discard=%s,format=%s", diskFullPath, i, config.DiskCache, config.DiskDiscard, config.Format)
+					if config.DetectZeroes != "off" {
+						driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+					}
+					driveArgs = append(driveArgs, driveArgumentString)
+				}
 			}
-			driveArgs = append(driveArgs, driveArgumentString)
 		} else {
-			driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
-			if config.DetectZeroes != "off" {
-				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			if config.DiskImage {
+				driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
+				if config.DetectZeroes != "off" {
+					driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+				}
+				driveArgs = append(driveArgs, driveArgumentString)
+			} else {
+				diskFullPaths := state.Get("qemu_disk_paths").([]string)
+				for _, diskFullPath := range diskFullPaths {
+					driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", diskFullPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
+					if config.DetectZeroes != "off" {
+						driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+					}
+					driveArgs = append(driveArgs, driveArgumentString)
+				}
 			}
-			driveArgs = append(driveArgs, driveArgumentString)
-
 		}
 	} else {
 		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.Format))
@@ -114,17 +143,23 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	deviceArgs = append(deviceArgs, fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
 
 	if config.Headless == true {
-		vncIpRaw, vncIpOk := state.GetOk("vnc_ip")
 		vncPortRaw, vncPortOk := state.GetOk("vnc_port")
+		vncPass := state.Get("vnc_password")
 
-		if vncIpOk && vncPortOk {
-			vncIp := vncIpRaw.(string)
+		if vncPortOk && vncPass != nil && len(vncPass.(string)) > 0 {
+			vncPort := vncPortRaw.(int)
+
+			ui.Message(fmt.Sprintf(
+				"The VM will be run headless, without a GUI. If you want to\n"+
+					"view the screen of the VM, connect via VNC to vnc://%s:%d\n"+
+					"with the password: %s", vncIP, vncPort, vncPass))
+		} else if vncPortOk {
 			vncPort := vncPortRaw.(int)
 
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
 					"view the screen of the VM, connect via VNC without a password to\n"+
-					"vnc://%s:%d", vncIp, vncPort))
+					"vnc://%s:%d", vncIP, vncPort))
 		} else {
 			ui.Message("The VM will be run headless, without a GUI, as configured.\n" +
 				"If the run isn't succeeding as you expect, please enable the GUI\n" +

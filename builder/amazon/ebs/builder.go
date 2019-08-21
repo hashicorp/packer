@@ -86,6 +86,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors
 	var errs *packer.MultiError
+	var warns []string
+
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
@@ -100,12 +102,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"you use an AMI that already has either SR-IOV or ENA enabled."))
 	}
 
+	if b.config.RunConfig.SpotPriceAutoProduct != "" {
+		warns = append(warns, "spot_price_auto_product is deprecated and no "+
+			"longer necessary for Packer builds. In future versions of "+
+			"Packer, inclusion of spot_price_auto_product will error your "+
+			"builds. Please take a look at our current documentation to "+
+			"understand how Packer requests Spot instances.")
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return nil, nil
+	return warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -144,7 +154,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
 			SpotPrice:                         b.config.SpotPrice,
-			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
 			SpotTags:                          b.config.SpotTags,
 			Tags:                              b.config.RunTags,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
@@ -177,8 +186,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
-			DestAmiName:     b.config.AMIName,
-			ForceDeregister: b.config.AMIForceDeregister,
+			DestAmiName:        b.config.AMIName,
+			ForceDeregister:    b.config.AMIForceDeregister,
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -221,7 +231,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.Comm.SSHInterface),
+				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -243,15 +253,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AMIName:             b.config.AMIName,
 			Regions:             b.config.AMIRegions,
 		},
-		&stepCreateAMI{},
+		&stepCreateAMI{
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
+		},
 		&awscommon.StepAMIRegionCopy{
-			AccessConfig:      &b.config.AccessConfig,
-			Regions:           b.config.AMIRegions,
-			AMIKmsKeyId:       b.config.AMIKmsKeyId,
-			RegionKeyIds:      b.config.AMIRegionKMSKeyIDs,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-			OriginalRegion:    *ec2conn.Config.Region,
+			AccessConfig:       &b.config.AccessConfig,
+			Regions:            b.config.AMIRegions,
+			AMIKmsKeyId:        b.config.AMIKmsKeyId,
+			RegionKeyIds:       b.config.AMIRegionKMSKeyIDs,
+			EncryptBootVolume:  b.config.AMIEncryptBootVolume,
+			Name:               b.config.AMIName,
+			OriginalRegion:     *ec2conn.Config.Region,
+			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:    b.config.AMIDescription,

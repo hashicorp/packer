@@ -5,7 +5,6 @@ package docker
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -179,7 +178,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ContainerDir == "" {
-		if runtime.GOOS == "windows" {
+		if c.WindowsContainer {
 			c.ContainerDir = "c:/packer-files"
 		} else {
 			c.ContainerDir = "/packer-files"

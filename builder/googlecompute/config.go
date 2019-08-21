@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"golang.org/x/oauth2/jwt"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -167,7 +168,7 @@ type Config struct {
 	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
 
-	Account            AccountFile
+	Account            *jwt.Config
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
@@ -311,9 +312,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.AccountFile != "" {
-		if err := ProcessAccountFile(&c.Account, c.AccountFile); err != nil {
+		cfg, err := ProcessAccountFile(c.AccountFile)
+		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+		c.Account = cfg
 	}
 
 	if c.OmitExternalIP && c.Address != "" {

@@ -64,6 +64,8 @@ type Config struct {
 	// bootscript, Default bootscript
 	BootType string `mapstructure:"boottype" required:"false"`
 
+	RemoveVolume bool `mapstructure:"remove_volume"`
+
 	UserAgent string
 	ctx       interpolate.Context
 }

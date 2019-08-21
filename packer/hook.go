@@ -16,7 +16,7 @@ const HookProvision = "packer_provision"
 // in. In addition to that, the Hook is given access to a UI so that it can
 // output things to the user.
 //
-// The first context argument controlls cancellation, the context will usually
+// The first context argument controls cancellation, the context will usually
 // be called when Run is still in progress so the mechanism that handles this
 // must be race-free. Cancel should attempt to cancel the hook in the quickest,
 // safest way possible.

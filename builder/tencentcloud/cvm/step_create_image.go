@@ -3,9 +3,12 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -25,6 +28,15 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ImageName = &config.ImageName
 	req.ImageDescription = &config.ImageDescription
 	req.InstanceId = instance.InstanceId
+	// TODO: We should allow user to specify which data disk should be
+	// included into created image.
+	var dataDiskIds []*string
+	for _, disk := range instance.DataDisks {
+		dataDiskIds = append(dataDiskIds, disk.DiskId)
+	}
+	if len(dataDiskIds) > 0 {
+		req.DataDiskIds = dataDiskIds
+	}
 
 	True := "True"
 	False := "False"
@@ -46,7 +58,26 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		req.Sysprep = &False
 	}
 
-	_, err := client.CreateImage(req)
+	err := retry.Config{
+		Tries: 60,
+		RetryDelay: (&retry.Backoff{
+			InitialBackoff: 5 * time.Second,
+			MaxBackoff:     5 * time.Second,
+			Multiplier:     2,
+		}).Linear,
+		ShouldRetry: func(err error) bool {
+			if e, ok := err.(*errors.TencentCloudSDKError); ok {
+				if e.Code == "InvalidImageName.Duplicate" {
+					return false
+				}
+			}
+			return true
+		},
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := client.CreateImage(req)
+		return err
+	})
+
 	if err != nil {
 		err := fmt.Errorf("create image failed: %s", err.Error())
 		state.Put("error", err)

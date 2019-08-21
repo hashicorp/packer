@@ -80,6 +80,17 @@
     custom keys. For valid formats see *KmsKeyId* in the [AWS API docs -
     CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
     
+    This option supercedes the `kms_key_id` option -- if you set both, and
+    they are different, Packer will respect the value in
+    `region_kms_key_ids` for your build region and silently disregard the
+    value provided in `kms_key_id`.
+    
+-   `skip_save_build_region` (bool) - If true, Packer will not check whether an AMI with the `ami_name` exists
+    in the region it is building in. It will use an intermediary AMI name,
+    which it will not convert to an AMI in the build region. It will copy
+    the intermediary AMI into any regions provided in `ami_regions`, then
+    delete the intermediary AMI. Default `false`.
+    
 -   `snapshot_tags` (TagMap) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
     [template engine](../templates/engine.html), see [Build template

@@ -55,6 +55,14 @@ type BlockDevice struct {
 	// The size of the volume, in GiB. Required if not specifying a
 	// snapshot_id.
 	VolumeSize int64 `mapstructure:"volume_size" required:"false"`
+	// ID, alias or ARN of the KMS key to use for boot volume encryption. This
+	// only applies to the main region, other regions where the AMI will be
+	// copied will be encrypted by the default EBS KMS key. For valid formats
+	// see KmsKeyId in the [AWS API docs -
+	// CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html)
+	// This field is validated by Packer, when using an alias, you will have to
+	// prefix kms_key_id with alias/.
+	KmsKeyId string `mapstructure:"kms_key_id" required:"false"`
 }
 
 type BlockDevices []BlockDevice
@@ -116,6 +124,11 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	if b.DeviceName == "" {
 		return fmt.Errorf("The `device_name` must be specified " +
 			"for every device in the block device mapping.")
+	}
+	// Warn that encrypted must be true or nil when setting kms_key_id
+	if b.KmsKeyId != "" && b.Encrypted != nil && *b.Encrypted == false {
+		return fmt.Errorf("The device %v, must also have `encrypted: "+
+			"true` when setting a kms_key_id.", b.DeviceName)
 	}
 
 	return nil

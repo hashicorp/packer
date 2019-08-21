@@ -148,7 +148,7 @@ func (p *parser) parseLine() (li *lineInfo, err error) {
 
 	// Helper closure for all string-based tokens, common behaviour:
 	// - Consume t2 token
-	// - If empty, return unkown line info
+	// - If empty, return unknown line info
 	// - Otherwise return the specified line info
 	returnStringVal := func(t lineType) (*lineInfo, error) {
 		p.popToken()
@@ -160,7 +160,7 @@ func (p *parser) parseLine() (li *lineInfo, err error) {
 
 	// Helper closure for all path tokens (allow/disallow), common behaviour:
 	// - Consume t2 token
-	// - If empty, return unkown line info
+	// - If empty, return unknown line info
 	// - Otherwise, normalize the path (add leading "/" if missing, remove trailing "*")
 	// - Detect if wildcards are present, if so, compile into a regexp
 	// - Return the specified line info
@@ -198,7 +198,7 @@ func (p *parser) parseLine() (li *lineInfo, err error) {
 	}
 
 	switch strings.ToLower(t1) {
-	case "\n":
+	case tokEOL:
 		// Don't consume t2 and continue parsing
 		return &lineInfo{t: lIgnore}, nil
 

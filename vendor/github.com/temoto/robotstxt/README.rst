@@ -110,3 +110,6 @@ Flair
 
 .. image:: https://codecov.io/gh/temoto/robotstxt/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/temoto/robotstxt
+
+.. image:: https://goreportcard.com/badge/github.com/temoto/robotstxt
+    :target: https://goreportcard.com/report/github.com/temoto/robotstxt

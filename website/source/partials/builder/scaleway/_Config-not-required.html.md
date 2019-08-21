@@ -15,3 +15,4 @@
 -   `boottype` (string) - The type of boot, can be either local or
     bootscript, Default bootscript
     
+-   `remove_volume` (bool) - Remove Volume

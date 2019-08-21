@@ -12,6 +12,7 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
+
 	// The name of the resulting AMI that will appear when
 	// managing AMIs in the AWS console or via APIs. This must be unique. To help
 	// make this unique, use a function like timestamp (see [template
@@ -96,7 +97,18 @@ type AMIConfig struct {
 	// conjunction with `snapshot_users` -- in that situation you must use
 	// custom keys. For valid formats see *KmsKeyId* in the [AWS API docs -
 	// CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
+	//
+	// This option supercedes the `kms_key_id` option -- if you set both, and
+	// they are different, Packer will respect the value in
+	// `region_kms_key_ids` for your build region and silently disregard the
+	// value provided in `kms_key_id`.
 	AMIRegionKMSKeyIDs map[string]string `mapstructure:"region_kms_key_ids" required:"false"`
+	// If true, Packer will not check whether an AMI with the `ami_name` exists
+	// in the region it is building in. It will use an intermediary AMI name,
+	// which it will not convert to an AMI in the build region. It will copy
+	// the intermediary AMI into any regions provided in `ami_regions`, then
+	// delete the intermediary AMI. Default `false`.
+	AMISkipBuildRegion bool `mapstructure:"skip_save_build_region"`
 	// Tags to apply to snapshot.
 	// They will override AMI tags if already applied to snapshot. This is a
 	// [template engine](../templates/engine.html), see [Build template

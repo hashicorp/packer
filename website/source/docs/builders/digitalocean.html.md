@@ -83,6 +83,10 @@ builder.
     droplet to enter a desired state (such as "active") before timing out. The
     default state timeout is "6m".
 
+-   `snapshot_timeout` (string) - The time to wait, as a duration string, for a
+    snapshot action to complete (e.g snapshot creation) before timing out. The
+    default snapshot timeout is "60m".
+
 -   `user_data` (string) - User data to launch with the Droplet. Packer will
     not automatically wait for a user script to finish before shutting down the
     instance this must be handled in a provisioner.

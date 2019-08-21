@@ -29,6 +29,7 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
+	jdcloudbuilder "github.com/hashicorp/packer/builder/jdcloud"
 	linodebuilder "github.com/hashicorp/packer/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
@@ -38,6 +39,10 @@ import (
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
+	oscbsubuilder "github.com/hashicorp/packer/builder/osc/bsu"
+	oscbsusurrogatebuilder "github.com/hashicorp/packer/builder/osc/bsusurrogate"
+	oscbsuvolumebuilder "github.com/hashicorp/packer/builder/osc/bsuvolume"
+	oscchrootbuilder "github.com/hashicorp/packer/builder/osc/chroot"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -46,9 +51,11 @@ import (
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
+	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
+	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
@@ -62,6 +69,7 @@ import (
 	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
 	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
+	exoscaleimportpostprocessor "github.com/hashicorp/packer/post-processor/exoscale-import"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
@@ -110,6 +118,7 @@ var Builders = map[string]packer.Builder{
 	"hyperone":            new(hyperonebuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
 	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
+	"jdcloud":             new(jdcloudbuilder.Builder),
 	"linode":              new(linodebuilder.Builder),
 	"lxc":                 new(lxcbuilder.Builder),
 	"lxd":                 new(lxdbuilder.Builder),
@@ -119,6 +128,10 @@ var Builders = map[string]packer.Builder{
 	"openstack":           new(openstackbuilder.Builder),
 	"oracle-classic":      new(oracleclassicbuilder.Builder),
 	"oracle-oci":          new(oracleocibuilder.Builder),
+	"osc-bsu":             new(oscbsubuilder.Builder),
+	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
+	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
+	"osc-chroot":          new(oscchrootbuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
@@ -127,9 +140,11 @@ var Builders = map[string]packer.Builder{
 	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
+	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
 	"vagrant":             new(vagrantbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
+	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
@@ -166,6 +181,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),
 	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
+	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),

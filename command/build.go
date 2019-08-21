@@ -156,12 +156,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 					// Add a newline between the color output and the actual output
 					c.Ui.Say("")
 				}
-				// Now add timestamps if requested
-				if cfg.Timestamp {
-					ui = &packer.TimestampedUi{
-						Ui: ui,
-					}
-				}
+			}
+		}
+		// Now add timestamps if requested
+		if cfg.Timestamp {
+			ui = &packer.TimestampedUi{
+				Ui: ui,
 			}
 		}
 
@@ -241,9 +241,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
-				artifacts.Lock()
-				artifacts.m[name] = runArtifacts
-				artifacts.Unlock()
+				if nil != runArtifacts {
+					artifacts.Lock()
+					artifacts.m[name] = runArtifacts
+					artifacts.Unlock()
+				}
 			}
 		}()
 

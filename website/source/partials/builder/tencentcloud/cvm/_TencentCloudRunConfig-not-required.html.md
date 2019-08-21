@@ -11,6 +11,17 @@
     
 -   `disk_size` (int64) - Root disk size your cvm will be launched by. values range(in GB):
     
+-   `data_disks` ([]tencentCloudDataDisk) - Add one or more data disks to the instance before creating the image.
+    Note that if the source image has data disk snapshots, this argument
+    will be ignored, and the running instance will use source image data
+    disk settings, in such case, `disk_type` argument will be used as disk
+    type for all data disks, and each data disk size will use the origin
+    value in source image.
+    The data disks allow for the following argument:
+    -  `disk_type` - Type of the data disk. Valid choices: `CLOUD_BASIC`, `CLOUD_PREMIUM` and `CLOUD_SSD`.
+    -  `disk_size` - Size of the data disk.
+    -  `disk_snapshot_id` - Id of the snapshot for a data disk.
+    
 -   `vpc_id` (string) - Specify vpc your cvm will be launched by.
     
 -   `vpc_name` (string) - Specify vpc name you will create. if vpc_id is not set, packer will
@@ -40,5 +51,8 @@
 -   `user_data_file` (string) - userdata file.
     
 -   `host_name` (string) - host name.
+    
+-   `run_tags` (map[string]string) - Tags to apply to the instance that is *launched* to create the image.
+    These tags are *not* applied to the resulting image.
     
 -   `ssh_private_ip` (bool) - SSH Private Ip

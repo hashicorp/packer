@@ -12,6 +12,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type tencentCloudDataDisk struct {
+	DiskType   string `mapstructure:"disk_type"`
+	DiskSize   int64  `mapstructure:"disk_size"`
+	SnapshotId string `mapstructure:"disk_snapshot_id"`
+}
+
 type TencentCloudRunConfig struct {
 	// Whether allocate public ip to your cvm.
 	// Default value is false.
@@ -31,6 +37,17 @@ type TencentCloudRunConfig struct {
 	DiskType string `mapstructure:"disk_type" required:"false"`
 	// Root disk size your cvm will be launched by. values range(in GB):
 	DiskSize int64 `mapstructure:"disk_size" required:"false"`
+	// Add one or more data disks to the instance before creating the image.
+	// Note that if the source image has data disk snapshots, this argument
+	// will be ignored, and the running instance will use source image data
+	// disk settings, in such case, `disk_type` argument will be used as disk
+	// type for all data disks, and each data disk size will use the origin
+	// value in source image.
+	// The data disks allow for the following argument:
+	// -  `disk_type` - Type of the data disk. Valid choices: `CLOUD_BASIC`, `CLOUD_PREMIUM` and `CLOUD_SSD`.
+	// -  `disk_size` - Size of the data disk.
+	// -  `disk_snapshot_id` - Id of the snapshot for a data disk.
+	DataDisks []tencentCloudDataDisk `mapstructure:"data_disks"`
 	// Specify vpc your cvm will be launched by.
 	VpcId string `mapstructure:"vpc_id" required:"false"`
 	// Specify vpc name you will create. if vpc_id is not set, packer will
@@ -61,6 +78,9 @@ type TencentCloudRunConfig struct {
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// host name.
 	HostName string `mapstructure:"host_name" required:"false"`
+	// Tags to apply to the instance that is *launched* to create the image.
+	// These tags are *not* applied to the resulting image.
+	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`
@@ -148,6 +168,10 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if cf.HostName == "" {
 		cf.HostName = cf.InstanceName[:15]
+	}
+
+	if cf.RunTags == nil {
+		cf.RunTags = make(map[string]string)
 	}
 
 	return errs

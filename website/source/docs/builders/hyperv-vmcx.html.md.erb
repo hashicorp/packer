@@ -33,7 +33,7 @@ Import from folder:
 ``` json
 {
   "type": "hyperv-vmcx",
-  "clone_from_vmcx_path": "c:/virtual machines/ubuntu-12.04.5-server-amd64",
+  "clone_from_vmcx_path": "c:/path/to/ubuntu-12.04.5-server-amd64",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
@@ -86,6 +86,10 @@ builder.
 -   `clone_from_vmcx_path` (string) - The path to a directory containing a
     previously exported virtual machine. The exported machine will be used
     as the source for new VM.
+
+    note: You should provide the named directory that contains the
+    "Virtual Machines", "Snapshots", and/or "Virtual Hard Disks" subdirectories,
+    not the .vmcx file itself.
 
 
 ### Required for virtual machine clone:
@@ -140,7 +144,7 @@ builder.
 -   `configuration_version` (string) - This allows you to set the vm version when
      calling New-VM to generate the vm.
 
--   `cpu` (number) - The number of CPUs the virtual machine should use. If
+-   `cpus` (number) - The number of CPUs the virtual machine should use. If
     this isn't specified, the default is 1 CPU.
 
 -   `enable_dynamic_memory` (boolean) - If `true` enable dynamic memory for
@@ -407,7 +411,7 @@ Packer config:
       "winrm_timeout" : "4h",
       "shutdown_command": "f:\\run-sysprep.cmd",
       "memory": 4096,
-      "cpu": 4,
+      "cpus": 4,
       "generation": 2,
       "switch_name":"LAN",
       "enable_secure_boot":true

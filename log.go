@@ -35,6 +35,9 @@ func logOutput() (logOutput io.Writer, err error) {
 					if strings.Contains(scanner.Text(), "ui:") {
 						continue
 					}
+					if strings.Contains(scanner.Text(), "ui error:") {
+						continue
+					}
 					os.Stderr.WriteString(fmt.Sprint(scanner.Text() + "\n"))
 				}
 			}(scanner)

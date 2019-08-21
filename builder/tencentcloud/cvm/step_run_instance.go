@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
@@ -25,6 +26,8 @@ type stepRunInstance struct {
 	HostName                 string
 	InternetMaxBandwidthOut  int64
 	AssociatePublicIpAddress bool
+	Tags                     map[string]string
+	DataDisks                []tencentCloudDataDisk
 }
 
 func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -60,9 +63,45 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ImageId = source_image.ImageId
 	req.InstanceChargeType = &POSTPAID_BY_HOUR
 	req.InstanceType = &s.InstanceType
+	// TODO: Add check for system disk size, it should be larger than image system disk size.
 	req.SystemDisk = &cvm.SystemDisk{
 		DiskType: &s.DiskType,
 		DiskSize: &s.DiskSize,
+	}
+	// System disk snapshot is mandatory, so if there are additional data disks,
+	// length will be larger than 1.
+	if source_image.SnapshotSet != nil && len(source_image.SnapshotSet) > 1 {
+		ui.Say("Use source image snapshot data disks, ignore user data disk settings.")
+		var dataDisks []*cvm.DataDisk
+		for _, snapshot := range source_image.SnapshotSet {
+			if *snapshot.DiskUsage == "DATA_DISK" {
+				var dataDisk cvm.DataDisk
+				// FIXME: Currently we have no way to get original disk type
+				// from data disk snapshots, and we don't allow user to overwrite
+				// snapshot settings, and we cannot guarantee a certain hard-coded type
+				// is not sold out, so here we use system disk type as a workaround.
+				//
+				// Eventually, we need to allow user to overwrite snapshot disk
+				// settings.
+				dataDisk.DiskType = &s.DiskType
+				dataDisk.DiskSize = snapshot.DiskSize
+				dataDisk.SnapshotId = snapshot.SnapshotId
+				dataDisks = append(dataDisks, &dataDisk)
+			}
+		}
+		req.DataDisks = dataDisks
+	} else {
+		var dataDisks []*cvm.DataDisk
+		for _, disk := range s.DataDisks {
+			var dataDisk cvm.DataDisk
+			dataDisk.DiskType = &disk.DiskType
+			dataDisk.DiskSize = &disk.DiskSize
+			if disk.SnapshotId != "" {
+				dataDisk.SnapshotId = &disk.SnapshotId
+			}
+			dataDisks = append(dataDisks, &dataDisk)
+		}
+		req.DataDisks = dataDisks
 	}
 	req.VirtualPrivateCloud = &cvm.VirtualPrivateCloud{
 		VpcId:    &vpc_id,
@@ -88,6 +127,22 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	req.ClientToken = &s.InstanceName
 	req.HostName = &s.HostName
 	req.UserData = &userData
+	var tags []*cvm.Tag
+	for k, v := range s.Tags {
+		tags = append(tags, &cvm.Tag{
+			Key:   &k,
+			Value: &v,
+		})
+	}
+	resourceType := "instance"
+	if len(tags) > 0 {
+		req.TagSpecification = []*cvm.TagSpecification{
+			&cvm.TagSpecification{
+				ResourceType: &resourceType,
+				Tags:         tags,
+			},
+		}
+	}
 
 	resp, err := client.RunInstances(req)
 	if err != nil {
@@ -143,15 +198,23 @@ func (s *stepRunInstance) Cleanup(state multistep.StateBag) {
 	if s.instanceId == "" {
 		return
 	}
-	MessageClean(state, "instance")
+	MessageClean(state, "Instance")
 	client := state.Get("cvm_client").(*cvm.Client)
 	ui := state.Get("ui").(packer.Ui)
 	req := cvm.NewTerminateInstancesRequest()
 	req.InstanceIds = []*string{&s.instanceId}
-	_, err := client.TerminateInstances(req)
-	// The binding relation between instance and vpc would last few minutes after
-	// instance terminate, we sleep here to give more time
-	time.Sleep(2 * time.Minute)
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 60,
+		RetryDelay: (&retry.Backoff{
+			InitialBackoff: 5 * time.Second,
+			MaxBackoff:     5 * time.Second,
+			Multiplier:     2,
+		}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := client.TerminateInstances(req)
+		return err
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("terminate instance(%s) failed: %s", s.instanceId, err.Error()))
 	}

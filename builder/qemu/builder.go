@@ -122,6 +122,15 @@ type Config struct {
 	// does not include WHPX support and users may need to compile or source a
 	// build of QEMU for Windows themselves with WHPX support.
 	Accelerator string `mapstructure:"accelerator" required:"false"`
+	// Additional disks to create. Uses `vm_name` as the disk name template and
+	// appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
+	// is the default disk. Each string represents the disk image size in bytes.
+	// Optional suffixes 'k' or 'K' (kilobyte, 1024), 'M' (megabyte, 1024k), 'G'
+	// (gigabyte, 1024M), 'T' (terabyte, 1024G), 'P' (petabyte, 1024T) and 'E'
+	// (exabyte, 1024P)  are supported. 'b' is ignored. Per qemu-img documentation.
+	// Each additional disk uses the same disk parameters as the default disk.
+	// Unset by default.
+	AdditionalDiskSize []string `mapstructure:"disk_additional_size" required:"false"`
 	// The number of cpus to use when building the VM.
 	//  The default is `1` CPU.
 	CpuCount int `mapstructure:"cpus" required:"false"`
@@ -270,13 +279,18 @@ type Config struct {
 	// some platforms. For example qemu-kvm, or qemu-system-i386 may be a
 	// better choice for some systems.
 	QemuBinary string `mapstructure:"qemu_binary" required:"false"`
-	// The minimum and
-	// maximum port to use for the SSH port on the host machine which is forwarded
-	// to the SSH port on the guest machine. Because Packer often runs in parallel,
-	// Packer will choose a randomly available port in this range to use as the
-	// host port. By default this is 2222 to 4444.
+	// Enable QMP socket. Location is specified by `qmp_socket_path`. Defaults
+	// to false.
+	QMPEnable bool `mapstructure:"qmp_enable" required:"false"`
+	// QMP Socket Path when `qmp_enable` is true. Defaults to
+	// `output_directory`/`vm_name`.monitor.
+	QMPSocketPath string `mapstructure:"qmp_socket_path" required:"false"`
+	// The minimum and maximum port to use for the SSH port on the host machine
+	// which is forwarded to the SSH port on the guest machine. Because Packer
+	// often runs in parallel, Packer will choose a randomly available port in
+	// this range to use as the host port. By default this is 2222 to 4444.
 	SSHHostPortMin int `mapstructure:"ssh_host_port_min" required:"false"`
-	SSHHostPortMax int `mapstructure:"ssh_host_port_max"`
+	SSHHostPortMax int `mapstructure:"ssh_host_port_max" required:"false"`
 	// If true, do not pass a -display option
 	// to qemu, allowing it to choose the default. This may be needed when running
 	// under macOS, and getting errors about sdl not being available.
@@ -285,6 +299,10 @@ type Config struct {
 	// binded to for VNC. By default packer will use 127.0.0.1 for this. If you
 	// wish to bind to all interfaces use 0.0.0.0.
 	VNCBindAddress string `mapstructure:"vnc_bind_address" required:"false"`
+	// Whether or not to set a password on the VNC server. This option
+	// automatically enables the QMP socket. See `qmp_socket_path`. Defaults to
+	// `false`.
+	VNCUsePassword bool `mapstructure:"vnc_use_password" required:"false"`
 	// The minimum and maximum port
 	// to use for VNC access to the virtual machine. The builder uses VNC to type
 	// the initial boot_command. Because Packer generally runs in parallel,
@@ -300,7 +318,7 @@ type Config struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
@@ -458,6 +476,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
 	}
 
+	if b.config.DiskImage && len(b.config.AdditionalDiskSize) > 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
+	}
+
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
@@ -500,6 +523,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
+
 	if b.config.SSHHostPortMin < 0 {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be positive"))
@@ -508,6 +532,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+
+	if b.config.VNCUsePassword && b.config.QMPSocketPath == "" {
+		socketName := fmt.Sprintf("%s.monitor", b.config.VMName)
+		b.config.QMPSocketPath = filepath.Join(b.config.OutputDir, socketName)
 	}
 
 	if b.config.QemuArgs == nil {
@@ -581,6 +610,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
+		new(stepConfigureQMP),
 		&stepTypeBootCommand{},
 	)
 
@@ -588,7 +618,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		steps = append(steps,
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      commHost,
+				Host:      commHost(b.config.Comm.SSHHost),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
@@ -662,7 +692,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		state: make(map[string]interface{}),
 	}
 
-	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskName"] = b.config.VMName
+	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
+	if ok {
+		artifact.state["diskPaths"] = diskpaths
+	}
 	artifact.state["diskType"] = b.config.Format
 	artifact.state["diskSize"] = uint64(b.config.DiskSize)
 	artifact.state["domainType"] = b.config.Accelerator

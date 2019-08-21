@@ -86,7 +86,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepDropletInfo),
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost,
+			Host:      communicator.CommHost(b.config.Comm.SSHHost, "droplet_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
@@ -95,7 +95,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		new(stepShutdown),
 		new(stepPowerOff),
-		new(stepSnapshot),
+		&stepSnapshot{
+			snapshotTimeout: b.config.SnapshotTimeout,
+		},
 	}
 
 	// Run the steps

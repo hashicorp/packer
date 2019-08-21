@@ -108,6 +108,30 @@ ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
 	}
 }
 
+func TestArtifactIDManagedImageWithSharedImageGalleryId(t *testing.T) {
+	artifact, err := NewManagedImageArtifactWithSIGAsDestination("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGallery")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+ManagedImageSharedImageGalleryId: fakeSharedImageGallery
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
 func TestArtifactString(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{

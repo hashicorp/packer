@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/gophercloud/gophercloud"
@@ -66,7 +67,10 @@ func FindFreeFloatingIP(client *gophercloud.ServiceClient) (*floatingips.Floatin
 // GetInstancePortID returns internal port of the instance that can be used for
 // the association of a floating IP.
 // It will return an ID of a first port if there are many.
-func GetInstancePortID(client *gophercloud.ServiceClient, id string) (string, error) {
+func GetInstancePortID(client *gophercloud.ServiceClient, id string, instance_float_net string) (string, error) {
+
+	selected_interface := 0
+
 	interfacesPage, err := attachinterfaces.List(client, id).AllPages()
 	if err != nil {
 		return "", err
@@ -79,7 +83,16 @@ func GetInstancePortID(client *gophercloud.ServiceClient, id string) (string, er
 		return "", fmt.Errorf("instance '%s' has no interfaces", id)
 	}
 
-	return interfaces[0].PortID, nil
+	for i := 0; i < len(interfaces); i++ {
+		log.Printf("Instance interface: %v: %+v\n", i, interfaces[i])
+		if interfaces[i].NetID == instance_float_net {
+			log.Printf("Found preferred interface: %v\n", i)
+			selected_interface = i
+			log.Printf("Using interface value: %v", selected_interface)
+		}
+	}
+
+	return interfaces[selected_interface].PortID, nil
 }
 
 // CheckFloatingIPNetwork checks provided network reference and returns a valid

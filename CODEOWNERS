@@ -16,7 +16,9 @@
 /builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
 /builder/hcloud/                        @LKaemmerling
 /builder/hyperone                       @m110 @gregorybrzeski @ad-m
+/builder/ucloud/                        @shawnmssu
 /builder/yandex                         @GennadySpb @alexanderKhaustov @seukyaso
+/builder/osc                            @marinsalinas
 
 # provisioners
 
@@ -27,5 +29,6 @@
 
 /post-processor/alicloud-import/        dongxiao.zzh@alibaba-inc.com
 /post-processor/checksum/               v.tolstov@selfip.ru
+/post-processor/exoscale-import/        @falzm @mcorbin
 /post-processor/googlecompute-export/   crunkleton@google.com
 /post-processor/vsphere-template/       nelson@bennu.cl

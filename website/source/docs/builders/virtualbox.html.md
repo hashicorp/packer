@@ -28,3 +28,10 @@ supports the following VirtualBox builders:
     VirtualBox VM export you want to use as the source. As an additional
     benefit, you can feed the artifact of this builder back into itself to
     iterate on a machine.
+
+-   [virtualbox-vm](/docs/builders/virtualbox-vm.html) - This builder uses an
+    existing VM to run defined provisioners on top of that VM, and optionally
+    creates a snapshot to save the changes applied from the provisioners. In
+    addition the builder is able to export that machine to create an image. The
+    builder is able to attach to a defined snapshot as a starting point, which
+    could be defined statically or dynamically via a variable.

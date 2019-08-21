@@ -52,18 +52,31 @@ func homeDir() (string, error) {
 }
 
 func configFile() (string, error) {
-	dir, err := homeDir()
-	if err != nil {
-		return "", err
+	var dir string
+	if cd := os.Getenv("PACKER_CONFIG_DIR"); cd != "" {
+		log.Printf("Detected config directory from env var: %s", cd)
+		dir = cd
+	} else {
+		homedir, err := homeDir()
+		if err != nil {
+			return "", err
+		}
+		dir = homedir
 	}
-
 	return filepath.Join(dir, defaultConfigFile), nil
 }
 
 func configDir() (string, error) {
-	dir, err := homeDir()
-	if err != nil {
-		return "", err
+	var dir string
+	if cd := os.Getenv("PACKER_CONFIG_DIR"); cd != "" {
+		log.Printf("Detected config directory from env var: %s", cd)
+		dir = cd
+	} else {
+		homedir, err := homeDir()
+		if err != nil {
+			return "", err
+		}
+		dir = homedir
 	}
 
 	return filepath.Join(dir, defaultConfigDir), nil

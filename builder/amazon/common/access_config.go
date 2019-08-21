@@ -253,7 +253,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Make sure it's obvious from the config how we're getting credentials:
-	// Vault, Packer config, or environemnt.
+	// Vault, Packer config, or environment.
 	if !c.VaultAWSEngine.Empty() {
 		if len(c.AccessKey) > 0 {
 			errs = append(errs,

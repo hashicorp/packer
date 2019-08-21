@@ -9,8 +9,10 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	newCompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
@@ -41,6 +43,8 @@ type AzureClient struct {
 	armStorage.AccountsClient
 	compute.DisksClient
 	compute.SnapshotsClient
+	newCompute.GalleryImageVersionsClient
+	newCompute.GalleryImagesClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -123,7 +127,7 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 }
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
-	cloud *azure.Environment,
+	cloud *azure.Environment, SharedGalleryTimeout time.Duration,
 	servicePrincipalToken, servicePrincipalTokenVault *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
@@ -201,6 +205,19 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.AccountsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.AccountsClient.UserAgent)
+
+	azureClient.GalleryImageVersionsClient = newCompute.NewGalleryImageVersionsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.GalleryImageVersionsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.GalleryImageVersionsClient.RequestInspector = withInspection(maxlen)
+	azureClient.GalleryImageVersionsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.GalleryImageVersionsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImageVersionsClient.UserAgent)
+	azureClient.GalleryImageVersionsClient.Client.PollingDuration = SharedGalleryTimeout
+
+	azureClient.GalleryImagesClient = newCompute.NewGalleryImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.GalleryImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.GalleryImagesClient.RequestInspector = withInspection(maxlen)
+	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImagesClient.UserAgent)
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

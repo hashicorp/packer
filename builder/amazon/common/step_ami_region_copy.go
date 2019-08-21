@@ -21,19 +21,58 @@ type StepAMIRegionCopy struct {
 	Name              string
 	OriginalRegion    string
 
-	toDelete      string
-	getRegionConn func(*AccessConfig, string) (ec2iface.EC2API, error)
+	toDelete           string
+	getRegionConn      func(*AccessConfig, string) (ec2iface.EC2API, error)
+	AMISkipBuildRegion bool
+}
+
+func (s *StepAMIRegionCopy) DeduplicateRegions(intermediary bool) {
+	// Deduplicates regions by looping over the list of regions and storing
+	// the regions as keys in a map. This saves users from accidentally copying
+	// regions twice if they've added a region to a map twice.
+
+	RegionMap := map[string]bool{}
+	RegionSlice := []string{}
+
+	// Original build region may or may not be present in the Regions list, so
+	// let's make absolutely sure it's in our map.
+	RegionMap[s.OriginalRegion] = true
+	for _, r := range s.Regions {
+		RegionMap[r] = true
+	}
+
+	if !intermediary || s.AMISkipBuildRegion {
+		// We don't want to copy back into the original region if we aren't
+		// using an intermediary image, so remove the original region from our
+		// map.
+
+		// We also don't want to copy back into the original region if the
+		// intermediary image is because we're skipping the build region.
+		delete(RegionMap, s.OriginalRegion)
+
+	}
+
+	// Now print all those keys into the region slice again
+	for k, _ := range RegionMap {
+		RegionSlice = append(RegionSlice, k)
+	}
+
+	s.Regions = RegionSlice
 }
 
 func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
+	intermediary, _ := state.Get("intermediary_image").(bool)
 
+	s.DeduplicateRegions(intermediary)
 	ami := amis[s.OriginalRegion]
-	// Always copy back into original region to preserve the ami name
-	s.toDelete = ami
-	s.Regions = append(s.Regions, s.OriginalRegion)
+
+	// Make a note to delete the intermediary AMI if necessary.
+	if intermediary {
+		s.toDelete = ami
+	}
 
 	if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
 		// encrypt_boot is true, so we have to copy the temporary
@@ -42,7 +81,11 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		if s.RegionKeyIds == nil {
 			s.RegionKeyIds = make(map[string]string)
 		}
-		s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+
+		// Make sure the kms_key_id for the original region is in the map
+		if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
+			s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+		}
 	}
 
 	if len(s.Regions) == 0 {
@@ -53,15 +96,18 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	var lock sync.Mutex
 	var wg sync.WaitGroup
-	var regKeyID string
 	errs := new(packer.MultiError)
-
 	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
+		var regKeyID string
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
 		if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
+			// Encrypt is true, explicitly
 			regKeyID = s.RegionKeyIds[region]
+		} else {
+			// Encrypt is nil or false; Make sure region key is empty
+			regKeyID = ""
 		}
 
 		go func(region string) {
@@ -95,6 +141,10 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+
+	if len(s.toDelete) == 0 {
+		return
+	}
 
 	// Delete the unencrypted amis and snapshots
 	ui.Say("Deregistering the AMI and deleting unencrypted temporary " +

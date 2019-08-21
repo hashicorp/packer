@@ -244,3 +244,4 @@
     password for Windows instances. Defaults to 20 minutes. Example value:
     10m
     
+-   `ssh_interface` (string) - SSH Interface

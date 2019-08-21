@@ -3,6 +3,7 @@
 *.so
 *.sublime-*
 .DS_Store
+.idea/
 _cgo_*
 _obj
 _test

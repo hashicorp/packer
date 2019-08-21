@@ -23,6 +23,15 @@
     does not include WHPX support and users may need to compile or source a
     build of QEMU for Windows themselves with WHPX support.
     
+-   `disk_additional_size` ([]string) - Additional disks to create. Uses `vm_name` as the disk name template and
+    appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
+    is the default disk. Each string represents the disk image size in bytes.
+    Optional suffixes 'k' or 'K' (kilobyte, 1024), 'M' (megabyte, 1024k), 'G'
+    (gigabyte, 1024M), 'T' (terabyte, 1024G), 'P' (petabyte, 1024T) and 'E'
+    (exabyte, 1024P)  are supported. 'b' is ignored. Per qemu-img documentation.
+    Each additional disk uses the same disk parameters as the default disk.
+    Unset by default.
+    
 -   `cpus` (int) - The number of cpus to use when building the VM.
      The default is `1` CPU.
     
@@ -171,11 +180,16 @@
     some platforms. For example qemu-kvm, or qemu-system-i386 may be a
     better choice for some systems.
     
--   `ssh_host_port_min` (int) - The minimum and
-    maximum port to use for the SSH port on the host machine which is forwarded
-    to the SSH port on the guest machine. Because Packer often runs in parallel,
-    Packer will choose a randomly available port in this range to use as the
-    host port. By default this is 2222 to 4444.
+-   `qmp_enable` (bool) - Enable QMP socket. Location is specified by `qmp_socket_path`. Defaults
+    to false.
+    
+-   `qmp_socket_path` (string) - QMP Socket Path when `qmp_enable` is true. Defaults to
+    `output_directory`/`vm_name`.monitor.
+    
+-   `ssh_host_port_min` (int) - The minimum and maximum port to use for the SSH port on the host machine
+    which is forwarded to the SSH port on the guest machine. Because Packer
+    often runs in parallel, Packer will choose a randomly available port in
+    this range to use as the host port. By default this is 2222 to 4444.
     
 -   `ssh_host_port_max` (int) - SSH Host Port Max
 -   `use_default_display` (bool) - If true, do not pass a -display option
@@ -185,6 +199,10 @@
 -   `vnc_bind_address` (string) - The IP address that should be
     binded to for VNC. By default packer will use 127.0.0.1 for this. If you
     wish to bind to all interfaces use 0.0.0.0.
+    
+-   `vnc_use_password` (bool) - Whether or not to set a password on the VNC server. This option
+    automatically enables the QMP socket. See `qmp_socket_path`. Defaults to
+    `false`.
     
 -   `vnc_port_min` (int) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type

@@ -24,6 +24,14 @@
     droplet to enter a desired state (such as "active") before timing out. The
     default state timeout is "6m".
     
+-   `snapshot_timeout` (time.Duration) - How long to wait for an image to be published to the shared image
+    gallery before timing out. If your Packer build is failing on the
+    Publishing to Shared Image Gallery step with the error `Original Error:
+    context deadline exceeded`, but the image is present when you check your
+    Azure dashboard, then you probably need to increase this timeout from
+    its default of "60m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
 -   `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
     sets the hostname of the machine to this value.
     

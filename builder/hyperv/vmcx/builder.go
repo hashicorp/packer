@@ -24,10 +24,10 @@ import (
 )
 
 const (
-	DefaultRamSize                 = 1 * 1024  // 1GB
-	MinRamSize                     = 32        // 32MB
-	MaxRamSize                     = 32 * 1024 // 32GB
-	MinNestedVirtualizationRamSize = 4 * 1024  // 4GB
+	DefaultRamSize                 = 1 * 1024    // 1GB
+	MinRamSize                     = 32          // 32MB
+	MaxRamSize                     = 1024 * 1024 // 1TB
+	MinNestedVirtualizationRamSize = 4 * 1024    // 4GB
 
 	LowRam = 256 // 256MB
 
@@ -286,6 +286,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 					errs, fmt.Errorf("CloneFromVMCXPath does not exist: %s", err))
 			}
 		}
+		if strings.HasSuffix(strings.ToLower(b.config.CloneFromVMCXPath), ".vmcx") {
+			// User has provided the vmcx file itself rather than the containing
+			// folder.
+			if strings.Contains(b.config.CloneFromVMCXPath, "Virtual Machines") {
+				keep := strings.Split(b.config.CloneFromVMCXPath, "Virtual Machines")
+				b.config.CloneFromVMCXPath = keep[0]
+			} else {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to "+
+					"parse the clone_from_vmcx_path to find the vm directory. "+
+					"Please provide the path to the folder containing the "+
+					"vmcx file, not the file itself. Example: instead of "+
+					"C:\\path\\to\\output-hyperv-iso\\Virtual Machines\\filename.vmcx"+
+					", provide C:\\path\\to\\output-hyperv-iso\\."))
+			}
+		}
 	}
 
 	if b.config.Generation < 1 || b.config.Generation > 2 {
@@ -536,7 +551,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 
 		&hypervcommon.StepRun{
-			Headless: b.config.Headless,
+			Headless:   b.config.Headless,
+			SwitchName: b.config.SwitchName,
 		},
 
 		&hypervcommon.StepTypeBootCommand{

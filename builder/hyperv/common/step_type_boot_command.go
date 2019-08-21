@@ -33,6 +33,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
+	hostIp := common.GetHTTPIP()
 
 	// Wait the for the vm to boot.
 	if int64(s.BootWait) > 0 {
@@ -45,18 +46,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
-
-	if err != nil {
-		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
-
-	common.SetHTTPIP(hostIp)
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIp,
 		httpPort,

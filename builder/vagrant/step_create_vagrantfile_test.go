@@ -20,7 +20,8 @@ func TestStepCreateVagrantfile_Impl(t *testing.T) {
 func TestCreateFile(t *testing.T) {
 	testy := StepCreateVagrantfile{
 		OutputDir: "./",
-		SourceBox: "bananas",
+		SourceBox: "apples",
+		BoxName:   "bananas",
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
@@ -30,7 +31,13 @@ func TestCreateFile(t *testing.T) {
 	contents, err := ioutil.ReadFile(templatePath)
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
-  config.vm.box = "bananas"
+  config.vm.define "source", autostart: false do |source|
+	source.vm.box = "apples"
+  end
+  config.vm.define "output" do |output|
+	output.vm.box = "bananas"
+	output.vm.box_url = "file://package.box"
+  end
   config.vm.synced_folder ".", "/vagrant", disabled: true
 end`
 	if ok := strings.Compare(actual, expected); ok != 0 {
@@ -51,7 +58,13 @@ func TestCreateFile_customSync(t *testing.T) {
 	contents, err := ioutil.ReadFile(templatePath)
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
-  config.vm.box = ""
+  config.vm.define "source", autostart: false do |source|
+	source.vm.box = ""
+  end
+  config.vm.define "output" do |output|
+	output.vm.box = ""
+	output.vm.box_url = "file://package.box"
+  end
   config.vm.synced_folder "myfolder/foldertimes", "/vagrant"
 end`
 	if ok := strings.Compare(actual, expected); ok != 0 {

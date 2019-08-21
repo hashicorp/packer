@@ -14,7 +14,8 @@ import (
 )
 
 type stepCreateAMI struct {
-	image *ec2.Image
+	image              *ec2.Image
+	AMISkipBuildRegion bool
 }
 
 func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -25,9 +26,18 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Create the image
 	amiName := config.AMIName
-	if config.AMIEncryptBootVolume != nil {
-		// encrypt_boot was set, so we will create a temporary image
-		// and then create a copy of it with the correct encrypt_boot
+	state.Put("intermediary_image", false)
+	if config.AMIEncryptBootVolume != nil && *config.AMIEncryptBootVolume != false || s.AMISkipBuildRegion {
+		state.Put("intermediary_image", true)
+
+		// From AWS SDK docs: You can encrypt a copy of an unencrypted snapshot,
+		// but you cannot use it to create an unencrypted copy of an encrypted
+		// snapshot. Your default CMK for EBS is used unless you specify a
+		// non-default key using KmsKeyId.
+
+		// If encrypt_boot is nil or true, we need to create a temporary image
+		// so that in step_region_copy, we can copy it with the correct
+		// encryption
 		amiName = random.AlphaNum(7)
 	}
 

@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, &b.config.Account)
+		ui, b.config.ProjectId, b.config.Account)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
-			Host:        commHost,
+			Host:        communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
 			SSHConfig:   b.config.Comm.SSHConfigFunc(),
 			WinRMConfig: winrmConfig,
 		},

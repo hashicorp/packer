@@ -41,7 +41,8 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	vncPort := state.Get("vnc_port").(int)
-	vncIP := state.Get("vnc_ip").(string)
+	vncIP := config.VNCBindAddress
+	vncPassword := state.Get("vnc_password")
 
 	if config.VNCConfig.DisableVNC {
 		log.Println("Skipping boot command step...")
@@ -76,7 +77,15 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 	defer nc.Close()
 
-	c, err := vnc.Client(nc, &vnc.ClientConfig{Exclusive: false})
+	var auth []vnc.ClientAuth
+
+	if vncPassword != nil && len(vncPassword.(string)) > 0 {
+		auth = []vnc.ClientAuth{&vnc.PasswordAuth{Password: vncPassword.(string)}}
+	} else {
+		auth = []vnc.ClientAuth{new(vnc.ClientAuthNone)}
+	}
+
+	c, err := vnc.Client(nc, &vnc.ClientConfig{Auth: auth, Exclusive: false})
 	if err != nil {
 		err := fmt.Errorf("Error handshaking with VNC: %s", err)
 		state.Put("error", err)
