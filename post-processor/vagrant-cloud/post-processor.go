@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -95,7 +96,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
-	// required configuration
+	// Required configuration
 	templates := map[string]*string{
 		"box_tag":      &p.config.Tag,
 		"version":      &p.config.Version,
@@ -109,7 +110,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	// create the HTTP client
+	// Create the HTTP client
 	p.client, err = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken, p.insecureSkipTLSVerify)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
@@ -132,7 +133,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	// We assume that there is only one .box file to upload
 	if !strings.HasSuffix(artifact.Files()[0], ".box") {
 		return nil, false, false, fmt.Errorf(
-			"Unknown files in artifact, vagrant box is required: %s", artifact.Files())
+			"Unknown files in artifact, Vagrant box with .box suffix is required as first artifact file: %s", artifact.Files())
 	}
 
 	if p.warnAtlasToken {
@@ -231,6 +232,8 @@ func providerFromBuilderName(name string) string {
 // Returns the Vagrant provider the box is intended for use with by
 // reading the metadata file packaged inside the box
 func providerFromVagrantBox(boxfile string) (providerName string, err error) {
+	log.Println("Attempting to determine provider from metadata in box file. This may take some time...")
+
 	f, err := os.Open(boxfile)
 	if err != nil {
 		return "", fmt.Errorf("Error attempting to open box file: %s", err)
