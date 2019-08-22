@@ -48,7 +48,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	var blockStorageClient *gophercloud.ServiceClient
 	if s.UseBlockStorageVolume {
 		// We need the v3 block storage client.
-		blockStorageClient, err := config.blockStorageV3Client()
+		blockStorageClient, err = config.blockStorageV3Client()
 		if err != nil {
 			err = fmt.Errorf("Error initializing block storage client: %s", err)
 			state.Put("error", err)
