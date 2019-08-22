@@ -17,9 +17,7 @@ type AlicloudDiskDevice struct {
 	Description        string         `mapstructure:"disk_description"`
 	DeleteWithInstance bool           `mapstructure:"disk_delete_with_instance"`
 	Device             string         `mapstructure:"disk_device"`
-	RawEncrypted       config.Trilean `mapstructure:"disk_encrypted"`
-
-	Encrypted *bool
+	Encrypted          config.Trilean `mapstructure:"disk_encrypted"`
 }
 
 type AlicloudDiskDevices struct {
@@ -35,7 +33,7 @@ type AlicloudImageConfig struct {
 	AlicloudImageUNShareAccounts      []string          `mapstructure:"image_unshare_account"`
 	AlicloudImageDestinationRegions   []string          `mapstructure:"image_copy_regions"`
 	AlicloudImageDestinationNames     []string          `mapstructure:"image_copy_names"`
-	RawImageEncrypted                 config.Trilean    `mapstructure:"image_encrypted"`
+	ImageEncrypted                    config.Trilean    `mapstructure:"image_encrypted"`
 	AlicloudImageForceDelete          bool              `mapstructure:"image_force_delete"`
 	AlicloudImageForceDeleteSnapshots bool              `mapstructure:"image_force_delete_snapshots"`
 	AlicloudImageForceDeleteInstances bool              `mapstructure:"image_force_delete_instances"`
@@ -43,8 +41,6 @@ type AlicloudImageConfig struct {
 	AlicloudImageSkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AlicloudImageTags                 map[string]string `mapstructure:"tags"`
 	AlicloudDiskDevices               `mapstructure:",squash"`
-
-	ImageEncrypted *bool
 }
 
 func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
@@ -78,13 +74,6 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 
 		c.AlicloudImageDestinationRegions = regions
-	}
-
-	c.ImageEncrypted = c.RawImageEncrypted.ToBoolPointer()
-
-	c.ECSSystemDiskMapping.Encrypted = c.RawImageEncrypted.ToBoolPointer()
-	for i := range c.ECSImagesDiskMappings {
-		c.ECSImagesDiskMappings[i].Encrypted = c.RawImageEncrypted.ToBoolPointer()
 	}
 
 	if len(errs) > 0 {

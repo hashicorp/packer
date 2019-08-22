@@ -132,8 +132,7 @@ func TestBuilderPrepare_Devices(t *testing.T) {
 		Description:  "system disk",
 		DiskName:     "system_disk",
 		DiskSize:     60,
-		RawEncrypted: helperconfig.TriUnset,
-		Encrypted:    nil,
+		Encrypted:    helperconfig.TriUnset,
 	}
 	if !reflect.DeepEqual(b.config.ECSSystemDiskMapping, expected) {
 		t.Fatalf("system disk is not set properly, actual: %v; expected: %v", b.config.ECSSystemDiskMapping, expected)

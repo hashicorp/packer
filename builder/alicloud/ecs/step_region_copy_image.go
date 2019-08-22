@@ -7,6 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,7 +21,7 @@ type stepRegionCopyAlicloudImage struct {
 func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 
-	if config.ImageEncrypted != nil {
+	if config.ImageEncrypted != confighelper.TriUnset {
 		s.AlicloudImageDestinationRegions = append(s.AlicloudImageDestinationRegions, s.RegionId)
 		s.AlicloudImageDestinationNames = append(s.AlicloudImageDestinationNames, config.AlicloudImageName)
 	}
@@ -38,7 +39,7 @@ func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.S
 
 	ui.Say(fmt.Sprintf("Coping image %s from %s...", srcImageId, s.RegionId))
 	for index, destinationRegion := range s.AlicloudImageDestinationRegions {
-		if destinationRegion == s.RegionId && config.ImageEncrypted == nil {
+		if destinationRegion == s.RegionId && config.ImageEncrypted == confighelper.TriUnset {
 			continue
 		}
 
@@ -52,8 +53,8 @@ func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.S
 		copyImageRequest.ImageId = srcImageId
 		copyImageRequest.DestinationRegionId = destinationRegion
 		copyImageRequest.DestinationImageName = ecsImageName
-		if config.ImageEncrypted != nil {
-			copyImageRequest.Encrypted = requests.NewBoolean(*config.ImageEncrypted)
+		if config.ImageEncrypted != confighelper.TriUnset {
+			copyImageRequest.Encrypted = requests.NewBoolean(config.ImageEncrypted.True())
 		}
 
 		imageResponse, err := client.CopyImage(copyImageRequest)
@@ -65,7 +66,7 @@ func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.S
 		ui.Message(fmt.Sprintf("Copy image from %s(%s) to %s(%s)", s.RegionId, srcImageId, destinationRegion, imageResponse.ImageId))
 	}
 
-	if config.ImageEncrypted != nil {
+	if config.ImageEncrypted != confighelper.TriUnset {
 		if _, err := client.WaitForImageStatus(s.RegionId, alicloudImages[s.RegionId], ImageStatusAvailable, time.Duration(ALICLOUD_DEFAULT_LONG_TIMEOUT)*time.Second); err != nil {
 			return halt(state, err, fmt.Sprintf("Timeout waiting image %s finish copying", alicloudImages[s.RegionId]))
 		}
