@@ -139,7 +139,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 	c.SnapshotUsers = []string{"foo", "bar"}
 	c.AMIKmsKeyId = "123-abc-456"
-	c.RawAMIEncryptBootVolume = config.TriTrue
+	c.AMIEncryptBootVolume = config.TriTrue
 	c.AMIRegions = []string{"us-east-1", "us-west-1"}
 	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
@@ -162,7 +162,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIUsers = []string{"testAccountID"}
-	c.RawAMIEncryptBootVolume = config.TriTrue
+	c.AMIEncryptBootVolume = config.TriTrue
 
 	accessConf := testAccessConfig()
 
