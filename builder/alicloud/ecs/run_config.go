@@ -15,7 +15,7 @@ import (
 type RunConfig struct {
 	AssociatePublicIpAddress bool           `mapstructure:"associate_public_ip_address"`
 	ZoneId                   string         `mapstructure:"zone_id"`
-	RawIOOptimized           config.Trilean `mapstructure:"io_optimized"`
+	IOOptimized              config.Trilean `mapstructure:"io_optimized"`
 	InstanceType             string         `mapstructure:"instance_type"`
 	Description              string         `mapstructure:"description"`
 	AlicloudSourceImage      string         `mapstructure:"source_image"`
@@ -38,7 +38,6 @@ type RunConfig struct {
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`
 	SSHPrivateIp bool                `mapstructure:"ssh_private_ip"`
-	IOOptimized  *bool
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -69,8 +68,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
 		}
 	}
-
-	c.IOOptimized = c.RawIOOptimized.ToBoolPointer()
 
 	return errs
 }

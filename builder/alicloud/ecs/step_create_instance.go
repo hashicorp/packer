@@ -18,7 +18,7 @@ import (
 )
 
 type stepCreateAlicloudInstance struct {
-	IOOptimized             *bool
+	IOOptimized             confighelper.Trilean
 	InstanceType            string
 	UserData                string
 	UserDataFile            string
@@ -143,12 +143,10 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 	request.InternetChargeType = s.InternetChargeType
 	request.InternetMaxBandwidthOut = requests.Integer(convertNumber(s.InternetMaxBandwidthOut))
 
-	if s.IOOptimized != nil {
-		if *s.IOOptimized {
-			request.IoOptimized = IOOptimizedOptimized
-		} else {
-			request.IoOptimized = IOOptimizedNone
-		}
+	if s.IOOptimized.True() {
+		request.IoOptimized = IOOptimizedOptimized
+	} else if IOOptimized.False() {
+		request.IoOptimized = IOOptimizedNone
 	}
 
 	config := state.Get("config").(*Config)
