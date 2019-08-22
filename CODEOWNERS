@@ -5,6 +5,7 @@
 /builder/alicloud/                      @chhaj5236
 /builder/azure/                         @paulmey
 /builder/hyperv/                        @taliesins
+/builder/jdcloud/                       @XiaohanLiang @remrain
 /builder/linode/                        @displague @ctreatma @stvnjacobs
 /builder/lxc/                           @ChrisLundquist
 /builder/lxd/                           @ChrisLundquist
