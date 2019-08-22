@@ -24,13 +24,11 @@ type Config struct {
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	VolumeMappings     []BlockDevice  `mapstructure:"ebs_volumes"`
-	RawAMIENASupport   config.Trilean `mapstructure:"ena_support"`
+	AMIENASupport      config.Trilean `mapstructure:"ena_support"`
 	AMISriovNetSupport bool           `mapstructure:"sriov_support"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context
-
-	AMIENASupport *bool
 }
 
 type Builder struct {
@@ -77,9 +75,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	b.config.AMIENASupport = b.config.RawAMIENASupport.ToBoolPointer()
-
-	if b.config.IsSpotInstance() && ((b.config.AMIENASupport != nil && *b.config.AMIENASupport) || b.config.AMISriovNetSupport) {
+	if b.config.IsSpotInstance() && ((b.config.AMIENASupport.True()) || b.config.AMISriovNetSupport) {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("Spot instances do not support modification, which is required "+
 				"when either `ena_support` or `sriov_support` are set. Please ensure "+

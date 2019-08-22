@@ -20,7 +20,7 @@ type AMIConfig struct {
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AMITags                 TagMap            `mapstructure:"tags"`
-	RawAMIENASupport        config.Trilean    `mapstructure:"ena_support"`
+	AMIENASupport           config.Trilean    `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
@@ -32,8 +32,6 @@ type AMIConfig struct {
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 	AMISkipBuildRegion      bool              `mapstructure:"skip_save_build_region"`
 
-	// parsed from RawAMIENASupport above. Used in steps.
-	AMIENASupport        *bool
 	AMIEncryptBootVolume *bool
 }
 
@@ -65,7 +63,6 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	errs = append(errs, c.prepareRegions(accessConfig)...)
 
-	c.AMIENASupport = c.RawAMIENASupport.ToBoolPointer()
 	c.AMIEncryptBootVolume = c.RawAMIEncryptBootVolume.ToBoolPointer()
 	// Prevent sharing of default KMS key encrypted volumes with other aws users
 	if len(c.AMIUsers) > 0 {
