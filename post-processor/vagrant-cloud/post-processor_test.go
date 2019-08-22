@@ -322,7 +322,7 @@ func TestProviderFromVagrantBox_metadata_bad_json(t *testing.T) {
 
 	_, err = providerFromVagrantBox(boxfile.Name())
 	if err == nil {
-		t.Fatalf("Should have error as box files metadata.json file is empty")
+		t.Fatalf("Should have error as box files metadata.json file contains badly formatted JSON")
 	}
 	t.Logf("%s", err)
 }
@@ -342,7 +342,7 @@ func TestProviderFromVagrantBox_metadata_no_provider_key(t *testing.T) {
 
 	_, err = providerFromVagrantBox(boxfile.Name())
 	if err == nil {
-		t.Fatalf("Should have error as box files metadata.json file is empty")
+		t.Fatalf("Should have error as provider key/value pair is missing from boxes metadata.json file")
 	}
 	t.Logf("%s", err)
 }
@@ -362,7 +362,7 @@ func TestProviderFromVagrantBox_metadata_provider_value_empty(t *testing.T) {
 
 	_, err = providerFromVagrantBox(boxfile.Name())
 	if err == nil {
-		t.Fatalf("Should have error as boxes metadata.json file 'provider' key is empty")
+		t.Fatalf("Should have error as value associated with 'provider' key in boxes metadata.json file is empty")
 	}
 	t.Logf("%s", err)
 }
