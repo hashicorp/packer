@@ -14,7 +14,7 @@ import (
 type BlockDevice struct {
 	DeleteOnTermination bool           `mapstructure:"delete_on_termination"`
 	DeviceName          string         `mapstructure:"device_name"`
-	RawEncrypted        config.Trilean `mapstructure:"encrypted"`
+	Encrypted           config.Trilean `mapstructure:"encrypted"`
 	IOPS                int64          `mapstructure:"iops"`
 	NoDevice            bool           `mapstructure:"no_device"`
 	SnapshotId          string         `mapstructure:"snapshot_id"`
@@ -24,8 +24,6 @@ type BlockDevice struct {
 	KmsKeyId            string         `mapstructure:"kms_key_id"`
 	// ebssurrogate only
 	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
-
-	Encrypted *bool
 }
 
 type BlockDevices struct {
@@ -77,7 +75,8 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 			if blockDevice.SnapshotId != "" {
 				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
 			}
-			ebsBlockDevice.Encrypted = blockDevice.Encrypted
+
+			ebsBlockDevice.Encrypted = blockDevice.Encrypted.ToBoolPointer()
 
 			if blockDevice.KmsKeyId != "" {
 				ebsBlockDevice.KmsKeyId = aws.String(blockDevice.KmsKeyId)
@@ -96,9 +95,9 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		return fmt.Errorf("The `device_name` must be specified " +
 			"for every device in the block device mapping.")
 	}
-	b.Encrypted = b.RawEncrypted.ToBoolPointer()
+
 	// Warn that encrypted must be true or nil when setting kms_key_id
-	if b.KmsKeyId != "" && b.Encrypted != nil && *b.Encrypted == false {
+	if b.KmsKeyId != "" && b.Encrypted.False() {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}
