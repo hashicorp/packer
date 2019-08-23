@@ -178,7 +178,7 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 
 func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
 	c := testAMIConfig()
-	c.AMIEncryptBootVolume = aws.Bool(true)
+	c.AMIEncryptBootVolume = config.TriTrue
 
 	accessConf := testAccessConfig()
 
