@@ -145,7 +145,7 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 
 	if s.IOOptimized.True() {
 		request.IoOptimized = IOOptimizedOptimized
-	} else if IOOptimized.False() {
+	} else if s.IOOptimized.False() {
 		request.IoOptimized = IOOptimizedNone
 	}
 
