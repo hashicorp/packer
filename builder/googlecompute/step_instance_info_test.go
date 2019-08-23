@@ -149,7 +149,7 @@ func TestStepInstanceInfo_errorTimeout(t *testing.T) {
 
 	errCh := make(chan error, 1)
 	go func() {
-		<-time.After(10 * time.Millisecond)
+		<-time.After(50 * time.Millisecond)
 		errCh <- nil
 	}()
 
