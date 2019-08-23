@@ -5,8 +5,14 @@
 package vagrantcloud
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -19,6 +25,7 @@ import (
 
 var builtins = map[string]string{
 	"mitchellh.post-processor.vagrant": "vagrant",
+	"packer.post-processor.artifice":   "artifice",
 	"vagrant":                          "vagrant",
 }
 
@@ -89,7 +96,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
-	// required configuration
+	// Required configuration
 	templates := map[string]*string{
 		"box_tag":      &p.config.Tag,
 		"version":      &p.config.Version,
@@ -103,7 +110,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	// create the HTTP client
+	// Create the HTTP client
 	p.client, err = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken, p.insecureSkipTLSVerify)
 	if err != nil {
 		errs = packer.MultiErrorAppend(
@@ -126,20 +133,21 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	// We assume that there is only one .box file to upload
 	if !strings.HasSuffix(artifact.Files()[0], ".box") {
 		return nil, false, false, fmt.Errorf(
-			"Unknown files in artifact, vagrant box is required: %s", artifact.Files())
+			"Unknown files in artifact, Vagrant box with .box suffix is required as first artifact file: %s", artifact.Files())
 	}
 
 	if p.warnAtlasToken {
 		ui.Message("Warning: Using Vagrant Cloud token found in ATLAS_TOKEN. Please make sure it is correct, or set VAGRANT_CLOUD_TOKEN")
 	}
 
-	// The name of the provider for vagrant cloud, and vagrant
-	providerName := providerFromBuilderName(artifact.Id())
+	// Determine the name of the provider for Vagrant Cloud, and Vagrant
+	providerName, err := getProvider(artifact.Id(), artifact.Files()[0], builtins[artifact.BuilderId()])
 
 	p.config.ctx.Data = &boxDownloadUrlTemplate{
 		ArtifactId: artifact.Id(),
 		Provider:   providerName,
 	}
+
 	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
 	if err != nil {
 		return nil, false, false, fmt.Errorf("Error processing box_download_url: %s", err)
@@ -187,8 +195,21 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	return NewArtifact(providerName, p.config.Tag), true, false, nil
 }
 
-// converts a packer builder name to the corresponding vagrant
-// provider
+func getProvider(builderName, boxfile, builderId string) (providerName string, err error) {
+	if builderId == "artifice" {
+		// The artifice post processor cannot embed any data in the
+		// supplied artifact so the provider information must be extracted
+		// from the box file directly
+		providerName, err = providerFromVagrantBox(boxfile)
+	} else {
+		// For the Vagrant builder and Vagrant post processor the provider can
+		// be determined from information embedded in the artifact
+		providerName = providerFromBuilderName(builderName)
+	}
+	return providerName, err
+}
+
+// Converts a packer builder name to the corresponding vagrant provider
 func providerFromBuilderName(name string) string {
 	switch name {
 	case "aws":
@@ -206,4 +227,60 @@ func providerFromBuilderName(name string) string {
 	default:
 		return name
 	}
+}
+
+// Returns the Vagrant provider the box is intended for use with by
+// reading the metadata file packaged inside the box
+func providerFromVagrantBox(boxfile string) (providerName string, err error) {
+	log.Println("Attempting to determine provider from metadata in box file. This may take some time...")
+
+	f, err := os.Open(boxfile)
+	if err != nil {
+		return "", fmt.Errorf("Error attempting to open box file: %s", err)
+	}
+	defer f.Close()
+
+	// Vagrant boxes are gzipped tar archives
+	ar, err := gzip.NewReader(f)
+	if err != nil {
+		return "", fmt.Errorf("Error unzipping box archive: %s", err)
+	}
+	tr := tar.NewReader(ar)
+
+	// The metadata.json file in the tar archive contains a 'provider' key
+	type metadata struct {
+		ProviderName string `json:"provider"`
+	}
+	md := metadata{}
+
+	// Loop through the files in the archive and read the provider
+	// information from the boxes metadata.json file
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			if md.ProviderName == "" {
+				return "", fmt.Errorf("Error: Provider info was not found in box: %s", boxfile)
+			}
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("Error reading header info from box tar archive: %s", err)
+		}
+
+		if hdr.Name == "metadata.json" {
+			contents, err := ioutil.ReadAll(tr)
+			if err != nil {
+				return "", fmt.Errorf("Error reading contents of metadata.json file from box file: %s", err)
+			}
+			err = json.Unmarshal(contents, &md)
+			if err != nil {
+				return "", fmt.Errorf("Error parsing metadata.json file: %s", err)
+			}
+			if md.ProviderName == "" {
+				return "", fmt.Errorf("Error: Could not determine Vagrant provider from box metadata.json file")
+			}
+			break
+		}
+	}
+	return md.ProviderName, nil
 }
