@@ -35,8 +35,8 @@ type Config struct {
 	Commit bool `mapstructure:"commit" required:"true"`
 
 	// The directory inside container to mount temp directory from host server
-	// for work file provisioner. This defaults to c:/packer-files on windows
-	// and /packer-files on other systems.
+	// for work [file provisioner](/docs/provisioners/file.html). This defaults
+	// to c:/packer-files on windows and /packer-files on other systems.
 	ContainerDir string `mapstructure:"container_dir" required:"false"`
 	// Throw away the container when the build is complete. This is useful for
 	// the [artifice

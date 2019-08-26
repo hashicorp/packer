@@ -18,7 +18,10 @@
     or `ssh_agent_auth` must be specified when `ssh_keypair_name` is
     utilized.
     
--   `temporary_key_pair_name` (string) - SSH Temporary Key Pair Name
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair to generate. By default, Packer
+    generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is
+    a 36 character unique identifier.
+    
 -   `ssh_clear_authorized_keys` (bool) - If true, Packer will attempt to remove its temporary key from
     `~/.ssh/authorized_keys` and `/root/.ssh/authorized_keys`. This is a
     mostly cosmetic option, since Packer will delete the temporary private

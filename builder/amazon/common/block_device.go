@@ -38,7 +38,9 @@ type BlockDevice struct {
 	// encrypted one.
 	Encrypted *bool `mapstructure:"encrypted" required:"false"`
 	// The number of I/O operations per second (IOPS) that the volume supports.
-	// See the documentation on IOPs for more information
+	// See the documentation on
+	// [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+	// for more information
 	IOPS int64 `mapstructure:"iops" required:"false"`
 	// Suppresses the specified device included in the block device mapping of
 	// the AMI.

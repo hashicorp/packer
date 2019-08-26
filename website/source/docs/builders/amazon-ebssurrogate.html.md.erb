@@ -46,6 +46,10 @@ necessary for this build to succeed and can be found further down the page.
 
 ### AMI Configuration
 
+#### Required:
+
+<%= partial "partials/builder/amazon/common/AMIConfig-required" %>
+
 #### Optional:
 <%= partial "partials/builder/amazon/common/AMIConfig-not-required" %>
 
@@ -92,6 +96,8 @@ Block devices can be nested in the
 #### Optional:
 
 <%= partial "partials/helper/communicator/Config-not-required" %>
+<%= partial "partials/helper/communicator/SSH-not-required" %>
+<%= partial "partials/helper/communicator/SSHInterface-not-required" %>
 
 ## Basic Example
 

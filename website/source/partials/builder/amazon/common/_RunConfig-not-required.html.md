@@ -231,9 +231,32 @@
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
     
--   `vpc_filter` (VpcFilterOptions) - Filters used to populate the vpc_id field.
-    vpc_id take precedence over this.
+-   `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
     Example:
+    
+    ``` json
+    {
+      "vpc_filter": {
+        "filters": {
+          "tag:Class": "build",
+          "isDefault": "false",
+          "cidr": "/24"
+        }
+      }
+    }
+    ```
+    
+    This selects the VPC with tag `Class` with the value `build`, which is not
+    the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
+    unless *exactly* one VPC is returned.
+    
+    -   `filters` (map of strings) - filters used to select a `vpc_id`. NOTE:
+        This will fail unless *exactly* one VPC is returned. Any filter
+        described in the docs for
+        [DescribeVpcs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html)
+        is valid.
+    
+    `vpc_id` take precedence over this.
     
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
     in order to create a temporary security group within the VPC. Requires

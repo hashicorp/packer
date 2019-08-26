@@ -14,7 +14,9 @@
     encrypted one.
     
 -   `iops` (int64) - The number of I/O operations per second (IOPS) that the volume supports.
-    See the documentation on IOPs for more information
+    See the documentation on
+    [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+    for more information
     
 -   `no_device` (bool) - Suppresses the specified device included in the block device mapping of
     the AMI.

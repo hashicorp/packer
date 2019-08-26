@@ -60,8 +60,10 @@ type AccessConfig struct {
 	// This allows skipping TLS
 	// verification of the AWS EC2 endpoint. The default is false.
 	InsecureSkipTLSVerify bool `mapstructure:"insecure_skip_tls_verify" required:"false"`
-	// The MFA TOTP code. This should probably be a user variable since it
-	// changes all the time.
+	// The MFA
+	// [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+	// code. This should probably be a user variable since it changes all the
+	// time.
 	MFACode string `mapstructure:"mfa_code" required:"false"`
 	// The profile to use in the shared credentials file for
 	// AWS. See Amazon's documentation on [specifying
