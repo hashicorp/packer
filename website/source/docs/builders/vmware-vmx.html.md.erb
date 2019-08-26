@@ -76,13 +76,11 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Required:
 
-<%= partial "partials/builder/virtualbox/ovf/Config-required" %>
+<%= partial "partials/builder/vmware/vmx/Config-required" %>
 
 #### Optional:
 
-<%= partial "partials/builder/virtualbox/ovf/Config-not-required" %>
-<%= partial "partials/builder/virtualbox/common/VBoxVersionConfig-not-required" %>
-<%= partial "partials/builder/virtualbox/common/GuestAdditionsConfig-not-required" %>
+<%= partial "partials/builder/vmware/vmx/Config-not-required" %>
 
 ### Http directory configuration
 
@@ -103,19 +101,19 @@ necessary for this build to succeed and can be found further down the page.
 
 #### Optional:
 
-<%= partial "partials/builder/virtualbox/common/ExportConfig-not-required" %>
+<%= partial "partials/builder/vmware/common/ExportConfig-not-required" %>
 
 ### Output configuration
 
 #### Optional:
 
-<%= partial "partials/builder/virtualbox/common/OutputConfig-not-required" %>
+<%= partial "partials/builder/vmware/common/OutputConfig-not-required" %>
 
 ### Run configuration
 
 #### Optional:
 
-<%= partial "partials/builder/virtualbox/common/RunConfig-not-required" %>
+<%= partial "partials/builder/vmware/common/RunConfig-not-required" %>
 
 ### Driver configuration
 
@@ -135,12 +133,6 @@ necessary for this build to succeed and can be found further down the page.
 
 <%= partial "partials/builder/vmware/common/VMXConfig-not-required" %>
 
-### Shutdown configuration
-
-#### Optional:
-
-<%= partial "partials/builder/virtualbox/common/ShutdownConfig-not-required" %>
-
 ### Communicator configuration
 
 #### Optional common fields:
@@ -150,29 +142,34 @@ necessary for this build to succeed and can be found further down the page.
 #### Optional SSH fields:
 
 <%= partial "partials/helper/communicator/SSH-not-required" %>
-<%= partial "partials/builder/virtualbox/common/SSHConfig-not-required" %>
+<%= partial "partials/builder/vmware/common/SSHConfig-not-required" %>
 
 #### Optional WinRM fields:
 
 <%= partial "partials/helper/communicator/WinRM-not-required" %>
 
-## Boot Command
+## Shutdown Configuration
 
-The `boot_command` configuration is very important: it specifies the keys to
-type when the virtual machine is first booted in order to start the OS
-installer. This command is typed after `boot_wait`.
+<%= partial "partials/common/shutdowncommand/ShutdownConfig-not-required" %>
 
-As documented above, the `boot_command` is an array of strings. The strings are
-all typed in sequence. It is an array only to improve readability within the
-template.
+## Boot Configuration
 
-The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard.
+<%= partial "partials/common/bootcommand/BootConfig" %>
+<%= partial "partials/common/bootcommand/VNCConfig" %>
 
--&gt; Keystrokes are typed as separate key up/down events over VNC with a
-default 100ms delay. The delay alleviates issues with latency and CPU
-contention. You can tune this delay on a per-builder basis by specifying
-"boot_key_interval" in your Packer template, for example:
+-&gt; **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
+configuration has to include a `hostonly` or `nat` type network interface.
+If you are using this feature, it is recommended to leave the default network
+configuration while you are building the VM, and use the `vmx_data_post` hook
+to modify the network configuration after the VM is done building.
+
+#### Optional:
+
+<%= partial "partials/common/bootcommand/VNCConfig-not-required" %>
+<%= partial "partials/common/bootcommand/BootConfig-not-required" %>
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ```
 {
@@ -185,48 +182,6 @@ contention. You can tune this delay on a per-builder basis by specifying
   ]
 }
 ```
-
--   `<f1>` - `<f12>` - Simulates pressing a function key.
-
--   `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
-
--   `<spacebar>` - Simulates pressing the spacebar.
-
--   `<insert>` - Simulates pressing the insert key.
-
--   `<home>` `<end>` - Simulates pressing the home and end keys.
-
--   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
-
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
-
--   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
-
--   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
-
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
-
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl
-    key.
-
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
-    shift key.
-
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
-
--   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
-
--   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
-
--   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
-    sending any additional keys. This is useful if you have to generally wait
-    for the UI to update before typing more.
-
-In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
-available variables are:
-
-<%= partial "partials/builders/boot-command" %>
 
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:

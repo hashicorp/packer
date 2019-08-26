@@ -81,7 +81,10 @@ type SSH struct {
 	// [`ssh_private_key_file`](../templates/communicator.html#ssh_private_key_file)
 	// or `ssh_agent_auth` must be specified when `ssh_keypair_name` is
 	// utilized.
-	SSHKeyPairName          string `mapstructure:"ssh_keypair_name"`
+	SSHKeyPairName string `mapstructure:"ssh_keypair_name"`
+	// The name of the temporary key pair to generate. By default, Packer
+	// generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is
+	// a 36 character unique identifier.
 	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
 	// If true, Packer will attempt to remove its temporary key from
 	// `~/.ssh/authorized_keys` and `/root/.ssh/authorized_keys`. This is a

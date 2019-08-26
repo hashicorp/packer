@@ -7,8 +7,8 @@
     /app", "EXPOSE 8080" ]
     
 -   `container_dir` (string) - The directory inside container to mount temp directory from host server
-    for work file provisioner. This defaults to c:/packer-files on windows
-    and /packer-files on other systems.
+    for work [file provisioner](/docs/provisioners/file.html). This defaults
+    to c:/packer-files on windows and /packer-files on other systems.
     
 -   `exec_user` (string) - Username (UID) to run remote commands with. You can also set the group
     name/ID if you want: (UID or UID:GID). You may need this if you get

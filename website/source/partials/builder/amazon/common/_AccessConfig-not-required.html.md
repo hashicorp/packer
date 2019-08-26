@@ -12,8 +12,10 @@
 -   `insecure_skip_tls_verify` (bool) - This allows skipping TLS
     verification of the AWS EC2 endpoint. The default is false.
     
--   `mfa_code` (string) - The MFA TOTP code. This should probably be a user variable since it
-    changes all the time.
+-   `mfa_code` (string) - The MFA
+    [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the
+    time.
     
 -   `profile` (string) - The profile to use in the shared credentials file for
     AWS. See Amazon's documentation on [specifying

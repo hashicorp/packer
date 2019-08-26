@@ -1,11 +1,13 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/chroot/builder.go; DO NOT EDIT MANUALLY -->
 
--   `ami_block_device_mappings` (BlockDevices) - Add one or more block device mappings to the AMI. If this field is
-    populated, and you are building from an existing source image, the block
-    device mappings in the source image will be overwritten. This means you
-    must have a block device mapping entry for your root volume,
-    `root_volume_size` and `root_device_name`. See the
-    [BlockDevices](#block-devices-configuration) documentation for fields.
+-   `ami_block_device_mappings` (BlockDevices) - Add one or more [block device
+    mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. If this field is populated, and you are building from an
+    existing source image, the block device mappings in the source image
+    will be overwritten. This means you must have a block device mapping
+    entry for your root volume, `root_volume_size` and `root_device_name`.
+    See the [BlockDevices](#block-devices-configuration) documentation for
+    fields.
     
 -   `chroot_mounts` ([][]string) - This is a list of devices to mount into the chroot environment. This
     configuration parameter requires some additional documentation which is

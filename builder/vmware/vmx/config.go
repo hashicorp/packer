@@ -29,9 +29,19 @@ type Config struct {
 	vmwcommon.ToolsConfig          `mapstructure:",squash"`
 	vmwcommon.VMXConfig            `mapstructure:",squash"`
 	vmwcommon.ExportConfig         `mapstructure:",squash"`
-	// By default Packer creates a 'full' clone of
-	// the virtual machine specified in source_path. The resultant virtual
-	// machine is fully independant from the parent it was cloned from.
+	// By default Packer creates a 'full' clone of the virtual machine
+	// specified in source_path. The resultant virtual machine is fully
+	// independant from the parent it was cloned from.
+	//
+	// Setting linked to true instead causes Packer to create the virtual
+	// machine as a 'linked' clone. Linked clones use and require ongoing
+	// access to the disks of the parent virtual machine. The benefit of a
+	// linked clone is that the clones virtual disk is typically very much
+	// smaller than would be the case for a full clone. Additionally, the
+	// cloned virtual machine can also be created much faster. Creating a
+	// linked clone will typically only be of benefit in some advanced build
+	// scenarios. Most users will wish to create a full clone instead. Defaults
+	// to false.
 	Linked bool `mapstructure:"linked" required:"false"`
 	// The type of remote machine that will be used to
 	// build this VM rather than a local desktop product. The only value accepted
