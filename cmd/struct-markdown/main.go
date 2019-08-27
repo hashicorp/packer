@@ -105,6 +105,10 @@ func main() {
 			} else {
 				docs = strings.Join(camelcase.Split(field.Names[0].Name), " ")
 			}
+
+			if strings.Contains(docs, "TODO") {
+				continue
+			}
 			fieldType := string(b[field.Type.Pos()-1 : field.Type.End()-1])
 			fieldType = strings.ReplaceAll(fieldType, "*", `\*`)
 

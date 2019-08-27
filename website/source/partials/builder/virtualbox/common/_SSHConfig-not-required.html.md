@@ -11,6 +11,3 @@
     does not setup forwarded port mapping for SSH requests and uses ssh_port
     on the host to communicate to the virtual machine.
     
--   `ssh_wait_timeout` (time.Duration) - These are deprecated, but we keep them around for BC
-    TODO(@mitchellh): remove
-    
