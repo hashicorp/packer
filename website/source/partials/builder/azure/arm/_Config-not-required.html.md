@@ -76,8 +76,17 @@
     
     CLI example `az vm list-sizes --location westus`
     
--   `managed_image_resource_group_name` (string) - Managed Image Resource Group Name
--   `managed_image_name` (string) - Managed Image Name
+-   `managed_image_resource_group_name` (string) - Specify the managed image resource group name where the result of the
+    Packer build will be saved. The resource group must already exist. If
+    this value is set, the value managed_image_name must also be set. See
+    documentation to learn more about managed images.
+    
+-   `managed_image_name` (string) - Specify the managed image name where the result of the Packer build will
+    be saved. The image name must not exist ahead of time, and will not be
+    overwritten. If this value is set, the value
+    managed_image_resource_group_name must also be set. See documentation to
+    learn more about managed images.
+    
 -   `managed_image_storage_account_type` (string) - Specify the storage account
     type for a managed image. Valid values are Standard_LRS and Premium_LRS.
     The default is Standard_LRS.
@@ -100,15 +109,21 @@
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
     
--   `resource_group_name` (string) - Resource Group Name
--   `storage_account` (string) - Storage Account
+-   `resource_group_name` (string) - Resource group under which the final artifact will be stored.
+    
+-   `storage_account` (string) - Storage account under which the final artifact will be stored.
+    
 -   `temp_compute_name` (string) - temporary name assigned to the VM. If this
     value is not set, a random value will be assigned. Knowing the resource
     group and VM name allows one to execute commands to update the VM during a
     Packer build, e.g. attach a resource disk to the VM.
     
--   `temp_resource_group_name` (string) - Temp Resource Group Name
--   `build_resource_group_name` (string) - Build Resource Group Name
+-   `temp_resource_group_name` (string) - name assigned to the temporary resource group created during the build.
+    If this value is not set, a random value will be assigned. This resource
+    group is deleted at the end of the build.
+    
+-   `build_resource_group_name` (string) - Specify an existing resource group to run the build in.
+    
 -   `private_virtual_network_with_public_ip` (bool) - This value allows you to
     set a virtual_network_name and obtain a public IP. If this value is not
     set and virtual_network_name is defined Packer is only allowed to be
