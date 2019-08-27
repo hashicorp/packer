@@ -10,9 +10,9 @@ import (
 
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
-	// Tags applied to the AMI. This is a
-	// template engine, see Build template
-	// data for more information.
+	// Tags to apply to the volume. These are retained after the builder
+	// completes. This is a [template engine](/docs/templates/engine.html), see
+	// [Build template data](#build-template-data) for more information.
 	Tags awscommon.TagMap `mapstructure:"tags" required:"false"`
 }
 
