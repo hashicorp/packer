@@ -193,8 +193,17 @@ type Config struct {
 	// CLI example `az vm list-sizes --location westus`
 	VMSize string `mapstructure:"vm_size" required:"false"`
 
+	// Specify the managed image resource group name where the result of the
+	// Packer build will be saved. The resource group must already exist. If
+	// this value is set, the value managed_image_name must also be set. See
+	// documentation to learn more about managed images.
 	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName              string `mapstructure:"managed_image_name"`
+	// Specify the managed image name where the result of the Packer build will
+	// be saved. The image name must not exist ahead of time, and will not be
+	// overwritten. If this value is set, the value
+	// managed_image_resource_group_name must also be set. See documentation to
+	// learn more about managed images.
+	ManagedImageName string `mapstructure:"managed_image_name"`
 	// Specify the storage account
 	// type for a managed image. Valid values are Standard_LRS and Premium_LRS.
 	// The default is Standard_LRS.
