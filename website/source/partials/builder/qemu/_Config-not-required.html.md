@@ -140,7 +140,8 @@
         ],
         [ "-device", "virtio-net,netdev=mynet0" ]
       ]
-    } ```
+    }
+    ```
     
     would produce the following (not including other defaults supplied by
     the builder and not otherwise conflicting with the qemuargs):
