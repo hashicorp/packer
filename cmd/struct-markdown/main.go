@@ -105,10 +105,12 @@ func main() {
 			} else {
 				docs = strings.Join(camelcase.Split(field.Names[0].Name), " ")
 			}
+			fieldType := string(b[field.Type.Pos()-1 : field.Type.End()-1])
+			fieldType = strings.ReplaceAll(fieldType, "*", `\*`)
 
 			field := Field{
 				Name: name,
-				Type: fmt.Sprintf("%s", b[field.Type.Pos()-1:field.Type.End()-1]),
+				Type: fieldType,
 				Docs: docs,
 			}
 			if req, err := tags.Get("required"); err == nil && req.Value() == "true" {
