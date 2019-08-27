@@ -23,7 +23,8 @@
             },
             "most_recent": true
         }
-    } ```
+    }
+    ```
     
     This selects the most recent production Ubuntu 16.04 shared to you by
     the given owner. NOTE: This will fail unless *exactly* one image is
