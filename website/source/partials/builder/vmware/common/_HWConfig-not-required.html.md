@@ -49,7 +49,7 @@
                                           should use the named-pipe.
         * `endpoint` (string) - Chooses the type of the VM-end, which can be
                                 either a `client` or `server`.
-        * `host` (str`ing) - Chooses the type of the host-end, which can be either
+        * `host` (string) - Chooses the type of the host-end, which can be either
                             an `app` (application) or `vm` (another virtual-machine).
         * `yield` (bool) - This is an optional boolean that specifies whether
                            the vm should yield the cpu when polling the port.
