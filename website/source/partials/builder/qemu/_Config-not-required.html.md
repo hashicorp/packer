@@ -217,8 +217,3 @@
     "BUILDNAME" is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
     
--   `ssh_wait_timeout` (time.Duration) - These are deprecated, but we keep them around for BC
-    TODO(@mitchellh): remove
-    
--   `run_once` (bool) - TODO(mitchellh): deprecate
-    
