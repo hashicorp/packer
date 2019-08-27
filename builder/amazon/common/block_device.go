@@ -133,7 +133,8 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}
 
-	return nil
+	_, err := interpolate.RenderInterface(&b, ctx)
+	return err
 }
 
 func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
