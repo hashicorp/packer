@@ -227,15 +227,21 @@ type Config struct {
 	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
 	// 256 characters. Tags are applied to every resource deployed by a Packer
 	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
-	AzureTags         map[string]*string `mapstructure:"azure_tags" required:"false"`
-	ResourceGroupName string             `mapstructure:"resource_group_name"`
-	StorageAccount    string             `mapstructure:"storage_account"`
+	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
+	// Resource group under which the final artifact will be stored.
+	ResourceGroupName string `mapstructure:"resource_group_name"`
+	// Storage account under which the final artifact will be stored.
+	StorageAccount string `mapstructure:"storage_account"`
 	// temporary name assigned to the VM. If this
 	// value is not set, a random value will be assigned. Knowing the resource
 	// group and VM name allows one to execute commands to update the VM during a
 	// Packer build, e.g. attach a resource disk to the VM.
-	TempComputeName            string `mapstructure:"temp_compute_name" required:"false"`
-	TempResourceGroupName      string `mapstructure:"temp_resource_group_name"`
+	TempComputeName string `mapstructure:"temp_compute_name" required:"false"`
+	// name assigned to the temporary resource group created during the build.
+	// If this value is not set, a random value will be assigned. This resource
+	// group is deleted at the end of the build.
+	TempResourceGroupName string `mapstructure:"temp_resource_group_name"`
+	// Specify an existing resource group to run the build in.
 	BuildResourceGroupName     string `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
