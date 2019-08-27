@@ -10,7 +10,7 @@
     source instance. See the [BlockDevices](#block-devices-configuration)
     documentation for fields.
     
--   `ena_support` (*bool) - Enable enhanced networking (ENA but not SriovNetSupport) on
+-   `ena_support` (\*bool) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add ec2:ModifyInstanceAttribute to your AWS
     IAM policy. If false, this will disable enhanced networking in the final
     AMI as opposed to passing the setting through unchanged from the source.

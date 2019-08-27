@@ -104,7 +104,7 @@
     region that supports [availability
     zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
     
--   `azure_tags` (map[string]*string) - the user can define up to 15
+-   `azure_tags` (map[string]\*string) - the user can define up to 15
     tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.

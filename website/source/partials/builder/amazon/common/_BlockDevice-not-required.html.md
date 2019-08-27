@@ -8,7 +8,7 @@
 -   `device_name` (string) - The device name exposed to the instance (for example, /dev/sdh or xvdh).
     Required for every device in the block device mapping.
     
--   `encrypted` (*bool) - Indicates whether or not to encrypt the volume. By default, Packer will
+-   `encrypted` (\*bool) - Indicates whether or not to encrypt the volume. By default, Packer will
     keep the encryption setting to what it was in the source image. Setting
     false will result in an unencrypted device, and true will result in an
     encrypted one.

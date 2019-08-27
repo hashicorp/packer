@@ -30,7 +30,7 @@
 -   `disk_device` (string) - Device information of the related instance:
     such as /dev/xvdb It is null unless the Status is In_use.
     
--   `disk_encrypted` (*bool) - Whether or not to encrypt the data disk.
+-   `disk_encrypted` (\*bool) - Whether or not to encrypt the data disk.
     If this option is set to true, the data disk will be encryped and corresponding snapshot in the target image will also be encrypted. By
     default, if this is an extra data disk, Packer will not encrypt the
     data disk. Otherwise, Packer will keep the encryption setting to what

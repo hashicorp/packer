@@ -19,7 +19,7 @@
     uppercase/lowercase letter or a Chinese character, and may contain numbers,
     _ or -. It cannot begin with http:// or https://.
     
--   `image_encrypted` (*bool) - Whether or not to encrypt the target images,            including those copied if image_copy_regions is specified. If this option
+-   `image_encrypted` (\*bool) - Whether or not to encrypt the target images,            including those copied if image_copy_regions is specified. If this option
     is set to true, a temporary image will be created from the provisioned
     instance in the main region and an encrypted copy will be generated in the
     same region. By default, Packer will keep the encryption setting to what
