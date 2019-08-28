@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -45,15 +46,19 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 				continue
 			}
 
+			ui.Message(fmt.Sprintf("Compiling list of tags to apply to volume on %s...", mapping.DeviceName))
 			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
-				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
+				err := fmt.Errorf("Error generating tags for device %s: %s", mapping.DeviceName, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
 			tags.Report(ui)
 
+			// Generate the map of volumes and associated tags to apply.
+			// Looping over the instance block device mappings allows us to
+			// obtain the volumeId
 			for _, v := range instance.BlockDeviceMappings {
 				if *v.DeviceName == mapping.DeviceName {
 					toTag[*v.Ebs.VolumeId] = tags
@@ -61,9 +66,11 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 			}
 		}
 
+		// Apply the tags
 		for volumeId, tags := range toTag {
+			ui.Message(fmt.Sprintf("Applying tags to EBS Volume: %s", volumeId))
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-				Resources: []*string{&volumeId},
+				Resources: aws.StringSlice([]string{volumeId}),
 				Tags:      tags,
 			})
 			if err != nil {
@@ -72,7 +79,6 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-
 		}
 	}
 
