@@ -23,9 +23,9 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes"`
 	AMIENASupport      *bool         `mapstructure:"ena_support"`
 	AMISriovNetSupport bool          `mapstructure:"sriov_support"`
+	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context
@@ -120,8 +120,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
 			BlockDevices:                      b.config.launchBlockDevices,
 			BlockDurationMinutes:              b.config.BlockDurationMinutes,
-			Ctx:                               b.config.ctx,
 			Comm:                              &b.config.RunConfig.Comm,
+			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
@@ -129,8 +129,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
-			SpotPrice:                         b.config.SpotPrice,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
+			SpotPrice:                         b.config.SpotPrice,
 			SpotTags:                          b.config.SpotTags,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
