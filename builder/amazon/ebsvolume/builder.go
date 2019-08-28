@@ -23,9 +23,10 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	AMIENASupport      *bool         `mapstructure:"ena_support"`
-	AMISriovNetSupport bool          `mapstructure:"sriov_support"`
-	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes"`
+	AMIENASupport      *bool            `mapstructure:"ena_support"`
+	AMISriovNetSupport bool             `mapstructure:"sriov_support"`
+	VolumeMappings     []BlockDevice    `mapstructure:"ebs_volumes"`
+	VolumeRunTags      awscommon.TagMap `mapstructure:"run_volume_tags"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context
@@ -135,6 +136,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
+			VolumeTags:                        b.config.VolumeRunTags,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
@@ -154,6 +156,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
+			VolumeTags:                        b.config.VolumeRunTags,
 		}
 	}
 
