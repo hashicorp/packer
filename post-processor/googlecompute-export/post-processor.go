@@ -19,13 +19,14 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 
-	DiskSizeGb  int64    `mapstructure:"disk_size"`
-	DiskType    string   `mapstructure:"disk_type"`
-	MachineType string   `mapstructure:"machine_type"`
-	Network     string   `mapstructure:"network"`
-	Paths       []string `mapstructure:"paths"`
-	Subnetwork  string   `mapstructure:"subnetwork"`
-	Zone        string   `mapstructure:"zone"`
+	DiskSizeGb          int64    `mapstructure:"disk_size"`
+	DiskType            string   `mapstructure:"disk_type"`
+	MachineType         string   `mapstructure:"machine_type"`
+	Network             string   `mapstructure:"network"`
+	Paths               []string `mapstructure:"paths"`
+	Subnetwork          string   `mapstructure:"subnetwork"`
+	Zone                string   `mapstructure:"zone"`
+	ServiceAccountEmail string   `mapstructure:"service_account_email"`
 
 	Account *jwt.Config
 	ctx     interpolate.Context
@@ -139,6 +140,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			"https://www.googleapis.com/auth/devstorage.full_control",
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
+	}
+	if p.config.ServiceAccountEmail != "" {
+		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
 	}
 	exporterConfig.CalcTimeout()
 
