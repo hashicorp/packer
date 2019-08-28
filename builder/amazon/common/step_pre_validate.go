@@ -85,19 +85,20 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 
 	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s", s.DestAmiName))
-	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+	req, resp := ec2conn.DescribeImagesRequest(&ec2.DescribeImagesInput{
 		Filters: []*ec2.Filter{{
 			Name:   aws.String("name"),
 			Values: []*string{aws.String(s.DestAmiName)},
 		}}})
+	req.RetryCount = 11
 
+	err := req.Send()
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
 	if len(resp.Images) > 0 {
 		err := fmt.Errorf("Error: AMI Name: '%s' is used by an existing AMI: %s", *resp.Images[0].Name, *resp.Images[0].ImageId)
 		state.Put("error", err)
