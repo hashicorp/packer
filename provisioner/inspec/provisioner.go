@@ -217,6 +217,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
+	if err != nil {
+		return fmt.Errorf("error creating host signer: %s", err)
+	}
+
 	// Remove the private key file
 	if len(k.privKeyFile) > 0 {
 		defer os.Remove(k.privKeyFile)
