@@ -30,6 +30,7 @@ type Config struct {
 	Subnetwork          string   `mapstructure:"subnetwork"`
 	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
 	Zone                string   `mapstructure:"zone"`
+	ServiceAccountEmail string   `mapstructure:"service_account_email"`
 
 	account *jwt.Config
 	ctx     interpolate.Context
@@ -149,6 +150,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			"https://www.googleapis.com/auth/devstorage.full_control",
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
+	}
+	if p.config.ServiceAccountEmail != "" {
+		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
 	}
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
