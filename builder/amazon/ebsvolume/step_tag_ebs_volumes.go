@@ -3,6 +3,7 @@ package ebsvolume
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -20,6 +21,7 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
 	volumes := make(EbsVolumes)
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
@@ -37,8 +39,50 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 	state.Put("ebsvolumes", volumes)
 
 	if len(s.VolumeMapping) > 0 {
-		ui.Say("Tagging EBS volumes...")
+		// If run_volume_tags were set in the template any attached EBS
+		// volume will have had these tags applied when the instance was
+		// created. We now need to remove these tags to ensure only the EBS
+		// volume tags are applied (if any)
+		if config.VolumeRunTags.IsSet() {
+			ui.Say("Removing any tags applied to EBS volumes when the source instance was created...")
 
+			ui.Message("Compiling list of existing tags to remove...")
+			existingTags, err := config.VolumeRunTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			if err != nil {
+				err := fmt.Errorf("Error generating list of tags to remove: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+			existingTags.Report(ui)
+
+			// Generate the list of volumes with tags to delete.
+			// Looping over the instance block device mappings allows us to
+			// obtain the volumeId
+			volumeIds := []string{}
+			for _, mapping := range s.VolumeMapping {
+				for _, v := range instance.BlockDeviceMappings {
+					if *v.DeviceName == mapping.DeviceName {
+						volumeIds = append(volumeIds, *v.Ebs.VolumeId)
+					}
+				}
+			}
+
+			// Delete the tags
+			ui.Message(fmt.Sprintf("Deleting 'run_volume_tags' on EBS Volumes: %s", strings.Join(volumeIds, ", ")))
+			_, err = ec2conn.DeleteTags(&ec2.DeleteTagsInput{
+				Resources: aws.StringSlice(volumeIds),
+				Tags:      existingTags,
+			})
+			if err != nil {
+				err := fmt.Errorf("Error deleting tags on EBS Volumes %s: %s", strings.Join(volumeIds, ", "), err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+
+		ui.Say("Tagging EBS volumes...")
 		toTag := map[string][]*ec2.Tag{}
 		for _, mapping := range s.VolumeMapping {
 			if len(mapping.Tags) == 0 {
