@@ -108,6 +108,12 @@ builder.
         engine](/docs/templates/engine.html), see [Build template
         data](#build-template-data) for more information.
 
+        Note: The tags specified here may be *temporarily* overridden by
+        those specified in `run_volume_tags` - but only while the instance
+        is being created. Packer will replace all tags on the volume with
+        those configured here as soon as the instance is reported as
+        'ready'.
+
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC,
     public IP addresses are not provided by default. If this is `true`, your
     new instance will get a Public IP. Default: `false`.
@@ -209,6 +215,19 @@ builder.
     that is *launched* to create the EBS volumes. This is a [template
     engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
+
+-   `run_volume_tags` (object of key/value strings) - Tags to apply to the
+    volumes of the instance that is *launched* to create EBS Volumes. These
+    tags will *not* appear in the tags of the resulting EBS volumes unless
+    they're duplicated under `tags` in the `ebs_volumes` setting. This is a
+    [template engine](/docs/templates/engine.html), see [Build template
+    data](#build-template-data) for more information.
+
+    Note: The tags specified here will be *temporarily* applied to volumes
+    specified in `ebs_volumes` - but only while the instance is being
+    created. Packer will replace all tags on the volume with the tags
+    configured in the `ebs_volumes` section as soon as the instance is
+    reported as 'ready'.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security
     group to assign to the instance. By default this is not set and Packer will
