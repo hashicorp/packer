@@ -96,6 +96,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		return nil, err
 	}
 	qemuVersion, err := version.NewVersion(rawVersion)
+	if err != nil {
+		return nil, err
+	}
 	v2 := version.Must(version.NewVersion("2.0"))
 
 	if qemuVersion.GreaterThanOrEqual(v2) {
