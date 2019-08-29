@@ -235,7 +235,7 @@ builder.
 
 -   `security_token` (string) - STS access token, can be set through template
     or by exporting as environment variable such as
-    `export SecurityToken=value`.
+    `export SECURITY_TOKEN=value`.
 
 -   `skip_region_validation` (boolean) - The region validation can be skipped
     if this value is true, the default value is false.
