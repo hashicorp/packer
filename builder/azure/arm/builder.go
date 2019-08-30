@@ -439,8 +439,9 @@ func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) strin
 		ui.Error(fmt.Sprintf("Failed to parse the token,Error: %s", err.Error()))
 		return ""
 	}
-	return claims["oid"].(string)
 
+	oid, _ := claims["oid"].(string)
+	return oid
 }
 
 func normalizeAzureRegion(name string) string {
