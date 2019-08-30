@@ -292,3 +292,12 @@ make testacc TEST=./builder/amazon/ebs TESTARGS="-run TestBuilderAcc_forceDelete
 Acceptance tests typically require other environment variables to be set for
 things such as API tokens and keys. Each test should error and tell you which
 credentials are missing, so those are not documented here.
+
+#### Debugging
+
+Each packer plugin runs in a separate process and communicates with RCP over a
+socket therefore using a debugger will not work (be complicated at least).
+
+But most of the Packer code is really simple and easy to follow with PACKER_LOG
+turned on. If that doesn't work adding some extra debug print outs when you have
+homed in on the problem is usually enough.
