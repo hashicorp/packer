@@ -30,6 +30,7 @@ type AMIConfig struct {
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 	AMISkipBuildRegion      bool              `mapstructure:"skip_save_build_region"`
+	AMISkipBuildIfExists    bool              `mapstructure:"skip_build_if_exists"`
 }
 
 func stringInSlice(s []string, searchstr string) bool {

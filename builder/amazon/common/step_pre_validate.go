@@ -18,9 +18,10 @@ import (
 // the build before actually doing any time consuming work
 //
 type StepPreValidate struct {
-	DestAmiName        string
-	ForceDeregister    bool
-	AMISkipBuildRegion bool
+	DestAmiName          string
+	ForceDeregister      bool
+	AMISkipBuildRegion   bool
+	AMISkipBuildIfExists bool
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -99,9 +100,14 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	if len(resp.Images) > 0 {
-		err := fmt.Errorf("Error: AMI Name: '%s' is used by an existing AMI: %s", *resp.Images[0].Name, *resp.Images[0].ImageId)
-		state.Put("error", err)
-		ui.Error(err.Error())
+		if s.AMISkipBuildIfExists {
+			msg := fmt.Sprintf("Info: AMI Name: '%s' (ID: '%s') already exists, skipping build", *resp.Images[0].Name, *resp.Images[0].ImageId)
+			ui.Message(msg)
+		} else {
+			err := fmt.Errorf("Error: AMI Name: '%s' is used by an existing AMI: %s", *resp.Images[0].Name, *resp.Images[0].ImageId)
+			state.Put("error", err)
+			ui.Error(err.Error())
+		}
 		return multistep.ActionHalt
 	}
 

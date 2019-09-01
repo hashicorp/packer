@@ -296,6 +296,9 @@ builder.
     shutdown in case Packer exits ungracefully. Possible values are "stop" and
     "terminate", default is `stop`.
 
+-   `skip_build_if_exists` (boolean) - Set to true if you want to skip building
+    an AMI if one with the same `ami_name` already exists. Default `false`.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Default `false`.
 
