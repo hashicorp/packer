@@ -293,7 +293,7 @@ Acceptance tests typically require other environment variables to be set for
 things such as API tokens and keys. Each test should error and tell you which
 credentials are missing, so those are not documented here.
 
-#### Debugging
+#### Debugging Plugins
 
 Each packer plugin runs in a separate process and communicates with RCP over a
 socket therefore using a debugger will not work (be complicated at least).
