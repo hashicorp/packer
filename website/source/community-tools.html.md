@@ -16,6 +16,9 @@ power of Packer templates.
 
 ## Third-Party plugins
 
+This is an incomplete list. If you have written your own plugin, please make a
+pull request to the website so that we can document your contribution here!
+
 - [ARM builder](https://github.com/solo-io/packer-builder-arm-image) - A builder
   for creating ARM images
 
