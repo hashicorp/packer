@@ -90,8 +90,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, rawErr.(error)
 	}
 
+	tplID, ok := state.Get("template_id").(int)
+	if !ok {
+		return nil, fmt.Errorf("template ID could not be determined")
+	}
+
 	artifact := &Artifact{
-		templateID:    state.Get("template_id").(int),
+		templateID:    tplID,
 		proxmoxClient: b.proxmoxClient,
 	}
 
