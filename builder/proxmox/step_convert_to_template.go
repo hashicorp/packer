@@ -3,6 +3,7 @@ package proxmox
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -44,7 +45,7 @@ func (s *stepConvertToTemplate) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
+	log.Printf("template_id: %d", vmRef.VmId())
 	state.Put("template_id", vmRef.VmId())
 
 	return multistep.ActionContinue
