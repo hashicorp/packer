@@ -25,15 +25,6 @@ type OMIConfig struct {
 	SnapshotGroups          []string `mapstructure:"snapshot_groups"`
 }
 
-func stringInSlice(s []string, searchstr string) bool {
-	for _, item := range s {
-		if item == searchstr {
-			return true
-		}
-	}
-	return false
-}
-
 func (c *OMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
 
