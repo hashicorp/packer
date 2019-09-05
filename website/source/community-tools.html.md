@@ -14,6 +14,29 @@ Packer has a vibrant community of contributors who have built a number of great
 tools on top of Packer. There are also quite a few projects demonstrating the
 power of Packer templates.
 
+## Third-Party plugins
+
+This is an incomplete list. If you have written your own plugin, please make a
+pull request to the website so that we can document your contribution here!
+
+- [ARM builder](https://github.com/solo-io/packer-builder-arm-image) - A builder
+  for creating ARM images
+
+- [Comment Provisioner](https://github.com/SwampDragons/packer-provisioner-comment) -
+  Example provisioner that allows you to annotate your build with bubble-text
+  comments.
+
+- [vSphere builder](https://github.com/jetbrains-infra/packer-builder-vsphere) -
+  A builder for interacting directly with the vSphere API rather than the esx
+  host directly.
+
+- [Vultr builder](https://github.com/vultr/packer-builder-vultr) - A builder
+  for creating [Vultr](https://www.vultr.com/) snapshots.
+
+- [Windows Update provisioner](https://github.com/rgl/packer-provisioner-windows-update) -
+  A provisioner for gracefully handling windows updates and the reboots they
+  cause.
+
 ## Templates
 
 - [bento](https://github.com/chef/bento) - Packer templates for building minimal
@@ -35,7 +58,7 @@ power of Packer templates.
 - [cbednarski/packer-ubuntu](https://github.com/cbednarski/packer-ubuntu) -
   Ubuntu LTS Virtual Machines for Vagrant
 
-* [geerlingguy/packer-ubuntu-1604](https://github.com/geerlingguy/packer-ubuntu-1604) 
+* [geerlingguy/packer-ubuntu-1604](https://github.com/geerlingguy/packer-ubuntu-1604)
   \- Ubuntu 16.04 minimal Vagrant Box using Ansible provisioner
 
 * [jakobadam/packer-qemu-templates](https://github.com/jakobadam/packer-qemu-templates)
