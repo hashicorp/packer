@@ -45,6 +45,11 @@ install-build-deps: ## Install dependencies for bin build
 	@go get github.com/mitchellh/gox
 
 install-gen-deps: ## Install dependencies for code generation
+	# to avoid having to tidy our go deps, it we `go get` our binaries from a
+	# temp dir. `go get` will change our deps and the following deps are not
+	# part of out code dependencies; so a go mod tidy will remove them again.
+	# `go install` seems install the last tagged version and we want to install
+	# master. 
 	@(cd $(TEMPDIR) && go get golang.org/x/tools/cmd/goimports)
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
 	@(cd $(TEMPDIR) && go get github.com/alvaroloes/enumer)
