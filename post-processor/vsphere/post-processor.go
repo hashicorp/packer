@@ -19,11 +19,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-var builtins = map[string]string{
-	"mitchellh.vmware":     "vmware",
-	"mitchellh.vmware-esx": "vmware",
-}
-
 var ovftool string = "ovftool"
 
 var (
@@ -116,10 +111,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
-	}
-
 	source := ""
 	for _, path := range artifact.Files() {
 		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
