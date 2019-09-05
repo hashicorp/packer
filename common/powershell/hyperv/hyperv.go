@@ -32,20 +32,27 @@ type scriptOptions struct {
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
 param([string]$switchName, [int]$addressIndex)
-
 $HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
 if ($HostVMAdapter){
-    $HostNetAdapter = Get-NetAdapter | ?{ $_.DeviceId -eq $HostVMAdapter.DeviceId }
-    if ($HostNetAdapter){
-        $HostNetAdapterIfIndex = @()
-        $HostNetAdapterIfIndex +=  $HostNetAdapter.ifIndex
-        $HostNetAdapterConfiguration =  @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex) }
-        if ($HostNetAdapterConfiguration){
-            return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
-        }
-    }
+  $HostNetAdapter = Get-NetAdapter | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
+   if ($HostNetAdapter){
+     $HostNetAdapterIfIndex = @()
+     $HostNetAdapterIfIndex +=  $HostNetAdapter.ifIndex
+     $HostNetAdapterConfiguration =  @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex) }
+       if ($HostNetAdapterConfiguration){
+         return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
+     }
+   }
 }
-return $false
+else {
+  $HostNetAdapterConfiguration=@(Get-NetIPAddress -CimSession $env:computername -AddressFamily IPv4 | Where-Object { ( $_.InterfaceAlias -notmatch 'Loopback' ) -and ( $_.SuffixOrigin -notmatch "Link" )})
+  if ($HostNetAdapterConfiguration) {
+    return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
+  }
+  else {
+    return $false
+ }
+}
 `
 
 	var ps powershell.PowerShellCmd

@@ -1,11 +1,37 @@
-## 1.4.3 (upcoming)
+## 1.4.4 (Upcoming)
 
 ### IMPROVEMENTS:
-**new builder** UCloud builder [GH-7775]
-**new builder** Outscale [GH-7459]
-**new builder** VirtualBox Snapshot [GH-7780]
-**bew builder** JDCloud [GH-7962]
-**new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
+* builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
+* builder/hcloud: Allow selecting image based on filters [GH-7945]
+* builder/hyper-v: Decrease the delay between Hyper-V VM startup and hyper-v
+    builder's ability to send keystrokes to the target VM. [GH-7970]
+* builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+* builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
+* post-processor/vagrant-cloud: Allow use of the Artifice post-processor with
+    the Vagrant Cloud post-processor [GH-8018] [GH-8027]
+
+### BUG FIXES:
+* builder/azure: Avoid a panic in getObjectIdFromToken [GH-8047]
+* builder/hyper-v: Fix when management interface is not part of virtual switch
+    [GH-8017]
+* builder/openstack: Fix race condition created when adding metadata [GH-8016]
+* builder/qemu: Fix dropped error when retrieving version [GH-8050]
+* builder/vagrant: Fix provisioning boxes, define source and output boxes
+    [GH-7957]
+* builder/virtualbox: Fix windows pathing problem for guest additions checksum
+    download. [GH-7996]
+* core: Fix bug where sensitive variables contianing commas were not being
+    properly sanitized in UI calls. [GH-7997]
+* provisioner/ansible: Fix provisioner dropped errors [GH-8045]
+
+## 1.4.3 (August 14, 2019)
+
+### IMPROVEMENTS:
+* **new builder** UCloud builder [GH-7775]
+* **new builder** Outscale [GH-7459]
+* **new builder** VirtualBox Snapshot [GH-7780]
+* **new builder** JDCloud [GH-7962]
+* **new post-processor** Exoscale Import post-processor [GH-7822] [GH-7946]
 * build: Change Makefile to behave differently inside and outside the gopath
     when generating code. [GH-7827]
 * builder/amazon: Don't calculate spot bids; Amazon has changed spot pricing to
@@ -30,6 +56,8 @@
 * core: Change how on-error=abort is handled to prevent EOF errors that mask
     real issues [GH-7913]
 * core: Clean up logging vs ui call in step download [GH-7936]
+* core: New environment var option to allow user to set location of config
+    directory [GH-7912]
 * core: Remove obsolete Cancel functions from builtin provisioners [GH-7917]
 * post-processor/vagrant:  Add option to allow box Vagrantfiles to be generated
     during the build [GH-7951]
@@ -39,12 +67,15 @@
     [GH-7833]
 
 ### BUG FIXES:
+* builder/amazon: Add error to warn users of spot_tags regression. [GH-7989]
 * builder/amazon: Allow EC2 Spot Fleet packer instances to run in parallel
     [GH-7818]
 * builder/amazon: Fix failures and duplication in Amazon region copy and
     encryption step. [GH-7870] [GH-7923]
 * builder/amazon: No longer store names of volumes which get deleted on
     termination inside ebssurrogate artifact. [GH-7829]
+* builder/amazon: Update aws-sdk-go to v1.22.2, resolving some AssumeRole
+    issues [GH-7967]
 * builder/azure: Create configurable polling duration and set higher default
     for image copies to prevent timeouts on successful copies [GH-7920]
 * builder/digitalocean: increase timeout for Digital Ocean snapshot creation.
@@ -86,7 +117,6 @@
     warning [GH-7893]
 * provisioner/salt-masterless: Make salt-masterless provisioner respect
     disable_sudo directive for all commands [GH-7774]
-* Update aws-sdk-go to v1.22.2, resolving some AssumeRole issues [GH-7967]
 
 ## 1.4.2 (June 26, 2019)
 

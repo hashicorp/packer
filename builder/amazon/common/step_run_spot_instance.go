@@ -40,8 +40,7 @@ type StepRunSpotInstance struct {
 	UserDataFile                      string
 	Ctx                               interpolate.Context
 
-	instanceId  string
-	spotRequest *ec2.SpotInstanceRequest
+	instanceId string
 }
 
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
@@ -258,7 +257,31 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// Create the request for the spot instance.
 	req, createOutput := ec2conn.CreateFleetRequest(createFleetInput)
 	ui.Message(fmt.Sprintf("Sending spot request (%s)...", req.RequestID))
+	// Actually send the spot connection request.
+	err = req.Send()
+	if err != nil {
+		if createOutput.FleetId != nil {
+			err = fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
+		} else {
+			err = fmt.Errorf("Error waiting for fleet request: %s", err)
+		}
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
+	if len(createOutput.Errors) > 0 {
+		errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
+		for _, outErr := range createOutput.Errors {
+			errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+		}
+		err = fmt.Errorf(errString)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	instanceId = *createOutput.Instances[0].InstanceIds[0]
 	// Tag the spot instance request (not the eventual spot instance)
 	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
@@ -267,9 +290,36 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	spotTags.Report(ui)
 
 	if len(spotTags) > 0 && s.SpotTags.IsSet() {
+		spotTags.Report(ui)
+
+		// Use the instance ID to find out the SIR, so that we can tag the spot
+		// request associated with this instance.
+
+		err = retry.Config{
+			Tries:       11,
+			ShouldRetry: func(error) bool { return true },
+			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			_, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+				InstanceIds: []*string{aws.String(instanceId)},
+			})
+			return err
+		})
+		if err != nil {
+			err := fmt.Errorf("Error describing instance for spot request tags: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		describeOutput, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{aws.String(instanceId)},
+		})
+		sir := describeOutput.Reservations[0].Instances[0].SpotInstanceRequestId
+
+		// Apply tags to the spot request.
 		err = retry.Config{
 			Tries:       11,
 			ShouldRetry: func(error) bool { return false },
@@ -277,7 +327,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		}.Run(ctx, func(ctx context.Context) error {
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
 				Tags:      spotTags,
-				Resources: []*string{aws.String(req.RequestID)},
+				Resources: []*string{sir},
 			})
 			return err
 		})
@@ -288,24 +338,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 	}
-
-	// Actually send the spot connection request.
-	err = req.Send()
-	if err != nil {
-		err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", req.RequestID, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if len(createOutput.Errors) > 0 {
-		err := fmt.Errorf("error sending spot request: %s", *createOutput.Errors[0])
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	instanceId = *createOutput.Instances[0].InstanceIds[0]
 
 	// Set the instance ID so that the cleanup works properly
 	s.instanceId = instanceId
@@ -404,28 +436,9 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 }
 
 func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
-
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	launchTemplateName := state.Get("launchTemplateName").(string)
-
-	// Cancel the spot request if it exists
-	if s.spotRequest != nil {
-		ui.Say("Cancelling the spot request...")
-		input := &ec2.CancelSpotInstanceRequestsInput{
-			SpotInstanceRequestIds: []*string{s.spotRequest.SpotInstanceRequestId},
-		}
-		if _, err := ec2conn.CancelSpotInstanceRequests(input); err != nil {
-			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
-			return
-		}
-
-		err := WaitUntilSpotRequestFulfilled(aws.BackgroundContext(), ec2conn, *s.spotRequest.SpotInstanceRequestId)
-		if err != nil {
-			ui.Error(err.Error())
-		}
-
-	}
 
 	// Terminate the source instance if it exists
 	if s.instanceId != "" {

@@ -163,16 +163,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// If we were interrupted or cancelled, then just exit.
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		return nil, errors.New("Build was cancelled.")
+		return nil, errors.New("build was cancelled")
 	}
 
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		return nil, errors.New("Build was halted.")
+		return nil, errors.New("build was halted")
 	}
 
 	if b.config.SkipExport {
 		return nil, nil
-	} else {
-		return vboxcommon.NewArtifact(b.config.OutputDir)
 	}
+
+	return vboxcommon.NewArtifact(b.config.OutputDir)
 }
