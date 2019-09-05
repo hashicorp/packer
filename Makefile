@@ -45,14 +45,9 @@ install-build-deps: ## Install dependencies for bin build
 	@go get github.com/mitchellh/gox
 
 install-gen-deps: ## Install dependencies for code generation
-	@go get golang.org/x/tools/cmd/goimports
-	@./scripts/off_gopath.sh; if [ $$? -eq 0 ]; then \
-		go get github.com/mna/pigeon@master; \
-	else \
-		go get -u github.com/mna/pigeon; \
-	fi
-
-	@go get github.com/alvaroloes/enumer
+	@(cd $(TEMPDIR) && go get golang.org/x/tools/cmd/goimports)
+	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
+	@(cd $(TEMPDIR) && go get github.com/alvaroloes/enumer)
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
