@@ -5,7 +5,7 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13
   darwin:
     macos:
       xcode: "9.0"
