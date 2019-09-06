@@ -268,7 +268,6 @@ var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 					log.Printf("Communication connection err: %s", err)
 					shouldContinue = true
 				}
-				cmdKeyCheck.Wait()
 
 				stdoutToRead := buf2.String()
 				if strings.Contains(stdoutToRead, "True") {
