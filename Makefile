@@ -50,7 +50,6 @@ install-gen-deps: ## Install dependencies for code generation
 	# out code dependencies; so a go mod tidy will remove them again. `go
 	# install` seems to install the last tagged version and we want to install
 	# master. 
-	@(cd $(TEMPDIR) && go get golang.org/x/tools/cmd/goimports)
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
 	@(cd $(TEMPDIR) && go get github.com/alvaroloes/enumer)
 
@@ -97,7 +96,6 @@ fmt-examples:
 generate: install-gen-deps ## Generate dynamically generated code
 	go generate ./...
 	go fmt common/bootcommand/boot_command.go
-	goimports -w common/bootcommand/boot_command.go
 	go fmt command/plugin.go
 
 generate-check: generate ## Check go code generation is on par
