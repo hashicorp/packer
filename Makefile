@@ -51,7 +51,7 @@ install-gen-deps: ## Install dependencies for code generation
 	# install` seems to install the last tagged version and we want to install
 	# master. 
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
-	@(cd $(TEMPDIR) && go get github.com/alvaroloes/enumer)
+	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/alvaroloes/enumer@master)
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
