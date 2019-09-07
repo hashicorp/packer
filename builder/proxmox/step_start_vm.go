@@ -30,6 +30,8 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
 		Agent:        agent,
+		Boot:         "cdn", // Boot priority, c:CDROM -> d:Disk -> n:Network
+		QemuCpu:      "host",
 		Description:  "Packer ephemeral build VM",
 		Memory:       c.Memory,
 		QemuCores:    c.Cores,
@@ -142,7 +144,7 @@ func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 	ui.Say("Stopping VM")
 	_, err := client.StopVm(vmRef)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error stop VM. Please stop and delete it manually: %s", err))
+		ui.Error(fmt.Sprintf("Error stopping VM. Please stop and delete it manually: %s", err))
 		return
 	}
 
