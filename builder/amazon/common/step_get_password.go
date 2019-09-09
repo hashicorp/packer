@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common/retry"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -52,7 +53,7 @@ func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Message(
 			"It is normal for this process to take up to 15 minutes,\n" +
 				"but it usually takes around 5. Please wait.")
-		password, err = s.waitForPassword(state, cancel)
+		password, err = s.waitForPassword(state, cancel, ctx)
 		waitDone <- true
 	}()
 
@@ -106,7 +107,7 @@ func (s *StepGetPassword) Cleanup(multistep.StateBag) {
 	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
 }
 
-func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
+func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}, ctx context.Context) (string, error) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	privateKey := s.Comm.SSHPrivateKey
@@ -119,11 +120,25 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 		case <-time.After(5 * time.Second):
 		}
 
-		resp, err := ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
-			InstanceId: instance.InstanceId,
+		// Wrap in a retry so that we don't fail on rate-limiting.
+		log.Printf("Retrieving auto-generated instance password...")
+		var resp *ec2.GetPasswordDataOutput
+		err := retry.Config{
+			Tries:      11,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			var err error
+			resp, err = ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
+				InstanceId: instance.InstanceId,
+			})
+			if err != nil {
+				err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
+				return err
+			}
+			return nil
 		})
+
 		if err != nil {
-			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
 			return "", err
 		}
 
