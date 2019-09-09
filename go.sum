@@ -25,6 +25,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591 h
 github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591/go.mod h1:EHGzQGbwozJBj/4qj3WGrTJ0FqjgOTOxLQ0VNWvPn08=
 github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4 h1:o//09WenT9BNcQypCYfOBfRe5gtLUvUfTPq0xQqPMEI=
 github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
+github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60 h1:iEmbIRk4brAP3wevhCr5MGAqxHUbbIDHvE+6D1/7pRA=
+github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af h1:DBNMBMuMiWYu0b+8KMJuWmfCkcxl09JwdlqwDZZ6U14=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e h1:/8wOj52pewmIX/8d5eVO3t7Rr3astkBI/ruyg4WNqRo=
