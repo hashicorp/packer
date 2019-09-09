@@ -103,7 +103,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RawBootKeyInterval = os.Getenv(common.PackerKeyEnv)
 	}
 	if c.RawBootKeyInterval == "" {
-		c.BootKeyInterval = common.PackerKeyDefault
+		c.BootKeyInterval = 5 * time.Millisecond
 	} else {
 		if interval, err := time.ParseDuration(c.RawBootKeyInterval); err == nil {
 			c.BootKeyInterval = interval
