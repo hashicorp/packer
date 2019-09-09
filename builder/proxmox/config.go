@@ -151,6 +151,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			log.Printf("Disk %d cache mode not set, using default 'none'", idx)
 			c.Disks[idx].CacheMode = "none"
 		}
+		// For any storage pool types which aren't in rxStorageTypes in proxmox-api/proxmox/config_qemu.go:651
+		// (currently zfspool and lvm), the format parameter is mandatory. Make sure this is still up to date
+		// when updating the vendored code!
+		if !contains([]string{"zfspool", "lvm"}, c.Disks[idx].StoragePoolType) && c.Disks[idx].DiskFormat == "" {
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType)))
+		}
 	}
 
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
@@ -196,4 +202,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	packer.LogSecretFilter.Set(c.Password)
 	return c, nil, nil
+}
+
+func contains(haystack []string, needle string) bool {
+	for _, candidate := range haystack {
+		if candidate == needle {
+			return true
+		}
+	}
+	return false
 }
