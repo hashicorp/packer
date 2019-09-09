@@ -16,15 +16,21 @@ power of Packer templates.
 
 ## Third-Party plugins
 
-This is an incomplete list. If you have written your own plugin, please make a
-pull request to the website so that we can document your contribution here!
+The plugins listed below have been built by the community of Packer users and
+vendors. These plugins are not officially tested nor officially maintained by
+HashiCorp, and are listed here in order to help users find them easily.
+
+To learn more about how to use community plugins, or how to build your own,
+check out the docs on [extending Packer](/docs/extending/plugins.html)
+
+If you have built a plugin and would like to add it to this community list,
+please make a pull request to the website so that we can document your
+contribution here!
+
+### Community Builders
 
 - [ARM builder](https://github.com/solo-io/packer-builder-arm-image) - A builder
   for creating ARM images
-
-- [Comment Provisioner](https://github.com/SwampDragons/packer-provisioner-comment) -
-  Example provisioner that allows you to annotate your build with bubble-text
-  comments.
 
 - [vSphere builder](https://github.com/jetbrains-infra/packer-builder-vsphere) -
   A builder for interacting directly with the vSphere API rather than the esx
@@ -32,6 +38,13 @@ pull request to the website so that we can document your contribution here!
 
 - [Vultr builder](https://github.com/vultr/packer-builder-vultr) - A builder
   for creating [Vultr](https://www.vultr.com/) snapshots.
+
+
+### Community Provisioners
+
+- [Comment Provisioner](https://github.com/SwampDragons/packer-provisioner-comment) -
+  Example provisioner that allows you to annotate your build with bubble-text
+  comments.
 
 - [Windows Update provisioner](https://github.com/rgl/packer-provisioner-windows-update) -
   A provisioner for gracefully handling windows updates and the reboots they
