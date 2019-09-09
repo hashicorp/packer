@@ -50,7 +50,7 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
 github.com/NaverCloudPlatform/ncloud-sdk-go/common
 github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
-# github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4
+# github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors

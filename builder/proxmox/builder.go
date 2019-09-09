@@ -46,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 
-	err = b.proxmoxClient.Login(b.config.Username, b.config.Password)
+	err = b.proxmoxClient.Login(b.config.Username, b.config.Password, "")
 	if err != nil {
 		return nil, err
 	}
