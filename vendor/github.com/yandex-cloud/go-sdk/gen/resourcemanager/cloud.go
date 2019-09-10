@@ -68,6 +68,15 @@ func (c *CloudServiceClient) SetAccessBindings(ctx context.Context, in *access.S
 	return resourcemanager.NewCloudServiceClient(conn).SetAccessBindings(ctx, in, opts...)
 }
 
+// Update implements resourcemanager.CloudServiceClient
+func (c *CloudServiceClient) Update(ctx context.Context, in *resourcemanager.UpdateCloudRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return resourcemanager.NewCloudServiceClient(conn).Update(ctx, in, opts...)
+}
+
 // UpdateAccessBindings implements resourcemanager.CloudServiceClient
 func (c *CloudServiceClient) UpdateAccessBindings(ctx context.Context, in *access.UpdateAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
