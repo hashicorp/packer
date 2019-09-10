@@ -31,6 +31,15 @@ func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *redis.AddCluste
 	return redis.NewClusterServiceClient(conn).AddHosts(ctx, in, opts...)
 }
 
+// AddShard implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) AddShard(ctx context.Context, in *redis.AddClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).AddShard(ctx, in, opts...)
+}
+
 // Backup implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) Backup(ctx context.Context, in *redis.BackupClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -67,6 +76,15 @@ func (c *ClusterServiceClient) DeleteHosts(ctx context.Context, in *redis.Delete
 	return redis.NewClusterServiceClient(conn).DeleteHosts(ctx, in, opts...)
 }
 
+// DeleteShard implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) DeleteShard(ctx context.Context, in *redis.DeleteClusterShardRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).DeleteShard(ctx, in, opts...)
+}
+
 // Get implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) Get(ctx context.Context, in *redis.GetClusterRequest, opts ...grpc.CallOption) (*redis.Cluster, error) {
 	conn, err := c.getConn(ctx)
@@ -74,6 +92,15 @@ func (c *ClusterServiceClient) Get(ctx context.Context, in *redis.GetClusterRequ
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).Get(ctx, in, opts...)
+}
+
+// GetShard implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) GetShard(ctx context.Context, in *redis.GetClusterShardRequest, opts ...grpc.CallOption) (*redis.Shard, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).GetShard(ctx, in, opts...)
 }
 
 // List implements redis.ClusterServiceClient
@@ -121,6 +148,15 @@ func (c *ClusterServiceClient) ListOperations(ctx context.Context, in *redis.Lis
 	return redis.NewClusterServiceClient(conn).ListOperations(ctx, in, opts...)
 }
 
+// ListShards implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) ListShards(ctx context.Context, in *redis.ListClusterShardsRequest, opts ...grpc.CallOption) (*redis.ListClusterShardsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).ListShards(ctx, in, opts...)
+}
+
 // Move implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) Move(ctx context.Context, in *redis.MoveClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -128,6 +164,15 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *redis.MoveClusterRe
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).Move(ctx, in, opts...)
+}
+
+// Rebalance implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) Rebalance(ctx context.Context, in *redis.RebalanceClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).Rebalance(ctx, in, opts...)
 }
 
 // Restore implements redis.ClusterServiceClient
@@ -146,6 +191,15 @@ func (c *ClusterServiceClient) Start(ctx context.Context, in *redis.StartCluster
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).Start(ctx, in, opts...)
+}
+
+// StartFailover implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) StartFailover(ctx context.Context, in *redis.StartClusterFailoverRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).StartFailover(ctx, in, opts...)
 }
 
 // Stop implements redis.ClusterServiceClient
