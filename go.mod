@@ -121,8 +121,8 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
-	github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
-	github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
+	github.com/yandex-cloud/go-genproto v0.0.0-20190802103534-6089d9ff8d82
+	github.com/yandex-cloud/go-sdk v0.0.0-20190802103531-4ab1dac90bf7
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45

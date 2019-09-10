@@ -214,6 +214,25 @@ func TestZone(t *testing.T) {
 	}
 }
 
+func TestGpuDefaultPlatformID(t *testing.T) {
+	raw := testConfig(t)
+	raw["instance_gpus"] = 1
+
+	c, _, _ := NewConfig(raw)
+	if c.PlatformID != "gpu-standard-v1" {
+		t.Fatalf("expected 'gpu-standard-v1', but got '%s'", c.PlatformID)
+	}
+}
+
+func TestGpuWrongPlatformID(t *testing.T) {
+	raw := testConfig(t)
+	raw["instance_gpus"] = 1
+	raw["platform_id"] = "standard-v1"
+
+	_, warns, errs := NewConfig(raw)
+	testConfigErr(t, warns, errs, "incompatible GPU platform_id")
+}
+
 // Helper stuff below
 
 func testConfig(t *testing.T) (config map[string]interface{}) {
