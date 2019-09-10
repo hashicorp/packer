@@ -45,14 +45,13 @@ install-build-deps: ## Install dependencies for bin build
 	@go get github.com/mitchellh/gox
 
 install-gen-deps: ## Install dependencies for code generation
-	@go get golang.org/x/tools/cmd/goimports
-	@./scripts/off_gopath.sh; if [ $$? -eq 0 ]; then \
-		go get github.com/mna/pigeon@master; \
-	else \
-		go get -u github.com/mna/pigeon; \
-	fi
-
-	@go get github.com/alvaroloes/enumer
+	# to avoid having to tidy our go deps, we `go get` our binaries from a temp
+	# dir. `go get` will change our deps and the following deps are not part of
+	# out code dependencies; so a go mod tidy will remove them again. `go
+	# install` seems to install the last tagged version and we want to install
+	# master. 
+	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
+	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/alvaroloes/enumer@master)
 	@go install ./cmd/struct-markdown
 
 dev: ## Build and install a development build
@@ -100,7 +99,6 @@ generate: install-gen-deps ## Generate dynamically generated code
 	@find website/source/ -type f | xargs grep -l '^<!-- Code generated' | xargs rm
 	go generate ./...
 	go fmt common/bootcommand/boot_command.go
-	goimports -w common/bootcommand/boot_command.go
 	go fmt command/plugin.go
 
 generate-check: generate ## Check go code generation is on par
