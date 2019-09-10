@@ -14,23 +14,28 @@ type StepUp struct {
 	GlobalID       string
 }
 
+func (s *StepUp) generateArgs() []string {
+	box := "source"
+	if s.GlobalID != "" {
+		box = s.GlobalID
+	}
+
+	// start only the source box
+	args := []string{box}
+
+	if s.Provider != "" {
+		args = append(args, fmt.Sprintf("--provider=%s", s.Provider))
+	}
+	return args
+}
+
 func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Calling Vagrant Up...")
 
-	// start only the source box
-	args := []string{"source"}
-	if s.GlobalID != "" {
-		args = append(args, s.GlobalID)
-	}
-
-	if s.Provider != "" {
-		args = append(args, fmt.Sprintf("--provider=%s", s.Provider))
-	}
-
-	_, _, err := driver.Up(args)
+	_, _, err := driver.Up(s.generateArgs())
 
 	if err != nil {
 		state.Put("error", err)
@@ -46,13 +51,18 @@ func (s *StepUp) Cleanup(state multistep.StateBag) {
 
 	ui.Say(fmt.Sprintf("%sing Vagrant box...", s.TeardownMethod))
 
+	box := "source"
+	if s.GlobalID != "" {
+		box = s.GlobalID
+	}
+
 	var err error
 	if s.TeardownMethod == "halt" {
-		err = driver.Halt(s.GlobalID)
+		err = driver.Halt(box)
 	} else if s.TeardownMethod == "suspend" {
-		err = driver.Suspend(s.GlobalID)
+		err = driver.Suspend(box)
 	} else if s.TeardownMethod == "destroy" {
-		err = driver.Destroy(s.GlobalID)
+		err = driver.Destroy(box)
 	} else {
 		// Should never get here because of template validation
 		state.Put("error", fmt.Errorf("Invalid teardown method selected; must be either halt, suspend, or destory."))
