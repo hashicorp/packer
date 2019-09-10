@@ -71,6 +71,15 @@ to force the log to always go to a specific file when logging is enabled. Note
 that even when `PACKER_LOG_PATH` is set, `PACKER_LOG` must be set in order for
 any logging to be enabled.
 
+### Debugging Plugins
+
+Each packer plugin runs in a separate process and communicates with RCP over a
+socket therefore using a debugger will not work (be complicated at least).
+
+But most of the Packer code is really simple and easy to follow with PACKER_LOG
+turned on. If that doesn't work adding some extra debug print outs when you have
+homed in on the problem is usually enough.
+
 ### Debugging Packer in Powershell/Windows
 
 In Windows you can set the detailed logs environmental variable `PACKER_LOG` or

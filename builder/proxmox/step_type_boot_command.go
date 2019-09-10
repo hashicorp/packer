@@ -30,7 +30,7 @@ type bootCommandTemplateData struct {
 }
 
 type commandTyper interface {
-	MonitorCmd(*proxmox.VmRef, string) (map[string]interface{}, error)
+	Sendkey(*proxmox.VmRef, string) error
 }
 
 var _ commandTyper = &proxmox.Client{}

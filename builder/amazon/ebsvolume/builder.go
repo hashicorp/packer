@@ -24,6 +24,21 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+
+	// Enable enhanced networking (ENA but not SriovNetSupport) on
+	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
+	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
+	// on your instance. See [Amazon's documentation on enabling enhanced
+	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+	AMIENASupport *bool `mapstructure:"ena_support" required:"false"`
+	// Enable enhanced networking (SriovNetSupport but not ENA) on
+	// HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
+	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
+	// on your instance. See [Amazon's documentation on enabling enhanced
+	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+	// Default `false`.
+	AMISriovNetSupport bool `mapstructure:"sriov_support" required:"false"`
+
 	// Add the block device mappings to the AMI. If you add instance store
 	// volumes or EBS volumes in addition to the root device volume, the
 	// created AMI will contain block device mapping information for those
@@ -34,23 +49,23 @@ type Config struct {
 	// source instance. See the [BlockDevices](#block-devices-configuration)
 	// documentation for fields.
 	VolumeMappings BlockDevices `mapstructure:"ebs_volumes" required:"false"`
-	// Enable enhanced networking (ENA but not SriovNetSupport) on
-	// HVM-compatible AMIs. If set, add ec2:ModifyInstanceAttribute to your AWS
-	// IAM policy. If false, this will disable enhanced networking in the final
-	// AMI as opposed to passing the setting through unchanged from the source.
-	// Note: you must make sure enhanced networking is enabled on your
-	// instance. See Amazon's documentation on enabling enhanced networking.
-	AMIENASupport *bool `mapstructure:"ena_support" required:"false"`
-	// Enable enhanced networking (SriovNetSupport but not ENA) on
-	// HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
-	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
-	// on your instance. See [Amazon's documentation on enabling enhanced
-	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
-	// Default `false`.
-	AMISriovNetSupport bool `mapstructure:"sriov_support" required:"false"`
+	// Tags to apply to the volumes of the instance that is *launched* to
+	// create EBS Volumes. These tags will *not* appear in the tags of the
+	// resulting EBS volumes unless they're duplicated under `tags` in the
+	// `ebs_volumes` setting. This is a [template
+	// engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
+	//
+	//  Note: The tags specified here will be *temporarily* applied to volumes
+	// specified in `ebs_volumes` - but only while the instance is being
+	// created. Packer will replace all tags on the volume with the tags
+	// configured in the `ebs_volumes` section as soon as the instance is
+	// reported as 'ready'.
+	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
 
 	launchBlockDevices BlockDevices
-	ctx                interpolate.Context
+
+	ctx interpolate.Context
 }
 
 type Builder struct {
@@ -142,8 +157,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
 			LaunchMappings:                    b.config.launchBlockDevices,
 			BlockDurationMinutes:              b.config.BlockDurationMinutes,
-			Ctx:                               b.config.ctx,
 			Comm:                              &b.config.RunConfig.Comm,
+			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
@@ -151,12 +166,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
-			SpotPrice:                         b.config.SpotPrice,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
+			SpotPrice:                         b.config.SpotPrice,
 			SpotTags:                          b.config.SpotTags,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
+			VolumeTags:                        b.config.VolumeRunTags,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
@@ -176,6 +192,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
+			VolumeTags:                        b.config.VolumeRunTags,
 		}
 	}
 

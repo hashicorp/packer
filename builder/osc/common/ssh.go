@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -27,35 +28,42 @@ func SSHHost(e oapiDescriber, sshInterface string) func(multistep.StateBag) (str
 		for j := 0; j <= tries; j++ {
 			var host string
 			i := state.Get("vm").(oapi.Vm)
+
+			if len(i.Nics) <= 0 {
+				return "", errors.New("couldn't determine address for vm, nics are empty")
+			}
+
+			nic := i.Nics[0]
+
 			if sshInterface != "" {
 				switch sshInterface {
 				case "public_ip":
-					if i.PublicIp != "" {
-						host = i.PublicIp
-					}
-				case "private_ip":
-					if i.PrivateIp != "" {
-						host = i.PrivateIp
+					if nic.LinkPublicIp.PublicIp != "" {
+						host = nic.LinkPublicIp.PublicIp
 					}
 				case "public_dns":
-					if i.PublicDnsName != "" {
-						host = i.PublicDnsName
+					if nic.LinkPublicIp.PublicDnsName != "" {
+						host = nic.LinkPublicIp.PublicDnsName
+					}
+				case "private_ip":
+					if privateIP, err := getPrivateIP(nic); err != nil {
+						host = privateIP.PrivateIp
 					}
 				case "private_dns":
-					if i.PrivateDnsName != "" {
-						host = i.PrivateDnsName
+					if privateIP, err := getPrivateIP(nic); err != nil {
+						host = privateIP.PrivateDnsName
 					}
 				default:
 					panic(fmt.Sprintf("Unknown interface type: %s", sshInterface))
 				}
 			} else if i.NetId != "" {
-				if i.PublicIp != "" {
-					host = i.PublicIp
-				} else if i.PrivateIp != "" {
-					host = i.PrivateIp
+				if nic.LinkPublicIp.PublicIp != "" {
+					host = nic.LinkPublicIp.PublicIp
+				} else if privateIP, err := getPrivateIP(nic); err != nil {
+					host = privateIP.PrivateIp
 				}
-			} else if i.PublicDnsName != "" {
-				host = i.PublicDnsName
+			} else if nic.LinkPublicIp.PublicDnsName != "" {
+				host = nic.LinkPublicIp.PublicDnsName
 			}
 
 			if host != "" {
@@ -81,4 +89,21 @@ func SSHHost(e oapiDescriber, sshInterface string) func(multistep.StateBag) (str
 
 		return "", errors.New("couldn't determine address for vm")
 	}
+}
+
+func getPrivateIP(nic oapi.NicLight) (oapi.PrivateIpLightForVm, error) {
+	isPrimary := true
+
+	i := sort.Search(len(nic.PrivateIps), func(i int) bool { return nic.PrivateIps[i].IsPrimary == isPrimary })
+
+	if i < len(nic.PrivateIps) && nic.PrivateIps[i].IsPrimary == isPrimary {
+		return nic.PrivateIps[i], nil
+	}
+
+	if len(nic.PrivateIps) > 0 {
+		return nic.PrivateIps[0], nil
+	}
+
+	return oapi.PrivateIpLightForVm{}, fmt.Errorf("couldn't determine private address for vm")
+
 }

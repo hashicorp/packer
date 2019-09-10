@@ -1,7 +1,7 @@
 ---
 description: |
-    The amazon-ebsvolume Packer builder is like the EBS builder, but is intended to
-    create EBS volumes rather than a machine image.
+    The amazon-ebsvolume Packer builder is like the EBS builder, but is
+    intended to create EBS volumes rather than a machine image.
 layout: docs
 page_title: 'Amazon EBS Volume - Builders'
 sidebar_current: 'docs-builders-amazon-ebsvolume'
@@ -14,9 +14,12 @@ Type: `amazon-ebsvolume`
 The `amazon-ebsvolume` Packer builder is able to create Amazon Elastic Block
 Store volumes which are prepopulated with filesystems or data.
 
-This builder builds EBS volumes by launching an EC2 instance from a source AMI,
-provisioning that running machine, and then destroying the source machine,
-keeping the volumes intact.
+This builder creates EBS volumes by launching an EC2 instance from a source
+provisioning that running machine, and then destroying the source machine,	AMI.
+One or more EBS volumes are attached to the running instance, allowing keeping
+the volumes intact.	them to be provisioned into from the running machine. Once
+provisioning is complete the source machine is destroyed. The provisioned
+volumes are kept intact.
 
 This is all done in your own AWS account. The builder will create temporary key
 pairs, security group rules, etc. that provide it temporary access to the

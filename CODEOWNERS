@@ -14,6 +14,7 @@
 /builder/profitbricks/                  @jasmingacic
 /builder/triton/                        @sean-
 /builder/ncloud/                        @YuSungDuk
+/builder/proxmox/                       @carlpett
 /builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
 /builder/hcloud/                        @LKaemmerling
 /builder/hyperone                       @m110 @gregorybrzeski @ad-m
