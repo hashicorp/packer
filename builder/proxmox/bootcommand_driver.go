@@ -102,12 +102,9 @@ func (p *proxmoxDriver) SendSpecial(special string, action bootcommand.KeyAction
 }
 
 func (p *proxmoxDriver) send(keys string) error {
-	res, err := p.client.MonitorCmd(p.vmRef, "sendkey "+keys)
+	err := p.client.Sendkey(p.vmRef, keys)
 	if err != nil {
 		return err
-	}
-	if data, ok := res["data"].(string); ok && len(data) > 0 {
-		return fmt.Errorf("failed to send keys: %s", data)
 	}
 
 	time.Sleep(p.interval)

@@ -25,6 +25,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591 h
 github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591/go.mod h1:EHGzQGbwozJBj/4qj3WGrTJ0FqjgOTOxLQ0VNWvPn08=
 github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4 h1:o//09WenT9BNcQypCYfOBfRe5gtLUvUfTPq0xQqPMEI=
 github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
+github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60 h1:iEmbIRk4brAP3wevhCr5MGAqxHUbbIDHvE+6D1/7pRA=
+github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af h1:DBNMBMuMiWYu0b+8KMJuWmfCkcxl09JwdlqwDZZ6U14=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e h1:/8wOj52pewmIX/8d5eVO3t7Rr3astkBI/ruyg4WNqRo=
@@ -38,6 +40,7 @@ github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 h1:BFFG6KP8ASFBg2pt
 github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607/go.mod h1:LzD22aAzDP8/dyiCKFp31He4m2GPjl0AFyzDtZzUu9M=
 github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6 h1:uZuxRZCz65cG1o6K/xUqImNcYKtmk9ylqaH0itMSvzA=
 github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6/go.mod h1:V8iCPQYkqmusNa815XgQio277wI47sdRh1dUOLdyC6Q=
+github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
 github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43 h1:ePCAQPf5tUc5IMcUvu6euhSGna7jzs7eiXtJXHig6Zc=
 github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43/go.mod h1:S6puKjZ9ZeqUPBv2hEBnMZGcM2J6mOsDRQcmxkMAND0=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
