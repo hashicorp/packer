@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/to"
 	"log"
 	"runtime"
 	"strings"
@@ -20,6 +18,8 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/go-autorest/autorest/to"
 )
 
 type Config struct {
@@ -29,6 +29,7 @@ type Config struct {
 
 	FromScratch bool   `mapstructure:"from_scratch"`
 	Source      string `mapstructure:"source"`
+	sourceType  sourceType
 
 	CommandWrapper    string     `mapstructure:"command_wrapper"`
 	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
@@ -51,6 +52,13 @@ type Config struct {
 
 	ctx interpolate.Context
 }
+
+type sourceType string
+
+const (
+	sourcePlatformImage sourceType = "PlatformImage"
+	sourceDisk          sourceType = "Disk"
+)
 
 func (c *Config) GetContext() interpolate.Context {
 	return c.ctx
@@ -163,9 +171,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	} else {
 		if _, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
 			log.Println("Source is platform image:", b.config.Source)
+			b.config.sourceType = sourcePlatformImage
+		} else if id, err := azure.ParseResourceID(b.config.Source); err == nil &&
+			strings.EqualFold(id.Provider, "Microsoft.Compute") && strings.EqualFold(id.ResourceType, "disks") {
+			log.Println("Source is a disk resource ID:", b.config.Source)
+			b.config.sourceType = sourceDisk
 		} else {
 			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("source: %q is not a valid platform image specifier", b.config.Source))
+				errs, fmt.Errorf("source: %q is not a valid platform image specifier, nor is it a disk resource ID", b.config.Source))
 		}
 	}
 
@@ -301,16 +314,36 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Location:               info.Location,
 			})
 	} else {
-		if pi, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
-			if strings.EqualFold(pi.Version, "latest") {
+		switch b.config.sourceType {
+		case sourcePlatformImage:
 
-				vmi, err := azcli.VirtualMachineImagesClient().GetLatest(ctx, pi.Publisher, pi.Offer, pi.Sku, info.Location)
-				if err != nil {
-					return nil, fmt.Errorf("error retieving latest version of %q: %v", b.config.Source, err)
+			if pi, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
+				if strings.EqualFold(pi.Version, "latest") {
+
+					vmi, err := azcli.VirtualMachineImagesClient().GetLatest(ctx, pi.Publisher, pi.Offer, pi.Sku, info.Location)
+					if err != nil {
+						return nil, fmt.Errorf("error retieving latest version of %q: %v", b.config.Source, err)
+					}
+					pi.Version = to.String(vmi.Name)
+					log.Println("Resolved latest version of source image:", pi.Version)
 				}
-				pi.Version = to.String(vmi.Name)
-				log.Println("Resolved latest version of source image:", pi.Version)
+				steps = append(steps,
+					&StepCreateNewDisk{
+						SubscriptionID:         info.SubscriptionID,
+						ResourceGroup:          info.ResourceGroupName,
+						DiskName:               b.config.TemporaryOSDiskName,
+						DiskSizeGB:             b.config.OSDiskSizeGB,
+						DiskStorageAccountType: b.config.OSDiskStorageAccountType,
+						HyperVGeneration:       b.config.ImageHyperVGeneration,
+						Location:               info.Location,
+						PlatformImage:          pi,
+
+						SkipCleanup: b.config.OSDiskSkipCleanup,
+					})
+			} else {
+				panic("Unknown image source: " + b.config.Source)
 			}
+		case sourceDisk:
 			steps = append(steps,
 				&StepCreateNewDisk{
 					SubscriptionID:         info.SubscriptionID,
@@ -319,13 +352,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 					DiskSizeGB:             b.config.OSDiskSizeGB,
 					DiskStorageAccountType: b.config.OSDiskStorageAccountType,
 					HyperVGeneration:       b.config.ImageHyperVGeneration,
-					Location:               info.Location,
-					PlatformImage:          pi,
+					SourceDiskResourceID:   b.config.Source,
+					//todo(paulmey) validate that source disk is in same location as VM
 
 					SkipCleanup: b.config.OSDiskSkipCleanup,
 				})
-		} else {
-			panic("Unknown image source: " + b.config.Source)
+		default:
+			panic(fmt.Errorf("Unknown source type: %+q", b.config.sourceType))
 		}
 	}
 
