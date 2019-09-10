@@ -104,8 +104,9 @@ Optional Parameters:
 -   `galaxy_command` (string) - The command to invoke ansible-galaxy. By
     default, this is `ansible-galaxy`.
 
--   `galaxy_force_install` (string) - Force overwriting an existing role.
-    Adds `--force` option to `ansible-galaxy` command. By default, this is empty.
+-   `galaxy_force_install` (bool) - Force overwriting an existing role.
+    Adds `--force` option to `ansible-galaxy` command. By default, this is
+    `false`.
 
 -   `groups` (array of strings) - The groups into which the Ansible host should
     be placed. When unspecified, the host is not associated with any groups.
