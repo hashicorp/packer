@@ -72,30 +72,35 @@ func (g *Group) DoAsync(key interface{}, fn func() interface{}) {
 
 // Call represents single deduplicated function call.
 type Call struct {
-	wg      sync.WaitGroup
-	mu      sync.Mutex
-	calling bool
-	val     interface{}
+	mu        sync.Mutex
+	callState *callState
+}
+
+type callState struct {
+	wg  sync.WaitGroup
+	val interface{}
 }
 
 func (c *Call) Do(fn func() interface{}) interface{} {
 	c.mu.Lock()
-	if c.calling {
+	if c.callState != nil {
+		callState := c.callState
 		c.mu.Unlock()
-		c.wg.Wait()
-		return c.val
+		callState.wg.Wait()
+		return callState.val
 	}
 
-	c.calling = true
-	c.wg.Add(1)
+	c.callState = &callState{}
+	c.callState.wg.Add(1)
 	c.mu.Unlock()
 
-	c.val = fn()
+	res := fn()
 
 	c.mu.Lock()
-	c.calling = false
+	c.callState.val = res
+	c.callState.wg.Done()
+	c.callState = nil
 	c.mu.Unlock()
-	c.wg.Done()
 
-	return c.val
+	return res
 }
