@@ -23,6 +23,7 @@
 * core: Fix bug where sensitive variables contianing commas were not being
     properly sanitized in UI calls. [GH-7997]
 * provisioner/ansible: Fix provisioner dropped errors [GH-8045]
+* builder/proxmox: Fix panic caused by cancelling build [GH-8067] [GH-8072]
 
 ## 1.4.3 (August 14, 2019)
 
