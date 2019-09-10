@@ -19,8 +19,11 @@ type StepCreateNewDisk struct {
 	DiskSizeGB                              int32  // optional, ignored if 0
 	DiskStorageAccountType                  string // from compute.DiskStorageAccountTypes
 	HyperVGeneration                        string
-	Location                                string
-	PlatformImage                           *client.PlatformImage
+
+	Location      string
+	PlatformImage *client.PlatformImage
+
+	SourceDiskResourceID string
 
 	SkipCleanup bool
 }
@@ -55,7 +58,10 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 		disk.DiskProperties.DiskSizeGB = to.Int32Ptr(s.DiskSizeGB)
 	}
 
-	if s.PlatformImage == nil {
+	if s.SourceDiskResourceID != "" {
+		disk.CreationData.CreateOption = compute.Copy
+		disk.CreationData.SourceResourceID = to.StringPtr(s.SourceDiskResourceID)
+	} else if s.PlatformImage == nil {
 		disk.CreationData.CreateOption = compute.Empty
 	} else {
 		disk.CreationData.CreateOption = compute.FromImage
