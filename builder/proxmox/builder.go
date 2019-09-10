@@ -3,6 +3,7 @@ package proxmox
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
@@ -45,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 
-	err = b.proxmoxClient.Login(b.config.Username, b.config.Password)
+	err = b.proxmoxClient.Login(b.config.Username, b.config.Password, "")
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +90,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		return nil, errors.New("build was cancelled")
+	}
+
+	// Verify that the template_id was set properly, otherwise we didn't progress through the last step
+	tplID, ok := state.Get("template_id").(int)
+	if !ok {
+		return nil, fmt.Errorf("template ID could not be determined")
+	}
 
 	artifact := &Artifact{
-		templateID:    state.Get("template_id").(int),
+		templateID:    tplID,
 		proxmoxClient: b.proxmoxClient,
 	}
 

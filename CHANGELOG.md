@@ -1,11 +1,29 @@
 ## 1.4.4 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
+* builder/hcloud: Allow selecting image based on filters [GH-7945]
+* builder/hyper-v: Decrease the delay between Hyper-V VM startup and hyper-v
+    builder's ability to send keystrokes to the target VM. [GH-7970]
 * builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+* builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
+* post-processor/vagrant-cloud: Allow use of the Artifice post-processor with
+    the Vagrant Cloud post-processor [GH-8018] [GH-8027]
 
 ### BUG FIXES:
+* builder/azure: Avoid a panic in getObjectIdFromToken [GH-8047]
+* builder/hyper-v: Fix when management interface is not part of virtual switch
+    [GH-8017]
+* builder/openstack: Fix race condition created when adding metadata [GH-8016]
+* builder/qemu: Fix dropped error when retrieving version [GH-8050]
+* builder/vagrant: Fix provisioning boxes, define source and output boxes
+    [GH-7957]
+* builder/virtualbox: Fix windows pathing problem for guest additions checksum
+    download. [GH-7996]
 * core: Fix bug where sensitive variables contianing commas were not being
     properly sanitized in UI calls. [GH-7997]
+* provisioner/ansible: Fix provisioner dropped errors [GH-8045]
+* builder/proxmox: Fix panic caused by cancelling build [GH-8067] [GH-8072]
 
 ## 1.4.3 (August 14, 2019)
 
