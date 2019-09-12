@@ -18,6 +18,7 @@ type AccessConfig struct {
 	PrivateKey string `mapstructure:"private_key"`
 	Region     string `mapstructure:"region"`
 	ProjectId  string `mapstructure:"project_id"`
+	BaseUrl    string `mapstructure:"base_url"`
 
 	client *UCloudClient
 }
@@ -30,6 +31,9 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 	cfg := ucloud.NewConfig()
 	cfg.Region = c.Region
 	cfg.ProjectId = c.ProjectId
+	if c.BaseUrl != "" {
+		cfg.BaseUrl = c.BaseUrl
+	}
 	cfg.UserAgent = fmt.Sprintf("Packer-UCloud/%s", version.FormattedVersion())
 
 	cred := auth.NewCredential()
