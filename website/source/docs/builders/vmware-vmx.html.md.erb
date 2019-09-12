@@ -102,6 +102,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-  `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init,
+    Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
+    By default, the floppy label will be 'packer'.
+
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
     `/Applications/VMware Fusion.app` but this setting allows you to
     customize this.
