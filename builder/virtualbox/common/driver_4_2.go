@@ -252,17 +252,18 @@ func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
 	}
 	log.Printf("Executing LoadSnapshots: VM: %s", vmName)
 
+	var rootNode *VBoxSnapshot
 	stdoutString, err := d.VBoxManageWithOutput("snapshot", vmName, "list", "--machinereadable")
+	if stdoutString == "This machine does not have any snapshots" {
+		return rootNode, nil
+	}
 	if nil != err {
 		return nil, err
 	}
 
-	var rootNode *VBoxSnapshot
-	if stdoutString != "This machine does not have any snapshots" {
-		rootNode, err = ParseSnapshotData(stdoutString)
-		if nil != err {
-			return nil, err
-		}
+	rootNode, err = ParseSnapshotData(stdoutString)
+	if nil != err {
+		return nil, err
 	}
 
 	return rootNode, nil
