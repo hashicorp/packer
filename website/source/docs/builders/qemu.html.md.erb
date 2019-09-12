@@ -209,6 +209,11 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     listed files must not exceed 1.44 MB. The supported ways to move large
     files into the OS are using `http_directory` or [the file provisioner](https://www.packer.io/docs/provisioners/file.html).
 
+-  `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init,
+    Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
+    By default, the floppy label will be 'packer'.
+
 -   `format` (string) - Either `qcow2` or `raw`, this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
 
