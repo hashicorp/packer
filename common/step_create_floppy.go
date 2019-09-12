@@ -37,7 +37,7 @@ func (s *StepCreateFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 	if s.Label == "" {
 		s.Label = "packer"
 	} else {
-		log.Println("Floppy label is set to %s", s.Label)
+		log.Printf("Floppy label is set to %s", s.Label)
 	}
 
 	s.FilesAdded = make(map[string]bool)
