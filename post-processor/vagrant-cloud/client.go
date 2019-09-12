@@ -106,12 +106,10 @@ func (v *VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
 	log.Printf("Post-Processor Vagrant Cloud API DELETE: %s", scrubbedUrl)
 
-	req, err := http.NewRequest("DELETE", reqUrl, nil)
+	req, err := v.newRequest("DELETE", reqUrl, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
@@ -196,6 +194,8 @@ func (v *VagrantCloudClient) newRequest(method, url string, body io.Reader) (*ht
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
+	if len(v.AccessToken) > 0 {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
+	}
 	return req, err
 }

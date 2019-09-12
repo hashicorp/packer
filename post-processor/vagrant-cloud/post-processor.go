@@ -98,9 +98,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Required configuration
 	templates := map[string]*string{
-		"box_tag":      &p.config.Tag,
-		"version":      &p.config.Version,
-		"access_token": &p.config.AccessToken,
+		"box_tag": &p.config.Tag,
+		"version": &p.config.Version,
 	}
 
 	for key, ptr := range templates {
@@ -108,6 +107,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
+
+	if p.config.VagrantCloudUrl == VAGRANT_CLOUD_URL && p.config.AccessToken == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overriden"))
 	}
 
 	// Create the HTTP client
