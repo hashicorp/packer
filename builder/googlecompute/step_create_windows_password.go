@@ -55,12 +55,17 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 	buf := make([]byte, 4)
 	binary.BigEndian.PutUint32(buf, uint32(priv.E))
 
+	email := ""
+	if c.Account != nil {
+		email = c.Account.Email
+	}
+
 	data := WindowsPasswordConfig{
 		key:      priv,
 		UserName: c.Comm.WinRMUser,
 		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
 		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
-		Email:    c.Account.Email,
+		Email:    email,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
 
