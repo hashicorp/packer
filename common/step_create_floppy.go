@@ -21,6 +21,7 @@ import (
 type StepCreateFloppy struct {
 	Files       []string
 	Directories []string
+	Label       string
 
 	floppyPath string
 
@@ -31,6 +32,12 @@ func (s *StepCreateFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 	if len(s.Files) == 0 && len(s.Directories) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue
+	}
+
+	if s.Label == "" {
+		s.Label = "packer"
+	} else {
+		log.Printf("Floppy label is set to %s", s.Label)
 	}
 
 	s.FilesAdded = make(map[string]bool)
@@ -70,8 +77,8 @@ func (s *StepCreateFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Println("Formatting the block device with a FAT filesystem...")
 	formatConfig := &fat.SuperFloppyConfig{
 		FATType: fat.FAT12,
-		Label:   "packer",
-		OEMName: "packer",
+		Label:   s.Label,
+		OEMName: s.Label,
 	}
 	if err := fat.FormatSuperFloppy(device, formatConfig); err != nil {
 		state.Put("error", fmt.Errorf("Error creating floppy: %s", err))

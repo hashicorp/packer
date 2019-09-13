@@ -136,6 +136,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-  `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init,
+    Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
+    By default, the floppy label will be 'packer'.
+
 -   `format` (string) - Either `ovf` or `ova`, this specifies the output format
     of the exported virtual machine. This defaults to `ovf`.
 
