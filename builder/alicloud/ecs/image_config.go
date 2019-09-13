@@ -5,18 +5,19 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type AlicloudDiskDevice struct {
-	DiskName           string `mapstructure:"disk_name"`
-	DiskCategory       string `mapstructure:"disk_category"`
-	DiskSize           int    `mapstructure:"disk_size"`
-	SnapshotId         string `mapstructure:"disk_snapshot_id"`
-	Description        string `mapstructure:"disk_description"`
-	DeleteWithInstance bool   `mapstructure:"disk_delete_with_instance"`
-	Device             string `mapstructure:"disk_device"`
-	Encrypted          *bool  `mapstructure:"disk_encrypted"`
+	DiskName           string         `mapstructure:"disk_name"`
+	DiskCategory       string         `mapstructure:"disk_category"`
+	DiskSize           int            `mapstructure:"disk_size"`
+	SnapshotId         string         `mapstructure:"disk_snapshot_id"`
+	Description        string         `mapstructure:"disk_description"`
+	DeleteWithInstance bool           `mapstructure:"disk_delete_with_instance"`
+	Device             string         `mapstructure:"disk_device"`
+	Encrypted          config.Trilean `mapstructure:"disk_encrypted"`
 }
 
 type AlicloudDiskDevices struct {
@@ -32,7 +33,7 @@ type AlicloudImageConfig struct {
 	AlicloudImageUNShareAccounts      []string          `mapstructure:"image_unshare_account"`
 	AlicloudImageDestinationRegions   []string          `mapstructure:"image_copy_regions"`
 	AlicloudImageDestinationNames     []string          `mapstructure:"image_copy_names"`
-	ImageEncrypted                    *bool             `mapstructure:"image_encrypted"`
+	ImageEncrypted                    config.Trilean    `mapstructure:"image_encrypted"`
 	AlicloudImageForceDelete          bool              `mapstructure:"image_force_delete"`
 	AlicloudImageForceDeleteSnapshots bool              `mapstructure:"image_force_delete_snapshots"`
 	AlicloudImageForceDeleteInstances bool              `mapstructure:"image_force_delete_instances"`

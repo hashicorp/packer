@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepModifyEBSBackedInstance struct {
-	EnableAMIENASupport      *bool
+	EnableAMIENASupport      confighelper.Trilean
 	EnableAMISriovNetSupport bool
 }
 
 func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ec2conn := state.Get("ec2").(ec2iface.EC2API)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -40,9 +41,9 @@ func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.S
 
 	// Handle EnaSupport flag.
 	// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
-	if s.EnableAMIENASupport != nil {
+	if s.EnableAMIENASupport != confighelper.TriUnset {
 		var prefix string
-		if *s.EnableAMIENASupport {
+		if s.EnableAMIENASupport.True() {
 			prefix = "En"
 		} else {
 			prefix = "Dis"
@@ -50,7 +51,7 @@ func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.S
 		ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
 			InstanceId: instance.InstanceId,
-			EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(*s.EnableAMIENASupport)},
+			EnaSupport: &ec2.AttributeBooleanValue{Value: s.EnableAMIENASupport.ToBoolPointer()},
 		})
 		if err != nil {
 			err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
