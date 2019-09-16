@@ -157,10 +157,10 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
-			// underscore will be replaced
+			// underscore is not allowed
 			"image_name",
 			"foo_bar",
-			false,
+			true,
 		},
 		{
 			// too long
