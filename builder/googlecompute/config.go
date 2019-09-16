@@ -144,17 +144,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// used for ImageName and ImageFamily
-	imageErrorText := "Invalid image %s: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"
+	imageErrorText := "Invalid image %s %q: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"
 
 	if len(c.ImageName) > 63 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Invalid image name: Must not be longer than 63 characters"))
 	}
 
-	// replaces invalid characters with hyphens
-	c.ImageName = templateCleanImageName(c.ImageName)
 	if !validImageName.MatchString(c.ImageName) {
-		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name")))
+		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name", c.ImageName)))
 	}
 
 	if len(c.ImageFamily) > 63 {
@@ -164,7 +162,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.ImageFamily != "" {
 		if !validImageName.MatchString(c.ImageFamily) {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family")))
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
 		}
 	}
 
