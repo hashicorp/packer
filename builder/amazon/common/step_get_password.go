@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common/retry"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -45,14 +46,13 @@ func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) mul
 	// Get the password
 	var password string
 	var err error
-	cancel := make(chan struct{})
 	waitDone := make(chan bool, 1)
 	go func() {
 		ui.Say("Waiting for auto-generated password for instance...")
 		ui.Message(
 			"It is normal for this process to take up to 15 minutes,\n" +
 				"but it usually takes around 5. Please wait.")
-		password, err = s.waitForPassword(state, cancel)
+		password, err = s.waitForPassword(ctx, state)
 		waitDone <- true
 	}()
 
@@ -76,16 +76,12 @@ WaitLoop:
 			err := fmt.Errorf("Timeout waiting for password.")
 			state.Put("error", err)
 			ui.Error(err.Error())
-			close(cancel)
 			return multistep.ActionHalt
-		case <-time.After(1 * time.Second):
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				// The step sequence was cancelled, so cancel waiting for password
-				// and just start the halting process.
-				close(cancel)
-				log.Println("[WARN] Interrupt detected, quitting waiting for password.")
-				return multistep.ActionHalt
-			}
+		case <-ctx.Done():
+			// The step sequence was cancelled, so cancel waiting for password
+			// and just start the halting process.
+			log.Println("[WARN] Interrupt detected, quitting waiting for password.")
+			return multistep.ActionHalt
 		}
 	}
 
@@ -106,24 +102,38 @@ func (s *StepGetPassword) Cleanup(multistep.StateBag) {
 	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
 }
 
-func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
+func (s *StepGetPassword) waitForPassword(ctx context.Context, state multistep.StateBag) (string, error) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	privateKey := s.Comm.SSHPrivateKey
 
 	for {
 		select {
-		case <-cancel:
+		case <-ctx.Done():
 			log.Println("[INFO] Retrieve password wait cancelled. Exiting loop.")
 			return "", errors.New("Retrieve password wait cancelled")
 		case <-time.After(5 * time.Second):
 		}
 
-		resp, err := ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
-			InstanceId: instance.InstanceId,
+		// Wrap in a retry so that we don't fail on rate-limiting.
+		log.Printf("Retrieving auto-generated instance password...")
+		var resp *ec2.GetPasswordDataOutput
+		err := retry.Config{
+			Tries:      11,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			var err error
+			resp, err = ec2conn.GetPasswordData(&ec2.GetPasswordDataInput{
+				InstanceId: instance.InstanceId,
+			})
+			if err != nil {
+				err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
+				return err
+			}
+			return nil
 		})
+
 		if err != nil {
-			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
 			return "", err
 		}
 
