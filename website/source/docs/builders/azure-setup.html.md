@@ -9,7 +9,7 @@ sidebar_current: 'docs-builders-azure-setup'
 
 # Authorizing Packer Builds in Azure
 
-In order to build VMs in Azure Packer needs 6 configuration options to be
+In order to build VMs in Azure, Packer needs 6 configuration options to be
 specified:
 
 -   `subscription_id` - UUID identifying your Azure subscription (where billing
@@ -26,9 +26,9 @@ specified:
 -   `storage_account` - name of the storage account where your VHD(s) will be
     stored
 
--&gt; Behind the scenes Packer uses the OAuth protocol to authenticate against
+-&gt; Behind the scenes, Packer uses the OAuth protocol to authenticate against
 Azure Active Directory and authorize requests to the Azure Service Management
-API. These topics are unnecessarily complicated so we will try to ignore them
+API. These topics are unnecessarily complicated, so we will try to ignore them
 for the rest of this document.<br /><br />You do not need to understand how
 OAuth works in order to use Packer with Azure, though the Active Directory
 terms "service principal" and "role" will be useful for understanding Azure's
@@ -45,10 +45,10 @@ for Linux based VMs.) Device login is intended for those who are first time
 users, and just want to ''kick the tires.'' We recommend the SPN approach if
 you intend to automate Packer.
 
-> Device login is for **interactive** builds, and SPN is **automated** builds.
+> Device login is for **interactive** builds, and SPN is for **automated** builds.
 
 There are three pieces of information you must provide to enable device login
-mode.
+mode:
 
 1.  SubscriptionID
 2.  Resource Group - parent resource group that Packer uses to build an image.
@@ -111,7 +111,7 @@ you into Azure, name your resources, and export your Packer configuration.
 
 ## Manual Setup
 
-If you want more control or the script does not work for you, you can also use
+If you want more control, or the script does not work for you, you can also use
 the manual instructions below to setup your Azure account. You will need to
 manually keep track of the various account identifiers, resource names, and
 your service principal password.
