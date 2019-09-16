@@ -33,10 +33,6 @@ func MultiErrorAppend(err error, errs ...error) *MultiError {
 
 	switch err := err.(type) {
 	case *MultiError:
-		if err == nil {
-			err = new(MultiError)
-		}
-
 		for _, verr := range errs {
 			switch rhsErr := verr.(type) {
 			case *MultiError:
