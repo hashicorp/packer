@@ -25,7 +25,6 @@ type Template struct {
 	Builders           map[string]*Builder
 	Provisioners       []*Provisioner
 	PostProcessors     [][]*PostProcessor
-	Push               Push
 
 	// RawContents is just the raw data for this template
 	RawContents []byte
@@ -64,15 +63,6 @@ func (t *Template) Raw() (*rawTemplate, error) {
 		}
 
 		out.Variables[k] = v
-	}
-
-	if t.Push.Name != "" {
-		b, _ := json.Marshal(t.Push)
-
-		var m map[string]interface{}
-		_ = json.Unmarshal(b, &m)
-
-		out.Push = m
 	}
 
 	return &out, nil

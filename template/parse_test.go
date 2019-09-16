@@ -359,15 +359,6 @@ func TestParse(t *testing.T) {
 		},
 
 		{
-			"parse-push.json",
-			&Template{
-				Push: Push{
-					Name: "foo",
-				},
-			},
-			false,
-		},
-		{
 			"parse-comment.json",
 			&Template{
 				Builders: map[string]*Builder{
@@ -479,9 +470,6 @@ func TestParse(t *testing.T) {
 							},
 						},
 					},
-				},
-				Push: Push{
-					Name: "push test",
 				},
 			},
 			false,
