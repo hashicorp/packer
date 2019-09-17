@@ -96,7 +96,13 @@ func (d *Vagrant_2_2_Driver) Verify() error {
 	}
 
 	constraints, err := version.NewConstraint(VAGRANT_MIN_VERSION)
+	if err != nil {
+		return fmt.Errorf("error parsing vagrant minimum version: %v", err)
+	}
 	vers, err := d.Version()
+	if err != nil {
+		return fmt.Errorf("error getting virtualbox version: %v", err)
+	}
 	v, err := version.NewVersion(vers)
 	if err != nil {
 		return fmt.Errorf("Error figuring out Vagrant version.")
