@@ -9,46 +9,45 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	"github.com/yandex-cloud/go-sdk/pkg/sdkerrors"
 )
 
 type rpcCredentials struct {
-	creds     ExchangeableCredentials
 	plaintext bool
 
-	// getConn set in Init.
-	getConn lazyConn
+	createToken createIAMTokenFunc // Injected on Init
 	// now may be replaced in tests
 	now func() time.Time
 
 	// mutex guards conn and currentState, and excludes multiple simultaneous token updates
 	mutex        sync.RWMutex
-	conn         *grpc.ClientConn // initialized lazily from getConn
 	currentState rpcCredentialsState
 }
 
 var _ credentials.PerRPCCredentials = &rpcCredentials{}
 
 type rpcCredentialsState struct {
-	token        string
-	refreshAfter time.Time
-	version      int64
+	token     string
+	expiresAt time.Time
+	version   int64
 }
 
-func newRPCCredentials(creds ExchangeableCredentials, plaintext bool) *rpcCredentials {
+func newRPCCredentials(plaintext bool) *rpcCredentials {
 	return &rpcCredentials{
-		creds:     creds,
 		plaintext: plaintext,
 		now:       time.Now,
 	}
 }
 
-func (c *rpcCredentials) Init(lazyConn lazyConn) {
-	c.getConn = lazyConn
+type createIAMTokenFunc func(ctx context.Context) (*iam.CreateIamTokenResponse, error)
+
+func (c *rpcCredentials) Init(createToken createIAMTokenFunc) {
+	c.createToken = createToken
 }
 
 func (c *rpcCredentials) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
@@ -66,8 +65,8 @@ func (c *rpcCredentials) GetRequestMetadata(ctx context.Context, uri ...string) 
 	c.mutex.RUnlock()
 
 	token := state.token
-	outdated := state.refreshAfter.Before(c.now())
-	if outdated {
+	expired := c.now().After(state.expiresAt)
+	if expired {
 		token, err = c.updateToken(ctx, state)
 		if err != nil {
 			return nil, err
@@ -92,30 +91,20 @@ func (c *rpcCredentials) updateToken(ctx context.Context, currentState rpcCreden
 		return c.currentState.token, nil
 	}
 
-	if c.conn == nil {
-		conn, err := c.getConn(ctx)
-		if err != nil {
-			return "", err
-		}
-		c.conn = conn
-	}
-	tokenClient := iam.NewIamTokenServiceClient(c.conn)
-
-	tokenReq, err := c.creds.IAMTokenRequest()
+	resp, err := c.createToken(ctx)
 	if err != nil {
-		return "", sdkerrors.WithMessage(err, "failed to create IAM token request from credentials")
+		return "", sdkerrors.WithMessage(err, "iam token create failed")
 	}
-
-	resp, err := tokenClient.Create(ctx, tokenReq)
-	if err != nil {
-		return "", err
+	expiresAt, expiresAtErr := ptypes.Timestamp(resp.ExpiresAt)
+	if expiresAtErr != nil {
+		grpclog.Errorf("invalid IAM Token expires_at: %s", expiresAtErr)
+		// Fallback to short term caching.
+		expiresAt = time.Now().Add(time.Minute)
 	}
-
 	c.currentState = rpcCredentialsState{
-		token:        resp.IamToken,
-		refreshAfter: c.now().Add(iamTokenExpiration),
-		version:      currentState.version + 1,
+		token:     resp.IamToken,
+		expiresAt: expiresAt,
+		version:   currentState.version + 1,
 	}
-
 	return c.currentState.token, nil
 }

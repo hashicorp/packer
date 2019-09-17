@@ -40,6 +40,15 @@ func (c *ClusterServiceClient) AddShard(ctx context.Context, in *clickhouse.AddC
 	return clickhouse.NewClusterServiceClient(conn).AddShard(ctx, in, opts...)
 }
 
+// AddZookeeper implements clickhouse.ClusterServiceClient
+func (c *ClusterServiceClient) AddZookeeper(ctx context.Context, in *clickhouse.AddClusterZookeeperRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return clickhouse.NewClusterServiceClient(conn).AddZookeeper(ctx, in, opts...)
+}
+
 // Backup implements clickhouse.ClusterServiceClient
 func (c *ClusterServiceClient) Backup(ctx context.Context, in *clickhouse.BackupClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -58,6 +67,15 @@ func (c *ClusterServiceClient) Create(ctx context.Context, in *clickhouse.Create
 	return clickhouse.NewClusterServiceClient(conn).Create(ctx, in, opts...)
 }
 
+// CreateExternalDictionary implements clickhouse.ClusterServiceClient
+func (c *ClusterServiceClient) CreateExternalDictionary(ctx context.Context, in *clickhouse.CreateClusterExternalDictionaryRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return clickhouse.NewClusterServiceClient(conn).CreateExternalDictionary(ctx, in, opts...)
+}
+
 // Delete implements clickhouse.ClusterServiceClient
 func (c *ClusterServiceClient) Delete(ctx context.Context, in *clickhouse.DeleteClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -65,6 +83,15 @@ func (c *ClusterServiceClient) Delete(ctx context.Context, in *clickhouse.Delete
 		return nil, err
 	}
 	return clickhouse.NewClusterServiceClient(conn).Delete(ctx, in, opts...)
+}
+
+// DeleteExternalDictionary implements clickhouse.ClusterServiceClient
+func (c *ClusterServiceClient) DeleteExternalDictionary(ctx context.Context, in *clickhouse.DeleteClusterExternalDictionaryRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return clickhouse.NewClusterServiceClient(conn).DeleteExternalDictionary(ctx, in, opts...)
 }
 
 // DeleteHosts implements clickhouse.ClusterServiceClient

@@ -21,10 +21,11 @@ This section will cover how to install and use plugins. If you're interested in
 developing plugins, the documentation for that is available below, in the
 [developing plugins](#developing-plugins) section.
 
-Because Packer is so young, there is no official listing of available Packer
-plugins. Plugins are best found via Google. Typically, searching "packer plugin
-*x*" will find what you're looking for if it exists. As Packer gets older, an
-official plugin directory is planned.
+The current official listing of available Packer plugins can be found
+[here](/community-tools.html#third-party-plugins). This is an incomplete list,
+and more plugins can be found by searching. Typically, searching "packer plugin
+*x*" will find what you're looking for if it exists. We hope to create an
+offical registry for third party plugins in the future.
 
 ## How Plugins Work
 
@@ -149,7 +150,7 @@ func main() {
 		panic(err)
 	}
 	server.RegisterBuilder(new(Builder))
-	server.Serve() 
+	server.Serve()
 }
 ```
 

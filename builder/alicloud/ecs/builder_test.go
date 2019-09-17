@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	helperconfig "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -126,13 +127,15 @@ func TestBuilderPrepare_Devices(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-	if !reflect.DeepEqual(b.config.ECSSystemDiskMapping, AlicloudDiskDevice{
+	expected := AlicloudDiskDevice{
 		DiskCategory: "cloud",
 		Description:  "system disk",
 		DiskName:     "system_disk",
 		DiskSize:     60,
-	}) {
-		t.Fatalf("system disk is not set properly, actual: %#v", b.config.ECSSystemDiskMapping)
+		Encrypted:    helperconfig.TriUnset,
+	}
+	if !reflect.DeepEqual(b.config.ECSSystemDiskMapping, expected) {
+		t.Fatalf("system disk is not set properly, actual: %v; expected: %v", b.config.ECSSystemDiskMapping, expected)
 	}
 	if !reflect.DeepEqual(b.config.ECSImagesDiskMappings, []AlicloudDiskDevice{
 		{

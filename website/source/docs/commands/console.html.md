@@ -14,6 +14,8 @@ interpolations. You may access variables in the Packer config you called the
 console with, or provide variables when you call console using the -var or
 -var-file command line options.
 
+~> **Note:** `console` is available from version 1.4.2 and above.
+
 Type in the interpolation to test and hit \<enter\> to see the result.
 
 To exit the console, type "exit" and hit \<enter\>, or use Control-C.

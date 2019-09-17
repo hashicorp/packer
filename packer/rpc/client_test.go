@@ -12,14 +12,15 @@ func testConn(t *testing.T) (net.Conn, net.Conn) {
 	}
 
 	var serverConn net.Conn
-	doneCh := make(chan struct{})
+	errChan := make(chan error)
 	go func() {
-		defer close(doneCh)
+		defer close(errChan)
 		defer l.Close()
 		var err error
 		serverConn, err = l.Accept()
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- err
+			return
 		}
 	}()
 
@@ -27,7 +28,11 @@ func testConn(t *testing.T) (net.Conn, net.Conn) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	<-doneCh
+
+	err = <-errChan
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 
 	return clientConn, serverConn
 }

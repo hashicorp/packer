@@ -12,6 +12,7 @@ import (
 type FloppyConfig struct {
 	FloppyFiles       []string `mapstructure:"floppy_files"`
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
+	FloppyLabel       string   `mapstructure:"floppy_label"`
 }
 
 func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {

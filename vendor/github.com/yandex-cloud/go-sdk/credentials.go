@@ -4,23 +4,22 @@
 package ycsdk
 
 import (
+	"context"
 	"crypto/rsa"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"net/http"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/golang/protobuf/ptypes"
 
 	iampb "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	"github.com/yandex-cloud/go-sdk/iamkey"
 	"github.com/yandex-cloud/go-sdk/pkg/sdkerrors"
-)
-
-const (
-	// iamTokenExpiration is refreshAfter time of IAM token.
-	// for now it constant, but in near future token expiration will be returned in
-	// See https://cloud.yandex.ru/docs/iam/concepts/authorization/iam-token for details.
-	iamTokenExpiration = 12 * time.Hour
 )
 
 // Credentials is an abstraction of API authorization credentials.
@@ -34,12 +33,18 @@ type Credentials interface {
 
 // ExchangeableCredentials can be exchanged for IAM Token in IAM Token Service, that can be used
 // to authorize API calls.
-// For now, this is the only option to authorize API calls, but this may be changed in future.
 // See https://cloud.yandex.ru/docs/iam/concepts/authorization/iam-token for details.
 type ExchangeableCredentials interface {
 	Credentials
 	// IAMTokenRequest returns request for fresh IAM token or error.
-	IAMTokenRequest() (iamTokenReq *iampb.CreateIamTokenRequest, err error)
+	IAMTokenRequest() (*iampb.CreateIamTokenRequest, error)
+}
+
+// NonExchangeableCredentials allows to get IAM Token without calling IAM Token Service.
+type NonExchangeableCredentials interface {
+	Credentials
+	// IAMToken returns IAM Token.
+	IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error)
 }
 
 // OAuthToken returns API credentials for user Yandex Passport OAuth token, that can be received
@@ -53,16 +58,6 @@ func OAuthToken(token string) Credentials {
 			},
 		}, nil
 	})
-}
-
-type exchangeableCredentialsFunc func() (iamTokenReq *iampb.CreateIamTokenRequest, err error)
-
-var _ ExchangeableCredentials = (exchangeableCredentialsFunc)(nil)
-
-func (exchangeableCredentialsFunc) YandexCloudAPICredentials() {}
-
-func (f exchangeableCredentialsFunc) IAMTokenRequest() (iamTokenReq *iampb.CreateIamTokenRequest, err error) {
-	return f()
 }
 
 // ServiceAccountKey returns credentials for the given IAM Key. The key is used to sign JWT tokens.
@@ -84,6 +79,15 @@ func ServiceAccountKey(key *iamkey.Key) (Credentials, error) {
 			},
 		}, nil
 	}), nil
+}
+
+// InstanceServiceAccount returns credentials for Compute Instance Service Account.
+// That is, for SDK build with InstanceServiceAccount credentials and used on Compute Instance
+// created with yandex.cloud.compute.v1.CreateInstanceRequest.service_account_id, API calls
+// will be authenticated with this ServiceAccount ID.
+// TODO(skipor): doc link
+func InstanceServiceAccount() NonExchangeableCredentials {
+	return newInstanceServiceAccountCredentials(InstanceMetadataAddr)
 }
 
 func newServiceAccountJWTBuilder(key *iamkey.Key) (*serviceAccountJWTBuilder, error) {
@@ -139,4 +143,85 @@ var jwtSigningMethodPS256WithSaltLengthEqualsHash = &jwt.SigningMethodRSAPSS{
 	Options: &rsa.PSSOptions{
 		SaltLength: rsa.PSSSaltLengthEqualsHash,
 	},
+}
+
+type exchangeableCredentialsFunc func() (iamTokenReq *iampb.CreateIamTokenRequest, err error)
+
+var _ ExchangeableCredentials = (exchangeableCredentialsFunc)(nil)
+
+func (exchangeableCredentialsFunc) YandexCloudAPICredentials() {}
+func (f exchangeableCredentialsFunc) IAMTokenRequest() (iamTokenReq *iampb.CreateIamTokenRequest, err error) {
+	return f()
+}
+
+func newInstanceServiceAccountCredentials(metadataServiceAddr string) NonExchangeableCredentials {
+	return &instanceServiceAccountCredentials{
+		metadataServiceAddr: metadataServiceAddr,
+		client: http.Client{
+			Transport: &http.Transport{
+				DialContext: (&net.Dialer{
+					Timeout:   time.Second, // One second should be enough for localhost connection.
+					KeepAlive: 0,           // No keep alive. Near token per hour requested.
+				}).DialContext,
+			},
+		},
+	}
+}
+
+type instanceServiceAccountCredentials struct {
+	metadataServiceAddr string
+	client              http.Client
+}
+
+func (c *instanceServiceAccountCredentials) YandexCloudAPICredentials() {}
+
+func (c *instanceServiceAccountCredentials) IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
+	token, err := c.iamToken(ctx)
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "instance service account token")
+	}
+	return token, nil
+}
+
+func (c *instanceServiceAccountCredentials) iamToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
+	URL := fmt.Sprintf("http://%s/computeMetadata/v1/instance/service-accounts/default/token", c.metadataServiceAddr)
+	req, err := http.NewRequest("GET", URL, nil)
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "request make failed")
+	}
+	req.Header.Set("Metadata-Flavor", "Google")
+	resp, err := c.client.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "compute instance metadata service call failed.\n"+
+			"Are you inside compute instance?\n"+
+			"Details")
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, errors.New("compute instance metadata service token resource is not found.\n" +
+			"Is this compute instance running using Service Account? That is, Instance.service_account_id should not be empty.")
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "response body read failed")
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected token get status: %s: %s", resp.Status, body)
+	}
+	var tokenResponse struct {
+		AccessToken string `json:"access_token"`
+		ExpiresIn   int64  `json:"expires_in"`
+		TokenType   string `json:"token_type"`
+	}
+	err = json.Unmarshal(body, &tokenResponse)
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "body unmarshal failed")
+	}
+	expiresAt := ptypes.TimestampNow()
+	expiresAt.Seconds += tokenResponse.ExpiresIn - 1
+	expiresAt.Nanos = 0 // Truncate is for readability.
+	return &iampb.CreateIamTokenResponse{
+		IamToken:  tokenResponse.AccessToken,
+		ExpiresAt: expiresAt,
+	}, nil
 }

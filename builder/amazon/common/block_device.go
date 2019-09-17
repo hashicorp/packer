@@ -6,21 +6,22 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // BlockDevice
 type BlockDevice struct {
-	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
-	DeviceName          string `mapstructure:"device_name"`
-	Encrypted           *bool  `mapstructure:"encrypted"`
-	IOPS                int64  `mapstructure:"iops"`
-	NoDevice            bool   `mapstructure:"no_device"`
-	SnapshotId          string `mapstructure:"snapshot_id"`
-	VirtualName         string `mapstructure:"virtual_name"`
-	VolumeType          string `mapstructure:"volume_type"`
-	VolumeSize          int64  `mapstructure:"volume_size"`
-	KmsKeyId            string `mapstructure:"kms_key_id"`
+	DeleteOnTermination bool           `mapstructure:"delete_on_termination"`
+	DeviceName          string         `mapstructure:"device_name"`
+	Encrypted           config.Trilean `mapstructure:"encrypted"`
+	IOPS                int64          `mapstructure:"iops"`
+	NoDevice            bool           `mapstructure:"no_device"`
+	SnapshotId          string         `mapstructure:"snapshot_id"`
+	VirtualName         string         `mapstructure:"virtual_name"`
+	VolumeType          string         `mapstructure:"volume_type"`
+	VolumeSize          int64          `mapstructure:"volume_size"`
+	KmsKeyId            string         `mapstructure:"kms_key_id"`
 	// ebssurrogate only
 	OmitFromArtifact bool `mapstructure:"omit_from_artifact"`
 }
@@ -74,7 +75,8 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 			if blockDevice.SnapshotId != "" {
 				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
 			}
-			ebsBlockDevice.Encrypted = blockDevice.Encrypted
+
+			ebsBlockDevice.Encrypted = blockDevice.Encrypted.ToBoolPointer()
 
 			if blockDevice.KmsKeyId != "" {
 				ebsBlockDevice.KmsKeyId = aws.String(blockDevice.KmsKeyId)
@@ -93,8 +95,9 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		return fmt.Errorf("The `device_name` must be specified " +
 			"for every device in the block device mapping.")
 	}
+
 	// Warn that encrypted must be true or nil when setting kms_key_id
-	if b.KmsKeyId != "" && b.Encrypted != nil && *b.Encrypted == false {
+	if b.KmsKeyId != "" && b.Encrypted.False() {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}
