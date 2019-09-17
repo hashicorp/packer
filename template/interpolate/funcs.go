@@ -60,7 +60,7 @@ func Funcs(ctx *Context) template.FuncMap {
 	result := make(map[string]interface{})
 	for k, v := range FuncGens {
 		switch v := v.(type) {
-		case FuncGenerator:
+		case func(*Context) interface{}:
 			result[k] = v(ctx)
 		default:
 			result[k] = v
