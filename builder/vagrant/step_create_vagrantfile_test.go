@@ -29,6 +29,9 @@ func TestCreateFile(t *testing.T) {
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
   config.vm.define "source", autostart: false do |source|
@@ -56,6 +59,9 @@ func TestCreateFile_customSync(t *testing.T) {
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
   config.vm.define "source", autostart: false do |source|
