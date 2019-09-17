@@ -20,12 +20,14 @@ type Config struct {
 	common.HTTPConfig   `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	APIURL       string        `mapstructure:"api_url"`
-	APIKey       string        `mapstructure:"api_key"`
-	SecretKey    string        `mapstructure:"secret_key"`
-	AsyncTimeout time.Duration `mapstructure:"async_timeout"`
-	HTTPGetOnly  bool          `mapstructure:"http_get_only"`
-	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
+	APIURL        string        `mapstructure:"api_url"`
+	APIKey        string        `mapstructure:"api_key"`
+	SecretKey     string        `mapstructure:"secret_key"`
+	AsyncTimeout  time.Duration `mapstructure:"async_timeout"`
+	HTTPGetOnly   bool          `mapstructure:"http_get_only"`
+	SSLNoVerify   bool          `mapstructure:"ssl_no_verify"`
+	EjectISO      bool          `mapstructure:"eject_iso"`
+	EjectISODelay time.Duration `mapstructure:"eject_iso_delay"`
 
 	CIDRList               []string `mapstructure:"cidr_list"`
 	CreateSecurityGroup    bool     `mapstructure:"create_security_group"`
