@@ -623,19 +623,19 @@ listed in the main window of the Images -> AMIs section.
 Why stop there though?
 
 As you'll see, with one simple change to the template above, it's
-just as easy to create your own Windows 2008 or Windows 2016 AMIs. Just
+just as easy to create your own Windows 2016 or Windows 2019 AMIs. Just
 set the value for the name field within `source_ami_filter` as required:
-
-For Windows 2008 SP2:
-
-```
-          "name": "*Windows_Server-2008-SP2*English-64Bit-Base*",
-```
 
 For Windows 2016:
 
 ```
-          "name": "*Windows_Server-2016-English-Full-Base*",
+          "name": "*Windows_Server-2016-English-Full-Base-20*",
+```
+
+For Windows 2019:
+
+```
+          "name": "*Windows_Server-2019-English-Full-Base-20*",
 ```
 
 The bootstrapping and sample provisioning should work the same across all
