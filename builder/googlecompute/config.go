@@ -17,7 +17,8 @@ import (
 	compute "google.golang.org/api/compute/v1"
 )
 
-var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
+// used for ImageName and ImageFamily
+var validImageName = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 
 // Config is the configuration structure for the GCE builder. It stores
 // both the publicly settable state as well as the privately generated
@@ -142,17 +143,27 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
+	// used for ImageName and ImageFamily
+	imageErrorText := "Invalid image %s %q: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"
+
+	if len(c.ImageName) > 63 {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Invalid image name: Must not be longer than 63 characters"))
+	}
+
+	if !validImageName.MatchString(c.ImageName) {
+		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name", c.ImageName)))
+	}
+
 	if len(c.ImageFamily) > 63 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Invalid image family: Must not be longer than 63 characters"))
 	}
 
 	if c.ImageFamily != "" {
-		if !reImageFamily.MatchString(c.ImageFamily) {
-			errs = packer.MultiErrorAppend(errs,
-				errors.New("Invalid image family: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"))
+		if !validImageName.MatchString(c.ImageFamily) {
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
 		}
-
 	}
 
 	if c.InstanceName == "" {
