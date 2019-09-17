@@ -108,7 +108,6 @@ require (
 	github.com/posener/complete v1.1.1
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17 // indirect
-	github.com/rwtodd/Go.Sed v0.0.0-20170507045331-d6d5d585814e
 	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
