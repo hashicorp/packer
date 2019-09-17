@@ -111,8 +111,8 @@ builder.
 -   `hypervisor` (string) - The target hypervisor (e.g. `XenServer`, `KVM`) for
     the new template. This option is required when using `source_iso`.
 
--   `eject_iso` (boolean) - If `true`, make a call to the CloudStack API, after 
-    loading image to cache requesting to check and detach ISO file (if any) 
+-   `eject_iso` (boolean) - If `true` make a call to the CloudStack API, after 
+    loading image to cache, requesting to check and detach ISO file (if any) 
     currently attached to a virtual machine. Defaults to `false`. This option 
     is only available when using `source_iso`.
 
