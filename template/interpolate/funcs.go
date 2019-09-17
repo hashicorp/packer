@@ -27,7 +27,7 @@ func init() {
 }
 
 // Funcs are the interpolation funcs that are available within interpolations.
-var FuncGens = map[string]FuncGenerator{
+var FuncGens = map[string]interface{}{
 	"build_name":     funcGenBuildName,
 	"build_type":     funcGenBuildType,
 	"env":            funcGenEnv,
@@ -43,8 +43,8 @@ var FuncGens = map[string]FuncGenerator{
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
 
-	"upper": funcGenPrimitive(strings.ToUpper),
-	"lower": funcGenPrimitive(strings.ToLower),
+	"upper": strings.ToUpper,
+	"lower": strings.ToLower,
 }
 
 var ErrVariableNotSetString = "Error: variable not set:"
@@ -58,7 +58,12 @@ type FuncGenerator func(*Context) interface{}
 func Funcs(ctx *Context) template.FuncMap {
 	result := make(map[string]interface{})
 	for k, v := range FuncGens {
-		result[k] = v(ctx)
+		switch v := v.(type) {
+		case FuncGenerator:
+			result[k] = v(ctx)
+		default:
+			result[k] = v
+		}
 	}
 	if ctx != nil {
 		for k, v := range ctx.Funcs {
@@ -123,12 +128,6 @@ func funcGenIsotime(ctx *Context) interface{} {
 		}
 
 		return InitTime.Format(format[0]), nil
-	}
-}
-
-func funcGenPrimitive(value interface{}) FuncGenerator {
-	return func(ctx *Context) interface{} {
-		return value
 	}
 }
 
