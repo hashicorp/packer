@@ -8,7 +8,7 @@ require (
 	github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4 // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
-	github.com/Telmate/proxmox-api-go v0.0.0-20190614181158-26cd147831a4
+	github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
@@ -31,6 +31,7 @@ require (
 	github.com/digitalocean/godo v1.11.1
 	github.com/dnaeon/go-vcr v1.0.0 // indirect
 	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 	github.com/exoscale/egoscale v0.18.1
@@ -38,7 +39,8 @@ require (
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
-	github.com/google/go-cmp v0.2.0
+	github.com/google/go-cmp v0.3.0
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.0.0
 	github.com/gophercloud/gophercloud v0.2.0
@@ -49,7 +51,7 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.0
-	github.com/hashicorp/go-getter v1.3.1-0.20190627223108-da0323b9545e
+	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
@@ -83,7 +85,6 @@ require (
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -120,18 +121,20 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
-	github.com/yandex-cloud/go-genproto v0.0.0-20190401174212-1db0ef3dce9b
-	github.com/yandex-cloud/go-sdk v0.0.0-20190402114215-3fc1d6947035
-	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
-	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
-	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
+	github.com/yandex-cloud/go-genproto v0.0.0-20190802103534-6089d9ff8d82
+	github.com/yandex-cloud/go-sdk v0.0.0-20190802103531-4ab1dac90bf7
+	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
-	golang.org/x/sys v0.0.0-20190425145619-16072639606e
-	golang.org/x/text v0.3.1 // indirect
-	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
-	google.golang.org/api v0.4.0
-	google.golang.org/grpc v1.20.1
+	golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0
+	google.golang.org/api v0.9.0
+	google.golang.org/grpc v1.21.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 )
+
+replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653
+
+go 1.13

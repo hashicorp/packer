@@ -248,7 +248,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		}
 
 		if vm.PrivateIp != "" {
-			ui.Message(fmt.Sprintf("Private IP: %s", vm.PublicIp))
+			ui.Message(fmt.Sprintf("Private IP: %s", vm.PrivateIp))
 		}
 	}
 

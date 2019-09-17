@@ -3,6 +3,7 @@ package uhost
 import (
 	"fmt"
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 
@@ -191,6 +192,17 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("UCLOUD_PROJECT_ID"); v == "" {
 		t.Fatal("UCLOUD_PROJECT_ID must be set for acceptance tests")
 	}
+}
+
+func TestUCloudClientBaseUrlConfigurable(t *testing.T) {
+	const url = "baseUrl"
+	access := &AccessConfig{BaseUrl: url}
+	client, err := access.Client()
+	assert.Nil(t, err)
+	assert.Equal(t, url, client.uaccountconn.Client.GetConfig().BaseUrl, "account conn's base url not configurable")
+	assert.Equal(t, url, client.uhostconn.Client.GetConfig().BaseUrl, "host conn's base url not configurable")
+	assert.Equal(t, url, client.unetconn.Client.GetConfig().BaseUrl, "net conn's base url not configurable")
+	assert.Equal(t, url, client.vpcconn.Client.GetConfig().BaseUrl, "vpc conn's base url not configurable")
 }
 
 func testUCloudClient() (*UCloudClient, error) {

@@ -18,6 +18,8 @@ import (
 )
 
 const defaultEndpoint = "api.cloud.yandex.net:443"
+const defaultGpuPlatformID = "gpu-standard-v1"
+const defaultPlatformID = "standard-v1"
 const defaultZone = "ru-central1-a"
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -40,6 +42,7 @@ type Config struct {
 	ImageName           string            `mapstructure:"image_name"`
 	ImageProductIDs     []string          `mapstructure:"image_product_ids"`
 	InstanceCores       int               `mapstructure:"instance_cores"`
+	InstanceGpus        int               `mapstructure:"instance_gpus"`
 	InstanceMemory      int               `mapstructure:"instance_mem_gb"`
 	InstanceName        string            `mapstructure:"instance_name"`
 	Labels              map[string]string `mapstructure:"labels"`
@@ -51,6 +54,7 @@ type Config struct {
 	SourceImageFamily   string            `mapstructure:"source_image_family"`
 	SourceImageFolderID string            `mapstructure:"source_image_folder_id"`
 	SourceImageID       string            `mapstructure:"source_image_id"`
+	SourceImageName     string            `mapstructure:"source_image_name"`
 	SubnetID            string            `mapstructure:"subnet_id"`
 	UseIPv4Nat          bool              `mapstructure:"use_ipv4_nat"`
 	UseIPv6             bool              `mapstructure:"use_ipv6"`
@@ -134,7 +138,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.PlatformID == "" {
-		c.PlatformID = "standard-v1"
+		c.PlatformID = defaultPlatformID
+		if c.InstanceGpus != 0 {
+			c.PlatformID = defaultGpuPlatformID
+		}
 	}
 
 	if es := c.Communicator.Prepare(&c.ctx); len(es) > 0 {
@@ -142,9 +149,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// Process required parameters.
-	if c.SourceImageID == "" && c.SourceImageFamily == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a source_image_id or source_image_family must be specified"))
+	if c.SourceImageID == "" {
+		if c.SourceImageFamily == "" && c.SourceImageName == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("a source_image_name or source_image_family must be specified"))
+		}
+		if c.SourceImageFamily != "" && c.SourceImageName != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("one of source_image_name or source_image_family must be specified, not both"))
+		}
 	}
 
 	if c.Endpoint == "" {
@@ -166,6 +179,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.FolderID == "" {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
+	}
+
+	if c.PlatformID != defaultGpuPlatformID && c.InstanceGpus != 0 {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("for instances with gpu platform_id must be specified as `%s`", defaultGpuPlatformID))
 	}
 
 	if c.Token == "" && c.ServiceAccountKeyFile == "" {

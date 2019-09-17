@@ -13,6 +13,7 @@ func TestDecode(t *testing.T) {
 		Name    string
 		Address string
 		Time    time.Duration
+		Trilean Trilean
 	}
 
 	cases := map[string]struct {
@@ -23,13 +24,27 @@ func TestDecode(t *testing.T) {
 		"basic": {
 			[]interface{}{
 				map[string]interface{}{
-					"name": "bar",
-					"time": "5s",
+					"name":    "bar",
+					"time":    "5s",
+					"trilean": "true",
 				},
 			},
 			&Target{
-				Name: "bar",
-				Time: 5 * time.Second,
+				Name:    "bar",
+				Time:    5 * time.Second,
+				Trilean: TriTrue,
+			},
+			nil,
+		},
+
+		"empty-string-trilean": {
+			[]interface{}{
+				map[string]interface{}{
+					"trilean": "",
+				},
+			},
+			&Target{
+				Trilean: TriUnset,
 			},
 			nil,
 		},
