@@ -106,8 +106,12 @@ func TypedResponse(resp *http.Response, v interface{}) error {
 	return nil
 }
 
-func (s *Session) Login(username string, password string) (err error) {
-	reqbody := ParamsToBody(map[string]interface{}{"username": username, "password": password})
+func (s *Session) Login(username string, password string, otp string) (err error) {
+	reqUser := map[string]interface{}{"username": username, "password": password}
+	if otp != "" {
+		reqUser["otp"] = otp
+	}
+	reqbody := ParamsToBody(reqUser)
 	olddebug := *Debug
 	*Debug = false // don't share passwords in debug log
 	resp, err := s.Post("/access/ticket", nil, nil, &reqbody)
@@ -127,6 +131,10 @@ func (s *Session) Login(username string, password string) (err error) {
 		return fmt.Errorf("Invalid login response:\n-----\n%s\n-----", dr)
 	}
 	dat := jbody["data"].(map[string]interface{})
+	//Check if the 2FA was required
+	if dat["NeedTFA"] == 1.0 {
+		return errors.New("Missing TFA code")
+	}
 	s.AuthTicket = dat["ticket"].(string)
 	s.CsrfToken = dat["CSRFPreventionToken"].(string)
 	return nil

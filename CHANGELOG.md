@@ -1,11 +1,51 @@
 ## 1.4.4 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
+* builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
+* builder/hcloud: Allow selecting image based on filters [GH-7945]
+* builder/hyper-v: Decrease the delay between Hyper-V VM startup and hyper-v
+    builder's ability to send keystrokes to the target VM. [GH-7970]
 * builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+* builder/proxmox: Shorten default boot_key_interval to 5ms from 100ms
+    [GH-8088]
+* builder/ucloud: Make ucloud builder's base url configurable [GH-8095]
+* builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
+* builder/yandex: Support GPU instances and set source image by name [GH-8091]
+* core: Add a new `floppy_label` option [GH-8099]
+* core: Added version compatibility to console command [GH-8080]
+* post-processor/vagrant-cloud: Allow use of the Artifice post-processor with
+    the Vagrant Cloud post-processor [GH-8018] [GH-8027]
+* post-processor/vsphere: Removed redundant whitelist check for builders,
+    allowing users to use post-processor withough the VMWare builder [GH-8064]
+
 
 ### BUG FIXES:
+* builder/amazon: Fix FleetID crash [GH-8013]
+* builder/azure: Avoid a panic in getObjectIdFromToken [GH-8047]
+* builder/hyper-v: Fix when management interface is not part of virtual switch
+    [GH-8017]
+* builder/openstack: Fix race condition created when adding metadata [GH-8016]
+* builder/outscale: Get SSH Host from VM.Nics instead of VM Root [GH-8077]
+* builder/proxmox: Bump proxmox api dep, fixing bug with checking http status
+    during boot command [GH-8083]
+* builder/proxmox: Check that disk format is set when pool type requires it
+    [GH-8084]
+* builder/proxmox: Fix panic caused by cancelling build [GH-8067] [GH-8072]
+* builder/qemu: Fix dropped error when retrieving version [GH-8050]
+* builder/vagrant: Fix provisioning boxes, define source and output boxes
+    [GH-7957]
+* builder/vagrant: Use GlobalID when provided [GH-8092]
+* builder/virtualbox: Fix windows pathing problem for guest additions checksum
+    download. [GH-7996]
+* builder/virtualbox: LoadSnapshots succeeds even if machine has no snapshots
+    [GH-8096]
 * core: Fix bug where sensitive variables contianing commas were not being
     properly sanitized in UI calls. [GH-7997]
+* core: Fix handling of booleans where "unset" is a value distinct from
+    "false". [GH-8021]
+* core: Fix tests that swallowed errors in goroutines [GH-8094]
+* provisioner/ansible: Fix provisioner dropped errors [GH-8045]
 
 ## 1.4.3 (August 14, 2019)
 

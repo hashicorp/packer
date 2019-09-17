@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -19,11 +20,11 @@ type AMIConfig struct {
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AMITags                 TagMap            `mapstructure:"tags"`
-	AMIENASupport           *bool             `mapstructure:"ena_support"`
+	AMIENASupport           config.Trilean    `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
-	AMIEncryptBootVolume    *bool             `mapstructure:"encrypt_boot"`
+	AMIEncryptBootVolume    config.Trilean    `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
@@ -62,7 +63,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	// Prevent sharing of default KMS key encrypted volumes with other aws users
 	if len(c.AMIUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
 			errs = append(errs, fmt.Errorf("Cannot share AMI encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {
@@ -92,7 +93,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	if len(c.SnapshotUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {
