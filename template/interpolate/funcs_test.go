@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -316,30 +317,36 @@ func TestFuncPackerVersion(t *testing.T) {
 	}
 }
 
-func TestFuncSed(t *testing.T) {
+func TestReplaceFuncs(t *testing.T) {
 	cases := []struct {
 		Input  string
 		Output string
 	}{
+
 		{
-			`{{sed "s|hello|world|" "hello"}}`,
-			`world`,
+			`{{ "foo-bar-baz" | replace "-" "/" 1}}`,
+			`foo/bar-baz`,
 		},
 
 		{
-			`{{sed "s|foo|bar|" "hello"}}`,
-			`hello`,
+			`{{ replace "-" "/" 1 "foo-bar-baz" }}`,
+			`foo/bar-baz`,
 		},
 
 		{
-			`{{user "foo" | sed "s|foo|bar|"}}`,
-			`bar`,
+			`{{ "I Am Henry VIII" | replace_all " " "-" }}`,
+			`I-Am-Henry-VIII`,
+		},
+
+		{
+			`{{ replace_all " " "-" "I Am Henry VIII" }}`,
+			`I-Am-Henry-VIII`,
 		},
 	}
 
 	ctx := &Context{
 		UserVariables: map[string]string{
-			"foo": "foo",
+			"fee": "-foo-",
 		},
 	}
 	for _, tc := range cases {
@@ -349,8 +356,8 @@ func TestFuncSed(t *testing.T) {
 			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
 		}
 
-		if result != tc.Output {
-			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		if diff := cmp.Diff(tc.Output, result); diff != "" {
+			t.Fatalf("Unexpected output: %s", diff)
 		}
 	}
 }
