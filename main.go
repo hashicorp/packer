@@ -25,7 +25,6 @@ import (
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
-	"github.com/shirou/gopsutil/process"
 )
 
 func main() {
@@ -194,9 +193,12 @@ func wrappedMain() int {
 		ui = basicUi
 		if !inPlugin {
 			currentPID := os.Getpid()
-			myProc, _ := process.NewProcess(int32(currentPID))
-			bg, _ := myProc.Background()
-			if bg {
+			backgrounded, err := checkProcess(currentPID)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot determind if process is in "+
+					"background: %s\n", err)
+			}
+			if backgrounded {
 				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
 			} else if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
