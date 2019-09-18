@@ -44,6 +44,8 @@ type Config struct {
 	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
 	SSHBastionPrivateKeyFile  string        `mapstructure:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
+	SSHRemoteTunnels          []string      `mapstructure:"ssh_remote_tunnels"`
+	SSHLocalTunnels           []string      `mapstructure:"ssh_local_tunnels"`
 	SSHProxyHost              string        `mapstructure:"ssh_proxy_host"`
 	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
 	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
@@ -303,6 +305,22 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 	if c.SSHBastionHost != "" && c.SSHProxyHost != "" {
 		errs = append(errs, errors.New("please specify either ssh_bastion_host or ssh_proxy_host, not both"))
+	}
+
+	for _, v := range c.SSHLocalTunnels {
+		_, err := helperssh.ParseTunnelArgument(v, packerssh.UnsetTunnel)
+		if err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_local_tunnels ('%s') is invalid: %s", v, err))
+		}
+	}
+
+	for _, v := range c.SSHRemoteTunnels {
+		_, err := helperssh.ParseTunnelArgument(v, packerssh.UnsetTunnel)
+		if err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_remote_tunnels ('%s') is invalid: %s", v, err))
+		}
 	}
 
 	return errs
