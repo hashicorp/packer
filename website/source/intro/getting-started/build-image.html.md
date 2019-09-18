@@ -372,7 +372,7 @@ for more info about what's going on behind the scenes here.
 ```powershell
 <powershell>
 # Set administrator password
-net user Administrator SuperS3cr3t!
+net user Administrator SuperS3cr3t!!!!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
 # First, make sure WinRM can't be connected to
@@ -381,6 +381,14 @@ netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" n
 # Delete any existing WinRM listeners
 winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
 winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Disable group policies which block basic authentication and unencrypted login
+
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowUnencryptedTraffic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowUnencryptedTraffic -Value 1
+
 
 # Create a new WinRM listener and configure
 winrm create winrm/config/listener?Address=*+Transport=HTTP
@@ -512,7 +520,7 @@ customize and control the build process:
       "user_data_file": "./bootstrap_win.txt",
       "communicator": "winrm",
       "winrm_username": "Administrator",
-      "winrm_password": "SuperS3cr3t!"
+      "winrm_password": "SuperS3cr3t!!!!"
     }
   ],
   "provisioners": [
