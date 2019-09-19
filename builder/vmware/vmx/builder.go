@@ -84,7 +84,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&stepRemoteUpload{
+		&vmwcommon.StepRemoteUpload{
 			Key:          "floppy_path",
 			Message:      "Uploading Floppy to remote machine...",
 			DoCleanup:    true,
