@@ -1,28 +1,29 @@
-package iso
+package common
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
 // (if it can) and stores that new remote path into the state bag.
-type stepRemoteUpload struct {
-	Key       string
-	Message   string
-	DoCleanup bool
+type StepRemoteUpload struct {
+	Key          string
+	Message      string
+	DoCleanup    bool
+	Checksum     string
+	ChecksumType string
 }
 
-func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(vmwcommon.Driver)
+func (s *StepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	remote, ok := driver.(vmwcommon.RemoteDriver)
+	remote, ok := driver.(RemoteDriver)
 	if !ok {
 		return multistep.ActionContinue
 	}
@@ -32,14 +33,10 @@ func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionContinue
 	}
 
-	config := state.Get("config").(*Config)
-	checksum := config.ISOChecksum
-	checksumType := config.ISOChecksumType
-
-	if esx5, ok := remote.(*vmwcommon.ESX5Driver); ok {
+	if esx5, ok := remote.(*ESX5Driver); ok {
 		remotePath := esx5.CachePath(path)
 
-		if esx5.VerifyChecksum(checksumType, checksum, remotePath) {
+		if esx5.VerifyChecksum(s.ChecksumType, s.Checksum, remotePath) {
 			ui.Say("Remote cache was verified skipping remote upload...")
 			state.Put(s.Key, remotePath)
 			return multistep.ActionContinue
@@ -49,7 +46,7 @@ func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say(s.Message)
 	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path, checksum, checksumType)
+	newPath, err := remote.UploadISO(path, s.Checksum, s.ChecksumType)
 	if err != nil {
 		err := fmt.Errorf("Error uploading file: %s", err)
 		state.Put("error", err)
@@ -61,14 +58,14 @@ func (s *stepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 	return multistep.ActionContinue
 }
 
-func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
+func (s *StepRemoteUpload) Cleanup(state multistep.StateBag) {
 	if !s.DoCleanup {
 		return
 	}
 
-	driver := state.Get("driver").(vmwcommon.Driver)
+	driver := state.Get("driver").(Driver)
 
-	remote, ok := driver.(vmwcommon.RemoteDriver)
+	remote, ok := driver.(RemoteDriver)
 	if !ok {
 		return
 	}
