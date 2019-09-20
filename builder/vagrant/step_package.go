@@ -25,9 +25,12 @@ func (s *StepPackage) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 	ui.Say("Packaging box...")
 	packageArgs := []string{}
+	box := "source"
 	if s.GlobalID != "" {
-		packageArgs = append(packageArgs, s.GlobalID)
+		box = s.GlobalID
 	}
+
+	packageArgs = append(packageArgs, box)
 
 	if len(s.Include) > 0 {
 		packageArgs = append(packageArgs, "--include", strings.Join(s.Include, ","))
