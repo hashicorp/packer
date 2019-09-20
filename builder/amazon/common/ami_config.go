@@ -13,9 +13,9 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	// The name of the resulting AMI that will appear when
-	// managing AMIs in the AWS console or via APIs. This must be unique. To help
-	// make this unique, use a function like timestamp (see [template
+	// The name of the resulting AMI that will appear when managing AMIs in the
+	// AWS console or via APIs. This must be unique. To help make this unique,
+	// use a function like timestamp (see [template
 	// engine](../templates/engine.html) for more info).
 	AMIName string `mapstructure:"ami_name" required:"true"`
 	// The description to set for the resulting
@@ -51,13 +51,12 @@ type AMIConfig struct {
 	// [template engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
 	AMITags TagMap `mapstructure:"tags" required:"false"`
-	// Enable enhanced networking (ENA but not
-	// SriovNetSupport) on HVM-compatible AMIs. If set, add
-	// ec2:ModifyInstanceAttribute to your AWS IAM policy. If false, this will
-	// disable enhanced networking in the final AMI as opposed to passing the
-	// setting through unchanged from the source. Note: you must make sure
-	// enhanced networking is enabled on your instance. [Amazon's
-	// documentation on enabling enhanced
+	// Enable enhanced networking (ENA but not SriovNetSupport) on
+	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
+	// AWS IAM policy.
+	//
+	// Note: you must make sure enhanced networking is enabled on your
+	// instance. See [Amazon's documentation on enabling enhanced
 	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 	AMIENASupport config.Trilean `mapstructure:"ena_support" required:"false"`
 	// Enable enhanced networking (SriovNetSupport but not ENA) on
