@@ -398,10 +398,5 @@ func (c *Core) init() error {
 		c.secrets = append(c.secrets, secret)
 	}
 
-	// Interpolate the push configuration
-	if _, err := interpolate.RenderInterface(&c.Template.Push, c.Context()); err != nil {
-		return fmt.Errorf("Error interpolating 'push': %s", err)
-	}
-
 	return nil
 }

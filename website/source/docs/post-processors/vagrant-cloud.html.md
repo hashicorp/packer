@@ -54,12 +54,6 @@ on Vagrant Cloud, as well as authentication and version information.
 
 ### Required:
 
--   `access_token` (string) - Your access token for the Vagrant Cloud API. This
-    can be generated on your [tokens
-    page](https://app.vagrantup.com/settings/security). If not specified, the
-    environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
-    if nothing is found, finally `ATLAS_TOKEN` will be used.
-
 -   `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
     Cloud, for example `hashicorp/precise64`, which is short for
     `vagrantcloud.com/hashicorp/precise64`.
@@ -70,15 +64,28 @@ on Vagrant Cloud, as well as authentication and version information.
     be semver, and doesn't validate that the version comes after your previous
     versions.
 
+-   `access_token` (string) - Your access token for the Vagrant Cloud API. This
+    can be generated on your [tokens
+    page](https://app.vagrantup.com/settings/security). If not specified, the
+    environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
+    if nothing is found, finally `ATLAS_TOKEN` will be used. This is required 
+    unless you are using a private hosting solution (i.e. `vagrant_cloud_url`
+    has been populated).
+
+    **or**
+
+-   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
+    This is useful if you're using Vagrant Private Cloud in your own network.
+    Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something 
+    other than the default then `access_token` can be left blank and no 
+    `Authorization` header will be added to requests sent by this post-processor.
+
+
 ### Optional:
 
 -   `no_release` (string) - If set to true, does not release the version on
     Vagrant Cloud, making it active. You can manually release the version via
     the API or Web UI. Defaults to false.
-
--   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
-    This is useful if you're using Vagrant Private Cloud in your own network.
-    Defaults to `https://vagrantcloud.com/api/v1`
 
 -   `insecure_skip_tls_verify` (boolean) - If set to true *and* `vagrant_cloud_url`
     is set to something different than its default, it will set TLS InsecureSkipVerify

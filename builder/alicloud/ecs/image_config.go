@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -47,7 +48,7 @@ type AlicloudDiskDevice struct {
 	// data disk. Otherwise, Packer will keep the encryption setting to what
 	// it was in the source image. Please refer to Introduction of ECS disk encryption
 	// for more details.
-	Encrypted *bool `mapstructure:"disk_encrypted" required:"false"`
+	Encrypted config.Trilean `mapstructure:"disk_encrypted" required:"false"`
 }
 
 type AlicloudDiskDevices struct {
@@ -163,7 +164,7 @@ type AlicloudImageConfig struct {
 	// instance in the main region and an encrypted copy will be generated in the
 	// same region. By default, Packer will keep the encryption setting to what
 	// it was in the source image.
-	ImageEncrypted *bool `mapstructure:"image_encrypted" required:"false"`
+	ImageEncrypted config.Trilean `mapstructure:"image_encrypted" required:"false"`
 	// If this value is true, when the target image names including those
 	// copied are duplicated with existing images, it will delete the existing
 	// images and then create the target images, otherwise, the creation will

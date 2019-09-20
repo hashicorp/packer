@@ -27,7 +27,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	// Create the image
 	amiName := config.AMIName
 	state.Put("intermediary_image", false)
-	if config.AMIEncryptBootVolume != nil && *config.AMIEncryptBootVolume != false || s.AMISkipBuildRegion {
+	if config.AMIEncryptBootVolume.True() || s.AMISkipBuildRegion {
 		state.Put("intermediary_image", true)
 
 		// From AWS SDK docs: You can encrypt a copy of an unencrypted snapshot,

@@ -27,6 +27,7 @@
     
 -   `instance_cores` (int) - The number of cores available to the instance.
     
+-   `instance_gpus` (int) - 
 -   `instance_mem_gb` (int) - The amount of memory available to the instance, specified in gigabytes.
     
 -   `instance_name` (string) - The name assigned to the instance.
@@ -49,6 +50,7 @@
 -   `source_image_id` (string) - The source image ID to use to create the new image
     from.
     
+-   `source_image_name` (string) - 
 -   `subnet_id` (string) - The Yandex VPC subnet id to use for
     the launched instance. Note, the zone of the subnet must match the
     zone in which the VM is launched.

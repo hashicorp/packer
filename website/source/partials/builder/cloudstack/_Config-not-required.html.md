@@ -27,6 +27,8 @@
 -   `disk_size` (int64) - The size (in GB) of the root disk of the new
     instance. This option is only available when using source_template.
     
+-   `eject_iso` (bool) - 
+-   `eject_iso_delay` (time.Duration) - 
 -   `expunge` (bool) - Set to true to expunge the instance when it is
     destroyed. Defaults to false.
     
@@ -93,5 +95,5 @@
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to
     false.
     
--   `template_tag` (string) - Template Tag
+-   `template_tag` (string) - 
 -   `tags` (map[string]string) - Tags

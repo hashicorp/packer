@@ -60,18 +60,19 @@ func testYamux(t *testing.T) (client *yamux.Session, server *yamux.Session) {
 	}
 
 	// Server side
-	doneCh := make(chan struct{})
+	errChan := make(chan error)
 	go func() {
-		defer close(doneCh)
+		defer close(errChan)
 		conn, err := l.Accept()
 		l.Close()
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- err
+			return
 		}
 
 		server, err = yamux.Server(conn, nil)
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- err
 		}
 	}()
 
@@ -86,7 +87,10 @@ func testYamux(t *testing.T) (client *yamux.Session, server *yamux.Session) {
 	}
 
 	// Wait for the server
-	<-doneCh
+	err = <-errChan
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 
 	return
 }

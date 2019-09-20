@@ -157,6 +157,24 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			// underscore is not allowed
+			"image_name",
+			"foo_bar",
+			true,
+		},
+		{
+			// too long
+			"image_name",
+			"foobar123xyz_abc-456-one-two_three_five_nine_seventeen_eleventy-seven",
+			true,
+		},
+		{
+			// starts with non-alphabetic character
+			"image_name",
+			"1boohoo",
+			true,
+		},
+		{
 			"image_encryption_key",
 			map[string]string{"kmsKeyName": "foo"},
 			false,

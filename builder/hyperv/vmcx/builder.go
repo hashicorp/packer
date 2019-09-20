@@ -497,6 +497,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,

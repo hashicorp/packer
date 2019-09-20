@@ -151,6 +151,13 @@ type SSH struct {
 	// Example: `5m`. Disabled by default.
 	SSHReadWriteTimeout time.Duration `mapstructure:"ssh_read_write_timeout"`
 
+	// Tunneling
+
+	//
+	SSHRemoteTunnels []string `mapstructure:"ssh_remote_tunnels"`
+	//
+	SSHLocalTunnels []string `mapstructure:"ssh_local_tunnels"`
+
 	// SSH Internals
 	SSHPublicKey  []byte
 	SSHPrivateKey []byte
@@ -441,6 +448,22 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 	if c.SSHBastionHost != "" && c.SSHProxyHost != "" {
 		errs = append(errs, errors.New("please specify either ssh_bastion_host or ssh_proxy_host, not both"))
+	}
+
+	for _, v := range c.SSHLocalTunnels {
+		_, err := helperssh.ParseTunnelArgument(v, packerssh.UnsetTunnel)
+		if err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_local_tunnels ('%s') is invalid: %s", v, err))
+		}
+	}
+
+	for _, v := range c.SSHRemoteTunnels {
+		_, err := helperssh.ParseTunnelArgument(v, packerssh.UnsetTunnel)
+		if err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_remote_tunnels ('%s') is invalid: %s", v, err))
+		}
 	}
 
 	return errs

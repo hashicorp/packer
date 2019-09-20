@@ -12,12 +12,13 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type stepCreateAlicloudInstance struct {
-	IOOptimized             *bool
+	IOOptimized             confighelper.Trilean
 	InstanceType            string
 	UserData                string
 	UserDataFile            string
@@ -142,12 +143,10 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 	request.InternetChargeType = s.InternetChargeType
 	request.InternetMaxBandwidthOut = requests.Integer(convertNumber(s.InternetMaxBandwidthOut))
 
-	if s.IOOptimized != nil {
-		if *s.IOOptimized {
-			request.IoOptimized = IOOptimizedOptimized
-		} else {
-			request.IoOptimized = IOOptimizedNone
-		}
+	if s.IOOptimized.True() {
+		request.IoOptimized = IOOptimizedOptimized
+	} else if s.IOOptimized.False() {
+		request.IoOptimized = IOOptimizedNone
 	}
 
 	config := state.Get("config").(*Config)
@@ -174,8 +173,8 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 		dataDisk.Description = imageDisk.Description
 		dataDisk.DeleteWithInstance = strconv.FormatBool(imageDisk.DeleteWithInstance)
 		dataDisk.Device = imageDisk.Device
-		if imageDisk.Encrypted != nil {
-			dataDisk.Encrypted = strconv.FormatBool(*imageDisk.Encrypted)
+		if imageDisk.Encrypted != confighelper.TriUnset {
+			dataDisk.Encrypted = strconv.FormatBool(imageDisk.Encrypted.True())
 		}
 
 		dataDisks = append(dataDisks, dataDisk)

@@ -86,3 +86,5 @@
     useful if, for example, packer hangs on a connection after a reboot.
     Example: `5m`. Disabled by default.
     
+-   `ssh_remote_tunnels` ([]string) - 
+-   `ssh_local_tunnels` ([]string) - 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/config"
 )
 
 func TestBlockDevice(t *testing.T) {
@@ -71,7 +72,7 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           aws.Bool(true),
+				Encrypted:           config.TriTrue,
 			},
 
 			Result: &ec2.BlockDeviceMapping{
@@ -90,7 +91,8 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           aws.Bool(true),
+				Encrypted:           config.TriTrue,
+				KmsKeyId:            "2Fa48a521f-3aff-4b34-a159-376ac5d37812",
 			},
 
 			Result: &ec2.BlockDeviceMapping{

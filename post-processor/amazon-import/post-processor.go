@@ -273,11 +273,19 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 		ui.Message(fmt.Sprintf("Starting rename of AMI (%s)", createdami))
 
-		resp, err := ec2conn.CopyImage(&ec2.CopyImageInput{
+		copyInput := &ec2.CopyImageInput{
 			Name:          &p.config.Name,
 			SourceImageId: &createdami,
 			SourceRegion:  config.Region,
-		})
+		}
+		if p.config.Encrypt {
+			copyInput.Encrypted = aws.Bool(p.config.Encrypt)
+			if p.config.KMSKey != "" {
+				copyInput.KmsKeyId = &p.config.KMSKey
+			}
+		}
+
+		resp, err := ec2conn.CopyImage(copyInput)
 
 		if err != nil {
 			return nil, false, false, fmt.Errorf("Error Copying AMI (%s): %s", createdami, err)

@@ -13,3 +13,4 @@
     characters (\*, ?, and \[\]) are allowed. The maximum summary size of
     all files in the listed directories are the same as in `floppy_files`.
     
+-   `floppy_label` (string) - Floppy Label
