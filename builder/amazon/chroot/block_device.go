@@ -47,7 +47,7 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	err := b.BlockDevice.Prepare(ctx)
 	if err != nil {
 		return err
-	} 
+	}
 
 	// Warn that encrypted must be true when setting kms_key_id
 	if b.KmsKeyId != "" && b.Encrypted.True() {
