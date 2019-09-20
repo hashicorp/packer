@@ -1013,4 +1013,10 @@ d-i pkgsel/update-policy select none
 choose-mirror-bin mirror/http/proxy string
 ```
 
--> **Note for *nix guests:** Please note that packer requires the VM to be running a hyper-v KVP daemon in order to detect the IP address of the guest VM. On RHEL based machines this may require installing the package `hyperv-daemons` and ensuring the `hypervkvpd` service is started at boot. On Debian based machines, you may need `linux-cloud-tools-common` for `hv_kvp_daemon`. Failure to do this may cause packer to wait at `Waiting for SSH to become available...` before eventually timing out.
+-> **Note for *nix guests:** Please note that packer requires the VM to be
+running a hyper-v KVP daemon in order to detect the IP address of the guest VM.
+On RHEL based machines this may require installing the package `hyperv-daemons`
+and ensuring the `hypervkvpd` service is started at boot. On Debian based
+machines, you may need `linux-cloud-tools-common` for `hv_kvp_daemon`. Failure
+to do this may cause packer to wait at `Waiting for SSH to become available...`
+before eventually timing out.
