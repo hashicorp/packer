@@ -27,7 +27,7 @@ type AlicloudAccessConfig struct {
 	// value is false.
 	AlicloudSkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
 	// STS access token, can be set through template or by exporting as
-	// environment variable such as export SECURITY_TOKEN=value.
+	// environment variable such as `export SECURITY_TOKEN=value`.
 	SecurityToken string `mapstructure:"security_token" required:"false"`
 
 	client *ClientWrapper
