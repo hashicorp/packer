@@ -59,9 +59,14 @@ type Config struct {
 	// The size (in GB) of the root disk of the new
 	// instance. This option is only available when using source_template.
 	DiskSize int64 `mapstructure:"disk_size" required:"false"`
-	//
+	// If `true` make a call to the CloudStack API, after loading image to
+	// cache, requesting to check and detach ISO file (if any) currently
+	// attached to a virtual machine. Defaults to `false`. This option is only
+	// available when using `source_iso`.
 	EjectISO bool `mapstructure:"eject_iso"`
-	//
+	// Configure the duration time to wait, making sure virtual machine is able
+	// to finish installing OS before it ejects safely. Requires `eject_iso`
+	// set to `true` and this option is only available when using `source_iso`.
 	EjectISODelay time.Duration `mapstructure:"eject_iso_delay"`
 	// Set to true to expunge the instance when it is
 	// destroyed. Defaults to false.
