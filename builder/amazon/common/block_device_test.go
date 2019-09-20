@@ -1,11 +1,11 @@
 package common
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/helper/config"
 )
 
@@ -102,6 +102,7 @@ func TestBlockDevice(t *testing.T) {
 					VolumeSize:          aws.Int64(8),
 					DeleteOnTermination: aws.Bool(true),
 					Encrypted:           aws.Bool(true),
+					KmsKeyId:            aws.String("2Fa48a521f-3aff-4b34-a159-376ac5d37812"),
 				},
 			},
 		},
@@ -152,15 +153,13 @@ func TestBlockDevice(t *testing.T) {
 		expected := []*ec2.BlockDeviceMapping{tc.Result}
 
 		amiResults := amiBlockDevices.BuildEC2BlockDeviceMappings()
-		if !reflect.DeepEqual(expected, amiResults) {
-			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
-				expected, amiResults)
+		if diff := cmp.Diff(expected, amiResults); diff != "" {
+			t.Fatalf("Bad block device: %s", diff)
 		}
 
 		launchResults := launchBlockDevices.BuildEC2BlockDeviceMappings()
-		if !reflect.DeepEqual(expected, launchResults) {
-			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
-				expected, launchResults)
+		if diff := cmp.Diff(expected, launchResults); diff != "" {
+			t.Fatalf("Bad block device: %s", diff)
 		}
 	}
 }
