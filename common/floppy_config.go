@@ -33,6 +33,7 @@ type FloppyConfig struct {
 	// characters (\*, ?, and \[\]) are allowed. The maximum summary size of
 	// all files in the listed directories are the same as in `floppy_files`.
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
+	FloppyLabel       string   `mapstructure:"floppy_label"`
 }
 
 func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {

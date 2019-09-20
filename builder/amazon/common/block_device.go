@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -36,7 +37,7 @@ type BlockDevice struct {
 	// keep the encryption setting to what it was in the source image. Setting
 	// false will result in an unencrypted device, and true will result in an
 	// encrypted one.
-	Encrypted *bool `mapstructure:"encrypted" required:"false"`
+	Encrypted config.Trilean `mapstructure:"encrypted" required:"false"`
 	// The number of I/O operations per second (IOPS) that the volume supports.
 	// See the documentation on
 	// [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -115,7 +116,11 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 	if blockDevice.SnapshotId != "" {
 		ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
 	}
-	ebsBlockDevice.Encrypted = blockDevice.Encrypted
+	ebsBlockDevice.Encrypted = blockDevice.Encrypted.ToBoolPointer()
+
+	if blockDevice.KmsKeyId != "" {
+		ebsBlockDevice.KmsKeyId = aws.String(blockDevice.KmsKeyId)
+	}
 
 	mapping.Ebs = ebsBlockDevice
 
@@ -127,8 +132,9 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		return fmt.Errorf("The `device_name` must be specified " +
 			"for every device in the block device mapping.")
 	}
+
 	// Warn that encrypted must be true or nil when setting kms_key_id
-	if b.KmsKeyId != "" && b.Encrypted != nil && *b.Encrypted == false {
+	if b.KmsKeyId != "" && b.Encrypted.False() {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
 	}

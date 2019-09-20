@@ -40,6 +40,12 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	client, err := config.imageV2Client()
+	if err != nil {
+		err := fmt.Errorf("error creating image client: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	if s.SourceImageName != "" {
 		s.SourceImageOpts = images.ListOpts{

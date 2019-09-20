@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -109,7 +110,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 		AMIKmsKeyId:  "12345",
 		// Original region key in regionkeyids is different than in amikmskeyid
 		RegionKeyIds:      map[string]string{"us-east-1": "12345"},
-		EncryptBootVolume: aws.Bool(true),
+		EncryptBootVolume: config.TriTrue,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -153,7 +154,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 	stepAMIRegionCopy = StepAMIRegionCopy{
 		AccessConfig:      testAccessConfig(),
 		Regions:           []string{"us-east-1"},
-		EncryptBootVolume: aws.Bool(false),
+		EncryptBootVolume: config.TriFalse,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -179,7 +180,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 		AMIKmsKeyId: "IlikePancakes",
 		// Original region key in regionkeyids is different than in amikmskeyid
 		RegionKeyIds:      map[string]string{"us-east-1": "12345", "us-west-2": "abcde", "ap-east-1": "xyz"},
-		EncryptBootVolume: aws.Bool(true),
+		EncryptBootVolume: config.TriTrue,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -226,7 +227,7 @@ func TestStepAmiRegionCopy_nil_encryption(t *testing.T) {
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
-		EncryptBootVolume: nil,
+		EncryptBootVolume: config.TriUnset,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -252,7 +253,7 @@ func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
-		EncryptBootVolume: aws.Bool(true),
+		EncryptBootVolume: config.TriTrue,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -278,7 +279,7 @@ func TestStepAmiRegionCopy_nil_intermediary(t *testing.T) {
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
-		EncryptBootVolume: aws.Bool(false),
+		EncryptBootVolume: config.TriFalse,
 		Name:              "fake-ami-name",
 		OriginalRegion:    "us-east-1",
 	}
@@ -360,7 +361,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 		Name:               "fake-ami-name",
 		OriginalRegion:     "us-east-1",
 		AMISkipBuildRegion: false,
-		EncryptBootVolume:  aws.Bool(true),
+		EncryptBootVolume:  config.TriTrue,
 	}
 	// mock out the region connection code
 	stepAMIRegionCopy.getRegionConn = getMockConn
@@ -386,7 +387,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 		Name:               "fake-ami-name",
 		OriginalRegion:     "us-east-1",
 		AMISkipBuildRegion: true,
-		EncryptBootVolume:  aws.Bool(true),
+		EncryptBootVolume:  config.TriTrue,
 	}
 	// mock out the region connection code
 	stepAMIRegionCopy.getRegionConn = getMockConn

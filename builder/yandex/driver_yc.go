@@ -2,6 +2,7 @@ package yandex
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/packer/helper/useragent"
@@ -15,6 +16,7 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 	"github.com/yandex-cloud/go-sdk/iamkey"
 	"github.com/yandex-cloud/go-sdk/pkg/requestid"
+	"github.com/yandex-cloud/go-sdk/sdkresolvers"
 )
 
 type driverYC struct {
@@ -108,6 +110,16 @@ func (d *driverYC) GetImageFromFolder(ctx context.Context, folderID string, fami
 		MinDiskSizeGb: toGigabytes(image.MinDiskSize),
 		SizeGb:        toGigabytes(image.StorageSize),
 	}, nil
+}
+
+func (d *driverYC) GetImageFromFolderByName(ctx context.Context, folderID string, imageName string) (*Image, error) {
+	imageResolver := sdkresolvers.ImageResolver(imageName, sdkresolvers.FolderID(folderID))
+
+	if err := d.sdk.Resolve(ctx, imageResolver); err != nil {
+		return nil, fmt.Errorf("failed to resolve image name: %s", err)
+	}
+
+	return d.GetImage(imageResolver.ID())
 }
 
 func (d *driverYC) DeleteImage(ID string) error {

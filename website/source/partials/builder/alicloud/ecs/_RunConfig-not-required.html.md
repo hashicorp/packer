@@ -3,7 +3,7 @@
 -   `associate_public_ip_address` (bool) - Associate Public Ip Address
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
     
--   `io_optimized` (\*bool) - Whether an ECS instance is I/O optimized or not. If this option is not
+-   `io_optimized` (config.Trilean) - Whether an ECS instance is I/O optimized or not. If this option is not
     provided, the value will be determined by product API according to what
     `instance_type` is used.
     

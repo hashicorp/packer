@@ -75,6 +75,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug: b.config.PackerDebug,
 		},
 		&stepSetupNetworking{},
+		&stepDetachIso{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      communicator.CommHost(b.config.Comm.SSHHost, "ipaddress"),

@@ -7,12 +7,12 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-
 	// The name of the resulting AMI that will appear when
 	// managing AMIs in the AWS console or via APIs. This must be unique. To help
 	// make this unique, use a function like timestamp (see [template
@@ -59,7 +59,7 @@ type AMIConfig struct {
 	// enhanced networking is enabled on your instance. [Amazon's
 	// documentation on enabling enhanced
 	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
-	AMIENASupport *bool `mapstructure:"ena_support" required:"false"`
+	AMIENASupport config.Trilean `mapstructure:"ena_support" required:"false"`
 	// Enable enhanced networking (SriovNetSupport but not ENA) on
 	// HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
@@ -78,7 +78,7 @@ type AMIConfig struct {
 	// copying a provisioned instance to an AMI. By default, Packer will keep the
 	// encryption setting to what it was in the source image. Setting false will
 	// result in an unencrypted image, and true will result in an encrypted one.
-	AMIEncryptBootVolume *bool `mapstructure:"encrypt_boot" required:"false"`
+	AMIEncryptBootVolume config.Trilean `mapstructure:"encrypt_boot" required:"false"`
 	// ID, alias or ARN of the KMS key to use for boot volume encryption. This
 	// only applies to the main `region`, other regions where the AMI will be
 	// copied will be encrypted by the default EBS KMS key. For valid formats
@@ -156,7 +156,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	// Prevent sharing of default KMS key encrypted volumes with other aws users
 	if len(c.AMIUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
 			errs = append(errs, fmt.Errorf("Cannot share AMI encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {
@@ -186,7 +186,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	if len(c.SnapshotUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume != nil && *c.AMIEncryptBootVolume {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {

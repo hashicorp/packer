@@ -16,9 +16,7 @@ type DialFunc = func(context.Context, string) (net.Conn, error)
 
 func NewDialer() DialFunc {
 	return func(ctx context.Context, target string) (net.Conn, error) {
-		dialer := &net.Dialer{
-			DualStack: true,
-		}
+		dialer := &net.Dialer{}
 		net, addr := parseDialTarget(target)
 
 		deadline, ok := ctx.Deadline()

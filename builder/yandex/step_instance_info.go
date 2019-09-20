@@ -20,7 +20,7 @@ func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) mu
 	c := state.Get("config").(*Config)
 	instanceID := state.Get("instance_id").(string)
 
-	ui.Say("Waiting for instance to become active...")
+	ui.Say(fmt.Sprintf("Waiting for instance with id %s to become active...", instanceID))
 
 	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
 	defer cancel()

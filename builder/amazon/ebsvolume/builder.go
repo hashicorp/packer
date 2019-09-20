@@ -30,7 +30,7 @@ type Config struct {
 	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
 	// on your instance. See [Amazon's documentation on enabling enhanced
 	// networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
-	AMIENASupport *bool `mapstructure:"ena_support" required:"false"`
+	AMIENASupport config.Trilean `mapstructure:"ena_support" required:"false"`
 	// Enable enhanced networking (SriovNetSupport but not ENA) on
 	// HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy. Note: you must make sure enhanced networking is enabled
@@ -112,7 +112,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if b.config.IsSpotInstance() && ((b.config.AMIENASupport != nil && *b.config.AMIENASupport) || b.config.AMISriovNetSupport) {
+	if b.config.IsSpotInstance() && ((b.config.AMIENASupport.True()) || b.config.AMISriovNetSupport) {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("Spot instances do not support modification, which is required "+
 				"when either `ena_support` or `sriov_support` are set. Please ensure "+

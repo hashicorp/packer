@@ -78,7 +78,7 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 	if blockDevice.SnapshotId != "" {
 		ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
 	}
-	ebsBlockDevice.Encrypted = blockDevice.Encrypted
+	ebsBlockDevice.Encrypted = blockDevice.Encrypted.ToBoolPointer()
 
 	mapping.Ebs = ebsBlockDevice
 

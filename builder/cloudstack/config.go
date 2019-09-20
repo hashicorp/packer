@@ -21,6 +21,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	common.HTTPConfig   `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
+
 	// The CloudStack API endpoint we will connect to. It can
 	// also be specified via environment variable CLOUDSTACK_API_URL, if set.
 	APIURL string `mapstructure:"api_url" required:"true"`
@@ -58,6 +59,10 @@ type Config struct {
 	// The size (in GB) of the root disk of the new
 	// instance. This option is only available when using source_template.
 	DiskSize int64 `mapstructure:"disk_size" required:"false"`
+	//
+	EjectISO bool `mapstructure:"eject_iso"`
+	//
+	EjectISODelay time.Duration `mapstructure:"eject_iso_delay"`
 	// Set to true to expunge the instance when it is
 	// destroyed. Defaults to false.
 	Expunge bool `mapstructure:"expunge" required:"false"`
@@ -144,8 +149,9 @@ type Config struct {
 	// Set to true to indicate that the template
 	// contains tools to support dynamic scaling of VM cpu/memory. Defaults to
 	// false.
-	TemplateScalable bool   `mapstructure:"template_scalable" required:"false"`
-	TemplateTag      string `mapstructure:"template_tag"`
+	TemplateScalable bool `mapstructure:"template_scalable" required:"false"`
+	//
+	TemplateTag string `mapstructure:"template_tag"`
 
 	Tags map[string]string `mapstructure:"tags"`
 

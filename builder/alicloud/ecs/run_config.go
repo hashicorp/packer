@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -20,7 +21,7 @@ type RunConfig struct {
 	// Whether an ECS instance is I/O optimized or not. If this option is not
 	// provided, the value will be determined by product API according to what
 	// `instance_type` is used.
-	IOOptimized *bool `mapstructure:"io_optimized" required:"false"`
+	IOOptimized config.Trilean `mapstructure:"io_optimized" required:"false"`
 	// Type of the instance. For values, see [Instance Type
 	// Table](https://www.alibabacloud.com/help/doc-detail/25378.htm?spm=a3c0i.o25499en.a3.9.14a36ac8iYqKRA).
 	// You can also obtain the latest instance type table by invoking the
@@ -112,7 +113,6 @@ type RunConfig struct {
 	// to 0. For those disks containing lots of data, it may require a higher
 	// timeout value.
 	WaitSnapshotReadyTimeout int `mapstructure:"wait_snapshot_ready_timeout" required:"false"`
-
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
 	// If this value is true, packer will connect to
