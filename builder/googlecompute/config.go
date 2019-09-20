@@ -165,6 +165,18 @@ type Config struct {
 	// If true, use the instance's internal IP instead of its external IP
 	// during building.
 	UseInternalIP bool `mapstructure:"use_internal_ip" required:"false"`
+	// Can be set instead of account_file. If set, this builder will use
+	// HashiCorp Vault to generate an Oauth token for authenticating against
+	// Google's cloud. The value should be the path of the token generator
+	// within vault.
+	// For information on how to configure your Vault + GCP engine to produce
+	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp.html
+	// You must have the environment variables VAULT_ADDR and VAULT_TOKEN set,
+	// along with any other relevant variables for accessing your vault
+	// instance. For more information, see the Vault docs:
+	// https://www.vaultproject.io/docs/commands/#environment-variables
+	// Example:`"vault_gcp_oauth_engine": "gcp/token/my-project-editor",`
+	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 	// The zone in which to launch the instance used to create the image.
 	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
@@ -322,7 +334,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	// Authenticating via an account file
 	if c.AccountFile != "" {
+		if c.VaultGCPOauthEngine != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
+				"specify both account_file and vault_gcp_oauth_engine."))
+		}
 		cfg, err := ProcessAccountFile(c.AccountFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)

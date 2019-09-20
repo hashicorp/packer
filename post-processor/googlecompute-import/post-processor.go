@@ -34,6 +34,7 @@ type Config struct {
 	ImageLabels          map[string]string `mapstructure:"image_labels"`
 	ImageName            string            `mapstructure:"image_name"`
 	SkipClean            bool              `mapstructure:"skip_clean"`
+	VaultGCPOauthEngine  string            `mapstructure:"vault_gcp_oauth_engine"`
 
 	Account *jwt.Config
 	ctx     interpolate.Context
@@ -78,6 +79,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.Account = cfg
 	}
 
+	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("May set either account_file or "+
+				"vault_gcp_oauth_engine, but not both."))
+	}
+
 	templates := map[string]*string{
 		"bucket":     &p.config.Bucket,
 		"image_name": &p.config.ImageName,
@@ -98,7 +105,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	client, err := googlecompute.NewClientGCE(p.config.Account)
+	client, err := googlecompute.NewClientGCE(p.config.Account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}
