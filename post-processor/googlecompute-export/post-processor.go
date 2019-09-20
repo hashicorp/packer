@@ -19,13 +19,14 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 
-	DiskSizeGb  int64    `mapstructure:"disk_size"`
-	DiskType    string   `mapstructure:"disk_type"`
-	MachineType string   `mapstructure:"machine_type"`
-	Network     string   `mapstructure:"network"`
-	Paths       []string `mapstructure:"paths"`
-	Subnetwork  string   `mapstructure:"subnetwork"`
-	Zone        string   `mapstructure:"zone"`
+	DiskSizeGb          int64    `mapstructure:"disk_size"`
+	DiskType            string   `mapstructure:"disk_type"`
+	MachineType         string   `mapstructure:"machine_type"`
+	Network             string   `mapstructure:"network"`
+	Paths               []string `mapstructure:"paths"`
+	Subnetwork          string   `mapstructure:"subnetwork"`
+	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
+	Zone                string   `mapstructure:"zone"`
 
 	Account *jwt.Config
 	ctx     interpolate.Context
@@ -67,6 +68,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	if p.config.Network == "" && p.config.Subnetwork == "" {
 		p.config.Network = "default"
+	}
+
+	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("May set either account_file or "+
+				"vault_gcp_oauth_engine, but not both."))
 	}
 
 	if len(errs.Errors) > 0 {
@@ -142,7 +149,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	exporterConfig.CalcTimeout()
 
-	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId, p.config.Account)
+	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
+		p.config.Account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}
