@@ -5,7 +5,7 @@
     
 -   `disk_block_size` (uint) - The block size of the VHD to be created.
     Recommended disk block size for Linux hyper-v guests is 1 MiB. This
-    defaults to "32 MiB".
+    defaults to "32" MiB.
     
 -   `memory` (uint) - The amount, in megabytes, of RAM to assign to the
     VM. By default, this is 1 GB.
