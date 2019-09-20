@@ -81,18 +81,13 @@ func tStateSpot() multistep.StateBag {
 func getBasicStep() *StepRunSpotInstance {
 	stepRunSpotInstance := StepRunSpotInstance{
 		AssociatePublicIpAddress: false,
-		BlockDevices: BlockDevices{
-			AMIBlockDevices: AMIBlockDevices{
-				AMIMappings: []BlockDevice(nil),
-			},
-			LaunchBlockDevices: LaunchBlockDevices{
-				LaunchMappings: []BlockDevice(nil),
-			},
-		},
-		BlockDurationMinutes: 0,
-		Debug:                false,
+		LaunchMappings:           BlockDevices{},
+		BlockDurationMinutes:     0,
+		Debug:                    false,
 		Comm: &communicator.Config{
-			SSHKeyPairName: "foo",
+			SSH: communicator.SSH{
+				SSHKeyPairName: "foo",
+			},
 		},
 		EbsOptimized:                      false,
 		ExpectedRootDevice:                "ebs",

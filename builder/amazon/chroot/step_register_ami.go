@@ -83,7 +83,7 @@ func buildBaseRegisterOpts(config *Config, sourceImage *ec2.Image, rootVolumeSiz
 
 	generatingNewBlockDeviceMappings := config.FromScratch || len(config.AMIMappings) > 0
 	if generatingNewBlockDeviceMappings {
-		mappings = config.AMIBlockDevices.BuildAMIDevices()
+		mappings = config.AMIMappings.BuildEC2BlockDeviceMappings()
 		rootDeviceName = config.RootDeviceName
 	} else {
 		// If config.FromScratch is false, source image must be set

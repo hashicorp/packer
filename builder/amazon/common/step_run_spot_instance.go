@@ -19,9 +19,13 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+type EC2BlockDeviceMappingsBuilder interface {
+	BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping
+}
+
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	BlockDevices                      BlockDevices
+	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	BlockDurationMinutes              int64
 	Debug                             bool
 	Comm                              *communicator.Config
@@ -53,7 +57,7 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	// LaunchTemplateEbsBlockDeviceRequest structs are themselves
 	// identical except for the struct's name, so you can cast one directly
 	// into the other.
-	blockDeviceMappings := s.BlockDevices.BuildLaunchDevices()
+	blockDeviceMappings := s.LaunchMappings.BuildEC2BlockDeviceMappings()
 	var launchMappingRequests []*ec2.LaunchTemplateBlockDeviceMappingRequest
 	for _, mapping := range blockDeviceMappings {
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{

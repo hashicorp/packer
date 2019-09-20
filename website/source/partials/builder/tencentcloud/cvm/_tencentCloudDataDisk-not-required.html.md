@@ -1,0 +1,5 @@
+<!-- Code generated from the comments of the tencentCloudDataDisk struct in builder/tencentcloud/cvm/run_config.go; DO NOT EDIT MANUALLY -->
+
+-   `disk_type` (string) - Disk Type
+-   `disk_size` (int64) - Disk Size
+-   `disk_snapshot_id` (string) - Snapshot Id

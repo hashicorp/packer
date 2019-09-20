@@ -1,0 +1,6 @@
+<!-- Code generated from the comments of the PrlctlPostConfig struct in builder/parallels/common/prlctl_post_config.go; DO NOT EDIT MANUALLY -->
+
+-   `prlctl_post` ([][]string) - Identical to prlctl, except
+    that it is run after the virtual machine is shutdown, and before the virtual
+    machine is exported.
+    
