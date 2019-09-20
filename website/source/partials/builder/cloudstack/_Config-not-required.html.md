@@ -27,8 +27,15 @@
 -   `disk_size` (int64) - The size (in GB) of the root disk of the new
     instance. This option is only available when using source_template.
     
--   `eject_iso` (bool) - 
--   `eject_iso_delay` (time.Duration) - 
+-   `eject_iso` (bool) - If `true` make a call to the CloudStack API, after loading image to
+    cache, requesting to check and detach ISO file (if any) currently
+    attached to a virtual machine. Defaults to `false`. This option is only
+    available when using `source_iso`.
+    
+-   `eject_iso_delay` (time.Duration) - Configure the duration time to wait, making sure virtual machine is able
+    to finish installing OS before it ejects safely. Requires `eject_iso`
+    set to `true` and this option is only available when using `source_iso`.
+    
 -   `expunge` (bool) - Set to true to expunge the instance when it is
     destroyed. Defaults to false.
     

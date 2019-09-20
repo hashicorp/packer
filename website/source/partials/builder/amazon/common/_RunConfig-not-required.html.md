@@ -89,11 +89,9 @@
     
     `security_group_ids` take precedence over this.
     
--   `run_tags` (map[string]string) - Tags to apply to the instance that is *launched* to create the AMI.
-    These tags are *not* applied to the resulting AMI unless they're
-    duplicated in `tags`. This is a [template
-    engine](/docs/templates/engine.html), see [Build template
-    data](#build-template-data) for more information.
+-   `run_tags` (map[string]string) - Tags to apply to the instance that is that is *launched* to create the
+    EBS volumes. This is a [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
     
 -   `security_group_id` (string) - The ID (not the name) of the security
     group to assign to the instance. By default this is not set and Packer will

@@ -4,5 +4,5 @@
     value is false.
     
 -   `security_token` (string) - STS access token, can be set through template or by exporting as
-    environment variable such as export SECURITY_TOKEN=value.
+    environment variable such as `export SECURITY_TOKEN=value`.
     
