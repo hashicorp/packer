@@ -40,6 +40,7 @@ var FuncGens = map[string]interface{}{
 	"packer_version": funcGenPackerVersion,
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
+	"sed":            funcGenSed,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -263,6 +264,14 @@ func funcGenVault(ctx *Context) interface{} {
 
 		value := data.(map[string]interface{})[key].(string)
 		return value, nil
+	}
+}
+
+func funcGenSed(ctx *Context) interface{} {
+	return func(expression string, inputString string) (string, error) {
+		return "", errors.New("template function `sed` is deprecated " +
+			"use `replace` or `replace_all` instead." +
+			"Documentation: https://www.packer.io/docs/templates/engine.html")
 	}
 }
 
