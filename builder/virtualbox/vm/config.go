@@ -15,19 +15,17 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig             `mapstructure:",squash"`
-	common.HTTPConfig               `mapstructure:",squash"`
-	common.FloppyConfig             `mapstructure:",squash"`
-	bootcommand.BootConfig          `mapstructure:",squash"`
-	vboxcommon.ExportConfig         `mapstructure:",squash"`
-	vboxcommon.ExportOpts           `mapstructure:",squash"`
-	vboxcommon.OutputConfig         `mapstructure:",squash"`
-	vboxcommon.RunConfig            `mapstructure:",squash"`
-	vboxcommon.SSHConfig            `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
-	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
+	common.PackerConfig          `mapstructure:",squash"`
+	common.HTTPConfig            `mapstructure:",squash"`
+	common.FloppyConfig          `mapstructure:",squash"`
+	bootcommand.BootConfig       `mapstructure:",squash"`
+	vboxcommon.ExportConfig      `mapstructure:",squash"`
+	vboxcommon.OutputConfig      `mapstructure:",squash"`
+	vboxcommon.RunConfig         `mapstructure:",squash"`
+	vboxcommon.SSHConfig         `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
 
 	GuestAdditionsMode   string `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath   string `mapstructure:"guest_additions_path"`
@@ -78,7 +76,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Prepare the errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ExportOpts.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
@@ -86,7 +83,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 

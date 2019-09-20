@@ -26,3 +26,4 @@ packer-test*.log
 Thumbs.db
 /packer.exe
 .project
+cache

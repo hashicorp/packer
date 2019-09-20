@@ -1,0 +1,16 @@
+<!-- Code generated from the comments of the Config struct in builder/googlecompute/config.go; DO NOT EDIT MANUALLY -->
+
+-   `project_id` (string) - The project ID that will be used to launch instances and store images.
+    
+-   `source_image` (string) - The source image to use to create the new image from. You can also
+    specify source_image_family instead. If both source_image and
+    source_image_family are specified, source_image takes precedence.
+    Example: "debian-8-jessie-v20161027"
+    
+-   `source_image_family` (string) - The source image family to use to create the new image from. The image
+    family always returns its latest image that is not deprecated. Example:
+    "debian-8".
+    
+-   `zone` (string) - The zone in which to launch the instance used to create the image.
+    Example: "us-central1-a"
+    

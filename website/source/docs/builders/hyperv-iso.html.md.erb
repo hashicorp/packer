@@ -48,7 +48,17 @@ leading to corruption of files or lost changes. As such, it is important to
 add a `shutdown_command`. This tells Packer how to safely shutdown and
 power off the VM.
 
-<%= partial "partials/builders/iso-config" %>
+## ISO Configuration Reference
+
+<%= partial "partials/common/ISOConfig" %>
+
+### Required:
+
+<%= partial "partials/common/ISOConfig-required" %>
+
+### Optional:
+
+<%= partial "partials/common/ISOConfig-not-required" %>
 
 ## Configuration Reference
 
@@ -62,120 +72,6 @@ builder.
 
 ### Optional:
 
--   `boot_command` (array of strings) - This is an array of commands to type
-    when the virtual machine is first booted. The goal of these commands
-    should be to type just enough to initialize the operating system
-    installer. Special keys can be typed as well, and are covered in the
-    section below on the boot command. If this is not specified, it is assumed
-    the installer will start itself.
-
--   `boot_wait` (string) - The time to wait after booting the initial virtual
-    machine before typing the `boot_command`. The value specified should be
-    a duration. For example, setting a duration of "1m30s" would cause
-    Packer to wait for 1 minute 30 seconds before typing the boot command.
-    The default duration is "10s" (10 seconds).
-
--   `configuration_version` (string) - This allows you to set the vm version when
-     calling New-VM to generate the vm.
-
--   `cpus` (number) - The number of CPUs the virtual machine should use. If
-    this isn't specified, the default is 1 CPU.
-
--   `differencing_disk` (boolean) - If true enables differencing disks. Only
-    the changes will be written to the new disk. This is especially useful if
-    your source is a VHD/VHDX. This defaults to `false`.
-
--   `disk_additional_size` (array of integers) - The size or sizes of any
-    additional hard disks for the VM in megabytes. If this is not specified
-    then the VM will only contain a primary hard disk. Additional drives
-    will be attached to the SCSI interface only. The builder uses
-    expandable rather than fixed-size virtual hard disks, so the actual
-    file representing the disk will not use the full size unless it is
-    full.
-
--   `disk_block_size` (string) - The block size of the VHD to be created in MiB.
-    Recommended disk block size for Linux hyper-v guests is 1 MiB. This
-    defaults to "32" (MiB).
-
--   `disk_size` (number) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is 40 GB.
-
--   `enable_dynamic_memory` (boolean) - If `true` enable dynamic memory for
-    the virtual machine. This defaults to `false`.
-
--   `enable_mac_spoofing` (boolean) - If `true` enable MAC address spoofing
-    for the virtual machine. This defaults to `false`.
-
--   `enable_secure_boot` (boolean) - If `true` enable secure boot for the
-    virtual machine. This defaults to `false`. See `secure_boot_template`
-    below for additional settings.
-
--   `enable_virtualization_extensions` (boolean) - If `true` enable
-    virtualization extensions for the virtual machine. This defaults to
-    `false`. For nested virtualization you need to enable MAC spoofing,
-    disable dynamic memory and have at least 4GB of RAM assigned to the
-    virtual machine.
-
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are
-    allowed. The maximum summary size of all files in the listed directories
-    are the same as in `floppy_files`.
-
--   `floppy_files` (array of strings) - A list of files to place onto a floppy
-    disk that is attached when the VM is booted. This is most useful for
-    unattended Windows installs, which look for an `Autounattend.xml` file on
-    removable media. By default, no floppy will be attached. All files listed
-    in this setting get placed into the root directory of the floppy and the
-    floppy is attached as the first floppy device. Currently, no support
-    exists for creating sub-directories on the floppy. Wildcard characters
-    (`*`, `?`, and `[]`) are allowed. Directory names are also allowed, which
-    will add all the files found in the directory to the floppy.
-
--  `floppy_label` (string) - The label to use for the floppy disk that
-    is attached when the VM is booted. This is most useful for cloud-init,
-    Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
-    By default, the floppy label will be 'packer'.
-
--   `generation` (number) - The Hyper-V generation for the virtual machine. By
-    default, this is 1. Generation 2 Hyper-V virtual machines do not support
-    floppy drives. In this scenario use `secondary_iso_images` instead. Hard
-    drives and DVD drives will also be SCSI and not IDE.
-
--   `guest_additions_mode` (string) - If set to `attach` then attach and
-    mount the ISO image specified in `guest_additions_path`. If set to
-    `none` then guest additions are not attached and mounted; This is the
-    default.
-
--   `guest_additions_path` (string) - The path to the ISO image for guest
-    additions.
-
--   `headless` (boolean) - Packer defaults to building Hyper-V virtual
-    machines by launching a GUI that shows the console of the machine being
-    built. When this value is set to true, the machine will start without a
-    console.
-
--   `http_directory` (string) - Path to a directory to serve using Packers
-    inbuilt HTTP server. The files in this directory will be available
-    over HTTP to the virtual machine. This is useful for hosting kickstart
-    files and so on. By default this value is unset and the HTTP server is
-    not started. The address and port of the HTTP server will be available
-    as variables in `boot_command`. This is covered in more detail below.
-
--   `http_port_min` and `http_port_max` (number) - These are the minimum and
-    maximum port to use for the HTTP server started to serve the
-    `http_directory`. Since Packer often runs in parallel, a randomly
-    available port in this range will be repeatedly chosen until an
-    available port is found. To force the HTTP server to use a specific
-    port, set an identical value for `http_port_min` and `http_port_max`.
-    By default the values are 8000 and 9000, respectively.
-
--   `mac_address` (string) - This allows a specific MAC address to be used on
-    the default virtual network card. The MAC address must be a string with
-    no delimiters, for example "0000deadbeef".
-
 -   `output_directory` (string) - This setting specifies the directory that
     artifacts from the build, such as the virtual machine files and disks,
     will be output to. The path to the directory may be relative or
@@ -184,119 +80,35 @@ builder.
     created, must be empty prior to running the builder. By default this is
     "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
--   `memory` (number) - The amount, in megabytes, of RAM to assign to the
-    VM. By default, this is 1 GB.
+<%= partial "partials/builder/hyperv/iso/Config-not-required" %>
 
--   `secondary_iso_images` (array of strings) - A list of ISO paths to
-    attach to a VM when it is booted. This is most useful for unattended
-    Windows installs, which look for an `Autounattend.xml` file on removable
-    media. By default, no secondary ISO will be attached.
+## Http directory configuration reference
 
--   `secure_boot_template` (string) - The secure boot template to be
-    configured. Valid values are "MicrosoftWindows" (Windows) or
-    "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if
-    `enable_secure_boot` is set to "true". This defaults to "MicrosoftWindows".
+<%= partial "partials/common/HTTPConfig" %>
+### Optional:
 
--   `shutdown_command` (string) - The command to use to gracefully shut down
-    the machine once all provisioning is complete. By default this is an
-    empty string, which tells Packer to just forcefully shut down the
-    machine. This setting can be safely omitted if for example, a shutdown
-    command to gracefully halt the machine is configured inside a
-    provisioning script. If one or more scripts require a reboot it is
-    suggested to leave this blank (since reboots may fail) and instead
-    specify the final shutdown command in your last script.
+<%= partial "partials/common/HTTPConfig-not-required" %>
 
--   `shutdown_timeout` (string) - The amount of time to wait after executing
-    the `shutdown_command` for the virtual machine to actually shut down.
-    If the machine doesn't shut down in this time it is considered an
-    error. By default, the time out is "5m" (five minutes).
+## Shutdown configuration reference
 
--   `skip_compaction` (boolean) - If `true` skip compacting the hard disk for
-    the virtual machine when exporting. This defaults to `false`.
+### Optional:
 
--   `skip_export` (boolean) - If `true` Packer will skip the export of the VM.
-    If you are interested only in the VHD/VHDX files, you can enable this
-    option. The resulting VHD/VHDX file will be output to
-    `<output_directory>/Virtual Hard Disks`. By default this option is `false`
-    and Packer will export the VM to `output_directory`.
+<%= partial "partials/common/shutdowncommand/ShutdownConfig-not-required" %>
 
--   `switch_name` (string) - The name of the switch to connect the virtual
-    machine to. By default, leaving this value unset will cause Packer to
-    try and determine the switch to use by looking for an external switch
-    that is up and running.
+## Floppy configuration reference
 
--   `switch_vlan_id` (string) - This is the VLAN of the virtual switch's
-    network card. By default none is set. If none is set then a VLAN is not
-    set on the switch's network card. If this value is set it should match
-    the VLAN specified in by `vlan_id`.
+<%= partial "partials/common/FloppyConfig" %>
 
--   `temp_path` (string) - The location under which Packer will create a
-    directory to house all the VM files and folders during the build.
-    By default `%TEMP%` is used which, for most systems, will evaluate to
-    `%USERPROFILE%/AppData/Local/Temp`.
+### Optional:
 
-    The build directory housed under `temp_path` will have a name similar
-    to `packerhv1234567`. The seven digit number at the end of the name is
-    automatically generated by Packer to ensure the directory name is
-    unique.
+<%= partial "partials/common/FloppyConfig-not-required" %>
 
--   `use_fixed_vhd_format` (boolean) - If true, creates the boot disk on the
-    virtual machine as a fixed VHD format disk. The default is `false`, which
-    creates a dynamic VHDX format disk. This option requires setting
-    `generation` to `1`, `skip_compaction` to `true`, and
-    `differencing_disk` to `false`. Additionally, any value entered for
-    `disk_block_size` will be ignored. The most likely use case for this
-    option is outputing a disk that is in the format required for upload to
-    Azure.
+## Boot Configuration Reference
 
--   `vlan_id` (string) - This is the VLAN of the virtual machine's network
-    card for the new virtual machine. By default none is set. If none is set
-    then VLANs are not set on the virtual machine's network card.
+<%= partial "partials/common/bootcommand/BootConfig" %>
 
--   `vm_name` (string) - This is the name of the new virtual machine,
-    without the file extension. By default this is "packer-BUILDNAME",
-    where "BUILDNAME" is the name of the build.
-
--   `use_legacy_network_adapter` (bool) - If true use a legacy network adapter as the NIC.
-    This defaults to false. A legacy network adapter is fully emulated NIC, and is thus
-    supported by various exotic operating systems, but this emulation requires
-    additional overhead and should only be used if absolutely necessary.
-
-## Boot Command
-
-The `boot_command` configuration is very important: it specifies the keys to
-type when the virtual machine is first booted in order to start the OS
-installer. This command is typed after `boot_wait`, which gives the virtual
-machine some time to actually load the ISO.
-
-As documented above, the `boot_command` is an array of strings. The strings
-are all typed in sequence. It is an array only to improve readability within
-the template.
-
-The boot command is "typed" character for character over the virtual keyboard
-to the machine, simulating a human actually typing the keyboard.
-
-<%= partial "partials/builders/boot-command" %>
-
-The example shown below is a working boot command used to start an Ubuntu
-12.04 installer:
-
-``` json
-[
-  "<esc><esc><enter><wait>",
-  "/install/vmlinuz noapic ",
-  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-  "hostname={{ .Name }} ",
-  "fb=false debconf/frontend=noninteractive ",
-  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- <enter>"
-]
-```
-
-For more examples of various boot commands, see the sample projects from our
-[community templates page](/community-tools.html#templates).
+### Optional:
+<%= partial "partials/common/bootcommand/BootConfig-not-required" %>
 
 ## Integration Services
 

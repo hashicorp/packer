@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package common
 
 import (
@@ -12,8 +14,10 @@ type SSHConfig struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHSkipRequestPty bool          `mapstructure:"ssh_skip_request_pty"`
-	SSHWaitTimeout    time.Duration `mapstructure:"ssh_wait_timeout"`
+	SSHSkipRequestPty bool `mapstructure:"ssh_skip_request_pty"`
+	// These are deprecated, but we keep them around for BC
+	// TODO(@mitchellh): remove
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
 }
 
 func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {

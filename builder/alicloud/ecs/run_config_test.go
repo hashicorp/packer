@@ -13,7 +13,9 @@ func testConfig() *RunConfig {
 		AlicloudSourceImage: "alicloud_images",
 		InstanceType:        "ecs.n1.tiny",
 		Comm: communicator.Config{
-			SSHUsername: "alicloud",
+			SSH: communicator.SSH{
+				SSHUsername: "alicloud",
+			},
 		},
 	}
 }
