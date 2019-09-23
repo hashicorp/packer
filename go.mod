@@ -8,10 +8,13 @@ require (
 	github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4 // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
+	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
+	github.com/antchfx/htmlquery v1.0.0 // indirect
+	github.com/antchfx/xmlquery v1.0.0 // indirect
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6 // indirect
@@ -35,7 +38,11 @@ require (
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 	github.com/exoscale/egoscale v0.18.1
+	github.com/fatih/camelcase v1.0.0
+	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
+	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gocolly/colly v1.2.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
@@ -69,6 +76,7 @@ require (
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
+	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77 // indirect
 	github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817 // indirect
 	github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f // indirect
@@ -109,11 +117,13 @@ require (
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17 // indirect
 	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
+	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/stretchr/testify v1.3.0
+	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.71+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.8.7
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
@@ -133,6 +143,8 @@ require (
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
 
 replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653
 

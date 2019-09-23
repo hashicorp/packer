@@ -1,0 +1,17 @@
+<!-- Code generated from the comments of the RunConfig struct in builder/virtualbox/common/run_config.go; DO NOT EDIT MANUALLY -->
+
+-   `headless` (bool) - Packer defaults to building VirtualBox virtual
+    machines by launching a GUI that shows the console of the machine
+    being built. When this value is set to true, the machine will start
+    without a console.
+    
+-   `vrdp_bind_address` (string) - The IP address that should be
+    binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
+    wish to bind to all interfaces use 0.0.0.0.
+    
+-   `vrdp_port_min` (int) - The minimum and maximum port
+    to use for VRDP access to the virtual machine. Packer uses a randomly chosen
+    port in this range that appears available. By default this is 5900 to
+    6000. The minimum and maximum ports are inclusive.
+    
+-   `vrdp_port_max` (int) - VRDP Port Max

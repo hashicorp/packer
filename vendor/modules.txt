@@ -50,6 +50,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/common
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
 github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
+# github.com/PuerkitoBio/goquery v1.5.0
+github.com/PuerkitoBio/goquery
 # github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
@@ -67,6 +69,12 @@ github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
 github.com/aliyun/alibaba-cloud-sdk-go/services/ram
 # github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
+# github.com/andybalholm/cascadia v1.0.0
+github.com/andybalholm/cascadia
+# github.com/antchfx/htmlquery v1.0.0
+github.com/antchfx/htmlquery
+# github.com/antchfx/xmlquery v1.0.0
+github.com/antchfx/xmlquery
 # github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
 github.com/antchfx/xpath
 # github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607
@@ -168,12 +176,29 @@ github.com/dylanmei/iso8601
 github.com/dylanmei/winrmtest
 # github.com/exoscale/egoscale v0.18.1
 github.com/exoscale/egoscale
+# github.com/fatih/camelcase v1.0.0
+github.com/fatih/camelcase
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/fatih/structtag v1.0.0
+github.com/fatih/structtag
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
+# github.com/gobwas/glob v0.2.3
+github.com/gobwas/glob
+github.com/gobwas/glob/compiler
+github.com/gobwas/glob/match
+github.com/gobwas/glob/syntax
+github.com/gobwas/glob/syntax/ast
+github.com/gobwas/glob/syntax/lexer
+github.com/gobwas/glob/util/runes
+github.com/gobwas/glob/util/strings
+# github.com/gocolly/colly v1.2.0
+github.com/gocolly/colly
+github.com/gocolly/colly/debug
+github.com/gocolly/colly/storage
 # github.com/gofrs/flock v0.7.1 => github.com/azr/flock v0.0.0-20190823144736-958d66434653
 github.com/gofrs/flock
 # github.com/gofrs/uuid v3.2.0+incompatible
@@ -325,6 +350,8 @@ github.com/joyent/triton-go/network
 github.com/json-iterator/go
 # github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 github.com/kardianos/osext
+# github.com/kennygrant/sanitize v1.2.4
+github.com/kennygrant/sanitize
 # github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77
 github.com/klauspost/compress/flate
 # github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817
@@ -416,6 +443,8 @@ github.com/profitbricks/profitbricks-sdk-go
 github.com/renstrom/fuzzysearch/fuzzy
 # github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735
 github.com/ryanuber/go-glob
+# github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
+github.com/saintfish/chardet
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
@@ -427,6 +456,8 @@ github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/temoto/robotstxt v1.1.1
+github.com/temoto/robotstxt
 # github.com/tencentcloud/tencentcloud-sdk-go v3.0.71+incompatible
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors

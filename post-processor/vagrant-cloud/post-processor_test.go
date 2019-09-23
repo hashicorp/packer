@@ -38,6 +38,14 @@ func testBadConfig() map[string]interface{} {
 	}
 }
 
+func testNoAccessTokenProvidedConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"box_tag":             "baz",
+		"version_description": "bar",
+		"version":             "0.5",
+	}
+}
+
 func newSecureServer(token string, handler http.HandlerFunc) *httptest.Server {
 	token = fmt.Sprintf("Bearer %s", token)
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -56,6 +64,18 @@ func newSelfSignedSslServer(token string, handler http.HandlerFunc) *httptest.Se
 	return httptest.NewTLSServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("authorization") != token {
 			http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		if handler != nil {
+			handler(rw, req)
+		}
+	}))
+}
+
+func newNoAuthServer(handler http.HandlerFunc) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("authorization") != "" {
+			http.Error(rw, "Authorization header was provider", http.StatusBadRequest)
 			return
 		}
 		if handler != nil {
@@ -144,6 +164,29 @@ func TestPostProcessor_Configure_Bad(t *testing.T) {
 	var p PostProcessor
 	if err := p.Configure(config); err == nil {
 		t.Fatalf("should have err")
+	}
+}
+
+func TestPostProcessor_Configure_checkAccessTokenIsRequiredByDefault(t *testing.T) {
+	var p PostProcessor
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+
+	config := testNoAccessTokenProvidedConfig()
+	if err := p.Configure(config); err == nil {
+		t.Fatalf("Expected access token to be required.")
+	}
+}
+
+func TestPostProcessor_Configure_checkAccessTokenIsNotRequiredForOverridenVagrantCloud(t *testing.T) {
+	var p PostProcessor
+	server := newNoAuthServer(nil)
+	defer server.Close()
+
+	config := testNoAccessTokenProvidedConfig()
+	config["vagrant_cloud_url"] = server.URL
+	if err := p.Configure(config); err != nil {
+		t.Fatalf("Expected blank access token to be allowed and authenticate to pass: %s", err)
 	}
 }
 

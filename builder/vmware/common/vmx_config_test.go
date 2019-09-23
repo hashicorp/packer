@@ -2,6 +2,8 @@ package common
 
 import (
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestVMXConfigPrepare(t *testing.T) {
@@ -11,7 +13,7 @@ func TestVMXConfigPrepare(t *testing.T) {
 		"two": "bar",
 	}
 
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}

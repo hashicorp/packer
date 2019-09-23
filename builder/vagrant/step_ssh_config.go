@@ -30,7 +30,11 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 	driver := state.Get("driver").(VagrantDriver)
 	config := state.Get("config").(*Config)
 
-	sshConfig, err := driver.SSHConfig(s.GlobalID)
+	box := "source"
+	if s.GlobalID != "" {
+		box = s.GlobalID
+	}
+	sshConfig, err := driver.SSHConfig(box)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

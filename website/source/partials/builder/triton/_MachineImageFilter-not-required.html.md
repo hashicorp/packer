@@ -1,0 +1,3 @@
+<!-- Code generated from the comments of the MachineImageFilter struct in builder/triton/source_machine_config.go; DO NOT EDIT MANUALLY -->
+
+-   `most_recent` (bool) - Most Recent
