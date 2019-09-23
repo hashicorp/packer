@@ -36,6 +36,11 @@ type Context struct {
 	TemplatePath string
 }
 
+// NewContext returns an initialized empty context.
+func NewContext() *Context {
+	return &Context{}
+}
+
 // Render is shorthand for constructing an I and calling Render.
 func Render(v string, ctx *Context) (string, error) {
 	return (&I{Value: v}).Render(ctx)

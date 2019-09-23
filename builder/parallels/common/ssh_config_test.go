@@ -6,19 +6,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func testSSHConfig() *SSHConfig {
 	return &SSHConfig{
 		Comm: communicator.Config{
-			SSHUsername: "foo",
+			SSH: communicator.SSH{
+				SSHUsername: "foo",
+			},
 		},
 	}
 }
 
 func TestSSHConfigPrepare(t *testing.T) {
 	c := testSSHConfig()
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -34,14 +37,14 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = "/i/dont/exist"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -60,7 +63,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -71,7 +74,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}

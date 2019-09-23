@@ -1,0 +1,2 @@
+<!-- Code generated from the comments of the SerialConfigPipe struct in builder/vmware/common/hw_config.go; DO NOT EDIT MANUALLY -->
+ serial conversions

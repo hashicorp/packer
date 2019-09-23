@@ -164,7 +164,15 @@ func TestISOConfigPrepare_ISOUrl(t *testing.T) {
 	i.RawSingleISOUrl = ""
 	i.ISOChecksum = ""
 	i.ISOChecksumURL = ts.URL + "/basic.txt"
-	warns, err = i.Prepare(nil)
+	// ISOConfig.Prepare() returns a slice of errors
+	var errs []error
+	warns, errs = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("expected no warnings, got:%v", warns)
+	}
+	if len(errs) < 1 || err[0] == nil {
+		t.Fatalf("expected a populated error slice, got: %v", errs)
+	}
 
 	// Test iso_url set
 	i = testISOConfig()

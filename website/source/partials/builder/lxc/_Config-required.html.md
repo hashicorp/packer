@@ -1,0 +1,9 @@
+<!-- Code generated from the comments of the Config struct in builder/lxc/config.go; DO NOT EDIT MANUALLY -->
+
+-   `config_file` (string) - The path to the lxc configuration file.
+    
+-   `template_name` (string) - The LXC template name to use.
+    
+-   `template_environment_vars` ([]string) - Environmental variables to
+    use to build the template with.
+    

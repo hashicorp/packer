@@ -2,11 +2,13 @@ package common
 
 import (
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestHWConfigPrepare(t *testing.T) {
 	c := new(HWConfig)
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestOutputConfigPrepare(t *testing.T) {
@@ -17,7 +18,7 @@ func TestOutputConfigPrepare(t *testing.T) {
 	}
 
 	pc := &common.PackerConfig{PackerBuildName: "foo"}
-	errs := c.Prepare(testConfigTemplate(t), pc)
+	errs := c.Prepare(interpolate.NewContext(), pc)
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -41,7 +42,7 @@ func TestOutputConfigPrepare_exists(t *testing.T) {
 		PackerBuildName: "foo",
 		PackerForce:     false,
 	}
-	errs := c.Prepare(testConfigTemplate(t), pc)
+	errs := c.Prepare(interpolate.NewContext(), pc)
 	if len(errs) == 0 {
 		t.Fatal("should have errors")
 	}
@@ -61,7 +62,7 @@ func TestOutputConfigPrepare_forceExists(t *testing.T) {
 		PackerBuildName: "foo",
 		PackerForce:     true,
 	}
-	errs := c.Prepare(testConfigTemplate(t), pc)
+	errs := c.Prepare(interpolate.NewContext(), pc)
 	if len(errs) > 0 {
 		t.Fatal("should not have errors")
 	}

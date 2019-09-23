@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package vagrant
 
 import (
@@ -36,39 +38,91 @@ type Config struct {
 	common.FloppyConfig    `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
 	SSHConfig              `mapstructure:",squash"`
-
-	// This is the name of the new virtual machine.
-	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
-	OutputDir    string `mapstructure:"output_dir"`
-	SourceBox    string `mapstructure:"source_path"`
-	GlobalID     string `mapstructure:"global_id"`
-	Checksum     string `mapstructure:"checksum"`
-	ChecksumType string `mapstructure:"checksum_type"`
-	BoxName      string `mapstructure:"box_name"`
-
-	Provider string `mapstructure:"provider"`
+	// The directory to create that will contain your output box. We always
+	// create this directory and run from inside of it to prevent Vagrant init
+	// collisions. If unset, it will be set to packer- plus your buildname.
+	OutputDir string `mapstructure:"output_dir" required:"false"`
+	// URL of the vagrant box to use, or the name of the vagrant box.
+	// hashicorp/precise64, ./mylocalbox.box and https://example.com/my-box.box
+	// are all valid source boxes. If your source is a .box file, whether
+	// locally or from a URL like the latter example above, you will also need
+	// to provide a box_name. This option is required, unless you set
+	// global_id. You may only set one or the other, not both.
+	SourceBox string `mapstructure:"source_path" required:"true"`
+	// the global id of a Vagrant box already added to Vagrant on your system.
+	// You can find the global id of your Vagrant boxes using the command
+	// vagrant global-status; your global_id will be a 7-digit number and
+	// letter comination that you'll find in the leftmost column of the
+	// global-status output.  If you choose to use global_id instead of
+	// source_box, Packer will skip the Vagrant initialize and add steps, and
+	// simply launch the box directly using the global id.
+	GlobalID string `mapstructure:"global_id" required:"true"`
+	// The checksum for the .box file. The type of the checksum is specified
+	// with checksum_type, documented below.
+	Checksum string `mapstructure:"checksum" required:"false"`
+	// The type of the checksum specified in checksum. Valid values are none,
+	// md5, sha1, sha256, or sha512. Although the checksum will not be verified
+	// when checksum_type is set to "none", this is not recommended since OVA
+	// files can be very large and corruption does happen from time to time.
+	ChecksumType string `mapstructure:"checksum_type" required:"false"`
+	// if your source_box is a boxfile that we need to add to Vagrant, this is
+	// the name to give it. If left blank, will default to "packer_" plus your
+	// buildname.
+	BoxName string `mapstructure:"box_name" required:"false"`
+	// The vagrant provider.
+	// This parameter is required when source_path have more than one provider,
+	// or when using vagrant-cloud post-processor. Defaults to unset.
+	Provider string `mapstructure:"provider" required:"false"`
 
 	Communicator string `mapstructure:"communicator"`
 
-	// Whether to Halt, Suspend, or Destroy the box
-	TeardownMethod string `mapstructure:"teardown_method"`
-
 	// Options for the "vagrant init" command
-	BoxVersion   string `mapstructure:"box_version"`
-	Template     string `mapstructure:"template"`
+
+	// What vagrantfile to use
+	VagrantfileTpl string `mapstructure:"vagrantfile_template"`
+	// Whether to halt, suspend, or destroy the box when the build has
+	// completed. Defaults to "halt"
+	TeardownMethod string `mapstructure:"teardown_method" required:"false"`
+	// What box version to use when initializing Vagrant.
+	BoxVersion string `mapstructure:"box_version" required:"false"`
+	// a path to a golang template for a vagrantfile. Our default template can
+	// be found here. So far the only template variables available to you are
+	// {{ .BoxName }} and {{ .SyncedFolder }}, which correspond to the Packer
+	// options box_name and synced_folder.
+	Template string `mapstructure:"template" required:"false"`
+
 	SyncedFolder string `mapstructure:"synced_folder"`
-
-	// Options for the "vagrant box add" command
-	SkipAdd     bool   `mapstructure:"skip_add"`
-	AddCACert   string `mapstructure:"add_cacert"`
-	AddCAPath   string `mapstructure:"add_capath"`
-	AddCert     string `mapstructure:"add_cert"`
-	AddClean    bool   `mapstructure:"add_clean"`
-	AddForce    bool   `mapstructure:"add_force"`
-	AddInsecure bool   `mapstructure:"add_insecure"`
-
-	// Don't package the Vagrant box after build.
-	SkipPackage       bool     `mapstructure:"skip_package"`
+	// Don't call "vagrant add" to add the box to your local environment; this
+	// is necessary if you want to launch a box that is already added to your
+	// vagrant environment.
+	SkipAdd bool `mapstructure:"skip_add" required:"false"`
+	// Equivalent to setting the
+	// --cacert
+	// option in vagrant add; defaults to unset.
+	AddCACert string `mapstructure:"add_cacert" required:"false"`
+	// Equivalent to setting the
+	// --capath option
+	// in vagrant add; defaults to unset.
+	AddCAPath string `mapstructure:"add_capath" required:"false"`
+	// Equivalent to setting the
+	// --cert option in
+	// vagrant add; defaults to unset.
+	AddCert string `mapstructure:"add_cert" required:"false"`
+	// Equivalent to setting the
+	// --clean flag in
+	// vagrant add; defaults to unset.
+	AddClean bool `mapstructure:"add_clean" required:"false"`
+	// Equivalent to setting the
+	// --force flag in
+	// vagrant add; defaults to unset.
+	AddForce bool `mapstructure:"add_force" required:"false"`
+	// Equivalent to setting the
+	// --insecure flag in
+	// vagrant add; defaults to unset.
+	AddInsecure bool `mapstructure:"add_insecure" required:"false"`
+	// if true, Packer will not call vagrant package to
+	// package your base box into its own standalone .box file.
+	SkipPackage       bool     `mapstructure:"skip_package" required:"false"`
 	OutputVagrantfile string   `mapstructure:"output_vagrantfile"`
 	PackageInclude    []string `mapstructure:"package_include"`
 

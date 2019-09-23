@@ -1,0 +1,8 @@
+<!-- Code generated from the comments of the HTTPConfig struct in common/http_config.go; DO NOT EDIT MANUALLY -->
+Packer will create an http server serving `http_directory` when it is set, a
+random free port will be selected and the architecture of the directory
+referenced will be available in your builder.
+
+Example usage from a builder:
+
+  `wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/foo/bar/preseed.cfg`
