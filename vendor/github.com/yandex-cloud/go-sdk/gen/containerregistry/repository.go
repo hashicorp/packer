@@ -8,7 +8,9 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
 //revive:disable
@@ -21,6 +23,24 @@ type RepositoryServiceClient struct {
 
 var _ containerregistry.RepositoryServiceClient = &RepositoryServiceClient{}
 
+// Get implements containerregistry.RepositoryServiceClient
+func (c *RepositoryServiceClient) Get(ctx context.Context, in *containerregistry.GetRepositoryRequest, opts ...grpc.CallOption) (*containerregistry.Repository, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRepositoryServiceClient(conn).Get(ctx, in, opts...)
+}
+
+// GetByName implements containerregistry.RepositoryServiceClient
+func (c *RepositoryServiceClient) GetByName(ctx context.Context, in *containerregistry.GetRepositoryByNameRequest, opts ...grpc.CallOption) (*containerregistry.Repository, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRepositoryServiceClient(conn).GetByName(ctx, in, opts...)
+}
+
 // List implements containerregistry.RepositoryServiceClient
 func (c *RepositoryServiceClient) List(ctx context.Context, in *containerregistry.ListRepositoriesRequest, opts ...grpc.CallOption) (*containerregistry.ListRepositoriesResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -28,4 +48,31 @@ func (c *RepositoryServiceClient) List(ctx context.Context, in *containerregistr
 		return nil, err
 	}
 	return containerregistry.NewRepositoryServiceClient(conn).List(ctx, in, opts...)
+}
+
+// ListAccessBindings implements containerregistry.RepositoryServiceClient
+func (c *RepositoryServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRepositoryServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
+// SetAccessBindings implements containerregistry.RepositoryServiceClient
+func (c *RepositoryServiceClient) SetAccessBindings(ctx context.Context, in *access.SetAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRepositoryServiceClient(conn).SetAccessBindings(ctx, in, opts...)
+}
+
+// UpdateAccessBindings implements containerregistry.RepositoryServiceClient
+func (c *RepositoryServiceClient) UpdateAccessBindings(ctx context.Context, in *access.UpdateAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRepositoryServiceClient(conn).UpdateAccessBindings(ctx, in, opts...)
 }

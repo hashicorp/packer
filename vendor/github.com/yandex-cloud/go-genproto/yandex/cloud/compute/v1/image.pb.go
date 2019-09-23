@@ -240,7 +240,9 @@ func (m *Image) GetOs() *Os {
 }
 
 type Os struct {
-	// Operating system type.
+	// Operating system type. The default is `LINUX`.
+	//
+	// This field is used to correctly emulate a vCPU and calculate the cost of using an instance.
 	Type                 Os_Type  `protobuf:"varint,1,opt,name=type,proto3,enum=yandex.cloud.compute.v1.Os_Type" json:"type,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

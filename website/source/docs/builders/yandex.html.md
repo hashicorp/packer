@@ -106,6 +106,8 @@ can be configured for this builder.
     
 -   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 
+-   `max_retries` (number) - The maximum number of times an API request is being executed.
+
 -   `metadata` (object of key/value strings) - Metadata applied to the launched
     instance.
 
@@ -135,10 +137,11 @@ can be configured for this builder.
 
 -   `source_image_folder_id` (string) - The ID of the folder containing the source image.
 
--   `source_image_id` (string) - The source image ID to use to create the new image from.
+-   `source_image_id` (string) - The source image ID to use to create the new image
+    from.
 
--   `source_image_name` (string) - The source image name to use to create the new image from. 
-    Name will be looked up in `source_image_folder_id`. 
+-   `source_image_name` (string) - The source image name to use to create the new image
+    from. Name will be looked up in `source_image_folder_id`. 
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `5m`.

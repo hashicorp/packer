@@ -5,11 +5,40 @@ package sdkerrors
 
 import (
 	"fmt"
+
+	"google.golang.org/grpc/status"
 )
+
+func WithMessagef(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+	return WithMessage(err, fmt.Sprintf(format, args...))
+}
+
+func WithMessage(err error, message string) error {
+	if err == nil {
+		return nil
+	}
+
+	withMessage := errWithMessage{err, message}
+	if _, ok := err.(statusErr); ok {
+		return &statusErrWithMessage{withMessage}
+	}
+	return &withMessage
+}
+
+type statusErr interface {
+	GRPCStatus() *status.Status
+}
 
 type errWithMessage struct {
 	err     error
 	message string
+}
+
+type statusErrWithMessage struct {
+	errWithMessage
 }
 
 func (e *errWithMessage) Error() string {
@@ -20,16 +49,6 @@ func (e *errWithMessage) Cause() error {
 	return e.err
 }
 
-func WithMessage(err error, message string) error {
-	if err == nil {
-		return nil
-	}
-	return &errWithMessage{err, message}
-}
-
-func WithMessagef(err error, format string, args ...interface{}) error {
-	if err == nil {
-		return nil
-	}
-	return &errWithMessage{err, fmt.Sprintf(format, args...)}
+func (e *statusErrWithMessage) GRPCStatus() *status.Status {
+	return status.Convert(e.err)
 }

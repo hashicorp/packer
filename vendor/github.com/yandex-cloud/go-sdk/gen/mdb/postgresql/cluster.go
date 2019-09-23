@@ -148,6 +148,15 @@ func (c *ClusterServiceClient) Start(ctx context.Context, in *postgresql.StartCl
 	return postgresql.NewClusterServiceClient(conn).Start(ctx, in, opts...)
 }
 
+// StartFailover implements postgresql.ClusterServiceClient
+func (c *ClusterServiceClient) StartFailover(ctx context.Context, in *postgresql.StartClusterFailoverRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return postgresql.NewClusterServiceClient(conn).StartFailover(ctx, in, opts...)
+}
+
 // Stop implements postgresql.ClusterServiceClient
 func (c *ClusterServiceClient) Stop(ctx context.Context, in *postgresql.StopClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

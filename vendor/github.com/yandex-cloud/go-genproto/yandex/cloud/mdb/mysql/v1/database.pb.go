@@ -6,7 +6,7 @@ package mysql
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/yandex-cloud/go-genproto/yandex/cloud/validation"
+	_ "github.com/yandex-cloud/go-genproto/yandex/cloud"
 	math "math"
 )
 
