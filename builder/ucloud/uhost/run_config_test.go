@@ -1,8 +1,9 @@
 package uhost
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func testConfig() *RunConfig {
@@ -11,7 +12,9 @@ func testConfig() *RunConfig {
 		InstanceType:  "n-basic-2",
 		Zone:          "cn-bj2-02",
 		Comm: communicator.Config{
-			SSHUsername: "ucloud",
+			SSH: communicator.SSH{
+				SSHUsername: "ucloud",
+			},
 		},
 	}
 }

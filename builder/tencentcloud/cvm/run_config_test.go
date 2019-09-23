@@ -13,7 +13,9 @@ func testConfig() *TencentCloudRunConfig {
 		SourceImageId: "img-qwer1234",
 		InstanceType:  "S3.SMALL2",
 		Comm: communicator.Config{
-			SSHUsername: "tencentcloud",
+			SSH: communicator.SSH{
+				SSHUsername: "tencentcloud",
+			},
 		},
 	}
 }

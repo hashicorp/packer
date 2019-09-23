@@ -1,0 +1,61 @@
+<!-- Code generated from the comments of the Config struct in builder/hyperone/config.go; DO NOT EDIT MANUALLY -->
+
+-   `api_url` (string) - Custom API endpoint URL, compatible with HyperOne.
+    It can also be specified via environment variable HYPERONE_API_URL.
+    
+-   `token_login` (string) - Login (an e-mail) on HyperOne platform. Set this
+    if you want to fetch the token by SSH authentication.
+    
+-   `state_timeout` (time.Duration) - Timeout for waiting on the API to complete
+    a request. Defaults to 5m.
+    
+-   `image_name` (string) - The name of the resulting image. Defaults to
+    "packer-{{timestamp}}"
+    (see configuration templates for more info).
+    
+-   `image_description` (string) - The description of the resulting image.
+    
+-   `image_tags` (map[string]interface{}) - Key/value pair tags to
+    add to the created image.
+    
+-   `image_service` (string) - The service of the resulting image.
+    
+-   `vm_name` (string) - The name of the created server.
+    
+-   `vm_tags` (map[string]interface{}) - Key/value pair tags to
+    add to the created server.
+    
+-   `disk_name` (string) - The name of the created disk.
+    
+-   `disk_type` (string) - The type of the created disk. Defaults to ssd.
+    
+-   `network` (string) - The ID of the network to attach to the created server.
+    
+-   `private_ip` (string) - The ID of the private IP within chosen network
+    that should be assigned to the created server.
+    
+-   `public_ip` (string) - The ID of the public IP that should be assigned to
+    the created server. If network is chosen, the public IP will be associated
+    with server's private IP.
+    
+-   `public_netadp_service` (string) - Custom service of public network adapter.
+    Can be useful when using custom api_url. Defaults to public.
+    
+-   `chroot_disk` (bool) - Chroot Disk
+-   `chroot_disk_size` (float32) - Chroot Disk Size
+-   `chroot_disk_type` (string) - Chroot Disk Type
+-   `chroot_mount_path` (string) - Chroot Mount Path
+-   `chroot_mounts` ([][]string) - Chroot Mounts
+-   `chroot_copy_files` ([]string) - Chroot Copy Files
+-   `chroot_command_wrapper` (string) - Chroot Command Wrapper
+-   `mount_options` ([]string) - Mount Options
+-   `mount_partition` (string) - Mount Partition
+-   `pre_mount_commands` ([]string) - Pre Mount Commands
+-   `post_mount_commands` ([]string) - Post Mount Commands
+-   `ssh_keys` ([]string) - List of SSH keys by name or id to be added
+    to the server on launch.
+    
+-   `user_data` (string) - User data to launch with the server. Packer will not
+    automatically wait for a user script to finish before shutting down the
+    instance, this must be handled in a provisioner.
+    

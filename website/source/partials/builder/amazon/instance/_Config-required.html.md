@@ -1,0 +1,16 @@
+<!-- Code generated from the comments of the Config struct in builder/amazon/instance/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `account_id` (string) - Your AWS account ID. This is required for bundling the AMI. This is not
+    the same as the access key. You can find your account ID in the security
+    credentials page of your AWS account.
+    
+-   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This bucket will be created
+    if it doesn't exist.
+    
+-   `x509_cert_path` (string) - The local path to a valid X509 certificate for your AWS account. This is
+    used for bundling the AMI. This X509 certificate must be registered with
+    your account from the security credentials page in the AWS console.
+    
+-   `x509_key_path` (string) - The local path to the private key for the X509 certificate specified by
+    x509_cert_path. This is used for bundling the AMI.
+    
