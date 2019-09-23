@@ -1,0 +1,27 @@
+{
+ "variables":{
+   "access_key":"PHcMJWadjpfzuQ1jQ5pR",
+   "key_secret":"nUfgNCO2oYC4lLdUvtedKVnV3Qiv2iPURCMvwiya",
+   "base_url":"http://172.20.12.23:8080",
+   "zone_uuid":"1064f1938e3244179fdf0624fdfddbd7",
+   "image_uuid":"9cdeddcac279404e85c9cc346780c80e",
+   "l3network_uuid":"0c084f241fe44fafb573043af9392ffd",
+   "instance_offering":"66db1e1f60084243b6d475719e8e15d2"
+ },   
+ "builders":[{
+   "type":"zstack-vminstance",
+   "poll_replace_str":["10.0.18.189","172.20.12.23"],
+   "access_key": "{{user `access_key`}}",
+   "key_secret":"{{user `key_secret`}}",
+   "base_url":"{{user `base_url`}}",
+   "skip_packer_systemtag":true,
+   "skip_provision_mod":true,
+   "show_secret":false,
+   "ssh_username":"root",
+   "ssh_password":"password",
+   "zone_uuid":"{{user `zone_uuid`}}",
+   "image_uuid":"{{user `image_uuid`}}",
+   "l3network_uuid":"{{user `l3network_uuid`}}",
+   "instance_offering":"{{user `instance_offering`}}"
+ }]
+}

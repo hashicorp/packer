@@ -1,0 +1,16 @@
+[mysqld]
+datadir=/data/mysql
+socket=/var/lib/mysql/mysql.sock
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+log-bin=/data/mysql/binlog
+server-id=2
+master-host={{master}}
+master-user=root
+master-password=password
+master-port=3306
+replicate-do-db=wordpress
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid

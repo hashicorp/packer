@@ -1,0 +1,32 @@
+{
+ "variables":{
+   "access_key":"tKYwaNrMbARP4vF15eCs",
+   "key_secret":"gZ0PGTIZcOAPBnnec5tLD5TXYO3R7Ml8Gk6niX2r",
+   "base_url":"http://172.20.12.23:8080"
+ },   
+ "builders":[{
+   "type":"zstack-vminstance",
+   "skip_provision_mod":true,
+   "poll_replace_str":["10.0.18.189","172.20.12.23"],
+   "packer_debug":true,
+   "access_key": "{{user `access_key`}}",
+   "key_secret":"{{user `key_secret`}}",
+   "show_secret":false,
+   "ssh_username":"root",
+   "ssh_password":"password",
+   "state_timeout":"30000ms",
+   "create_timeout":"15000ms",
+   "base_url":"{{user `base_url`}}",
+   "zone_uuid":"0d91658fa3184ed8bc0fd85392d1e809",
+   "image_uuid":"4ad00a1322ae23429963c03c694cb5c3",
+   "l3network_uuid":"1bb92a0fda6440a3b47916a2db651bf5",
+   "instance_offering":"6c8d4e6e20a142829f01626c86869244"
+ }],
+ "provisioners": [{
+    "type": "shell",
+    "inline": [
+       "sleep 3",
+       "touch /root/test_mingjian"
+    ]
+ }]
+}

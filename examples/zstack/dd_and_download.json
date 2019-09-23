@@ -1,0 +1,40 @@
+{
+ "variables":{
+   "access_key":"tKYwaNrMbARP4vF15eCs",
+   "key_secret":"gZ0PGTIZcOAPBnnec5tLD5TXYO3R7Ml8Gk6niX2r",
+   "base_url":"http://172.20.12.23:8080"
+ },   
+ "builders":[{
+   "type":"zstack-vminstance",
+   "skip_delete_vminstance":true,
+   "poll_replace_str":["10.0.18.189","172.20.12.23"],
+   "packer_debug":true,
+   "ssh_public_key_file":"/root/.ssh/id_rsa.pub",
+   "access_key": "{{user `access_key`}}",
+   "key_secret":"{{user `key_secret`}}",
+   "show_secret":false,
+   "ssh_username":"root",
+   "ssh_password":"password",
+   "state_timeout":"30000ms",
+   "create_timeout":"30000ms",
+   "user_data":"hello zstack",
+   "base_url":"{{user `base_url`}}",
+   "zone_uuid":"0d91658fa3184ed8bc0fd85392d1e809",
+   "image_uuid":"0e28cc3f123c432f8baf2c2a4c103426",
+   "l3network_uuid":"1bb92a0fda6440a3b47916a2db651bf5",
+   "instance_offering":"6c8d4e6e20a142829f01626c86869244"
+ }],
+ "provisioners": [{
+    "type": "shell",
+    "inline": [
+       "sleep 3",
+       "dd if=/dev/urandom of=/root/test_mingjian bs=1M count=2"
+    ]
+ },
+ {
+	 "type":"file",
+	 "source":"/root/test_mingjian",
+	 "destination":"/tmp/test_mingjian",
+	 "direction":"download"
+ }]
+}

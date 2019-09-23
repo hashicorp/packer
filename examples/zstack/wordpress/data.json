@@ -1,0 +1,93 @@
+{
+ "variables":{
+   "access_key":"tKYwaNrMbARP4vF15eCs",
+   "key_secret":"gZ0PGTIZcOAPBnnec5tLD5TXYO3R7Ml8Gk6niX2r",
+   "base_url":"http://172.20.12.23:8080",
+   "basedir":"/root/go/src/github.com/hashicorp/packer/example/",
+   "mountpath":"/data"
+ },   
+ "builders":[{
+   "type":"zstack-vminstance",
+   "skip_packer_systemtag":true,
+   "packer_debug":true,
+   "access_key": "{{user `access_key`}}",
+   "key_secret":"{{user `key_secret`}}",
+   "filesystem":"ext4",
+   "mount_path":"{{user `mountpath`}}",
+   "create_with_root":true,
+   "show_secret":false,
+   "ssh_username":"root",
+   "ssh_password":"password",
+   "state_timeout":"60000ms",
+   "create_timeout":"120000ms",
+   "datavolume_size":"1g",
+   "base_url":"{{user `base_url`}}",
+   "zone_uuid":"0d91658fa3184ed8bc0fd85392d1e809",
+   "image_uuid":"6da33d2306d03fbab4d9d33d45b234ec",
+   "l3network_uuid":"1bb92a0fda6440a3b47916a2db651bf5",
+   "instance_offering":"6c8d4e6e20a142829f01626c86869244"
+ }],
+ "provisioners": [
+  {
+   "type":"shell",
+   "inline": [
+    "yum install cloud-init -y",
+    "yum install -y nginx",
+    "yum install php-fpm -y",
+    "yum install mysql -y",
+    "yum install mysql-server -y",
+    "yum install wordpress -y",
+    "mkdir -p /opt/www",
+    "mv /usr/share/wordpress /opt/www/",
+    "mkdir -p {{user `mountpath`}}/mysql",
+    "chown -R mysql {{user `mountpath`}}/mysql",
+    "rm -f /etc/nginx/conf.d/default.conf",
+    "echo 'mount /dev/vdb {{user `mountpath`}}' >> /etc/rc.d/rc.local",
+    "echo 'service mysqld restart' >> /etc/rc.d/rc.local",
+    "sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config",
+    "sed -i 's/BOOTPROTO=none/BOOTPROTO=dhcp/' /etc/sysconfig/network-scripts/ifcfg-*"
+   ]
+ },
+ {
+   "type":"file",
+   "source":"{{user `basedir`}}/wordpress/config/my.cnf",
+   "destination":"/etc/"
+ },
+ {
+  "type":"file",
+  "source":"{{user `basedir`}}/wordpress/config/my-slave.cnf",
+  "destination":"/etc/"
+ },
+ {
+  "type":"file",
+  "source":"{{user `basedir`}}/wordpress/config/config-slave.sh",
+  "destination":"/root/"
+ },
+ {
+  "type":"file",
+  "source":"{{user `basedir`}}/wordpress/config/nginx.conf",
+  "destination":"/etc/nginx/"
+ },
+ {
+  "type":"file",
+  "source":"{{user `basedir`}}/wordpress/config/wp-config.php",
+  "destination":"/opt/www/wordpress/"
+ },
+ {
+  "type":"shell",
+  "scripts": [
+    "{{user `basedir`}}/wordpress/init_mysql.sh"
+  ]
+ },
+ {
+  "type":"shell",
+  "inline": [
+   "chkconfig nginx on",
+   "chkconfig php-fpm on",
+   "chkconfig mysqld on",
+   "service php-fpm start",
+   "service nginx start",
+   "sleep 3"
+  ]
+ }]
+}

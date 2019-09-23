@@ -21,6 +21,7 @@
 /builder/ucloud/                        @shawnmssu
 /builder/yandex                         @GennadySpb @alexanderKhaustov @seukyaso
 /builder/osc                            @marinsalinas
+/builder/zstack                         @mingjian.deng @koven2049
 
 # provisioners
 
