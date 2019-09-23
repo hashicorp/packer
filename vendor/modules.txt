@@ -52,6 +52,8 @@ github.com/NaverCloudPlatform/ncloud-sdk-go/request
 github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
 # github.com/PuerkitoBio/goquery v1.5.0
 github.com/PuerkitoBio/goquery
+# github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
+github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
@@ -186,6 +188,9 @@ github.com/fatih/structtag
 github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
+# github.com/go-ole/go-ole v1.2.4
+github.com/go-ole/go-ole
+github.com/go-ole/go-ole/oleutil
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
 github.com/gobwas/glob/compiler
@@ -453,6 +458,15 @@ github.com/satori/go.uuid
 github.com/scaleway/scaleway-cli/pkg/api
 github.com/scaleway/scaleway-cli/pkg/sshcommand
 github.com/scaleway/scaleway-cli/pkg/utils
+# github.com/shirou/gopsutil v2.18.12+incompatible
+github.com/shirou/gopsutil/cpu
+github.com/shirou/gopsutil/host
+github.com/shirou/gopsutil/internal/common
+github.com/shirou/gopsutil/mem
+github.com/shirou/gopsutil/net
+github.com/shirou/gopsutil/process
+# github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4
+github.com/shirou/w32
 # github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0

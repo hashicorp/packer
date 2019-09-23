@@ -192,7 +192,15 @@ func wrappedMain() int {
 		}
 		ui = basicUi
 		if !inPlugin {
-			if TTY, err := openTTY(); err != nil {
+			currentPID := os.Getpid()
+			backgrounded, err := checkProcess(currentPID)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot determind if process is in "+
+					"background: %s\n", err)
+			}
+			if backgrounded {
+				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+			} else if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			} else {
 				basicUi.TTY = TTY
