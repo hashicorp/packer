@@ -405,8 +405,12 @@ github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0 h1:NJrcIkdzq0C
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0/go.mod h1:sBh287mCRwCz6zyXHMmw7sSZGPohVpnx+o+OY4M+i3A=
 github.com/yandex-cloud/go-genproto v0.0.0-20190802103534-6089d9ff8d82 h1:HLQoCLW2021qJKLrGQbcdEikBJ3gfYF94JYqZuw6Qxg=
 github.com/yandex-cloud/go-genproto v0.0.0-20190802103534-6089d9ff8d82/go.mod h1:HEUYX/p8966tMUHHT+TsS0hF/Ca/NYwqprC5WXSDMfE=
+github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e h1:hzwq5GUKP0aQzDja1XP4sBYyOmnezs/RVtzP+xiLbfI=
+github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e/go.mod h1:HEUYX/p8966tMUHHT+TsS0hF/Ca/NYwqprC5WXSDMfE=
 github.com/yandex-cloud/go-sdk v0.0.0-20190802103531-4ab1dac90bf7 h1:rWXARBMLHylvASK6spamDC8zSL5v2voZop3M6SBul9Y=
 github.com/yandex-cloud/go-sdk v0.0.0-20190802103531-4ab1dac90bf7/go.mod h1:Eml0jFLU4VVHgIN8zPHMuNwZXVzUMILyO6lQZSfz854=
+github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829 h1:2FGwbx03GpP1Ulzg/L46tSoKh9t4yg8BhMKQl/Ff1x8=
+github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829/go.mod h1:Eml0jFLU4VVHgIN8zPHMuNwZXVzUMILyO6lQZSfz854=
 go.opencensus.io v0.21.0 h1:mU6zScU4U1YAFPHEHYk+3JC4SY7JxgkqS10ZOSyksNg=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0 h1:C9hSCOW830chIVkdja34wa6Ky+IzWllkUinR+BtRZd4=

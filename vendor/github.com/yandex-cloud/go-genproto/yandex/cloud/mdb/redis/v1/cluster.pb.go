@@ -586,10 +586,10 @@ func (*ClusterConfig) XXX_OneofWrappers() []interface{} {
 }
 
 type Shard struct {
-	// Name of the Redis shard. The host name is assigned by user at creation time, and cannot be changed.
+	// Name of the Redis shard. The shard name is assigned by user at creation time, and cannot be changed.
 	// 1-63 characters long.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// ID of the Redis cluster. The ID is assigned by MDB at creation time.
+	// ID of the Redis cluster the shard belongs to. The ID is assigned by MDB at creation time.
 	ClusterId            string   `protobuf:"bytes,2,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

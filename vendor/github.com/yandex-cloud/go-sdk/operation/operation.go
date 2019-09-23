@@ -154,7 +154,7 @@ func (o *Operation) waitInterval(ctx context.Context, pollInterval time.Duration
 				notFoundCount++
 			} else {
 				// Message needed to distinguish poll fail and operation error, which are both gRPC status.
-				return sdkerrors.WithMessage(err, "poll fail")
+				return sdkerrors.WithMessagef(err, "operation (id=%s) poll fail", o.Id())
 			}
 		}
 		if o.Done() {
@@ -175,10 +175,10 @@ func (o *Operation) waitInterval(ctx context.Context, pollInterval time.Duration
 		case <-wait():
 		case <-ctx.Done():
 			stop()
-			return ctx.Err()
+			return sdkerrors.WithMessagef(ctx.Err(), "operation (id=%s) wait context done", o.Id())
 		}
 	}
-	return o.Error()
+	return sdkerrors.WithMessagef(o.Error(), "operation (id=%s) failed", o.Id())
 }
 
 func shoudRetry(err error) bool {
