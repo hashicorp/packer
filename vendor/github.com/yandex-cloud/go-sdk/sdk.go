@@ -87,7 +87,7 @@ func Build(ctx context.Context, conf Config, customOpts ...grpc.DialOption) (*SD
 	if conf.Endpoint == "" {
 		conf.Endpoint = defaultEndpoint
 	}
-	const DefaultTimeout = 10 * time.Second
+	const DefaultTimeout = 20 * time.Second
 	if conf.DialContextTimeout == 0 {
 		conf.DialContextTimeout = DefaultTimeout
 	}

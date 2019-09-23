@@ -8,6 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/serverless/functions/v1"
 )
@@ -85,6 +86,15 @@ func (c *FunctionServiceClient) List(ctx context.Context, in *functions.ListFunc
 	return functions.NewFunctionServiceClient(conn).List(ctx, in, opts...)
 }
 
+// ListAccessBindings implements functions.FunctionServiceClient
+func (c *FunctionServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return functions.NewFunctionServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
 // ListFunctionTagHistory implements functions.FunctionServiceClient
 func (c *FunctionServiceClient) ListFunctionTagHistory(ctx context.Context, in *functions.ListFunctionTagHistoryRequest, opts ...grpc.CallOption) (*functions.ListFunctionTagHistoryResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -130,6 +140,15 @@ func (c *FunctionServiceClient) RemoveTag(ctx context.Context, in *functions.Rem
 	return functions.NewFunctionServiceClient(conn).RemoveTag(ctx, in, opts...)
 }
 
+// SetAccessBindings implements functions.FunctionServiceClient
+func (c *FunctionServiceClient) SetAccessBindings(ctx context.Context, in *access.SetAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return functions.NewFunctionServiceClient(conn).SetAccessBindings(ctx, in, opts...)
+}
+
 // SetTag implements functions.FunctionServiceClient
 func (c *FunctionServiceClient) SetTag(ctx context.Context, in *functions.SetFunctionTagRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -146,4 +165,13 @@ func (c *FunctionServiceClient) Update(ctx context.Context, in *functions.Update
 		return nil, err
 	}
 	return functions.NewFunctionServiceClient(conn).Update(ctx, in, opts...)
+}
+
+// UpdateAccessBindings implements functions.FunctionServiceClient
+func (c *FunctionServiceClient) UpdateAccessBindings(ctx context.Context, in *access.UpdateAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return functions.NewFunctionServiceClient(conn).UpdateAccessBindings(ctx, in, opts...)
 }

@@ -8,7 +8,7 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
-	_ "github.com/yandex-cloud/go-genproto/yandex/cloud/validation"
+	_ "github.com/yandex-cloud/go-genproto/yandex/cloud"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

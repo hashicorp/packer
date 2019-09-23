@@ -974,8 +974,8 @@ type Resources struct {
 	// Type of the storage environment for the host.
 	// Possible values:
 	// * network-hdd — network HDD drive,
-	// * network-nvme — network SSD drive,
-	// * local-nvme — local SSD storage.
+	// * network-ssd — network SSD drive,
+	// * local-ssd — local SSD storage.
 	DiskTypeId           string   `protobuf:"bytes,3,opt,name=disk_type_id,json=diskTypeId,proto3" json:"disk_type_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
