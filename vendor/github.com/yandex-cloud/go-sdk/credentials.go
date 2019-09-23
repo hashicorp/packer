@@ -16,6 +16,8 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	iampb "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	"github.com/yandex-cloud/go-sdk/iamkey"
@@ -224,4 +226,14 @@ func (c *instanceServiceAccountCredentials) iamToken(ctx context.Context) (*iamp
 		IamToken:  tokenResponse.AccessToken,
 		ExpiresAt: expiresAt,
 	}, nil
+}
+
+// NoCredentials implements Credentials, it allows to create unauthenticated connections
+type NoCredentials struct{}
+
+func (creds NoCredentials) YandexCloudAPICredentials() {}
+
+// IAMToken always returns gRPC error with status UNAUTHENTICATED
+func (creds NoCredentials) IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
+	return nil, status.Error(codes.Unauthenticated, "unauthenticated connection")
 }

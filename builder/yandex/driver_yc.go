@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
@@ -16,7 +19,13 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 	"github.com/yandex-cloud/go-sdk/iamkey"
 	"github.com/yandex-cloud/go-sdk/pkg/requestid"
+	"github.com/yandex-cloud/go-sdk/pkg/retry"
 	"github.com/yandex-cloud/go-sdk/sdkresolvers"
+)
+
+const (
+	defaultExponentialBackoffBase = 50 * time.Millisecond
+	defaultExponentialBackoffCap  = 1 * time.Minute
 )
 
 type driverYC struct {
@@ -51,11 +60,23 @@ func NewDriverYC(ui packer.Ui, config *Config) (Driver, error) {
 		sdkConfig.Credentials = credentials
 	}
 
+	requestIDInterceptor := requestid.Interceptor()
+
+	retryInterceptor := retry.Interceptor(
+		retry.WithMax(config.MaxRetries),
+		retry.WithCodes(codes.Unavailable),
+		retry.WithAttemptHeader(true),
+		retry.WithBackoff(retry.BackoffExponentialWithJitter(defaultExponentialBackoffBase, defaultExponentialBackoffCap)))
+
+	// Make sure retry interceptor is above id interceptor.
+	// Now we will have new request id for every retry attempt.
+	interceptorChain := grpc_middleware.ChainUnaryClient(retryInterceptor, requestIDInterceptor)
+
 	userAgentMD := metadata.Pairs("user-agent", useragent.String())
 
 	sdk, err := ycsdk.Build(context.Background(), sdkConfig,
 		grpc.WithDefaultCallOptions(grpc.Header(&userAgentMD)),
-		grpc.WithUnaryInterceptor(requestid.Interceptor()))
+		grpc.WithUnaryInterceptor(interceptorChain))
 
 	if err != nil {
 		return nil, err

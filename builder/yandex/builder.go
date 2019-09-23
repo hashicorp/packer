@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+	"github.com/yandex-cloud/go-sdk/pkg/requestid"
 )
 
 // The unique ID for this builder.
@@ -35,6 +37,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a Yandex.Cloud compute image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverYC(ui, b.config)
+	ctx = requestid.ContextWithClientTraceID(ctx, uuid.New().String())
 
 	if err != nil {
 		return nil, err

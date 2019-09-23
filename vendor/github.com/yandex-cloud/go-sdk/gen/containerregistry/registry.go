@@ -8,6 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
@@ -58,6 +59,24 @@ func (c *RegistryServiceClient) List(ctx context.Context, in *containerregistry.
 	return containerregistry.NewRegistryServiceClient(conn).List(ctx, in, opts...)
 }
 
+// ListAccessBindings implements containerregistry.RegistryServiceClient
+func (c *RegistryServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRegistryServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
+// SetAccessBindings implements containerregistry.RegistryServiceClient
+func (c *RegistryServiceClient) SetAccessBindings(ctx context.Context, in *access.SetAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRegistryServiceClient(conn).SetAccessBindings(ctx, in, opts...)
+}
+
 // Update implements containerregistry.RegistryServiceClient
 func (c *RegistryServiceClient) Update(ctx context.Context, in *containerregistry.UpdateRegistryRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -65,4 +84,13 @@ func (c *RegistryServiceClient) Update(ctx context.Context, in *containerregistr
 		return nil, err
 	}
 	return containerregistry.NewRegistryServiceClient(conn).Update(ctx, in, opts...)
+}
+
+// UpdateAccessBindings implements containerregistry.RegistryServiceClient
+func (c *RegistryServiceClient) UpdateAccessBindings(ctx context.Context, in *access.UpdateAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return containerregistry.NewRegistryServiceClient(conn).UpdateAccessBindings(ctx, in, opts...)
 }

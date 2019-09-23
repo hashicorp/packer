@@ -267,6 +267,8 @@ github.com/gophercloud/gophercloud/pagination
 github.com/gophercloud/utils/openstack/clientconfig
 # github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777
 github.com/gorilla/websocket
+# github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
+github.com/grpc-ecosystem/go-grpc-middleware
 # github.com/grpc-ecosystem/grpc-gateway v1.8.5
 github.com/grpc-ecosystem/grpc-gateway/internal
 github.com/grpc-ecosystem/grpc-gateway/runtime
@@ -431,7 +433,7 @@ github.com/packer-community/winrmcp/winrmcp
 # github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/pkg/errors v0.8.0
+# github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 github.com/pkg/sftp
@@ -465,9 +467,9 @@ github.com/shirou/gopsutil/net
 github.com/shirou/gopsutil/process
 # github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4
 github.com/shirou/w32
-# github.com/sirupsen/logrus v1.3.0
+# github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.3.0
+# github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/temoto/robotstxt v1.1.1
@@ -518,9 +520,10 @@ github.com/vmware/govmomi/vim25/types
 github.com/vmware/govmomi/vim25/xml
 # github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 github.com/xanzy/go-cloudstack/cloudstack
-# github.com/yandex-cloud/go-genproto v0.0.0-20190802103534-6089d9ff8d82
-github.com/yandex-cloud/go-genproto/yandex/api
+# github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
+github.com/yandex-cloud/go-genproto/yandex/cloud
 github.com/yandex-cloud/go-genproto/yandex/cloud/access
+github.com/yandex-cloud/go-genproto/yandex/cloud/api
 github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1
 github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1/instancegroup
 github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1
@@ -542,9 +545,9 @@ github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1/config
 github.com/yandex-cloud/go-genproto/yandex/cloud/operation
 github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1
 github.com/yandex-cloud/go-genproto/yandex/cloud/serverless/functions/v1
-github.com/yandex-cloud/go-genproto/yandex/cloud/validation
+github.com/yandex-cloud/go-genproto/yandex/cloud/serverless/triggers/v1
 github.com/yandex-cloud/go-genproto/yandex/cloud/vpc/v1
-# github.com/yandex-cloud/go-sdk v0.0.0-20190802103531-4ab1dac90bf7
+# github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
 github.com/yandex-cloud/go-sdk
 github.com/yandex-cloud/go-sdk/dial
 github.com/yandex-cloud/go-sdk/gen/apiendpoint
@@ -563,11 +566,13 @@ github.com/yandex-cloud/go-sdk/gen/mdb/postgresql
 github.com/yandex-cloud/go-sdk/gen/mdb/redis
 github.com/yandex-cloud/go-sdk/gen/operation
 github.com/yandex-cloud/go-sdk/gen/resourcemanager
+github.com/yandex-cloud/go-sdk/gen/triggers
 github.com/yandex-cloud/go-sdk/gen/vpc
 github.com/yandex-cloud/go-sdk/iamkey
 github.com/yandex-cloud/go-sdk/operation
 github.com/yandex-cloud/go-sdk/pkg/grpcclient
 github.com/yandex-cloud/go-sdk/pkg/requestid
+github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers

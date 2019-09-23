@@ -1,5 +1,3 @@
-//go:generate struct-markdown
-
 package yandex
 
 import (
@@ -22,6 +20,7 @@ import (
 const defaultEndpoint = "api.cloud.yandex.net:443"
 const defaultGpuPlatformID = "gpu-standard-v1"
 const defaultPlatformID = "standard-v1"
+const defaultMaxRetries = 3
 const defaultZone = "ru-central1-a"
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -74,6 +73,8 @@ type Config struct {
 	Labels map[string]string `mapstructure:"labels" required:"false"`
 	// Identifier of the hardware platform configuration for the instance. This defaults to standard-v1.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
+	// The maximum number of times an API request is being executed
+	MaxRetries int `mapstructure:"max_retries"`
 	// Metadata applied to the launched instance.
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
 	// Metadata applied to the launched instance. Value are file paths.
@@ -217,6 +218,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.Zone == "" {
 		c.Zone = defaultZone
+	}
+
+	if c.MaxRetries == 0 {
+		c.MaxRetries = defaultMaxRetries
 	}
 
 	// provision config by OS environment variables
