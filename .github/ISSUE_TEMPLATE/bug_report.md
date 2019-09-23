@@ -2,6 +2,7 @@
 name: Bug Report
 about: You're experiencing an issue with Packer that is different than the
 documented behavior.
+
 ---
 
 When filing a bug, please include the following headings if possible. Any
