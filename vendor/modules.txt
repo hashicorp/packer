@@ -446,8 +446,6 @@ github.com/posener/complete/match
 github.com/profitbricks/profitbricks-sdk-go
 # github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17
 github.com/renstrom/fuzzysearch/fuzzy
-# github.com/rwtodd/Go.Sed v0.0.0-20170507045331-d6d5d585814e
-github.com/rwtodd/Go.Sed/sed
 # github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735
 github.com/ryanuber/go-glob
 # github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca

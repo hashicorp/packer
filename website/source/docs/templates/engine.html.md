@@ -36,24 +36,6 @@ Here is a full list of the available functions for reference.
 
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
--   `env` - Returns environment variables. See example in [using home
-    variable](/docs/templates/user-variables.html#using-home-variable)
--   `isotime [FORMAT]` - UTC time, which can be
-    [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
-    examples below in [the `isotime` format
-    reference](/docs/templates/engine.html#isotime-function-format-reference).
--   `lower` - Lowercases the string.
--   `pwd` - The working directory while executing Packer.
--   `sed` - Use [a golang implementation of
-    sed](https://github.com/rwtodd/Go.Sed) to parse an input string.
--   `split` - Split an input string using separator and return the requested
-    substring.
--   `template_dir` - The directory to the template for the build.
--   `timestamp` - The current Unix timestamp in UTC.
--   `uuid` - Returns a random UUID.
--   `upper` - Uppercases the string.
--   `user` - Specifies a user variable.
--   `packer_version` - Returns Packer version.
 -   `clean_resource_name` - Image names can only contain certain characters and
     have a maximum length, eg 63 on GCE & 80 on Azure. `clean_resource_name`
     will convert upper cases to lower cases and replace illegal characters with
@@ -75,6 +57,26 @@ Here is a full list of the available functions for reference.
     clean_resource_name}}"` will cause your build to fail because the image
     name will start with a number, which is why in the above example we prepend
     the isotime with "mybuild".
+-   `env` - Returns environment variables. See example in [using home
+    variable](/docs/templates/user-variables.html#using-home-variable)
+-   `isotime [FORMAT]` - UTC time, which can be
+    [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
+    examples below in [the `isotime` format
+    reference](/docs/templates/engine.html#isotime-function-format-reference).
+-   `lower` - Lowercases the string.
+-   `packer_version` - Returns Packer version.
+-   `pwd` - The working directory while executing Packer.
+-   `replace` - ( old, new string, n int, s ) Replace returns a copy of the
+    string s with the first n non-overlapping instances of old replaced by new.
+-   `replace_all` - ( old, new string, s )  ReplaceAll returns a copy of the
+    string s with all non-overlapping instances of old replaced by new.
+-   `split` - Split an input string using separator and return the requested
+    substring.
+-   `template_dir` - The directory to the template for the build.
+-   `timestamp` - The current Unix timestamp in UTC.
+-   `uuid` - Returns a random UUID.
+-   `upper` - Uppercases the string.
+-   `user` - Specifies a user variable.
 
 #### Specific to Amazon builders:
 
@@ -336,17 +338,13 @@ this case, on the `fixed-string` value):
 }
 ```
 
-# sed Function Format Reference
+# replace Function Format Reference
 
-See the library documentation
-<a href="https://github.com/rwtodd/Go.Sed" class="uri">https://github.com/rwtodd/Go.Sed</a>
-for notes about the difference between this golang implementation of sed and
-the regexes you may be used to. A very simple example of this functionality:
+Here are some examples using the replace options:
 
-        "provisioners": [
-          {
-              "type": "shell-local",
-              "environment_vars": ["EXAMPLE={{ sed \"s/null/awesome/\" build_type}}"],
-              "inline": ["echo build_type is $EXAMPLE\n"]
-          }
-        ]
+``` liquid
+build_name = foo-bar-provider
+
+{{ replace_all "-" "/" build_name }}  = foo/bar/provider
+{{ build_name | replace "-" "/" 1 }} = foo/bar-provider
+```
