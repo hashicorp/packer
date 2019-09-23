@@ -106,6 +106,12 @@ The SSH communicator has the following options:
     messages to the server. Set to a negative value (`-1s`) to disable. Example
     value: `10s`. Defaults to `5s`.
 
+-   `ssh_local_tunnels` (array of strings) - An array of OpenSSH-style tunnels to
+    create. The port is bound on the *local packer host* and connections are
+    forwarded to the remote destination. Note unless `GatewayPorts=yes` is set
+    in SSHD daemon, the target *must* be `localhost`. Example value:
+    `3306:localhost:3306`
+
 -   `ssh_password` (string) - A plaintext password to use to authenticate with
     SSH.
 
@@ -131,6 +137,11 @@ The SSH communicator has the following options:
 -   `ssh_read_write_timeout` (string) - The amount of time to wait for a remote
     command to end. This might be useful if, for example, packer hangs on a
     connection after a reboot. Example: `5m`. Disabled by default.
+
+-   `ssh_remote_tunnels` (array of strings) - An array of OpenSSH-style tunnels
+    to create. The port is bound on the *remote build host* and connections to it are
+    forwarded to the packer host's network. Non-localhost destinations may be set here.
+    Example value: `8443:git.example.com:443`
 
 -   `ssh_timeout` (string) - The time to wait for SSH to become available.
     Packer uses this to determine when the machine has booted so this is

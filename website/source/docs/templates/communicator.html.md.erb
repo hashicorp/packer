@@ -1,0 +1,85 @@
+---
+description: |
+    Communicators are the mechanism Packer uses to upload files, execute scripts,
+    etc. with the machine being created.
+layout: docs
+page_title: 'Communicators - Templates'
+sidebar_current: 'docs-templates-communicators'
+---
+
+# Template Communicators
+
+Communicators are the mechanism Packer uses to upload files, execute scripts,
+etc. with the machine being created.
+
+Communicators are configured within the
+[builder](/docs/templates/builders.html) section. 
+
+All communicators have the following options:
+
+<%= partial "partials/helper/communicator/Config-not-required" %>
+
+## Using a Communicator
+
+By default, the SSH communicator is usually used. Additional configuration may
+not even be necessary, since some builders such as Amazon automatically
+configure everything.
+
+However, to specify a communicator, you set the `communicator` key within a
+build. Multiple builds can have different communicators. Example:
+
+``` json
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "communicator": "ssh"
+    }
+  ]
+}
+```
+
+After specifying the `communicator`, you can specify a number of other
+configuration parameters for that communicator. These are documented below.
+
+
+## SSH Communicator
+
+The SSH communicator connects to the host via SSH. If you have an SSH agent
+configured on the host running Packer, and SSH agent authentication is enabled
+in the communicator config, Packer will automatically forward the SSH agent to
+the remote host.
+
+The SSH communicator has the following options:
+
+<%= partial "partials/helper/communicator/SSH-not-required" %>
+
+### SSH Communicator Details
+
+Packer will only use one authentication method, either `publickey` or if
+`ssh_password` is used packer will offer `password` and `keyboard-interactive`
+both sending the password. In other words Packer will not work with *sshd*
+configured with more than one configured authentication method using
+`AuthenticationMethods`.
+
+Packer supports the following ciphers:
+
+-   aes128-ctr
+-   aes192-ctr
+-   aes256-ctr
+-   arcfour128
+-   arcfour256
+-   arcfour
+-   `es128-gcm@openssh.com`
+-   `acha20-poly1305@openssh.com`
+
+And the following MACs:
+
+-   hmac-sha1
+-   hmac-sha1-96
+-   hmac-sha2-256
+-   `hmac-sha2-256-etm@openssh.com`
+
+## WinRM Communicator
+
+<%= partial "partials/helper/communicator/WinRM-not-required" %>

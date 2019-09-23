@@ -172,6 +172,25 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		}
 		nc.Close()
 
+		// Parse out all the requested Port Tunnels that will go over our SSH connection
+		var tunnels []ssh.TunnelSpec
+		for _, v := range s.Config.SSHLocalTunnels {
+			t, err := helperssh.ParseTunnelArgument(v, ssh.LocalTunnel)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Error parsing port forwarding: %s", err)
+			}
+			tunnels = append(tunnels, t)
+		}
+		for _, v := range s.Config.SSHRemoteTunnels {
+			t, err := helperssh.ParseTunnelArgument(v, ssh.RemoteTunnel)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Error parsing port forwarding: %s", err)
+			}
+			tunnels = append(tunnels, t)
+		}
+
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
 			Connection:             connFunc,
@@ -181,6 +200,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
 			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
 			Timeout:                s.Config.SSHReadWriteTimeout,
+			Tunnels:                tunnels,
 		}
 
 		log.Printf("[INFO] Attempting SSH connection to %s...", address)

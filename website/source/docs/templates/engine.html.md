@@ -256,6 +256,9 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
 
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
+For those unfamiliar with GO date/time formatting, here is a link to the
+documentation: [go date/time formatting](https://programming.guide/go/format-parse-string-time-date-example.html)
+
 Note that "-0700" is always formatted into "+0000" because `isotime` is always
 UTC time.
 

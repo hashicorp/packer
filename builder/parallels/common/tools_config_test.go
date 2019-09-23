@@ -2,6 +2,8 @@ package common
 
 import (
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func testToolsConfig() *ToolsConfig {
@@ -14,7 +16,7 @@ func testToolsConfig() *ToolsConfig {
 
 func TestToolsConfigPrepare(t *testing.T) {
 	c := testToolsConfig()
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("bad err: %#v", errs)
 	}
@@ -27,7 +29,7 @@ func TestToolsConfigPrepare_ParallelsToolsMode(t *testing.T) {
 	// Test default mode
 	c = testToolsConfig()
 	c.ParallelsToolsMode = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
@@ -38,7 +40,7 @@ func TestToolsConfigPrepare_ParallelsToolsMode(t *testing.T) {
 	// Test another mode
 	c = testToolsConfig()
 	c.ParallelsToolsMode = "attach"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
@@ -49,7 +51,7 @@ func TestToolsConfigPrepare_ParallelsToolsMode(t *testing.T) {
 	// Test invalid mode
 	c = testToolsConfig()
 	c.ParallelsToolsMode = "invalid_mode"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -62,7 +64,7 @@ func TestToolsConfigPrepare_ParallelsToolsGuestPath(t *testing.T) {
 	// Test default path
 	c = testToolsConfig()
 	c.ParallelsToolsGuestPath = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
@@ -73,7 +75,7 @@ func TestToolsConfigPrepare_ParallelsToolsGuestPath(t *testing.T) {
 	// Test with a good one
 	c = testToolsConfig()
 	c.ParallelsToolsGuestPath = "foo"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -90,7 +92,7 @@ func TestToolsConfigPrepare_ParallelsToolsFlavor(t *testing.T) {
 	// Test with a default value
 	c = testToolsConfig()
 	c.ParallelsToolsFlavor = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -99,7 +101,7 @@ func TestToolsConfigPrepare_ParallelsToolsFlavor(t *testing.T) {
 	c = testToolsConfig()
 	c.ParallelsToolsMode = "attach"
 	c.ParallelsToolsFlavor = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -108,7 +110,7 @@ func TestToolsConfigPrepare_ParallelsToolsFlavor(t *testing.T) {
 	c = testToolsConfig()
 	c.ParallelsToolsMode = "disable"
 	c.ParallelsToolsFlavor = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
