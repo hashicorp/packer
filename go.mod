@@ -57,6 +57,7 @@ require (
 	github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hashicorp/consul v1.4.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
@@ -114,7 +115,7 @@ require (
 	github.com/outscale/osc-go v0.0.1
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 	github.com/pierrec/lz4 v2.0.5+incompatible
-	github.com/pkg/errors v0.8.0
+	github.com/pkg/errors v0.8.1
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.1.1
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
@@ -127,7 +128,7 @@ require (
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.71+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.8.7
