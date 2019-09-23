@@ -11,6 +11,6 @@ have a question.
 
 - Packer Guides: https://www.packer.io/guides/index.html
 - Discussion List: https://groups.google.com/group/packer-tool
-- Any other questions can be sent to the packer section of the [HashiCorp
-  forum](https://discuss.hashicorp.com/c/packer)
+- Any other questions can be sent to the packer section of the HashiCorp
+  forum: https://discuss.hashicorp.com/c/packer
 - Packer community links: https://www.packer.io/community.html
