@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -22,7 +23,8 @@ type StepProvision struct {
 	Comm packer.Communicator
 }
 
-func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBag, hooktype string) multistep.StepAction {
+	// hooktype will be either packer.HookProvision or packer.HookCleanupProvision
 	comm := s.Comm
 	if comm == nil {
 		raw, ok := state.Get("communicator").(packer.Communicator)
@@ -35,17 +37,29 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...
-	log.Println("Running the provision hook")
+	if hooktype == packer.HookProvision {
+		log.Println("Running the provision hook")
+	} else if hooktype == packer.HookCleanupProvision {
+		ui.Say("Provisioning step had errors: Running the cleanup provisioner, if present...")
+	}
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- hook.Run(ctx, packer.HookProvision, ui, comm, nil)
+		errCh <- hook.Run(ctx, hooktype, ui, comm, nil)
 	}()
 
 	for {
 		select {
 		case err := <-errCh:
 			if err != nil {
-				state.Put("error", err)
+				if hooktype == packer.HookProvision {
+					// We don't overwrite the error if it's a cleanup
+					// provisioner being run.
+					state.Put("error", err)
+				} else if hooktype == packer.HookCleanupProvision {
+					origErr := state.Get("error").(error)
+					state.Put("error", fmt.Errorf("Cleanup failed: %s. "+
+						"Original Provisioning error: %s", err, origErr))
+				}
 				return multistep.ActionHalt
 			}
 
@@ -62,4 +76,15 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 }
 
-func (*StepProvision) Cleanup(multistep.StateBag) {}
+func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	return s.runWithHook(ctx, state, packer.HookProvision)
+}
+
+func (s *StepProvision) Cleanup(state multistep.StateBag) {
+	// We have a "final" provisioner that gets defined by "on-error-script"
+	// which we only call if there's an error during the provision run and
+	// the "on-error-script" is defined.
+	if _, ok := state.GetOk("error"); ok {
+		s.runWithHook(context.Background(), state, packer.HookCleanupProvision)
+	}
+}
