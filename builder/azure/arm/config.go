@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -129,11 +130,12 @@ type Config struct {
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
 	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
-	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip"`
-	VirtualNetworkName                string `mapstructure:"virtual_network_name"`
-	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name"`
-	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
-	CustomDataFile                    string `mapstructure:"custom_data_file"`
+	PrivateVirtualNetworkWithPublicIp bool     `mapstructure:"private_virtual_network_with_public_ip"`
+	VirtualNetworkName                string   `mapstructure:"virtual_network_name"`
+	VirtualNetworkSubnetName          string   `mapstructure:"virtual_network_subnet_name"`
+	VirtualNetworkResourceGroupName   string   `mapstructure:"virtual_network_resource_group_name"`
+	AllowedInboundIpAddresses         []string `mapstructure:"allowed_inbound_ip_addresses"`
+	CustomDataFile                    string   `mapstructure:"custom_data_file"`
 	customData                        string
 	PlanInfo                          PlanInformation `mapstructure:"plan_info"`
 
@@ -673,6 +675,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
 	}
 
+	if c.AllowedInboundIpAddresses != nil && len(c.AllowedInboundIpAddresses) >= 1 {
+		if ok, err := assertAllowedInboundIpAddresses(c.AllowedInboundIpAddresses, "allowed_inbound_ip_addresses"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	/////////////////////////////////////////////
 	// Plan Info
 	if c.PlanInfo.PlanName != "" || c.PlanInfo.PlanProduct != "" || c.PlanInfo.PlanPublisher != "" || c.PlanInfo.PlanPromotionCode != "" {
@@ -740,6 +748,17 @@ func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
 func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
 	if !isValidAzureName(reSnapshotPrefix, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
+	}
+	return true, nil
+}
+
+func assertAllowedInboundIpAddresses(ipAddresses []string, setting string) (bool, error) {
+	for _, ipAddress := range ipAddresses {
+		if net.ParseIP(ipAddress) == nil {
+			if _, _, err := net.ParseCIDR(ipAddress); err != nil {
+				return false, fmt.Errorf("The setting %s must only contain valid IP addresses or CIDR blocks", setting)
+			}
+		}
 	}
 	return true, nil
 }
