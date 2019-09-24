@@ -121,7 +121,7 @@ builder.
         by the installer, for example.
 
     -   `storage_pool_type` (string) - Required. The type of the pool, can
-        be `lvm`, `lvm-thin`, `zfs` or `directory`.
+        be `lvm`, `lvm-thin`, `zfspool` or `directory`.
 
     -   `type` (string) - The type of disk. Can be `scsi`, `sata`, `virtio` or
         `ide`. Defaults to `scsi`.
