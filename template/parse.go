@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -28,6 +29,7 @@ type rawTemplate struct {
 	Push               map[string]interface{} `json:"push,omitempty"`
 	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
 	Provisioners       []interface{}          `json:"provisioners,omitempty"`
+	CleanupProvisioner interface{}            `mapstructure:"on-error-script" json:"on-error-script,omitempty"`
 	Variables          map[string]interface{} `json:"variables,omitempty"`
 	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
@@ -240,6 +242,38 @@ func (r *rawTemplate) Template() (*Template, error) {
 		}
 
 		result.Provisioners = append(result.Provisioners, &p)
+	}
+
+	// Gather the on-error-script
+	log.Printf("r.CleanupProvisioner is %#v", r.CleanupProvisioner)
+	if r.CleanupProvisioner != nil {
+		var p Provisioner
+		if err := r.decoder(&p, nil).Decode(r.CleanupProvisioner); err != nil {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"On Error Cleanup provisioner: %s", err))
+		}
+
+		// Type is required before any richer validation
+		log.Printf("p is %#v", p)
+		if p.Type == "" {
+			errs = multierror.Append(errs, fmt.Errorf(
+				"on error cleanup provisioner missing 'type'"))
+		}
+
+		// Set the raw configuration and delete any special keys
+		p.Config = r.CleanupProvisioner.(map[string]interface{})
+
+		delete(p.Config, "except")
+		delete(p.Config, "only")
+		delete(p.Config, "override")
+		delete(p.Config, "pause_before")
+		delete(p.Config, "type")
+		delete(p.Config, "timeout")
+
+		if len(p.Config) == 0 {
+			p.Config = nil
+		}
+		result.CleanupProvisioner = &p
 	}
 
 	// If we have errors, return those with a nil result
