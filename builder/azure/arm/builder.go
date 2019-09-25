@@ -57,7 +57,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// FillParameters function will set the authType from supplied parameters set the subscription and tenant id.
+	// FillParameters function captures authType and sets defaults.
 	err := b.config.ClientConfig.FillParameters()
 	if err != nil {
 		return nil, err
