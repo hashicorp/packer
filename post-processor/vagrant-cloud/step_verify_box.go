@@ -43,6 +43,9 @@ func (s *stepVerifyBox) Run(ctx context.Context, state multistep.StateBag) multi
 	if resp.StatusCode != 200 {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+		}
 		state.Put("error", fmt.Errorf("Error retrieving box: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}
