@@ -145,6 +145,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Determine the name of the provider for Vagrant Cloud, and Vagrant
 	providerName, err := getProvider(artifact.Id(), artifact.Files()[0], builtins[artifact.BuilderId()])
+	if err != nil {
+		return nil, false, false, fmt.Errorf("error getting provider name: %s", err)
+	}
 
 	p.config.ctx.Data = &boxDownloadUrlTemplate{
 		ArtifactId: artifact.Id(),
