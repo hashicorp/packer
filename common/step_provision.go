@@ -81,9 +81,9 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 }
 
 func (s *StepProvision) Cleanup(state multistep.StateBag) {
-	// We have a "final" provisioner that gets defined by "on-error-script"
+	// We have a "final" provisioner that gets defined by "error-cleanup-provisioner"
 	// which we only call if there's an error during the provision run and
-	// the "on-error-script" is defined.
+	// the "error-cleanup-provisioner" is defined.
 	if _, ok := state.GetOk("error"); ok {
 		s.runWithHook(context.Background(), state, packer.HookCleanupProvision)
 	}
