@@ -254,6 +254,8 @@ func (c Config) GetServicePrincipalTokens(
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
 }
 
+// FillParameters capture the user intent from the supplied parameter set in authType, retrieves the TenantID and CloudEnvironment if not specified.
+// The SubscriptionID is also retrieved in case MSI auth is requested.
 func (c *Config) FillParameters() error {
 	if c.authType == "" {
 		if c.useDeviceLogin() {
