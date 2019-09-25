@@ -125,3 +125,15 @@
 -   `use_internal_ip` (bool) - If true, use the instance's internal IP instead of its external IP
     during building.
     
+-   `vault_gcp_oauth_engine` (string) - Can be set instead of account_file. If set, this builder will use
+    HashiCorp Vault to generate an Oauth token for authenticating against
+    Google's cloud. The value should be the path of the token generator
+    within vault.
+    For information on how to configure your Vault + GCP engine to produce
+    Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp.html
+    You must have the environment variables VAULT_ADDR and VAULT_TOKEN set,
+    along with any other relevant variables for accessing your vault
+    instance. For more information, see the Vault docs:
+    https://www.vaultproject.io/docs/commands/#environment-variables
+    Example:`"vault_gcp_oauth_engine": "gcp/token/my-project-editor",`
+    
