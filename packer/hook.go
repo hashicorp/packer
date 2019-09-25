@@ -45,7 +45,6 @@ func (h *DispatchHook) Run(ctx context.Context, name string, ui Ui, comm Communi
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-
 		if err := hook.Run(ctx, name, ui, comm, data); err != nil {
 			return err
 		}

@@ -10,8 +10,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/builder/file"
+	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 	shell_local "github.com/hashicorp/packer/post-processor/shell-local"
+	"github.com/hashicorp/packer/provisioner/shell"
+	sl "github.com/hashicorp/packer/provisioner/shell-local"
 )
 
 func TestBuildOnlyFileCommaFlags(t *testing.T) {
@@ -176,7 +179,18 @@ func fileExists(filename string) bool {
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		Builder: func(n string) (packer.Builder, error) {
-			return &file.Builder{}, nil
+			if n == "file" {
+				return &file.Builder{}, nil
+			}
+			return &null.Builder{}, nil
+		},
+		Provisioner: func(n string) (packer.Provisioner, error) {
+			if n == "shell" {
+				return &shell.Provisioner{}, nil
+			} else if n == "shell-local" {
+				return &sl.Provisioner{}, nil
+			}
+			return nil, fmt.Errorf("requested provisioner not implemented in this test")
 		},
 		PostProcessor: func(n string) (packer.PostProcessor, error) {
 			return &shell_local.PostProcessor{}, nil
@@ -212,6 +226,7 @@ func cleanup() {
 	os.RemoveAll("fuchsias.txt")
 	os.RemoveAll("lilas.txt")
 	os.RemoveAll("campanules.txt")
+	os.RemoveAll("ducky.txt")
 }
 
 func TestBuildCommand_ParseArgs(t *testing.T) {

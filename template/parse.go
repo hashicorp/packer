@@ -245,7 +245,6 @@ func (r *rawTemplate) Template() (*Template, error) {
 	}
 
 	// Gather the on-error-script
-	log.Printf("r.CleanupProvisioner is %#v", r.CleanupProvisioner)
 	if r.CleanupProvisioner != nil {
 		var p Provisioner
 		if err := r.decoder(&p, nil).Decode(r.CleanupProvisioner); err != nil {
