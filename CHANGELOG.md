@@ -14,6 +14,7 @@
 * builder/ucloud: Make ucloud builder's base url configurable [GH-8095]
 * builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
 * builder/yandex: Support GPU instances and set source image by name [GH-8091]
+* builder/yandex: Add ability to retry API requests [GH-8142]
 * communicator/ssh: Support for SSH port tunneling [GH-7918]
 * core: Add a new `floppy_label` option [GH-8099]
 * core: Added version compatibility to console command [GH-8080]
