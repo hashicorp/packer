@@ -253,7 +253,6 @@ func (r *rawTemplate) Template() (*Template, error) {
 		}
 
 		// Type is required before any richer validation
-		log.Printf("p is %#v", p)
 		if p.Type == "" {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"on error cleanup provisioner missing 'type'"))
