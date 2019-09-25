@@ -5,6 +5,8 @@
 * builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
 * builder/cloudstack: New step to detach iso. [GH-8106]
 * builder/googlecompute: Fail fast when image name is invalid. [GH-8112]
+* builder/googlecompute: Users can now query Vault for an Oauth token rather
+    than setting an account file [GH-8143]
 * builder/hcloud: Allow selecting image based on filters [GH-7945]
 * builder/hyper-v: Decrease the delay between Hyper-V VM startup and hyper-v
     builder's ability to send keystrokes to the target VM. [GH-7970]
@@ -13,8 +15,10 @@
     [GH-8088]
 * builder/ucloud: Make ucloud builder's base url configurable [GH-8095]
 * builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
-* builder/yandex: Support GPU instances and set source image by name [GH-8091]
+* builder/vmware: Allow user to attach floppy files to remote vmx builds
+    [GH-8132]
 * builder/yandex: Add ability to retry API requests [GH-8142]
+* builder/yandex: Support GPU instances and set source image by name [GH-8091]
 * communicator/ssh: Support for SSH port tunneling [GH-7918]
 * core: Add a new `floppy_label` option [GH-8099]
 * core: Added version compatibility to console command [GH-8080]
@@ -56,8 +60,13 @@
 * core: Fix handling of booleans where "unset" is a value distinct from
     "false". [GH-8021]
 * core: Fix tests that swallowed errors in goroutines [GH-8094]
+* core: Fix bug where Packer could no longer run as background process [GH-8101]
 * post-processor/amazon-import: Fix non-default encryption. [GH-8113]
 * provisioner/ansible: Fix provisioner dropped errors [GH-8045]
+
+### BACKWARDS INCOMPATIBILITIES:
+* core: "sed" template function has been deprecated in favor of "replace" and
+    "replace_all" functins [GH-8119]
 
 ## 1.4.3 (August 14, 2019)
 
