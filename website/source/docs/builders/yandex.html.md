@@ -133,7 +133,8 @@ can be configured for this builder.
  
 -   `use_ipv6` (boolean) - Set to `true` to enable IPv6 for the instance being
     created. This defaults to `false`, or not enabled.
--&gt; **Note:** ~> Usage of IPv6 will be available in the future.
+
+    \~&gt; **Note:** Usage of IPv6 will be available in the future.
 
 -   `source_image_folder_id` (string) - The ID of the folder containing the source image.
 
@@ -141,7 +142,7 @@ can be configured for this builder.
     from.
 
 -   `source_image_name` (string) - The source image name to use to create the new image
-    from. Name will be looked up in `source_image_folder_id`. 
+    from. Name will be looked up in `source_image_folder_id`.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `5m`.

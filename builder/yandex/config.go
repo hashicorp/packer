@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 package yandex
 
 import (
@@ -62,7 +63,7 @@ type Config struct {
 	ImageProductIDs []string `mapstructure:"image_product_ids" required:"false"`
 	// The number of cores available to the instance.
 	InstanceCores int `mapstructure:"instance_cores" required:"false"`
-	//
+	// The number of GPU available to the instance.
 	InstanceGpus int `mapstructure:"instance_gpus"`
 	// The amount of memory available to the instance, specified in gigabytes.
 	InstanceMemory int `mapstructure:"instance_mem_gb" required:"false"`
@@ -92,7 +93,8 @@ type Config struct {
 	// The source image ID to use to create the new image
 	// from.
 	SourceImageID string `mapstructure:"source_image_id" required:"false"`
-	//
+	// The source image name to use to create the new image
+	// from. Name will be looked up in `source_image_folder_id`.
 	SourceImageName string `mapstructure:"source_image_name"`
 	// The Yandex VPC subnet id to use for
 	// the launched instance. Note, the zone of the subnet must match the
@@ -103,7 +105,7 @@ type Config struct {
 	UseIPv4Nat bool `mapstructure:"use_ipv4_nat" required:"false"`
 	// Set to true to enable IPv6 for the instance being
 	// created. This defaults to false, or not enabled.
-	// -> Note: ~> Usage of IPv6 will be available in the future.
+	// -> Note: Usage of IPv6 will be available in the future.
 	UseIPv6 bool `mapstructure:"use_ipv6" required:"false"`
 	// If true, use the instance's internal IP address
 	// instead of its external IP during building.
