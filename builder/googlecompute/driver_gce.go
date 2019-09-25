@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
+	vaultapi "github.com/hashicorp/vault/api"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -35,13 +36,52 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewClientGCE(conf *jwt.Config) (*http.Client, error) {
+// Define a TokenSource that gets tokens from Vault
+type OauthTokenSource struct {
+	Path string
+}
+
+func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
+	log.Printf("Retrieving Oauth token from Vault...")
+	vaultConfig := vaultapi.DefaultConfig()
+	cli, err := vaultapi.NewClient(vaultConfig)
+	if err != nil {
+		return nil, fmt.Errorf("%s\n", err)
+	}
+	resp, err := cli.Logical().Read(ots.Path)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading vault resp: %s", err)
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("Vault Oauth Engine does not exist at the given path.")
+	}
+	token, ok := resp.Data["token"]
+	if !ok {
+		return nil, fmt.Errorf("ERROR, token was not present in response body")
+	}
+	at := token.(string)
+
+	log.Printf("Retrieved Oauth token from Vault")
+	return &oauth2.Token{
+		AccessToken: at,
+		Expiry:      time.Now().Add(time.Minute * time.Duration(60)),
+	}, nil
+
+}
+
+func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 	var err error
 
 	var client *http.Client
 
-	// Auth with AccountFile first if provided
-	if conf != nil && len(conf.PrivateKey) > 0 {
+	if vaultOauth != "" {
+		// Auth with Vault Oauth
+		log.Printf("Using Vault to generate Oauth token.")
+		ts := OauthTokenSource{vaultOauth}
+		return oauth2.NewClient(oauth2.NoContext, ts), nil
+
+	} else if conf != nil && len(conf.PrivateKey) > 0 {
+		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
 		log.Printf("[INFO]   -- Email: %s", conf.Email)
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
@@ -75,8 +115,8 @@ func NewClientGCE(conf *jwt.Config) (*http.Client, error) {
 	return client, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config) (Driver, error) {
-	client, err := NewClientGCE(conf)
+func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (Driver, error) {
+	client, err := NewClientGCE(conf, vaultOauth)
 	if err != nil {
 		return nil, err
 	}
