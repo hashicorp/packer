@@ -29,7 +29,7 @@ type rawTemplate struct {
 	Push               map[string]interface{} `json:"push,omitempty"`
 	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
 	Provisioners       []interface{}          `json:"provisioners,omitempty"`
-	CleanupProvisioner interface{}            `mapstructure:"on-error-script" json:"on-error-script,omitempty"`
+	CleanupProvisioner interface{}            `mapstructure:"error-cleanup-provisioner" json:"error-cleanup-provisioner,omitempty"`
 	Variables          map[string]interface{} `json:"variables,omitempty"`
 	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
@@ -244,7 +244,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Provisioners = append(result.Provisioners, &p)
 	}
 
-	// Gather the on-error-script
+	// Gather the error-cleanup-provisioner
 	if r.CleanupProvisioner != nil {
 		var p Provisioner
 		if err := r.decoder(&p, nil).Decode(r.CleanupProvisioner); err != nil {

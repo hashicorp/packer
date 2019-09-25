@@ -11,7 +11,7 @@
 			"inline": ["exit 2"]
 		}
 	],
-	"on-error-script": {
+	"error-cleanup-provisioner": {
 		"type": "shell-local",
 		"inline": ["echo 'rubber ducky'> ducky.txt"]
 	}
