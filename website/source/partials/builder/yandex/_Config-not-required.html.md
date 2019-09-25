@@ -9,9 +9,9 @@
 -   `disk_name` (string) - The name of the disk, if unset the instance name
     will be used.
     
--   `disk_size_gb` (int) - The size of the disk in GB. This defaults to 10, which is 10GB.
+-   `disk_size_gb` (int) - The size of the disk in GB. This defaults to `10`, which is 10GB.
     
--   `disk_type` (string) - Specify disk type for the launched instance. Defaults to network-hdd.
+-   `disk_type` (string) - Specify disk type for the launched instance. Defaults to `network-hdd`.
     
 -   `image_description` (string) - The description of the resulting image.
     
@@ -21,7 +21,7 @@
     apply to the created image.
     
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
-    packer-{{timestamp}}.
+    `packer-{{timestamp}}`.
     
 -   `image_product_ids` ([]string) - License IDs that indicate which licenses are attached to resulting image.
     
@@ -36,7 +36,7 @@
 -   `labels` (map[string]string) - Key/value pair labels to apply to
     the launched instance.
     
--   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to standard-v1.
+-   `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
     
 -   `max_retries` (int) - The maximum number of times an API request is being executed
     
@@ -64,14 +64,15 @@
     access.
     
 -   `use_ipv6` (bool) - Set to true to enable IPv6 for the instance being
-    created. This defaults to false, or not enabled.
-    -> Note: Usage of IPv6 will be available in the future.
+    created. This defaults to `false`, or not enabled.
+    
+    -> **Note**: Usage of IPv6 will be available in the future.
     
 -   `use_internal_ip` (bool) - If true, use the instance's internal IP address
     instead of its external IP during building.
     
--   `zone` (string) - The name of the zone to launch the instance.  This defaults to ru-central1-a.
+-   `zone` (string) - The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
     
 -   `state_timeout` (time.Duration) - The time to wait for instance state changes.
-    Defaults to 5m.
+    Defaults to `5m`.
     

@@ -8,5 +8,5 @@
     
 -   `source_image_family` (string) - The source image family to create the new image
     from. You can also specify source_image_id instead. Just one of a source_image_id or
-    source_image_family must be specified. Example: ubuntu-1804-lts
+    source_image_family must be specified. Example: `ubuntu-1804-lts`
     

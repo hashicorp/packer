@@ -45,9 +45,9 @@ type Config struct {
 	// The name of the disk, if unset the instance name
 	// will be used.
 	DiskName string `mapstructure:"disk_name" required:"false"`
-	// The size of the disk in GB. This defaults to 10, which is 10GB.
+	// The size of the disk in GB. This defaults to `10`, which is 10GB.
 	DiskSizeGb int `mapstructure:"disk_size_gb" required:"false"`
-	// Specify disk type for the launched instance. Defaults to network-hdd.
+	// Specify disk type for the launched instance. Defaults to `network-hdd`.
 	DiskType string `mapstructure:"disk_type" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
@@ -57,7 +57,7 @@ type Config struct {
 	// apply to the created image.
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// The unique name of the resulting image. Defaults to
-	// packer-{{timestamp}}.
+	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// License IDs that indicate which licenses are attached to resulting image.
 	ImageProductIDs []string `mapstructure:"image_product_ids" required:"false"`
@@ -72,7 +72,7 @@ type Config struct {
 	// Key/value pair labels to apply to
 	// the launched instance.
 	Labels map[string]string `mapstructure:"labels" required:"false"`
-	// Identifier of the hardware platform configuration for the instance. This defaults to standard-v1.
+	// Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
 	// The maximum number of times an API request is being executed
 	MaxRetries int `mapstructure:"max_retries"`
@@ -86,7 +86,7 @@ type Config struct {
 	SerialLogFile string `mapstructure:"serial_log_file" required:"false"`
 	// The source image family to create the new image
 	// from. You can also specify source_image_id instead. Just one of a source_image_id or
-	// source_image_family must be specified. Example: ubuntu-1804-lts
+	// source_image_family must be specified. Example: `ubuntu-1804-lts`
 	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
 	// The ID of the folder containing the source image.
 	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
@@ -104,18 +104,19 @@ type Config struct {
 	// access.
 	UseIPv4Nat bool `mapstructure:"use_ipv4_nat" required:"false"`
 	// Set to true to enable IPv6 for the instance being
-	// created. This defaults to false, or not enabled.
-	// -> Note: Usage of IPv6 will be available in the future.
+	// created. This defaults to `false`, or not enabled.
+	//
+	// -> **Note**: Usage of IPv6 will be available in the future.
 	UseIPv6 bool `mapstructure:"use_ipv6" required:"false"`
 	// If true, use the instance's internal IP address
 	// instead of its external IP during building.
 	UseInternalIP bool `mapstructure:"use_internal_ip" required:"false"`
-	// The name of the zone to launch the instance.  This defaults to ru-central1-a.
+	// The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
 	Zone string `mapstructure:"zone" required:"false"`
 
 	ctx interpolate.Context
 	// The time to wait for instance state changes.
-	// Defaults to 5m.
+	// Defaults to `5m`.
 	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 }
 
