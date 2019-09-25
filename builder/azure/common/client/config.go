@@ -280,19 +280,19 @@ func (c *Config) FillParameters() error {
 		c.SubscriptionID = subscriptionID
 	}
 
-	if c.TenantID == "" {
-		tenantID, err := common.FindTenantID(*c.CloudEnvironment, c.SubscriptionID)
-		if err != nil {
-			return err
-		}
-		c.TenantID = tenantID
-	}
-
 	if c.CloudEnvironment == nil {
 		err := c.setCloudEnvironment()
 		if err != nil {
 			return err
 		}
+	}
+
+	if c.TenantID == "" {
+		tenantID, err := findTenantID(*c.CloudEnvironment, c.SubscriptionID)
+		if err != nil {
+			return err
+		}
+		c.TenantID = tenantID
 	}
 
 	return nil
