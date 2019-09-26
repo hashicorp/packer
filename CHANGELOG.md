@@ -3,6 +3,7 @@
 ### IMPROVEMENTS:
 * builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
 * builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
+* builder/azure: Refactor client config [GH-8121]
 * builder/cloudstack: New step to detach iso. [GH-8106]
 * builder/googlecompute: Fail fast when image name is invalid. [GH-8112]
 * builder/googlecompute: Users can now query Vault for an Oauth token rather
@@ -28,6 +29,7 @@
     the Vagrant Cloud post-processor [GH-8018] [GH-8027]
 * post-processor/vsphere: Removed redundant whitelist check for builders,
     allowing users to use post-processor withough the VMWare builder [GH-8064]
+
 
 ### BUG FIXES:
 * builder/amazon: Fix FleetID crash. [GH-8013]
