@@ -1,3 +1,9 @@
+//go:generate struct-markdown
+
+// Package chroot is able to create an Azure manage image without requiring the
+// launch of a new instance for every build. It does this by attaching and
+// mounting the root disk and chrooting into that directory.
+// It then creates a managed image from that attached disk.
 package chroot
 
 import (
@@ -22,32 +28,68 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
+// Config is the configuration that is chained through the steps and settable
+// from the template.
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	ClientConfig client.Config `mapstructure:",squash"`
 
+	// When set to `true`, starts with an empty, unpartitioned disk. Defaults to `false`.
 	FromScratch bool   `mapstructure:"from_scratch"`
-	Source      string `mapstructure:"source"`
+	// Either a managed disk resourced ID or a publisher:offer:sku:version specifier for plaform image sources.
+	Source      string `mapstructure:"source" required:"true"`
 	sourceType  sourceType
 
+	// How to run shell commands. This may be useful to set environment variables or perhaps run
+	// a command with sudo or so on. This is a configuration template where the `.Command` variable
+	// is replaced with the command to be run. Defaults to `{{.Command}}`.
 	CommandWrapper    string     `mapstructure:"command_wrapper"`
+	// A series of commands to execute after attaching the root volume and before mounting the chroot. 
+	// This is not required unless using `from_scratch`. If so, this should include any partitioning 
+	// and filesystem creation commands. The path to the device is provided by `{{.Device}}`.
 	PreMountCommands  []string   `mapstructure:"pre_mount_commands"`
+	// Options to supply the `mount` command when mounting devices. Each option will be prefixed with 
+	// `-o` and supplied to the `mount` command ran by Packer. Because this command is ran in a shell,
+	// user discretion is advised. See this manual page for the `mount` command for valid file system specific options.
 	MountOptions      []string   `mapstructure:"mount_options"`
+	// The partition number containing the / partition. By default this is the first partition of the volume.
 	MountPartition    string     `mapstructure:"mount_partition"`
+	// The path where the volume will be mounted. This is where the chroot environment will be. This defaults
+	// to `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template where the `.Device` 
+	// variable is replaced with the name of the device where the volume is attached.
 	MountPath         string     `mapstructure:"mount_path"`
+	// As `pre_mount_commands`, but the commands are executed after mounting the root device and before the
+	// extra mount and copy steps. The device and mount path are provided by `{{.Device}}` and `{{.MountPath}}`.
 	PostMountCommands []string   `mapstructure:"post_mount_commands"`
+	// This is a list of devices to mount into the chroot environment. This configuration parameter requires 
+	// some additional documentation which is in the "Chroot Mounts" section below. Please read that section
+	// for more information on how to use this.
 	ChrootMounts      [][]string `mapstructure:"chroot_mounts"`
+	// Paths to files on the running Azure instance that will be copied into the chroot environment prior to 
+	// provisioning. Defaults to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip copying
+	// `/etc/resolv.conf`. You may need to do this if you're building an image that uses systemd.
 	CopyFiles         []string   `mapstructure:"copy_files"`
 
+	// The name of the temporary disk that will be created in the resource group of the VM that Packer is
+	// running on. Will be generated if not set.
 	TemporaryOSDiskName      string `mapstructure:"temporary_os_disk_name"`
+	// Try to resize the OS disk to this size on the first copy. Disks can only be englarged. If not specified,
+	// the disk will keep its original size. Required when using `from_scratch`
 	OSDiskSizeGB             int32  `mapstructure:"os_disk_size_gb"`
+	// The [storage SKU](https://docs.microsoft.com/en-us/rest/api/compute/disks/createorupdate#diskstorageaccounttypes)
+	// to use for the OS Disk. Defaults to `Standard_LRS`.
 	OSDiskStorageAccountType string `mapstructure:"os_disk_storage_account_type"`
+	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
+	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
 	OSDiskCacheType          string `mapstructure:"os_disk_cache_type"`
+	// If set to `true`, leaves the temporary disk behind in the Packer VM resource group. Defaults to `false`
 	OSDiskSkipCleanup        bool   `mapstructure:"os_disk_skip_cleanup"`
 
-	ImageResourceID       string `mapstructure:"image_resource_id"`
-	ImageOSState          string `mapstructure:"image_os_state"`
+	// The image to create using this build.
+	ImageResourceID       string `mapstructure:"image_resource_id" required:"true"`
+	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
+	// Defaults to `V2`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
 
 	ctx interpolate.Context
@@ -60,6 +102,8 @@ const (
 	sourceDisk          sourceType = "Disk"
 )
 
+// GetContext implements ContextProvider to allow steps to use the config context 
+// for template interpolation
 func (c *Config) GetContext() interpolate.Context {
 	return c.ctx
 }
@@ -145,12 +189,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OSDiskCacheType = string(compute.CachingTypesReadOnly)
 	}
 
-	if b.config.ImageOSState == "" {
-		b.config.ImageOSState = string(compute.Generalized)
-	}
-
 	if b.config.ImageHyperVGeneration == "" {
-		b.config.ImageHyperVGeneration = string(compute.V1)
+		b.config.ImageHyperVGeneration = string(compute.V2)
 	}
 
 	// checks, accumulate any errors or warnings
@@ -202,10 +242,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if err := checkOSState(b.config.ImageOSState); err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("image_os_state: %v", err))
-	}
-
 	if err := checkHyperVGeneration(b.config.ImageHyperVGeneration); err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("image_hyperv_generation: %v", err))
 	}
@@ -216,16 +252,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	packer.LogSecretFilter.Set(b.config.ClientConfig.ClientSecret, b.config.ClientConfig.ClientJWT)
 	return warns, nil
-}
-
-func checkOSState(s string) interface{} {
-	for _, v := range compute.PossibleOperatingSystemStateTypesValues() {
-		if compute.OperatingSystemStateTypes(s) == v {
-			return nil
-		}
-	}
-	return fmt.Errorf("%q is not a valid value %v",
-		s, compute.PossibleOperatingSystemStateTypesValues())
 }
 
 func checkDiskCacheType(s string) interface{} {
@@ -385,7 +411,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&chroot.StepEarlyCleanup{},
 		&StepCreateImage{
 			ImageResourceID:          b.config.ImageResourceID,
-			ImageOSState:             b.config.ImageOSState,
+			ImageOSState:             string(compute.Generalized),
 			OSDiskCacheType:          b.config.OSDiskCacheType,
 			OSDiskStorageAccountType: b.config.OSDiskStorageAccountType,
 			Location:                 info.Location,
