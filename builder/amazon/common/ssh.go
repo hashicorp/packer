@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -20,12 +21,16 @@ var (
 
 // SSHHost returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHHost(e ec2Describer, sshInterface string) func(multistep.StateBag) (string, error) {
+func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
+		}
+
 		const tries = 2
 		// <= with current structure to check result of describing `tries` times
 		for j := 0; j <= tries; j++ {
-			var host string
 			i := state.Get("instance").(*ec2.Instance)
 			if sshInterface != "" {
 				switch sshInterface {
