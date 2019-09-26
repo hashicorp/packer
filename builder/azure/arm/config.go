@@ -676,8 +676,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if c.AllowedInboundIpAddresses != nil && len(c.AllowedInboundIpAddresses) >= 1 {
-		if ok, err := assertAllowedInboundIpAddresses(c.AllowedInboundIpAddresses, "allowed_inbound_ip_addresses"); !ok {
-			errs = packer.MultiErrorAppend(errs, err)
+		if c.VirtualNetworkName != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_name is specified, allowed_inbound_ip_addresses cannot be specified"))
+		} else {
+			if ok, err := assertAllowedInboundIpAddresses(c.AllowedInboundIpAddresses, "allowed_inbound_ip_addresses"); !ok {
+				errs = packer.MultiErrorAppend(errs, err)
+			}
 		}
 	}
 
