@@ -1,0 +1,146 @@
+package chroot
+
+import (
+	"context"
+	"io/ioutil"
+	"net/http"
+	"reflect"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	"github.com/Azure/go-autorest/autorest"
+	"github.com/hashicorp/packer/builder/azure/common/client"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+)
+
+func Test_StepVerifySourceDisk_Run(t *testing.T) {
+	type fields struct {
+		SubscriptionID       string
+		SourceDiskResourceID string
+		Location             string
+
+		GetDiskResponseCode int
+		GetDiskResponseBody string
+	}
+	type args struct {
+		state multistep.StateBag
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		want       multistep.StepAction
+		errormatch string
+	}{
+		{
+			name: "HappyPath",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
+				Location:             "westus2",
+
+				GetDiskResponseCode: 200,
+				GetDiskResponseBody: `{"location":"westus2"}`,
+			},
+			want: multistep.ActionContinue,
+		},
+		{
+			name: "DiskNotFound",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
+				Location:             "westus2",
+
+				GetDiskResponseCode: 404,
+				GetDiskResponseBody: `{}`,
+			},
+			want:       multistep.ActionHalt,
+			errormatch: "Unable to retrieve",
+		},
+		{
+			name: "NotADisk",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/images/image1",
+				Location:             "westus2",
+
+				GetDiskResponseCode: 404,
+			},
+			want:       multistep.ActionHalt,
+			errormatch: "not a managed disk",
+		},
+		{
+			name: "OtherSubscription",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/subscriptions/subid2/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
+				Location:             "westus2",
+
+				GetDiskResponseCode: 200,
+				GetDiskResponseBody: `{"location":"westus2"}`,
+			},
+			want:       multistep.ActionHalt,
+			errormatch: "different subscription",
+		},
+		{
+			name: "OtherLocation",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
+				Location:             "eastus",
+
+				GetDiskResponseCode: 200,
+				GetDiskResponseBody: `{"location":"westus2"}`,
+			},
+			want:       multistep.ActionHalt,
+			errormatch: "different location",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := StepVerifySourceDisk{
+				SubscriptionID:       tt.fields.SubscriptionID,
+				SourceDiskResourceID: tt.fields.SourceDiskResourceID,
+				Location:             tt.fields.Location,
+			}
+
+			m := compute.NewDisksClient("subscriptionId")
+			m.Sender = autorest.SenderFunc(func(r *http.Request) (*http.Response, error) {
+				return &http.Response{
+					Request:    r,
+					Body:       ioutil.NopCloser(strings.NewReader(tt.fields.GetDiskResponseBody)),
+					StatusCode: tt.fields.GetDiskResponseCode,
+				}, nil
+			})
+			errorBuffer := &strings.Builder{}
+			ui := &packer.BasicUi{
+				Reader:      strings.NewReader(""),
+				Writer:      ioutil.Discard,
+				ErrorWriter: errorBuffer,
+			}
+
+			state := new(multistep.BasicStateBag)
+			state.Put("azureclient", &client.AzureClientSetMock{
+				DisksClientMock: m,
+			})
+			state.Put("ui", ui)
+
+			if got := s.Run(context.TODO(), state); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StepVerifySourceDisk.Run() = %v, want %v", got, tt.want)
+			}
+			if tt.errormatch != "" {
+				if !regexp.MustCompile(tt.errormatch).MatchString(errorBuffer.String()) {
+					t.Errorf("Expected the error output (%q) to match %q", errorBuffer.String(), tt.errormatch)
+				}
+			}
+		})
+	}
+}
+
+type uiThatRemebersErrors struct {
+	packer.Ui
+	LastError string
+}
