@@ -1,4 +1,4 @@
-package arm
+package client
 
 import (
 	"testing"
