@@ -286,6 +286,32 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	instanceId = *createOutput.Instances[0].InstanceIds[0]
+	// Set the instance ID so that the cleanup works properly
+	s.instanceId = instanceId
+
+	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
+
+	// Get information about the created instance
+	var describeOutput *ec2.DescribeInstancesOutput
+	err = retry.Config{
+		Tries:       11,
+		ShouldRetry: func(error) bool { return true },
+		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		describeOutput, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{aws.String(instanceId)},
+		})
+		return err
+	})
+	if err != nil || len(describeOutput.Reservations) == 0 || len(describeOutput.Reservations[0].Instances) == 0 {
+		err := fmt.Errorf("Error finding source instance.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	instance := describeOutput.Reservations[0].Instances[0]
+
 	// Tag the spot instance request (not the eventual spot instance)
 	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
@@ -297,30 +323,8 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	if len(spotTags) > 0 && s.SpotTags.IsSet() {
 		spotTags.Report(ui)
-
 		// Use the instance ID to find out the SIR, so that we can tag the spot
 		// request associated with this instance.
-
-		err = retry.Config{
-			Tries:       11,
-			ShouldRetry: func(error) bool { return true },
-			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			_, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-				InstanceIds: []*string{aws.String(instanceId)},
-			})
-			return err
-		})
-		if err != nil {
-			err := fmt.Errorf("Error describing instance for spot request tags: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		describeOutput, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIds: []*string{aws.String(instanceId)},
-		})
 		sir := describeOutput.Reservations[0].Instances[0].SpotInstanceRequestId
 
 		// Apply tags to the spot request.
@@ -342,22 +346,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 	}
-
-	// Set the instance ID so that the cleanup works properly
-	s.instanceId = instanceId
-
-	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
-
-	r, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{aws.String(instanceId)},
-	})
-	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
-		err := fmt.Errorf("Error finding source instance.")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	instance := r.Reservations[0].Instances[0]
 
 	// Retry creating tags for about 2.5 minutes
 	err = retry.Config{
