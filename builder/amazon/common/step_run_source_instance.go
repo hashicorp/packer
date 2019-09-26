@@ -199,14 +199,34 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
-	r, err := ec2conn.DescribeInstances(describeInstance)
+	// there's a race condition that can happen because of AWS's eventual
+	// consistency where even though the wait is complete, the describe call
+	// will fail. Retry a couple of times to try to mitigate that race.
 
+	var r *ec2.DescribeInstancesOutput
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(error) bool {
+			if awsErr, ok := err.(awserr.Error); ok {
+				switch awsErr.Code() {
+				case "InvalidInstanceID.NotFound":
+					return true
+				}
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		r, err = ec2conn.DescribeInstances(describeInstance)
+		return err
+	})
 	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
 		err := fmt.Errorf("Error finding source instance.")
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
 	instance := r.Reservations[0].Instances[0]
 
 	if s.Debug {
