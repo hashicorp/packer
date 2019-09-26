@@ -308,7 +308,6 @@ func TestConfigShouldAcceptCorrectInboundIpAddresses(t *testing.T) {
 		"subscription_id":        "ignore",
 		"os_type":                constants.Target_Linux,
 		"communicator":           "none",
-		"virtual_network_name":   "MyVirtualNetwork",
 	}
 
 	config["allowed_inbound_ip_addresses"] = ipValue0
@@ -355,7 +354,6 @@ func TestConfigShouldRejectIncorrectInboundIpAddresses(t *testing.T) {
 		"subscription_id":        "ignore",
 		"os_type":                constants.Target_Linux,
 		"communicator":           "none",
-		"virtual_network_name":   "MyVirtualNetwork",
 	}
 
 	config["allowed_inbound_ip_addresses"] = []string{"127.0.0.1", "127.0.0.two"}
@@ -369,6 +367,32 @@ func TestConfigShouldRejectIncorrectInboundIpAddresses(t *testing.T) {
 	if err == nil {
 		// 192.168.100.1000/24 is invalid
 		t.Errorf("Expected configuration creation to fail, but it succeeded with the malformed allowed_inbound_ip_addresses set to %v", c.AllowedInboundIpAddresses)
+	}
+}
+
+func TestConfigShouldRejectInboundIpAddressesWithVirtualNetwork(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":          "ignore",
+		"capture_container_name":       "ignore",
+		"location":                     "ignore",
+		"image_url":                    "ignore",
+		"storage_account":              "ignore",
+		"resource_group_name":          "ignore",
+		"subscription_id":              "ignore",
+		"os_type":                      constants.Target_Linux,
+		"communicator":                 "none",
+		"allowed_inbound_ip_addresses": "127.0.0.1",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config["virtual_network_name"] = "some_vnet_name"
+	_, _, err = newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Errorf("Expected configuration creation to fail, but it succeeded with allowed_inbound_ip_addresses and virtual_network_name both specified")
 	}
 }
 
