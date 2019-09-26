@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
-		"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
