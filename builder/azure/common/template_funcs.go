@@ -1,4 +1,4 @@
-package arm
+package common
 
 import (
 	"bytes"
@@ -23,9 +23,6 @@ func isValidByteValue(b byte) bool {
 // Clean up image name by replacing invalid characters with "-"
 // Names are not allowed to end in '.', '-', or  '_' and are trimmed.
 func templateCleanImageName(s string) string {
-	if ok, _ := assertManagedImageName(s, ""); ok {
-		return s
-	}
 	b := []byte(s)
 	newb := make([]byte, len(b))
 	for i := range newb {

@@ -157,10 +157,12 @@ To use an existing resource group you **must** provide:
 Providing `temp_resource_group_name` or `location` in combination with
 `build_resource_group_name` is not allowed.
 
+<%= partial "partials/builder/azure/common/client/_Config" %>
+
 ### Optional:
 
 <%= partial "partials/builder/azure/arm/Config-not-required" %>
-<%= partial "partials/builder/azure/arm/ClientConfig-not-required" %>
+<%= partial "partials/builder/azure/common/client/_Config-not-required" %>
 
 ## Basic Example
 

@@ -1,4 +1,4 @@
-package arm
+package common
 
 import "testing"
 
