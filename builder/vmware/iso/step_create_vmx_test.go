@@ -168,6 +168,9 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	warn, err := b.Prepare()
+	if err != nil {
+		t.Fatalf("error preparing build: %v", err)
+	}
 	if len(warn) > 0 {
 		for _, w := range warn {
 			t.Logf("Configuration warning: %s", w)
