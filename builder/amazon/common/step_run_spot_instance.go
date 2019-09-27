@@ -294,8 +294,8 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// Get information about the created instance
 	var describeOutput *ec2.DescribeInstancesOutput
 	err = retry.Config{
-		Tries:       11,
-		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		Tries:      11,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		describeOutput, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
 			InstanceIds: []*string{aws.String(instanceId)},
