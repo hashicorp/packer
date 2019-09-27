@@ -50,7 +50,6 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 				"`communicator` config was set to \"none\". If you have any provisioners\n" +
 				"then a communicator is required. Please fix this to continue.")
 	}
-
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 

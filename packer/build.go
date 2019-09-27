@@ -84,15 +84,16 @@ type Build interface {
 // multiple files, of course, but it should be for only a single provider
 // (such as VirtualBox, EC2, etc.).
 type coreBuild struct {
-	name           string
-	builder        Builder
-	builderConfig  interface{}
-	builderType    string
-	hooks          map[string][]Hook
-	postProcessors [][]coreBuildPostProcessor
-	provisioners   []coreBuildProvisioner
-	templatePath   string
-	variables      map[string]string
+	name               string
+	builder            Builder
+	builderConfig      interface{}
+	builderType        string
+	hooks              map[string][]Hook
+	postProcessors     [][]coreBuildPostProcessor
+	provisioners       []coreBuildProvisioner
+	cleanupProvisioner coreBuildProvisioner
+	templatePath       string
+	variables          map[string]string
 
 	debug         bool
 	force         bool
@@ -164,6 +165,17 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 		}
 	}
 
+	// Prepare the on-error-cleanup provisioner
+	if b.cleanupProvisioner.pType != "" {
+		configs := make([]interface{}, len(b.cleanupProvisioner.config), len(b.cleanupProvisioner.config)+1)
+		copy(configs, b.cleanupProvisioner.config)
+		configs = append(configs, packerConfig)
+		err = b.cleanupProvisioner.provisioner.Prepare(configs...)
+		if err != nil {
+			return
+		}
+	}
+
 	// Prepare the post-processors
 	for _, ppSeq := range b.postProcessors {
 		for _, corePP := range ppSeq {
@@ -220,6 +232,17 @@ func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
 			Provisioners: hookedProvisioners,
 		})
+	}
+
+	if b.cleanupProvisioner.pType != "" {
+		hookedCleanupProvisioner := &HookedProvisioner{
+			b.cleanupProvisioner.provisioner,
+			b.cleanupProvisioner.config,
+			b.cleanupProvisioner.pType,
+		}
+		hooks[HookCleanupProvision] = []Hook{&ProvisionHook{
+			Provisioners: []*HookedProvisioner{hookedCleanupProvisioner},
+		}}
 	}
 
 	hook := &DispatchHook{Mapping: hooks}
