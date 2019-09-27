@@ -206,7 +206,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	var r *ec2.DescribeInstancesOutput
 	err = retry.Config{
 		Tries: 11,
-		ShouldRetry: func(error) bool {
+		ShouldRetry: func(err error) bool {
 			if awsErr, ok := err.(awserr.Error); ok {
 				switch awsErr.Code() {
 				case "InvalidInstanceID.NotFound":
