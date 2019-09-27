@@ -28,6 +28,7 @@ type rawTemplate struct {
 	Push               map[string]interface{} `json:"push,omitempty"`
 	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
 	Provisioners       []interface{}          `json:"provisioners,omitempty"`
+	CleanupProvisioner interface{}            `mapstructure:"error-cleanup-provisioner" json:"error-cleanup-provisioner,omitempty"`
 	Variables          map[string]interface{} `json:"variables,omitempty"`
 	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
@@ -54,6 +55,34 @@ func (r *rawTemplate) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(m)
+}
+
+func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
+	var p Provisioner
+	if err := r.decoder(&p, nil).Decode(raw); err != nil {
+		return p, fmt.Errorf("Error decoding provisioner: %s", err)
+
+	}
+
+	// Type is required before any richer validation
+	if p.Type == "" {
+		return p, fmt.Errorf("Provisioner missing 'type'")
+	}
+
+	// Set the raw configuration and delete any special keys
+	p.Config = raw.(map[string]interface{})
+
+	delete(p.Config, "except")
+	delete(p.Config, "only")
+	delete(p.Config, "override")
+	delete(p.Config, "pause_before")
+	delete(p.Config, "type")
+	delete(p.Config, "timeout")
+
+	if len(p.Config) == 0 {
+		p.Config = nil
+	}
+	return p, nil
 }
 
 // Template returns the actual Template object built from this raw
@@ -211,35 +240,25 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
 	}
 	for i, v := range r.Provisioners {
-		var p Provisioner
-		if err := r.decoder(&p, nil).Decode(v); err != nil {
+		p, err := r.decodeProvisioner(v)
+		if err != nil {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"provisioner %d: %s", i+1, err))
 			continue
 		}
 
-		// Type is required before any richer validation
-		if p.Type == "" {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"provisioner %d: missing 'type'", i+1))
-			continue
-		}
-
-		// Set the raw configuration and delete any special keys
-		p.Config = v.(map[string]interface{})
-
-		delete(p.Config, "except")
-		delete(p.Config, "only")
-		delete(p.Config, "override")
-		delete(p.Config, "pause_before")
-		delete(p.Config, "type")
-		delete(p.Config, "timeout")
-
-		if len(p.Config) == 0 {
-			p.Config = nil
-		}
-
 		result.Provisioners = append(result.Provisioners, &p)
+	}
+
+	// Gather the error-cleanup-provisioner
+	if r.CleanupProvisioner != nil {
+		p, err := r.decodeProvisioner(r.CleanupProvisioner)
+		if err != nil {
+			errs = multierror.Append(errs,
+				fmt.Errorf("On Error Cleanup Provisioner error: %s", err))
+		}
+
+		result.CleanupProvisioner = &p
 	}
 
 	// If we have errors, return those with a nil result

@@ -29,15 +29,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	steps := []multistep.Step{}
 
-	if b.config.CommConfig.Type != "none" {
-		steps = append(steps,
-			&communicator.StepConnect{
-				Config:    &b.config.CommConfig,
-				Host:      CommHost(b.config.CommConfig.Host()),
-				SSHConfig: b.config.CommConfig.SSHConfigFunc(),
-			},
-		)
-	}
+	steps = append(steps,
+		&communicator.StepConnect{
+			Config:    &b.config.CommConfig,
+			Host:      CommHost(b.config.CommConfig.Host()),
+			SSHConfig: b.config.CommConfig.SSHConfigFunc(),
+		},
+	)
 
 	steps = append(steps,
 		new(common.StepProvision),

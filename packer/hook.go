@@ -6,6 +6,7 @@ import (
 
 // This is the hook that should be fired for provisioners to run.
 const HookProvision = "packer_provision"
+const HookCleanupProvision = "packer_cleanup_provision"
 
 // A Hook is used to hook into an arbitrarily named location in a build,
 // allowing custom behavior to run at certain points along a build.
@@ -44,7 +45,6 @@ func (h *DispatchHook) Run(ctx context.Context, name string, ui Ui, comm Communi
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-
 		if err := hook.Run(ctx, name, ui, comm, data); err != nil {
 			return err
 		}

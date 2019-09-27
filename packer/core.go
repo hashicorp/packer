@@ -112,6 +112,49 @@ func (c *Core) BuildNames() []string {
 	return r
 }
 
+func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (coreBuildProvisioner, error) {
+	// Get the provisioner
+	cbp := coreBuildProvisioner{}
+	provisioner, err := c.components.Provisioner(rawP.Type)
+	if err != nil {
+		return cbp, fmt.Errorf(
+			"error initializing provisioner '%s': %s",
+			rawP.Type, err)
+	}
+	if provisioner == nil {
+		return cbp, fmt.Errorf(
+			"provisioner type not found: %s", rawP.Type)
+	}
+
+	// Get the configuration
+	config := make([]interface{}, 1, 2)
+	config[0] = rawP.Config
+	if rawP.Override != nil {
+		if override, ok := rawP.Override[rawName]; ok {
+			config = append(config, override)
+		}
+	}
+	// If we're pausing, we wrap the provisioner in a special pauser.
+	if rawP.PauseBefore > 0 {
+		provisioner = &PausedProvisioner{
+			PauseBefore: rawP.PauseBefore,
+			Provisioner: provisioner,
+		}
+	} else if rawP.Timeout > 0 {
+		provisioner = &TimeoutProvisioner{
+			Timeout:     rawP.Timeout,
+			Provisioner: provisioner,
+		}
+	}
+	cbp = coreBuildProvisioner{
+		pType:       rawP.Type,
+		provisioner: provisioner,
+		config:      config,
+	}
+
+	return cbp, nil
+}
+
 // Build returns the Build object for the given name.
 func (c *Core) Build(n string) (Build, error) {
 	// Setup the builder
@@ -140,46 +183,23 @@ func (c *Core) Build(n string) (Build, error) {
 		if rawP.OnlyExcept.Skip(rawName) {
 			continue
 		}
-
-		// Get the provisioner
-		provisioner, err := c.components.Provisioner(rawP.Type)
+		cbp, err := c.generateCoreBuildProvisioner(rawP, rawName)
 		if err != nil {
-			return nil, fmt.Errorf(
-				"error initializing provisioner '%s': %s",
-				rawP.Type, err)
-		}
-		if provisioner == nil {
-			return nil, fmt.Errorf(
-				"provisioner type not found: %s", rawP.Type)
+			return nil, err
 		}
 
-		// Get the configuration
-		config := make([]interface{}, 1, 2)
-		config[0] = rawP.Config
-		if rawP.Override != nil {
-			if override, ok := rawP.Override[rawName]; ok {
-				config = append(config, override)
-			}
-		}
+		provisioners = append(provisioners, cbp)
+	}
 
-		// If we're pausing, we wrap the provisioner in a special pauser.
-		if rawP.PauseBefore > 0 {
-			provisioner = &PausedProvisioner{
-				PauseBefore: rawP.PauseBefore,
-				Provisioner: provisioner,
-			}
-		} else if rawP.Timeout > 0 {
-			provisioner = &TimeoutProvisioner{
-				Timeout:     rawP.Timeout,
-				Provisioner: provisioner,
-			}
+	var cleanupProvisioner coreBuildProvisioner
+	if c.Template.CleanupProvisioner != nil {
+		// This is a special instantiation of the shell-local provisioner that
+		// is only run on error at end of provisioning step before other step
+		// cleanup occurs.
+		cleanupProvisioner, err = c.generateCoreBuildProvisioner(c.Template.CleanupProvisioner, rawName)
+		if err != nil {
+			return nil, err
 		}
-
-		provisioners = append(provisioners, coreBuildProvisioner{
-			pType:       rawP.Type,
-			provisioner: provisioner,
-			config:      config,
-		})
 	}
 
 	// Setup the post-processors
@@ -232,14 +252,15 @@ func (c *Core) Build(n string) (Build, error) {
 	// TODO hooks one day
 
 	return &coreBuild{
-		name:           n,
-		builder:        builder,
-		builderConfig:  configBuilder.Config,
-		builderType:    configBuilder.Type,
-		postProcessors: postProcessors,
-		provisioners:   provisioners,
-		templatePath:   c.Template.Path,
-		variables:      c.variables,
+		name:               n,
+		builder:            builder,
+		builderConfig:      configBuilder.Config,
+		builderType:        configBuilder.Type,
+		postProcessors:     postProcessors,
+		provisioners:       provisioners,
+		cleanupProvisioner: cleanupProvisioner,
+		templatePath:       c.Template.Path,
+		variables:          c.variables,
 	}, nil
 }
 
