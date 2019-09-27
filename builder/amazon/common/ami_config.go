@@ -77,6 +77,10 @@ type AMIConfig struct {
 	// copying a provisioned instance to an AMI. By default, Packer will keep the
 	// encryption setting to what it was in the source image. Setting false will
 	// result in an unencrypted image, and true will result in an encrypted one.
+	// If you have used the `launch_block_device_mappings` to set an encryption
+	// key and that key is the same as the one you want the image encrypted with
+	// at the end, then you don't need to set this field; leaving it empty will
+	// prevent an unnecessary extra copy step and save you some time.
 	AMIEncryptBootVolume config.Trilean `mapstructure:"encrypt_boot" required:"false"`
 	// ID, alias or ARN of the KMS key to use for boot volume encryption. This
 	// only applies to the main `region`, other regions where the AMI will be
