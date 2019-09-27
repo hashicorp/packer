@@ -161,6 +161,19 @@ builder.
   "tag2": "value2"
 ```
 
+-   `defined_tags` (map of map of strings) - Add one or more defined tags for a given namespace to the resulting
+    custom image. See [the Oracle
+    docs](https://docs.cloud.oracle.com/iaas/Content/Identity/Concepts/taggingoverview.htm)
+    for more details. Example:
+
+``` {.yaml}
+"tags":
+  "namespace": {
+    "tag1": "value1",
+    "tag2": "value2"
+  }
+```
+
 ## Basic Example
 
 Here is a basic example. Note that account specific configuration has been

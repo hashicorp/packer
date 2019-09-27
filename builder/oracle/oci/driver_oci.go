@@ -81,6 +81,7 @@ func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, err
 		InstanceId:    &id,
 		DisplayName:   &d.cfg.ImageName,
 		FreeformTags:  d.cfg.Tags,
+		DefinedTags:   d.cfg.DefinedTags,
 	}})
 
 	if err != nil {
