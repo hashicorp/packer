@@ -32,6 +32,7 @@ type Config struct {
 	Username           string `mapstructure:"username"`
 	Password           string `mapstructure:"password"`
 	Node               string `mapstructure:"node"`
+	Pool               string `mapstructure:"pool"`
 
 	VMName string `mapstructure:"vm_name"`
 	VMID   int    `mapstructure:"vm_id"`

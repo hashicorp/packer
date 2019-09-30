@@ -62,6 +62,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 	vmRef := proxmox.NewVmRef(c.VMID)
 	vmRef.SetNode(c.Node)
+	if c.Pool != "" {
+		vmRef.SetPool(c.Pool)
+	}
 
 	err := config.CreateVm(vmRef, client)
 	if err != nil {
