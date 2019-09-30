@@ -208,9 +208,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		}
 	}
 
-	//if c.DefinedTags != nil {
-	//	}
-
 	if c.ImageName == "" {
 		name, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
