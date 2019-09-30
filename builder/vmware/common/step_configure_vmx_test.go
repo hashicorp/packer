@@ -17,6 +17,9 @@ func testVMXFile(t *testing.T) string {
 
 	// displayName must always be set
 	err = WriteVMX(tf.Name(), map[string]string{"displayName": "PackerBuild"})
+	if err != nil {
+		t.Fatalf("error writing .vmx file: %v", err)
+	}
 	tf.Close()
 
 	return tf.Name()
