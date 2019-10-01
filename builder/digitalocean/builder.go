@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
+	client := godo.NewClient(oauth2.NewClient(context.TODO(), &apiTokenSource{
 		AccessToken: b.config.APIToken,
 	}))
 	if b.config.APIURL != "" {
