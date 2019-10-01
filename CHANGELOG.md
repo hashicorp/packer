@@ -1,4 +1,4 @@
-## 1.4.4 (Upcoming)
+## 1.4.4 (October 1, 2019)
 
 ### IMPROVEMENTS:
 ** new core feature** Error cleanup provisioner [GH-8155]
