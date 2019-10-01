@@ -146,8 +146,10 @@ type Config struct {
 	// one of the other listed interfaces. Using the `scsi` interface under
 	// these circumstances will cause the build to fail.
 	DiskInterface string `mapstructure:"disk_interface" required:"false"`
-	// The size, in megabytes, of the hard disk to create
-	// for the VM. By default, this is 40960 (40 GB).
+	// The size in bytes, suffixes of the first letter of common byte types
+	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
+	// Will create the of the hard disk of the VM. By default, this is
+	// `40960M` (40 GB).
 	DiskSize string `mapstructure:"disk_size" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
