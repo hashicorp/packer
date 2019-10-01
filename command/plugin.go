@@ -34,6 +34,7 @@ import (
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	ncloudbuilder "github.com/hashicorp/packer/builder/ncloud"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
+	nutanixbuilder "github.com/hashicorp/packer/builder/nutanix"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
@@ -115,6 +116,7 @@ var Builders = map[string]packer.Builder{
 	"lxd":                 new(lxdbuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
 	"null":                new(nullbuilder.Builder),
+	"nutanix":             new(nutanixbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
 	"oracle-classic":      new(oracleclassicbuilder.Builder),
