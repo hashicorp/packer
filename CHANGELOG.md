@@ -1,6 +1,7 @@
 ## 1.4.4 (Upcoming)
 
 ### IMPROVEMENTS:
+** new core feature** Error cleanup provisioner [GH-8155]
 * builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
 * builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
 * builder/azure: Refactor client config [GH-8121]
@@ -14,6 +15,8 @@
 * builder/openstack: Store WinRM password for provisioners to use [GH-7940]
 * builder/proxmox: Shorten default boot_key_interval to 5ms from 100ms
     [GH-8088]
+* builder/proxmox: Allow running the template VM in a Proxmox resource pool
+    [GH-7862]
 * builder/ucloud: Make ucloud builder's base url configurable [GH-8095]
 * builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
 * builder/vmware: Allow user to attach floppy files to remote vmx builds
@@ -30,11 +33,14 @@
 * post-processor/vsphere: Removed redundant whitelist check for builders,
     allowing users to use post-processor withough the VMWare builder [GH-8064]
 
-
 ### BUG FIXES:
 * builder/amazon: Fix FleetID crash. [GH-8013]
 * builder/amazon: Gracefully handle rate limiting when retrieving winrm
     password. [GH-8087]
+* builder/amazon: Fix race condition in spot instance launching [GH-8165]
+* builder/amazon: Amazon builders now respect ssh_host option [GH-8162]
+* builder/amazon: Update the AWS sdk to resolve some credential handling issues
+    [GH-8131]
 * builder/azure: Avoid a panic in getObjectIdFromToken [GH-8047]
 * builder/googlecompute: Fix crash caused by nil account file. [GH-8102]
 * builder/hyper-v: Fix when management interface is not part of virtual switch
@@ -57,13 +63,18 @@
     download. [GH-7996]
 * builder/virtualbox: LoadSnapshots succeeds even if machine has no snapshots
     [GH-8096]
+* builder/vmware: fix dropped test errors [GH-8170]
 * core: Fix bug where sensitive variables contianing commas were not being
     properly sanitized in UI calls. [GH-7997]
 * core: Fix handling of booleans where "unset" is a value distinct from
     "false". [GH-8021]
 * core: Fix tests that swallowed errors in goroutines [GH-8094]
 * core: Fix bug where Packer could no longer run as background process [GH-8101]
+* core: Fix zsh auto-completion [GH-8160]
+* communicator/ssh: Friendlier message warning user that their creds may be
+    wrong [GH-8167]
 * post-processor/amazon-import: Fix non-default encryption. [GH-8113]
+* post-processor/vagrant-cloud: Fix dropped errors [GH-8156]
 * provisioner/ansible: Fix provisioner dropped errors [GH-8045]
 
 ### BACKWARDS INCOMPATIBILITIES:
