@@ -83,6 +83,42 @@ specify a custom `name` parameter, then you should use that as the value
 instead of the type.
 Values within `except` could also be a *post-processor* name.
 
+## On Error Provisioner
+
+You can optionally create a single specialized provisioner field called an
+`error-cleanup-provisioner`. This provisioner will not run unless the normal
+provisioning run fails. If the normal provisioning run does fail, this special
+error provisioner will run *before the instanace is shut down*. This allows you
+to make last minute changes and clean up behaviors that Packer may not be able
+to clean up on its own.
+
+For examples, users may use this provisioner to make sure that the instance is
+properly unsubscribed from any services that it connected to during the build
+run.
+
+Toy usage example for the error cleanup script:
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": ["exit 2"]
+    }
+  ],
+  "error-cleanup-provisioner": {
+    "type": "shell-local",
+    "inline": ["echo 'rubber ducky'> ducky.txt"]
+  }
+}
+```
+
 ## Build-Specific Overrides
 
 While the goal of Packer is to produce identical machine images, it sometimes
