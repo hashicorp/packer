@@ -32,6 +32,9 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"metadata": map[string]string{
 			"key": "value",
 		},
+		"defined_tags": map[string]map[string]interface{}{
+			"namespace": {"key": "value"},
+		},
 	}
 }
 
