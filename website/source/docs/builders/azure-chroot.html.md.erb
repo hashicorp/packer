@@ -29,8 +29,8 @@ which is much easier to use.
 This builder works by creating a new MD from either an existing source or from
 scratch and attaching it to the (already existing) Azure  VM where Packer is
 running. Once attached, a [chroot](https://en.wikipedia.org/wiki/Chroot) is set
-up and made available to the provisioners. After provisioning, the MD is
-detached, snapshotted and a MD image is created.
+up and made available to the [provisioners](/docs/provisioners/index.html).
+After provisioning, the MD is detached, snapshotted and a MD image is created.
 
 Using this process, minutes can be shaved off the image creation process
 because Packer does not need to launch a VM instance.
@@ -38,24 +38,26 @@ because Packer does not need to launch a VM instance.
 There are some restrictions however:
 * The host system must be a similar system (generally the same OS version,
   kernel versions, etc.) as the image being built.
-* If the source is a user image or managed disk, it must be made available in
-  the same region as the host system. ([name=Paul Meyer]: we could work around
-  this restriction by doing a cross-region copy, but that takes away the main
-  speed advantage.)
+* If the source is a  managed disk, it must be made available in the same
+  region as the host system.
 * The host system SKU has to allow for all of the specified disks to be
   attached.
 
 ## Configuration Reference
 
 There are many configuration options available for the builder. We'll start
-withauthentication parameters, then go over the builder specific options.
+with authentication parameters, then go over the Azure chroot builder specific
+options.
 
 ### Authentication options
-The Azure builders [share this configuration](/docs/builders/azure.html).
+None of the authentication options are required, but depending on which
+ones are specified a different authentication method may be used. See the
+[shared Azure builders documentation](/docs/builders/azure.html) for more
+information.
 
 <%= partial "partials/builder/azure/common/client/_Config-not-required.html" %>
 
-### Builder specific options 
+### Azure chroot builder specific options 
 
 #### Required:
 <%= partial "partials/builder/azure/chroot/_Config-required.html" %>
