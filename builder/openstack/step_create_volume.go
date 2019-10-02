@@ -63,6 +63,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 		AvailabilityZone: s.VolumeAvailabilityZone,
 		Name:             s.VolumeName,
 		ImageID:          sourceImage,
+		Metadata:         config.ImageMetadata,
 	}
 	volume, err := volumes.Create(blockStorageClient, volumeOpts).Extract()
 	if err != nil {
