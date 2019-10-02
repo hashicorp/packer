@@ -1,0 +1,101 @@
+---
+description: |
+    The azure-chroot Packer builder is able to create Azure Managed Images leveraging
+    a VM in Azure.
+layout: docs
+page_title: 'Azure chroot - Builders'
+sidebar_current: 'docs-builders-azure-chroot'
+---
+
+# Azure Builder (chroot)
+
+Type: `azure-chroot`
+
+The `azure-chroot` builder is able to build Azure managed disk (MD) images. For
+more information on managed disks, see [Azure Managed Disks Overview](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/managed-disks-overview).
+
+The difference between this builder and the `azure-arm` builder is that this
+builder is able to build a managed disk image without launching an Azure VM 
+instance. This can dramatically speed up image builds. It also allows for more
+deterministic image content and enables some capabilities that are not possible
+with the `azure-arm` builder.
+
+> **This is an advanced builder** If you're just getting started with Packer,
+it is recommend to start with the [azure-arm builder](/docs/builders/azure-arm.html),
+which is much easier to use.
+
+## How Does it Work?
+
+This builder works by creating a new MD from either an existing source or from
+scratch and attaching it to the (already existing) Azure  VM where Packer is
+running. Once attached, a [chroot](https://en.wikipedia.org/wiki/Chroot) is set
+up and made available to the provisioners. After provisioning, the MD is
+detached, snapshotted and a MD image is created.
+
+Using this process, minutes can be shaved off the image creation process
+because Packer does not need to launch a VM instance.
+
+There are some restrictions however:
+* The host system must be a similar system (generally the same OS version,
+  kernel versions, etc.) as the image being built.
+* If the source is a user image or managed disk, it must be made available in
+  the same region as the host system. ([name=Paul Meyer]: we could work around
+  this restriction by doing a cross-region copy, but that takes away the main
+  speed advantage.)
+* The host system SKU has to allow for all of the specified disks to be
+  attached.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. We'll start
+withauthentication parameters, then go over the builder specific options.
+
+### Authentication options
+The Azure builders [share this configuration](/docs/builders/azure.html).
+
+<%= partial "partials/builder/azure/common/client/_Config-not-required.html" %>
+
+### Builder specific options 
+
+#### Required:
+<%= partial "partials/builder/azure/chroot/_Config-required.html" %>
+
+#### Optional:
+<%= partial "partials/builder/azure/chroot/_Config-not-required.html" %>
+
+## Chroot Mounts
+
+The `chroot_mounts` configuration can be used to mount specific devices within
+the chroot. By default, the following additional mounts are added into the
+chroot by Packer:
+
+-   `/proc` (proc)
+-   `/sys` (sysfs)
+-   `/dev` (bind to real `/dev`)
+-   `/dev/pts` (devpts)
+-   `/proc/sys/fs/binfmt_misc` (binfmt\_misc)
+
+These default mounts are usually good enough for anyone and are sane defaults.
+However, if you want to change or add the mount points, you may using the
+`chroot_mounts` configuration. Here is an example configuration which only
+mounts `/prod` and `/dev`:
+
+``` json
+{
+  "chroot_mounts": [
+    ["proc", "proc", "/proc"],
+    ["bind", "/dev", "/dev"]
+  ]
+}
+```
+
+`chroot_mounts` is a list of a 3-tuples of strings. The three components of the
+3-tuple, in order, are:
+
+-   The filesystem type. If this is "bind", then Packer will properly bind the
+    filesystem to another mount point.
+
+-   The source device.
+
+-   The mount directory.
+
