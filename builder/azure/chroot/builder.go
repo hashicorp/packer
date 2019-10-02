@@ -37,7 +37,7 @@ type Config struct {
 
 	// When set to `true`, starts with an empty, unpartitioned disk. Defaults to `false`.
 	FromScratch bool `mapstructure:"from_scratch"`
-	// Either a managed disk resourced ID or a publisher:offer:sku:version specifier for plaform image sources.
+	// Either a managed disk resource ID or a publisher:offer:sku:version specifier for plaform image sources.
 	Source     string `mapstructure:"source" required:"true"`
 	sourceType sourceType
 
