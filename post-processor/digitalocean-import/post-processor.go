@@ -119,13 +119,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"spaces_region": &p.config.SpacesRegion,
 		"space_name":    &p.config.SpaceName,
 		"image_name":    &p.config.Name,
-		"image_regions": &p.config.ImageRegions[0],
 	}
 	for key, ptr := range requiredArgs {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
+
+	if len(p.config.ImageRegions) == 0 {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("image_regions must be set"))
 	}
 
 	if len(errs.Errors) > 0 {
