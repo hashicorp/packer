@@ -298,6 +298,10 @@ type Config struct {
 	// to qemu, allowing it to choose the default. This may be needed when running
 	// under macOS, and getting errors about sdl not being available.
 	UseDefaultDisplay bool `mapstructure:"use_default_display" required:"false"`
+	// What QEMU -display option to use. Defaults to gtk, use none to not pass the
+	// -display option allowing QEMU to choose the default. This may be needed when
+	// running under macOS, and getting errors about sdl not being available.
+	Display string `mapstructure:"display" required:"false"`
 	// The IP address that should be
 	// binded to for VNC. By default packer will use 127.0.0.1 for this. If you
 	// wish to bind to all interfaces use 0.0.0.0.
