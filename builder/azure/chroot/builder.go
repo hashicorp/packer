@@ -89,7 +89,7 @@ type Config struct {
 	// The image to create using this build.
 	ImageResourceID string `mapstructure:"image_resource_id" required:"true"`
 	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
-	// Defaults to `V2`.
+	// Defaults to `V1`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
 
 	ctx interpolate.Context
@@ -190,7 +190,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.ImageHyperVGeneration == "" {
-		b.config.ImageHyperVGeneration = string(compute.V2)
+		b.config.ImageHyperVGeneration = string(compute.V1)
 	}
 
 	// checks, accumulate any errors or warnings
