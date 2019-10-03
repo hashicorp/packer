@@ -35,6 +35,16 @@ func ConfigTmpDir() (string, error) {
 		configdir = fp
 	}
 
+	_, err = os.Stat(configdir)
+	if os.IsNotExist(err) {
+		log.Printf("Config dir %s does not exist; creating...", configdir)
+		if err = os.MkdirAll(configdir, 0755); err != nil {
+			return "", err
+		}
+	} else if err != nil {
+		return "", err
+	}
+
 	td, err := ioutil.TempDir(configdir, "tmp")
 	if err != nil {
 		return "", fmt.Errorf("Error creating temp dir: %s", err)
