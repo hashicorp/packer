@@ -46,5 +46,5 @@
 -   `os_disk_skip_cleanup` (bool) - If set to `true`, leaves the temporary disk behind in the Packer VM resource group. Defaults to `false`
     
 -   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
-    Defaults to `V2`.
+    Defaults to `V1`.
     
