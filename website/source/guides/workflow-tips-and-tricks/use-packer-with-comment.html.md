@@ -1,6 +1,6 @@
 ---
 layout: guides
-sidebar_current: use-packer-with-comment
+sidebar_current: workflow-tips-and-tricks-use-packer-with-comment
 page_title: Use jq and Packer to comment your templates - Guides
 description: |-
   You can add detailed comments beyond the root-level underscore-prefixed field

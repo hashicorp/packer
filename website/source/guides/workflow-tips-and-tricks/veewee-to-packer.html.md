@@ -1,6 +1,6 @@
 ---
 layout: guides
-sidebar_current: guides-veewee-to-packer
+sidebar_current: workflow-tips-and-tricks-guides-veewee-to-packer
 page_title: Convert Veewee Definitions to Packer Templates - Guides
 description: |-
   If you are or were a user of Veewee, then there is an official tool called

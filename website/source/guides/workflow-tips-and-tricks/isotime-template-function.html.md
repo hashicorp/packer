@@ -1,6 +1,6 @@
 ---
 layout: guides
-sidebar_current: isotime-template-function
+sidebar_current: workflow-tips-and-tricks-isotime-template-function
 page_title: Using the isotime template function - Guides
 description: |-
   It can be a bit confusing to figure out how to format your isotime using the
