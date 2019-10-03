@@ -3,7 +3,9 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -27,9 +29,15 @@ func (s *StepStopServer) Run(ctx context.Context, state multistep.StateBag) mult
 
 	ui.Say(fmt.Sprintf("Stopping server: %s ...", server.ID))
 	if err := startstop.Stop(client, server.ID).ExtractErr(); err != nil {
-		err = fmt.Errorf("Error stopping server: %s", err)
-		state.Put("error", err)
-		return multistep.ActionHalt
+		if _, ok := err.(gophercloud.ErrDefault409); ok {
+			// The server might have already been shut down by Windows Sysprep
+			log.Printf("[WARN] 409 on stopping an already stopped server, continuing")
+			return multistep.ActionContinue
+		} else {
+			err = fmt.Errorf("Error stopping server: %s", err)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 	}
 
 	ui.Message(fmt.Sprintf("Waiting for server to stop: %s ...", server.ID))
@@ -45,7 +53,6 @@ func (s *StepStopServer) Run(ctx context.Context, state multistep.StateBag) mult
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
 	return multistep.ActionContinue
 }
 
