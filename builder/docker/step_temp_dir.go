@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,16 +35,7 @@ func ConfigTmpDir() (string, error) {
 		configdir = fp
 	}
 
-	td := filepath.Join(configdir, "tmp")
-	_, err = os.Stat(td)
-	if os.IsNotExist(err) {
-		log.Printf("Creating tempdir in %s", td)
-		if err = os.MkdirAll(td, 0755); err != nil {
-			return "", err
-		}
-	} else if err != nil {
-		return "", err
-	}
+	td, err := ioutil.TempDir(configdir, "tmp")
 	log.Printf("Set Packer temp dir to %s", td)
 	return td, nil
 }
