@@ -36,6 +36,10 @@ func ConfigTmpDir() (string, error) {
 	}
 
 	td, err := ioutil.TempDir(configdir, "tmp")
+	if err != nil {
+		return "", fmt.Errorf("Error creating temp dir: %s", err)
+
+	}
 	log.Printf("Set Packer temp dir to %s", td)
 	return td, nil
 }
