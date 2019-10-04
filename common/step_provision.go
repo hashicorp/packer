@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,18 +21,62 @@ import (
 //
 // Produces:
 //   <nothing>
+
+// Provisioners interpolate most of their fields in the prepare stage; this
+// placeholder map helps keep fields that are only generated at build time from
+// accidentally being interpolated into empty strings at prepare time.
+func PlaceholderData() map[string]string {
+	placeholderData := map[string]string{}
+
+	// use reflection to grab the communicator config field off the config
+	var sshExample communicator.SSH
+	var winrmExample communicator.WinRM
+
+	t := reflect.TypeOf(sshExample)
+	n := t.NumField()
+	for i := 0; i < n; i++ {
+		fVal := t.Field(i)
+		name := fVal.Name
+		placeholderData[name] = fmt.Sprintf("{{.%s}}", name)
+	}
+
+	t = reflect.TypeOf(winrmExample)
+	n = t.NumField()
+	for i := 0; i < n; i++ {
+		fVal := t.Field(i)
+		name := fVal.Name
+		placeholderData[name] = fmt.Sprintf("{{.%s}}", name)
+	}
+
+	return placeholderData
+}
+
 type StepProvision struct {
 	Comm packer.Communicator
 }
 
-func PopulateProvisionHookData(state multistep.StateBag) packer.ProvisionHookData {
-	hookData := packer.NewProvisionHookData()
-
-	// Add WinRMPassword to runtime data
-	WinRMPassword, ok := state.GetOk("winrm_password")
-	if ok {
-		hookData.WinRMPassword = WinRMPassword.(string)
+func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
+	hookData := map[string]interface{}{}
+	// Read communicator data into hook data
+	commConf, ok := state.GetOk("communicator_config")
+	if !ok {
+		log.Printf("Unable to load config from state to populate provisionHookData")
+		return hookData
 	}
+	cast := commConf.(*communicator.Config)
+
+	pd := PlaceholderData()
+
+	v := reflect.ValueOf(cast)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	// Loop over all field values and retrieve them from the ssh config
+	for fieldName, _ := range pd {
+		fVal := v.FieldByName(fieldName)
+		hookData[fieldName] = fVal.Interface()
+	}
+
 	return hookData
 }
 
@@ -48,6 +94,7 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 	ui := state.Get("ui").(packer.Ui)
 
 	hookData := PopulateProvisionHookData(state)
+	log.Printf("Megan hookdata is %T", hookData)
 
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...
@@ -58,7 +105,7 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 	}
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- hook.Run(ctx, hooktype, ui, comm, &hookData)
+		errCh <- hook.Run(ctx, hooktype, ui, comm, hookData)
 	}()
 
 	for {

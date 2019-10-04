@@ -25,7 +25,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Communicator, _ *packer.ProvisionHookData) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Communicator, _ interface{}) error {
 	_, retErr := sl.Run(ctx, ui, &p.config)
 
 	return retErr

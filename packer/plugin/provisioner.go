@@ -21,7 +21,7 @@ func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
 	return c.p.Prepare(configs...)
 }
 
-func (c *cmdProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData *packer.ProvisionHookData) error {
+func (c *cmdProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
