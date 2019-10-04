@@ -35,7 +35,7 @@ func testStepTempDir_impl(t *testing.T) string {
 	dir := dirRaw.(string)
 
 	if _, err := os.Stat(dir); err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Stat for %s failed: err: %s", err, dir)
 	}
 
 	// Cleanup
