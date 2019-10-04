@@ -104,18 +104,19 @@ mounts `/prod` and `/dev`:
 ## Example
 Here is an example that creates a Debian image with updated packages. Specify
 all environment variables (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, 
-`ARM_SUBSCRIPTION_ID`) to use a service principal, specify only `ARM_SUBSCRIPTION_ID`
-to use interactive login or leave them empty to use the system-assigned identity
-of the VM you run Packer on.
+`ARM_SUBSCRIPTION_ID`) to use a service principal.
 The identity you choose should have permission to create disks and images and also
 to update your VM.
+Set the `ARM_IMAGE_RESOURCEGROUP_ID` variable to an existing resource group in the
+subscription where the resulting image will be created.
 
 ``` json
 {
   "variables": {
     "client_id": "{{env `ARM_CLIENT_ID`}}",
     "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
-    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}"
+    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+    "resource_group": "{{env `ARM_IMAGE_RESOURCEGROUP_ID`}}"
   },
   "builders": [{
     "type": "azure-chroot",

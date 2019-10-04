@@ -1,58 +1,53 @@
 package chroot
 
 import (
-	"reflect"
-	"regexp"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 )
-
-func TestBuilder_Prepare_DiskAsInput(t *testing.T) {
-	b := Builder{}
-	_, err := b.Prepare(map[string]interface{}{
-		"source": "/subscriptions/28279221-ccbe-40f0-b70b-4d78ab822e09/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
-	})
-
-	if err != nil {
-		// make sure there is no error about the source field
-		errs, ok := err.(*packer.MultiError)
-		if !ok {
-			t.Error("Expected the returned error to be of type packer.MultiError")
-		}
-		for _, err := range errs.Errors {
-			if matched, _ := regexp.MatchString(`(^|\W)source\W`, err.Error()); matched {
-				t.Errorf("Did not expect an error about the 'source' field, but found %q", err)
-			}
-		}
-	}
-}
 
 func TestBuilder_Prepare(t *testing.T) {
 	type config map[string]interface{}
-	
+	type regexMatchers map[string]string // map of regex : error message
+
 	tests := []struct {
 		name     string
 		config   config
-		want     []string
 		validate func(Config)
 		wantErr  bool
 	}{
 		{
-			name: "HappyPath",
+			name: "HappyPathFromPlatformImage",
 			config: config{
 				"client_id":         "123",
 				"client_secret":     "456",
 				"subscription_id":   "789",
-				"resource_group":    "rgname",
 				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 				"source":            "credativ:Debian:9:latest",
 			},
-			wantErr: false,
-			validate: func(c Config){
-				if(c.OSDiskSizeGB!=0){
-					t.Fatalf("Expected OSDiskSizeGB to be 0, was %+v", c.OSDiskSizeGB)
+			validate: func(c Config) {
+				if c.OSDiskSizeGB != 0 {
+					t.Errorf("Expected OSDiskSizeGB to be 0, was %+v", c.OSDiskSizeGB)
 				}
+				if c.MountPartition != "1" {
+					t.Errorf("Expected MountPartition to be %s, but found %s", "1", c.MountPartition)
+				}
+				if c.OSDiskStorageAccountType != string(compute.PremiumLRS) {
+					t.Errorf("Expected OSDiskStorageAccountType to be %s, but found %s", string(compute.PremiumLRS), c.OSDiskStorageAccountType)
+				}
+				if c.OSDiskCacheType != string(compute.CachingTypesReadOnly) {
+					t.Errorf("Expected OSDiskCacheType to be %s, but found %s", string(compute.CachingTypesReadOnly), c.OSDiskCacheType)
+				}
+				if c.ImageHyperVGeneration != string(compute.V1) {
+					t.Errorf("Expected ImageHyperVGeneration to be %s, but found %s", string(compute.V1), c.ImageHyperVGeneration)
+				}
+			},
+		},
+		{
+			name: "HappyPathFromPlatformImage",
+			config: config{
+				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+				"source":            "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
 			},
 		},
 	}
@@ -60,13 +55,15 @@ func TestBuilder_Prepare(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Builder{}
 
-			got, err := b.Prepare(tt.config)
+			_, err := b.Prepare(tt.config)
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Builder.Prepare() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Builder.Prepare() = %v, want %v", got, tt.want)
+
+			if tt.validate != nil {
+				tt.validate(b.config)
 			}
 		})
 	}
