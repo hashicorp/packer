@@ -49,7 +49,6 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 			OsType:           "Linux",
 			HyperVGeneration: compute.HyperVGeneration(s.HyperVGeneration),
 			CreationData:     &compute.CreationData{},
-			DiskSizeGB:       to.Int32Ptr(s.DiskSizeGB),
 		},
 		//Tags: map[string]*string{
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 	"testing"
 
@@ -14,56 +15,133 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func Test_StepCreateNewDisk_FromDisk(t *testing.T) {
-	sut := StepCreateNewDisk{
-		SubscriptionID:         "SubscriptionID",
-		ResourceGroup:          "ResourceGroupName",
-		DiskName:               "TemporaryOSDiskName",
-		DiskSizeGB:             42,
-		DiskStorageAccountType: string(compute.PremiumLRS),
-		HyperVGeneration:       string(compute.V1),
-		Location:               "westus",
-		SourceDiskResourceID:   "SourceDisk",
-	}
+func TestStepCreateNewDisk_Run(t *testing.T) {
+	type fields struct {
+		SubscriptionID         string
+		ResourceGroup          string
+		DiskName               string
+		DiskSizeGB             int32
+		DiskStorageAccountType string
+		HyperVGeneration       string
+		Location               string
+		PlatformImage          *client.PlatformImage
+		SourceDiskResourceID   string
 
-	expected := regexp.MustCompile(`[\s\n]`).ReplaceAllString(`
-{
-	"location": "westus",
-	"properties": {
-		"osType": "Linux",
-		"hyperVGeneration": "V1",
-		"creationData": {
-			"createOption": "Copy",
-			"sourceResourceId": "SourceDisk"
+		expectedPutDiskBody string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   multistep.StepAction
+	}{
+		{
+			name: "HappyPathDiskSource",
+			fields: fields{
+				SubscriptionID:         "SubscriptionID",
+				ResourceGroup:          "ResourceGroupName",
+				DiskName:               "TemporaryOSDiskName",
+				DiskSizeGB:             42,
+				DiskStorageAccountType: string(compute.PremiumLRS),
+				HyperVGeneration:       string(compute.V1),
+				Location:               "westus",
+				SourceDiskResourceID:   "SourceDisk",
+
+				expectedPutDiskBody: `
+				{
+					"location": "westus",
+					"properties": {
+						"osType": "Linux",
+						"hyperVGeneration": "V1",
+						"creationData": {
+							"createOption": "Copy",
+							"sourceResourceId": "SourceDisk"
+						},
+						"diskSizeGB": 42
+					},
+					"sku": {
+						"name": "Premium_LRS"
+					}
+				}`,
+			},
+			want: multistep.ActionContinue,
 		},
-		"diskSizeGB": 42
-	},
-	"sku": {
-		"name": "Premium_LRS"
+		{
+			name: "HappyPathDiskSource",
+			fields: fields{
+				SubscriptionID:         "SubscriptionID",
+				ResourceGroup:          "ResourceGroupName",
+				DiskName:               "TemporaryOSDiskName",
+				DiskStorageAccountType: string(compute.StandardLRS),
+				HyperVGeneration:       string(compute.V1),
+				Location:               "westus",
+				PlatformImage: &client.PlatformImage{
+					Publisher: "Microsoft",
+					Offer:     "Windows",
+					Sku:       "2016-DataCenter",
+					Version:   "2016.1.4",
+				},
+
+				expectedPutDiskBody: `
+				{
+					"location": "westus",
+					"properties": {
+						"osType": "Linux",
+						"hyperVGeneration": "V1",
+						"creationData": {
+							"createOption":"FromImage",
+							"imageReference": {
+								"id":"/subscriptions/SubscriptionID/providers/Microsoft.Compute/locations/westus/publishers/Microsoft/artifacttypes/vmimage/offers/Windows/skus/2016-DataCenter/versions/2016.1.4"
+							}
+						}
+					},
+					"sku": {
+						"name": "Standard_LRS"
+					}
+				}`,
+			},
+			want: multistep.ActionContinue,
+		},
 	}
-}`, "")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := StepCreateNewDisk{
+				SubscriptionID:         tt.fields.SubscriptionID,
+				ResourceGroup:          tt.fields.ResourceGroup,
+				DiskName:               tt.fields.DiskName,
+				DiskSizeGB:             tt.fields.DiskSizeGB,
+				DiskStorageAccountType: tt.fields.DiskStorageAccountType,
+				HyperVGeneration:       tt.fields.HyperVGeneration,
+				Location:               tt.fields.Location,
+				PlatformImage:          tt.fields.PlatformImage,
+				SourceDiskResourceID:   tt.fields.SourceDiskResourceID,
+			}
 
-	m := compute.NewDisksClient("subscriptionId")
-	m.Sender = autorest.SenderFunc(func(r *http.Request) (*http.Response, error) {
-		b, _ := ioutil.ReadAll(r.Body)
-		if string(b) != expected {
-			t.Fatalf("expected body to be %q, but got %q", expected, string(b))
-		}
-		return &http.Response{
-			Request:    r,
-			StatusCode: 200,
-		}, nil
-	})
+			expectedPutDiskBody := regexp.MustCompile(`[\s\n]`).ReplaceAllString(tt.fields.expectedPutDiskBody, "")
 
-	state := new(multistep.BasicStateBag)
-	state.Put("azureclient", &client.AzureClientSetMock{
-		DisksClientMock: m,
-	})
-	state.Put("ui", packer.TestUi(t))
+			m := compute.NewDisksClient("subscriptionId")
+			m.Sender = autorest.SenderFunc(func(r *http.Request) (*http.Response, error) {
+				if r.Method != "PUT" {
+					t.Fatal("Expected only a PUT disk call")
+				}
+				b, _ := ioutil.ReadAll(r.Body)
+				if string(b) != expectedPutDiskBody {
+					t.Fatalf("expected body to be %q, but got %q", expectedPutDiskBody, string(b))
+				}
+				return &http.Response{
+					Request:    r,
+					StatusCode: 200,
+				}, nil
+			})
 
-	r := sut.Run(context.TODO(), state)
+			state := new(multistep.BasicStateBag)
+			state.Put("azureclient", &client.AzureClientSetMock{
+				DisksClientMock: m,
+			})
+			state.Put("ui", packer.TestUi(t))
 
-	if r != multistep.ActionContinue {
-		t.Fatal("Run failed")
+			if got := s.Run(context.TODO(), state); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StepCreateNewDisk.Run() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
