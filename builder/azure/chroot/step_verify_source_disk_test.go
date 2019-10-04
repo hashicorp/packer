@@ -48,6 +48,19 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 			want: multistep.ActionContinue,
 		},
 		{
+			name: "NotAResourceID",
+			fields: fields{
+				SubscriptionID:       "subid1",
+				SourceDiskResourceID: "/other",
+				Location:             "westus2",
+
+				GetDiskResponseCode: 200,
+				GetDiskResponseBody: `{"location":"westus2"}`,
+			},
+			want: multistep.ActionHalt,
+			errormatch: "Could not parse resource id",
+		},
+		{
 			name: "DiskNotFound",
 			fields: fields{
 				SubscriptionID:       "subid1",
@@ -115,6 +128,7 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 					StatusCode: tt.fields.GetDiskResponseCode,
 				}, nil
 			})
+
 			errorBuffer := &strings.Builder{}
 			ui := &packer.BasicUi{
 				Reader:      strings.NewReader(""),
@@ -128,12 +142,20 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 			})
 			state.Put("ui", ui)
 
-			if got := s.Run(context.TODO(), state); !reflect.DeepEqual(got, tt.want) {
+			got := s.Run(context.TODO(), state);
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StepVerifySourceDisk.Run() = %v, want %v", got, tt.want)
 			}
+
 			if tt.errormatch != "" {
 				if !regexp.MustCompile(tt.errormatch).MatchString(errorBuffer.String()) {
 					t.Errorf("Expected the error output (%q) to match %q", errorBuffer.String(), tt.errormatch)
+				}
+			}
+			
+			if got == multistep.ActionHalt {
+				if _, ok := state.GetOk("error"); !ok {
+					t.Fatal("Expected 'error' to be set in statebag after failure")
 				}
 			}
 		})

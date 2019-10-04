@@ -3,6 +3,7 @@ package chroot
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -26,36 +27,51 @@ func (s StepVerifySourceDisk) Run(ctx context.Context, state multistep.StateBag)
 	ui.Say("Checking source disk location")
 	resource, err := azure.ParseResourceID(s.SourceDiskResourceID)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Could not parse resource id %q: %s", s.SourceDiskResourceID, err))
+		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
+		err := fmt.Errorf("Could not parse resource id %q: %s", s.SourceDiskResourceID, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	if !strings.EqualFold(resource.SubscriptionID, s.SubscriptionID) {
-		ui.Error(fmt.Sprintf("Source disk resource %q is in a different subscription than this VM (%q). "+
+		err := fmt.Errorf("Source disk resource %q is in a different subscription than this VM (%q). "+
 			"Packer does not know how to handle that.",
-			s.SourceDiskResourceID, s.SubscriptionID))
+			s.SourceDiskResourceID, s.SubscriptionID)
+		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	if !(strings.EqualFold(resource.Provider, "Microsoft.Compute") && strings.EqualFold(resource.ResourceType, "disks")) {
-		ui.Error(fmt.Sprintf("Resource ID %q is not a managed disk resource", s.SourceDiskResourceID))
+		err := fmt.Errorf("Resource ID %q is not a managed disk resource", s.SourceDiskResourceID)
+		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	disk, err := azcli.DisksClient().Get(ctx,
 		resource.ResourceGroup, resource.ResourceName)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Unable to retrieve disk (%q): %s", s.SourceDiskResourceID, err))
+		err := fmt.Errorf("Unable to retrieve disk (%q): %s", s.SourceDiskResourceID, err)
+		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	location := to.String(disk.Location)
 	if !strings.EqualFold(location, s.Location) {
-		ui.Error(fmt.Sprintf("Source disk resource %q is in a different location (%q) than this VM (%q). "+
+		err := fmt.Errorf("Source disk resource %q is in a different location (%q) than this VM (%q). "+
 			"Packer does not know how to handle that.",
 			s.SourceDiskResourceID,
 			location,
-			s.Location))
+			s.Location)
+		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
