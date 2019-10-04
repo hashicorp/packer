@@ -115,6 +115,7 @@ type Builder struct {
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = azcommon.TemplateFuncs
+	b.config.ctx.Funcs["vm"] = CreateVMMetadataTemplateFunc()
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -129,6 +130,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			},
 		},
 	}, raws...)
+	if err != nil {
+		return nil, err
+	}
 
 	var errs *packer.MultiError
 	var warns []string

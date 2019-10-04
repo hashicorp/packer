@@ -101,7 +101,52 @@ mounts `/prod` and `/dev`:
 
 -   The mount directory.
 
-## Example
+## Additional template function
+
+Because this builder runs on an Azure VM, there is an additional template function
+available called `vm`, which returns the following VM metadata:
+
+-   name
+-   subscription_id
+-   resource_group
+-   location
+-   resource_id
+
+This function can be used in the configuration templates, for example, use
+```
+"{{ vm `subscription_id` }}"
+```
+to fill in the subscription ID of the VM in any of the configuration options.
+
+## Examples
+Here are some examples using this builder.
+
+### Using a VM with a Managed Identity
+On a VM with a system-assigned managed identity that has the contributor role
+on its own resource group, the following config can be used to create an
+updated Debian image:
+``` json
+{
+  "builders": [{
+    "type": "azure-chroot",
+
+    "command_wrapper": "sudo {{.Command}}",
+
+    "image_resource_id": "/subscriptions/{{vm `subscription_id`}}/resourceGroups/{{vm `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+    "source": "credativ:Debian:9:latest"
+  }],
+  "provisioners": [{
+    "inline": [
+      "apt-get update",
+      "apt-get upgrade -y"
+    ],
+    "inline_shebang": "/bin/sh -x",
+    "type": "shell"
+  }]
+}
+```
+
+### Using a Service Principal
 Here is an example that creates a Debian image with updated packages. Specify
 all environment variables (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, 
 `ARM_SUBSCRIPTION_ID`) to use a service principal.
