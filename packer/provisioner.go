@@ -6,8 +6,6 @@ import (
 	"log"
 	"sync"
 	"time"
-
-	"github.com/hashicorp/packer/helper/config"
 )
 
 // A provisioner is responsible for installing and configuring software
@@ -22,7 +20,7 @@ type Provisioner interface {
 	// given for cancellation, a UI is given to communicate with the user, and
 	// a communicator is given that is guaranteed to be connected to some
 	// machine so that provisioning can be done.
-	Provision(context.Context, Ui, Communicator, *ProvisionHookData) error
+	Provision(context.Context, Ui, Communicator, interface{}) error
 }
 
 // A HookedProvisioner represents a provisioner and information describing it
@@ -39,35 +37,12 @@ type ProvisionHook struct {
 	Provisioners []*HookedProvisioner
 }
 
-type ProvisionHookData struct {
-	WinRMPassword string
-}
-
-func NewProvisionHookData() ProvisionHookData {
-	// this is the function we use to create the provisionhookdata, and as a
-	// bonus the initialized state applies defaults that act as passthroughs so
-	// that when prepare is called the first time, we can save interpolating
-	// these values until provisioner run time.
-	hookData := ProvisionHookData{
-		WinRMPassword: `{{.WinRMPassword}}`,
-	}
-	return hookData
-}
-
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
 	if len(h.Provisioners) == 0 {
 		return nil
 	}
-
-	generatedData := NewProvisionHookData()
-	err := config.Decode(&generatedData, &config.DecodeOpts{Interpolate: false}, data)
-	if err != nil {
-		log.Printf("Failed to decode provisioner generated data: %s", err)
-	}
-
-	log.Printf("Megan decoded data: %#v", generatedData)
 
 	if comm == nil {
 		return fmt.Errorf(
@@ -78,7 +53,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
-		err := p.Provisioner.Provision(ctx, ui, comm, &generatedData)
+		err := p.Provisioner.Provision(ctx, ui, comm, data)
 
 		ts.End(err)
 		if err != nil {
@@ -100,7 +75,7 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData *ProvisionHookData) error {
+func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData interface{}) error {
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
@@ -127,7 +102,7 @@ func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData *ProvisionHookData) error {
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData interface{}) error {
 	// Use a select to determine if we get cancelled during the wait
 	message := "Pausing before the next provisioner . Press enter to continue."
 

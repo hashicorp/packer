@@ -188,7 +188,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ *packer.ProvisionHookData) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ interface{}) error {
 	ui.Say("Provisioning with Ansible...")
 
 	if len(p.config.PlaybookDir) > 0 {

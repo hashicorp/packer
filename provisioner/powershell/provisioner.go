@@ -74,13 +74,7 @@ type Config struct {
 type Provisioner struct {
 	config        Config
 	communicator  packer.Communicator
-	generatedData *packer.ProvisionHookData
-}
-
-type ExecuteCommandTemplate struct {
-	Vars          string
-	Path          string
-	WinRMPassword string
+	generatedData map[string]interface{}
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
@@ -95,9 +89,9 @@ func (p *Provisioner) defaultExecuteCommand() string {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// Create passthrough for winrm password so we can fill it in once we know
+	// Create passthrough for build-generated data so we can fill it in once we know
 	// it
-	p.config.ctx.Data = packer.NewProvisionHookData()
+	p.config.ctx.Data = common.PlaceholderData()
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -226,12 +220,21 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData *packer.ProvisionHookData) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
-	p.generatedData = generatedData
+	p.generatedData = map[string]interface{}{}
+	for key, val := range generatedData.(map[interface{}]interface{}) {
+		keyString, ok := key.(string)
+		if ok {
+			p.generatedData[keyString] = val
+		} else {
+			log.Printf("Error casting generated data key to a string.")
+		}
+	}
 
-	packer.LogSecretFilter.Set(p.generatedData.WinRMPassword)
+	winRMPass := p.generatedData["WinRMPassword"]
+	packer.LogSecretFilter.Set(winRMPass.(string))
 
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
@@ -414,11 +417,11 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 		return "", err
 	}
 
-	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path:          p.config.RemotePath,
-		Vars:          p.config.RemoteEnvVarPath,
-		WinRMPassword: p.generatedData.WinRMPassword,
-	}
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = ctxData
+
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 
 	if err != nil {
@@ -437,11 +440,11 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 		return "", err
 	}
 
-	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path:          p.config.RemotePath,
-		Vars:          p.config.RemoteEnvVarPath,
-		WinRMPassword: p.generatedData.WinRMPassword,
-	}
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = ctxData
+
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return "", fmt.Errorf("Error processing command: %s", err)

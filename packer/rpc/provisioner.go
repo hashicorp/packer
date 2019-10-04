@@ -39,11 +39,11 @@ func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 }
 
 type ProvisionerProvisionArgs struct {
-	GeneratedData *packer.ProvisionHookData
+	GeneratedData interface{}
 	StreamID      uint32
 }
 
-func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData *packer.ProvisionHookData) error {
+func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)

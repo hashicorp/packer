@@ -22,7 +22,7 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 	return nil
 }
 
-func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData *ProvisionHookData) error {
+func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData interface{}) error {
 	t.ProvCalled = true
 	t.ProvCommunicator = comm
 	t.ProvUi = ui

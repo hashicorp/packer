@@ -179,7 +179,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ *packer.ProvisionHookData) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ interface{}) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
