@@ -38,7 +38,7 @@ if ($HostVMAdapter){
   if ($HostNetAdapter){
     $HostNetAdapterIfIndex = @()
     $HostNetAdapterIfIndex += $HostNetAdapter.ifIndex
-    $HostNetAdapterConfiguration = @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex)
+    $HostNetAdapterConfiguration = @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex)}
     if ($HostNetAdapterConfiguration){
       return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
     }
