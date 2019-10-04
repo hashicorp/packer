@@ -1,3 +1,25 @@
+## 1.5.0 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/oracle-oci: Support defined tags for oci builder [GH-8172]
+
+### BUG FIXES:
+* builder/amazon: Fix spot instance bug where builder would fail if one
+    availability zone could not support the requested spot instance type, even
+    if another AZ could do so. [GH-8184]
+* builder/docker: Use a unique temp dir for each build to prevent concurrent
+    builds from stomping on each other [GH-8192]
+* builder/openstack: Warn instead of failing on terminate if instance is
+    already shut down [GH-8176]
+* post-processor/digitalocean-import: Fix panic when 'image_regions' not set
+    [GH-8179]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/qemu: Provide disk size as a string [GH-7546]
+* core: Finish deprecating old tempalte functions clean_ami_name and
+    clean_image_name in favor of generic clean_resource_name [GH-8193]
+
+
 ## 1.4.4 (October 1, 2019)
 
 ### IMPROVEMENTS:
