@@ -57,7 +57,7 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 				GetDiskResponseCode: 200,
 				GetDiskResponseBody: `{"location":"westus2"}`,
 			},
-			want: multistep.ActionHalt,
+			want:       multistep.ActionHalt,
 			errormatch: "Could not parse resource id",
 		},
 		{
@@ -142,7 +142,7 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 			})
 			state.Put("ui", ui)
 
-			got := s.Run(context.TODO(), state);
+			got := s.Run(context.TODO(), state)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StepVerifySourceDisk.Run() = %v, want %v", got, tt.want)
 			}
@@ -152,7 +152,7 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 					t.Errorf("Expected the error output (%q) to match %q", errorBuffer.String(), tt.errormatch)
 				}
 			}
-			
+
 			if got == multistep.ActionHalt {
 				if _, ok := state.GetOk("error"); !ok {
 					t.Fatal("Expected 'error' to be set in statebag after failure")

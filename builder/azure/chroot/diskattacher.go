@@ -26,7 +26,7 @@ type DiskAttacher interface {
 	WaitForDetach(ctx context.Context, diskID string) error
 }
 
-var NewDiskAttacher = func (azureClient client.AzureClientSet) DiskAttacher {
+var NewDiskAttacher = func(azureClient client.AzureClientSet) DiskAttacher {
 	return &diskAttacher{
 		azcli: azureClient,
 	}
