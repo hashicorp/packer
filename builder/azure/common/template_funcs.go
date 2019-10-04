@@ -3,8 +3,6 @@ package common
 import (
 	"bytes"
 	"text/template"
-
-	packertpl "github.com/hashicorp/packer/common/template"
 )
 
 func isValidByteValue(b byte) bool {
