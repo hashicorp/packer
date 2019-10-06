@@ -40,6 +40,7 @@ type Config struct {
 	Memory  int          `mapstructure:"memory"`
 	Cores   int          `mapstructure:"cores"`
 	Sockets int          `mapstructure:"sockets"`
+	CPUType string       `mapstructure:"cpu_type"`
 	OS      string       `mapstructure:"os"`
 	NICs    []nicConfig  `mapstructure:"network_adapters"`
 	Disks   []diskConfig `mapstructure:"disks"`
@@ -128,6 +129,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Sockets < 1 {
 		log.Printf("Number of sockets %d is too small, using default: 1", c.Sockets)
 		c.Sockets = 1
+	}
+	if c.CPUType == "" {
+		log.Printf("CPU type not set, using default 'kvm64'")
+		c.CPUType = "kvm64"
 	}
 	if c.OS == "" {
 		log.Printf("OS not set, using default 'other'")
