@@ -152,6 +152,10 @@ builder.
     then `qemu-guest-agent` must be installed on the guest. When disabled, then 
     `ssh_host` should be used. Defaults to `true`.
 
+-   `scsi_controller` (string) - The SCSI controller model to emulate. Can be `lsi`,
+    `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
+    Defaults to `lsi`.
+
 ## Example: Fedora with kickstart
 
 Here is a basic example creating a Fedora 29 server image with a Kickstart
