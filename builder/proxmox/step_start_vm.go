@@ -31,7 +31,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		Name:         c.VMName,
 		Agent:        agent,
 		Boot:         "cdn", // Boot priority, c:CDROM -> d:Disk -> n:Network
-		QemuCpu:      "host",
+		QemuCpu:      c.CPUType,
 		Description:  "Packer ephemeral build VM",
 		Memory:       c.Memory,
 		QemuCores:    c.Cores,

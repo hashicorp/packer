@@ -73,6 +73,10 @@ builder.
 -   `sockets` (int) - How many CPU sockets to give the virtual machine.
     Defaults to `1`
 
+-   `cpu_type` (string) - The CPU type to emulate. See the Proxmox API
+    documentation for the complete list of accepted values. For best
+    performance, set this to `host`. Defaults to `kvm64`.
+
 -   `os` (string) - The operating system. Can be `wxp`, `w2k`, `w2k3`, `w2k8`,
     `wvista`, `win7`, `win8`, `win10`, `l24` (Linux 2.4), `l26` (Linux 2.6+),
     `solaris` or `other`. Defaults to `other`.

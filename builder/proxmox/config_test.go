@@ -90,6 +90,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	// Memory 0 is too small, using default: 512
 	// Number of cores 0 is too small, using default: 1
 	// Number of sockets 0 is too small, using default: 1
+	// CPU type not set, using default 'kvm64'
 	// OS not set, using default 'other'
 	// NIC 0 model not set, using default 'e1000'
 	// Disk 0 cache mode not set, using default 'none'
@@ -103,6 +104,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 	if b.config.Sockets != 1 {
 		t.Errorf("Expected Sockets to be 1, got %d", b.config.Sockets)
+	}
+	if b.config.CPUType != "kvm64" {
+		t.Errorf("Expected CPU type to be 'kvm64', got %s", b.config.CPUType)
 	}
 	if b.config.OS != "other" {
 		t.Errorf("Expected OS to be 'other', got %s", b.config.OS)
