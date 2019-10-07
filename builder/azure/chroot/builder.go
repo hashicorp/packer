@@ -28,6 +28,9 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
+// BuilderId is the unique ID for this builder
+const BuilderId = "azure.chroot"
+
 // Config is the configuration that is chained through the steps and settable
 // from the template.
 type Config struct {
@@ -437,7 +440,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, rawErr.(error)
 	}
 
-	return nil, nil
+	// Build the artifact and return it
+	artifact := &azcommon.Artifact{
+		Resources:      []string{b.config.ImageResourceID},
+		BuilderIdValue: BuilderId,
+	}
+
+	return artifact, nil
 }
 
 var _ packer.Builder = &Builder{}
