@@ -94,6 +94,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	// NIC 0 model not set, using default 'e1000'
 	// Disk 0 cache mode not set, using default 'none'
 	// Agent not set, default is true
+	// SCSI controller not set, using default 'lsi'
 
 	if b.config.Memory != 512 {
 		t.Errorf("Expected Memory to be 512, got %d", b.config.Memory)
@@ -115,6 +116,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 	if b.config.Agent != true {
 		t.Errorf("Expected Agent to be true, got %t", b.config.Agent)
+	}
+	if b.config.SCSIController != "lsi" {
+		t.Errorf("Expected SCSI controller to be 'lsi', got %s", b.config.SCSIController)
 	}
 }
 
