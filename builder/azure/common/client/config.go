@@ -4,7 +4,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/builder/azure/common"
 	"os"
 	"strings"
 	"time"
@@ -303,4 +302,4 @@ func (c *Config) FillParameters() error {
 }
 
 // allow override for unit tests
-var findTenantID = common.FindTenantID
+var findTenantID = FindTenantID

@@ -6,12 +6,11 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/azure"
 
-	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_MetadataReturnsComputeInfo(t *testing.T) {
-	if !common.IsAzure() {
+	if !IsAzure() {
 		t.Skipf("Not running on Azure, skipping live IMDS test")
 	}
 	mdc := NewMetadataClient()

@@ -1,4 +1,4 @@
-package common
+package client
 
 import (
 	"io/ioutil"
