@@ -120,6 +120,13 @@ to fill in the subscription ID of the VM in any of the configuration options.
 
 ## Examples
 Here are some examples using this builder.
+This builder requires privileged actions, such as mounting disks, running
+`chroot` and other admin commands. Usually it needs to be run with root
+permissions, for example:
+
+```
+sudo -E packer build example.json
+```
 
 ### Using a VM with a Managed Identity
 On a VM with a system-assigned managed identity that has the contributor role
@@ -130,8 +137,6 @@ updated Debian image:
 {
   "builders": [{
     "type": "azure-chroot",
-
-    "command_wrapper": "sudo {{.Command}}",
 
     "image_resource_id": "/subscriptions/{{vm `subscription_id`}}/resourceGroups/{{vm `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
     "source": "credativ:Debian:9:latest"
