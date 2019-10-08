@@ -506,6 +506,10 @@ func TestSystemShouldDefineRuntimeValues(t *testing.T) {
 	if c.tmpOSDiskName == "" {
 		t.Errorf("Expected tmpOSDiskName to not be empty, but it was '%s'!", c.tmpOSDiskName)
 	}
+
+	if c.tmpNsgName == "" {
+		t.Errorf("Expected tmpNsgName to not be empty, but it was '%s'!", c.tmpNsgName)
+	}
 }
 
 func TestConfigShouldTransformToVirtualMachineCaptureParameters(t *testing.T) {

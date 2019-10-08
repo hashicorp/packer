@@ -347,7 +347,9 @@ type Config struct {
 	// allowed access to the VM. If provided, an Azure Network Security
 	// Group will be created with corresponding rules and be bound to
 	// the NIC attached to the VM.
-	AllowedInboundIpAddresses         []string `mapstructure:"allowed_inbound_ip_addresses"`
+	// Providing `allowed_inbound_ip_addresses` in combination with
+	// `virtual_network_name` is not allowed.
+	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
 	// Runtime Values
 	UserName               string
@@ -363,6 +365,7 @@ type Config struct {
 	tmpOSDiskName          string
 	tmpSubnetName          string
 	tmpVirtualNetworkName  string
+	tmpNsgName             string
 	tmpWinRMCertificateUrl string
 
 	// Authentication with the VM via SSH
@@ -610,6 +613,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpOSDiskName = tempName.OSDiskName
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
+	c.tmpNsgName = tempName.NsgName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
