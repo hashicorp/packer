@@ -37,15 +37,16 @@ type Config struct {
 	VMName string `mapstructure:"vm_name"`
 	VMID   int    `mapstructure:"vm_id"`
 
-	Memory  int          `mapstructure:"memory"`
-	Cores   int          `mapstructure:"cores"`
-	Sockets int          `mapstructure:"sockets"`
-	CPUType string       `mapstructure:"cpu_type"`
-	OS      string       `mapstructure:"os"`
-	NICs    []nicConfig  `mapstructure:"network_adapters"`
-	Disks   []diskConfig `mapstructure:"disks"`
-	ISOFile string       `mapstructure:"iso_file"`
-	Agent   bool         `mapstructure:"qemu_agent"`
+	Memory         int          `mapstructure:"memory"`
+	Cores          int          `mapstructure:"cores"`
+  CPUType        string       `mapstructure:"cpu_type"`
+	Sockets        int          `mapstructure:"sockets"`
+	OS             string       `mapstructure:"os"`
+	NICs           []nicConfig  `mapstructure:"network_adapters"`
+	Disks          []diskConfig `mapstructure:"disks"`
+	ISOFile        string       `mapstructure:"iso_file"`
+	Agent          bool         `mapstructure:"qemu_agent"`
+	SCSIController string       `mapstructure:"scsi_controller"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
@@ -163,6 +164,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if !contains([]string{"zfspool", "lvm"}, c.Disks[idx].StoragePoolType) && c.Disks[idx].DiskFormat == "" {
 			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType)))
 		}
+	}
+	if c.SCSIController == "" {
+		log.Printf("SCSI controller not set, using default 'lsi'")
+		c.SCSIController = "lsi"
 	}
 
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
