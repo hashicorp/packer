@@ -40,6 +40,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		QemuIso:      c.ISOFile,
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
+		Scsihw:       c.SCSIController,
 	}
 
 	if c.VMID == 0 {
