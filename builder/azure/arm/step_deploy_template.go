@@ -115,6 +115,12 @@ func deleteResource(ctx context.Context, client *AzureClient, resourceType strin
 			err = f.WaitForCompletionRef(ctx, client.VirtualNetworksClient.Client)
 		}
 		return err
+	case "Microsoft.Network/networkSecurityGroups":
+		f, err := client.SecurityGroupsClient.Delete(ctx, resourceGroupName, resourceName)
+		if err == nil {
+			err = f.WaitForCompletionRef(ctx, client.SecurityGroupsClient.Client)
+		}
+		return err
 	case "Microsoft.Network/publicIPAddresses":
 		f, err := client.PublicIPAddressesClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {

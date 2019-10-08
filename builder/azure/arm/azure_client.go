@@ -37,6 +37,7 @@ type AzureClient struct {
 	network.InterfacesClient
 	network.SubnetsClient
 	network.VirtualNetworksClient
+	network.SecurityGroupsClient
 	compute.ImagesClient
 	compute.VirtualMachinesClient
 	common.VaultClient
@@ -181,6 +182,12 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VirtualNetworksClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualNetworksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VirtualNetworksClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VirtualNetworksClient.UserAgent)
+
+	azureClient.SecurityGroupsClient = network.NewSecurityGroupsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.SecurityGroupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.SecurityGroupsClient.RequestInspector = withInspection(maxlen)
+	azureClient.SecurityGroupsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.SecurityGroupsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.SecurityGroupsClient.UserAgent)
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.PublicIPAddressesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)

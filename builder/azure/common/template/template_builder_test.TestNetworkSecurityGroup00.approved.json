@@ -50,40 +50,7 @@
         },
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Network/publicIPAddresses"
-    },
-    {
-      "apiVersion": "[variables('virtualNetworksApiVersion')]",
-      "location": "[variables('location')]",
-      "name": "[variables('virtualNetworkName')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetAddressPrefix')]"
-            }
-          }
-        ]
-      },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
-      "type": "Microsoft.Network/virtualNetworks"
     },
     {
       "apiVersion": "[variables('networkInterfacesApiVersion')]",
@@ -109,12 +76,6 @@
           }
         ]
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Network/networkInterfaces"
     },
     {
@@ -124,11 +85,6 @@
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
-      "plan": {
-        "name": "planName00",
-        "product": "planProduct00",
-        "publisher": "planPublisher00"
-      },
       "properties": {
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -153,7 +109,7 @@
             "ssh": {
               "publicKeys": [
                 {
-                  "keyData": "",
+                  "keyData": "--test-ssh-authorized-key--",
                   "path": "[variables('sshKeyPath')]"
                 }
               ]
@@ -162,9 +118,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "offer": "ignored00",
-            "publisher": "ignored00",
-            "sku": "ignored00",
+            "offer": "UbuntuServer",
+            "publisher": "Canonical",
+            "sku": "16.04",
             "version": "latest"
           },
           "osDisk": {
@@ -177,13 +133,61 @@
           }
         }
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Compute/virtualMachines"
+    },
+    {
+      "apiVersion": "[variables('networkSecurityGroupsApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[parameters('nsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowIPsToSshWinRMInbound",
+            "properties": {
+              "access": "Allow",
+              "description": "Allow inbound traffic from specified IP addresses",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "123",
+              "direction": "Inbound",
+              "priority": 100,
+              "protocol": "Tcp",
+              "sourceAddressPrefixes": [
+                "127.0.0.1",
+                "192.168.100.0/24"
+              ],
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/networkSecurityGroups"
+    },
+    {
+      "apiVersion": "[variables('virtualNetworksApiVersion')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('nsgName'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[variables('virtualNetworkName')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/virtualNetworks"
     }
   ],
   "variables": {
