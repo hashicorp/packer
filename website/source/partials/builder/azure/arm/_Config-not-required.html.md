@@ -217,6 +217,13 @@
 -   `disk_caching_type` (string) - Specify the disk caching type. Valid values
     are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
     
+-   `allowed_inbound_ip_addresses` ([]string) - Specify the list of IP addresses and CIDR blocks that should be
+    allowed access to the VM. If provided, an Azure Network Security
+    Group will be created with corresponding rules and be bound to
+    the NIC attached to the VM.
+    Providing `allowed_inbound_ip_addresses` in combination with
+    `virtual_network_name` is not allowed.
+    
 -   `async_resourcegroup_delete` (bool) - If you want packer to delete the
     temporary resource group asynchronously set this value. It's a boolean
     value and defaults to false. Important Setting this true means that
