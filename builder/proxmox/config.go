@@ -39,7 +39,7 @@ type Config struct {
 
 	Memory         int          `mapstructure:"memory"`
 	Cores          int          `mapstructure:"cores"`
-  CPUType        string       `mapstructure:"cpu_type"`
+	CPUType        string       `mapstructure:"cpu_type"`
 	Sockets        int          `mapstructure:"sockets"`
 	OS             string       `mapstructure:"os"`
 	NICs           []nicConfig  `mapstructure:"network_adapters"`
