@@ -108,6 +108,9 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 			}
 			return err
 		})
+		if err != nil {
+			return err
+		}
 
 		if err = deploymentOperations.Next(); err != nil {
 			return err
