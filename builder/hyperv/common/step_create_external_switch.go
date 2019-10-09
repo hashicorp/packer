@@ -84,8 +84,6 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Unregistering and deleting external switch...")
 
-	var err error = nil
-
 	errMsg := "Error deleting external switch: %s"
 
 	// connect the vm to the old switch
@@ -94,7 +92,7 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	err = driver.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
+	err := driver.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
 	if err != nil {
 		ui.Error(fmt.Sprintf(errMsg, err))
 		return
