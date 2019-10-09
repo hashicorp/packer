@@ -283,6 +283,9 @@ Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ 
 	}
 	final := regex.ReplaceAllString(b.String(), "")
 	regex, err = regexp.Compile("\n\n")
+	if err != nil {
+		return "", err
+	}
 	final = regex.ReplaceAllString(final, "\n")
 
 	return final, nil
