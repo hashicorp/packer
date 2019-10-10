@@ -95,8 +95,8 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 				return nil, errors.New("WinRM wait cancelled")
 			case <-time.After(5 * time.Second):
 			}
-			first = false
 		}
+		first = false
 
 		host, err := s.Host(state)
 		if err != nil {
