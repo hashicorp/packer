@@ -33,7 +33,7 @@ func (c *comm) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	return errors.New("Upload is not implemented when communicator = 'none'")
 }
 
-func (c *comm) UploadDir(dst string, src string, excl []string) error {
+func (c *comm) UploadDir(dst string, src string, excl []string, overwriteRemote bool) error {
 	return errors.New("UploadDir is not implemented when communicator = 'none'")
 }
 
