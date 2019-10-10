@@ -107,7 +107,7 @@ func TestCommunicatorRPC(t *testing.T) {
 	dirDst := "foo"
 	dirSrc := "bar"
 	dirExcl := []string{"foo"}
-	err = remote.UploadDir(dirDst, dirSrc, dirExcl)
+	err = remote.UploadDir(dirDst, dirSrc, dirExcl, false)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

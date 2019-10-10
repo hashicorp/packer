@@ -104,7 +104,7 @@ func (c communicator) Upload(string, io.Reader, *os.FileInfo) error {
 	return errors.New("communicator not supported")
 }
 
-func (c communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	return errors.New("communicator not supported")
 }
 

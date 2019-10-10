@@ -24,9 +24,9 @@ type MockCommunicator struct {
 	UploadPath   string
 	UploadData   string
 
-	UploadDirDst     string
-	UploadDirSrc     string
-	UploadDirExclude []string
+	UploadDirDst             string
+	UploadDirSrc             string
+	UploadDirExclude         []string
 	UploadDirOverwriteRemote bool
 
 	DownloadDirDst     string

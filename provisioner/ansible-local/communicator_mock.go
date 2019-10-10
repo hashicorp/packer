@@ -24,7 +24,7 @@ func (c *communicatorMock) Upload(dst string, _ io.Reader, _ *os.FileInfo) error
 	return nil
 }
 
-func (c *communicatorMock) UploadDir(dst, src string, exclude []string) error {
+func (c *communicatorMock) UploadDir(dst, src string, exclude []string, overwriteRemote bool) error {
 	return nil
 }
 
