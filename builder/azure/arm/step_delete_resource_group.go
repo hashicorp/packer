@@ -95,7 +95,7 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 			resourceType,
 			resourceName))
 
-		err := retry.Config{
+		_ = retry.Config{
 			Tries:      10,
 			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
@@ -108,9 +108,6 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 			}
 			return err
 		})
-		if err != nil {
-			return err
-		}
 
 		if err = deploymentOperations.Next(); err != nil {
 			return err
