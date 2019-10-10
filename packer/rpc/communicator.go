@@ -145,7 +145,7 @@ func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err er
 	return
 }
 
-func (c *communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	args := &CommunicatorUploadDirArgs{
 		Dst:     dst,
 		Src:     src,
@@ -299,7 +299,7 @@ func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interfa
 }
 
 func (c *CommunicatorServer) UploadDir(args *CommunicatorUploadDirArgs, reply *error) error {
-	return c.c.UploadDir(args.Dst, args.Src, args.Exclude)
+	return c.c.UploadDir(args.Dst, args.Src, args.Exclude, false)
 }
 
 func (c *CommunicatorServer) DownloadDir(args *CommunicatorUploadDirArgs, reply *error) error {

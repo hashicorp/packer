@@ -171,7 +171,7 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 
 func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicator) error {
 	for _, dir := range p.config.ModuleDirs {
-		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude); err != nil {
+		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude, false); err != nil {
 			return fmt.Errorf("Could not upload %q: %s", dir.Source, err)
 		}
 		ui.Message(fmt.Sprintf("transferred %q to %q", dir.Source, dir.Destination))

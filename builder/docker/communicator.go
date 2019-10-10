@@ -164,7 +164,7 @@ func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) er
 	return nil
 }
 
-func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *Communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	/*
 		from https://docs.docker.com/engine/reference/commandline/cp/#extended-description
 		SRC_PATH specifies a directory

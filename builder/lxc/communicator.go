@@ -101,7 +101,7 @@ func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo)
 	return ShellCommand(cpCmd).Run()
 }
 
-func (c *LxcAttachCommunicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *LxcAttachCommunicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	// TODO: remove any file copied if it appears in `exclude`
 	dest := filepath.Join(c.RootFs, dst)
 	log.Printf("Uploading directory '%s' to rootfs '%s'", src, dest)

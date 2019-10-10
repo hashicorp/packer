@@ -60,7 +60,7 @@ func (c *Communicator) Upload(string, io.Reader, *os.FileInfo) error {
 	return fmt.Errorf("upload not supported")
 }
 
-func (c *Communicator) UploadDir(string, string, []string) error {
+func (c *Communicator) UploadDir(string, string, []string, bool) error {
 	return fmt.Errorf("uploadDir not supported")
 }
 

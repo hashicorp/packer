@@ -319,7 +319,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 		src = src + "/"
 	}
 
-	return comm.UploadDir(dst, src, nil)
+	return comm.UploadDir(dst, src, nil, false)
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst string, src string) error {

@@ -474,7 +474,7 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 
 func (p *Provisioner) uploadDir(ui packer.Ui, comm packer.Communicator, dst, src string, ignore []string) error {
 	_, temp_dst := filepath.Split(dst)
-	if err := comm.UploadDir(temp_dst, src, ignore); err != nil {
+	if err := comm.UploadDir(temp_dst, src, ignore, false); err != nil {
 		return err
 	}
 	return p.moveFile(ui, comm, dst, temp_dst)

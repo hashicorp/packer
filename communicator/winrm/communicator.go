@@ -141,7 +141,7 @@ func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) err
 }
 
 // UploadDir implementation of communicator.Communicator interface
-func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *Communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	if !strings.HasSuffix(src, "/") {
 		dst = fmt.Sprintf("%s\\%s", dst, filepath.Base(src))
 	}

@@ -31,6 +31,9 @@ type Config struct {
 	// False if the sources have to exist.
 	Generated bool
 
+	// True if direction is upload and any existing destination directory is going to be overwritten
+	OverwriteRemoteDirectory bool
+
 	ctx interpolate.Context
 }
 
@@ -152,7 +155,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 
 		// If we're uploading a directory, short circuit and do that
 		if info.IsDir() {
-			return comm.UploadDir(p.config.Destination, src, nil)
+			return comm.UploadDir(p.config.Destination, src, nil, p.config.OverwriteRemoteDirectory)
 		}
 
 		// We're uploading a file...

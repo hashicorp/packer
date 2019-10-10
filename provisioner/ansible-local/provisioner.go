@@ -509,5 +509,5 @@ func (p *Provisioner) uploadDir(ui packer.Ui, comm packer.Communicator, dst, src
 	if src[len(src)-1] != '/' {
 		src = src + "/"
 	}
-	return comm.UploadDir(dst, src, nil)
+	return comm.UploadDir(dst, src, nil, false)
 }

@@ -87,7 +87,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	return command.Run()
 }
 
-func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *Communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	// NOTE:lxc file push doesn't yet support directory uploads.
 	// As a work around, we tar up the folder, upload it as a file, then extract it
 

@@ -86,7 +86,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	return ShellCommand(cpCmd).Run()
 }
 
-func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *Communicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	// If src ends with a trailing "/", copy from "src/." so that
 	// directory contents (including hidden files) are copied, but the
 	// directory "src" is omitted.  BSD does this automatically when

@@ -39,9 +39,9 @@ func (c *ChrootCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo) er
 	return c.Wrapped.Upload(dst, r, fi)
 }
 
-func (c *ChrootCommunicator) UploadDir(dst string, src string, exclude []string) error {
+func (c *ChrootCommunicator) UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error {
 	dst = filepath.Join(c.Chroot, dst)
-	return c.Wrapped.UploadDir(dst, src, exclude)
+	return c.Wrapped.UploadDir(dst, src, exclude, false)
 }
 
 func (c *ChrootCommunicator) Download(src string, w io.Writer) error {

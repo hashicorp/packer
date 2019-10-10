@@ -27,6 +27,7 @@ type MockCommunicator struct {
 	UploadDirDst     string
 	UploadDirSrc     string
 	UploadDirExclude []string
+	UploadDirOverwriteRemote bool
 
 	DownloadDirDst     string
 	DownloadDirSrc     string
@@ -90,10 +91,11 @@ func (c *MockCommunicator) Upload(path string, r io.Reader, fi *os.FileInfo) err
 	return nil
 }
 
-func (c *MockCommunicator) UploadDir(dst string, src string, excl []string) error {
+func (c *MockCommunicator) UploadDir(dst string, src string, excl []string, overwriteRemote bool) error {
 	c.UploadDirDst = dst
 	c.UploadDirSrc = src
 	c.UploadDirExclude = excl
+	c.UploadDirOverwriteRemote = overwriteRemote
 
 	return nil
 }

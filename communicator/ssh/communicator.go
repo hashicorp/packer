@@ -179,7 +179,7 @@ func (c *comm) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	}
 }
 
-func (c *comm) UploadDir(dst string, src string, excl []string) error {
+func (c *comm) UploadDir(dst string, src string, excl []string, overwriteRemote bool) error {
 	log.Printf("[DEBUG] Upload dir '%s' to '%s'", src, dst)
 	if c.config.UseSftp {
 		return c.sftpUploadDirSession(dst, src, excl)

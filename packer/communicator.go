@@ -63,14 +63,14 @@ type Communicator interface {
 	Upload(string, io.Reader, *os.FileInfo) error
 
 	// UploadDir uploads the contents of a directory recursively to
-	// the remote path. It also takes an optional slice of paths to
-	// ignore when uploading.
+	// the remote path. It takes an optional slice of paths to
+	// ignore when uploading. It can also optionally overwrite remote directories.
 	//
 	// The folder name of the source folder should be created unless there
 	// is a trailing slash on the source "/". For example: "/tmp/src" as
 	// the source will create a "src" directory in the destination unless
 	// a trailing slash is added. This is identical behavior to rsync(1).
-	UploadDir(dst string, src string, exclude []string) error
+	UploadDir(dst string, src string, exclude []string, overwriteRemote bool) error
 
 	// Download downloads a file from the machine from the given remote path
 	// with the contents writing to the given writer. This method will

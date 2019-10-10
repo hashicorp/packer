@@ -242,7 +242,7 @@ func (state *scpUploadState) DirProtocol(in *bufio.Reader, out io.Writer) error 
 		return err
 	}
 
-	if err := state.comm.UploadDir(filepath.Dir(state.DestPath()), state.SrcPath(), nil); err != nil {
+	if err := state.comm.UploadDir(filepath.Dir(state.DestPath()), state.SrcPath(), nil, false); err != nil {
 		return err
 	}
 
