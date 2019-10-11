@@ -1,10 +1,11 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type Upload struct {
@@ -14,7 +15,7 @@ type Upload struct {
 type stepPrepareUpload struct {
 }
 
-func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
@@ -35,6 +36,9 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 		} else {
 			cloudErrors := &VagrantCloudErrors{}
 			err = decodeBody(resp, cloudErrors)
+			if err != nil {
+				ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+			}
 			state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
 		}
 		return multistep.ActionHalt

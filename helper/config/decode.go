@@ -23,6 +23,15 @@ type DecodeOpts struct {
 	Interpolate        bool
 	InterpolateContext *interpolate.Context
 	InterpolateFilter  *interpolate.RenderFilter
+
+	DecodeHooks []mapstructure.DecodeHookFunc
+}
+
+var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
+	uint8ToStringHook,
+	stringToTrilean,
+	mapstructure.StringToSliceHookFunc(","),
+	mapstructure.StringToTimeDurationHookFunc(),
 }
 
 // Decode decodes the configuration into the target and optionally
@@ -60,17 +69,18 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		}
 	}
 
+	decodeHookFuncs := DefaultDecodeHookFuncs
+	if len(config.DecodeHooks) != 0 {
+		decodeHookFuncs = config.DecodeHooks
+	}
+
 	// Build our decoder
 	var md mapstructure.Metadata
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Result:           target,
 		Metadata:         &md,
 		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			uint8ToStringHook,
-			mapstructure.StringToSliceHookFunc(","),
-			mapstructure.StringToTimeDurationHookFunc(),
-		),
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(decodeHookFuncs...),
 	})
 	if err != nil {
 		return err
@@ -108,10 +118,11 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 // detecting things like user variables from the raw configuration params.
 func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	var s struct {
-		BuildName    string            `mapstructure:"packer_build_name"`
-		BuildType    string            `mapstructure:"packer_builder_type"`
-		TemplatePath string            `mapstructure:"packer_template_path"`
-		Vars         map[string]string `mapstructure:"packer_user_variables"`
+		BuildName     string            `mapstructure:"packer_build_name"`
+		BuildType     string            `mapstructure:"packer_builder_type"`
+		TemplatePath  string            `mapstructure:"packer_template_path"`
+		Vars          map[string]string `mapstructure:"packer_user_variables"`
+		SensitiveVars []string          `mapstructure:"packer_sensitive_variables"`
 	}
 
 	for _, r := range raws {
@@ -121,10 +132,11 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	}
 
 	return &interpolate.Context{
-		BuildName:     s.BuildName,
-		BuildType:     s.BuildType,
-		TemplatePath:  s.TemplatePath,
-		UserVariables: s.Vars,
+		BuildName:          s.BuildName,
+		BuildType:          s.BuildType,
+		TemplatePath:       s.TemplatePath,
+		UserVariables:      s.Vars,
+		SensitiveVariables: s.SensitiveVars,
 	}, nil
 }
 
@@ -141,5 +153,32 @@ func uint8ToStringHook(f reflect.Kind, t reflect.Kind, v interface{}) (interface
 		}
 	}
 
+	return v, nil
+}
+
+func stringToTrilean(f reflect.Type, t reflect.Type, v interface{}) (interface{}, error) {
+	// We have a custom data type, config, which we read from a string and
+	// then cast to a *bool. Why? So that we can appropriately read "unset"
+	// *bool values in order to intelligently default, even when the values are
+	// being set by a template variable.
+
+	testTril, _ := TrileanFromString("")
+	if t == reflect.TypeOf(testTril) {
+		// From value is string
+		if f == reflect.TypeOf("") {
+			tril, err := TrileanFromString(v.(string))
+			if err != nil {
+				return v, fmt.Errorf("Error parsing bool from given var: %s", err)
+			}
+			return tril, nil
+		} else {
+			// From value is boolean
+			if f == reflect.TypeOf(true) {
+				tril := TrileanFromBool(v.(bool))
+				return tril, nil
+			}
+		}
+
+	}
 	return v, nil
 }

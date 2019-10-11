@@ -1,24 +1,24 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step copies the virtual disk that will be used as the
 // hard drive for the virtual machine.
 type stepCopyDisk struct{}
 
-func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s", config.VMName))
-	name := config.VMName
 
 	command := []string{
 		"convert",
@@ -27,7 +27,7 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 		path,
 	}
 
-	if config.DiskImage == false {
+	if !config.DiskImage || config.UseBackingFile {
 		return multistep.ActionContinue
 	}
 
@@ -38,8 +38,6 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	state.Put("disk_filename", name)
 
 	return multistep.ActionContinue
 }

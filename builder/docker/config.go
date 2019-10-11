@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package docker
 
 import (
@@ -23,29 +25,82 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	Author         string
-	Changes        []string
-	Commit         bool
-	ContainerDir   string `mapstructure:"container_dir"`
-	Discard        bool
-	ExecUser       string `mapstructure:"exec_user"`
-	ExportPath     string `mapstructure:"export_path"`
-	Image          string
-	Message        string
-	Privileged     bool `mapstructure:"privileged"`
-	Pty            bool
-	Pull           bool
-	RunCommand     []string `mapstructure:"run_command"`
-	Volumes        map[string]string
-	FixUploadOwner bool `mapstructure:"fix_upload_owner"`
+	// Set the author (e-mail) of a commit.
+	Author string `mapstructure:"author"`
+	// Dockerfile instructions to add to the commit. Example of instructions
+	// are CMD, ENTRYPOINT, ENV, and EXPOSE. Example: [ "USER ubuntu", "WORKDIR
+	// /app", "EXPOSE 8080" ]
+	Changes []string `mapstructure:"changes"`
+	// If true, the container will be committed to an image rather than exported.
+	Commit bool `mapstructure:"commit" required:"true"`
+
+	// The directory inside container to mount temp directory from host server
+	// for work [file provisioner](/docs/provisioners/file.html). This defaults
+	// to c:/packer-files on windows and /packer-files on other systems.
+	ContainerDir string `mapstructure:"container_dir" required:"false"`
+	// Throw away the container when the build is complete. This is useful for
+	// the [artifice
+	// post-processor](https://www.packer.io/docs/post-processors/artifice.html).
+	Discard bool `mapstructure:"discard" required:"true"`
+	// Username (UID) to run remote commands with. You can also set the group
+	// name/ID if you want: (UID or UID:GID). You may need this if you get
+	// permission errors trying to run the shell or other provisioners.
+	ExecUser string `mapstructure:"exec_user" required:"false"`
+	// The path where the final container will be exported as a tar file.
+	ExportPath string `mapstructure:"export_path" required:"true"`
+	// The base image for the Docker container that will be started. This image
+	// will be pulled from the Docker registry if it doesn't already exist.
+	Image string `mapstructure:"image" required:"true"`
+	// Set a message for the commit.
+	Message string `mapstructure:"message" required:"true"`
+	// If true, run the docker container with the `--privileged` flag. This
+	// defaults to false if not set.
+	Privileged bool `mapstructure:"privileged" required:"false"`
+	Pty        bool
+	// If true, the configured image will be pulled using `docker pull` prior
+	// to use. Otherwise, it is assumed the image already exists and can be
+	// used. This defaults to true if not set.
+	Pull bool `mapstructure:"pull" required:"false"`
+	// An array of arguments to pass to docker run in order to run the
+	// container. By default this is set to ["-d", "-i", "-t",
+	// "--entrypoint=/bin/sh", "--", "{{.Image}}"] if you are using a linux
+	// container, and ["-d", "-i", "-t", "--entrypoint=powershell", "--",
+	// "{{.Image}}"] if you are running a windows container. {{.Image}} is a
+	// template variable that corresponds to the image template option. Passing
+	// the entrypoint option this way will make it the default entrypoint of
+	// the resulting image, so running docker run -it --rm  will start the
+	// docker image from the /bin/sh shell interpreter; you could run a script
+	// or another shell by running docker run -it --rm  -c /bin/bash. If your
+	// docker image embeds a binary intended to be run often, you should
+	// consider changing the default entrypoint to point to it.
+	RunCommand []string `mapstructure:"run_command" required:"false"`
+	// A mapping of additional volumes to mount into this container. The key of
+	// the object is the host path, the value is the container path.
+	Volumes map[string]string `mapstructure:"volumes" required:"false"`
+	// If true, files uploaded to the container will be owned by the user the
+	// container is running as. If false, the owner will depend on the version
+	// of docker installed in the system. Defaults to true.
+	FixUploadOwner bool `mapstructure:"fix_upload_owner" required:"false"`
+	// If "true", tells Packer that you are building a Windows container
+	// running on a windows host. This is necessary for building Windows
+	// containers, because our normal docker bindings do not work for them.
+	WindowsContainer bool `mapstructure:"windows_container" required:"false"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
-	Login           bool
-	LoginPassword   string `mapstructure:"login_password"`
-	LoginServer     string `mapstructure:"login_server"`
-	LoginUsername   string `mapstructure:"login_username"`
-	EcrLogin        bool   `mapstructure:"ecr_login"`
+	Login bool `mapstructure:"login" required:"false"`
+	// The password to use to authenticate to login.
+	LoginPassword string `mapstructure:"login_password" required:"false"`
+	// The server address to login to.
+	LoginServer string `mapstructure:"login_server" required:"false"`
+	// The username to use to authenticate to login.
+	LoginUsername string `mapstructure:"login_username" required:"false"`
+	// Defaults to false. If true, the builder will login in order to pull the
+	// image from Amazon EC2 Container Registry (ECR). The builder only logs in
+	// for the duration of the pull. If true login_server is required and
+	// login, login_username, and login_password will be ignored. For more
+	// information see the section on ECR.
+	EcrLogin        bool `mapstructure:"ecr_login" required:"false"`
 	AwsAccessConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context
@@ -73,13 +128,16 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Defaults
 	if len(c.RunCommand) == 0 {
-		c.RunCommand = []string{"-d", "-i", "-t", "{{.Image}}", "/bin/bash"}
+		c.RunCommand = []string{"-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"}
+		if c.WindowsContainer {
+			c.RunCommand = []string{"-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"}
+		}
 	}
 
 	// Default Pull if it wasn't set
 	hasPull := false
 	for _, k := range md.Keys {
-		if k == "Pull" {
+		if k == "pull" {
 			hasPull = true
 			break
 		}
@@ -92,6 +150,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// Default to the normal Docker type
 	if c.Comm.Type == "" {
 		c.Comm.Type = "docker"
+		if c.WindowsContainer {
+			c.Comm.Type = "dockerWindowsContainer"
+		}
 	}
 
 	var errs *packer.MultiError
@@ -117,7 +178,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.ContainerDir == "" {
-		c.ContainerDir = "/packer-files"
+		if c.WindowsContainer {
+			c.ContainerDir = "c:/packer-files"
+		} else {
+			c.ContainerDir = "/packer-files"
+		}
 	}
 
 	if c.EcrLogin && c.LoginServer == "" {

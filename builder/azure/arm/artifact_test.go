@@ -10,7 +10,7 @@ func getFakeSasUrl(name string) string {
 	return fmt.Sprintf("SAS-%s", name)
 }
 
-func TestArtifactId(t *testing.T) {
+func TestArtifactIdVHD(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
 			{
@@ -28,7 +28,7 @@ func TestArtifactId(t *testing.T) {
 		},
 	}
 
-	artifact, err := NewArtifact(&template, getFakeSasUrl)
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -36,6 +36,97 @@ func TestArtifactId(t *testing.T) {
 	expected := "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd"
 
 	result := artifact.Id()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImage(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithoutOSDiskSnapshotName(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithoutDataDiskSnapshotPrefix(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithSharedImageGalleryId(t *testing.T) {
+	artifact, err := NewManagedImageArtifactWithSIGAsDestination("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGallery")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+ManagedImageSharedImageGalleryId: fakeSharedImageGallery
+`
+
+	result := artifact.String()
 	if result != expected {
 		t.Fatalf("bad: %s", result)
 	}
@@ -59,7 +150,7 @@ func TestArtifactString(t *testing.T) {
 		},
 	}
 
-	artifact, err := NewArtifact(&template, getFakeSasUrl)
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -79,6 +170,66 @@ func TestArtifactString(t *testing.T) {
 	}
 	if !strings.Contains(testSubject, "StorageAccountLocation: southcentralus") {
 		t.Errorf("Expected String() output to contain StorageAccountLocation")
+	}
+	if !strings.Contains(testSubject, "OSType: Linux") {
+		t.Errorf("Expected String() output to contain OSType")
+	}
+}
+
+func TestAdditionalDiskArtifactString(t *testing.T) {
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+						DataDisks: []CaptureDisk{
+							{
+								Image: CaptureUri{
+									Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+								},
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	testSubject := artifact.String()
+	if !strings.Contains(testSubject, "OSDiskUri: https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd") {
+		t.Errorf("Expected String() output to contain OSDiskUri")
+	}
+	if !strings.Contains(testSubject, "OSDiskUriReadOnlySas: SAS-Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd") {
+		t.Errorf("Expected String() output to contain OSDiskUriReadOnlySas")
+	}
+	if !strings.Contains(testSubject, "TemplateUri: https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json") {
+		t.Errorf("Expected String() output to contain TemplateUri")
+	}
+	if !strings.Contains(testSubject, "TemplateUriReadOnlySas: SAS-Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json") {
+		t.Errorf("Expected String() output to contain TemplateUriReadOnlySas")
+	}
+	if !strings.Contains(testSubject, "StorageAccountLocation: southcentralus") {
+		t.Errorf("Expected String() output to contain StorageAccountLocation")
+	}
+	if !strings.Contains(testSubject, "OSType: Linux") {
+		t.Errorf("Expected String() output to contain OSType")
+	}
+	if !strings.Contains(testSubject, "AdditionalDiskUri (datadisk-1): https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd") {
+		t.Errorf("Expected String() output to contain AdditionalDiskUri")
+	}
+	if !strings.Contains(testSubject, "AdditionalDiskUriReadOnlySas (datadisk-1): SAS-Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd") {
+		t.Errorf("Expected String() output to contain AdditionalDiskUriReadOnlySas")
 	}
 }
 
@@ -100,7 +251,7 @@ func TestArtifactProperties(t *testing.T) {
 		},
 	}
 
-	testSubject, err := NewArtifact(&template, getFakeSasUrl)
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -120,9 +271,74 @@ func TestArtifactProperties(t *testing.T) {
 	if testSubject.StorageAccountLocation != "southcentralus" {
 		t.Errorf("Expected StorageAccountLocation to be 'southcentral', but got %s", testSubject.StorageAccountLocation)
 	}
+	if testSubject.OSType != "Linux" {
+		t.Errorf("Expected OSType to be 'Linux', but got %s", testSubject.OSType)
+	}
 }
 
-func TestArtifactOverHypenatedCaptureUri(t *testing.T) {
+func TestAdditionalDiskArtifactProperties(t *testing.T) {
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+						DataDisks: []CaptureDisk{
+							{
+								Image: CaptureUri{
+									Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+								},
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	if testSubject.OSDiskUri != "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd" {
+		t.Errorf("Expected template to be 'https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd', but got %s", testSubject.OSDiskUri)
+	}
+	if testSubject.OSDiskUriReadOnlySas != "SAS-Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd" {
+		t.Errorf("Expected template to be 'SAS-Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd', but got %s", testSubject.OSDiskUriReadOnlySas)
+	}
+	if testSubject.TemplateUri != "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json" {
+		t.Errorf("Expected template to be 'https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json', but got %s", testSubject.TemplateUri)
+	}
+	if testSubject.TemplateUriReadOnlySas != "SAS-Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json" {
+		t.Errorf("Expected template to be 'SAS-Images/images/packer-vmTemplate.4085bb15-3644-4641-b9cd-f575918640b4.json', but got %s", testSubject.TemplateUriReadOnlySas)
+	}
+	if testSubject.StorageAccountLocation != "southcentralus" {
+		t.Errorf("Expected StorageAccountLocation to be 'southcentral', but got %s", testSubject.StorageAccountLocation)
+	}
+	if testSubject.OSType != "Linux" {
+		t.Errorf("Expected OSType to be 'Linux', but got %s", testSubject.OSType)
+	}
+	if testSubject.AdditionalDisks == nil {
+		t.Errorf("Expected AdditionalDisks to be not nil")
+	}
+	if len(*testSubject.AdditionalDisks) != 1 {
+		t.Errorf("Expected AdditionalDisks to have one additional disk, but got %d", len(*testSubject.AdditionalDisks))
+	}
+	if (*testSubject.AdditionalDisks)[0].AdditionalDiskUri != "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd" {
+		t.Errorf("Expected additional disk uri to be 'https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd', but got %s", (*testSubject.AdditionalDisks)[0].AdditionalDiskUri)
+	}
+	if (*testSubject.AdditionalDisks)[0].AdditionalDiskUriReadOnlySas != "SAS-Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd" {
+		t.Errorf("Expected additional disk sas to be 'SAS-Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd', but got %s", (*testSubject.AdditionalDisks)[0].AdditionalDiskUriReadOnlySas)
+	}
+}
+
+func TestArtifactOverHyphenatedCaptureUri(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
 			{
@@ -140,7 +356,7 @@ func TestArtifactOverHypenatedCaptureUri(t *testing.T) {
 		},
 	}
 
-	testSubject, err := NewArtifact(&template, getFakeSasUrl)
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -153,7 +369,7 @@ func TestArtifactOverHypenatedCaptureUri(t *testing.T) {
 func TestArtifactRejectMalformedTemplates(t *testing.T) {
 	template := CaptureTemplate{}
 
-	_, err := NewArtifact(&template, getFakeSasUrl)
+	_, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err == nil {
 		t.Fatalf("Expected artifact creation to fail, but it succeeded.")
 	}
@@ -176,7 +392,7 @@ func TestArtifactRejectMalformedStorageUri(t *testing.T) {
 		},
 	}
 
-	_, err := NewArtifact(&template, getFakeSasUrl)
+	_, err := NewArtifact(&template, getFakeSasUrl, "Linux")
 	if err == nil {
 		t.Fatalf("Expected artifact creation to fail, but it succeeded.")
 	}

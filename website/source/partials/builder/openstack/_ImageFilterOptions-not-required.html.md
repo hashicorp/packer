@@ -1,0 +1,7 @@
+<!-- Code generated from the comments of the ImageFilterOptions struct in builder/openstack/run_config.go; DO NOT EDIT MANUALLY -->
+
+-   `name` (string) - Name
+-   `owner` (string) - Owner
+-   `tags` ([]string) - Tags
+-   `visibility` (string) - Visibility
+-   `properties` (map[string]string) - Properties

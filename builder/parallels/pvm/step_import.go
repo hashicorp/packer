@@ -1,11 +1,12 @@
 package pvm
 
 import (
+	"context"
 	"fmt"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step imports an PVM VM into Parallels.
@@ -15,7 +16,7 @@ type StepImport struct {
 	vmName     string
 }
 
-func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepImport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)

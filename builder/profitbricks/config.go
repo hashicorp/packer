@@ -2,13 +2,14 @@ package profitbricks
 
 import (
 	"errors"
+	"os"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"os"
 )
 
 type Config struct {
@@ -52,7 +53,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	var errs *packer.MultiError
 
-	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKey == "" {
+	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKeyFile == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("Either ssh private key path or ssh password must be set."))
 	}
@@ -121,7 +122,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
-	common.ScrubConfig(c, c.PBUsername)
+	packer.LogSecretFilter.Set(c.PBUsername)
 
 	return &c, nil, nil
 }

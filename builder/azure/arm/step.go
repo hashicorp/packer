@@ -1,19 +1,9 @@
 package arm
 
 import (
-	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
-
-func processInterruptibleResult(
-	result common.InterruptibleTaskResult, sayError func(error), state multistep.StateBag) multistep.StepAction {
-	if result.IsCancelled {
-		return multistep.ActionHalt
-	}
-
-	return processStepResult(result.Err, sayError, state)
-}
 
 func processStepResult(
 	err error, sayError func(error), state multistep.StateBag) multistep.StepAction {

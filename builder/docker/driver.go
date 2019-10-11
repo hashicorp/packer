@@ -20,7 +20,7 @@ type Driver interface {
 	Export(id string, dst io.Writer) error
 
 	// Import imports a container from a tar file
-	Import(path, repo string) (string, error)
+	Import(path string, changes []string, repo string) (string, error)
 
 	// IPAddress returns the address of the container that can be used
 	// for external access.
@@ -46,7 +46,10 @@ type Driver interface {
 	// along with a potential error.
 	StartContainer(*ContainerConfig) (string, error)
 
-	// StopContainer forcibly stops a container.
+	// KillContainer forcibly stops a container.
+	KillContainer(id string) error
+
+	// StopContainer gently stops a container.
 	StopContainer(id string) error
 
 	// TagImage tags the image with the given ID

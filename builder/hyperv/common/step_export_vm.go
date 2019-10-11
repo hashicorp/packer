@@ -1,82 +1,50 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
-)
-
-const (
-	vhdDir string = "Virtual Hard Disks"
-	vmDir  string = "Virtual Machines"
 )
 
 type StepExportVm struct {
-	OutputDir      string
-	SkipCompaction bool
+	OutputDir  string
+	SkipExport bool
 }
 
-func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExportVm) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	var err error
-	var errorMsg string
+	if s.SkipExport {
+		ui.Say("Skipping export of virtual machine...")
+		return multistep.ActionContinue
+	}
 
-	vmName := state.Get("vmName").(string)
-	tmpPath := state.Get("packerTempDir").(string)
-	outputPath := s.OutputDir
+	ui.Say("Exporting virtual machine...")
 
-	// create temp path to export vm
-	errorMsg = "Error creating temp export path: %s"
-	vmExportPath, err := ioutil.TempDir(tmpPath, "export")
+	// The VM name is needed for the export command
+	var vmName string
+	if v, ok := state.GetOk("vmName"); ok {
+		vmName = v.(string)
+	}
+
+	// The export process exports the VM to a folder named 'vmName' under
+	// the output directory. This contains the usual 'Snapshots', 'Virtual
+	// Hard Disks' and 'Virtual Machines' directories.
+	err := driver.ExportVirtualMachine(vmName, s.OutputDir)
 	if err != nil {
-		err := fmt.Errorf(errorMsg, err)
+		err = fmt.Errorf("Error exporting vm: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Exporting vm...")
-
-	err = driver.ExportVirtualMachine(vmName, vmExportPath)
-	if err != nil {
-		errorMsg = "Error exporting vm: %s"
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// copy to output dir
-	expPath := filepath.Join(vmExportPath, vmName)
-
-	if s.SkipCompaction {
-		ui.Say("Skipping disk compaction...")
-	} else {
-		ui.Say("Compacting disks...")
-		err = driver.CompactDisks(expPath, vhdDir)
-		if err != nil {
-			errorMsg = "Error compacting disks: %s"
-			err := fmt.Errorf(errorMsg, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	}
-
-	ui.Say("Copying to output dir...")
-	err = driver.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
-	if err != nil {
-		errorMsg = "Error exporting vm: %s"
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	// Store the path to the export directory for later steps
+	exportPath := filepath.Join(s.OutputDir, vmName)
+	state.Put("export_path", exportPath)
 
 	return multistep.ActionContinue
 }

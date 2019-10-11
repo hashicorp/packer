@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -8,14 +9,14 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepDeleteOSDisk struct {
 	client        *AzureClient
 	delete        func(string, string) error
-	deleteManaged func(string, string) error
+	deleteManaged func(context.Context, string, string) error
 	say           func(message string)
 	error         func(e error)
 }
@@ -42,15 +43,17 @@ func (s *StepDeleteOSDisk) deleteBlob(storageContainerName string, blobName stri
 	return err
 }
 
-func (s *StepDeleteOSDisk) deleteManagedDisk(resourceGroupName string, imageName string) error {
+func (s *StepDeleteOSDisk) deleteManagedDisk(ctx context.Context, resourceGroupName string, imageName string) error {
 	xs := strings.Split(imageName, "/")
 	diskName := xs[len(xs)-1]
-	_, errChan := s.client.DisksClient.Delete(resourceGroupName, diskName, nil)
-	err := <-errChan
+	f, err := s.client.DisksClient.Delete(ctx, resourceGroupName, diskName)
+	if err == nil {
+		err = f.WaitForCompletionRef(ctx, s.client.DisksClient.Client)
+	}
 	return err
 }
 
-func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteOSDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary OS disk ...")
 
 	var osDisk = state.Get(constants.ArmOSDiskVhd).(string)
@@ -67,7 +70,7 @@ func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	var err error
 	if isManagedDisk {
-		err = s.deleteManaged(resourceGroupName, osDisk)
+		err = s.deleteManaged(ctx, resourceGroupName, osDisk)
 		if err != nil {
 			s.say("Failed to delete the managed OS Disk!")
 			return processStepResult(err, s.error, state)

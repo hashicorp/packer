@@ -1,0 +1,231 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+    This VirtualBox Packer builder is able to create VirtualBox virtual machines
+    and export them in the OVF format, starting from an existing OVF/OVA (exported
+    virtual machine image).
+layout: docs
+page_title: 'VirtualBox OVF/OVA - Builders'
+sidebar_current: 'docs-builders-virtualbox-ovf'
+---
+
+# VirtualBox Builder (from an OVF/OVA)
+
+Type: `virtualbox-ovf`
+
+This VirtualBox Packer builder is able to create
+[VirtualBox](https://www.virtualbox.org/) virtual machines and export them in
+the OVF format, starting from an existing OVF/OVA (exported virtual machine
+image).
+
+When exporting from VirtualBox make sure to choose OVF Version 2, since Version
+1 is not compatible and will generate errors like this:
+
+    ==> virtualbox-ovf: Progress state: VBOX_E_FILE_ERROR
+    ==> virtualbox-ovf: VBoxManage: error: Appliance read failed
+    ==> virtualbox-ovf: VBoxManage: error: Error reading "source.ova": element "Section" has no "type" attribute, line 21
+    ==> virtualbox-ovf: VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Appliance, interface IAppliance
+    ==> virtualbox-ovf: VBoxManage: error: Context: "int handleImportAppliance(HandlerArg*)" at line 304 of file VBoxManageAppliance.cpp
+
+The builder builds a virtual machine by importing an existing OVF or OVA file.
+It then boots this image, runs provisioners on this new VM, and exports that VM
+to create the image. The imported machine is deleted prior to finishing the
+build.
+
+## Basic Example
+
+Here is a basic example. This example is functional if you have an OVF matching
+the settings here.
+
+``` json
+{
+  "type": "virtualbox-ovf",
+  "source_path": "source.ovf",
+  "ssh_username": "packer",
+  "ssh_password": "packer",
+  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+}
+```
+
+It is important to add a `shutdown_command`. By default Packer halts the virtual
+machine and the file system may not be sync'd. Thus, changes made in a
+provisioner might not be saved.
+
+## Configuration Reference
+
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Export](#export-configuration),
+[Boot](#boot-configuration),
+[Shutdown](#shutdown-configuration),
+[Run](#run-configuration),
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+### Required:
+
+<%= partial "partials/builder/virtualbox/ovf/Config-required" %>
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/ovf/Config-not-required" %>
+<%= partial "partials/builder/virtualbox/common/VBoxVersionConfig-not-required" %>
+<%= partial "partials/builder/virtualbox/common/GuestAdditionsConfig-not-required" %>
+
+### Http directory configuration
+
+<%= partial "partials/common/HTTPConfig" %>
+#### Optional:
+
+<%= partial "partials/common/HTTPConfig-not-required" %>
+
+### Floppy configuration
+
+<%= partial "partials/common/FloppyConfig" %>
+
+#### Optional:
+
+<%= partial "partials/common/FloppyConfig-not-required" %>
+
+### Export configuration
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/common/ExportConfig-not-required" %>
+
+### Output configuration
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/common/OutputConfig-not-required" %>
+
+### Run configuration
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/common/RunConfig-not-required" %>
+
+### Shutdown configuration
+
+#### Optional:
+
+<%= partial "partials/builder/virtualbox/common/ShutdownConfig-not-required" %>
+
+### Communicator configuration
+
+#### Optional common fields:
+
+<%= partial "partials/helper/communicator/Config-not-required" %>
+
+#### Optional SSH fields:
+
+<%= partial "partials/helper/communicator/SSH-not-required" %>
+<%= partial "partials/builder/virtualbox/common/SSHConfig-not-required" %>
+
+#### Optional WinRM fields:
+
+<%= partial "partials/helper/communicator/WinRM-not-required" %>
+
+### Boot Configuration
+
+<%= partial "partials/common/bootcommand/BootConfig" %>
+<%= partial "partials/common/bootcommand/VNCConfig" %>
+
+The boot command is sent to the VM through the `VBoxManage` utility in as few
+invocations as possible. We send each character in groups of 25, with a default
+delay of 100ms between groups. The delay alleviates issues with latency and CPU
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+```
+{
+  "builders": [
+    {
+      "type": "virtualbox",
+      "boot_keygroup_interval": "500ms"
+      ...
+    }
+  ]
+}
+```
+
+#### Optional:
+
+<%= partial "partials/common/bootcommand/VNCConfig-not-required" %>
+<%= partial "partials/common/bootcommand/BootConfig-not-required" %>
+
+<%= partial "partials/builders/boot-command" %>
+
+<%= partial "partials/builders/virtualbox-ssh-key-pair" %>
+
+Example boot command. This is actually a working boot command used to start an
+Ubuntu 12.04 installer:
+
+``` text
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
+## Guest Additions
+
+Packer will automatically download the proper guest additions for the version of
+VirtualBox that is running and upload those guest additions into the virtual
+machine so that provisioners can easily install them.
+
+Packer downloads the guest additions from the official VirtualBox website, and
+verifies the file with the official checksums released by VirtualBox.
+
+After the virtual machine is up and the operating system is installed, Packer
+uploads the guest additions into the virtual machine. The path where they are
+uploaded is controllable by `guest_additions_path`, and defaults to
+"VBoxGuestAdditions.iso". Without an absolute path, it is uploaded to the home
+directory of the SSH user.
+
+## VBoxManage Commands
+
+In order to perform extra customization of the virtual machine, a template can
+define extra calls to `VBoxManage` to perform.
+[VBoxManage](https://www.virtualbox.org/manual/ch09.html) is the command-line
+interface to VirtualBox where you can completely control VirtualBox. It can be
+used to do things such as set RAM, CPUs, etc.
+
+Extra VBoxManage commands are defined in the template in the `vboxmanage`
+section. An example is shown below that sets the memory and number of CPUs
+within the virtual machine:
+
+``` json
+{
+  "vboxmanage": [
+    ["modifyvm", "{{.Name}}", "--memory", "1024"],
+    ["modifyvm", "{{.Name}}", "--cpus", "2"]
+  ]
+}
+```
+
+The value of `vboxmanage` is an array of commands to execute. These commands are
+executed in the order defined. So in the above example, the memory will be set
+followed by the CPUs.
+
+Each command itself is an array of strings, where each string is an argument to
+`VBoxManage`. Each argument is treated as a [configuration
+template](/docs/templates/engine.html). The only available
+variable is `Name` which is replaced with the unique name of the VM, which is
+required for many VBoxManage calls.

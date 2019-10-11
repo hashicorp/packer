@@ -1,18 +1,17 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 // StateRefreshFunc is a function type used for StateChangeConf that is
@@ -35,228 +34,333 @@ type StateChangeConf struct {
 	Target    string
 }
 
-// AMIStateRefreshFunc returns a StateRefreshFunc that is used to watch
-// an AMI for state changes.
-func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		resp, err := conn.DescribeImages(&ec2.DescribeImagesInput{
-			ImageIds: []*string{&imageId},
-		})
-		if err != nil {
-			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidAMIID.NotFound" {
-				// Set this to nil as if we didn't find anything.
-				resp = nil
-			} else if isTransientNetworkError(err) {
-				// Transient network error, treat it as if we didn't find anything
-				resp = nil
-			} else {
-				log.Printf("Error on AMIStateRefresh: %s", err)
-				return nil, "", err
-			}
-		}
+// Following are wrapper functions that use Packer's environment-variables to
+// determine retry logic, then call the AWS SDK's built-in waiters.
 
-		if resp == nil || len(resp.Images) == 0 {
-			// Sometimes AWS has consistency issues and doesn't see the
-			// AMI. Return an empty state.
-			return nil, "", nil
-		}
-
-		i := resp.Images[0]
-		return i, *i.State, nil
+func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string) error {
+	imageInput := ec2.DescribeImagesInput{
+		ImageIds: []*string{&imageId},
 	}
+
+	waitOpts := getWaiterOptions()
+	if len(waitOpts) == 0 {
+		// Bump this default to 30 minutes because the aws default
+		// of ten minutes doesn't work for some of our long-running copies.
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(120))
+	}
+	err := conn.WaitUntilImageAvailableWithContext(
+		ctx,
+		&imageInput,
+		waitOpts...)
+	return err
 }
 
-// InstanceStateRefreshFunc returns a StateRefreshFunc that is used to watch
-// an EC2 instance.
-func InstanceStateRefreshFunc(conn *ec2.EC2, instanceId string) StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		resp, err := conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIds: []*string{&instanceId},
-		})
-		if err != nil {
-			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidInstanceID.NotFound" {
-				// Set this to nil as if we didn't find anything.
-				resp = nil
-			} else if isTransientNetworkError(err) {
-				// Transient network error, treat it as if we didn't find anything
-				resp = nil
-			} else {
-				log.Printf("Error on InstanceStateRefresh: %s", err)
-				return nil, "", err
-			}
-		}
+func WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
 
-		if resp == nil || len(resp.Reservations) == 0 || len(resp.Reservations[0].Instances) == 0 {
-			// Sometimes AWS just has consistency issues and doesn't see
-			// our instance yet. Return an empty state.
-			return nil, "", nil
-		}
-
-		i := resp.Reservations[0].Instances[0]
-		return i, *i.State.Name, nil
+	instanceInput := ec2.DescribeInstancesInput{
+		InstanceIds: []*string{&instanceId},
 	}
+
+	err := conn.WaitUntilInstanceTerminatedWithContext(
+		ctx,
+		&instanceInput,
+		getWaiterOptions()...)
+	return err
 }
 
-// SpotRequestStateRefreshFunc returns a StateRefreshFunc that is used to watch
-// a spot request for state changes.
-func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		resp, err := conn.DescribeSpotInstanceRequests(&ec2.DescribeSpotInstanceRequestsInput{
-			SpotInstanceRequestIds: []*string{&spotRequestId},
-		})
-
-		if err != nil {
-			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidSpotInstanceRequestID.NotFound" {
-				// Set this to nil as if we didn't find anything.
-				resp = nil
-			} else if isTransientNetworkError(err) {
-				// Transient network error, treat it as if we didn't find anything
-				resp = nil
-			} else {
-				log.Printf("Error on SpotRequestStateRefresh: %s", err)
-				return nil, "", err
-			}
-		}
-
-		if resp == nil || len(resp.SpotInstanceRequests) == 0 {
-			// Sometimes AWS has consistency issues and doesn't see the
-			// SpotRequest. Return an empty state.
-			return nil, "", nil
-		}
-
-		i := resp.SpotInstanceRequests[0]
-		return i, *i.State, nil
+// This function works for both requesting and cancelling spot instances.
+func WaitUntilSpotRequestFulfilled(ctx aws.Context, conn *ec2.EC2, spotRequestId string) error {
+	spotRequestInput := ec2.DescribeSpotInstanceRequestsInput{
+		SpotInstanceRequestIds: []*string{&spotRequestId},
 	}
+
+	err := conn.WaitUntilSpotInstanceRequestFulfilledWithContext(
+		ctx,
+		&spotRequestInput,
+		getWaiterOptions()...)
+	return err
 }
 
-func ImportImageRefreshFunc(conn *ec2.EC2, importTaskId string) StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		resp, err := conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
-			ImportTaskIds: []*string{
-				&importTaskId,
+func WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+	volumeInput := ec2.DescribeVolumesInput{
+		VolumeIds: []*string{&volumeId},
+	}
+
+	err := conn.WaitUntilVolumeAvailableWithContext(
+		ctx,
+		&volumeInput,
+		getWaiterOptions()...)
+	return err
+}
+
+func WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
+	snapInput := ec2.DescribeSnapshotsInput{
+		SnapshotIds: []*string{&snapshotID},
+	}
+
+	err := conn.WaitUntilSnapshotCompletedWithContext(
+		ctx,
+		&snapInput,
+		getWaiterOptions()...)
+	return err
+}
+
+// Wrappers for our custom AWS waiters
+
+func WaitUntilVolumeAttached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+	volumeInput := ec2.DescribeVolumesInput{
+		VolumeIds: []*string{&volumeId},
+	}
+
+	err := WaitForVolumeToBeAttached(conn,
+		ctx,
+		&volumeInput,
+		getWaiterOptions()...)
+	return err
+}
+
+func WaitUntilVolumeDetached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+	volumeInput := ec2.DescribeVolumesInput{
+		VolumeIds: []*string{&volumeId},
+	}
+
+	err := WaitForVolumeToBeDetached(conn,
+		ctx,
+		&volumeInput,
+		getWaiterOptions()...)
+	return err
+}
+
+func WaitUntilImageImported(ctx aws.Context, conn *ec2.EC2, taskID string) error {
+	importInput := ec2.DescribeImportImageTasksInput{
+		ImportTaskIds: []*string{&taskID},
+	}
+
+	err := WaitForImageToBeImported(conn,
+		ctx,
+		&importInput,
+		getWaiterOptions()...)
+	return err
+}
+
+// Custom waiters using AWS's request.Waiter
+
+func WaitForVolumeToBeAttached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeVolumesInput, opts ...request.WaiterOption) error {
+	w := request.Waiter{
+		Name:        "DescribeVolumes",
+		MaxAttempts: 40,
+		Delay:       request.ConstantWaiterDelay(5 * time.Second),
+		Acceptors: []request.WaiterAcceptor{
+			{
+				State:    request.SuccessWaiterState,
+				Matcher:  request.PathAllWaiterMatch,
+				Argument: "Volumes[].Attachments[].State",
+				Expected: "attached",
 			},
 		},
-		)
-		if err != nil {
-			if ec2err, ok := err.(awserr.Error); ok && strings.HasPrefix(ec2err.Code(), "InvalidConversionTaskId") {
-				resp = nil
-			} else if isTransientNetworkError(err) {
-				resp = nil
-			} else {
-				log.Printf("Error on ImportImageRefresh: %s", err)
-				return nil, "", err
+		Logger: c.Config.Logger,
+		NewRequest: func(opts []request.Option) (*request.Request, error) {
+			var inCpy *ec2.DescribeVolumesInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
 			}
-		}
-
-		if resp == nil || len(resp.ImportImageTasks) == 0 {
-			return nil, "", nil
-		}
-
-		i := resp.ImportImageTasks[0]
-		return i, *i.Status, nil
+			req, _ := c.DescribeVolumesRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
 	}
+	w.ApplyOptions(opts...)
+
+	return w.WaitWithContext(ctx)
 }
 
-// WaitForState watches an object and waits for it to achieve a certain
-// state.
-func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
-	log.Printf("Waiting for state to become: %s", conf.Target)
-
-	sleepSeconds := SleepSeconds()
-	maxTicks := TimeoutSeconds()/sleepSeconds + 1
-	notfoundTick := 0
-
-	for {
-		var currentState string
-		i, currentState, err = conf.Refresh()
-		if err != nil {
-			return
-		}
-
-		if i == nil {
-			// If we didn't find the resource, check if we have been
-			// not finding it for awhile, and if so, report an error.
-			notfoundTick += 1
-			if notfoundTick > maxTicks {
-				return nil, errors.New("couldn't find resource")
+func WaitForVolumeToBeDetached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeVolumesInput, opts ...request.WaiterOption) error {
+	w := request.Waiter{
+		Name:        "DescribeVolumes",
+		MaxAttempts: 40,
+		Delay:       request.ConstantWaiterDelay(5 * time.Second),
+		Acceptors: []request.WaiterAcceptor{
+			{
+				State:    request.SuccessWaiterState,
+				Matcher:  request.PathAllWaiterMatch,
+				Argument: "length(Volumes[].Attachments[]) == `0`",
+				Expected: true,
+			},
+		},
+		Logger: c.Config.Logger,
+		NewRequest: func(opts []request.Option) (*request.Request, error) {
+			var inCpy *ec2.DescribeVolumesInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
 			}
-		} else {
-			// Reset the counter for when a resource isn't found
-			notfoundTick = 0
-
-			if currentState == conf.Target {
-				return
-			}
-
-			if conf.StepState != nil {
-				if _, ok := conf.StepState.GetOk(multistep.StateCancelled); ok {
-					return nil, errors.New("interrupted")
-				}
-			}
-
-			found := false
-			for _, allowed := range conf.Pending {
-				if currentState == allowed {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				err := fmt.Errorf("unexpected state '%s', wanted target '%s'", currentState, conf.Target)
-				return nil, err
-			}
-		}
-
-		time.Sleep(time.Duration(sleepSeconds) * time.Second)
+			req, _ := c.DescribeVolumesRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
 	}
+	w.ApplyOptions(opts...)
+
+	return w.WaitWithContext(ctx)
 }
 
-func isTransientNetworkError(err error) bool {
-	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
-		return true
+func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeImportImageTasksInput, opts ...request.WaiterOption) error {
+	w := request.Waiter{
+		Name:        "DescribeImages",
+		MaxAttempts: 720,
+		Delay:       request.ConstantWaiterDelay(5 * time.Second),
+		Acceptors: []request.WaiterAcceptor{
+			{
+				State:    request.SuccessWaiterState,
+				Matcher:  request.PathAllWaiterMatch,
+				Argument: "ImportImageTasks[].Status",
+				Expected: "completed",
+			},
+			{
+				State:    request.FailureWaiterState,
+				Matcher:  request.PathAnyWaiterMatch,
+				Argument: "ImportImageTasks[].Status",
+				Expected: "deleted",
+			},
+		},
+		Logger: c.Config.Logger,
+		NewRequest: func(opts []request.Option) (*request.Request, error) {
+			var inCpy *ec2.DescribeImportImageTasksInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.DescribeImportImageTasksRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
 	}
+	w.ApplyOptions(opts...)
 
-	return false
+	return w.WaitWithContext(ctx)
 }
 
-// Returns 300 seconds (5 minutes) by default
-// Some AWS operations, like copying an AMI to a distant region, take a very long time
-// Allow user to override with AWS_TIMEOUT_SECONDS environment variable
-func TimeoutSeconds() (seconds int) {
-	seconds = 300
+// This helper function uses the environment variables AWS_TIMEOUT_SECONDS and
+// AWS_POLL_DELAY_SECONDS to generate waiter options that can be passed into any
+// request.Waiter function. These options will control how many times the waiter
+// will retry the request, as well as how long to wait between the retries.
 
-	override := os.Getenv("AWS_TIMEOUT_SECONDS")
+// DEFAULTING BEHAVIOR:
+// if AWS_POLL_DELAY_SECONDS is set but the others are not, Packer will set this
+// poll delay and use the waiter-specific default
+
+// if AWS_TIMEOUT_SECONDS is set but AWS_MAX_ATTEMPTS is not, Packer will use
+// AWS_TIMEOUT_SECONDS and _either_ AWS_POLL_DELAY_SECONDS _or_ 2 if the user has not set AWS_POLL_DELAY_SECONDS, to determine a max number of attempts to make.
+
+// if AWS_TIMEOUT_SECONDS, _and_ AWS_MAX_ATTEMPTS are both set,
+// AWS_TIMEOUT_SECONDS will be ignored.
+
+// if AWS_MAX_ATTEMPTS is set but AWS_POLL_DELAY_SECONDS is not, then we will
+// use waiter-specific defaults.
+
+type envInfo struct {
+	envKey     string
+	Val        int
+	overridden bool
+}
+
+type overridableWaitVars struct {
+	awsPollDelaySeconds envInfo
+	awsMaxAttempts      envInfo
+	awsTimeoutSeconds   envInfo
+}
+
+func getWaiterOptions() []request.WaiterOption {
+	envOverrides := getEnvOverrides()
+	waitOpts := applyEnvOverrides(envOverrides)
+	return waitOpts
+}
+
+func getOverride(varInfo envInfo) envInfo {
+	override := os.Getenv(varInfo.envKey)
 	if override != "" {
 		n, err := strconv.Atoi(override)
 		if err != nil {
-			log.Printf("Invalid timeout seconds '%s', using default", override)
+			log.Printf("Invalid %s '%s', using default", varInfo.envKey, override)
 		} else {
-			seconds = n
+			varInfo.overridden = true
+			varInfo.Val = n
 		}
 	}
 
-	log.Printf("Allowing %ds to complete (change with AWS_TIMEOUT_SECONDS)", seconds)
-	return seconds
+	return varInfo
+}
+func getEnvOverrides() overridableWaitVars {
+	// Load env vars from environment.
+	envValues := overridableWaitVars{
+		envInfo{"AWS_POLL_DELAY_SECONDS", 2, false},
+		envInfo{"AWS_MAX_ATTEMPTS", 0, false},
+		envInfo{"AWS_TIMEOUT_SECONDS", 0, false},
+	}
+
+	envValues.awsMaxAttempts = getOverride(envValues.awsMaxAttempts)
+	envValues.awsPollDelaySeconds = getOverride(envValues.awsPollDelaySeconds)
+	envValues.awsTimeoutSeconds = getOverride(envValues.awsTimeoutSeconds)
+
+	return envValues
 }
 
-// Returns 2 seconds by default
-// AWS async operations sometimes takes long times, if there are multiple parallel builds,
-// polling at 2 second frequency will exceed the request limit. Allow 2 seconds to be
-// overwritten with AWS_POLL_DELAY_SECONDS
-func SleepSeconds() (seconds int) {
-	seconds = 2
+func LogEnvOverrideWarnings() {
+	pollDelay := os.Getenv("AWS_POLL_DELAY_SECONDS")
+	timeoutSeconds := os.Getenv("AWS_TIMEOUT_SECONDS")
+	maxAttempts := os.Getenv("AWS_MAX_ATTEMPTS")
 
-	override := os.Getenv("AWS_POLL_DELAY_SECONDS")
-	if override != "" {
-		n, err := strconv.Atoi(override)
-		if err != nil {
-			log.Printf("Invalid sleep seconds '%s', using default", override)
-		} else {
-			seconds = n
+	if maxAttempts != "" && timeoutSeconds != "" {
+		warning := fmt.Sprintf("[WARNING] (aws): AWS_MAX_ATTEMPTS and " +
+			"AWS_TIMEOUT_SECONDS are both set. Packer will use " +
+			"AWS_MAX_ATTEMPTS and discard AWS_TIMEOUT_SECONDS.")
+		if pollDelay == "" {
+			warning = fmt.Sprintf("%s  Since you have not set the poll delay, "+
+				"Packer will default to a 2-second delay.", warning)
 		}
+		log.Printf(warning)
+	} else if timeoutSeconds != "" {
+		log.Printf("[WARNING] (aws): env var AWS_TIMEOUT_SECONDS is " +
+			"deprecated in favor of AWS_MAX_ATTEMPTS. If you have not " +
+			"explicitly set AWS_POLL_DELAY_SECONDS, we are defaulting to a " +
+			"poll delay of 2 seconds, regardless of the AWS waiter's default.")
+	}
+	if maxAttempts == "" && timeoutSeconds == "" && pollDelay == "" {
+		log.Printf("[INFO] (aws): No AWS timeout and polling overrides have been set. " +
+			"Packer will default to waiter-specific delays and timeouts. If you would " +
+			"like to customize the length of time between retries and max " +
+			"number of retries you may do so by setting the environment " +
+			"variables AWS_POLL_DELAY_SECONDS and AWS_MAX_ATTEMPTS to your " +
+			"desired values.")
+	}
+}
+
+func applyEnvOverrides(envOverrides overridableWaitVars) []request.WaiterOption {
+	waitOpts := make([]request.WaiterOption, 0)
+	// If user has set poll delay seconds, overwrite it. If user has NOT,
+	// default to a poll delay of 2 seconds
+	if envOverrides.awsPollDelaySeconds.overridden {
+		delaySeconds := request.ConstantWaiterDelay(time.Duration(envOverrides.awsPollDelaySeconds.Val) * time.Second)
+		waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
 	}
 
-	log.Printf("Using %ds as polling delay (change with AWS_POLL_DELAY_SECONDS)", seconds)
-	return seconds
+	// If user has set max attempts, overwrite it. If user hasn't set max
+	// attempts, default to whatever the waiter has set as a default.
+	if envOverrides.awsMaxAttempts.overridden {
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(envOverrides.awsMaxAttempts.Val))
+	} else if envOverrides.awsTimeoutSeconds.overridden {
+		maxAttempts := envOverrides.awsTimeoutSeconds.Val / envOverrides.awsPollDelaySeconds.Val
+		// override the delay so we can get the timeout right
+		if !envOverrides.awsPollDelaySeconds.overridden {
+			delaySeconds := request.ConstantWaiterDelay(time.Duration(envOverrides.awsPollDelaySeconds.Val) * time.Second)
+			waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
+		}
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
+	}
+
+	return waitOpts
 }

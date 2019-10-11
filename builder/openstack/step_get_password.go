@@ -1,27 +1,30 @@
 package openstack
 
 import (
+	"context"
 	"crypto/rsa"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 )
 
 // StepGetPassword reads the password from a booted OpenStack server and sets
 // it on the WinRM config.
 type StepGetPassword struct {
-	Debug bool
-	Comm  *communicator.Config
+	Debug     bool
+	Comm      *communicator.Config
+	BuildName string
 }
 
-func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm
@@ -48,7 +51,7 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	server := state.Get("server").(*servers.Server)
 	var password string
 
-	privateKey, err := ssh.ParseRawPrivateKey([]byte(state.Get("privateKey").(string)))
+	privateKey, err := ssh.ParseRawPrivateKey(s.Comm.SSHPrivateKey)
 	if err != nil {
 		err = fmt.Errorf("Error parsing private key: %s", err)
 		state.Put("error", err)
@@ -75,7 +78,12 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 			"Password (since debug is enabled) \"%s\"", s.Comm.WinRMPassword))
 	}
 
+	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
+
 	return multistep.ActionContinue
 }
 
-func (s *StepGetPassword) Cleanup(multistep.StateBag) {}
+func (s *StepGetPassword) Cleanup(multistep.StateBag) {
+	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
+}

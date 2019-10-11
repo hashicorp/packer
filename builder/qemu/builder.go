@@ -1,6 +1,9 @@
+//go:generate struct-markdown
+
 package qemu
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,11 +14,13 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderId = "transcend.qemu"
@@ -25,6 +30,9 @@ var accels = map[string]struct{}{
 	"kvm":  {},
 	"tcg":  {},
 	"xen":  {},
+	"hax":  {},
+	"hvf":  {},
+	"whpx": {},
 }
 
 var netDevice = map[string]bool{
@@ -72,57 +80,252 @@ var diskDiscard = map[string]bool{
 	"ignore": true,
 }
 
+var diskDZeroes = map[string]bool{
+	"unmap": true,
+	"on":    true,
+	"off":   true,
+}
+
 type Builder struct {
 	config Config
 	runner multistep.Runner
 }
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	common.HTTPConfig   `mapstructure:",squash"`
-	common.ISOConfig    `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
-	common.FloppyConfig `mapstructure:",squash"`
-
-	ISOSkipCache      bool       `mapstructure:"iso_skip_cache"`
-	Accelerator       string     `mapstructure:"accelerator"`
-	BootCommand       []string   `mapstructure:"boot_command"`
-	DiskInterface     string     `mapstructure:"disk_interface"`
-	DiskSize          uint       `mapstructure:"disk_size"`
-	DiskCache         string     `mapstructure:"disk_cache"`
-	DiskDiscard       string     `mapstructure:"disk_discard"`
-	SkipCompaction    bool       `mapstructure:"skip_compaction"`
-	DiskCompression   bool       `mapstructure:"disk_compression"`
-	Format            string     `mapstructure:"format"`
-	Headless          bool       `mapstructure:"headless"`
-	DiskImage         bool       `mapstructure:"disk_image"`
-	MachineType       string     `mapstructure:"machine_type"`
-	NetDevice         string     `mapstructure:"net_device"`
-	OutputDir         string     `mapstructure:"output_directory"`
-	QemuArgs          [][]string `mapstructure:"qemuargs"`
-	QemuBinary        string     `mapstructure:"qemu_binary"`
-	ShutdownCommand   string     `mapstructure:"shutdown_command"`
-	SSHHostPortMin    uint       `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    uint       `mapstructure:"ssh_host_port_max"`
-	UseDefaultDisplay bool       `mapstructure:"use_default_display"`
-	VNCBindAddress    string     `mapstructure:"vnc_bind_address"`
-	VNCPortMin        uint       `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint       `mapstructure:"vnc_port_max"`
-	VMName            string     `mapstructure:"vm_name"`
-
+	common.PackerConfig            `mapstructure:",squash"`
+	common.HTTPConfig              `mapstructure:",squash"`
+	common.ISOConfig               `mapstructure:",squash"`
+	bootcommand.VNCConfig          `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
+	Comm                           communicator.Config `mapstructure:",squash"`
+	common.FloppyConfig            `mapstructure:",squash"`
+	// Use iso from provided url. Qemu must support
+	// curl block device. This defaults to `false`.
+	ISOSkipCache bool `mapstructure:"iso_skip_cache" required:"false"`
+	// The accelerator type to use when running the VM.
+	// This may be `none`, `kvm`, `tcg`, `hax`, `hvf`, `whpx`, or `xen`. The appropriate
+	// software must have already been installed on your build machine to use the
+	// accelerator you specified. When no accelerator is specified, Packer will try
+	// to use `kvm` if it is available but will default to `tcg` otherwise.
+	//
+	// -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
+	// upstream issue which can be tracked
+	// [here](https://github.com/intel/haxm/issues/20).
+	//
+	// -&gt; The `hvf` and `whpx` accelerator are new and experimental as of
+	// [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
+	// You may encounter issues unrelated to Packer when using these.  You may need to
+	// add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
+	// guest operating system.
+	//
+	// -&gt; For `whpx`, note that [Stefan Weil's QEMU for Windows distribution](https://qemu.weilnetz.de/w64/)
+	// does not include WHPX support and users may need to compile or source a
+	// build of QEMU for Windows themselves with WHPX support.
+	Accelerator string `mapstructure:"accelerator" required:"false"`
+	// Additional disks to create. Uses `vm_name` as the disk name template and
+	// appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
+	// is the default disk. Each string represents the disk image size in bytes.
+	// Optional suffixes 'k' or 'K' (kilobyte, 1024), 'M' (megabyte, 1024k), 'G'
+	// (gigabyte, 1024M), 'T' (terabyte, 1024G), 'P' (petabyte, 1024T) and 'E'
+	// (exabyte, 1024P)  are supported. 'b' is ignored. Per qemu-img documentation.
+	// Each additional disk uses the same disk parameters as the default disk.
+	// Unset by default.
+	AdditionalDiskSize []string `mapstructure:"disk_additional_size" required:"false"`
+	// The number of cpus to use when building the VM.
+	//  The default is `1` CPU.
+	CpuCount int `mapstructure:"cpus" required:"false"`
+	// The interface to use for the disk. Allowed values include any of `ide`,
+	// `scsi`, `virtio` or `virtio-scsi`^\*. Note also that any boot commands
+	// or kickstart type scripts must have proper adjustments for resulting
+	// device names. The Qemu builder uses `virtio` by default.
+	//
+	// ^\* Please be aware that use of the `scsi` disk interface has been
+	// disabled by Red Hat due to a bug described
+	// [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220). If you are
+	// running Qemu on RHEL or a RHEL variant such as CentOS, you *must* choose
+	// one of the other listed interfaces. Using the `scsi` interface under
+	// these circumstances will cause the build to fail.
+	DiskInterface string `mapstructure:"disk_interface" required:"false"`
+	// The size in bytes, suffixes of the first letter of common byte types
+	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
+	// Will create the of the hard disk of the VM. By default, this is
+	// `40960M` (40 GB).
+	DiskSize string `mapstructure:"disk_size" required:"false"`
+	// The cache mode to use for disk. Allowed values include any of
+	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
+	// default, this is set to `writeback`.
+	DiskCache string `mapstructure:"disk_cache" required:"false"`
+	// The discard mode to use for disk. Allowed values
+	// include any of unmap or ignore. By default, this is set to ignore.
+	DiskDiscard string `mapstructure:"disk_discard" required:"false"`
+	// The detect-zeroes mode to use for disk.
+	// Allowed values include any of unmap, on or off. Defaults to off.
+	// When the value is "off" we don't set the flag in the qemu command, so that
+	// Packer still works with old versions of QEMU that don't have this option.
+	DetectZeroes string `mapstructure:"disk_detect_zeroes" required:"false"`
+	// Packer compacts the QCOW2 image using
+	// qemu-img convert.  Set this option to true to disable compacting.
+	// Defaults to false.
+	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`
+	// Apply compression to the QCOW2 disk file
+	// using qemu-img convert. Defaults to false.
+	DiskCompression bool `mapstructure:"disk_compression" required:"false"`
+	// Either `qcow2` or `raw`, this specifies the output format of the virtual
+	// machine image. This defaults to `qcow2`.
+	Format string `mapstructure:"format" required:"false"`
+	// Packer defaults to building QEMU virtual machines by
+	// launching a GUI that shows the console of the machine being built. When this
+	// value is set to `true`, the machine will start without a console.
+	//
+	// You can still see the console if you make a note of the VNC display
+	// number chosen, and then connect using `vncviewer -Shared <host>:<display>`
+	Headless bool `mapstructure:"headless" required:"false"`
+	// Packer defaults to building from an ISO file, this parameter controls
+	// whether the ISO URL supplied is actually a bootable QEMU image. When
+	// this value is set to `true`, the machine will either clone the source or
+	// use it as a backing file (if `use_backing_file` is `true`); then, it
+	// will resize the image according to `disk_size` and boot it.
+	DiskImage bool `mapstructure:"disk_image" required:"false"`
+	// Only applicable when disk_image is true
+	// and format is qcow2, set this option to true to create a new QCOW2
+	// file that uses the file located at iso_url as a backing file. The new file
+	// will only contain blocks that have changed compared to the backing file, so
+	// enabling this option can significantly reduce disk usage.
+	UseBackingFile bool `mapstructure:"use_backing_file" required:"false"`
+	// The type of machine emulation to use. Run your qemu binary with the
+	// flags `-machine help` to list available types for your system. This
+	// defaults to `pc`.
+	MachineType string `mapstructure:"machine_type" required:"false"`
+	// The amount of memory to use when building the VM
+	// in megabytes. This defaults to 512 megabytes.
+	MemorySize int `mapstructure:"memory" required:"false"`
+	// The driver to use for the network interface. Allowed values `ne2k_pci`,
+	// `i82551`, `i82557b`, `i82559er`, `rtl8139`, `e1000`, `pcnet`, `virtio`,
+	// `virtio-net`, `virtio-net-pci`, `usb-net`, `i82559a`, `i82559b`,
+	// `i82559c`, `i82550`, `i82562`, `i82557a`, `i82557c`, `i82801`,
+	// `vmxnet3`, `i82558a` or `i82558b`. The Qemu builder uses `virtio-net` by
+	// default.
+	NetDevice string `mapstructure:"net_device" required:"false"`
+	// This is the path to the directory where the
+	// resulting virtual machine will be created. This may be relative or absolute.
+	// If relative, the path is relative to the working directory when packer
+	// is executed. This directory must not exist or be empty prior to running
+	// the builder. By default this is output-BUILDNAME where "BUILDNAME" is the
+	// name of the build.
+	OutputDir string `mapstructure:"output_directory" required:"false"`
+	// Allows complete control over the qemu command line (though not, at this
+	// time, qemu-img). Each array of strings makes up a command line switch
+	// that overrides matching default switch/value pairs. Any value specified
+	// as an empty string is ignored. All values after the switch are
+	// concatenated with no separator.
+	//
+	// ~&gt; **Warning:** The qemu command line allows extreme flexibility, so
+	// beware of conflicting arguments causing failures of your run. For
+	// instance, using --no-acpi could break the ability to send power signal
+	// type commands (e.g., shutdown -P now) to the virtual machine, thus
+	// preventing proper shutdown. To see the defaults, look in the packer.log
+	// file and search for the qemu-system-x86 command. The arguments are all
+	// printed for review.
+	//
+	// The following shows a sample usage:
+	//
+	// ``` json {
+	//   "qemuargs": [
+	//     [ "-m", "1024M" ],
+	//     [ "--no-acpi", "" ],
+	//     [
+	//       "-netdev",
+	//       "user,id=mynet0,",
+	//       "hostfwd=hostip:hostport-guestip:guestport",
+	//       ""
+	//     ],
+	//     [ "-device", "virtio-net,netdev=mynet0" ]
+	//   ]
+	// }
+	// ```
+	//
+	// would produce the following (not including other defaults supplied by
+	// the builder and not otherwise conflicting with the qemuargs):
+	//
+	// ``` text qemu-system-x86 -m 1024m --no-acpi -netdev
+	// user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device
+	// virtio-net,netdev=mynet0" ```
+	//
+	// ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
+	// builds are available though an environmental variable does need to be
+	// set for QEMU for Windows to redirect stdout to the console instead of
+	// stdout.txt.
+	//
+	// The following shows the environment variable that needs to be set for
+	// Windows QEMU support:
+	//
+	// ``` text setx SDL_STDIO_REDIRECT=0 ```
+	//
+	// You can also use the `SSHHostPort` template variable to produce a packer
+	// template that can be invoked by `make` in parallel:
+	//
+	// ``` json {
+	//   "qemuargs": [
+	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+	//     [ "-device", "virtio-net,netdev=forward,id=net0"]
+	//   ]
+	// } ```
+	//
+	// `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
+	// of which will bind to their own SSH port as determined by each process.
+	// This will also work with WinRM, just change the port forward in
+	// `qemuargs` to map to WinRM's default port of `5985` or whatever value
+	// you have the service set to listen on.
+	QemuArgs [][]string `mapstructure:"qemuargs" required:"false"`
+	// The name of the Qemu binary to look for. This
+	// defaults to qemu-system-x86_64, but may need to be changed for
+	// some platforms. For example qemu-kvm, or qemu-system-i386 may be a
+	// better choice for some systems.
+	QemuBinary string `mapstructure:"qemu_binary" required:"false"`
+	// Enable QMP socket. Location is specified by `qmp_socket_path`. Defaults
+	// to false.
+	QMPEnable bool `mapstructure:"qmp_enable" required:"false"`
+	// QMP Socket Path when `qmp_enable` is true. Defaults to
+	// `output_directory`/`vm_name`.monitor.
+	QMPSocketPath string `mapstructure:"qmp_socket_path" required:"false"`
+	// The minimum and maximum port to use for the SSH port on the host machine
+	// which is forwarded to the SSH port on the guest machine. Because Packer
+	// often runs in parallel, Packer will choose a randomly available port in
+	// this range to use as the host port. By default this is 2222 to 4444.
+	SSHHostPortMin int `mapstructure:"ssh_host_port_min" required:"false"`
+	SSHHostPortMax int `mapstructure:"ssh_host_port_max" required:"false"`
+	// If true, do not pass a -display option
+	// to qemu, allowing it to choose the default. This may be needed when running
+	// under macOS, and getting errors about sdl not being available.
+	UseDefaultDisplay bool `mapstructure:"use_default_display" required:"false"`
+	// The IP address that should be
+	// binded to for VNC. By default packer will use 127.0.0.1 for this. If you
+	// wish to bind to all interfaces use 0.0.0.0.
+	VNCBindAddress string `mapstructure:"vnc_bind_address" required:"false"`
+	// Whether or not to set a password on the VNC server. This option
+	// automatically enables the QMP socket. See `qmp_socket_path`. Defaults to
+	// `false`.
+	VNCUsePassword bool `mapstructure:"vnc_use_password" required:"false"`
+	// The minimum and maximum port
+	// to use for VNC access to the virtual machine. The builder uses VNC to type
+	// the initial boot_command. Because Packer generally runs in parallel,
+	// Packer uses a randomly chosen port in this range that appears available. By
+	// default this is 5900 to 6000. The minimum and maximum ports are inclusive.
+	VNCPortMin int `mapstructure:"vnc_port_min" required:"false"`
+	VNCPortMax int `mapstructure:"vnc_port_max"`
+	// This is the name of the image (QCOW2 or IMG) file for
+	// the new virtual machine. By default this is packer-BUILDNAME, where
+	// "BUILDNAME" is the name of the build. Currently, no file extension will be
+	// used unless it is specified in this option.
+	VMName string `mapstructure:"vm_name" required:"false"`
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
 
-	RawBootWait        string `mapstructure:"boot_wait"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-
-	bootWait        time.Duration ``
-	shutdownTimeout time.Duration ``
-	ctx             interpolate.Context
+	ctx interpolate.Context
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -142,9 +345,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = 40960
+	if b.config.DiskSize == "" || b.config.DiskSize == "0" {
+		b.config.DiskSize = "40960M"
 	}
 
 	if b.config.DiskCache == "" {
@@ -153,6 +357,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskDiscard == "" {
 		b.config.DiskDiscard = "ignore"
+	}
+
+	if b.config.DetectZeroes == "" {
+		b.config.DetectZeroes = "off"
 	}
 
 	if b.config.Accelerator == "" {
@@ -187,8 +395,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.QemuBinary = "qemu-system-x86_64"
 	}
 
-	if b.config.RawBootWait == "" {
-		b.config.RawBootWait = "10s"
+	if b.config.MemorySize < 10 {
+		log.Printf("MemorySize %d is too small, using default: 512", b.config.MemorySize)
+		b.config.MemorySize = 512
+	}
+
+	if b.config.CpuCount < 1 {
+		log.Printf("CpuCount %d too small, using default: 1", b.config.CpuCount)
+		b.config.CpuCount = 1
 	}
 
 	if b.config.SSHHostPortMin == 0 {
@@ -220,6 +434,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.NetDevice == "" {
 		b.config.NetDevice = "virtio-net"
@@ -257,9 +472,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskCompression = false
 	}
 
+	if b.config.UseBackingFile && !(b.config.DiskImage && b.config.Format == "qcow2") {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
+	}
+
+	if b.config.DiskImage && len(b.config.AdditionalDiskSize) > 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
+	}
+
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {
@@ -279,7 +504,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("unrecognized disk cache type"))
+			errs, errors.New("unrecognized disk discard type"))
+	}
+
+	if _, ok := diskDZeroes[b.config.DetectZeroes]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk detect zeroes setting"))
 	}
 
 	if !b.config.PackerForce {
@@ -290,30 +520,24 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
-	}
-
-	if b.config.RawShutdownTimeout == "" {
-		b.config.RawShutdownTimeout = "5m"
-	}
-
-	b.config.shutdownTimeout, err = time.ParseDuration(b.config.RawShutdownTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
 	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
 	}
 
+	if b.config.SSHHostPortMin < 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("ssh_host_port_min must be positive"))
+	}
+
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+
+	if b.config.VNCUsePassword && b.config.QMPSocketPath == "" {
+		socketName := fmt.Sprintf("%s.monitor", b.config.VMName)
+		b.config.QMPSocketPath = filepath.Join(b.config.OutputDir, socketName)
 	}
 
 	if b.config.QemuArgs == nil {
@@ -327,7 +551,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return warnings, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with Qemu
 	driver, err := b.newDriver(b.config.QemuBinary)
 	if err != nil {
@@ -367,6 +591,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		new(stepCreateDisk),
 		new(stepCopyDisk),
@@ -387,7 +612,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
-		&stepBootWait{},
+		new(stepConfigureQMP),
 		&stepTypeBootCommand{},
 	)
 
@@ -395,8 +620,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		steps = append(steps,
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      commHost,
-				SSHConfig: sshConfig,
+				Host:      commHost(b.config.Comm.SSHHost),
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
 			},
@@ -405,6 +630,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps = append(steps,
 		new(common.StepProvision),
+	)
+
+	steps = append(steps,
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	)
 	steps = append(steps,
 		new(stepShutdown),
@@ -416,7 +647,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
 	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
@@ -425,7 +655,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -464,19 +694,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		state: make(map[string]interface{}),
 	}
 
-	artifact.state["diskName"] = state.Get("disk_filename").(string)
+	artifact.state["diskName"] = b.config.VMName
+	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
+	if ok {
+		artifact.state["diskPaths"] = diskpaths
+	}
 	artifact.state["diskType"] = b.config.Format
-	artifact.state["diskSize"] = uint64(b.config.DiskSize)
+	artifact.state["diskSize"] = b.config.DiskSize
 	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }
 
 func (b *Builder) newDriver(qemuBinary string) (Driver, error) {

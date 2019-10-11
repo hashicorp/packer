@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -10,15 +11,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v1"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
+	vaultapi "github.com/hashicorp/vault/api"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -35,32 +36,64 @@ type driverGCE struct {
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
-func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
+// Define a TokenSource that gets tokens from Vault
+type OauthTokenSource struct {
+	Path string
+}
+
+func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
+	log.Printf("Retrieving Oauth token from Vault...")
+	vaultConfig := vaultapi.DefaultConfig()
+	cli, err := vaultapi.NewClient(vaultConfig)
+	if err != nil {
+		return nil, fmt.Errorf("%s\n", err)
+	}
+	resp, err := cli.Logical().Read(ots.Path)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading vault resp: %s", err)
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("Vault Oauth Engine does not exist at the given path.")
+	}
+	token, ok := resp.Data["token"]
+	if !ok {
+		return nil, fmt.Errorf("ERROR, token was not present in response body")
+	}
+	at := token.(string)
+
+	log.Printf("Retrieved Oauth token from Vault")
+	return &oauth2.Token{
+		AccessToken: at,
+		Expiry:      time.Now().Add(time.Minute * time.Duration(60)),
+	}, nil
+
+}
+
+func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 	var err error
 
 	var client *http.Client
 
-	// Auth with AccountFile first if provided
-	if a.PrivateKey != "" {
-		log.Printf("[INFO] Requesting Google token via AccountFile...")
-		log.Printf("[INFO]   -- Email: %s", a.ClientEmail)
-		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-		log.Printf("[INFO]   -- Private Key Length: %d", len(a.PrivateKey))
+	if vaultOauth != "" {
+		// Auth with Vault Oauth
+		log.Printf("Using Vault to generate Oauth token.")
+		ts := OauthTokenSource{vaultOauth}
+		return oauth2.NewClient(context.TODO(), ts), nil
 
-		conf := jwt.Config{
-			Email:      a.ClientEmail,
-			PrivateKey: []byte(a.PrivateKey),
-			Scopes:     DriverScopes,
-			TokenURL:   "https://accounts.google.com/o/oauth2/token",
-		}
+	} else if conf != nil && len(conf.PrivateKey) > 0 {
+		// Auth with AccountFile if provided
+		log.Printf("[INFO] Requesting Google token via account_file...")
+		log.Printf("[INFO]   -- Email: %s", conf.Email)
+		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
+		log.Printf("[INFO]   -- Private Key Length: %d", len(conf.PrivateKey))
 
 		// Initiate an http.Client. The following GET request will be
 		// authorized and authenticated on the behalf of
 		// your service account.
-		client = conf.Client(oauth2.NoContext)
+		client = conf.Client(context.TODO())
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
-		client, err = google.DefaultClient(oauth2.NoContext, DriverScopes...)
+		client, err = google.DefaultClient(context.TODO(), DriverScopes...)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -79,16 +112,23 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 		return nil, err
 	}
 
-	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.New(client)
-	// Set UserAgent
-	versionString := version.FormattedVersion()
-	service.UserAgent = fmt.Sprintf(
-		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
+	return client, nil
+}
 
+func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (Driver, error) {
+	client, err := NewClientGCE(conf, vaultOauth)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("[INFO] Instantiating GCE client...")
+	service, err := compute.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set UserAgent
+	service.UserAgent = useragent.String()
 
 	return &driverGCE{
 		projectId: p,
@@ -97,14 +137,16 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
-		Description: description,
-		Name:        name,
-		Family:      family,
-		Labels:      image_labels,
-		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
-		SourceType:  "RAW",
+		Description:        description,
+		Name:               name,
+		Family:             family,
+		Labels:             image_labels,
+		Licenses:           image_licenses,
+		ImageEncryptionKey: image_encryption_key,
+		SourceDisk:         fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
+		SourceType:         "RAW",
 	}
 
 	imageCh := make(chan *Image, 1)
@@ -170,7 +212,28 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
+	projects := []string{
+		d.projectId,
+		// Public projects, drawn from
+		// https://cloud.google.com/compute/docs/images
+		"centos-cloud",
+		"cos-cloud",
+		"coreos-cloud",
+		"debian-cloud",
+		"rhel-cloud",
+		"rhel-sap-cloud",
+		"suse-cloud",
+		"suse-sap-cloud",
+		"suse-byos-cloud",
+		"ubuntu-os-cloud",
+		"windows-cloud",
+		"windows-sql-cloud",
+		"gce-uefi-images",
+		"gce-nvme",
+		// misc
+		"google-containers",
+		"opensuse-cloud",
+	}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
@@ -342,6 +405,20 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		guestAccelerators = append(guestAccelerators, ac)
 	}
 
+	// Configure the instance's service account. If the user has set
+	// disable_default_service_account, then the default service account
+	// will not be used. If they also do not set service_account_email, then
+	// the instance will be created with no service account or scopes.
+	serviceAccount := &compute.ServiceAccount{}
+	if !c.DisableDefaultServiceAccount {
+		serviceAccount.Email = "default"
+		serviceAccount.Scopes = c.Scopes
+	}
+	if c.ServiceAccountEmail != "" {
+		serviceAccount.Email = c.ServiceAccountEmail
+		serviceAccount.Scopes = c.Scopes
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -365,7 +442,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		Metadata: &compute.Metadata{
 			Items: metadata,
 		},
-		Name: c.Name,
+		MinCpuPlatform: c.MinCpuPlatform,
+		Name:           c.Name,
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
@@ -378,10 +456,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Preemptible:       c.Preemptible,
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
-			{
-				Email:  "default",
-				Scopes: c.Scopes,
-			},
+			serviceAccount,
 		},
 		Tags: &compute.Tags{
 			Items: c.Tags,
@@ -569,14 +644,18 @@ type stateRefreshFunc func() (string, error)
 // waitForState will spin in a loop forever waiting for state to
 // reach a certain target.
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
-	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
+	ctx := context.TODO()
+	err := retry.Config{
+		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 2 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
 		state, err := refresh()
 		if err != nil {
-			return false, err
-		} else if state == target {
-			return true, nil
+			return err
 		}
-		return false, nil
+		if state == target {
+			return nil
+		}
+		return fmt.Errorf("retrying for state %s, got %s", target, state)
 	})
 	errCh <- err
 	return err

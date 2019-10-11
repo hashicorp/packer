@@ -1,0 +1,61 @@
+{
+  "_comment": "comment",
+  "description": "Description Test",
+  "min_packer_version": "1.3.0",
+  "variables": {
+    "one": "1",
+    "two": "2",
+    "three": null
+  },
+  "sensitive-variables": ["one"],
+  "builders": [
+    {
+      "type": "amazon-ebs",
+
+      "ami_name": "AMI Name",
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+      "source_ami": "ami-aaaaaaaaaaaaaa"
+    },
+    {
+      "type": "docker",
+
+      "image": "ubuntu",
+      "export_path": "image.tar"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "script.sh"
+    },
+    {
+      "type": "shell",
+      "script": "script.sh",
+      "override": {
+        "docker": {
+          "execute_command": "echo 'override'"
+        }
+      }
+    }
+  ],
+  "post-processors": [
+    [
+      "compress",
+      {
+        "type": "vagrant",
+        "only": ["docker"]
+      }
+    ],
+    [
+      {
+        "type": "shell-local",
+        "inline": ["echo foo"],
+        "except": ["amazon-ebs"]
+      }
+    ]
+  ],
+  "push": {
+    "name": "push test"
+  }
+}

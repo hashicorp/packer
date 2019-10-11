@@ -3,11 +3,13 @@ package vagrant
 import (
 	"bytes"
 	"compress/flate"
-	"github.com/hashicorp/packer/packer"
+	"context"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -135,13 +137,25 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	var p PostProcessor
+
+	if err := p.Configure(c); err != nil {
+		t.Fatal("no error expected as vagrantfile_template exists")
+	}
+
 	if err := os.Remove(name); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	var p PostProcessor
 	if err := p.Configure(c); err == nil {
-		t.Fatal("expected an error since vagrantfile_template does not exist")
+		t.Fatal("expected error since vagrantfile_template does not exist and vagrantfile_template_generated is unset")
+	}
+
+	// The vagrantfile_template will be generated during the build process
+	c["vagrantfile_template_generated"] = true
+
+	if err := p.Configure(c); err != nil {
+		t.Fatal("no error expected due to missing vagrantfile_template as vagrantfile_template_generated is set")
 	}
 }
 
@@ -150,7 +164,7 @@ func TestPostProcessorPostProcess_badId(t *testing.T) {
 		BuilderIdValue: "invalid.packer",
 	}
 
-	_, _, err := testPP(t).PostProcess(testUi(), artifact)
+	_, _, _, err := testPP(t).PostProcess(context.Background(), testUi(), artifact)
 	if !strings.Contains(err.Error(), "artifact type") {
 		t.Fatalf("err: %s", err)
 	}
@@ -180,7 +194,7 @@ func TestPostProcessorPostProcess_vagrantfileUserVariable(t *testing.T) {
 	a := &packer.MockArtifact{
 		BuilderIdValue: "packer.parallels",
 	}
-	a2, _, err := p.PostProcess(testUi(), a)
+	a2, _, _, err := p.PostProcess(context.Background(), testUi(), a)
 	if a2 != nil {
 		for _, fn := range a2.Files() {
 			defer os.Remove(fn)

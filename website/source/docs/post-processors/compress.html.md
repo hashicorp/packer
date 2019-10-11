@@ -23,10 +23,9 @@ filename: `packer_{{.BuildName}}_{{.BuilderType}}`. If you want to change this
 you will need to specify the `output` option.
 
 -   `output` (string) - The path to save the compressed archive. The archive
-    format is inferred from the filename. E.g. `.tar.gz` will be a
-    gzipped tarball. `.zip` will be a zip file. If the extension can't be
-    detected packer defaults to `.tar.gz` behavior but will not change
-    the filename.
+    format is inferred from the filename. E.g. `.tar.gz` will be a gzipped
+    tarball. `.zip` will be a zip file. If the extension can't be detected
+    packer defaults to `.tar.gz` behavior but will not change the filename.
 
     You can use `{{.BuildName}}` and `{{.BuilderType}}` in your output path. If
     you are executing multiple builders in parallel you should make sure
@@ -39,7 +38,9 @@ you will need to specify the `output` option.
     algorithms that support it, from 1 through 9 inclusive. Typically higher
     compression levels take longer but produce smaller files. Defaults to `6`
 
--   `keep_input_artifact` (boolean) - Keep source files; defaults to `false`
+-   `keep_input_artifact` (boolean) - if `true`, keep both the source files and
+    the compressed file; if `false`, discard the source files. Defaults to
+    `false`
 
 ### Supported Formats
 

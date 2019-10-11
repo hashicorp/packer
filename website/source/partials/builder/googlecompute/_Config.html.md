@@ -1,0 +1,4 @@
+<!-- Code generated from the comments of the Config struct in builder/googlecompute/config.go; DO NOT EDIT MANUALLY -->
+Config is the configuration structure for the GCE builder. It stores
+both the publicly settable state as well as the privately generated
+state of the config object.

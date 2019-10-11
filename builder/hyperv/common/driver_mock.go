@@ -1,5 +1,9 @@
 package common
 
+import (
+	"context"
+)
+
 type DriverMock struct {
 	IsRunning_Called bool
 	IsRunning_VmName string
@@ -62,10 +66,20 @@ type DriverMock struct {
 	GetVirtualMachineNetworkAdapterAddress_Return string
 	GetVirtualMachineNetworkAdapterAddress_Err    error
 
+	ReplaceVirtualMachineNetworkAdapter_Called  bool
+	ReplaceVirtualMachineNetworkAdapter_VmName  string
+	ReplaceVirtualMachineNetworkAdapter_Replace bool
+	ReplaceVirtualMachineNetworkAdapter_Err     error
+
 	SetNetworkAdapterVlanId_Called     bool
 	SetNetworkAdapterVlanId_SwitchName string
 	SetNetworkAdapterVlanId_VlanId     string
 	SetNetworkAdapterVlanId_Err        error
+
+	SetVmNetworkAdapterMacAddress_Called bool
+	SetVmNetworkAdapterMacAddress_VmName string
+	SetVmNetworkAdapterMacAddress_Mac    string
+	SetVmNetworkAdapterMacAddress_Err    error
 
 	SetVirtualMachineVlanId_Called bool
 	SetVirtualMachineVlanId_VmName string
@@ -96,6 +110,9 @@ type DriverMock struct {
 	DeleteVirtualSwitch_SwitchName string
 	DeleteVirtualSwitch_Err        error
 
+	CheckVMName_Called bool
+	CheckVMName_Err    error
+
 	CreateVirtualSwitch_Called     bool
 	CreateVirtualSwitch_SwitchName string
 	CreateVirtualSwitch_SwitchType string
@@ -107,6 +124,7 @@ type DriverMock struct {
 	AddVirtualMachineHardDrive_VhdFile        string
 	AddVirtualMachineHardDrive_VhdName        string
 	AddVirtualMachineHardDrive_VhdSizeBytes   int64
+	AddVirtualMachineHardDrive_VhdBlockSize   int64
 	AddVirtualMachineHardDrive_ControllerType string
 	AddVirtualMachineHardDrive_Err            error
 
@@ -114,16 +132,18 @@ type DriverMock struct {
 	CreateVirtualMachine_VmName           string
 	CreateVirtualMachine_Path             string
 	CreateVirtualMachine_HarddrivePath    string
-	CreateVirtualMachine_VhdPath          string
 	CreateVirtualMachine_Ram              int64
 	CreateVirtualMachine_DiskSize         int64
+	CreateVirtualMachine_DiskBlockSize    int64
 	CreateVirtualMachine_SwitchName       string
 	CreateVirtualMachine_Generation       uint
 	CreateVirtualMachine_DifferentialDisk bool
+	CreateVirtualMachine_FixedVHD         bool
+	CreateVirtualMachine_Version          string
 	CreateVirtualMachine_Err              error
 
 	CloneVirtualMachine_Called                bool
-	CloneVirtualMachine_CloneFromVmxcPath     string
+	CloneVirtualMachine_CloneFromVmcxPath     string
 	CloneVirtualMachine_CloneFromVmName       string
 	CloneVirtualMachine_CloneFromSnapshotName string
 	CloneVirtualMachine_CloneAllSnapshots     bool
@@ -132,6 +152,7 @@ type DriverMock struct {
 	CloneVirtualMachine_HarddrivePath         string
 	CloneVirtualMachine_Ram                   int64
 	CloneVirtualMachine_SwitchName            string
+	CloneVirtualMachine_Copy                  bool
 	CloneVirtualMachine_Err                   error
 
 	DeleteVirtualMachine_Called bool
@@ -153,10 +174,11 @@ type DriverMock struct {
 	SetVirtualMachineDynamicMemory_Enable bool
 	SetVirtualMachineDynamicMemory_Err    error
 
-	SetVirtualMachineSecureBoot_Called bool
-	SetVirtualMachineSecureBoot_VmName string
-	SetVirtualMachineSecureBoot_Enable bool
-	SetVirtualMachineSecureBoot_Err    error
+	SetVirtualMachineSecureBoot_Called       bool
+	SetVirtualMachineSecureBoot_VmName       string
+	SetVirtualMachineSecureBoot_TemplateName string
+	SetVirtualMachineSecureBoot_Enable       bool
+	SetVirtualMachineSecureBoot_Err          error
 
 	SetVirtualMachineVirtualizationExtensions_Called bool
 	SetVirtualMachineVirtualizationExtensions_VmName string
@@ -173,17 +195,20 @@ type DriverMock struct {
 	ExportVirtualMachine_Path   string
 	ExportVirtualMachine_Err    error
 
-	CompactDisks_Called  bool
-	CompactDisks_ExpPath string
-	CompactDisks_VhdDir  string
-	CompactDisks_Err     error
+	PreserveLegacyExportBehaviour_Called  bool
+	PreserveLegacyExportBehaviour_SrcPath string
+	PreserveLegacyExportBehaviour_DstPath string
+	PreserveLegacyExportBehaviour_Err     error
 
-	CopyExportedVirtualMachine_Called     bool
-	CopyExportedVirtualMachine_ExpPath    string
-	CopyExportedVirtualMachine_OutputPath string
-	CopyExportedVirtualMachine_VhdDir     string
-	CopyExportedVirtualMachine_VmDir      string
-	CopyExportedVirtualMachine_Err        error
+	MoveCreatedVHDsToOutputDir_Called  bool
+	MoveCreatedVHDsToOutputDir_SrcPath string
+	MoveCreatedVHDsToOutputDir_DstPath string
+	MoveCreatedVHDsToOutputDir_Err     error
+
+	CompactDisks_Called bool
+	CompactDisks_Path   string
+	CompactDisks_Result string
+	CompactDisks_Err    error
 
 	RestartVirtualMachine_Called bool
 	RestartVirtualMachine_VmName string
@@ -231,6 +256,14 @@ type DriverMock struct {
 	UnmountFloppyDrive_Called bool
 	UnmountFloppyDrive_VmName string
 	UnmountFloppyDrive_Err    error
+
+	Connect_Called bool
+	Connect_VmName string
+	Connect_Cancel context.CancelFunc
+	Connect_Err    error
+
+	Disconnect_Called bool
+	Disconnect_Cancel context.CancelFunc
 }
 
 func (d *DriverMock) IsRunning(vmName string) (bool, error) {
@@ -311,11 +344,25 @@ func (d *DriverMock) GetVirtualMachineNetworkAdapterAddress(vmName string) (stri
 	return d.GetVirtualMachineNetworkAdapterAddress_Return, d.GetVirtualMachineNetworkAdapterAddress_Err
 }
 
+func (d *DriverMock) ReplaceVirtualMachineNetworkAdapter(vmName string, replace bool) error {
+	d.ReplaceVirtualMachineNetworkAdapter_Called = true
+	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
+	d.ReplaceVirtualMachineNetworkAdapter_Replace = replace
+	return d.ReplaceVirtualMachineNetworkAdapter_Err
+}
+
 func (d *DriverMock) SetNetworkAdapterVlanId(switchName string, vlanId string) error {
 	d.SetNetworkAdapterVlanId_Called = true
 	d.SetNetworkAdapterVlanId_SwitchName = switchName
 	d.SetNetworkAdapterVlanId_VlanId = vlanId
 	return d.SetNetworkAdapterVlanId_Err
+}
+
+func (d *DriverMock) SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	d.SetVmNetworkAdapterMacAddress_Called = true
+	d.SetVmNetworkAdapterMacAddress_VmName = vmName
+	d.SetVmNetworkAdapterMacAddress_Mac = mac
+	return d.SetVmNetworkAdapterMacAddress_Err
 }
 
 func (d *DriverMock) SetVirtualMachineVlanId(vmName string, vlanId string) error {
@@ -365,33 +412,45 @@ func (d *DriverMock) CreateVirtualSwitch(switchName string, switchType string) (
 	return d.CreateVirtualSwitch_Return, d.CreateVirtualSwitch_Err
 }
 
-func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, controllerType string) error {
+func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string,
+	vhdSizeBytes int64, vhdDiskBlockSize int64, controllerType string) error {
 	d.AddVirtualMachineHardDrive_Called = true
 	d.AddVirtualMachineHardDrive_VmName = vmName
 	d.AddVirtualMachineHardDrive_VhdFile = vhdFile
 	d.AddVirtualMachineHardDrive_VhdName = vhdName
 	d.AddVirtualMachineHardDrive_VhdSizeBytes = vhdSizeBytes
+	d.AddVirtualMachineHardDrive_VhdSizeBytes = vhdDiskBlockSize
 	d.AddVirtualMachineHardDrive_ControllerType = controllerType
 	return d.AddVirtualMachineHardDrive_Err
 }
 
-func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint, diffDisks bool) error {
+func (d *DriverMock) CheckVMName(vmName string) error {
+	d.CheckVMName_Called = true
+	return d.CheckVMName_Err
+}
+
+func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string,
+	ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diffDisks bool, fixedVHD bool, version string) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
 	d.CreateVirtualMachine_Path = path
 	d.CreateVirtualMachine_HarddrivePath = harddrivePath
-	d.CreateVirtualMachine_VhdPath = vhdPath
 	d.CreateVirtualMachine_Ram = ram
 	d.CreateVirtualMachine_DiskSize = diskSize
+	d.CreateVirtualMachine_DiskBlockSize = diskBlockSize
 	d.CreateVirtualMachine_SwitchName = switchName
 	d.CreateVirtualMachine_Generation = generation
 	d.CreateVirtualMachine_DifferentialDisk = diffDisks
+	d.CreateVirtualMachine_Version = version
 	return d.CreateVirtualMachine_Err
 }
 
-func (d *DriverMock) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+func (d *DriverMock) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
+	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string,
+	harddrivePath string, ram int64, switchName string, copyTF bool) error {
 	d.CloneVirtualMachine_Called = true
-	d.CloneVirtualMachine_CloneFromVmxcPath = cloneFromVmxcPath
+	d.CloneVirtualMachine_CloneFromVmcxPath = cloneFromVmcxPath
 	d.CloneVirtualMachine_CloneFromVmName = cloneFromVmName
 	d.CloneVirtualMachine_CloneFromSnapshotName = cloneFromSnapshotName
 	d.CloneVirtualMachine_CloneAllSnapshots = cloneAllSnapshots
@@ -400,6 +459,8 @@ func (d *DriverMock) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmNa
 	d.CloneVirtualMachine_HarddrivePath = harddrivePath
 	d.CloneVirtualMachine_Ram = ram
 	d.CloneVirtualMachine_SwitchName = switchName
+	d.CloneVirtualMachine_Copy = copyTF
+
 	return d.CloneVirtualMachine_Err
 }
 
@@ -430,10 +491,11 @@ func (d *DriverMock) SetVirtualMachineDynamicMemory(vmName string, enable bool) 
 	return d.SetVirtualMachineDynamicMemory_Err
 }
 
-func (d *DriverMock) SetVirtualMachineSecureBoot(vmName string, enable bool) error {
+func (d *DriverMock) SetVirtualMachineSecureBoot(vmName string, enable bool, templateName string) error {
 	d.SetVirtualMachineSecureBoot_Called = true
 	d.SetVirtualMachineSecureBoot_VmName = vmName
 	d.SetVirtualMachineSecureBoot_Enable = enable
+	d.SetVirtualMachineSecureBoot_TemplateName = templateName
 	return d.SetVirtualMachineSecureBoot_Err
 }
 
@@ -458,20 +520,25 @@ func (d *DriverMock) ExportVirtualMachine(vmName string, path string) error {
 	return d.ExportVirtualMachine_Err
 }
 
-func (d *DriverMock) CompactDisks(expPath string, vhdDir string) error {
-	d.CompactDisks_Called = true
-	d.CompactDisks_ExpPath = expPath
-	d.CompactDisks_VhdDir = vhdDir
-	return d.CompactDisks_Err
+func (d *DriverMock) PreserveLegacyExportBehaviour(srcPath string, dstPath string) error {
+	d.PreserveLegacyExportBehaviour_Called = true
+	d.PreserveLegacyExportBehaviour_SrcPath = srcPath
+	d.PreserveLegacyExportBehaviour_DstPath = dstPath
+	return d.PreserveLegacyExportBehaviour_Err
 }
 
-func (d *DriverMock) CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
-	d.CopyExportedVirtualMachine_Called = true
-	d.CopyExportedVirtualMachine_ExpPath = expPath
-	d.CopyExportedVirtualMachine_OutputPath = outputPath
-	d.CopyExportedVirtualMachine_VhdDir = vhdDir
-	d.CopyExportedVirtualMachine_VmDir = vmDir
-	return d.CopyExportedVirtualMachine_Err
+func (d *DriverMock) MoveCreatedVHDsToOutputDir(srcPath string, dstPath string) error {
+	d.MoveCreatedVHDsToOutputDir_Called = true
+	d.MoveCreatedVHDsToOutputDir_SrcPath = srcPath
+	d.MoveCreatedVHDsToOutputDir_DstPath = dstPath
+	return d.MoveCreatedVHDsToOutputDir_Err
+}
+
+func (d *DriverMock) CompactDisks(path string) (result string, err error) {
+	d.CompactDisks_Called = true
+	d.CompactDisks_Path = path
+	d.CompactDisks_Result = "Mock compact result msg: mockdisk.vhdx. Disk size reduced by 20%"
+	return d.CompactDisks_Result, d.CompactDisks_Err
 }
 
 func (d *DriverMock) RestartVirtualMachine(vmName string) error {
@@ -488,7 +555,8 @@ func (d *DriverMock) CreateDvdDrive(vmName string, isoPath string, generation ui
 	return d.CreateDvdDrive_ControllerNumber, d.CreateDvdDrive_ControllerLocation, d.CreateDvdDrive_Err
 }
 
-func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
+func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber uint,
+	controllerLocation uint) error {
 	d.MountDvdDrive_Called = true
 	d.MountDvdDrive_VmName = vmName
 	d.MountDvdDrive_Path = path
@@ -497,7 +565,8 @@ func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber 
 	return d.MountDvdDrive_Err
 }
 
-func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
+func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
+	generation uint) error {
 	d.SetBootDvdDrive_Called = true
 	d.SetBootDvdDrive_VmName = vmName
 	d.SetBootDvdDrive_ControllerNumber = controllerNumber
@@ -533,4 +602,15 @@ func (d *DriverMock) UnmountFloppyDrive(vmName string) error {
 	d.UnmountFloppyDrive_Called = true
 	d.UnmountFloppyDrive_VmName = vmName
 	return d.UnmountFloppyDrive_Err
+}
+
+func (d *DriverMock) Connect(vmName string) (context.CancelFunc, error) {
+	d.Connect_Called = true
+	d.Connect_VmName = vmName
+	return d.Connect_Cancel, d.Connect_Err
+}
+
+func (d *DriverMock) Disconnect(cancel context.CancelFunc) {
+	d.Disconnect_Called = true
+	d.Disconnect_Cancel = cancel
 }

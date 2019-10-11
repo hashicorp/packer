@@ -3,15 +3,11 @@ package common
 import (
 	"errors"
 	"fmt"
-	"net"
-	"os"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	packerssh "github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type ec2Describer interface {
@@ -25,12 +21,16 @@ var (
 
 // SSHHost returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHHost(e ec2Describer, sshInterface string) func(multistep.StateBag) (string, error) {
+func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
+		}
+
 		const tries = 2
 		// <= with current structure to check result of describing `tries` times
 		for j := 0; j <= tries; j++ {
-			var host string
 			i := state.Get("instance").(*ec2.Instance)
 			if sshInterface != "" {
 				switch sshInterface {
@@ -83,58 +83,5 @@ func SSHHost(e ec2Describer, sshInterface string) func(multistep.StateBag) (stri
 		}
 
 		return "", errors.New("couldn't determine address for instance")
-	}
-}
-
-// SSHConfig returns a function that can be used for the SSH communicator
-// config for connecting to the instance created over SSH using the private key
-// or password.
-func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
-	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		if useAgent {
-			authSock := os.Getenv("SSH_AUTH_SOCK")
-			if authSock == "" {
-				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
-			}
-
-			sshAgent, err := net.Dial("unix", authSock)
-			if err != nil {
-				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
-			}
-
-			return &ssh.ClientConfig{
-				User: username,
-				Auth: []ssh.AuthMethod{
-					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
-				},
-				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			}, nil
-		}
-
-		privateKey, hasKey := state.GetOk("privateKey")
-		if hasKey {
-
-			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
-			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
-			}
-			return &ssh.ClientConfig{
-				User: username,
-				Auth: []ssh.AuthMethod{
-					ssh.PublicKeys(signer),
-				},
-				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			}, nil
-
-		} else {
-			return &ssh.ClientConfig{
-				User:            username,
-				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-				Auth: []ssh.AuthMethod{
-					ssh.Password(password),
-					ssh.KeyboardInteractive(
-						packerssh.PasswordKeyboardInteractive(password)),
-				}}, nil
-		}
 	}
 }

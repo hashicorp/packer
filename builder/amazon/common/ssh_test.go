@@ -5,14 +5,15 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 const (
-	privateIP  = "10.0.0.1"
-	publicIP   = "192.168.1.1"
-	privateDNS = "private.dns.test"
-	publicDNS  = "public.dns.test"
+	privateIP       = "10.0.0.1"
+	publicIP        = "192.168.1.1"
+	privateDNS      = "private.dns.test"
+	publicDNS       = "public.dns.test"
+	sshHostTemplate = "custom.host.value"
 )
 
 func TestSSHHost(t *testing.T) {
@@ -25,39 +26,46 @@ func TestSSHHost(t *testing.T) {
 		vpcId        string
 		sshInterface string
 
-		ok       bool
-		wantHost string
+		ok              bool
+		wantHost        string
+		sshHostOverride string
 	}{
-		{1, "", "", true, publicDNS},
-		{1, "", "private_ip", true, privateIP},
-		{1, "vpc-id", "", true, publicIP},
-		{1, "vpc-id", "private_ip", true, privateIP},
-		{1, "vpc-id", "private_dns", true, privateDNS},
-		{1, "vpc-id", "public_dns", true, publicDNS},
-		{1, "vpc-id", "public_ip", true, publicIP},
-		{2, "", "", true, publicDNS},
-		{2, "", "private_ip", true, privateIP},
-		{2, "vpc-id", "", true, publicIP},
-		{2, "vpc-id", "private_ip", true, privateIP},
-		{2, "vpc-id", "private_dns", true, privateDNS},
-		{2, "vpc-id", "public_dns", true, publicDNS},
-		{2, "vpc-id", "public_ip", true, publicIP},
-		{3, "", "", false, ""},
-		{3, "", "private_ip", false, ""},
-		{3, "vpc-id", "", false, ""},
-		{3, "vpc-id", "private_ip", false, ""},
-		{3, "vpc-id", "private_dns", false, ""},
-		{3, "vpc-id", "public_dns", false, ""},
-		{3, "vpc-id", "public_ip", false, ""},
+		{1, "", "", true, publicDNS, ""},
+		{1, "", "private_ip", true, privateIP, ""},
+		{1, "vpc-id", "", true, publicIP, ""},
+		{1, "vpc-id", "private_ip", true, privateIP, ""},
+		{1, "vpc-id", "private_dns", true, privateDNS, ""},
+		{1, "vpc-id", "public_dns", true, publicDNS, ""},
+		{1, "vpc-id", "public_ip", true, publicIP, ""},
+		{2, "", "", true, publicDNS, ""},
+		{2, "", "private_ip", true, privateIP, ""},
+		{2, "vpc-id", "", true, publicIP, ""},
+		{2, "vpc-id", "private_ip", true, privateIP, ""},
+		{2, "vpc-id", "private_dns", true, privateDNS, ""},
+		{2, "vpc-id", "public_dns", true, publicDNS, ""},
+		{2, "vpc-id", "public_ip", true, publicIP, ""},
+		{3, "", "", false, "", ""},
+		{3, "", "private_ip", false, "", ""},
+		{3, "vpc-id", "", false, "", ""},
+		{3, "vpc-id", "private_ip", false, "", ""},
+		{3, "vpc-id", "private_dns", false, "", ""},
+		{3, "vpc-id", "public_dns", false, "", ""},
+		{3, "vpc-id", "public_ip", false, "", ""},
+		{1, "", "", true, sshHostTemplate, sshHostTemplate},
+		{1, "vpc-id", "", true, sshHostTemplate, sshHostTemplate},
+		{2, "vpc-id", "private_dns", true, sshHostTemplate, sshHostTemplate},
 	}
 
 	for _, c := range cases {
-		testSSHHost(t, c.allowTries, c.vpcId, c.sshInterface, c.ok, c.wantHost)
+		testSSHHost(t, c.allowTries, c.vpcId, c.sshInterface, c.ok, c.wantHost,
+			c.sshHostOverride)
 	}
 }
 
-func testSSHHost(t *testing.T, allowTries int, vpcId string, sshInterface string, ok bool, wantHost string) {
-	t.Logf("allowTries=%d vpcId=%s sshInterface=%s ok=%t wantHost=%q", allowTries, vpcId, sshInterface, ok, wantHost)
+func testSSHHost(t *testing.T, allowTries int, vpcId string, sshInterface string,
+	ok bool, wantHost string, sshHostOverride string) {
+	t.Logf("allowTries=%d vpcId=%s sshInterface=%s ok=%t wantHost=%q sshHostOverride=%s",
+		allowTries, vpcId, sshInterface, ok, wantHost, sshHostOverride)
 
 	e := &fakeEC2Describer{
 		allowTries: allowTries,
@@ -68,7 +76,7 @@ func testSSHHost(t *testing.T, allowTries int, vpcId string, sshInterface string
 		publicDNS:  publicDNS,
 	}
 
-	f := SSHHost(e, sshInterface)
+	f := SSHHost(e, sshInterface, sshHostOverride)
 	st := &multistep.BasicStateBag{}
 	st.Put("instance", &ec2.Instance{
 		InstanceId: aws.String("instance-id"),

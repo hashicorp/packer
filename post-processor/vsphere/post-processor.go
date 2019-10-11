@@ -2,10 +2,15 @@ package vsphere
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
+	"os"
 	"os/exec"
+	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
@@ -14,10 +19,17 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-var builtins = map[string]string{
-	"mitchellh.vmware":     "vmware",
-	"mitchellh.vmware-esx": "vmware",
-}
+var ovftool string = "ovftool"
+
+var (
+	// Regular expression to validate RFC1035 hostnames from full fqdn or simple hostname.
+	// For example "packer-esxi1". Requires proper DNS setup and/or correct DNS search domain setting.
+	hostnameRegex = regexp.MustCompile(`^[[:alnum:]][[:alnum:]\-]{0,61}[[:alnum:]]|[[:alpha:]]$`)
+
+	// Simple regular expression to validate IPv4 values.
+	// For example "192.168.1.1".
+	ipv4Regex = regexp.MustCompile(`^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`)
+)
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -27,6 +39,7 @@ type Config struct {
 	Datastore    string   `mapstructure:"datastore"`
 	DiskMode     string   `mapstructure:"disk_mode"`
 	Host         string   `mapstructure:"host"`
+	ESXiHost     string   `mapstructure:"esxi_host"`
 	Insecure     bool     `mapstructure:"insecure"`
 	Options      []string `mapstructure:"options"`
 	Overwrite    bool     `mapstructure:"overwrite"`
@@ -64,7 +77,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
-	if _, err := exec.LookPath("ovftool"); err != nil {
+	if runtime.GOOS == "windows" {
+		ovftool = "ovftool.exe"
+	}
+
+	if _, err := exec.LookPath(ovftool); err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
@@ -93,11 +110,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
-	}
-
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	source := ""
 	for _, path := range artifact.Files() {
 		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
@@ -107,12 +120,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	if source == "" {
-		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
+		return nil, false, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
-	password := url.QueryEscape(p.config.Password)
+	password := escapeWithSpaces(p.config.Password)
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-		url.QueryEscape(p.config.Username),
+		escapeWithSpaces(p.config.Username),
 		password,
 		p.config.Host,
 		p.config.Datacenter,
@@ -122,6 +135,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
 
+	if p.config.ESXiHost != "" {
+		if ipv4Regex.MatchString(p.config.ESXiHost) {
+			ovftool_uri += "/?ip=" + p.config.ESXiHost
+		} else if hostnameRegex.MatchString(p.config.ESXiHost) {
+			ovftool_uri += "/?dns=" + p.config.ESXiHost
+		}
+	}
+
 	args, err := p.BuildArgs(source, ovftool_uri)
 	if err != nil {
 		ui.Message(fmt.Sprintf("Failed: %s\n", err))
@@ -129,22 +150,34 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s", p.filterLog(strings.Join(args, " ")))
+	log.Printf("Starting ovftool with parameters: %s",
+		strings.Replace(
+			strings.Join(args, " "),
+			password,
+			"<password>",
+			-1))
 
-	var out bytes.Buffer
-	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = &out
+	var errWriter io.Writer
+	var errOut bytes.Buffer
+	cmd := exec.Command(ovftool, args...)
+	errWriter = io.MultiWriter(os.Stderr, &errOut)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = errWriter
+
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, p.filterLog(out.String()))
+		err := fmt.Errorf("Error uploading virtual machine: %s\n%s\n", err, p.filterLog(errOut.String()))
+		return nil, false, false, err
 	}
 
-	ui.Message(p.filterLog(out.String()))
+	ui.Message(p.filterLog(errOut.String()))
 
-	return artifact, false, nil
+	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
+
+	return artifact, false, false, nil
 }
 
 func (p *PostProcessor) filterLog(s string) string {
-	password := url.QueryEscape(p.config.Password)
+	password := escapeWithSpaces(p.config.Password)
 	return strings.Replace(s, password, "<password>", -1)
 }
 
@@ -183,4 +216,11 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
 
 	return args, nil
+}
+
+// Encode everything except for + signs
+func escapeWithSpaces(stringToEscape string) string {
+	escapedString := url.QueryEscape(stringToEscape)
+	escapedString = strings.Replace(escapedString, "+", `%20`, -1)
+	return escapedString
 }

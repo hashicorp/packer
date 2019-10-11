@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type InspectCommand struct {
@@ -48,6 +50,11 @@ func (c *InspectCommand) Run(args []string) int {
 	} else {
 		requiredHeader := false
 		for k, v := range tpl.Variables {
+			for _, sensitive := range tpl.SensitiveVariables {
+				if ok := strings.Compare(sensitive.Default, v.Default); ok == 0 {
+					v.Default = "<sensitive>"
+				}
+			}
 			if v.Required {
 				if !requiredHeader {
 					requiredHeader = true
@@ -79,6 +86,11 @@ func (c *InspectCommand) Run(args []string) int {
 			v := tpl.Variables[k]
 			if v.Required {
 				continue
+			}
+			for _, sensitive := range tpl.SensitiveVariables {
+				if ok := strings.Compare(sensitive.Default, v.Default); ok == 0 {
+					v.Default = "<sensitive>"
+				}
 			}
 
 			padding := strings.Repeat(" ", max-len(k))
@@ -159,4 +171,14 @@ Options:
 
 func (c *InspectCommand) Synopsis() string {
 	return "see components of a template"
+}
+
+func (c *InspectCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (c *InspectCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-machine-readable": complete.PredictNothing,
+	}
 }

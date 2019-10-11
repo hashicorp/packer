@@ -1,15 +1,23 @@
+//
+// Copyright (c) 2018, Joyent, Inc. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+
 package compute
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
+	"github.com/pkg/errors"
 )
 
 type ImagesClient struct {
@@ -39,7 +47,6 @@ type Image struct {
 	Tags         map[string]string      `json:"tags"`
 	EULA         string                 `json:"eula"`
 	ACL          []string               `json:"acl"`
-	Error        client.TritonError     `json:"error"`
 }
 
 type ListImagesInput struct {
@@ -53,7 +60,7 @@ type ListImagesInput struct {
 }
 
 func (c *ImagesClient) List(ctx context.Context, input *ListImagesInput) ([]*Image, error) {
-	path := fmt.Sprintf("/%s/images", c.client.AccountName)
+	fullPath := path.Join("/", c.client.AccountName, "images")
 
 	query := &url.Values{}
 	if input.Name != "" {
@@ -80,7 +87,7 @@ func (c *ImagesClient) List(ctx context.Context, input *ListImagesInput) ([]*Ima
 
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 		Query:  query,
 	}
 	respReader, err := c.client.ExecuteRequestURIParams(ctx, reqInputs)
@@ -88,13 +95,13 @@ func (c *ImagesClient) List(ctx context.Context, input *ListImagesInput) ([]*Ima
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing List request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list images")
 	}
 
 	var result []*Image
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding List response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list images response")
 	}
 
 	return result, nil
@@ -105,23 +112,23 @@ type GetImageInput struct {
 }
 
 func (c *ImagesClient) Get(ctx context.Context, input *GetImageInput) (*Image, error) {
-	path := fmt.Sprintf("/%s/images/%s", c.client.AccountName, input.ImageID)
+	fullPath := path.Join("/", c.client.AccountName, "images", input.ImageID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to get image")
 	}
 
 	var result *Image
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Get response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode get image response")
 	}
 
 	return result, nil
@@ -132,17 +139,17 @@ type DeleteImageInput struct {
 }
 
 func (c *ImagesClient) Delete(ctx context.Context, input *DeleteImageInput) error {
-	path := fmt.Sprintf("/%s/images/%s", c.client.AccountName, input.ImageID)
+	fullPath := path.Join("/", c.client.AccountName, "images", input.ImageID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodDelete,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return errwrap.Wrapf("Error executing Delete request: {{err}}", err)
+		return errors.Wrap(err, "unable to delete image")
 	}
 
 	return nil
@@ -160,14 +167,13 @@ type MantaLocation struct {
 }
 
 func (c *ImagesClient) Export(ctx context.Context, input *ExportImageInput) (*MantaLocation, error) {
-	path := fmt.Sprintf("/%s/images/%s", c.client.AccountName, input.ImageID)
+	fullPath := path.Join("/", c.client.AccountName, "images", input.ImageID)
 	query := &url.Values{}
 	query.Set("action", "export")
-	query.Set("manta_path", input.MantaPath)
 
 	reqInputs := client.RequestInput{
-		Method: http.MethodGet,
-		Path:   path,
+		Method: http.MethodPost,
+		Path:   fullPath,
 		Query:  query,
 	}
 	respReader, err := c.client.ExecuteRequestURIParams(ctx, reqInputs)
@@ -175,13 +181,13 @@ func (c *ImagesClient) Export(ctx context.Context, input *ExportImageInput) (*Ma
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to export image")
 	}
 
 	var result *MantaLocation
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Get response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode export image response")
 	}
 
 	return result, nil
@@ -199,10 +205,10 @@ type CreateImageFromMachineInput struct {
 }
 
 func (c *ImagesClient) CreateFromMachine(ctx context.Context, input *CreateImageFromMachineInput) (*Image, error) {
-	path := fmt.Sprintf("/%s/images", c.client.AccountName)
+	fullPath := path.Join("/", c.client.AccountName, "images")
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -210,13 +216,13 @@ func (c *ImagesClient) CreateFromMachine(ctx context.Context, input *CreateImage
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing CreateFromMachine request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to create machine from image")
 	}
 
 	var result *Image
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding CreateFromMachine response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode create machine from image response")
 	}
 
 	return result, nil
@@ -224,7 +230,7 @@ func (c *ImagesClient) CreateFromMachine(ctx context.Context, input *CreateImage
 
 type UpdateImageInput struct {
 	ImageID     string            `json:"-"`
-	Name        string            `json:"name"`
+	Name        string            `json:"name,omitempty"`
 	Version     string            `json:"version,omitempty"`
 	Description string            `json:"description,omitempty"`
 	HomePage    string            `json:"homepage,omitempty"`
@@ -234,13 +240,13 @@ type UpdateImageInput struct {
 }
 
 func (c *ImagesClient) Update(ctx context.Context, input *UpdateImageInput) (*Image, error) {
-	path := fmt.Sprintf("/%s/images/%s", c.client.AccountName, input.ImageID)
+	fullPath := path.Join("/", c.client.AccountName, "images", input.ImageID)
 	query := &url.Values{}
 	query.Set("action", "update")
 
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Query:  query,
 		Body:   input,
 	}
@@ -249,13 +255,13 @@ func (c *ImagesClient) Update(ctx context.Context, input *UpdateImageInput) (*Im
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Update request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to update image")
 	}
 
 	var result *Image
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Update response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode update image response")
 	}
 
 	return result, nil

@@ -3,14 +3,15 @@
 package oci
 
 import (
+	"context"
 	"fmt"
-	"log"
 
-	client "github.com/hashicorp/packer/builder/oracle/oci/client"
+	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"github.com/oracle/oci-go-sdk/core"
 )
 
 // BuilderId uniquely identifies the builder
@@ -35,7 +36,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverOCI(b.config)
 	if err != nil {
 		return nil, err
@@ -50,37 +51,53 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&stepKeyPair{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("oci_%s.pem", b.config.PackerBuildName),
-			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
+		&ocommon.StepKeyPair{
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("oci_%s.pem", b.config.PackerBuildName),
 		},
 		&stepCreateInstance{},
 		&stepInstanceInfo{},
+		&stepGetDefaultCredentials{
+			Debug:     b.config.PackerDebug,
+			Comm:      &b.config.Comm,
+			BuildName: b.config.PackerBuildName,
+		},
 		&communicator.StepConnect{
-			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: SSHConfig(
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPassword),
+			Config:    &b.config.Comm,
+			Host:      communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		&stepImage{},
 	}
 
 	// Run the steps
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
+	region, err := b.config.ConfigProvider.Region()
+	if err != nil {
+		return nil, err
+	}
+
+	image, ok := state.GetOk("image")
+	if !ok {
+		return nil, err
+	}
+
 	// Build the artifact and return it
 	artifact := &Artifact{
-		Image:  state.Get("image").(client.Image),
-		Region: b.config.AccessCfg.Region,
+		Image:  image.(core.Image),
+		Region: region,
 		driver: driver,
 	}
 
@@ -88,9 +105,3 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 // Cancel terminates a running build.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}

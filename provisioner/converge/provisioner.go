@@ -5,6 +5,7 @@ package converge
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 
@@ -105,7 +106,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // Provision node somehow. TODO: actual docs
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Converge")
 
 	// bootstrapping
@@ -127,6 +128,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 }
 
 func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) error {
+	ctx := context.TODO()
 	if !p.config.Bootstrap {
 		return nil
 	}
@@ -152,12 +154,12 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 		Stderr:  &outErr,
 	}
 
-	if err = comm.Start(cmd); err != nil {
+	if err = comm.Start(ctx, cmd); err != nil {
 		return fmt.Errorf("Error bootstrapping converge: %s", err)
 	}
 
 	cmd.Wait()
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		ui.Error(out.String())
 		ui.Error(outErr.String())
 		return errors.New("Error bootstrapping converge")
@@ -179,6 +181,7 @@ func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicat
 }
 
 func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error {
+	ctx := context.TODO()
 	// create params JSON file
 	params, err := json.Marshal(p.config.Params)
 	if err != nil {
@@ -207,12 +210,12 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 		Stdout:  &runOut,
 		Stderr:  &runErr,
 	}
-	if err := comm.Start(cmd); err != nil {
+	if err := comm.Start(ctx, cmd); err != nil {
 		return fmt.Errorf("Error applying %q: %s", p.config.Module, err)
 	}
 
 	cmd.Wait()
-	if cmd.ExitStatus == 127 {
+	if cmd.ExitStatus() == 127 {
 		ui.Error("Could not find Converge. Is it installed and in PATH?")
 		if !p.config.Bootstrap {
 			ui.Error("Bootstrapping was disabled for this run. That might be why Converge isn't present.")
@@ -220,20 +223,14 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 
 		return errors.New("Could not find Converge")
 
-	} else if cmd.ExitStatus != 0 {
+	} else if cmd.ExitStatus() != 0 {
 		ui.Error(strings.TrimSpace(runOut.String()))
 		ui.Error(strings.TrimSpace(runErr.String()))
-		ui.Error(fmt.Sprintf("Exited with error code %d.", cmd.ExitStatus))
+		ui.Error(fmt.Sprintf("Exited with error code %d.", cmd.ExitStatus()))
 		return fmt.Errorf("Error applying %q", p.config.Module)
 	}
 
 	ui.Message(strings.TrimSpace(runOut.String()))
 
 	return nil
-}
-
-// Cancel the provisioning process
-func (p *Provisioner) Cancel() {
-	// there's not an awful lot we can do to cancel Converge at the moment.
-	// The default semantics are fine.
 }

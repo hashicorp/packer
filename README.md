@@ -9,10 +9,10 @@
 [travis]: https://travis-ci.org/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/hashicorp/packer
-[godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
-[godoc]: https://godoc.org/github.com/mitchellh/packer
-[report-badge]: https://goreportcard.com/badge/github.com/mitchellh/packer
-[report]: https://goreportcard.com/report/github.com/mitchellh/packer
+[godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
+[godoc]: https://godoc.org/github.com/hashicorp/packer
+[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer
+[report]: https://goreportcard.com/report/github.com/hashicorp/packer
 
 * Website: https://www.packer.io
 * IRC: `#packer-tool` on Freenode
@@ -23,24 +23,8 @@ from a single source configuration.
 
 Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel. Packer
-comes out of the box with support for the following platforms:
-
-* Amazon EC2 (AMI). Both EBS-backed and instance-store AMIs
-* Azure
-* CloudStack
-* DigitalOcean
-* Docker
-* Google Compute Engine
-* Hyper-V
-* 1&1
-* OpenStack
-* Oracle Cloud Infrastructure
-* Parallels
-* ProfitBricks
-* QEMU. Both KVM and Xen images.
-* Triton (Joyent Public Cloud)
-* VMware
-* VirtualBox
+comes out of the box with support for many platforms, the full list of which can
+be found at https://www.packer.io/docs/builders/index.html.
 
 Support for other platforms can be added via plugins.
 
@@ -48,10 +32,6 @@ The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
-Download and install packages and dependencies
-```
-go get github.com/hashicorp/packer
-```
 
 **Note:** There is a great
 [introduction and getting started guide](https://www.packer.io/intro)
@@ -59,8 +39,10 @@ for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
-First, [download a pre-built Packer binary](https://www.packer.io/downloads.html)
-for your operating system or [compile Packer yourself](CONTRIBUTING.md#setting-up-go-to-work-on-packer).
+First, [download a pre-built Packer
+binary](https://www.packer.io/downloads.html) for your operating system or
+[compile Packer
+yourself](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md#setting-up-go-to-work-on-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
@@ -98,7 +80,7 @@ Packer will build an AMI according to the "quick-start" template. The AMI
 will be available in your AWS account. To delete the AMI, you must manually
 delete it using the [AWS console](https://console.aws.amazon.com/). Packer
 builds your images, it does not manage their lifecycle. Where they go, how
-they're run, etc. is up to you.
+they're run, etc., is up to you.
 
 ## Documentation
 
@@ -108,4 +90,7 @@ https://www.packer.io/docs
 
 ## Developing Packer
 
-See [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.
+See
+[CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md)
+for best practices and instructions on setting up your development environment
+to work on Packer.

@@ -1,0 +1,12 @@
+{
+    "AppName": "anonuuid",
+    "ArtifactsDest": "dist",
+    "OutPath": "{{.Dest}}{{.PS}}{{.Version}}{{.PS}}{{.Os}}_{{.Arch}}{{.PS}}{{.ExeName}}{{.Ext}}",
+    "TasksExclude": [
+        "go-test",
+        "go-vet"
+    ],
+    "MainDirsExclude": "vendor,Godeps,testdata",
+    "PackageVersion": "1.0",
+    "ConfigVersion": "0.9"
+}

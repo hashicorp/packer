@@ -1,13 +1,14 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateInstance represents a Packer build step that creates GCE instances.
@@ -18,6 +19,7 @@ type StepCreateInstance struct {
 func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
+	var errs *packer.MultiError
 
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
@@ -40,10 +42,24 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	if c.StartupScriptFile != "" {
 		var content []byte
 		content, err = ioutil.ReadFile(c.StartupScriptFile)
+		if err != nil {
+			return nil, err
+		}
 		instanceMetadata[StartupWrappedScriptKey] = string(content)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
 		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
 	}
+
+	// Read metadata from files specified with metadata_files
+	for key, value := range c.MetadataFiles {
+		var content []byte
+		content, err = ioutil.ReadFile(value)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+		instanceMetadata[key] = string(content)
+	}
+
 	if sourceImage.IsWindows() {
 		// Windows startup script support is not yet implemented.
 		// Mark the startup script as done.
@@ -54,7 +70,10 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
 
-	return instanceMetadata, err
+	if errs != nil && len(errs.Errors) > 0 {
+		return instanceMetadata, errs
+	}
+	return instanceMetadata, nil
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
@@ -72,10 +91,10 @@ func getImage(c *Config, d Driver) (*Image, error) {
 }
 
 // Run executes the Packer build step that creates a GCE instance.
-func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
-	sshPublicKey := state.Get("ssh_public_key").(string)
+
 	ui := state.Get("ui").(packer.Ui)
 
 	sourceImage, err := getImage(c, d)
@@ -97,29 +116,38 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	var errCh <-chan error
 	var metadata map[string]string
-	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
+	metadata, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
+	if errs != nil {
+		state.Put("error", errs.Error())
+		ui.Error(errs.Error())
+		return multistep.ActionHalt
+	}
+
 	errCh, err = d.RunInstance(&InstanceConfig{
-		AcceleratorType:   c.AcceleratorType,
-		AcceleratorCount:  c.AcceleratorCount,
-		Address:           c.Address,
-		Description:       "New instance created by Packer",
-		DiskSizeGb:        c.DiskSizeGb,
-		DiskType:          c.DiskType,
-		Image:             sourceImage,
-		Labels:            c.Labels,
-		MachineType:       c.MachineType,
-		Metadata:          metadata,
-		Name:              name,
-		Network:           c.Network,
-		NetworkProjectId:  c.NetworkProjectId,
-		OmitExternalIP:    c.OmitExternalIP,
-		OnHostMaintenance: c.OnHostMaintenance,
-		Preemptible:       c.Preemptible,
-		Region:            c.Region,
-		Scopes:            c.Scopes,
-		Subnetwork:        c.Subnetwork,
-		Tags:              c.Tags,
-		Zone:              c.Zone,
+		AcceleratorType:              c.AcceleratorType,
+		AcceleratorCount:             c.AcceleratorCount,
+		Address:                      c.Address,
+		Description:                  "New instance created by Packer",
+		DisableDefaultServiceAccount: c.DisableDefaultServiceAccount,
+		DiskSizeGb:                   c.DiskSizeGb,
+		DiskType:                     c.DiskType,
+		Image:                        sourceImage,
+		Labels:                       c.Labels,
+		MachineType:                  c.MachineType,
+		Metadata:                     metadata,
+		MinCpuPlatform:               c.MinCpuPlatform,
+		Name:                         name,
+		Network:                      c.Network,
+		NetworkProjectId:             c.NetworkProjectId,
+		OmitExternalIP:               c.OmitExternalIP,
+		OnHostMaintenance:            c.OnHostMaintenance,
+		Preemptible:                  c.Preemptible,
+		Region:                       c.Region,
+		ServiceAccountEmail:          c.ServiceAccountEmail,
+		Scopes:                       c.Scopes,
+		Subnetwork:                   c.Subnetwork,
+		Tags:                         c.Tags,
+		Zone:                         c.Zone,
 	})
 
 	if err == nil {

@@ -1,20 +1,19 @@
 env:
-    - USER=travis
+  - USER=travis GO111MODULE=off
+
+os:
+  - osx
 
 sudo: false
 
 language: go
 
 go:
-  - 1.7.x
-  - 1.8.x
-  - 1.x
-
-install:
-  - make deps
+  - 1.12.x
 
 script:
-  - GOMAXPROCS=2 make ci
+  - df -h
+  - travis_wait make ci
 
 branches:
   only:

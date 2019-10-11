@@ -5,6 +5,10 @@ LINUX_BASE_BOX = "bento/ubuntu-16.04"
 FREEBSD_BASE_BOX = "jen20/FreeBSD-12.0-CURRENT"
 
 Vagrant.configure(2) do |config|
+	if Vagrant.has_plugin?("vagrant-cachier")
+		config.cache.scope = :box
+	end
+
 	# Compilation and development boxes
 	config.vm.define "linux", autostart: true, primary: true do |vmCfg|
 		vmCfg.vm.box = LINUX_BASE_BOX
@@ -69,9 +73,10 @@ def configureProviders(vmCfg, cpus: "2", memory: "2048")
 		end
 	end
 
-	vmCfg.vm.provider "virtualbox" do |v|
-		v.memory = memory
-		v.cpus = cpus
+	vmCfg.vm.provider "docker" do |d, override|
+		d.build_dir = "."
+		d.has_ssh = true
+		override.vm.box = nil
 	end
 
 	return vmCfg

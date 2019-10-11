@@ -88,12 +88,6 @@ func (c *Client) Builder() packer.Builder {
 	}
 }
 
-func (c *Client) Cache() packer.Cache {
-	return &cache{
-		client: c.client,
-	}
-}
-
 func (c *Client) Communicator() packer.Communicator {
 	return &communicator{
 		client: c.client,

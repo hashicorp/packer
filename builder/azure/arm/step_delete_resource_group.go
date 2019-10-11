@@ -1,13 +1,14 @@
 package arm
 
 import (
+	"context"
 	"fmt"
+	"time"
 
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 
 type StepDeleteResourceGroup struct {
 	client *AzureClient
-	delete func(state multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error
+	delete func(ctx context.Context, state multistep.StateBag, resourceGroupName string) error
 	say    func(message string)
 	error  func(e error)
 }
@@ -32,18 +33,18 @@ func NewStepDeleteResourceGroup(client *AzureClient, ui packer.Ui) *StepDeleteRe
 	return step
 }
 
-func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error {
+func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state multistep.StateBag, resourceGroupName string) error {
 	var err error
 	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
 		s.say("\nThe resource group was not created by Packer, only deleting individual resources ...")
 		var deploymentName = state.Get(constants.ArmDeploymentName).(string)
-		err = s.deleteDeploymentResources(deploymentName, resourceGroupName)
+		err = s.deleteDeploymentResources(ctx, deploymentName, resourceGroupName)
 		if err != nil {
 			return err
 		}
 
 		if keyVaultDeploymentName, ok := state.GetOk(constants.ArmKeyVaultDeploymentName); ok {
-			err = s.deleteDeploymentResources(keyVaultDeploymentName.(string), resourceGroupName)
+			err = s.deleteDeploymentResources(ctx, keyVaultDeploymentName.(string), resourceGroupName)
 			if err != nil {
 				return err
 			}
@@ -52,8 +53,16 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, 
 		return nil
 	} else {
 		s.say("\nThe resource group was created by Packer, deleting ...")
-		_, errChan := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
-		err = <-errChan
+		f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
+		if err == nil {
+			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+				// No need to wait for the completion for delete if request is Accepted
+				s.say(fmt.Sprintf("\nResource Group is being deleted, not waiting for deletion due to config. Resource Group Name '%s'", resourceGroupName))
+			} else {
+				f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)
+			}
+
+		}
 
 		if err != nil {
 			s.say(s.client.LastError.Error())
@@ -62,46 +71,46 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, 
 	}
 }
 
-func (s *StepDeleteResourceGroup) deleteDeploymentResources(deploymentName, resourceGroupName string) error {
+func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context, deploymentName, resourceGroupName string) error {
 	maxResources := int32(maxResourcesToDelete)
 
-	deploymentOperations, err := s.client.DeploymentOperationsClient.List(resourceGroupName, deploymentName, &maxResources)
+	deploymentOperations, err := s.client.DeploymentOperationsClient.ListComplete(ctx, resourceGroupName, deploymentName, &maxResources)
 	if err != nil {
 		s.reportIfError(err, resourceGroupName)
 		return err
 	}
 
-	for _, deploymentOperation := range *deploymentOperations.Value {
+	for deploymentOperations.NotDone() {
+		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
 		if deploymentOperation.Properties.TargetResource == nil {
+			deploymentOperations.Next()
 			continue
 		}
-		s.say(fmt.Sprintf(" -> %s : '%s'",
-			*deploymentOperation.Properties.TargetResource.ResourceType,
-			*deploymentOperation.Properties.TargetResource.ResourceName))
 
-		var networkDeleteFunction func(string, string, <-chan struct{}) (<-chan autorest.Response, <-chan error)
 		resourceName := *deploymentOperation.Properties.TargetResource.ResourceName
+		resourceType := *deploymentOperation.Properties.TargetResource.ResourceType
 
-		switch *deploymentOperation.Properties.TargetResource.ResourceType {
-		case "Microsoft.Compute/virtualMachines":
-			_, errChan := s.client.VirtualMachinesClient.Delete(resourceGroupName, resourceName, nil)
-			err := <-errChan
-			s.reportIfError(err, resourceName)
-		case "Microsoft.KeyVault/vaults":
-			_, err := s.client.VaultClientDelete.Delete(resourceGroupName, resourceName)
-			s.reportIfError(err, resourceName)
-		case "Microsoft.Network/networkInterfaces":
-			networkDeleteFunction = s.client.InterfacesClient.Delete
-		case "Microsoft.Network/virtualNetworks":
-			networkDeleteFunction = s.client.VirtualNetworksClient.Delete
-		case "Microsoft.Network/publicIPAddresses":
-			networkDeleteFunction = s.client.PublicIPAddressesClient.Delete
-		}
-		if networkDeleteFunction != nil {
-			_, errChan := networkDeleteFunction(resourceGroupName, resourceName, nil)
-			err := <-errChan
-			s.reportIfError(err, resourceName)
+		s.say(fmt.Sprintf(" -> %s : '%s'",
+			resourceType,
+			resourceName))
+
+		err := retry.Config{
+			Tries:      10,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			err := deleteResource(ctx, s.client,
+				resourceType,
+				resourceName,
+				resourceGroupName)
+			if err != nil {
+				s.reportIfError(err, resourceName)
+			}
+			return err
+		})
+
+		if err = deploymentOperations.Next(); err != nil {
+			return err
 		}
 	}
 
@@ -117,19 +126,23 @@ func (s *StepDeleteResourceGroup) reportIfError(err error, resourceName string) 
 	}
 }
 
-func (s *StepDeleteResourceGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteResourceGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting resource group ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 
-	result := common.StartInterruptibleTask(
-		func() bool { return common.IsStateCancelled(state) },
-		func(cancelCh <-chan struct{}) error { return s.delete(state, resourceGroupName, cancelCh) })
-	stepAction := processInterruptibleResult(result, s.error, state)
+	err := s.delete(ctx, state, resourceGroupName)
+	if err != nil {
+		state.Put(constants.Error, err)
+		s.error(err)
+
+		return multistep.ActionHalt
+	}
+
 	state.Put(constants.ArmIsResourceGroupCreated, false)
 
-	return stepAction
+	return multistep.ActionContinue
 }
 
 func (*StepDeleteResourceGroup) Cleanup(multistep.StateBag) {

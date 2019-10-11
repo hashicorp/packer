@@ -126,6 +126,10 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 			return err
 		}
 
+		// go >=1.10 wants to use GNU tar format to workaround issues in
+		// libarchive < 3.3.2
+		setHeaderFormat(header)
+
 		// We have to set the Name explicitly because it is supposed to
 		// be a relative path to the root. Otherwise, the tar ends up
 		// being a bunch of files in the root, even if they're actually

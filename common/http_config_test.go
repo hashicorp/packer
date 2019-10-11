@@ -24,11 +24,11 @@ func TestHTTPConfigPrepare_Bounds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-	portMin := uint(8000)
+	portMin := 8000
 	if h.HTTPPortMin != portMin {
 		t.Fatalf("HTTPPortMin: expected %d got %d", portMin, h.HTTPPortMin)
 	}
-	portMax := uint(9000)
+	portMax := 9000
 	if h.HTTPPortMax != portMax {
 		t.Fatalf("HTTPPortMax: expected %d got %d", portMax, h.HTTPPortMax)
 	}

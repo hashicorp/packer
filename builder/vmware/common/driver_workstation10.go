@@ -13,11 +13,19 @@ type Workstation10Driver struct {
 	Workstation9Driver
 }
 
-func (d *Workstation10Driver) Clone(dst, src string) error {
+func (d *Workstation10Driver) Clone(dst, src string, linked bool) error {
+
+	var cloneType string
+	if linked {
+		cloneType = "linked"
+	} else {
+		cloneType = "full"
+	}
+
 	cmd := exec.Command(d.Workstation9Driver.VmrunPath,
 		"-T", "ws",
 		"clone", src, dst,
-		"full")
+		cloneType)
 
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
@@ -32,4 +40,8 @@ func (d *Workstation10Driver) Verify() error {
 	}
 
 	return workstationVerifyVersion(VMWARE_WS_VERSION)
+}
+
+func (d *Workstation10Driver) GetVmwareDriver() VmwareDriver {
+	return d.Workstation9Driver.VmwareDriver
 }

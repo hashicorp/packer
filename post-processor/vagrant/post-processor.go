@@ -5,6 +5,7 @@ package vagrant
 
 import (
 	"compress/flate"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,30 +15,39 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 )
 
 var builtins = map[string]string{
-	"mitchellh.amazonebs":       "aws",
-	"mitchellh.amazon.instance": "aws",
-	"mitchellh.virtualbox":      "virtualbox",
-	"mitchellh.vmware":          "vmware",
-	"mitchellh.vmware-esx":      "vmware",
-	"pearkes.digitalocean":      "digitalocean",
-	"packer.parallels":          "parallels",
-	"MSOpenTech.hyperv":         "hyperv",
-	"transcend.qemu":            "libvirt",
+	"mitchellh.amazonebs":                 "aws",
+	"mitchellh.amazon.instance":           "aws",
+	"mitchellh.virtualbox":                "virtualbox",
+	"mitchellh.vmware":                    "vmware",
+	"mitchellh.vmware-esx":                "vmware",
+	"pearkes.digitalocean":                "digitalocean",
+	"packer.googlecompute":                "google",
+	"hashicorp.scaleway":                  "scaleway",
+	"packer.parallels":                    "parallels",
+	"MSOpenTech.hyperv":                   "hyperv",
+	"transcend.qemu":                      "libvirt",
+	"ustream.lxc":                         "lxc",
+	"Azure.ResourceManagement.VMImage":    "azure",
+	"packer.post-processor.docker-import": "docker",
+	"packer.post-processor.docker-tag":    "docker",
+	"packer.post-processor.docker-push":   "docker",
 }
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	CompressionLevel    int      `mapstructure:"compression_level"`
-	Include             []string `mapstructure:"include"`
-	OutputPath          string   `mapstructure:"output"`
-	Override            map[string]interface{}
-	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+	CompressionLevel             int      `mapstructure:"compression_level"`
+	Include                      []string `mapstructure:"include"`
+	OutputPath                   string   `mapstructure:"output"`
+	Override                     map[string]interface{}
+	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
+	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
 
 	ctx interpolate.Context
 }
@@ -88,7 +98,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
-	dir, err := ioutil.TempDir("", "packer")
+	dir, err := tmp.Dir("packer")
 	if err != nil {
 		return nil, false, err
 	}
@@ -150,11 +160,11 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 
 	name, ok := builtins[artifact.BuilderId()]
 	if !ok {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
@@ -164,7 +174,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		panic(fmt.Sprintf("bad provider name: %s", name))
 	}
 
-	return p.PostProcessProvider(name, provider, ui, artifact)
+	artifact, keep, err := p.PostProcessProvider(name, provider, ui, artifact)
+
+	// In some cases, (e.g. AMI), deleting the input artifact would render the
+	// resulting vagrant box useless. Because of these cases, we want to
+	// forcibly set keep_input_artifact.
+
+	// TODO: rework all provisioners to only forcibly keep those where it matters
+	return artifact, keep, true, err
 }
 
 func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
@@ -201,7 +218,7 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	}
 
 	var errs *packer.MultiError
-	if c.VagrantfileTemplate != "" {
+	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
@@ -220,6 +237,8 @@ func providerForName(name string) Provider {
 	switch name {
 	case "aws":
 		return new(AWSProvider)
+	case "scaleway":
+		return new(ScalewayProvider)
 	case "digitalocean":
 		return new(DigitalOceanProvider)
 	case "virtualbox":
@@ -232,12 +251,20 @@ func providerForName(name string) Provider {
 		return new(HypervProvider)
 	case "libvirt":
 		return new(LibVirtProvider)
+	case "google":
+		return new(GoogleProvider)
+	case "lxc":
+		return new(LXCProvider)
+	case "azure":
+		return new(AzureProvider)
+	case "docker":
+		return new(DockerProvider)
 	default:
 		return nil
 	}
 }
 
-// OutputPathTemplate is the structure that is availalable within the
+// OutputPathTemplate is the structure that is available within the
 // OutputPath variables.
 type outputPathTemplate struct {
 	ArtifactId string

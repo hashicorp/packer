@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type FixCommand struct {
@@ -85,7 +87,7 @@ func (c *FixCommand) Run(args []string) int {
 	c.Ui.Say(result)
 
 	if flagValidate {
-		// Attemot to parse and validate the template
+		// Attempt to parse and validate the template
 		tpl, err := template.Parse(strings.NewReader(result))
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
@@ -118,17 +120,16 @@ Usage: packer fix [options] TEMPLATE
   If the template cannot be fixed due to an error, the command will exit
   with a non-zero exit status. Error messages will appear on standard error.
 
-Fixes that are run:
+Fixes that are run (in order):
 
-  iso-md5             Replaces "iso_md5" in builders with newer "iso_checksum"
-  createtime          Replaces ".CreateTime" in builder configs with "{{timestamp}}"
-  virtualbox-gaattach Updates VirtualBox builders using "guest_additions_attach"
-                      to use "guest_additions_mode"
-  pp-vagrant-override Replaces old-style provider overrides for the Vagrant
-                      post-processor to new-style as of Packer 0.5.0.
-  virtualbox-rename   Updates "virtualbox" builders to "virtualbox-iso"
-  vmware-rename       Updates "vmware" builders to "vmware-iso"
+`
 
+	for _, name := range fix.FixerOrder {
+		helpText += fmt.Sprintf(
+			"  %-27s%s\n", name, fix.Fixers[name].Synopsis())
+	}
+
+	helpText += `
 Options:
 
   -validate=true      If true (default), validates the fixed template.
@@ -139,4 +140,14 @@ Options:
 
 func (c *FixCommand) Synopsis() string {
 	return "fixes templates from old versions of packer"
+}
+
+func (c *FixCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (c *FixCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-validate": complete.PredictNothing,
+	}
 }

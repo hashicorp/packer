@@ -1,17 +1,19 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step sets some variables in VirtualBox so that annoying
 // pop-up messages don't exist.
 type StepSuppressMessages struct{}
 
-func (StepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
+func (StepSuppressMessages) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

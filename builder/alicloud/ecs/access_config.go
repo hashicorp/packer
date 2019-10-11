@@ -1,39 +1,61 @@
+//go:generate struct-markdown
+
 package ecs
 
 import (
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/version"
 )
 
 // Config of alicloud
 type AlicloudAccessConfig struct {
-	AlicloudAccessKey      string `mapstructure:"access_key"`
-	AlicloudSecretKey      string `mapstructure:"secret_key"`
-	AlicloudRegion         string `mapstructure:"region"`
-	AlicloudSkipValidation bool   `mapstructure:"skip_region_validation"`
-	SecurityToken          string `mapstructure:"security_token"`
+	// This is the Alicloud access key. It must be provided, but it can also be
+	// sourced from the ALICLOUD_ACCESS_KEY environment variable.
+	AlicloudAccessKey string `mapstructure:"access_key" required:"true"`
+	// This is the Alicloud secret key. It must be provided, but it can also be
+	// sourced from the ALICLOUD_SECRET_KEY environment variable.
+	AlicloudSecretKey string `mapstructure:"secret_key" required:"true"`
+	// This is the Alicloud region. It must be provided, but it can also be
+	// sourced from the ALICLOUD_REGION environment variables.
+	AlicloudRegion string `mapstructure:"region" required:"true"`
+	// The region validation can be skipped if this value is true, the default
+	// value is false.
+	AlicloudSkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
+	// STS access token, can be set through template or by exporting as
+	// environment variable such as `export SECURITY_TOKEN=value`.
+	SecurityToken string `mapstructure:"security_token" required:"false"`
+
+	client *ClientWrapper
 }
 
+const Packer = "HashiCorp-Packer"
+const DefaultRequestReadTimeout = 10 * time.Second
+
 // Client for AlicloudClient
-func (c *AlicloudAccessConfig) Client() (*ecs.Client, error) {
-	if err := c.loadAndValidate(); err != nil {
-		return nil, err
+func (c *AlicloudAccessConfig) Client() (*ClientWrapper, error) {
+	if c.client != nil {
+		return c.client, nil
 	}
 	if c.SecurityToken == "" {
 		c.SecurityToken = os.Getenv("SECURITY_TOKEN")
 	}
-	client := ecs.NewECSClientWithSecurityToken(c.AlicloudAccessKey, c.AlicloudSecretKey,
-		c.SecurityToken, common.Region(c.AlicloudRegion))
 
-	client.SetBusinessInfo("Packer")
-	if _, err := client.DescribeRegions(); err != nil {
+	client, err := ecs.NewClientWithStsToken(c.AlicloudRegion, c.AlicloudAccessKey,
+		c.AlicloudSecretKey, c.SecurityToken)
+	if err != nil {
 		return nil, err
 	}
-	return client, nil
+
+	client.AppendUserAgent(Packer, version.FormattedVersion())
+	client.SetReadTimeout(DefaultRequestReadTimeout)
+	c.client = &ClientWrapper{client}
+
+	return c.client, nil
 }
 
 func (c *AlicloudAccessConfig) Prepare(ctx *interpolate.Context) []error {
@@ -42,10 +64,12 @@ func (c *AlicloudAccessConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, err)
 	}
 
-	if c.AlicloudRegion != "" && !c.AlicloudSkipValidation {
-		if c.validateRegion() != nil {
-			errs = append(errs, fmt.Errorf("Unknown alicloud region: %s", c.AlicloudRegion))
-		}
+	if c.AlicloudRegion == "" {
+		c.AlicloudRegion = os.Getenv("ALICLOUD_REGION")
+	}
+
+	if c.AlicloudRegion == "" {
+		errs = append(errs, fmt.Errorf("region option or ALICLOUD_REGION must be provided in template file or environment variables."))
 	}
 
 	if len(errs) > 0 {
@@ -69,21 +93,38 @@ func (c *AlicloudAccessConfig) Config() error {
 
 }
 
-func (c *AlicloudAccessConfig) loadAndValidate() error {
-	if err := c.validateRegion(); err != nil {
+func (c *AlicloudAccessConfig) ValidateRegion(region string) error {
+
+	supportedRegions, err := c.getSupportedRegions()
+	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (c *AlicloudAccessConfig) validateRegion() error {
-
-	for _, valid := range common.ValidRegions {
-		if c.AlicloudRegion == string(valid) {
+	for _, supportedRegion := range supportedRegions {
+		if region == supportedRegion {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("Not a valid alicloud region: %s", c.AlicloudRegion)
+	return fmt.Errorf("Not a valid alicloud region: %s", region)
+}
+
+func (c *AlicloudAccessConfig) getSupportedRegions() ([]string, error) {
+	client, err := c.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	regionsRequest := ecs.CreateDescribeRegionsRequest()
+	regionsResponse, err := client.DescribeRegions(regionsRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	validRegions := make([]string, len(regionsResponse.Regions.Region))
+	for _, valid := range regionsResponse.Regions.Region {
+		validRegions = append(validRegions, valid.RegionId)
+	}
+
+	return validRegions, nil
 }

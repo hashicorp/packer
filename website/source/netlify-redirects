@@ -1,0 +1,26 @@
+# REDIRECTS FILE
+#
+# See https://www.netlify.com/docs/redirects/ for documentation. Please do not
+# modify or delete existing redirects without first verifying internally.
+
+/docs/installation.html                         /docs/install/index.html
+/docs/command-line/machine-readable.html        /docs/commands/index.html
+/docs/command-line/introduction.html            /docs/commands/index.html
+/docs/templates/introduction.html               /docs/templates/index.html
+/docs/builders/azure-arm.html                   /docs/builders/azure.html
+/docs/templates/veewee-to-packer.html           /guides/veewee-to-packer.html
+/docs/extend/developing-plugins.html            /docs/extending/plugins.html
+/docs/extending/developing-plugins.html         /docs/extending/plugins.html
+/docs/extend/builder.html                       /docs/extending/custom-builders.html
+/docs/getting-started/setup.html                /docs/getting-started/install.html
+/docs/other/community.html                      /community-tools.html
+/downloads-community.html                       /community-tools.html
+/community                                      /community.html
+/community/index.html                           /community.html
+/docs/other/environmental-variables.html        /docs/other/environment-variables.html
+/docs/platforms.html                            /docs/builders/index.html
+/intro/platforms.html                           /docs/builders/index.html
+/docs/templates/configuration-templates.html    /docs/templates/engine.html
+/docs/machine-readable/*                        /docs/commands/index.html
+/docs/command-line/*                            /docs/commands/:splat
+/docs/extend/*                                  /docs/extending/:splat

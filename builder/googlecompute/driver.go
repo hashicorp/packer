@@ -3,6 +3,8 @@ package googlecompute
 import (
 	"crypto/rsa"
 	"time"
+
+	compute "google.golang.org/api/compute/v1"
 )
 
 // Driver is the interface that has to be implemented to communicate
@@ -11,7 +13,7 @@ import (
 type Driver interface {
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
-	CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error)
+	CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error)
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error
@@ -58,30 +60,33 @@ type Driver interface {
 }
 
 type InstanceConfig struct {
-	AcceleratorType   string
-	AcceleratorCount  int64
-	Address           string
-	Description       string
-	DiskSizeGb        int64
-	DiskType          string
-	Image             *Image
-	Labels            map[string]string
-	MachineType       string
-	Metadata          map[string]string
-	Name              string
-	Network           string
-	NetworkProjectId  string
-	OmitExternalIP    bool
-	OnHostMaintenance string
-	Preemptible       bool
-	Region            string
-	Scopes            []string
-	Subnetwork        string
-	Tags              []string
-	Zone              string
+	AcceleratorType              string
+	AcceleratorCount             int64
+	Address                      string
+	Description                  string
+	DisableDefaultServiceAccount bool
+	DiskSizeGb                   int64
+	DiskType                     string
+	Image                        *Image
+	Labels                       map[string]string
+	MachineType                  string
+	Metadata                     map[string]string
+	MinCpuPlatform               string
+	Name                         string
+	Network                      string
+	NetworkProjectId             string
+	OmitExternalIP               bool
+	OnHostMaintenance            string
+	Preemptible                  bool
+	Region                       string
+	ServiceAccountEmail          string
+	Scopes                       []string
+	Subnetwork                   string
+	Tags                         []string
+	Zone                         string
 }
 
-// WindowsPasswordConfig is the data structue that GCE needs to encrypt the created
+// WindowsPasswordConfig is the data structure that GCE needs to encrypt the created
 // windows password.
 type WindowsPasswordConfig struct {
 	key      *rsa.PrivateKey

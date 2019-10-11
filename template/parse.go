@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -20,16 +20,69 @@ import (
 // This is what is decoded directly from the file, and then it is turned
 // into a Template object thereafter.
 type rawTemplate struct {
-	MinVersion  string `mapstructure:"min_packer_version"`
-	Description string
+	MinVersion  string `mapstructure:"min_packer_version" json:"min_packer_version,omitempty"`
+	Description string `json:"description,omitempty"`
 
-	Builders       []map[string]interface{}
-	Push           map[string]interface{}
-	PostProcessors []interface{} `mapstructure:"post-processors"`
-	Provisioners   []map[string]interface{}
-	Variables      map[string]interface{}
+	Builders           []interface{}          `mapstructure:"builders" json:"builders,omitempty"`
+	Comments           []map[string]string    `json:"comments,omitempty"`
+	Push               map[string]interface{} `json:"push,omitempty"`
+	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
+	Provisioners       []interface{}          `json:"provisioners,omitempty"`
+	CleanupProvisioner interface{}            `mapstructure:"error-cleanup-provisioner" json:"error-cleanup-provisioner,omitempty"`
+	Variables          map[string]interface{} `json:"variables,omitempty"`
+	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
-	RawContents []byte
+	RawContents []byte `json:"-"`
+}
+
+// MarshalJSON conducts the necessary flattening of the rawTemplate struct
+// to provide valid Packer template JSON
+func (r *rawTemplate) MarshalJSON() ([]byte, error) {
+	// Avoid recursion
+	type rawTemplate_ rawTemplate
+	out, _ := json.Marshal(rawTemplate_(*r))
+
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(out, &m)
+
+	// Flatten Comments
+	delete(m, "comments")
+	for _, comment := range r.Comments {
+		for k, v := range comment {
+			out, _ = json.Marshal(v)
+			m[k] = out
+		}
+	}
+
+	return json.Marshal(m)
+}
+
+func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
+	var p Provisioner
+	if err := r.decoder(&p, nil).Decode(raw); err != nil {
+		return p, fmt.Errorf("Error decoding provisioner: %s", err)
+
+	}
+
+	// Type is required before any richer validation
+	if p.Type == "" {
+		return p, fmt.Errorf("Provisioner missing 'type'")
+	}
+
+	// Set the raw configuration and delete any special keys
+	p.Config = raw.(map[string]interface{})
+
+	delete(p.Config, "except")
+	delete(p.Config, "only")
+	delete(p.Config, "override")
+	delete(p.Config, "pause_before")
+	delete(p.Config, "type")
+	delete(p.Config, "timeout")
+
+	if len(p.Config) == 0 {
+		p.Config = nil
+	}
+	return p, nil
 }
 
 // Template returns the actual Template object built from this raw
@@ -43,12 +96,25 @@ func (r *rawTemplate) Template() (*Template, error) {
 	result.MinVersion = r.MinVersion
 	result.RawContents = r.RawContents
 
+	// Gather the comments
+	if len(r.Comments) > 0 {
+		result.Comments = make(map[string]string, len(r.Comments))
+
+		for _, c := range r.Comments {
+			for k, v := range c {
+				result.Comments[k] = v
+			}
+		}
+	}
+
 	// Gather the variables
 	if len(r.Variables) > 0 {
 		result.Variables = make(map[string]*Variable, len(r.Variables))
 	}
+
 	for k, rawV := range r.Variables {
 		var v Variable
+		v.Key = k
 
 		// Variable is required if the value is exactly nil
 		v.Required = rawV == nil
@@ -58,6 +124,12 @@ func (r *rawTemplate) Template() (*Template, error) {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"variable %s: %s", k, err))
 			continue
+		}
+
+		for _, sVar := range r.SensitiveVariables {
+			if sVar == k {
+				result.SensitiveVariables = append(result.SensitiveVariables, &v)
+			}
 		}
 
 		result.Variables[k] = &v
@@ -76,9 +148,11 @@ func (r *rawTemplate) Template() (*Template, error) {
 		}
 
 		// Set the raw configuration and delete any special keys
-		b.Config = rawB
+		b.Config = rawB.(map[string]interface{})
+
 		delete(b.Config, "name")
 		delete(b.Config, "type")
+
 		if len(b.Config) == 0 {
 			b.Config = nil
 		}
@@ -137,13 +211,22 @@ func (r *rawTemplate) Template() (*Template, error) {
 				continue
 			}
 
-			// Set the configuration
-			delete(c, "except")
-			delete(c, "only")
-			delete(c, "keep_input_artifact")
-			delete(c, "type")
-			if len(c) > 0 {
-				pp.Config = c
+			// Set the raw configuration and delete any special keys
+			pp.Config = c
+
+			// The name defaults to the type if it isn't set
+			if pp.Name == "" {
+				pp.Name = pp.Type
+			}
+
+			delete(pp.Config, "except")
+			delete(pp.Config, "only")
+			delete(pp.Config, "keep_input_artifact")
+			delete(pp.Config, "type")
+			delete(pp.Config, "name")
+
+			if len(pp.Config) == 0 {
+				pp.Config = nil
 			}
 
 			pps = append(pps, &pp)
@@ -157,43 +240,25 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
 	}
 	for i, v := range r.Provisioners {
-		var p Provisioner
-		if err := r.decoder(&p, nil).Decode(v); err != nil {
+		p, err := r.decodeProvisioner(v)
+		if err != nil {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"provisioner %d: %s", i+1, err))
 			continue
 		}
 
-		// Type is required before any richer validation
-		if p.Type == "" {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"provisioner %d: missing 'type'", i+1))
-			continue
-		}
-
-		// Copy the configuration
-		delete(v, "except")
-		delete(v, "only")
-		delete(v, "override")
-		delete(v, "pause_before")
-		delete(v, "type")
-		if len(v) > 0 {
-			p.Config = v
-		}
-
-		// TODO: stuff
 		result.Provisioners = append(result.Provisioners, &p)
 	}
 
-	// Push
-	if len(r.Push) > 0 {
-		var p Push
-		if err := r.decoder(&p, nil).Decode(r.Push); err != nil {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"push: %s", err))
+	// Gather the error-cleanup-provisioner
+	if r.CleanupProvisioner != nil {
+		p, err := r.decodeProvisioner(r.CleanupProvisioner)
+		if err != nil {
+			errs = multierror.Append(errs,
+				fmt.Errorf("On Error Cleanup Provisioner error: %s", err))
 		}
 
-		result.Push = p
+		result.CleanupProvisioner = &p
 	}
 
 	// If we have errors, return those with a nil result
@@ -296,9 +361,24 @@ func Parse(r io.Reader) (*Template, error) {
 	// Build an error if there are unused root level keys
 	if len(md.Unused) > 0 {
 		sort.Strings(md.Unused)
+
+		unusedMap, ok := raw.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Failed to convert unused root level keys to map")
+		}
+
 		for _, unused := range md.Unused {
-			// Ignore keys starting with '_' as comments
 			if unused[0] == '_' {
+				commentVal, ok := unusedMap[unused].(string)
+				if !ok {
+					return nil, fmt.Errorf("Failed to cast root level comment value to string")
+				}
+
+				comment := map[string]string{
+					unused: commentVal,
+				}
+
+				rawTpl.Comments = append(rawTpl.Comments, comment)
 				continue
 			}
 
@@ -321,7 +401,7 @@ func ParseFile(path string) (*Template, error) {
 	var err error
 	if path == "-" {
 		// Create a temp file for stdin in case of errors
-		f, err = ioutil.TempFile(os.TempDir(), "packer")
+		f, err = tmp.File("parse")
 		if err != nil {
 			return nil, err
 		}

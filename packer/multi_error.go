@@ -37,7 +37,16 @@ func MultiErrorAppend(err error, errs ...error) *MultiError {
 			err = new(MultiError)
 		}
 
-		err.Errors = append(err.Errors, errs...)
+		for _, verr := range errs {
+			switch rhsErr := verr.(type) {
+			case *MultiError:
+				if rhsErr != nil {
+					err.Errors = append(err.Errors, rhsErr.Errors...)
+				}
+			default:
+				err.Errors = append(err.Errors, verr)
+			}
+		}
 		return err
 	default:
 		newErrs := make([]error, len(errs)+1)

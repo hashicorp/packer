@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step attaches the VirtualBox guest additions as a inserted CD onto
@@ -19,11 +21,12 @@ import (
 //
 // Produces:
 type StepAttachGuestAdditions struct {
-	attachedPath       string
-	GuestAdditionsMode string
+	attachedPath            string
+	GuestAdditionsMode      string
+	GuestAdditionsInterface string
 }
 
-func (s *StepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -38,12 +41,22 @@ func (s *StepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 	guestAdditionsPath := state.Get("guest_additions_path").(string)
 
 	// Attach the guest additions to the computer
+
+	controllerName := "IDE Controller"
+	port := "1"
+	device := "0"
+	if s.GuestAdditionsInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "2"
+		device = "0"
+	}
+
 	log.Println("Attaching guest additions ISO onto IDE controller...")
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "1",
-		"--device", "0",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--type", "dvddrive",
 		"--medium", guestAdditionsPath,
 	}
@@ -69,11 +82,20 @@ func (s *StepAttachGuestAdditions) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 
+	controllerName := "IDE Controller"
+	port := "1"
+	device := "0"
+	if s.GuestAdditionsInterface == "sata" {
+		controllerName = "SATA Controller"
+		port = "2"
+		device = "0"
+	}
+
 	command := []string{
 		"storageattach", vmName,
-		"--storagectl", "IDE Controller",
-		"--port", "1",
-		"--device", "0",
+		"--storagectl", controllerName,
+		"--port", port,
+		"--device", device,
 		"--medium", "none",
 	}
 

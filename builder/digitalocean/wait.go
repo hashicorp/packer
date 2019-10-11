@@ -158,9 +158,9 @@ func waitForActionState(
 	}
 }
 
-// waitForImageState simply blocks until the image action is in
+// WaitForImageState simply blocks until the image action is in
 // a state we expect, while eventually timing out.
-func waitForImageState(
+func WaitForImageState(
 	desiredState string, imageId, actionId int,
 	client *godo.Client, timeout time.Duration) error {
 	done := make(chan struct{})
@@ -198,12 +198,12 @@ func waitForImageState(
 		}
 	}()
 
-	log.Printf("Waiting for up to %d seconds for image transter to become %s", timeout/time.Second, desiredState)
+	log.Printf("Waiting for up to %d seconds for image transfer to become %s", timeout/time.Second, desiredState)
 	select {
 	case err := <-result:
 		return err
 	case <-time.After(timeout):
-		err := fmt.Errorf("Timeout while waiting to for image transter to become '%s'", desiredState)
+		err := fmt.Errorf("Timeout while waiting to for image transfer to become '%s'", desiredState)
 		return err
 	}
 }

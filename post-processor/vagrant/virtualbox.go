@@ -4,13 +4,14 @@ import (
 	"archive/tar"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type VBoxProvider struct{}
@@ -132,7 +133,15 @@ func DecompressOva(dir, src string) error {
 		if hdr == nil || err == io.EOF {
 			break
 		}
+		if err != nil {
+			return err
+		}
 
+		// We use the fileinfo to get the file name because we are not
+		// expecting path information as from the tar header. It's important
+		// that we not use the path name from the tar header without checking
+		// for the presence of `..`. If we accidentally allow for that, we can
+		// open ourselves up to a path traversal vulnerability.
 		info := hdr.FileInfo()
 
 		// Shouldn't be any directories, skip them

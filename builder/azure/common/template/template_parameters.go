@@ -24,9 +24,13 @@ type TemplateParameters struct {
 	KeyVaultName               *TemplateParameter `json:"keyVaultName,omitempty"`
 	KeyVaultSecretValue        *TemplateParameter `json:"keyVaultSecretValue,omitempty"`
 	ObjectId                   *TemplateParameter `json:"objectId,omitempty"`
+	NicName                    *TemplateParameter `json:"nicName,omitempty"`
 	OSDiskName                 *TemplateParameter `json:"osDiskName,omitempty"`
+	PublicIPAddressName        *TemplateParameter `json:"publicIPAddressName,omitempty"`
 	StorageAccountBlobEndpoint *TemplateParameter `json:"storageAccountBlobEndpoint,omitempty"`
+	SubnetName                 *TemplateParameter `json:"subnetName,omitempty"`
 	TenantId                   *TemplateParameter `json:"tenantId,omitempty"`
+	VirtualNetworkName         *TemplateParameter `json:"virtualNetworkName,omitempty"`
 	VMSize                     *TemplateParameter `json:"vmSize,omitempty"`
 	VMName                     *TemplateParameter `json:"vmName,omitempty"`
 }

@@ -2,9 +2,10 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type LibVirtProvider struct{}
@@ -38,7 +39,7 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	// Convert domain type to libvirt driver
 	var driver string
 	switch domainType {
-	case "none", "tcg":
+	case "none", "tcg", "hvf":
 		driver = "qemu"
 	case "kvm":
 		driver = domainType

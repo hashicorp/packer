@@ -1,9 +1,11 @@
 package docker
 
 import (
+	"context"
 	"fmt"
+
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCommit commits the container to a image.
@@ -11,12 +13,22 @@ type StepCommit struct {
 	imageId string
 }
 
-func (s *StepCommit) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCommit) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
+	if config.WindowsContainer {
+		// docker can't commit a running Windows container
+		err := driver.StopContainer(containerId)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(fmt.Sprintf("Error halting windows container for commit: %s",
+				err.Error()))
+			return multistep.ActionHalt
+		}
+	}
 	ui.Say("Committing the container")
 	imageId, err := driver.Commit(containerId, config.Author, config.Changes, config.Message)
 	if err != nil {

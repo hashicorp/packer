@@ -1,25 +1,26 @@
 package triton
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateSourceMachine creates an machine with the specified attributes
 // and waits for it to become available for provisioners.
 type StepCreateSourceMachine struct{}
 
-func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepCreateSourceMachine) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if !config.MachineImageFilters.Empty() {
 		ui.Say("Selecting an image based on search criteria")
-		imageId, err := driver.GetImage(config)
+		imageId, err := driver.GetImage(*config)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Problem selecting an image based on an search criteria: %s", err))
 			return multistep.ActionHalt
@@ -28,7 +29,7 @@ func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAc
 		config.MachineImage = imageId
 	}
 
-	machineId, err := driver.CreateMachine(config)
+	machineId, err := driver.CreateMachine(*config)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Problem creating source machine: %s", err))
 		return multistep.ActionHalt

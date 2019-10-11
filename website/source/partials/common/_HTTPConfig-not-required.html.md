@@ -1,0 +1,17 @@
+<!-- Code generated from the comments of the HTTPConfig struct in common/http_config.go; DO NOT EDIT MANUALLY -->
+
+-   `http_directory` (string) - Path to a directory to serve using an HTTP server. The files in this
+    directory will be available over HTTP that will be requestable from the
+    virtual machine. This is useful for hosting kickstart files and so on.
+    By default this is an empty string, which means no HTTP server will be
+    started. The address and port of the HTTP server will be available as
+    variables in `boot_command`. This is covered in more detail below.
+    
+-   `http_port_min` (int) - These are the minimum and maximum port to use for the HTTP server
+    started to serve the `http_directory`. Because Packer often runs in
+    parallel, Packer will choose a randomly available port in this range to
+    run the HTTP server. If you want to force the HTTP server to be on one
+    port, make this minimum and maximum port the same. By default the values
+    are `8000` and `9000`, respectively.
+    
+-   `http_port_max` (int) - HTTP Port Max

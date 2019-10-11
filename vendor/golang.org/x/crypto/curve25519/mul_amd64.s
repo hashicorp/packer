@@ -3,40 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // This code was translated into a form compatible with 6a from the public
-// domain sources in SUPERCOP: http://bench.cr.yp.to/supercop.html
+// domain sources in SUPERCOP: https://bench.cr.yp.to/supercop.html
 
 // +build amd64,!gccgo,!appengine
 
+#include "const_amd64.h"
+
 // func mul(dest, a, b *[5]uint64)
-TEXT ·mul(SB),0,$128-24
+TEXT ·mul(SB),0,$16-24
 	MOVQ dest+0(FP), DI
 	MOVQ a+8(FP), SI
 	MOVQ b+16(FP), DX
 
-	MOVQ SP,R11
-	MOVQ $31,CX
-	NOTQ CX
-	ANDQ CX,SP
-	ADDQ $32,SP
-
-	MOVQ R11,0(SP)
-	MOVQ R12,8(SP)
-	MOVQ R13,16(SP)
-	MOVQ R14,24(SP)
-	MOVQ R15,32(SP)
-	MOVQ BX,40(SP)
-	MOVQ BP,48(SP)
-	MOVQ DI,56(SP)
 	MOVQ DX,CX
 	MOVQ 24(SI),DX
 	IMUL3Q $19,DX,AX
-	MOVQ AX,64(SP)
+	MOVQ AX,0(SP)
 	MULQ 16(CX)
 	MOVQ AX,R8
 	MOVQ DX,R9
 	MOVQ 32(SI),DX
 	IMUL3Q $19,DX,AX
-	MOVQ AX,72(SP)
+	MOVQ AX,8(SP)
 	MULQ 8(CX)
 	ADDQ AX,R8
 	ADCQ DX,R9
@@ -111,11 +99,11 @@ TEXT ·mul(SB),0,$128-24
 	MULQ 8(CX)
 	ADDQ AX,BX
 	ADCQ DX,BP
-	MOVQ 64(SP),AX
+	MOVQ 0(SP),AX
 	MULQ 24(CX)
 	ADDQ AX,R10
 	ADCQ DX,R11
-	MOVQ 64(SP),AX
+	MOVQ 0(SP),AX
 	MULQ 32(CX)
 	ADDQ AX,R12
 	ADCQ DX,R13
@@ -123,31 +111,31 @@ TEXT ·mul(SB),0,$128-24
 	MULQ 0(CX)
 	ADDQ AX,BX
 	ADCQ DX,BP
-	MOVQ 72(SP),AX
+	MOVQ 8(SP),AX
 	MULQ 16(CX)
 	ADDQ AX,R10
 	ADCQ DX,R11
-	MOVQ 72(SP),AX
+	MOVQ 8(SP),AX
 	MULQ 24(CX)
 	ADDQ AX,R12
 	ADCQ DX,R13
-	MOVQ 72(SP),AX
+	MOVQ 8(SP),AX
 	MULQ 32(CX)
 	ADDQ AX,R14
 	ADCQ DX,R15
-	MOVQ ·REDMASK51(SB),SI
-	SHLQ $13,R9:R8
+	MOVQ $REDMASK51,SI
+	SHLQ $13,R8,R9
 	ANDQ SI,R8
-	SHLQ $13,R11:R10
+	SHLQ $13,R10,R11
 	ANDQ SI,R10
 	ADDQ R9,R10
-	SHLQ $13,R13:R12
+	SHLQ $13,R12,R13
 	ANDQ SI,R12
 	ADDQ R11,R12
-	SHLQ $13,R15:R14
+	SHLQ $13,R14,R15
 	ANDQ SI,R14
 	ADDQ R13,R14
-	SHLQ $13,BP:BX
+	SHLQ $13,BX,BP
 	ANDQ SI,BX
 	ADDQ R15,BX
 	IMUL3Q $19,BP,DX
@@ -178,14 +166,4 @@ TEXT ·mul(SB),0,$128-24
 	MOVQ R9,16(DI)
 	MOVQ AX,24(DI)
 	MOVQ R10,32(DI)
-	MOVQ 0(SP),R11
-	MOVQ 8(SP),R12
-	MOVQ 16(SP),R13
-	MOVQ 24(SP),R14
-	MOVQ 32(SP),R15
-	MOVQ 40(SP),BX
-	MOVQ 48(SP),BP
-	MOVQ R11,SP
-	MOVQ DI,AX
-	MOVQ SI,DX
 	RET

@@ -36,5 +36,5 @@ func templateCleanAMIName(s string) string {
 }
 
 var TemplateFuncs = template.FuncMap{
-	"clean_ami_name": templateCleanAMIName,
+	"clean_resource_name": templateCleanAMIName,
 }

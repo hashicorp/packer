@@ -1,16 +1,18 @@
 package docker
 
 import (
+	"context"
 	"fmt"
+
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRun struct {
 	containerId string
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)
@@ -56,7 +58,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	// just mean that the container doesn't exist anymore, which isn't a
 	// big deal.
 	ui.Say(fmt.Sprintf("Killing the container: %s", s.containerId))
-	driver.StopContainer(s.containerId)
+	driver.KillContainer(s.containerId)
 
 	// Reset the container ID so that we're idempotent
 	s.containerId = ""

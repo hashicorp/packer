@@ -1,50 +1,33 @@
 package common
 
 import (
-	commonssh "github.com/hashicorp/packer/common/ssh"
-	"github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
-	gossh "golang.org/x/crypto/ssh"
+	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func CommHost(state multistep.StateBag) (string, error) {
-	vmName := state.Get("vmName").(string)
-	driver := state.Get("driver").(Driver)
+func CommHost(host string) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
 
-	mac, err := driver.Mac(vmName)
-	if err != nil {
-		return "", err
-	}
-
-	ip, err := driver.IpAddress(mac)
-	if err != nil {
-		return "", err
-	}
-
-	return ip, nil
-}
-
-func SSHConfigFunc(config *SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {
-	return func(state multistep.StateBag) (*gossh.ClientConfig, error) {
-		auth := []gossh.AuthMethod{
-			gossh.Password(config.Comm.SSHPassword),
-			gossh.KeyboardInteractive(
-				ssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
+		// Skip IP auto detection if the configuration has an ssh host configured.
+		if host != "" {
+			log.Printf("Using ssh_host value: %s", host)
+			return host, nil
 		}
 
-		if config.Comm.SSHPrivateKey != "" {
-			signer, err := commonssh.FileSigner(config.Comm.SSHPrivateKey)
-			if err != nil {
-				return nil, err
-			}
+		vmName := state.Get("vmName").(string)
+		driver := state.Get("driver").(Driver)
 
-			auth = append(auth, gossh.PublicKeys(signer))
+		mac, err := driver.Mac(vmName)
+		if err != nil {
+			return "", err
 		}
 
-		return &gossh.ClientConfig{
-			User:            config.Comm.SSHUsername,
-			Auth:            auth,
-			HostKeyCallback: gossh.InsecureIgnoreHostKey(),
-		}, nil
+		ip, err := driver.IpAddress(mac)
+		if err != nil {
+			return "", err
+		}
+
+		return ip, nil
 	}
 }

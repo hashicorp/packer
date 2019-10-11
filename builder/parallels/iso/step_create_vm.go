@@ -1,11 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
+	"strconv"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the actual virtual machine.
@@ -16,26 +18,53 @@ type stepCreateVM struct {
 	vmName string
 }
 
-func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	name := config.VMName
 
-	command := []string{
+	commands := make([][]string, 3)
+
+	commands[0] = []string{
 		"create", name,
 		"--distribution", config.GuestOSType,
 		"--dst", config.OutputDir,
 		"--no-hdd",
 	}
+	commands[1] = []string{
+		"set", name,
+		"--cpus", strconv.Itoa(config.HWConfig.CpuCount),
+	}
+	commands[2] = []string{
+		"set", name,
+		"--memsize", strconv.Itoa(config.HWConfig.MemorySize),
+	}
+
+	if config.HWConfig.Sound {
+		commands = append(commands, []string{
+			"set", name,
+			"--device-add-sound",
+			"--connect",
+		})
+	}
+
+	if config.HWConfig.USB {
+		commands = append(commands, []string{
+			"set", name,
+			"--device-add-usb",
+		})
+	}
 
 	ui.Say("Creating virtual machine...")
-	if err := driver.Prlctl(command...); err != nil {
-		err := fmt.Errorf("Error creating VM: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	for _, command := range commands {
+		if err := driver.Prlctl(command...); err != nil {
+			err := fmt.Errorf("Error creating VM: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	ui.Say("Applying default settings...")

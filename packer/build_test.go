@@ -1,9 +1,14 @@
 package packer
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
+
+func boolPointer(tf bool) *bool {
+	return &tf
+}
 
 func testBuild() *coreBuild {
 	return &coreBuild{
@@ -19,7 +24,7 @@ func testBuild() *coreBuild {
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), boolPointer(true)},
 			},
 		},
 		variables: make(map[string]string),
@@ -102,7 +107,7 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 	build.Prepare()
 }
 
-func TestBuildPrepare_BuilderWarniings(t *testing.T) {
+func TestBuildPrepare_BuilderWarnings(t *testing.T) {
 	expected := []string{"foo"}
 
 	build := testBuild()
@@ -172,12 +177,12 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 }
 
 func TestBuild_Run(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	build := testBuild()
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	ctx := context.Background()
+	artifacts, err := build.Run(ctx, ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -191,9 +196,9 @@ func TestBuild_Run(t *testing.T) {
 		t.Fatal("should be called")
 	}
 
-	// Verify hooks are disapatchable
+	// Verify hooks are dispatchable
 	dispatchHook := builder.RunHook
-	dispatchHook.Run("foo", nil, nil, 42)
+	dispatchHook.Run(ctx, "foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
 	if !hook.RunCalled {
@@ -204,7 +209,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(HookProvision, nil, new(MockCommunicator), 42)
+	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
 	prov := build.provisioners[0].provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")
@@ -218,7 +223,6 @@ func TestBuild_Run(t *testing.T) {
 }
 
 func TestBuild_Run_Artifacts(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	// Test case: Test that with no post-processors, we only get the
@@ -227,7 +231,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{}
 
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -247,12 +251,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -272,15 +276,15 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), boolPointer(true)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -300,17 +304,17 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -331,13 +335,68 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.postProcessors = [][]coreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true}, "pp", make(map[string]interface{}), false,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+
+	artifacts, err = build.Run(context.Background(), ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"b", "pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are discarded if user overrides.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), boolPointer(false),
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(context.Background(), ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are kept if user does not have preference.
+	build = testBuild()
+	build.postProcessors = [][]coreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), nil,
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -365,15 +424,24 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		}
 	}()
 
-	testBuild().Run(testUi(), &TestCache{})
+	testBuild().Run(context.Background(), testUi())
 }
 
 func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
-	build.Cancel()
+
+	build.Prepare()
+
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
 	builder := build.builder.(*MockBuilder)
-	if !builder.CancelCalled {
-		t.Fatal("cancel should be called")
+
+	builder.RunFn = func(ctx context.Context) {
+		topCtxCancel()
+	}
+
+	_, err := build.Run(topCtx, testUi())
+	if err == nil {
+		t.Fatal("build should err")
 	}
 }

@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	confighelper "github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepSourceAMIInfo extracts critical information from the source AMI
@@ -19,20 +21,9 @@ import (
 type StepSourceAMIInfo struct {
 	SourceAmi                string
 	EnableAMISriovNetSupport bool
-	EnableAMIENASupport      bool
+	EnableAMIENASupport      confighelper.Trilean
+	AMIVirtType              string
 	AmiFilters               AmiFilterOptions
-}
-
-// Build a slice of AMI filter options from the filters provided.
-func buildAmiFilters(input map[*string]*string) []*ec2.Filter {
-	var filters []*ec2.Filter
-	for k, v := range input {
-		filters = append(filters, &ec2.Filter{
-			Name:   k,
-			Values: []*string{v},
-		})
-	}
-	return filters
 }
 
 type imageSort []*ec2.Image
@@ -52,7 +43,7 @@ func mostRecentAmi(images []*ec2.Image) *ec2.Image {
 	return sortedImages[len(sortedImages)-1]
 }
 
-func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -64,7 +55,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	// We have filters to apply
 	if len(s.AmiFilters.Filters) > 0 {
-		params.Filters = buildAmiFilters(s.AmiFilters.Filters)
+		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
 	}
 	if len(s.AmiFilters.Owners) > 0 {
 		params.Owners = s.AmiFilters.Owners
@@ -104,11 +95,13 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if (s.EnableAMIENASupport || s.EnableAMISriovNetSupport) && *image.VirtualizationType != "hvm" {
-		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if s.EnableAMIENASupport.True() || s.EnableAMISriovNetSupport {
+		err = s.canEnableEnhancedNetworking(image)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	state.Put("source_image", image)
@@ -116,3 +109,16 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepSourceAMIInfo) Cleanup(multistep.StateBag) {}
+
+func (s *StepSourceAMIInfo) canEnableEnhancedNetworking(image *ec2.Image) error {
+	if s.AMIVirtType == "hvm" {
+		return nil
+	}
+	if s.AMIVirtType != "" {
+		return fmt.Errorf("Cannot enable enhanced networking, AMIVirtType '%s' is not HVM", s.AMIVirtType)
+	}
+	if *image.VirtualizationType != "hvm" {
+		return fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
+	}
+	return nil
+}

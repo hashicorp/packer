@@ -2,13 +2,11 @@ package arm
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 )
 
 // List of configuration parameters that are required by the ARM builder.
@@ -43,12 +41,16 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 		t.Error("Expected 'VMSize' to be populated, but it was empty!")
 	}
 
-	if c.ObjectID != "" {
-		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	if c.ClientConfig.ObjectID != "" {
+		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ClientConfig.ObjectID)
 	}
 
 	if c.managedImageStorageAccountType == "" {
 		t.Errorf("Expected 'managedImageStorageAccountType' to be populated, but it was empty!")
+	}
+
+	if c.diskCachingType == "" {
+		t.Errorf("Expected 'diskCachingType' to be populated, but it was empty!")
 	}
 }
 
@@ -59,6 +61,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues["vm_size"] = "override_vm_size"
 	builderValues["communicator"] = "ssh"
 	builderValues["managed_image_storage_account_type"] = "Premium_LRS"
+	builderValues["disk_caching_type"] = "None"
 
 	c, _, err := newConfig(builderValues, getPackerConfiguration())
 
@@ -86,8 +89,12 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found %q!", c.VMSize)
 	}
 
-	if c.managedImageStorageAccountType != compute.PremiumLRS {
+	if c.managedImageStorageAccountType != compute.StorageAccountTypesPremiumLRS {
 		t.Errorf("Expected 'managed_image_storage_account_type' to be set to 'Premium_LRS', but found %q!", c.managedImageStorageAccountType)
+	}
+
+	if c.diskCachingType != compute.CachingTypesNone {
+		t.Errorf("Expected 'disk_caching_type' to be set to 'None', but found %q!", c.diskCachingType)
 	}
 }
 
@@ -266,12 +273,12 @@ func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testin
 func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 
-	if c.CloudEnvironmentName != "Public" {
-		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.CloudEnvironmentName)
+	if c.ClientConfig.CloudEnvironmentName != "Public" {
+		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.ClientConfig.CloudEnvironmentName)
 	}
 
-	if c.cloudEnvironment == nil || c.cloudEnvironment.Name != "AzurePublicCloud" {
-		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.cloudEnvironment)
+	if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != "AzurePublicCloud" {
+		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.ClientConfig.CloudEnvironment)
 	}
 }
 
@@ -320,8 +327,8 @@ func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if c.cloudEnvironment == nil || c.cloudEnvironment.Name != x.environmentName {
-			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.cloudEnvironment)
+		if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != x.environmentName {
+			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.ClientConfig.CloudEnvironment)
 		}
 	}
 }
@@ -448,39 +455,6 @@ func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 	}
 }
 
-func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
-	config := map[string]string{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"storage_account":        "ignore",
-		"resource_group_name":    "ignore",
-		"subscription_id":        "ignore",
-		"os_type":                constants.Target_Windows,
-		"communicator":           "none",
-	}
-
-	_, _, err := newConfig(config, getPackerConfiguration())
-	if err == nil {
-		t.Fatal("Expected test to fail, but it succeeded")
-	}
-
-	multiError, _ := err.(*packer.MultiError)
-	if len(multiError.Errors) != 2 {
-		t.Errorf("Expected to find 2 errors, but found %d errors", len(multiError.Errors))
-	}
-
-	if !strings.Contains(err.Error(), "client_id must be specified") {
-		t.Error("Expected to find error for 'client_id must be specified")
-	}
-	if !strings.Contains(err.Error(), "client_secret must be specified") {
-		t.Error("Expected to find error for 'client_secret must be specified")
-	}
-}
-
 func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 	config := map[string]string{
 		"capture_container_name": "ignore",
@@ -499,7 +473,7 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 	wellFormedCaptureNamePrefix := []string{
 		"packer",
 		"AbcdefghijklmnopqrstuvwX",
-		"hypen-hypen",
+		"hyphen-hyphen",
 		"0leading-number",
 		"v1.core.local",
 	}
@@ -514,8 +488,8 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 	}
 
 	malformedCaptureNamePrefix := []string{
-		"-leading-hypen",
-		"trailing-hypen-",
+		"-leading-hyphen",
+		"trailing-hyphen-",
 		"trailing-period.",
 		"_leading-underscore",
 		"punc-!@#$%^&*()_+-=-punc",
@@ -550,7 +524,7 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 	wellFormedCaptureContainerName := []string{
 		"0leading",
 		"aleading",
-		"hype-hypen",
+		"hype-hyphen",
 		"abcdefghijklmnopqrstuvwxyz0123456789-abcdefghijklmnopqrstuvwxyz", // 63 characters
 	}
 
@@ -565,9 +539,9 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 
 	malformedCaptureContainerName := []string{
 		"No-Capitals",
-		"double--hypens",
-		"-leading-hypen",
-		"trailing-hypen-",
+		"double--hyphens",
+		"-leading-hyphen",
+		"trailing-hyphen-",
 		"punc-!@#$%^&*()_+-=-punc",
 		"there-are-over-63-characters-in-this-string-and-that-is-a-bad-container-name",
 	}
@@ -578,6 +552,105 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_container_name set to %q.", x)
+		}
+	}
+}
+
+func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_resource_group_name":   "ignore",
+		"managed_image_name":                  "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedManagedImageOSDiskSnapshotName := []string{
+		"AbcdefghijklmnopqrstuvwX",
+		"underscore_underscore",
+		"0leading_number",
+		"really_loooooooooooooooooooooooooooooooooooooooooooooooooong",
+	}
+
+	for _, x := range wellFormedManagedImageOSDiskSnapshotName {
+		config["managed_image_os_disk_snapshot_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_os_disk_snapshot_name set to %q.", x)
+		}
+	}
+
+	malformedManagedImageOSDiskSnapshotName := []string{
+		"-leading-hyphen",
+		"trailing-hyphen-",
+		"trailing-period.",
+		"punc-!@#$%^&*()_+-=-punc",
+		"really_looooooooooooooooooooooooooooooooooooooooooooooooooooooong_exceeding_80_char_limit",
+	}
+
+	for _, x := range malformedManagedImageOSDiskSnapshotName {
+		config["managed_image_os_disk_snapshot_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_os_disk_snapshot_name set to %q.", x)
+		}
+	}
+}
+
+func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedManagedImageDataDiskSnapshotPrefix := []string{
+		"min_ten_chars",
+		"AbcdefghijklmnopqrstuvwX",
+		"underscore_underscore",
+		"0leading_number",
+		"less_than_sixty_characters",
+	}
+
+	for _, x := range wellFormedManagedImageDataDiskSnapshotPrefix {
+		config["managed_image_data_disk_snapshot_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_data_disk_snapshot_prefix set to %q.", x)
+		}
+	}
+
+	malformedManagedImageDataDiskSnapshotPrefix := []string{
+		"-leading-hyphen",
+		"trailing-hyphen-",
+		"trailing-period.",
+		"punc-!@#$%^&*()_+-=-punc",
+		"really_looooooooooooooooooooooooooooooooooooooooooooooooooooooong_exceeding_60_char_limit",
+	}
+
+	for _, x := range malformedManagedImageDataDiskSnapshotPrefix {
+		config["managed_image_data_disk_snapshot_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_data_disk_snapshot_prefix set to %q.", x)
 		}
 	}
 }
@@ -621,12 +694,12 @@ func TestConfigShouldAcceptTags(t *testing.T) {
 
 	value := c.AzureTags["tag01"]
 	if *value != "value01" {
-		t.Errorf("expected AzureTags[\"tag01\"] to have value \"value01\", but got %q", value)
+		t.Errorf("expected AzureTags[\"tag01\"] to have value \"value01\", but got %q", *value)
 	}
 
 	value = c.AzureTags["tag02"]
 	if *value != "value02" {
-		t.Errorf("expected AzureTags[\"tag02\"] to have value \"value02\", but got %q", value)
+		t.Errorf("expected AzureTags[\"tag02\"] to have value \"value02\", but got %q", *value)
 	}
 }
 
@@ -721,6 +794,51 @@ func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
 	}
 }
 
+func TestConfigZoneResilientShouldDefaultToFalse(t *testing.T) {
+	config := map[string]interface{}{
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"build_resource_group_name":         "ignore",
+		"image_publisher":                   "igore",
+		"image_offer":                       "ignore",
+		"image_sku":                         "ignore",
+		"os_type":                           "linux",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := c.toImageParameters()
+	if *p.ImageProperties.StorageProfile.ZoneResilient {
+		t.Fatal("expected zone resilient default to be false")
+	}
+}
+
+func TestConfigZoneResilientSetFromConfig(t *testing.T) {
+	config := map[string]interface{}{
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"build_resource_group_name":         "ignore",
+		"image_publisher":                   "igore",
+		"image_offer":                       "ignore",
+		"image_sku":                         "ignore",
+		"os_type":                           "linux",
+		"managed_image_zone_resilient":      true,
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := c.toImageParameters()
+	if *p.ImageProperties.StorageProfile.ZoneResilient == false {
+		t.Fatal("expected managed image zone resilient to be true from config")
+	}
+}
+
 func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 	config := map[string]interface{}{
 		"capture_name_prefix":    "ignore",
@@ -741,6 +859,150 @@ func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject missing custom data file")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_resource_group_name":   "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image name")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageResourceGroupName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_name":                  "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image resource group name")
+	}
+}
+
+func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image name")
+	}
+}
+
+func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageResourceGroupName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":        "ignore",
+		"image_publisher":    "ignore",
+		"image_sku":          "ignore",
+		"location":           "ignore",
+		"subscription_id":    "ignore",
+		"communicator":       "none",
+		"managed_image_name": "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image resource group name")
+	}
+}
+
+func TestConfigShouldAcceptManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                             "ignore",
+		"image_publisher":                         "ignore",
+		"image_sku":                               "ignore",
+		"location":                                "ignore",
+		"subscription_id":                         "ignore",
+		"communicator":                            "none",
+		"managed_image_resource_group_name":       "ignore",
+		"managed_image_name":                      "ignore",
+		"managed_image_os_disk_snapshot_name":     "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal("expected config to accept platform managed image build")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefixWithCaptureContainerName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"capture_container_name":              "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture container name")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefixWithCaptureNamePrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"capture_name_prefix":                 "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture name prefix")
 	}
 }
 
@@ -834,7 +1096,7 @@ func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 
 func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 	config := map[string]interface{}{
-		"image_url":                                "ignore",
+		"image_url": "ignore",
 		"custom_managed_image_resource_group_name": "ignore",
 		"custom_managed_image_name":                "ignore",
 		"location":                                 "ignore",
@@ -874,6 +1136,27 @@ func TestConfigShouldRejectMalformedManageImageStorageAccountTypes(t *testing.T)
 	}
 }
 
+func TestConfigShouldRejectMalformedDiskCachingType(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+		"disk_caching_type":                        "--invalid--",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
 func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 	config := map[string]interface{}{
 		"custom_managed_image_resource_group_name": "ignore",
@@ -895,6 +1178,31 @@ func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 		_, _, err := newConfig(config, getPackerConfiguration())
 		if err != nil {
 			t.Fatalf("expected config to accept a managed_image_storage_account_type of %q", x)
+		}
+	}
+}
+
+func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	storage_account_types := []string{"None", "ReadOnly", "ReadWrite"}
+
+	for _, x := range storage_account_types {
+		config["disk_caching_type"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if err != nil {
+			t.Fatalf("expected config to accept a disk_caching_type of %q", x)
 		}
 	}
 }
@@ -1054,6 +1362,360 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 		} else if y.ok && err != nil {
 			t.Logf("expected config to accept %q for setting %q", y.name, settingUnderTest)
 		}
+	}
+}
+
+func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	if c.AdditionalDiskSize != nil {
+		t.Errorf("Expected Config to not have a set of additional disks, but got a non nil value")
+	}
+}
+
+func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	diskconfig := map[string][]int32{
+		"disk_additional_size": {32, 64},
+	}
+
+	c, _, _ := newConfig(config, diskconfig, getPackerConfiguration())
+	if c.AdditionalDiskSize == nil {
+		t.Errorf("Expected Config to have a set of additional disks, but got nil")
+	}
+	if len(c.AdditionalDiskSize) != 2 {
+		t.Errorf("Expected Config to have a 2 additional disks, but got %d additional disks", len(c.AdditionalDiskSize))
+	}
+	if c.AdditionalDiskSize[0] != 32 {
+		t.Errorf("Expected Config to have the first additional disks of size 32Gb, but got %dGb", c.AdditionalDiskSize[0])
+	}
+	if c.AdditionalDiskSize[1] != 64 {
+		t.Errorf("Expected Config to have the second additional disks of size 64Gb, but got %dGb", c.AdditionalDiskSize[1])
+	}
+}
+
+// Test that configuration handles plan info
+//
+// The use of plan info requires that the following three properties are set.
+//
+//  1. plan_name
+//  2. plan_product
+//  3. plan_publisher
+func TestPlanInfoConfiguration(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+	}
+
+	planInfo := map[string]string{
+		"plan_name": "--plan-name--",
+	}
+	config["plan_info"] = planInfo
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject the use of plan_name without plan_product and plan_publisher")
+	}
+
+	planInfo["plan_product"] = "--plan-product--"
+	_, _, err = newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject the use of plan_name and plan_product without plan_publisher")
+	}
+
+	planInfo["plan_publisher"] = "--plan-publisher--"
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("expected config to accept a complete plan configuration: %s", err)
+	}
+
+	if c.PlanInfo.PlanName != "--plan-name--" {
+		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanInfo.PlanName)
+	}
+	if c.PlanInfo.PlanProduct != "--plan-product--" {
+		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanInfo.PlanProduct)
+	}
+	if c.PlanInfo.PlanPublisher != "--plan-publisher--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanInfo.PlanPublisher)
+	}
+}
+
+func TestPlanInfoPromotionCode(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+		"plan_info": map[string]string{
+			"plan_name":           "--plan-name--",
+			"plan_product":        "--plan-product--",
+			"plan_publisher":      "--plan-publisher--",
+			"plan_promotion_code": "--plan-promotion-code--",
+		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("expected config to accept plan_info configuration, but got %s", err)
+	}
+
+	if c.PlanInfo.PlanName != "--plan-name--" {
+		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanInfo.PlanName)
+	}
+	if c.PlanInfo.PlanProduct != "--plan-product--" {
+		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanInfo.PlanProduct)
+	}
+	if c.PlanInfo.PlanPublisher != "--plan-publisher--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanInfo.PlanPublisher)
+	}
+	if c.PlanInfo.PlanPromotionCode != "--plan-promotion-code--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-promotion-code----, but got %q", c.PlanInfo.PlanPromotionCode)
+	}
+}
+
+// plan_info defines 3 or 4 tags based on plan data.
+// The user can define up to 15 tags.  If the combination of these two
+// exceeds the max tag amount, the builder should reject the configuration.
+func TestPlanInfoTooManyTagsErrors(t *testing.T) {
+	exactMaxNumberOfTags := map[string]string{}
+	for i := 0; i < 15; i++ {
+		exactMaxNumberOfTags[fmt.Sprintf("tag%.2d", i)] = "ignored"
+	}
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+		"azure_tags":             exactMaxNumberOfTags,
+		"plan_info": map[string]string{
+			"plan_name":           "--plan-name--",
+			"plan_product":        "--plan-product--",
+			"plan_publisher":      "--plan-publisher--",
+			"plan_promotion_code": "--plan-promotion-code--",
+		},
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject configuration due to excess tags")
+	}
+}
+
+// The Azure builder creates temporary resources, but the user has some control over
+// these values. This test asserts those values are controllable by the user.
+func TestConfigShouldAllowTempNameOverrides(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"temp_resource_group_name":          "myTempResourceGroupName",
+		"temp_compute_name":                 "myTempComputeName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.TempResourceGroupName != "myTempResourceGroupName" {
+		t.Errorf("expected TempResourceGroupName to be %q, but got %q", "myTempResourceGroupName", c.TempResourceGroupName)
+	}
+	if c.tmpResourceGroupName != "myTempResourceGroupName" {
+		t.Errorf("expected tmpResourceGroupName to be %q, but got %q", "myTempResourceGroupName", c.tmpResourceGroupName)
+	}
+
+	if c.TempComputeName != "myTempComputeName" {
+		t.Errorf("expected TempComputeName to be %q, but got %q", "myTempComputeName", c.TempComputeName)
+	}
+	if c.tmpComputeName != "myTempComputeName" {
+		t.Errorf("expected tmpComputeName to be %q, but got %q", "myTempComputeName", c.tmpResourceGroupName)
+	}
+}
+
+func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"async_resourcegroup_delete":        "true",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.AsyncResourceGroupDelete != true {
+		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+}
+func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.AsyncResourceGroupDelete != false {
+		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+}
+func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"async_resourcegroup_delete":        "asdasda",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil && c == nil {
+		t.Log("newConfig failed  which is expected ", err)
+
+	}
+
+}
+func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         "linux",
+		"shared_image_gallery": map[string]string{
+			"subscription":   "ignore",
+			"resource_group": "ignore",
+			"gallery_name":   "ignore",
+			"image_name":     "ignore",
+			"image_version":  "ignore",
+		},
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Log("expected config to accept Shared Image Gallery options", err)
+	}
+
+}
+
+func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         "linux",
+		"shared_image_gallery": map[string]string{
+			"subscription":   "ignore",
+			"resource_group": "ignore",
+			"gallery_name":   "ignore",
+			"image_name":     "ignore",
+			"image_version":  "ignore",
+		},
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"capture_container_name": "ignore",
+		"capture_name_prefix":    "ignore",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err)
+	}
+}
+
+func Test_GivenZoneNotSupportingResiliency_ConfigValidate_ShouldWarn(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+	builderValues["managed_image_zone_resilient"] = "true"
+	builderValues["location"] = "ukwest"
+
+	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	var m = ""
+	c.validateLocationZoneResiliency(func(s string) { m = s })
+
+	if m != "WARNING: Zone resiliency may not be supported in ukwest, checkout the docs at https://docs.microsoft.com/en-us/azure/availability-zones/" {
+		t.Errorf("warning message not as expected: %s", m)
+	}
+}
+
+func Test_GivenZoneSupportingResiliency_ConfigValidate_ShouldNotWarn(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+	builderValues["managed_image_zone_resilient"] = "true"
+	builderValues["location"] = "westeurope"
+
+	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	var m = ""
+	c.validateLocationZoneResiliency(func(s string) { m = s })
+
+	if m != "" {
+		t.Errorf("warning message not as expected: %s", m)
 	}
 }
 

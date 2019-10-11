@@ -2,8 +2,6 @@ package docker
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/iochan"
 	"io"
 	"log"
 	"os/exec"
@@ -11,6 +9,9 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/hashicorp/packer/common/iochan"
+	"github.com/hashicorp/packer/packer"
 )
 
 func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {
@@ -39,8 +40,8 @@ func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {
 
 	// Create the channels we'll use for data
 	exitCh := make(chan int, 1)
-	stdoutCh := iochan.DelimReader(stdout_r, '\n')
-	stderrCh := iochan.DelimReader(stderr_r, '\n')
+	stdoutCh := iochan.LineReader(stdout_r)
+	stderrCh := iochan.LineReader(stderr_r)
 
 	// Start the goroutine to watch for the exit
 	go func() {

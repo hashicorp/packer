@@ -3,16 +3,15 @@
 package ecs
 
 import (
-	"log"
-
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -35,8 +34,6 @@ type Builder struct {
 type InstanceNetWork string
 
 const (
-	ClassicNet                     = InstanceNetWork("classic")
-	VpcNet                         = InstanceNetWork("vpc")
 	ALICLOUD_DEFAULT_SHORT_TIMEOUT = 180
 	ALICLOUD_DEFAULT_TIMEOUT       = 1800
 	ALICLOUD_DEFAULT_LONG_TIMEOUT  = 3600
@@ -57,6 +54,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	if b.config.PackerConfig.PackerForce {
+		b.config.AlicloudImageForceDelete = true
+		b.config.AlicloudImageForceDeleteSnapshots = true
+	}
+
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AlicloudAccessConfig.Prepare(&b.config.ctx)...)
@@ -67,18 +69,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AlicloudAccessKey, b.config.AlicloudSecretKey))
+	packer.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 
 	client, err := b.config.Client()
 	if err != nil {
 		return nil, err
 	}
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -89,22 +91,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = []multistep.Step{
 		&stepPreValidate{
 			AlicloudDestImageName: b.config.AlicloudImageName,
-			ForceDelete:           b.config.AlicloudImageForceDetele,
+			ForceDelete:           b.config.AlicloudImageForceDelete,
 		},
 		&stepCheckAlicloudSourceImage{
 			SourceECSImageId: b.config.AlicloudSourceImage,
 		},
-		&StepConfigAlicloudKeyPair{
-			Debug:                b.config.PackerDebug,
-			KeyPairName:          b.config.SSHKeyPairName,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
-			RegionId:             b.config.AlicloudRegion,
+		&stepConfigAlicloudKeyPair{
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
+			RegionId:     b.config.AlicloudRegion,
 		},
 	}
-	if b.chooseNetworkType() == VpcNet {
+	if b.chooseNetworkType() == InstanceNetworkVpc {
 		steps = append(steps,
 			&stepConfigAlicloudVPC{
 				VpcId:     b.config.VpcId,
@@ -132,50 +131,69 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                b.config.AlicloudRegion,
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-			InstnaceName:            b.config.InstanceName,
+			InstanceName:            b.config.InstanceName,
 			ZoneId:                  b.config.ZoneId,
 		})
-	if b.chooseNetworkType() == VpcNet {
-		steps = append(steps, &setpConfigAlicloudEIP{
+	if b.chooseNetworkType() == InstanceNetworkVpc {
+		steps = append(steps, &stepConfigAlicloudEIP{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
+			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
+			SSHPrivateIp:             b.config.SSHPrivateIp,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
-			RegionId: b.config.AlicloudRegion,
+			RegionId:     b.config.AlicloudRegion,
+			SSHPrivateIp: b.config.SSHPrivateIp,
 		})
 	}
 	steps = append(steps,
-		&stepAttachKeyPar{},
+		&stepAttachKeyPair{},
 		&stepRunAlicloudInstance{},
-		&stepMountAlicloudDisk{},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: SSHHost(
 				client,
 				b.config.SSHPrivateIp),
-			SSHConfig: SSHConfig(
-				b.config.RunConfig.Comm.SSHAgentAuth,
-				b.config.RunConfig.Comm.SSHUsername,
-				b.config.RunConfig.Comm.SSHPassword),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.RunConfig.Comm,
+		},
 		&stepStopAlicloudInstance{
-			ForceStop: b.config.ForceStopInstance,
+			ForceStop:   b.config.ForceStopInstance,
+			DisableStop: b.config.DisableStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
-			AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-			AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
+			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
+			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
+			AlicloudImageDestinationRegions:   b.config.AlicloudImageConfig.AlicloudImageDestinationRegions,
+			AlicloudImageDestinationNames:     b.config.AlicloudImageConfig.AlicloudImageDestinationNames,
+		})
+
+	if b.config.AlicloudImageIgnoreDataDisks {
+		steps = append(steps, &stepCreateAlicloudSnapshot{
+			WaitSnapshotReadyTimeout: b.getSnapshotReadyTimeout(),
+		})
+	}
+
+	steps = append(steps,
+		&stepCreateAlicloudImage{
+			AlicloudImageIgnoreDataDisks: b.config.AlicloudImageIgnoreDataDisks,
+			WaitSnapshotReadyTimeout:     b.getSnapshotReadyTimeout(),
 		},
-		&stepCreateAlicloudImage{},
-		&setpRegionCopyAlicloudImage{
+		&stepCreateTags{
+			Tags: b.config.AlicloudImageTags,
+		},
+		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
 			RegionId:                        b.config.AlicloudRegion,
 		},
-		&setpShareAlicloudImage{
+		&stepShareAlicloudImage{
 			AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
 			AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
 			RegionId:                     b.config.AlicloudRegion,
@@ -183,7 +201,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -205,18 +223,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	return artifact, nil
 }
 
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}
-
 func (b *Builder) chooseNetworkType() InstanceNetWork {
 	if b.isVpcNetRequired() {
-		return VpcNet
+		return InstanceNetworkVpc
 	} else {
-		return ClassicNet
+		return InstanceNetworkClassic
 	}
 }
 
@@ -231,7 +242,7 @@ func (b *Builder) isVpcSpecified() bool {
 
 func (b *Builder) isUserDataNeeded() bool {
 	// Public key setup requires userdata
-	if b.config.RunConfig.Comm.SSHPrivateKey != "" {
+	if b.config.RunConfig.Comm.SSHPrivateKeyFile != "" {
 		return true
 	}
 
@@ -239,5 +250,13 @@ func (b *Builder) isUserDataNeeded() bool {
 }
 
 func (b *Builder) isKeyPairNeeded() bool {
-	return b.config.SSHKeyPairName != "" || b.config.TemporaryKeyPairName != ""
+	return b.config.Comm.SSHKeyPairName != "" || b.config.Comm.SSHTemporaryKeyPairName != ""
+}
+
+func (b *Builder) getSnapshotReadyTimeout() int {
+	if b.config.WaitSnapshotReadyTimeout > 0 {
+		return b.config.WaitSnapshotReadyTimeout
+	}
+
+	return ALICLOUD_DEFAULT_LONG_TIMEOUT
 }

@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"crypto/sha256"
 	"io/ioutil"
 	"os"
@@ -14,14 +15,9 @@ import (
 	"github.com/hashicorp/packer/template"
 )
 
-func TestCommunicator_impl(t *testing.T) {
-	var _ packer.Communicator = new(Communicator)
-}
-
 // TestUploadDownload verifies that basic upload / download functionality works
 func TestUploadDownload(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(dockerBuilderConfig))
 	if err != nil {
@@ -68,15 +64,15 @@ func TestUploadDownload(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{upload, nil, ""},
-				{download, nil, ""},
+				{Provisioner: upload, Config: nil, TypeName: ""},
+				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -105,7 +101,6 @@ func TestUploadDownload(t *testing.T) {
 // only intermittently.
 func TestLargeDownload(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(dockerLargeBuilderConfig))
 	if err != nil {
@@ -157,16 +152,16 @@ func TestLargeDownload(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{shell, nil, ""},
-				{downloadCupcake, nil, ""},
-				{downloadBigcake, nil, ""},
+				{Provisioner: shell, Config: nil, TypeName: ""},
+				{Provisioner: downloadCupcake, Config: nil, TypeName: ""},
+				{Provisioner: downloadBigcake, Config: nil, TypeName: ""},
 			},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
 	// Run things
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
@@ -210,7 +205,6 @@ func TestLargeDownload(t *testing.T) {
 // TestFixUploadOwner verifies that owner of uploaded files is the user the container is running as.
 func TestFixUploadOwner(t *testing.T) {
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
 	tpl, err := template.Parse(strings.NewReader(testFixUploadOwnerTemplate))
 	if err != nil {
@@ -266,16 +260,16 @@ func TestFixUploadOwner(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{fileProvisioner, nil, ""},
-				{dirProvisioner, nil, ""},
-				{shellProvisioner, nil, ""},
-				{verifyProvisioner, nil, ""},
+				{Provisioner: fileProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: dirProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: shellProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: verifyProvisioner, Config: nil, TypeName: ""},
 			},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
 
-	artifact, err := builder.Run(ui, hook, cache)
+	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}

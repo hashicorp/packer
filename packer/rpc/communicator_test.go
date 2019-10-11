@@ -2,10 +2,12 @@ package rpc
 
 import (
 	"bufio"
-	"github.com/hashicorp/packer/packer"
+	"context"
 	"io"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestCommunicatorRPC(t *testing.T) {
@@ -35,8 +37,10 @@ func TestCommunicatorRPC(t *testing.T) {
 	c.StartStderr = "errfoo\n"
 	c.StartExitStatus = 42
 
+	ctx := context.Background()
+
 	// Test Start
-	err := remote.Start(&cmd)
+	err := remote.Start(ctx, &cmd)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -72,8 +76,8 @@ func TestCommunicatorRPC(t *testing.T) {
 	}
 
 	// Test that we can get the exit status properly
-	if cmd.ExitStatus != 42 {
-		t.Fatalf("bad exit: %d", cmd.ExitStatus)
+	if cmd.ExitStatus() != 42 {
+		t.Fatalf("bad exit: %d", cmd.ExitStatus())
 	}
 
 	// Test that we can upload things

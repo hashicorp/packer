@@ -2,17 +2,19 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // Communicator is a special communicator that works by executing
@@ -22,9 +24,11 @@ type Communicator struct {
 	CmdWrapper CommandWrapper
 }
 
-func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+	// need extra escapes for the command since we're wrapping it in quotes
+	cmd.Command = strconv.Quote(cmd.Command)
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("chroot %s /bin/sh -c \"%s\"", c.Chroot, cmd.Command))
+		fmt.Sprintf("chroot %s /bin/sh -c %s", c.Chroot, cmd.Command))
 	if err != nil {
 		return err
 	}
@@ -64,7 +68,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
-	tf, err := ioutil.TempFile("", "packer-amazon-chroot")
+	tf, err := tmp.File("packer-amazon-chroot")
 	if err != nil {
 		return fmt.Errorf("Error preparing shell script: %s", err)
 	}

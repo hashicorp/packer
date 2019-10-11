@@ -1,7 +1,9 @@
 package packer
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -14,16 +16,11 @@ type Provisioner interface {
 	// should be merged in some sane way.
 	Prepare(...interface{}) error
 
-	// Provision is called to actually provision the machine. A UI is
-	// given to communicate with the user, and a communicator is given that
-	// is guaranteed to be connected to some machine so that provisioning
-	// can be done.
-	Provision(Ui, Communicator) error
-
-	// Cancel is called to cancel the provisioning. This is usually called
-	// while Provision is still being called. The Provisioner should act
-	// to stop its execution as quickly as possible in a race-free way.
-	Cancel()
+	// Provision is called to actually provision the machine. A context is
+	// given for cancellation, a UI is given to communicate with the user, and
+	// a communicator is given that is guaranteed to be connected to some
+	// machine so that provisioning can be done.
+	Provision(context.Context, Ui, Communicator) error
 }
 
 // A HookedProvisioner represents a provisioner and information describing it
@@ -38,13 +35,10 @@ type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
-
-	lock               sync.Mutex
-	runningProvisioner Provisioner
 }
 
 // Runs the provisioners in order.
-func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
+func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
 	if len(h.Provisioners) == 0 {
 		return nil
@@ -56,22 +50,10 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 				"`communicator` config was set to \"none\". If you have any provisioners\n" +
 				"then a communicator is required. Please fix this to continue.")
 	}
-
-	defer func() {
-		h.lock.Lock()
-		defer h.lock.Unlock()
-
-		h.runningProvisioner = nil
-	}()
-
 	for _, p := range h.Provisioners {
-		h.lock.Lock()
-		h.runningProvisioner = p.Provisioner
-		h.lock.Unlock()
-
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
-		err := p.Provisioner.Provision(ui, comm)
+		err := p.Provisioner.Provision(ctx, ui, comm)
 
 		ts.End(err)
 		if err != nil {
@@ -82,20 +64,33 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 	return nil
 }
 
-// Cancels the privisioners that are still running.
-func (h *ProvisionHook) Cancel() {
-	h.lock.Lock()
-	defer h.lock.Unlock()
-
-	if h.runningProvisioner != nil {
-		h.runningProvisioner.Cancel()
-	}
-}
-
 // PausedProvisioner is a Provisioner implementation that pauses before
 // the provisioner is actually run.
 type PausedProvisioner struct {
 	PauseBefore time.Duration
+	Provisioner Provisioner
+}
+
+func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+
+	// Use a select to determine if we get cancelled during the wait
+	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
+	select {
+	case <-time.After(p.PauseBefore):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+
+	return p.Provisioner.Provision(ctx, ui, comm)
+}
+
+// DebuggedProvisioner is a Provisioner implementation that waits until a key
+// press before the provisioner is actually run.
+type DebuggedProvisioner struct {
 	Provisioner Provisioner
 
 	cancelCh chan struct{}
@@ -103,68 +98,29 @@ type PausedProvisioner struct {
 	lock     sync.Mutex
 }
 
-func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
+func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ui Ui, comm Communicator) error {
-	p.lock.Lock()
-	cancelCh := make(chan struct{})
-	p.cancelCh = cancelCh
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+	// Use a select to determine if we get cancelled during the wait
+	message := "Pausing before the next provisioner . Press enter to continue."
 
-	// Setup the done channel, which is trigger when we're done
-	doneCh := make(chan struct{})
-	defer close(doneCh)
-	p.doneCh = doneCh
-	p.lock.Unlock()
+	result := make(chan string, 1)
+	go func() {
+		line, err := ui.Ask(message)
+		if err != nil {
+			log.Printf("Error asking for input: %s", err)
+		}
 
-	defer func() {
-		p.lock.Lock()
-		defer p.lock.Unlock()
-		if p.cancelCh == cancelCh {
-			p.cancelCh = nil
-		}
-		if p.doneCh == doneCh {
-			p.doneCh = nil
-		}
+		result <- line
 	}()
 
-	// Use a select to determine if we get cancelled during the wait
-	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
 	select {
-	case <-time.After(p.PauseBefore):
-	case <-cancelCh:
-		return nil
+	case <-result:
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 
-	provDoneCh := make(chan error, 1)
-	go p.provision(provDoneCh, ui, comm)
-
-	select {
-	case err := <-provDoneCh:
-		return err
-	case <-cancelCh:
-		p.Provisioner.Cancel()
-		return <-provDoneCh
-	}
-}
-
-func (p *PausedProvisioner) Cancel() {
-	var doneCh chan struct{}
-
-	p.lock.Lock()
-	if p.cancelCh != nil {
-		close(p.cancelCh)
-		p.cancelCh = nil
-	}
-	if p.doneCh != nil {
-		doneCh = p.doneCh
-	}
-	p.lock.Unlock()
-
-	<-doneCh
-}
-
-func (p *PausedProvisioner) provision(result chan<- error, ui Ui, comm Communicator) {
-	result <- p.Provisioner.Provision(ui, comm)
+	return p.Provisioner.Provision(ctx, ui, comm)
 }

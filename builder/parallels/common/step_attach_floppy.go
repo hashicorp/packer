@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepAttachFloppy is a step that attaches a floppy to the virtual machine.
@@ -22,7 +23,7 @@ type StepAttachFloppy struct {
 
 // Run adds a virtual FDD device to the VM and attaches the image.
 // If the image is not specified, then this step will be skipped.
-func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
 	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {

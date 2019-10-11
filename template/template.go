@@ -1,11 +1,12 @@
 package template
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Template represents the parsed template that is used to configure
@@ -18,40 +19,147 @@ type Template struct {
 	Description string
 	MinVersion  string
 
-	Variables      map[string]*Variable
-	Builders       map[string]*Builder
-	Provisioners   []*Provisioner
-	PostProcessors [][]*PostProcessor
-	Push           Push
+	Comments           map[string]string
+	Variables          map[string]*Variable
+	SensitiveVariables []*Variable
+	Builders           map[string]*Builder
+	Provisioners       []*Provisioner
+	CleanupProvisioner *Provisioner
+	PostProcessors     [][]*PostProcessor
 
 	// RawContents is just the raw data for this template
 	RawContents []byte
 }
 
+// Raw converts a Template struct back into the raw Packer template structure
+func (t *Template) Raw() (*rawTemplate, error) {
+	var out rawTemplate
+
+	out.MinVersion = t.MinVersion
+	out.Description = t.Description
+
+	for k, v := range t.Comments {
+		out.Comments = append(out.Comments, map[string]string{k: v})
+	}
+
+	for _, b := range t.Builders {
+		out.Builders = append(out.Builders, b)
+	}
+
+	for _, p := range t.Provisioners {
+		out.Provisioners = append(out.Provisioners, p)
+	}
+
+	for _, pp := range t.PostProcessors {
+		out.PostProcessors = append(out.PostProcessors, pp)
+	}
+
+	for _, v := range t.SensitiveVariables {
+		out.SensitiveVariables = append(out.SensitiveVariables, v.Key)
+	}
+
+	for k, v := range t.Variables {
+		if out.Variables == nil {
+			out.Variables = make(map[string]interface{})
+		}
+
+		out.Variables[k] = v
+	}
+
+	return &out, nil
+}
+
 // Builder represents a builder configured in the template
 type Builder struct {
-	Name   string
-	Type   string
-	Config map[string]interface{}
+	Name   string                 `json:"name,omitempty"`
+	Type   string                 `json:"type"`
+	Config map[string]interface{} `json:"config,omitempty"`
+}
+
+// MarshalJSON conducts the necessary flattening of the Builder struct
+// to provide valid Packer template JSON
+func (b *Builder) MarshalJSON() ([]byte, error) {
+	// Avoid recursion
+	type Builder_ Builder
+	out, _ := json.Marshal(Builder_(*b))
+
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(out, &m)
+
+	// Flatten Config
+	delete(m, "config")
+	for k, v := range b.Config {
+		out, _ = json.Marshal(v)
+		m[k] = out
+	}
+
+	return json.Marshal(m)
 }
 
 // PostProcessor represents a post-processor within the template.
 type PostProcessor struct {
-	OnlyExcept `mapstructure:",squash"`
+	OnlyExcept `mapstructure:",squash" json:",omitempty"`
 
-	Type              string
-	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
-	Config            map[string]interface{}
+	Name              string                 `json:"name,omitempty"`
+	Type              string                 `json:"type"`
+	KeepInputArtifact *bool                  `mapstructure:"keep_input_artifact" json:"keep_input_artifact,omitempty"`
+	Config            map[string]interface{} `json:"config,omitempty"`
+}
+
+// MarshalJSON conducts the necessary flattening of the PostProcessor struct
+// to provide valid Packer template JSON
+func (p *PostProcessor) MarshalJSON() ([]byte, error) {
+	// Early exit for simple definitions
+	if len(p.Config) == 0 && len(p.OnlyExcept.Only) == 0 && len(p.OnlyExcept.Except) == 0 && p.KeepInputArtifact == nil {
+		return json.Marshal(p.Type)
+	}
+
+	// Avoid recursion
+	type PostProcessor_ PostProcessor
+	out, _ := json.Marshal(PostProcessor_(*p))
+
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(out, &m)
+
+	// Flatten Config
+	delete(m, "config")
+	for k, v := range p.Config {
+		out, _ = json.Marshal(v)
+		m[k] = out
+	}
+
+	return json.Marshal(m)
 }
 
 // Provisioner represents a provisioner within the template.
 type Provisioner struct {
-	OnlyExcept `mapstructure:",squash"`
+	OnlyExcept `mapstructure:",squash" json:",omitempty"`
 
-	Type        string
-	Config      map[string]interface{}
-	Override    map[string]interface{}
-	PauseBefore time.Duration `mapstructure:"pause_before"`
+	Type        string                 `json:"type"`
+	Config      map[string]interface{} `json:"config,omitempty"`
+	Override    map[string]interface{} `json:"override,omitempty"`
+	PauseBefore time.Duration          `mapstructure:"pause_before" json:"pause_before,omitempty"`
+	Timeout     time.Duration          `mapstructure:"timeout" json:"timeout,omitempty"`
+}
+
+// MarshalJSON conducts the necessary flattening of the Provisioner struct
+// to provide valid Packer template JSON
+func (p *Provisioner) MarshalJSON() ([]byte, error) {
+	// Avoid recursion
+	type Provisioner_ Provisioner
+	out, _ := json.Marshal(Provisioner_(*p))
+
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(out, &m)
+
+	// Flatten Config
+	delete(m, "config")
+	for k, v := range p.Config {
+		out, _ = json.Marshal(v)
+		m[k] = out
+	}
+
+	return json.Marshal(m)
 }
 
 // Push represents the configuration for pushing the template to Atlas.
@@ -67,15 +175,26 @@ type Push struct {
 
 // Variable represents a variable within the template
 type Variable struct {
+	Key      string
 	Default  string
 	Required bool
+}
+
+func (v *Variable) MarshalJSON() ([]byte, error) {
+	if v.Required {
+		// We use a nil pointer to coax Go into marshalling it as a JSON null
+		var ret *string
+		return json.Marshal(ret)
+	}
+
+	return json.Marshal(v.Default)
 }
 
 // OnlyExcept is a struct that is meant to be embedded that contains the
 // logic required for "only" and "except" meta-parameters.
 type OnlyExcept struct {
-	Only   []string
-	Except []string
+	Only   []string `json:"only,omitempty"`
+	Except []string `json:"except,omitempty"`
 }
 
 //-------------------------------------------------------------------

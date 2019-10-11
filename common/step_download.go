@@ -1,14 +1,21 @@
 package common
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
-	"time"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 
+	getter "github.com/hashicorp/go-getter"
+	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	"github.com/hashicorp/packer/common/filelock"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -45,130 +52,165 @@ type StepDownload struct {
 	Extension string
 }
 
-func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
-	cache := state.Get("cache").(packer.Cache)
-	ui := state.Get("ui").(packer.Ui)
+func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
-	var checksum []byte
-	if s.Checksum != "" {
-		var err error
-		checksum, err = hex.DecodeString(s.Checksum)
-		if err != nil {
-			state.Put("error", fmt.Errorf("Error parsing checksum: %s", err))
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
+
+	var errs []error
+	for _, source := range s.Url {
+		if ctx.Err() != nil {
+			state.Put("error", fmt.Errorf("Download cancelled: %v", errs))
 			return multistep.ActionHalt
 		}
+		ui.Say(fmt.Sprintf("Trying %s", source))
+		var err error
+		var dst string
+		if s.Description == "OVF/OVA" && strings.HasSuffix(source, ".ovf") {
+			// TODO(adrien): make go-getter allow using files in place.
+			// ovf files usually point to a file in the same directory, so
+			// using them in place is the only way.
+			ui.Say(fmt.Sprintf("Using ovf inplace"))
+			dst = source
+		} else {
+			dst, err = s.download(ctx, ui, source)
+		}
+		if err == nil {
+			state.Put(s.ResultKey, dst)
+			return multistep.ActionContinue
+		}
+		// may be another url will work
+		errs = append(errs, err)
 	}
 
-	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
+	err := fmt.Errorf("error downloading %s: %v", s.Description, errs)
+	state.Put("error", err)
+	ui.Error(err.Error())
+	return multistep.ActionHalt
+}
 
-	// First try to use any already downloaded file
-	// If it fails, proceed to regualar download logic
+var (
+	getters = getter.Getters
+)
 
-	var downloadConfigs = make([]*DownloadConfig, len(s.Url))
-	var finalPath string
-	for i, url := range s.Url {
-		targetPath := s.TargetPath
-		if targetPath == "" {
-			// Determine a cache key. This is normally just the URL but
-			// if we force a certain extension we hash the URL and add
-			// the extension to force it.
-			cacheKey := url
-			if s.Extension != "" {
-				hash := sha1.Sum([]byte(url))
-				cacheKey = fmt.Sprintf(
-					"%s.%s", hex.EncodeToString(hash[:]), s.Extension)
-			}
-
-			log.Printf("Acquiring lock to download: %s", url)
-			targetPath = cache.Lock(cacheKey)
-			defer cache.Unlock(cacheKey)
+func init() {
+	if runtime.GOOS == "windows" {
+		getters["file"] = &getter.FileGetter{
+			// always copy local files instead of symlinking to fix GH-7534. The
+			// longer term fix for this would be to change the go-getter so that it
+			// can leave the source file where it is & tell us where it is.
+			Copy: true,
 		}
-
-		config := &DownloadConfig{
-			Url:        url,
-			TargetPath: targetPath,
-			CopyFile:   false,
-			Hash:       HashForType(s.ChecksumType),
-			Checksum:   checksum,
-			UserAgent:  "Packer",
-		}
-		downloadConfigs[i] = config
-
-		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
-			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
-			finalPath = config.TargetPath
-			break
+		getters["smb"] = &getter.FileGetter{
+			Copy: true,
 		}
 	}
+}
 
-	if finalPath == "" {
-		for i, url := range s.Url {
-			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
-
-			config := downloadConfigs[i]
-
-			path, err, retry := s.download(config, state)
-			if err != nil {
-				ui.Message(fmt.Sprintf("Error downloading: %s", err))
-			}
-
-			if !retry {
-				return multistep.ActionHalt
-			}
-
-			if err == nil {
-				finalPath = path
-				break
-			}
+func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+	if runtime.GOOS == "windows" {
+		// Check that the user specified a UNC path, and promote it to an smb:// uri.
+		if strings.HasPrefix(source, "\\\\") && len(source) > 2 && source[2] != '?' {
+			source = filepath.ToSlash(source[2:])
+			source = fmt.Sprintf("smb://%s", source)
 		}
 	}
 
-	if finalPath == "" {
-		err := fmt.Errorf("%s download failed.", s.Description)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	u, err := urlhelper.Parse(source)
+	if err != nil {
+		return "", fmt.Errorf("url parse: %s", err)
+	}
+	if checksum := u.Query().Get("checksum"); checksum != "" {
+		s.Checksum = checksum
+	}
+	if s.ChecksumType != "" && s.ChecksumType != "none" {
+		// add checksum to url query params as go getter will checksum for us
+		q := u.Query()
+		q.Set("checksum", s.ChecksumType+":"+s.Checksum)
+		u.RawQuery = q.Encode()
+	} else if s.Checksum != "" {
+		q := u.Query()
+		q.Set("checksum", s.Checksum)
+		u.RawQuery = q.Encode()
 	}
 
-	state.Put(s.ResultKey, finalPath)
-	return multistep.ActionContinue
+	targetPath := s.TargetPath
+	if targetPath == "" {
+		// store file under sha1(hash) if set
+		// hash can sometimes be a checksum url
+		// otherwise, use sha1(source_url)
+		var shaSum [20]byte
+		if s.Checksum != "" {
+			shaSum = sha1.Sum([]byte(s.Checksum))
+		} else {
+			shaSum = sha1.Sum([]byte(u.String()))
+		}
+		targetPath = hex.EncodeToString(shaSum[:])
+		if s.Extension != "" {
+			targetPath += "." + s.Extension
+		}
+	}
+	targetPath, err = packer.CachePath(targetPath)
+	if err != nil {
+		return "", fmt.Errorf("CachePath: %s", err)
+	}
+	lockFile := targetPath + ".lock"
+
+	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)
+	lock := filelock.New(lockFile)
+	lock.Lock()
+	defer lock.Unlock()
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("get working directory: %v", err)
+		// here we ignore the error in case the
+		// working directory is not needed.
+		// It would be better if the go-getter
+		// could guess it only in cases it is
+		// necessary.
+	}
+	src := u.String()
+	if u.Scheme == "" || strings.ToLower(u.Scheme) == "file" {
+		// If a local filepath, then we need to preprocess to make sure the
+		// path doens't have any multiple successive path separators; if it
+		// does, go-getter will read this as a specialized go-getter-specific
+		// subdirectory command, which it most likely isn't.
+		src = filepath.Clean(u.String())
+		if _, err := os.Stat(filepath.Clean(u.Path)); err != nil {
+			// Cleaned path isn't present on system so it must be some other
+			// scheme. Don't error right away; see if go-getter can figure it
+			// out.
+			src = u.String()
+		}
+	}
+
+	ui.Say(fmt.Sprintf("Trying %s", u.String()))
+	gc := getter.Client{
+		Ctx:              ctx,
+		Dst:              targetPath,
+		Src:              src,
+		ProgressListener: ui,
+		Pwd:              wd,
+		Dir:              false,
+		Getters:          getters,
+	}
+
+	switch err := gc.Get(); err.(type) {
+	case nil: // success !
+		ui.Say(fmt.Sprintf("%s => %s", u.String(), targetPath))
+		return targetPath, nil
+	case *getter.ChecksumError:
+		ui.Say(fmt.Sprintf("Checksum did not match, removing %s", targetPath))
+		if err := os.Remove(targetPath); err != nil {
+			ui.Error(fmt.Sprintf("Failed to remove cache file. Please remove manually: %s", targetPath))
+		}
+		return "", err
+	default:
+		ui.Say(fmt.Sprintf("Download failed %s", err))
+		return "", err
+	}
 }
 
 func (s *StepDownload) Cleanup(multistep.StateBag) {}
-
-func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
-	var path string
-	ui := state.Get("ui").(packer.Ui)
-	download := NewDownloadClient(config)
-
-	downloadCompleteCh := make(chan error, 1)
-	go func() {
-		var err error
-		path, err = download.Get()
-		downloadCompleteCh <- err
-	}()
-
-	progressTicker := time.NewTicker(5 * time.Second)
-	defer progressTicker.Stop()
-
-	for {
-		select {
-		case err := <-downloadCompleteCh:
-			if err != nil {
-				return "", err, true
-			}
-
-			return path, nil, true
-		case <-progressTicker.C:
-			progress := download.PercentProgress()
-			if progress >= 0 {
-				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
-			}
-		case <-time.After(1 * time.Second):
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				ui.Say("Interrupt received. Cancelling download...")
-				return "", nil, false
-			}
-		}
-	}
-}

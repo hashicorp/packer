@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -12,8 +13,9 @@ import (
 	"os"
 	"time"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.
@@ -23,7 +25,7 @@ type StepCreateWindowsPassword struct {
 }
 
 // Run executes the Packer build step that sets the windows password on a Windows GCE instance.
-func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(Driver)
 	c := state.Get("config").(*Config)
@@ -31,6 +33,7 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 
 	if c.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", c.Comm.WinRMPassword)
+		packer.LogSecretFilter.Set(c.Comm.WinRMPassword)
 		return multistep.ActionContinue
 	}
 
@@ -52,12 +55,17 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	buf := make([]byte, 4)
 	binary.BigEndian.PutUint32(buf, uint32(priv.E))
 
+	email := ""
+	if c.Account != nil {
+		email = c.Account.Email
+	}
+
 	data := WindowsPasswordConfig{
 		key:      priv,
 		UserName: c.Comm.WinRMUser,
 		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
 		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
-		Email:    c.Account.ClientEmail,
+		Email:    email,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
 
@@ -111,6 +119,8 @@ func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.Step
 	}
 
 	state.Put("winrm_password", data.password)
+	commonhelper.SetSharedState("winrm_password", data.password, c.PackerConfig.PackerBuildName)
+	packer.LogSecretFilter.Set(data.password)
 
 	return multistep.ActionContinue
 }

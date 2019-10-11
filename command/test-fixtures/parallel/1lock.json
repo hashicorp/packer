@@ -1,0 +1,5 @@
+{
+    "builders": [
+        {"type": "lock", "name": "build0"}
+    ]
+}

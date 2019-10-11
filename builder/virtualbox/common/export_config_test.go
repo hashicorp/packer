@@ -2,6 +2,8 @@ package common
 
 import (
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestExportConfigPrepare_BootWait(t *testing.T) {
@@ -10,8 +12,8 @@ func TestExportConfigPrepare_BootWait(t *testing.T) {
 
 	// Bad
 	c = new(ExportConfig)
-	c.Format = "illega"
-	errs = c.Prepare(testConfigTemplate(t))
+	c.Format = "illegal"
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
@@ -19,7 +21,7 @@ func TestExportConfigPrepare_BootWait(t *testing.T) {
 	// Good
 	c = new(ExportConfig)
 	c.Format = "ova"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -27,7 +29,22 @@ func TestExportConfigPrepare_BootWait(t *testing.T) {
 	// Good
 	c = new(ExportConfig)
 	c.Format = "ovf"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
+	if len(errs) > 0 {
+		t.Fatalf("should not have error: %s", errs)
+	}
+}
+
+func TestExportConfigPrepare_Opts(t *testing.T) {
+	var c *ExportConfig
+	var errs []error
+
+	// Good
+	c = new(ExportConfig)
+	c.ExportOpts = []string{
+		"--options",
+	}
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}

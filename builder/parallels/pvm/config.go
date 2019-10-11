@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package pvm
 
 import (
@@ -6,6 +8,8 @@ import (
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -19,15 +23,27 @@ type Config struct {
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
-	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
-	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig      `mapstructure:",squash"`
+	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
-
-	BootCommand []string `mapstructure:"boot_command"`
-	SourcePath  string   `mapstructure:"source_path"`
-	VMName      string   `mapstructure:"vm_name"`
-	ReassignMAC bool     `mapstructure:"reassign_mac"`
+	// The path to a PVM directory that acts as the source
+	// of this build.
+	SourcePath string `mapstructure:"source_path" required:"true"`
+	// Virtual disk image is compacted at the end of
+	// the build process using prl_disk_tool utility (except for the case that
+	// disk_type is set to plain). In certain rare cases, this might corrupt
+	// the resulting disk image. If you find this to be the case, you can disable
+	// compaction using this configuration value.
+	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`
+	// This is the name of the PVM directory for the new
+	// virtual machine, without the file extension. By default this is
+	// "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+	VMName string `mapstructure:"vm_name" required:"false"`
+	// If this is "false" the MAC address of the first
+	// NIC will reused when imported else a new MAC address will be generated
+	// by Parallels. Defaults to "false".
+	ReassignMAC bool `mapstructure:"reassign_mac" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -61,7 +77,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)

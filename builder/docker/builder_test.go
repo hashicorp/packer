@@ -1,8 +1,9 @@
 package docker
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilder_implBuilder(t *testing.T) {

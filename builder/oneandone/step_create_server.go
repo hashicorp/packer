@@ -1,23 +1,21 @@
 package oneandone
 
 import (
+	"context"
 	"fmt"
-	"github.com/1and1/oneandone-cloudserver-sdk-go"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"strings"
 	"time"
+
+	"github.com/1and1/oneandone-cloudserver-sdk-go"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type stepCreateServer struct{}
 
-func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
-
-	if sshkey, ok := state.GetOk("publicKey"); ok {
-		c.SSHKey = sshkey.(string)
-	}
 
 	token := oneandone.SetToken(c.Token)
 
@@ -70,8 +68,8 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	if c.Comm.SSHPassword != "" {
 		req.Password = c.Comm.SSHPassword
 	}
-	if c.SSHKey != "" {
-		req.SSHKey = c.SSHKey
+	if len(c.Comm.SSHPublicKey) != 0 {
+		req.SSHKey = string(c.Comm.SSHPublicKey)
 	}
 
 	server_id, server, err := api.CreateServer(&req)

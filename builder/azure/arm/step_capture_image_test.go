@@ -1,17 +1,18 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error {
+		captureVhd: func(context.Context, string, string, *compute.VirtualMachineCaptureParameters) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		generalizeVM: func(string, string) error {
@@ -26,7 +27,7 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepCaptureImage()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -38,7 +39,7 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error { return nil },
+		captureVhd: func(context.Context, string, string, *compute.VirtualMachineCaptureParameters) error { return nil },
 		generalizeVM: func(string, string) error {
 			return nil
 		},
@@ -51,7 +52,7 @@ func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepCaptureImage()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -73,7 +74,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
+		captureVhd: func(ctx context.Context, resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 			actualVirtualMachineCaptureParameters = parameters
@@ -91,7 +92,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepCaptureImage()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

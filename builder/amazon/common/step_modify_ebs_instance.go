@@ -1,21 +1,24 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	confighelper "github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepModifyEBSBackedInstance struct {
-	EnableAMIENASupport      bool
+	EnableAMIENASupport      confighelper.Trilean
 	EnableAMISriovNetSupport bool
 }
 
-func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
-	ec2conn := state.Get("ec2").(*ec2.EC2)
+func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	ec2conn := state.Get("ec2").(ec2iface.EC2API)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -36,16 +39,22 @@ func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.St
 		}
 	}
 
-	// Set EnaSupport to true.
+	// Handle EnaSupport flag.
 	// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
-	if s.EnableAMIENASupport {
-		ui.Say("Enabling Enhanced Networking (ENA)...")
+	if s.EnableAMIENASupport != confighelper.TriUnset {
+		var prefix string
+		if s.EnableAMIENASupport.True() {
+			prefix = "En"
+		} else {
+			prefix = "Dis"
+		}
+		ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
 			InstanceId: instance.InstanceId,
-			EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(true)},
+			EnaSupport: &ec2.AttributeBooleanValue{Value: s.EnableAMIENASupport.ToBoolPointer()},
 		})
 		if err != nil {
-			err := fmt.Errorf("Error enabling Enhanced Networking (ENA) on %s: %s", *instance.InstanceId, err)
+			err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

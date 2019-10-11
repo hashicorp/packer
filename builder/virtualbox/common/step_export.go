@@ -1,13 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -20,11 +22,20 @@ type StepExport struct {
 	Format         string
 	OutputDir      string
 	ExportOpts     []string
+	Bundling       VBoxBundleConfig
 	SkipNatMapping bool
 	SkipExport     bool
 }
 
-func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	// If ISO export is configured, ensure this option is propagated to VBoxManage.
+	for _, option := range s.ExportOpts {
+		if option == "--iso" || option == "-I" {
+			s.ExportOpts = append(s.ExportOpts, "--iso")
+			break
+		}
+	}
+
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

@@ -15,7 +15,6 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 
 	var expectedStateBagKeys = []string{
 		constants.AuthorizedKey,
-		constants.PrivateKey,
 
 		constants.ArmTags,
 		constants.ArmComputeName,
@@ -25,6 +24,7 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 		constants.ArmStorageAccountName,
 		constants.ArmVirtualMachineCaptureParameters,
 		constants.ArmPublicIPAddressName,
+		constants.ArmAsyncResourceGroupDelete,
 	}
 
 	for _, v := range expectedStateBagKeys {

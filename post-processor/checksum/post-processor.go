@@ -1,6 +1,7 @@
 package checksum
 
 import (
+	"context"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -95,7 +96,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	files := artifact.Files()
 	var h hash.Hash
 
@@ -113,29 +114,29 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		for _, art := range files {
 			checksumFile, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
 			if err != nil {
-				return nil, false, err
+				return nil, false, true, err
 			}
 
 			if _, err := os.Stat(checksumFile); err != nil {
 				newartifact.files = append(newartifact.files, checksumFile)
 			}
 			if err := os.MkdirAll(filepath.Dir(checksumFile), os.FileMode(0755)); err != nil {
-				return nil, false, fmt.Errorf("unable to create dir: %s", err.Error())
+				return nil, false, true, fmt.Errorf("unable to create dir: %s", err.Error())
 			}
 			fw, err := os.OpenFile(checksumFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.FileMode(0644))
 			if err != nil {
-				return nil, false, fmt.Errorf("unable to create file %s: %s", checksumFile, err.Error())
+				return nil, false, true, fmt.Errorf("unable to create file %s: %s", checksumFile, err.Error())
 			}
 			fr, err := os.Open(art)
 			if err != nil {
 				fw.Close()
-				return nil, false, fmt.Errorf("unable to open file %s: %s", art, err.Error())
+				return nil, false, true, fmt.Errorf("unable to open file %s: %s", art, err.Error())
 			}
 
 			if _, err = io.Copy(h, fr); err != nil {
 				fr.Close()
 				fw.Close()
-				return nil, false, fmt.Errorf("unable to compute %s hash for %s", ct, art)
+				return nil, false, true, fmt.Errorf("unable to compute %s hash for %s", ct, art)
 			}
 			fr.Close()
 			fw.WriteString(fmt.Sprintf("%x\t%s\n", h.Sum(nil), filepath.Base(art)))
@@ -144,5 +145,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 	}
 
-	return newartifact, true, nil
+	// sets keep and forceOverride to true because we don't want to accidentally
+	// delete the very artifact we're checksumming.
+	return newartifact, true, true, nil
 }

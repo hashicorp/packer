@@ -1,16 +1,19 @@
 package dockerpush
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/docker-import"
-	"github.com/hashicorp/packer/post-processor/docker-tag"
+	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
+	dockertag "github.com/hashicorp/packer/post-processor/docker-tag"
 	"github.com/hashicorp/packer/template/interpolate"
 )
+
+const BuilderIdImport = "packer.post-processor.docker-import"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -49,13 +52,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != dockerimport.BuilderId &&
 		artifact.BuilderId() != dockertag.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only import from docker-import and docker-tag artifacts.",
 			artifact.BuilderId())
-		return nil, false, err
+		return nil, false, false, err
 	}
 
 	driver := p.Driver
@@ -69,7 +72,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		username, password, err := p.config.EcrGetLogin(p.config.LoginServer)
 		if err != nil {
-			return nil, false, err
+			return nil, false, false, err
 		}
 
 		p.config.LoginUsername = username
@@ -83,7 +86,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			p.config.LoginUsername,
 			p.config.LoginPassword)
 		if err != nil {
-			return nil, false, fmt.Errorf(
+			return nil, false, false, fmt.Errorf(
 				"Error logging in to Docker: %s", err)
 		}
 
@@ -100,8 +103,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message("Pushing: " + name)
 	if err := driver.Push(name); err != nil {
-		return nil, false, err
+		return nil, false, false, err
 	}
 
-	return nil, false, nil
+	artifact = &docker.ImportArtifact{
+		BuilderIdValue: BuilderIdImport,
+		Driver:         driver,
+		IdValue:        name,
+	}
+
+	return artifact, true, false, nil
 }
