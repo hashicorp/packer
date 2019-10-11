@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 
-// Package chroot is able to create an Azure manage image without requiring the
-// launch of a new instance for every build. It does this by attaching and
+// Package chroot is able to create an Azure managed image without requiring the
+// launch of a new virtual machine for every build. It does this by attaching and
 // mounting the root disk and chrooting into that directory.
 // It then creates a managed image from that attached disk.
 package chroot
