@@ -345,6 +345,8 @@ github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models
 github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis
 github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client
 github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models
+# github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
+github.com/jehiah/go-strftime
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564

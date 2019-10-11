@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
+	strftime "github.com/jehiah/go-strftime"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -31,6 +32,7 @@ var FuncGens = map[string]interface{}{
 	"build_type":     funcGenBuildType,
 	"env":            funcGenEnv,
 	"isotime":        funcGenIsotime,
+	"strftime":       funcGenStrftime,
 	"pwd":            funcGenPwd,
 	"split":          funcGenSplitter,
 	"template_dir":   funcGenTemplateDir,
@@ -130,6 +132,12 @@ func funcGenIsotime(ctx *Context) interface{} {
 		}
 
 		return InitTime.Format(format[0]), nil
+	}
+}
+
+func funcGenStrftime(ctx *Context) interface{} {
+	return func(format string) string {
+		return strftime.Format(format, InitTime)
 	}
 }
 
