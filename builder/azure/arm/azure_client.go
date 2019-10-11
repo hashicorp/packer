@@ -127,7 +127,7 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 }
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
-	cloud *azure.Environment, SharedGalleryTimeout time.Duration,
+	cloud *azure.Environment, SharedGalleryTimeout time.Duration, PollingDuration time.Duration,
 	servicePrincipalToken, servicePrincipalTokenVault *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
@@ -139,84 +139,84 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.DeploymentsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DeploymentsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DeploymentsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DeploymentsClient.UserAgent)
-	azureClient.DeploymentsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.DeploymentsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.DeploymentOperationsClient = resources.NewDeploymentOperationsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DeploymentOperationsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DeploymentOperationsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DeploymentOperationsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DeploymentOperationsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DeploymentOperationsClient.UserAgent)
-	azureClient.DeploymentOperationsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.DeploymentOperationsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.DisksClient = compute.NewDisksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DisksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DisksClient.RequestInspector = withInspection(maxlen)
 	azureClient.DisksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DisksClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DisksClient.UserAgent)
-	azureClient.DisksClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.DisksClient.Client.PollingDuration = PollingDuration
 
 	azureClient.GroupsClient = resources.NewGroupsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.GroupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GroupsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GroupsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GroupsClient.UserAgent)
-	azureClient.GroupsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.GroupsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.ImagesClient = compute.NewImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.ImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.ImagesClient.RequestInspector = withInspection(maxlen)
 	azureClient.ImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.ImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.ImagesClient.UserAgent)
-	azureClient.ImagesClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.ImagesClient.Client.PollingDuration = PollingDuration
 
 	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.InterfacesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.InterfacesClient.RequestInspector = withInspection(maxlen)
 	azureClient.InterfacesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.InterfacesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.InterfacesClient.UserAgent)
-	azureClient.InterfacesClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.InterfacesClient.Client.PollingDuration = PollingDuration
 
 	azureClient.SubnetsClient = network.NewSubnetsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.SubnetsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.SubnetsClient.RequestInspector = withInspection(maxlen)
 	azureClient.SubnetsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.SubnetsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.SubnetsClient.UserAgent)
-	azureClient.SubnetsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.SubnetsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.VirtualNetworksClient = network.NewVirtualNetworksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.VirtualNetworksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualNetworksClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualNetworksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VirtualNetworksClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VirtualNetworksClient.UserAgent)
-	azureClient.VirtualNetworksClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.VirtualNetworksClient.Client.PollingDuration = PollingDuration
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.PublicIPAddressesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.PublicIPAddressesClient.RequestInspector = withInspection(maxlen)
 	azureClient.PublicIPAddressesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.PublicIPAddressesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.PublicIPAddressesClient.UserAgent)
-	azureClient.PublicIPAddressesClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.PublicIPAddressesClient.Client.PollingDuration = PollingDuration
 
 	azureClient.VirtualMachinesClient = compute.NewVirtualMachinesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.VirtualMachinesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualMachinesClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
 	azureClient.VirtualMachinesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VirtualMachinesClient.UserAgent)
-	azureClient.VirtualMachinesClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.VirtualMachinesClient.Client.PollingDuration = PollingDuration
 
 	azureClient.SnapshotsClient = compute.NewSnapshotsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.SnapshotsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.SnapshotsClient.RequestInspector = withInspection(maxlen)
 	azureClient.SnapshotsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.SnapshotsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.SnapshotsClient.UserAgent)
-	azureClient.SnapshotsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.SnapshotsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.AccountsClient = armStorage.NewAccountsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.AccountsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.AccountsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.AccountsClient.UserAgent)
-	azureClient.AccountsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.AccountsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.GalleryImageVersionsClient = newCompute.NewGalleryImageVersionsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.GalleryImageVersionsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
@@ -230,7 +230,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.GalleryImagesClient.RequestInspector = withInspection(maxlen)
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImagesClient.UserAgent)
-	azureClient.GalleryImageVersionsClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.GalleryImageVersionsClient.Client.PollingDuration = PollingDuration
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {
@@ -242,7 +242,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VaultClient.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VaultClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VaultClient.UserAgent)
-	azureClient.VaultClient.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.VaultClient.Client.PollingDuration = PollingDuration
 
 	// TODO(boumenot) - SDK still does not have a full KeyVault client.
 	// There are two ways that KeyVault has to be accessed, and each one has their own SPN.  An authenticated SPN
@@ -257,7 +257,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VaultClientDelete.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClientDelete.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VaultClientDelete.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VaultClientDelete.UserAgent)
-	azureClient.VaultClientDelete.Client.PollingDuration = SharedGalleryTimeout
+	azureClient.VaultClientDelete.Client.PollingDuration = PollingDuration
 
 	// If this is a managed disk build, this should be ignored.
 	if resourceGroupName != "" && storageAccountName != "" {
