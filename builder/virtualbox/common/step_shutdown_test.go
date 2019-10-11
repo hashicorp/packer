@@ -1,10 +1,12 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"context"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestStepShutdown_impl(t *testing.T) {
@@ -22,7 +24,7 @@ func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -59,7 +61,7 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -96,7 +98,7 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -128,12 +130,12 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 
 	// Test the run
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
-	testDuration := time.Since(start).Seconds()
-	if testDuration < 2.5 || testDuration > 2.6 {
-		t.Fatal("incorrect duration")
+	testDuration := time.Since(start)
+	if testDuration < 2500*time.Millisecond || testDuration > 2700*time.Millisecond {
+		t.Fatalf("incorrect duration %s", testDuration)
 	}
 
 	if _, ok := state.GetOk("error"); ok {
@@ -153,12 +155,12 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
-	testDuration = time.Since(start).Seconds()
-	if testDuration > 0.6 {
-		t.Fatal("incorrect duration")
+	testDuration = time.Since(start)
+	if testDuration > 700*time.Millisecond {
+		t.Fatalf("incorrect duration %s", testDuration)
 	}
 
 	if _, ok := state.GetOk("error"); ok {

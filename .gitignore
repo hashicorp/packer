@@ -4,6 +4,7 @@
 /src
 /website/.sass-cache
 /website/build
+/website/tmp
 .DS_Store
 .vagrant
 .idea
@@ -24,3 +25,5 @@ packer-test*.log
 *.iml
 Thumbs.db
 /packer.exe
+.project
+cache

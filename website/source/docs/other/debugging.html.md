@@ -10,6 +10,9 @@ sidebar_current: 'docs-other-debugging'
 
 # Debugging Packer Builds
 
+Using `packer build -on-error=ask` allows you to inspect failures and try out
+solutions before restarting the build.
+
 For remote builds with cloud providers like Amazon Web Services AMIs, debugging
 a Packer build can be eased greatly with `packer build -debug`. This disables
 parallelization and enables debug mode.
@@ -26,17 +29,25 @@ for debugging. The key will only be emitted for cloud-based builders. The
 ephemeral key will be deleted at the end of the packer run during cleanup.
 
 For a local builder, the SSH session initiated will be visible in the detail
-provided when `PACKER_LOG=1` environment variable is set prior to a build,
-and you can connect to the local machine using the userid and password defined
-in the kickstart or preseed associated with initialzing the local VM.
+provided when `PACKER_LOG=1` environment variable is set prior to a build, and
+you can connect to the local machine using the userid and password defined in
+the kickstart or preseed associated with initializing the local VM.
+
+It should be noted that one of the options `-on-error` is to `retry`, the retry
+of the step in question has limitations:
+
+-   the template packer is building is **not** reloaded from file.
+-   the resources specified from builders **are** reloaded from file.
+
+Check the specfics on your builder to confirm their behavior.
 
 ### Windows
 
 As of Packer 0.8.1 the default WinRM communicator will emit the password for a
-Remote Desktop Connection into your instance. This happens following the several
-minute pause as the instance is booted. Note a .pem key is still created for
-securely transmitting the password. Packer automatically decrypts the password
-for you in debug mode.
+Remote Desktop Connection into your instance. This happens following the
+several minute pause as the instance is booted. Note a .pem key is still
+created for securely transmitting the password. Packer automatically decrypts
+the password for you in debug mode.
 
 ## Debugging Packer
 
@@ -59,6 +70,15 @@ In addition to simply enabling the log, you can set `PACKER_LOG_PATH` in order
 to force the log to always go to a specific file when logging is enabled. Note
 that even when `PACKER_LOG_PATH` is set, `PACKER_LOG` must be set in order for
 any logging to be enabled.
+
+### Debugging Plugins
+
+Each packer plugin runs in a separate process and communicates with RCP over a
+socket therefore using a debugger will not work (be complicated at least).
+
+But most of the Packer code is really simple and easy to follow with PACKER_LOG
+turned on. If that doesn't work adding some extra debug print outs when you have
+homed in on the problem is usually enough.
 
 ### Debugging Packer in Powershell/Windows
 
@@ -84,9 +104,9 @@ provisioner step:
     amazon-ebs: No candidate version found for build-essential
 
 This, obviously can cause problems where a build is unable to finish
-successfully as the proper packages cannot be provisioned correctly. The problem
-arises when cloud-init has not finished fully running on the source AMI by the
-time that packer starts any provisioning steps.
+successfully as the proper packages cannot be provisioned correctly. The
+problem arises when cloud-init has not finished fully running on the source AMI
+by the time that packer starts any provisioning steps.
 
 Adding the following provisioner to the packer template, allows for the
 cloud-init process to fully finish before packer starts provisioning the source
@@ -113,7 +133,8 @@ error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:
 too many open files
 ```
 
-On Unix systems, you can check what your file descriptor limit is with `ulimit -Sn`. You should check with your OS vendor on how to raise this limit.
+On Unix systems, you can check what your file descriptor limit is with
+`ulimit -Sn`. You should check with your OS vendor on how to raise this limit.
 
 ## Issues when using long temp directory
 

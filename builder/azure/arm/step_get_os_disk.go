@@ -1,19 +1,20 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepGetOSDisk struct {
 	client *AzureClient
-	query  func(resourceGroupName string, computeName string) (compute.VirtualMachine, error)
+	query  func(ctx context.Context, resourceGroupName string, computeName string) (compute.VirtualMachine, error)
 	say    func(message string)
 	error  func(e error)
 }
@@ -29,15 +30,15 @@ func NewStepGetOSDisk(client *AzureClient, ui packer.Ui) *StepGetOSDisk {
 	return step
 }
 
-func (s *StepGetOSDisk) queryCompute(resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
-	vm, err := s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+func (s *StepGetOSDisk) queryCompute(ctx context.Context, resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
+	vm, err := s.client.VirtualMachinesClient.Get(ctx, resourceGroupName, computeName, "")
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
 	return vm, err
 }
 
-func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetOSDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Querying the machine's properties ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
@@ -46,7 +47,7 @@ func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
 
-	vm, err := s.query(resourceGroupName, computeName)
+	vm, err := s.query(ctx, resourceGroupName, computeName)
 	if err != nil {
 		state.Put(constants.Error, err)
 		s.error(err)

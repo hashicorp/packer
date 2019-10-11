@@ -1,6 +1,7 @@
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
+//go:generate go generate ./common/bootcommand/...
 package main
 
 import (
@@ -10,15 +11,16 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
@@ -35,6 +37,11 @@ func main() {
 // realMain is executed from main and returns the exit status to exit with.
 func realMain() int {
 	var wrapConfig panicwrap.WrapConfig
+	// When following env variable is set, packer
+	// wont panic wrap itself as it's already wrapped.
+	// i.e.: when terraform runs it.
+	wrapConfig.CookieKey = "PACKER_WRAP_COOKIE"
+	wrapConfig.CookieValue = "49C22B1A-3A93-4C98-97FA-E07D18C787B5"
 
 	if !panicwrap.Wrapped(&wrapConfig) {
 		// Generate a UUID for this packer run and pass it to the environment.
@@ -53,12 +60,16 @@ func realMain() int {
 			logWriter = ioutil.Discard
 		}
 
+		packer.LogSecretFilter.SetOutput(logWriter)
+
+		//packer.LogSecrets.
+
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
 
 		// We always send logs to a temporary file that we use in case
 		// there is a panic. Otherwise, we delete it.
-		logTempFile, err := ioutil.TempFile("", "packer-log")
+		logTempFile, err := tmp.File("packer-log")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
 			return 1
@@ -85,9 +96,10 @@ func realMain() int {
 
 		// Create the configuration for panicwrap and wrap our executable
 		wrapConfig.Handler = panicHandler(logTempFile)
-		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
+		wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
 		wrapConfig.Stdout = outW
 		wrapConfig.DetectDuration = 500 * time.Millisecond
+		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
 		exitStatus, err := panicwrap.Wrap(&wrapConfig)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
@@ -122,19 +134,14 @@ func wrappedMain() int {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	log.SetOutput(os.Stderr)
+	packer.LogSecretFilter.SetOutput(os.Stderr)
+	log.SetOutput(&packer.LogSecretFilter)
 
 	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
 
 	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
-
-	// Prepare stdin for plugin usage by switching it to a pipe
-	// But do not switch to pipe in plugin
-	if !inPlugin {
-		setupStdin()
-	}
 
 	config, err := loadConfig()
 	if err != nil {
@@ -151,19 +158,12 @@ func wrappedMain() int {
 		)
 	}
 
-	cacheDir := os.Getenv("PACKER_CACHE_DIR")
-	if cacheDir == "" {
-		cacheDir = "packer_cache"
-	}
-
-	cacheDir, err = filepath.Abs(cacheDir)
+	cacheDir, err := packer.CachePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
 	}
-
 	log.Printf("Setting cache directory: %s", cacheDir)
-	cache := &packer.FileCache{CacheDir: cacheDir}
 
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
@@ -171,13 +171,9 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
-	// Setup the UI if we're being machine-readable
-	var ui packer.Ui = &packer.BasicUi{
-		Reader:      os.Stdin,
-		Writer:      os.Stdout,
-		ErrorWriter: os.Stdout,
-	}
+	var ui packer.Ui
 	if machineReadable {
+		// Setup the UI as we're being machine-readable
 		ui = &packer.MachineReadableUi{
 			Writer: os.Stdout,
 		}
@@ -188,8 +184,30 @@ func wrappedMain() int {
 			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
 			return 1
 		}
+	} else {
+		basicUi := &packer.BasicUi{
+			Reader:      os.Stdin,
+			Writer:      os.Stdout,
+			ErrorWriter: os.Stdout,
+		}
+		ui = basicUi
+		if !inPlugin {
+			currentPID := os.Getpid()
+			backgrounded, err := checkProcess(currentPID)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot determind if process is in "+
+					"background: %s\n", err)
+			}
+			if backgrounded {
+				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+			} else if TTY, err := openTTY(); err != nil {
+				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+			} else {
+				basicUi.TTY = TTY
+				defer TTY.Close()
+			}
+		}
 	}
-
 	// Create the CLI meta
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
@@ -201,16 +219,17 @@ func wrappedMain() int {
 			},
 			Version: version.Version,
 		},
-		Cache: cache,
-		Ui:    ui,
+		Ui: ui,
 	}
 
 	cli := &cli.CLI{
-		Args:       args,
-		Commands:   Commands,
-		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
-		HelpWriter: os.Stdout,
-		Version:    version.Version,
+		Args:         args,
+		Autocomplete: true,
+		Commands:     Commands,
+		HelpFunc:     excludeHelpFunc(Commands, []string{"plugin"}),
+		HelpWriter:   os.Stdout,
+		Name:         "packer",
+		Version:      version.Version,
 	}
 
 	exitCode, err := cli.Run()

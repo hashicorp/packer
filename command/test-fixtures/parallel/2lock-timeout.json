@@ -1,0 +1,19 @@
+{
+    "builders": [
+        {"type": "lock", "name": "build0"},
+        {"type": "parallel-test", "name": "build1"},
+        {"type": "parallel-test", "name": "build2"},
+        {"type": "file", "name": "timeout-build", "target": "roses.txt"},
+        {"type": "parallel-test", "name": "build4"},
+        {"type": "parallel-test", "name": "build5"}
+    ],
+    "provisioners": [
+        {
+            "only": ["timeout-build"],
+            "type": "sleep",
+            "duration": "2m",
+
+            "timeout": "1ns"
+        }
+    ]
+}

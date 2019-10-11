@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -67,7 +68,7 @@ func TestCoreBuild_basic(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -97,7 +98,7 @@ func TestCoreBuild_basicInterpolated(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -230,7 +231,7 @@ func TestCoreBuild_prov(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -264,7 +265,7 @@ func TestCoreBuild_provSkip(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -298,7 +299,7 @@ func TestCoreBuild_provSkipInclude(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -332,7 +333,7 @@ func TestCoreBuild_provOverride(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(nil, nil)
+	artifact, err := build.Run(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -381,7 +382,7 @@ func TestCoreBuild_postProcess(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact, err := build.Run(ui, nil)
+	artifact, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -423,40 +424,6 @@ func TestCoreBuild_templatePath(t *testing.T) {
 
 	if result["value"] != expected {
 		t.Fatalf("bad: %#v", result)
-	}
-}
-
-func TestCore_pushInterpolate(t *testing.T) {
-	cases := []struct {
-		File   string
-		Vars   map[string]string
-		Result template.Push
-	}{
-		{
-			"push-vars.json",
-			map[string]string{"foo": "bar"},
-			template.Push{Name: "bar"},
-		},
-	}
-
-	for _, tc := range cases {
-		tpl, err := template.ParseFile(fixtureDir(tc.File))
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
-		}
-
-		core, err := NewCore(&CoreConfig{
-			Template:  tpl,
-			Variables: tc.Vars,
-		})
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
-		}
-
-		expected := core.Template.Push
-		if !reflect.DeepEqual(expected, tc.Result) {
-			t.Fatalf("err: %s\n\n%#v", tc.File, expected)
-		}
 	}
 }
 
@@ -516,9 +483,190 @@ func TestCoreValidate(t *testing.T) {
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
+
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
+	}
+}
+
+// Tests that we can properly interpolate user variables defined within the
+// packer template
+func TestCore_InterpolateUserVars(t *testing.T) {
+	cases := []struct {
+		File     string
+		Expected map[string]string
+		Err      bool
+	}{
+		{
+			"build-variables-interpolate.json",
+			map[string]string{
+				"foo":  "bar",
+				"bar":  "bar",
+				"baz":  "barbaz",
+				"bang": "bangbarbaz",
+			},
+			false,
+		},
+		{
+			"build-variables-interpolate2.json",
+			map[string]string{},
+			true,
+		},
+	}
+	for _, tc := range cases {
+		f, err := os.Open(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		ccf, err := NewCore(&CoreConfig{
+			Template: tpl,
+			Version:  "1.0.0",
+		})
+
+		if (err != nil) != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+		if !tc.Err {
+			for k, v := range ccf.variables {
+				if tc.Expected[k] != v {
+					t.Fatalf("Expected %s but got %s", tc.Expected[k], v)
+				}
+			}
+		}
+	}
+}
+
+// Tests that we can properly interpolate user variables defined within a
+// var-file provided alongside the Packer template
+func TestCore_InterpolateUserVars_VarFile(t *testing.T) {
+	cases := []struct {
+		File      string
+		Variables map[string]string
+		Expected  map[string]string
+		Err       bool
+	}{
+		{
+			// tests that we can interpolate from var files when var isn't set in
+			// originating template
+			"build-basic-interpolated.json",
+			map[string]string{
+				"name":   "gotta-{{user `my_var`}}",
+				"my_var": "interpolate-em-all",
+			},
+			map[string]string{
+				"name":   "gotta-interpolate-em-all",
+				"my_var": "interpolate-em-all"},
+			false,
+		},
+		{
+			// tests that we can interpolate from var files when var is set in
+			// originating template as required
+			"build-basic-interpolated-required.json",
+			map[string]string{
+				"name":   "gotta-{{user `my_var`}}",
+				"my_var": "interpolate-em-all",
+			},
+			map[string]string{
+				"name":   "gotta-interpolate-em-all",
+				"my_var": "interpolate-em-all"},
+			false,
+		},
+	}
+	for _, tc := range cases {
+		f, err := os.Open(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		ccf, err := NewCore(&CoreConfig{
+			Template:  tpl,
+			Version:   "1.0.0",
+			Variables: tc.Variables,
+		})
+
+		if (err != nil) != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+		if !tc.Err {
+			for k, v := range ccf.variables {
+				if tc.Expected[k] != v {
+					t.Fatalf("Expected value %s for key %s but got %s",
+						tc.Expected[k], k, v)
+				}
+			}
+		}
+	}
+}
+
+func TestSensitiveVars(t *testing.T) {
+	cases := []struct {
+		File          string
+		Vars          map[string]string
+		SensitiveVars []string
+		Expected      string
+		Err           bool
+	}{
+		// hardcoded
+		{
+			"sensitive-variables.json",
+			map[string]string{"foo": "bar"},
+			[]string{"foo"},
+			"bar",
+			false,
+		},
+		// interpolated
+		{
+			"sensitive-variables.json",
+			map[string]string{"foo": "bar",
+				"bang": "{{ user `foo`}}"},
+			[]string{"bang"},
+			"bar",
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		f, err := os.Open(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		_, err = NewCore(&CoreConfig{
+			Template:  tpl,
+			Variables: tc.Vars,
+			Version:   "1.0.0",
+		})
+
+		if (err != nil) != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+		filtered := LogSecretFilter.get()
+		if filtered[0] != tc.Expected && len(filtered) != 1 {
+			t.Fatalf("not filtering sensitive vars; filtered is %#v", filtered)
+		}
+
+		// clear filter so it doesn't break other tests
+		LogSecretFilter.s = make(map[string]struct{})
 	}
 }
 

@@ -1,40 +1,45 @@
 package ebssurrogate
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	confighelper "github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct {
 	RootDevice               RootBlockDevice
-	BlockDevices             []*ec2.BlockDeviceMapping
-	EnableAMIENASupport      bool
+	AMIDevices               []*ec2.BlockDeviceMapping
+	LaunchDevices            []*ec2.BlockDeviceMapping
+	EnableAMIENASupport      confighelper.Trilean
 	EnableAMISriovNetSupport bool
+	Architecture             string
 	image                    *ec2.Image
+	LaunchOmitMap            map[string]bool
 }
 
-func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	snapshotId := state.Get("snapshot_id").(string)
+	snapshotIds := state.Get("snapshot_ids").(map[string]string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
 
-	blockDevicesExcludingRoot := DeduplicateRootVolume(s.BlockDevices, s.RootDevice, snapshotId)
+	blockDevices := s.combineDevices(snapshotIds)
 
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
-		Architecture:        aws.String(ec2.ArchitectureValuesX8664),
+		Architecture:        aws.String(s.Architecture),
 		RootDeviceName:      aws.String(s.RootDevice.DeviceName),
 		VirtualizationType:  aws.String(config.AMIVirtType),
-		BlockDeviceMappings: blockDevicesExcludingRoot,
+		BlockDeviceMappings: blockDevices,
 	}
 
 	if s.EnableAMISriovNetSupport {
@@ -42,7 +47,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
 	}
-	if s.EnableAMIENASupport {
+	if s.EnableAMIENASupport.True() {
 		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)
@@ -61,15 +66,8 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
-		StepState: state,
-	}
-
 	ui.Say("Waiting for AMI to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
+	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -119,17 +117,39 @@ func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func DeduplicateRootVolume(BlockDevices []*ec2.BlockDeviceMapping, RootDevice RootBlockDevice, snapshotId string) []*ec2.BlockDeviceMapping {
-	// Defensive coding to make sure we only add the root volume once
-	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(BlockDevices))
-	for _, blockDevice := range BlockDevices {
-		if *blockDevice.DeviceName == RootDevice.SourceDeviceName {
-			continue
-		}
+func (s *StepRegisterAMI) combineDevices(snapshotIds map[string]string) []*ec2.BlockDeviceMapping {
+	devices := map[string]*ec2.BlockDeviceMapping{}
 
-		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
+	for _, device := range s.AMIDevices {
+		devices[*device.DeviceName] = device
 	}
 
-	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, RootDevice.createBlockDeviceMapping(snapshotId))
-	return blockDevicesExcludingRoot
+	// Devices in launch_block_device_mappings override any with
+	// the same name in ami_block_device_mappings, except for the
+	// one designated as the root device in ami_root_device
+	for _, device := range s.LaunchDevices {
+		// Skip devices we've flagged for omission
+		omit, ok := s.LaunchOmitMap[*device.DeviceName]
+		if ok && omit {
+			continue
+		}
+		snapshotId, ok := snapshotIds[*device.DeviceName]
+		if ok {
+			device.Ebs.SnapshotId = aws.String(snapshotId)
+			// Block devices with snapshot inherit
+			// encryption settings from the snapshot
+			device.Ebs.Encrypted = nil
+			device.Ebs.KmsKeyId = nil
+		}
+		if *device.DeviceName == s.RootDevice.SourceDeviceName {
+			device.DeviceName = aws.String(s.RootDevice.DeviceName)
+		}
+		devices[*device.DeviceName] = device
+	}
+
+	blockDevices := []*ec2.BlockDeviceMapping{}
+	for _, device := range devices {
+		blockDevices = append(blockDevices, device)
+	}
+	return blockDevices
 }

@@ -1,12 +1,13 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepLoadFlavor gets the FlavorRef from a Flavor. It first assumes
@@ -16,8 +17,8 @@ type StepLoadFlavor struct {
 	Flavor string
 }
 
-func (s *StepLoadFlavor) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepLoadFlavor) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client

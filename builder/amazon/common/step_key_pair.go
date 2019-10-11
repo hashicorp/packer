@@ -1,67 +1,73 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepKeyPair struct {
-	Debug                bool
-	SSHAgentAuth         bool
-	DebugKeyPath         string
-	TemporaryKeyPairName string
-	KeyPairName          string
-	PrivateKeyFile       string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 
 	doCleanup bool
 }
 
-func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := s.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"Error loading configured private key file: %s", err))
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with key pair in Source AMI")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
-		state.Put("keyPair", s.KeyPairName)
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
 		return multistep.ActionContinue
 	}
 
-	if s.TemporaryKeyPairName == "" {
+	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		state.Put("keyPair", "")
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+	var keyResp *ec2.CreateKeyPairOutput
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
-	keyResp, err := ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
-		KeyName: &s.TemporaryKeyPairName})
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
+	err := retry.Config{
+		Tries:      11,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		var err error
+		keyResp, err = ec2conn.CreateKeyPair(&ec2.CreateKeyPairInput{
+			KeyName: &s.Comm.SSHTemporaryKeyPairName})
+		return err
+	})
+
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
@@ -69,9 +75,9 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 	s.doCleanup = true
 
-	// Set some state data for use in future steps
-	state.Put("keyPair", s.TemporaryKeyPairName)
-	state.Put("privateKey", *keyResp.KeyMaterial)
+	// Set some data for use in future steps
+	s.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
+	s.Comm.SSHPrivateKey = []byte(*keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -112,10 +118,10 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")
-	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.TemporaryKeyPairName})
+	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.Comm.SSHTemporaryKeyPairName})
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.Comm.SSHTemporaryKeyPairName))
 	}
 
 	// Also remove the physical key if we're debugging.

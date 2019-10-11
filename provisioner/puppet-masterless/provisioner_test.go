@@ -1,10 +1,12 @@
 package puppetmasterless
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,15 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testConfig() map[string]interface{} {
+func testConfig() (config map[string]interface{}, tf *os.File) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		panic(err)
 	}
 
-	return map[string]interface{}{
+	config = map[string]interface{}{
 		"manifest_file": tf.Name(),
 	}
+
+	return config, tf
 }
 
 func TestProvisioner_Impl(t *testing.T) {
@@ -33,7 +37,10 @@ func TestProvisioner_Impl(t *testing.T) {
 }
 
 func TestGuestOSConfig_empty_unix(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
 	p := new(Provisioner)
 	err := p.Prepare(config)
 	if err != nil {
@@ -53,12 +60,15 @@ func TestGuestOSConfig_empty_unix(t *testing.T) {
 	}
 
 	expected := "cd /tmp/packer-puppet-masterless && " +
-		"sudo -E puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+		"sudo -E puppet apply --detailed-exitcodes /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
 func TestGuestOSConfig_full_unix(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
 	p := new(Provisioner)
 	err := p.Prepare(config)
 	if err != nil {
@@ -89,13 +99,16 @@ func TestGuestOSConfig_full_unix(t *testing.T) {
 
 	expected := "cd /tmp/packer-puppet-masterless && FACTER_lhs='rhs' FACTER_foo='bar' " +
 		"sudo -E puppet apply " +
-		"--verbose --modulepath='/m/p:/a/b' --hiera_config='/h/c/p' " +
-		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+		"--detailed-exitcodes --modulepath='/m/p:/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
 func TestGuestOSConfig_empty_windows(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
 	config["guest_os_type"] = "windows"
 	p := new(Provisioner)
 	err := p.Prepare(config)
@@ -115,12 +128,15 @@ func TestGuestOSConfig_empty_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless &&  && puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && puppet apply --detailed-exitcodes /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
 func TestGuestOSConfig_full_windows(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
 	config["guest_os_type"] = "windows"
 	p := new(Provisioner)
 	err := p.Prepare(config)
@@ -150,15 +166,17 @@ func TestGuestOSConfig_full_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless && " +
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && " +
 		"SET \"FACTER_lhs=rhs\" & SET \"FACTER_foo=bar\" && " +
-		"puppet apply --verbose --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
-		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+		"puppet apply --detailed-exitcodes --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
 func TestProvisionerPrepare_puppetBinDir(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "puppet_bin_dir")
 	p := new(Provisioner)
@@ -183,7 +201,9 @@ func TestProvisionerPrepare_puppetBinDir(t *testing.T) {
 }
 
 func TestProvisionerPrepare_hieraConfigPath(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "hiera_config_path")
 	p := new(Provisioner)
@@ -208,7 +228,9 @@ func TestProvisionerPrepare_hieraConfigPath(t *testing.T) {
 }
 
 func TestProvisionerPrepare_manifestFile(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "manifest_file")
 	p := new(Provisioner)
@@ -233,7 +255,9 @@ func TestProvisionerPrepare_manifestFile(t *testing.T) {
 }
 
 func TestProvisionerPrepare_manifestDir(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "manifestdir")
 	p := new(Provisioner)
@@ -258,7 +282,9 @@ func TestProvisionerPrepare_manifestDir(t *testing.T) {
 }
 
 func TestProvisionerPrepare_modulePaths(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "module_paths")
 	p := new(Provisioner)
@@ -291,7 +317,9 @@ func TestProvisionerPrepare_modulePaths(t *testing.T) {
 }
 
 func TestProvisionerPrepare_facterFacts(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "facter")
 	p := new(Provisioner)
@@ -346,7 +374,9 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 }
 
 func TestProvisionerPrepare_extraArguments(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	// Test with missing parameter
 	delete(config, "extra_arguments")
@@ -377,7 +407,9 @@ func TestProvisionerPrepare_extraArguments(t *testing.T) {
 }
 
 func TestProvisionerPrepare_stagingDir(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "staging_directory")
 	p := new(Provisioner)
@@ -405,7 +437,9 @@ func TestProvisionerPrepare_stagingDir(t *testing.T) {
 }
 
 func TestProvisionerPrepare_workingDir(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	delete(config, "working_directory")
 	p := new(Provisioner)
@@ -438,7 +472,10 @@ func TestProvisionerPrepare_workingDir(t *testing.T) {
 }
 
 func TestProvisionerProvision_extraArguments(t *testing.T) {
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
 	ui := &packer.MachineReadableUi{
 		Writer: ioutil.Discard,
 	}
@@ -457,7 +494,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -477,7 +514,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

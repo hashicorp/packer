@@ -23,7 +23,8 @@ type CaptureDisk struct {
 }
 
 type CaptureStorageProfile struct {
-	OSDisk CaptureDisk `json:"osDisk"`
+	OSDisk    CaptureDisk   `json:"osDisk"`
+	DataDisks []CaptureDisk `json:"dataDisks"`
 }
 
 type CaptureOSProfile struct {

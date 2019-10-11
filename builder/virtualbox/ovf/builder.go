@@ -1,15 +1,15 @@
 package ovf
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // Builder implements packer.Builder and builds the actual VirtualBox
@@ -32,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VirtualBox appliance.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {
@@ -44,13 +44,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("config", b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
-	state.Put("cache", cache)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Build the steps.
 	steps := []multistep.Step{
-		&vboxcommon.StepOutputDir{
+		&common.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
@@ -58,11 +57,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vboxcommon.StepSshKeyPair{
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
+			Comm:         &b.config.Comm,
 		},
 		&vboxcommon.StepDownloadGuestAdditions{
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
@@ -84,7 +89,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ImportFlags: b.config.ImportFlags,
 		},
 		&vboxcommon.StepAttachGuestAdditions{
-			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsMode:      b.config.GuestAdditionsMode,
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
 		&vboxcommon.StepConfigureVRDP{
 			VRDPBindAddress: b.config.VRDPBindAddress,
@@ -103,18 +109,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:      b.config.ctx,
 		},
 		&vboxcommon.StepRun{
-			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
 		},
 		&vboxcommon.StepTypeBootCommand{
-			BootCommand: b.config.BootCommand,
-			VMName:      b.config.VMName,
-			Ctx:         b.config.ctx,
+			BootWait:      b.config.BootWait,
+			BootCommand:   b.config.FlatBootCommand(),
+			VMName:        b.config.VMName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
-			SSHConfig: vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.SSHPort,
 			WinRMPort: vboxcommon.SSHPort,
 		},
@@ -127,12 +135,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                b.config.ctx,
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 			Delay:   b.config.PostShutdownDelay,
 		},
-		new(vboxcommon.StepRemoveDevices),
+		&vboxcommon.StepRemoveDevices{
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
+		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
 			Ctx:      b.config.ctx,
@@ -140,7 +153,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vboxcommon.StepExport{
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,
-			ExportOpts:     b.config.ExportOpts.ExportOpts,
+			ExportOpts:     b.config.ExportConfig.ExportOpts,
 			SkipNatMapping: b.config.SSHSkipNatMapping,
 			SkipExport:     b.config.SkipExport,
 		},
@@ -148,7 +161,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run the steps.
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// Report any errors.
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -168,9 +181,3 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 }
 
 // Cancel.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}

@@ -1,15 +1,22 @@
+//
+// Copyright (c) 2018, Joyent, Inc. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+
 package compute
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-
+	"path"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
+	"github.com/pkg/errors"
 )
 
 type SnapshotsClient struct {
@@ -28,23 +35,23 @@ type ListSnapshotsInput struct {
 }
 
 func (c *SnapshotsClient) List(ctx context.Context, input *ListSnapshotsInput) ([]*Snapshot, error) {
-	path := fmt.Sprintf("/%s/machines/%s/snapshots", c.client.AccountName, input.MachineID)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "snapshots")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing List request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list snapshots")
 	}
 
 	var result []*Snapshot
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding List response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list snapshots response")
 	}
 
 	return result, nil
@@ -56,23 +63,23 @@ type GetSnapshotInput struct {
 }
 
 func (c *SnapshotsClient) Get(ctx context.Context, input *GetSnapshotInput) (*Snapshot, error) {
-	path := fmt.Sprintf("/%s/machines/%s/snapshots/%s", c.client.AccountName, input.MachineID, input.Name)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "snapshots", input.Name)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to get snapshot")
 	}
 
 	var result *Snapshot
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Get response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode get snapshot response")
 	}
 
 	return result, nil
@@ -84,17 +91,17 @@ type DeleteSnapshotInput struct {
 }
 
 func (c *SnapshotsClient) Delete(ctx context.Context, input *DeleteSnapshotInput) error {
-	path := fmt.Sprintf("/%s/machines/%s/snapshots/%s", c.client.AccountName, input.MachineID, input.Name)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "snapshots", input.Name)
 	reqInputs := client.RequestInput{
 		Method: http.MethodDelete,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return errwrap.Wrapf("Error executing Delete request: {{err}}", err)
+		return errors.Wrap(err, "unable to delete snapshot")
 	}
 
 	return nil
@@ -106,17 +113,17 @@ type StartMachineFromSnapshotInput struct {
 }
 
 func (c *SnapshotsClient) StartMachine(ctx context.Context, input *StartMachineFromSnapshotInput) error {
-	path := fmt.Sprintf("/%s/machines/%s/snapshots/%s", c.client.AccountName, input.MachineID, input.Name)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "snapshots", input.Name)
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return errwrap.Wrapf("Error executing StartMachine request: {{err}}", err)
+		return errors.Wrap(err, "unable to start machine")
 	}
 
 	return nil
@@ -128,14 +135,14 @@ type CreateSnapshotInput struct {
 }
 
 func (c *SnapshotsClient) Create(ctx context.Context, input *CreateSnapshotInput) (*Snapshot, error) {
-	path := fmt.Sprintf("/%s/machines/%s/snapshots", c.client.AccountName, input.MachineID)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "snapshots")
 
 	data := make(map[string]interface{})
 	data["name"] = input.Name
 
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   data,
 	}
 
@@ -144,13 +151,13 @@ func (c *SnapshotsClient) Create(ctx context.Context, input *CreateSnapshotInput
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Create request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to create snapshot")
 	}
 
 	var result *Snapshot
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Create response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode create snapshot response")
 	}
 
 	return result, nil

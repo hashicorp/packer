@@ -1,13 +1,14 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -16,7 +17,7 @@ type stepSetupNetworking struct {
 	publicPort  int
 }
 
-func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSetupNetworking) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -30,9 +31,13 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		return multistep.ActionContinue
 	}
 
-	// Generate a random public port used to configure our port forward.
-	rand.Seed(time.Now().UnixNano())
-	s.publicPort = 50000 + rand.Intn(10000)
+	if config.PublicPort != 0 {
+		s.publicPort = config.PublicPort
+	} else {
+		// Generate a random public port used to configure our port forward.
+		rand.Seed(time.Now().UnixNano())
+		s.publicPort = 50000 + rand.Intn(10000)
+	}
 	state.Put("commPort", s.publicPort)
 
 	// Set the currently configured port to be the private port.
@@ -116,6 +121,11 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	// Store the port forward ID.
 	state.Put("port_forward_id", forward.Id)
 
+	if config.PreventFirewallChanges {
+		ui.Message("Networking has been setup (without firewall changes)!")
+		return multistep.ActionContinue
+	}
+
 	if network.Vpcid != "" {
 		ui.Message("Creating network ACL rule...")
 
@@ -186,7 +196,7 @@ func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 		// Create a new parameter struct.
 		p := client.Firewall.NewDeleteFirewallRuleParams(fwRuleID)
 
-		ui.Message("Deleting firewal rule...")
+		ui.Message("Deleting firewall rule...")
 		if _, err := client.Firewall.DeleteFirewallRule(p); err != nil {
 			// This is a very poor way to be told the ID does no longer exist :(
 			if !strings.Contains(err.Error(), fmt.Sprintf(

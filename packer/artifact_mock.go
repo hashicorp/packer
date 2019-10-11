@@ -7,6 +7,7 @@ type MockArtifact struct {
 	IdValue        string
 	StateValues    map[string]interface{}
 	DestroyCalled  bool
+	StringValue    string
 }
 
 func (a *MockArtifact) BuilderId() string {
@@ -34,8 +35,12 @@ func (a *MockArtifact) Id() string {
 	return id
 }
 
-func (*MockArtifact) String() string {
-	return "string"
+func (a *MockArtifact) String() string {
+	str := a.StringValue
+	if str == "" {
+		str = "string"
+	}
+	return str
 }
 
 func (a *MockArtifact) State(name string) interface{} {

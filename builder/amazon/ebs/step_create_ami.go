@@ -1,30 +1,51 @@
 package ebs
 
 import (
+	"context"
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common/random"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepCreateAMI struct {
-	image *ec2.Image
+	image              *ec2.Image
+	AMISkipBuildRegion bool
 }
 
-func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Create the image
-	ui.Say(fmt.Sprintf("Creating the AMI: %s", config.AMIName))
+	amiName := config.AMIName
+	state.Put("intermediary_image", false)
+	if config.AMIEncryptBootVolume.True() || s.AMISkipBuildRegion {
+		state.Put("intermediary_image", true)
+
+		// From AWS SDK docs: You can encrypt a copy of an unencrypted snapshot,
+		// but you cannot use it to create an unencrypted copy of an encrypted
+		// snapshot. Your default CMK for EBS is used unless you specify a
+		// non-default key using KmsKeyId.
+
+		// If encrypt_boot is nil or true, we need to create a temporary image
+		// so that in step_region_copy, we can copy it with the correct
+		// encryption
+		amiName = random.AlphaNum(7)
+	}
+
+	ui.Say(fmt.Sprintf("Creating AMI %s from instance %s", amiName, *instance.InstanceId))
 	createOpts := &ec2.CreateImageInput{
 		InstanceId:          instance.InstanceId,
-		Name:                &config.AMIName,
-		BlockDeviceMappings: config.BlockDevices.BuildAMIDevices(),
+		Name:                &amiName,
+		BlockDeviceMappings: config.AMIMappings.BuildEC2BlockDeviceMappings(),
 	}
 
 	createResp, err := ec2conn.CreateImage(createOpts)
@@ -42,16 +63,18 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *createResp.ImageId),
-		StepState: state,
-	}
-
 	ui.Say("Waiting for AMI to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for AMI: %s", err)
+	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); err != nil {
+		log.Printf("Error waiting for AMI: %s", err)
+		imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
+		if err != nil {
+			log.Printf("Unable to determine reason waiting for AMI failed: %s", err)
+			err = fmt.Errorf("Unknown error waiting for AMI.")
+		} else {
+			stateReason := imagesResp.Images[0].StateReason
+			err = fmt.Errorf("Error waiting for AMI. Reason: %s", stateReason)
+		}
+
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -92,10 +115,49 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancellation or error...")
-	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
-	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
-		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+	ui.Say("Deregistering the AMI and deleting associated snapshots because " +
+		"of cancellation, or error...")
+
+	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+		ImageIds: []*string{s.image.ImageId},
+	})
+
+	if err != nil {
+		err := fmt.Errorf("Error describing AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return
+	}
+
+	// Deregister image by name.
+	for _, i := range resp.Images {
+		_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+			ImageId: i.ImageId,
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error deregistering existing AMI: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return
+		}
+		ui.Say(fmt.Sprintf("Deregistered AMI id: %s", *i.ImageId))
+
+		// Delete snapshot(s) by image
+		for _, b := range i.BlockDeviceMappings {
+			if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
+				_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+					SnapshotId: b.Ebs.SnapshotId,
+				})
+
+				if err != nil {
+					err := fmt.Errorf("Error deleting existing snapshot: %s", err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return
+				}
+				ui.Say(fmt.Sprintf("Deleted snapshot: %s", *b.Ebs.SnapshotId))
+			}
+		}
 	}
 }

@@ -1,13 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"math/rand"
-	"net"
 
+	"github.com/hashicorp/packer/common/net"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VRDP server
@@ -22,33 +22,33 @@ import (
 // vrdp_port unit - The port that VRDP is configured to listen on.
 type StepConfigureVRDP struct {
 	VRDPBindAddress string
-	VRDPPortMin     uint
-	VRDPPortMax     uint
+	VRDPPortMin     int
+	VRDPPortMax     int
+
+	l *net.Listener
 }
 
-func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVRDP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	log.Printf("Looking for available port between %d and %d on %s", s.VRDPPortMin, s.VRDPPortMax, s.VRDPBindAddress)
-	var vrdpPort uint
-	portRange := int(s.VRDPPortMax - s.VRDPPortMin)
-
-	for {
-		if portRange > 0 {
-			vrdpPort = uint(rand.Intn(portRange)) + s.VRDPPortMin
-		} else {
-			vrdpPort = s.VRDPPortMin
-		}
-
-		log.Printf("Trying port: %d", vrdpPort)
-		l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.VRDPBindAddress, vrdpPort))
-		if err == nil {
-			defer l.Close()
-			break
-		}
+	var err error
+	s.l, err = net.ListenRangeConfig{
+		Addr:    s.VRDPBindAddress,
+		Min:     s.VRDPPortMin,
+		Max:     s.VRDPPortMax,
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		err := fmt.Errorf("Error finding port: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
+	s.l.Listener.Close() // free port, but don't unlock lock file
+	vrdpPort := s.l.Port
 
 	command := []string{
 		"modifyvm", vmName,
@@ -71,4 +71,11 @@ func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepConfigureVRDP) Cleanup(state multistep.StateBag) {}
+func (s *StepConfigureVRDP) Cleanup(state multistep.StateBag) {
+	if s.l != nil {
+		err := s.l.Close()
+		if err != nil {
+			log.Printf("failed to unlock port lockfile: %v", err)
+		}
+	}
+}

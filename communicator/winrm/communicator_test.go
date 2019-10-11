@@ -2,6 +2,7 @@ package winrm
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"strings"
 	"testing"
@@ -48,6 +49,12 @@ func newMockWinRMServer(t *testing.T) *winrmtest.Remote {
 		func(out, err io.Writer) int {
 			return 0
 		})
+	wrm.CommandFunc(
+		winrmtest.MatchText(`powershell -Command "(Get-Item C:/Temp/packer.cmd) -is [System.IO.DirectoryInfo]"`),
+		func(out, err io.Writer) int {
+			out.Write([]byte("False"))
+			return 0
+		})
 
 	return wrm
 }
@@ -71,8 +78,8 @@ func TestStart(t *testing.T) {
 	stdout := new(bytes.Buffer)
 	cmd.Command = "echo foo"
 	cmd.Stdout = stdout
-
-	err = c.Start(&cmd)
+	ctx := context.Background()
+	err = c.Start(ctx, &cmd)
 	if err != nil {
 		t.Fatalf("error executing remote command: %s", err)
 	}
@@ -113,5 +120,25 @@ func TestUpload(t *testing.T) {
 	if downloadedPayload != PAYLOAD {
 		t.Fatalf("files are not equal: expected [%s] length: %v, got [%s] length %v", PAYLOAD, len(PAYLOAD), downloadedPayload, len(downloadedPayload))
 	}
+}
 
+func TestUpload_nilFileInfo(t *testing.T) {
+	wrm := newMockWinRMServer(t)
+	defer wrm.Close()
+
+	c, err := New(&Config{
+		Host:     wrm.Host,
+		Port:     wrm.Port,
+		Username: "user",
+		Password: "pass",
+		Timeout:  30 * time.Second,
+	})
+	if err != nil {
+		t.Fatalf("error creating communicator: %s", err)
+	}
+	file := "C:\\Temp\\"
+	err = c.Upload(file, strings.NewReader(PAYLOAD), nil)
+	if err == nil {
+		t.Fatalf("Should have errored because of nil fileinfo")
+	}
 }

@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"io"
 	"os"
 	"strings"
@@ -32,19 +33,14 @@ type RemoteCmd struct {
 	Stdout io.Writer
 	Stderr io.Writer
 
-	// This will be set to true when the remote command has exited. It
-	// shouldn't be set manually by the user, but there is no harm in
-	// doing so.
-	Exited bool
-
 	// Once Exited is true, this will contain the exit code of the process.
-	ExitStatus int
-
-	// Internal fields
-	exitCh chan struct{}
+	exitStatus int
 
 	// This thing is a mutex, lock when making modifications concurrently
 	sync.Mutex
+
+	exitChInit sync.Once
+	exitCh     chan interface{}
 }
 
 // A Communicator is the interface used to communicate with the machine
@@ -59,7 +55,7 @@ type Communicator interface {
 	// Start again. The Start method returns immediately once the command
 	// is started. It does not wait for the command to complete. The
 	// RemoteCmd.Exited field should be used for this.
-	Start(*RemoteCmd) error
+	Start(context.Context, *RemoteCmd) error
 
 	// Upload uploads a file to the machine to the given path with the
 	// contents coming from the given reader. This method will block until
@@ -84,10 +80,12 @@ type Communicator interface {
 	DownloadDir(src string, dst string, exclude []string) error
 }
 
-// StartWithUi runs the remote command and streams the output to any
-// configured Writers for stdout/stderr, while also writing each line
-// as it comes to a Ui.
-func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
+// RunWithUi runs the remote command and streams the output to any configured
+// Writers for stdout/stderr, while also writing each line as it comes to a Ui.
+// RunWithUi will not return until the command finishes or is cancelled.
+func (r *RemoteCmd) RunWithUi(ctx context.Context, c Communicator, ui Ui) error {
+	r.initchan()
+
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
 	defer stdout_w.Close()
@@ -118,18 +116,16 @@ func (r *RemoteCmd) StartWithUi(c Communicator, ui Ui) error {
 	}
 
 	// Start the command
-	if err := c.Start(r); err != nil {
+	if err := c.Start(ctx, r); err != nil {
 		return err
 	}
 
 	// Create the channels we'll use for data
-	exitCh := make(chan struct{})
 	stdoutCh := iochan.DelimReader(stdout_r, '\n')
 	stderrCh := iochan.DelimReader(stderr_r, '\n')
 
 	// Start the goroutine to watch for the exit
 	go func() {
-		defer close(exitCh)
 		defer stdout_w.Close()
 		defer stderr_w.Close()
 		r.Wait()
@@ -141,14 +137,16 @@ OutputLoop:
 		select {
 		case output := <-stderrCh:
 			if output != "" {
-				ui.Message(r.cleanOutputLine(output))
+				ui.Error(r.cleanOutputLine(output))
 			}
 		case output := <-stdoutCh:
 			if output != "" {
 				ui.Message(r.cleanOutputLine(output))
 			}
-		case <-exitCh:
+		case <-r.exitCh:
 			break OutputLoop
+		case <-ctx.Done():
+			return ctx.Err()
 		}
 	}
 
@@ -159,7 +157,7 @@ OutputLoop:
 	}
 
 	for output := range stderrCh {
-		ui.Message(r.cleanOutputLine(output))
+		ui.Error(r.cleanOutputLine(output))
 	}
 
 	return nil
@@ -169,28 +167,34 @@ OutputLoop:
 // should be called by communicators who are running a remote command in
 // order to set that the command is done.
 func (r *RemoteCmd) SetExited(status int) {
+	r.initchan()
+
 	r.Lock()
-	defer r.Unlock()
+	r.exitStatus = status
+	r.Unlock()
 
-	if r.exitCh == nil {
-		r.exitCh = make(chan struct{})
-	}
-
-	r.Exited = true
-	r.ExitStatus = status
 	close(r.exitCh)
 }
 
-// Wait waits for the remote command to complete.
-func (r *RemoteCmd) Wait() {
-	// Make sure our condition variable is initialized.
-	r.Lock()
-	if r.exitCh == nil {
-		r.exitCh = make(chan struct{})
-	}
-	r.Unlock()
-
+// Wait for command exit and return exit status
+func (r *RemoteCmd) Wait() int {
+	r.initchan()
 	<-r.exitCh
+	r.Lock()
+	defer r.Unlock()
+	return r.exitStatus
+}
+
+func (r *RemoteCmd) ExitStatus() int {
+	return r.Wait()
+}
+
+func (r *RemoteCmd) initchan() {
+	r.exitChInit.Do(func() {
+		if r.exitCh == nil {
+			r.exitCh = make(chan interface{})
+		}
+	})
 }
 
 // cleanOutputLine cleans up a line so that '\r' don't muck up the

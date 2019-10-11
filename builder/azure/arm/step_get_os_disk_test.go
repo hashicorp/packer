@@ -1,19 +1,20 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {
 	var testSubject = &StepGetOSDisk{
-		query: func(string, string) (compute.VirtualMachine, error) {
+		query: func(context.Context, string, string) (compute.VirtualMachine, error) {
 			return createVirtualMachineFromUri("test.vhd"), fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		say:   func(message string) {},
@@ -22,7 +23,7 @@ func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetOSDisk()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -34,7 +35,7 @@ func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {
 
 func TestStepGetOSDiskShouldPassIfGetPasses(t *testing.T) {
 	var testSubject = &StepGetOSDisk{
-		query: func(string, string) (compute.VirtualMachine, error) {
+		query: func(context.Context, string, string) (compute.VirtualMachine, error) {
 			return createVirtualMachineFromUri("test.vhd"), nil
 		},
 		say:   func(message string) {},
@@ -43,7 +44,7 @@ func TestStepGetOSDiskShouldPassIfGetPasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetOSDisk()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -58,7 +59,7 @@ func TestStepGetOSDiskShouldTakeValidateArgumentsFromStateBag(t *testing.T) {
 	var actualComputeName string
 
 	var testSubject = &StepGetOSDisk{
-		query: func(resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
+		query: func(ctx context.Context, resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 
@@ -69,7 +70,7 @@ func TestStepGetOSDiskShouldTakeValidateArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepGetOSDisk()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

@@ -146,7 +146,6 @@ func (s *TelemetrySpan) End(err error) {
 	log.Printf("[INFO] (telemetry) ending %s", s.Name)
 	if err != nil {
 		s.Error = err.Error()
-		log.Printf("[INFO] (telemetry) found error: %s", err.Error())
 	}
 }
 

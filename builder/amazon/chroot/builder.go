@@ -1,48 +1,169 @@
-// The chroot package is able to create an Amazon AMI without requiring
-// the launch of a new instance for every build. It does this by attaching
-// and mounting the root volume of another AMI and chrooting into that
-// directory. It then creates an AMI from that attached drive.
+//go:generate struct-markdown
+
+// The chroot package is able to create an Amazon AMI without requiring the
+// launch of a new instance for every build. It does this by attaching and
+// mounting the root volume of another AMI and chrooting into that directory.
+// It then creates an AMI from that attached drive.
 package chroot
 
 import (
+	"context"
 	"errors"
-	"log"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
 const BuilderId = "mitchellh.amazon.chroot"
 
-// Config is the configuration that is chained through the steps and
-// settable from the template.
+// Config is the configuration that is chained through the steps and settable
+// from the template.
 type Config struct {
-	common.PackerConfig       `mapstructure:",squash"`
-	awscommon.AMIBlockDevices `mapstructure:",squash"`
-	awscommon.AMIConfig       `mapstructure:",squash"`
-	awscommon.AccessConfig    `mapstructure:",squash"`
-
-	ChrootMounts      [][]string                 `mapstructure:"chroot_mounts"`
-	CommandWrapper    string                     `mapstructure:"command_wrapper"`
-	CopyFiles         []string                   `mapstructure:"copy_files"`
-	DevicePath        string                     `mapstructure:"device_path"`
-	FromScratch       bool                       `mapstructure:"from_scratch"`
-	MountOptions      []string                   `mapstructure:"mount_options"`
-	MountPartition    int                        `mapstructure:"mount_partition"`
-	MountPath         string                     `mapstructure:"mount_path"`
-	PostMountCommands []string                   `mapstructure:"post_mount_commands"`
-	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
-	RootDeviceName    string                     `mapstructure:"root_device_name"`
-	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
-	SourceAmi         string                     `mapstructure:"source_ami"`
-	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
+	common.PackerConfig    `mapstructure:",squash"`
+	awscommon.AMIConfig    `mapstructure:",squash"`
+	awscommon.AccessConfig `mapstructure:",squash"`
+	// Add one or more [block device
+	// mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+	// to the AMI. If this field is populated, and you are building from an
+	// existing source image, the block device mappings in the source image
+	// will be overwritten. This means you must have a block device mapping
+	// entry for your root volume, `root_volume_size` and `root_device_name`.
+	// See the [BlockDevices](#block-devices-configuration) documentation for
+	// fields.
+	AMIMappings BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	// This is a list of devices to mount into the chroot environment. This
+	// configuration parameter requires some additional documentation which is
+	// in the Chroot Mounts section. Please read that section for more
+	// information on how to use this.
+	ChrootMounts [][]string `mapstructure:"chroot_mounts" required:"false"`
+	// How to run shell commands. This defaults to {{.Command}}. This may be
+	// useful to set if you want to set environmental variables or perhaps run
+	// it with sudo or so on. This is a configuration template where the
+	// .Command variable is replaced with the command to be run. Defaults to
+	// {{.Command}}.
+	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
+	// Paths to files on the running EC2 instance that will be copied into the
+	// chroot environment prior to provisioning. Defaults to /etc/resolv.conf
+	// so that DNS lookups work. Pass an empty list to skip copying
+	// /etc/resolv.conf. You may need to do this if you're building an image
+	// that uses systemd.
+	CopyFiles []string `mapstructure:"copy_files" required:"false"`
+	// The path to the device where the root volume of the source AMI will be
+	// attached. This defaults to "" (empty string), which forces Packer to
+	// find an open device automatically.
+	DevicePath string `mapstructure:"device_path" required:"false"`
+	// When we call the mount command (by default mount -o device dir), the
+	// string provided in nvme_mount_path will replace device in that command.
+	// When this option is not set, device in that command will be something
+	// like /dev/sdf1, mirroring the attached device name. This assumption
+	// works for most instances but will fail with c5 and m5 instances. In
+	// order to use the chroot builder with c5 and m5 instances, you must
+	// manually set nvme_device_path and device_path.
+	NVMEDevicePath string `mapstructure:"nvme_device_path" required:"false"`
+	// Build a new volume instead of starting from an existing AMI root volume
+	// snapshot. Default false. If true, source_ami is no longer used and the
+	// following options become required: ami_virtualization_type,
+	// pre_mount_commands and root_volume_size. The below options are also
+	// required in this mode only:
+	FromScratch bool `mapstructure:"from_scratch" required:"false"`
+	// Options to supply the mount command when mounting devices. Each option
+	// will be prefixed with -o and supplied to the mount command ran by
+	// Packer. Because this command is ran in a shell, user discretion is
+	// advised. See this manual page for the mount command for valid file
+	// system specific options.
+	MountOptions []string `mapstructure:"mount_options" required:"false"`
+	// The partition number containing the / partition. By default this is the
+	// first partition of the volume, (for example, xvda1) but you can
+	// designate the entire block device by setting "mount_partition": "0" in
+	// your config, which will mount xvda instead.
+	MountPartition string `mapstructure:"mount_partition" required:"false"`
+	// The path where the volume will be mounted. This is where the chroot
+	// environment will be. This defaults to
+	// /mnt/packer-amazon-chroot-volumes/{{.Device}}. This is a configuration
+	// template where the .Device variable is replaced with the name of the
+	// device where the volume is attached.
+	MountPath string `mapstructure:"mount_path" required:"false"`
+	// As pre_mount_commands, but the commands are executed after mounting the
+	// root device and before the extra mount and copy steps. The device and
+	// mount path are provided by {{.Device}} and {{.MountPath}}.
+	PostMountCommands []string `mapstructure:"post_mount_commands" required:"false"`
+	// A series of commands to execute after attaching the root volume and
+	// before mounting the chroot. This is not required unless using
+	// from_scratch. If so, this should include any partitioning and filesystem
+	// creation commands. The path to the device is provided by {{.Device}}.
+	PreMountCommands []string `mapstructure:"pre_mount_commands" required:"false"`
+	// The root device name. For example, xvda.
+	RootDeviceName string `mapstructure:"root_device_name" required:"false"`
+	// The size of the root volume in GB for the chroot environment and the
+	// resulting AMI. Default size is the snapshot size of the source_ami
+	// unless from_scratch is true, in which case this field must be defined.
+	RootVolumeSize int64 `mapstructure:"root_volume_size" required:"false"`
+	// The type of EBS volume for the chroot environment and resulting AMI. The
+	// default value is the type of the source_ami, unless from_scratch is
+	// true, in which case the default value is gp2. You can only specify io1
+	// if building based on top of a source_ami which is also io1.
+	RootVolumeType string `mapstructure:"root_volume_type" required:"false"`
+	// The source AMI whose root volume will be copied and provisioned on the
+	// currently running instance. This must be an EBS-backed AMI with a root
+	// volume snapshot that you have access to. Note: this is not used when
+	// from_scratch is set to true.
+	SourceAmi string `mapstructure:"source_ami" required:"true"`
+	// Filters used to populate the source_ami field. Example:
+	//
+	//
+	//     ``` json
+	//     {
+	//       "source_ami_filter": {
+	//       "filters": {
+	//        "virtualization-type": "hvm",
+	//        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+	//        "root-device-type": "ebs"
+	//      },
+	//      "owners": ["099720109477"],
+	//      "most_recent": true
+	//       }
+	//     }
+	//     ```
+	//
+	//     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+	//     This will fail unless *exactly* one AMI is returned. In the above example,
+	//     `most_recent` will cause this to succeed by selecting the newest image.
+	//
+	//     -   `filters` (map of strings) - filters used to select a `source_ami`.
+	//         NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+	//         described in the docs for
+	//         [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+	//         is valid.
+	//
+	//     -   `owners` (array of strings) - Filters the images by their owner. You
+	//         may specify one or more AWS account IDs, "self" (which will use the
+	//         account whose credentials you are using to run Packer), or an AWS owner
+	//         alias: for example, "amazon", "aws-marketplace", or "microsoft". This
+	//         option is required for security reasons.
+	//
+	//     -   `most_recent` (boolean) - Selects the newest created image when true.
+	//         This is most useful for selecting a daily distro build.
+	//
+	//     You may set this in place of `source_ami` or in conjunction with it. If you
+	//     set this in conjunction with `source_ami`, the `source_ami` will be added
+	//     to the filter. The provided `source_ami` must meet all of the filtering
+	//     criteria provided in `source_ami_filter`; this pins the AMI returned by the
+	//     filter, but will cause Packer to fail if the `source_ami` does not exist.
+	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
+	// Tags to apply to the volumes that are *launched*. This is a [template
+	// engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
+	RootVolumeTags awscommon.TagMap `mapstructure:"root_volume_tags" required:"false"`
+	// what architecture to use when registering the final AMI; valid options
+	// are "x86_64" or "arm64". Defaults to "x86_64".
+	Architecture string `mapstructure:"ami_architecture" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -66,6 +187,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"ami_description",
 				"snapshot_tags",
 				"tags",
+				"root_volume_tags",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",
@@ -75,6 +197,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 	if err != nil {
 		return nil, err
+	}
+
+	if b.config.Architecture == "" {
+		b.config.Architecture = "x86_64"
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -98,7 +224,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// set default copy file if we're not giving our own
 	if b.config.CopyFiles == nil {
-		b.config.CopyFiles = make([]string, 0)
 		if !b.config.FromScratch {
 			b.config.CopyFiles = []string{"/etc/resolv.conf"}
 		}
@@ -112,8 +237,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
 	}
 
-	if b.config.MountPartition == 0 {
-		b.config.MountPartition = 1
+	if b.config.MountPartition == "" {
+		b.config.MountPartition = "1"
 	}
 
 	// Accumulate any errors or warnings
@@ -161,23 +286,42 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New("source_ami or source_ami_filter is required."))
 		}
-		if len(b.config.AMIMappings) != 0 {
-			warns = append(warns, "ami_block_device_mappings are unused when from_scratch is false")
+		if len(b.config.AMIMappings) > 0 && b.config.RootDeviceName != "" {
+			if b.config.RootVolumeSize == 0 {
+				// Although, they can specify the device size in the block
+				// device mapping, it's easier to be specific here.
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("root_volume_size is required if ami_block_device_mappings is specified"))
+			}
+			warns = append(warns, "ami_block_device_mappings from source image will be completely overwritten")
+		} else if len(b.config.AMIMappings) > 0 {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If ami_block_device_mappings is specified, root_device_name must be specified"))
+		} else if b.config.RootDeviceName != "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
-		if b.config.RootDeviceName != "" {
-			warns = append(warns, "root_device_name is unused when from_scratch is false")
+	}
+	valid := false
+	for _, validArch := range []string{"x86_64", "arm64"} {
+		if validArch == b.config.Architecture {
+			valid = true
+			break
 		}
+	}
+	if !valid {
+		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return warns, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 	return warns, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
 	}
@@ -189,14 +333,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ec2conn := ec2.New(session)
 
 	wrappedCommand := func(command string) (string, error) {
-		ctx := b.config.ctx
-		ctx.Data = &wrappedCommandTemplate{Command: command}
-		return interpolate.Render(b.config.CommandWrapper, &ctx)
+		ictx := b.config.ctx
+		ictx.Data = &wrappedCommandTemplate{Command: command}
+		return interpolate.Render(b.config.CommandWrapper, &ictx)
 	}
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
+	state.Put("access_config", &b.config.AccessConfig)
+	state.Put("ami_config", &b.config.AMIConfig)
 	state.Put("ec2", ec2conn)
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
@@ -219,6 +365,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 				EnableAMIENASupport:      b.config.AMIENASupport,
 				AmiFilters:               b.config.SourceAmiFilter,
+				AMIVirtType:              b.config.AMIVirtType,
 			},
 			&StepCheckRootDevice{},
 		)
@@ -228,7 +375,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{
+			RootVolumeType: b.config.RootVolumeType,
 			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeTags: b.config.RootVolumeTags,
+			Ctx:            b.config.ctx,
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
@@ -259,18 +409,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
-		&awscommon.StepCreateEncryptedAMICopy{
-			KeyID:             b.config.AMIKmsKeyId,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
-		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
 			Regions:           b.config.AMIRegions,
+			AMIKmsKeyId:       b.config.AMIKmsKeyId,
 			RegionKeyIds:      b.config.AMIRegionKMSKeyIDs,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
 			Name:              b.config.AMIName,
+			OriginalRegion:    *ec2conn.Config.Region,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:    b.config.AMIDescription,
@@ -290,7 +436,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -310,11 +456,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

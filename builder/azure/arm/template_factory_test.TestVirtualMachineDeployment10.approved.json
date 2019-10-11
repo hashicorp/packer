@@ -11,10 +11,22 @@
     "dnsNameForPublicIP": {
       "type": "string"
     },
+    "nicName": {
+      "type": "string"
+    },
     "osDiskName": {
       "type": "string"
     },
+    "publicIPAddressName": {
+      "type": "string"
+    },
     "storageAccountBlobEndpoint": {
+      "type": "string"
+    },
+    "subnetName": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
       "type": "string"
     },
     "vmName": {
@@ -28,7 +40,7 @@
     {
       "apiVersion": "[variables('publicIPAddressApiVersion')]",
       "location": "[variables('location')]",
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[parameters('publicIPAddressName')]",
       "properties": {
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
@@ -40,10 +52,10 @@
     {
       "apiVersion": "[variables('networkInterfacesApiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
       ],
       "location": "[variables('location')]",
-      "name": "[variables('nicName')]",
+      "name": "[parameters('nicName')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -51,7 +63,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
               },
               "subnet": {
                 "id": "[variables('subnetRef')]"
@@ -65,7 +77,7 @@
     {
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
@@ -81,7 +93,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
             }
           ]
         },
@@ -109,11 +121,11 @@
           },
           "osDisk": {
             "caching": "ReadWrite",
-            "createOption": "fromImage",
+            "createOption": "FromImage",
             "managedDisk": {
               "storageAccountType": "Standard_LRS"
             },
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "osType": "Linux"
           }
         }
@@ -127,9 +139,7 @@
     "location": "[resourceGroup().location]",
     "managedDiskApiVersion": "2017-03-30",
     "networkInterfacesApiVersion": "2017-04-01",
-    "nicName": "packerNic",
     "publicIPAddressApiVersion": "2017-04-01",
-    "publicIPAddressName": "packerPublicIP",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",

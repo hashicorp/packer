@@ -1,13 +1,14 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
-	"net"
 
+	"github.com/hashicorp/packer/common/net"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -17,10 +18,27 @@ import (
 //   ui     packer.Ui
 //
 // Produces:
-//   vnc_port uint - The port that VNC is configured to listen on.
-type stepConfigureVNC struct{}
+//   vnc_port int - The port that VNC is configured to listen on.
+type stepConfigureVNC struct {
+	l *net.Listener
+}
 
-func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func VNCPassword() string {
+	length := int(8)
+
+	charSet := []byte("012345689abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	charSetLength := len(charSet)
+
+	password := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		password[i] = charSet[rand.Intn(charSetLength)]
+	}
+
+	return string(password)
+}
+
+func (s *stepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -30,28 +48,42 @@ func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	msg := fmt.Sprintf("Looking for available port between %d and %d on %s", config.VNCPortMin, config.VNCPortMax, config.VNCBindAddress)
 	ui.Say(msg)
 	log.Print(msg)
-	var vncPort uint
-	portRange := int(config.VNCPortMax - config.VNCPortMin)
-	for {
-		if portRange > 0 {
-			vncPort = uint(rand.Intn(portRange)) + config.VNCPortMin
-		} else {
-			vncPort = config.VNCPortMin
-		}
 
-		log.Printf("Trying port: %d", vncPort)
-		l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.VNCBindAddress, vncPort))
-		if err == nil {
-			defer l.Close()
-			break
-		}
+	var vncPassword string
+	var err error
+	s.l, err = net.ListenRangeConfig{
+		Addr:    config.VNCBindAddress,
+		Min:     config.VNCPortMin,
+		Max:     config.VNCPortMax,
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		err := fmt.Errorf("Error finding VNC port: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	s.l.Listener.Close() // free port, but don't unlock lock file
+	vncPort := s.l.Port
+
+	if config.VNCUsePassword {
+		vncPassword = VNCPassword()
+	} else {
+		vncPassword = ""
 	}
 
 	log.Printf("Found available VNC port: %d on IP: %s", vncPort, config.VNCBindAddress)
 	state.Put("vnc_port", vncPort)
-	state.Put("vnc_ip", config.VNCBindAddress)
+	state.Put("vnc_password", vncPassword)
 
 	return multistep.ActionContinue
 }
 
-func (stepConfigureVNC) Cleanup(multistep.StateBag) {}
+func (s *stepConfigureVNC) Cleanup(multistep.StateBag) {
+	if s.l != nil {
+		err := s.l.Close()
+		if err != nil {
+			log.Printf("failed to unlock port lockfile: %v", err)
+		}
+	}
+}

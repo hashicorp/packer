@@ -2,14 +2,16 @@ package vagrantcloud
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
+
+	commonhelper "github.com/hashicorp/packer/helper/common"
 )
 
 type VagrantCloudClient struct {
@@ -36,17 +38,21 @@ func (v VagrantCloudErrors) FormatErrors() string {
 	return strings.Join(errs, ". ")
 }
 
-func (v VagrantCloudClient) New(baseUrl string, token string) *VagrantCloudClient {
+func (v VagrantCloudClient) New(baseUrl string, token string, InsecureSkipTLSVerify bool) (*VagrantCloudClient, error) {
 	c := &VagrantCloudClient{
-		client: &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		},
+		client:      commonhelper.HttpClientWithEnvironmentProxy(),
 		BaseURL:     baseUrl,
 		AccessToken: token,
 	}
-	return c
+
+	if InsecureSkipTLSVerify {
+		transport := c.client.Transport.(*http.Transport)
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+
+	return c, c.ValidateAuthentication()
 }
 
 func decodeBody(resp *http.Response, out interface{}) error {
@@ -65,17 +71,27 @@ func encodeBody(obj interface{}) (io.Reader, error) {
 	return buf, nil
 }
 
-func (v VagrantCloudClient) Get(path string) (*http.Response, error) {
-	params := url.Values{}
-	params.Set("access_token", v.AccessToken)
-	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
+func (v *VagrantCloudClient) ValidateAuthentication() error {
+	resp, err := v.Get("authenticate")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf(resp.Status)
+	}
+	return nil
+}
 
-	// Scrub API key for logs
-	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
-	log.Printf("Post-Processor Vagrant Cloud API GET: %s", scrubbedUrl)
+func (v *VagrantCloudClient) Get(path string) (*http.Response, error) {
+	reqUrl := fmt.Sprintf("%s/%s", v.BaseURL, path)
 
-	req, err := http.NewRequest("GET", reqUrl, nil)
-	req.Header.Add("Content-Type", "application/json")
+	log.Printf("Post-Processor Vagrant Cloud API GET: %s", reqUrl)
+
+	req, err := v.newRequest("GET", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
@@ -83,17 +99,17 @@ func (v VagrantCloudClient) Get(path string) (*http.Response, error) {
 	return resp, err
 }
 
-func (v VagrantCloudClient) Delete(path string) (*http.Response, error) {
-	params := url.Values{}
-	params.Set("access_token", v.AccessToken)
-	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
+func (v *VagrantCloudClient) Delete(path string) (*http.Response, error) {
+	reqUrl := fmt.Sprintf("%s/%s", v.BaseURL, path)
 
 	// Scrub API key for logs
 	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
 	log.Printf("Post-Processor Vagrant Cloud API DELETE: %s", scrubbedUrl)
 
-	req, err := http.NewRequest("DELETE", reqUrl, nil)
-	req.Header.Add("Content-Type", "application/json")
+	req, err := v.newRequest("DELETE", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
@@ -101,7 +117,7 @@ func (v VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	return resp, err
 }
 
-func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, error) {
+func (v *VagrantCloudClient) Upload(path string, url string) (*http.Response, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -116,7 +132,7 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 
 	defer file.Close()
 
-	request, err := http.NewRequest("PUT", url, file)
+	request, err := v.newRequest("PUT", url, file)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error preparing upload request: %s", err)
@@ -132,10 +148,8 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 	return resp, err
 }
 
-func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response, error) {
-	params := url.Values{}
-	params.Set("access_token", v.AccessToken)
-	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
+func (v *VagrantCloudClient) Post(path string, body interface{}) (*http.Response, error) {
+	reqUrl := fmt.Sprintf("%s/%s", v.BaseURL, path)
 
 	encBody, err := encodeBody(body)
 
@@ -143,12 +157,12 @@ func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response,
 		return nil, fmt.Errorf("Error encoding body for request: %s", err)
 	}
 
-	// Scrub API key for logs
-	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
-	log.Printf("Post-Processor Vagrant Cloud API POST: %s. \n\n Body: %s", scrubbedUrl, encBody)
+	log.Printf("Post-Processor Vagrant Cloud API POST: %s. \n\n Body: %s", reqUrl, encBody)
 
-	req, err := http.NewRequest("POST", reqUrl, encBody)
-	req.Header.Add("Content-Type", "application/json")
+	req, err := v.newRequest("POST", reqUrl, encBody)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := v.client.Do(req)
 
@@ -157,21 +171,31 @@ func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response,
 	return resp, err
 }
 
-func (v VagrantCloudClient) Put(path string) (*http.Response, error) {
-	params := url.Values{}
-	params.Set("access_token", v.AccessToken)
-	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
+func (v *VagrantCloudClient) Put(path string) (*http.Response, error) {
+	reqUrl := fmt.Sprintf("%s/%s", v.BaseURL, path)
 
-	// Scrub API key for logs
-	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
-	log.Printf("Post-Processor Vagrant Cloud API PUT: %s", scrubbedUrl)
+	log.Printf("Post-Processor Vagrant Cloud API PUT: %s", reqUrl)
 
-	req, err := http.NewRequest("PUT", reqUrl, nil)
-	req.Header.Add("Content-Type", "application/json")
+	req, err := v.newRequest("PUT", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
 
 	return resp, err
+}
+
+func (v *VagrantCloudClient) newRequest(method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	if len(v.AccessToken) > 0 {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
+	}
+	return req, err
 }

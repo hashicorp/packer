@@ -1,11 +1,13 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step set iso_patch to available url
@@ -14,7 +16,7 @@ type stepSetISO struct {
 	Url       []string
 }
 
-func (s *stepSetISO) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSetISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	iso_path := ""
@@ -27,11 +29,7 @@ func (s *stepSetISO) Run(state multistep.StateBag) multistep.StepAction {
 
 		req.Header.Set("User-Agent", "Packer")
 
-		httpClient := &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}
+		httpClient := commonhelper.HttpClientWithEnvironmentProxy()
 
 		res, err := httpClient.Do(req)
 		if err == nil && (res.StatusCode >= 200 && res.StatusCode < 300) {

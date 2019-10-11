@@ -1,6 +1,10 @@
 package googlecompute
 
-import "fmt"
+import (
+	"fmt"
+
+	compute "google.golang.org/api/compute/v1"
+)
 
 // DriverMock is a Driver implementation that is a mocked out so that
 // it can be used for tests.
@@ -8,10 +12,11 @@ type DriverMock struct {
 	CreateImageName            string
 	CreateImageDesc            string
 	CreateImageFamily          string
+	CreateImageEncryptionKey   *compute.CustomerEncryptionKey
 	CreateImageLabels          map[string]string
+	CreateImageLicenses        []string
 	CreateImageZone            string
 	CreateImageDisk            string
-	CreateImageResultLicenses  []string
 	CreateImageResultProjectId string
 	CreateImageResultSelfLink  string
 	CreateImageResultSizeGb    int64
@@ -82,13 +87,15 @@ type DriverMock struct {
 	WaitForInstanceErrCh <-chan error
 }
 
-func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error) {
 	d.CreateImageName = name
 	d.CreateImageDesc = description
 	d.CreateImageFamily = family
 	d.CreateImageLabels = image_labels
+	d.CreateImageLicenses = image_licenses
 	d.CreateImageZone = zone
 	d.CreateImageDisk = disk
+	d.CreateImageEncryptionKey = image_encryption_key
 	if d.CreateImageResultProjectId == "" {
 		d.CreateImageResultProjectId = "test"
 	}
@@ -106,7 +113,7 @@ func (d *DriverMock) CreateImage(name, description, family, zone, disk string, i
 		ch := make(chan *Image, 1)
 		ch <- &Image{
 			Labels:    d.CreateImageLabels,
-			Licenses:  d.CreateImageResultLicenses,
+			Licenses:  d.CreateImageLicenses,
 			Name:      name,
 			ProjectId: d.CreateImageResultProjectId,
 			SelfLink:  d.CreateImageResultSelfLink,

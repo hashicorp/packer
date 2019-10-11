@@ -3,10 +3,23 @@
 // Package ec2 provides the client and types for making API
 // requests to Amazon Elastic Compute Cloud.
 //
-// Amazon Elastic Compute Cloud (Amazon EC2) provides resizable computing capacity
-// in the Amazon Web Services (AWS) cloud. Using Amazon EC2 eliminates your
-// need to invest in hardware up front, so you can develop and deploy applications
-// faster.
+// Amazon Elastic Compute Cloud (Amazon EC2) provides secure and resizable computing
+// capacity in the AWS cloud. Using Amazon EC2 eliminates the need to invest
+// in hardware up front, so you can develop and deploy applications faster.
+//
+// To learn more, see the following resources:
+//
+//    * Amazon EC2: AmazonEC2 product page (http://aws.amazon.com/ec2), Amazon
+//    EC2 documentation (http://aws.amazon.com/documentation/ec2)
+//
+//    * Amazon EBS: Amazon EBS product page (http://aws.amazon.com/ebs), Amazon
+//    EBS documentation (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html)
+//
+//    * Amazon VPC: Amazon VPC product page (http://aws.amazon.com/vpc), Amazon
+//    VPC documentation (http://aws.amazon.com/documentation/vpc)
+//
+//    * AWS VPN: AWS VPN product page (http://aws.amazon.com/vpn), AWS VPN documentation
+//    (http://aws.amazon.com/documentation/vpn)
 //
 // See https://docs.aws.amazon.com/goto/WebAPI/ec2-2016-11-15 for more information on this service.
 //
@@ -15,7 +28,7 @@
 //
 // Using the Client
 //
-// To Amazon Elastic Compute Cloud with the SDK use the New function to create
+// To contact Amazon Elastic Compute Cloud with the SDK use the New function to create
 // a new service client. With that client you can make API requests to the service.
 // These clients are safe to use concurrently.
 //

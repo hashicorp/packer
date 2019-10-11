@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/approvals/go-approval-tests"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
+	approvaltests "github.com/approvals/go-approval-tests"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/template"
 )
@@ -261,10 +261,10 @@ growpart:
 // Ensure the VM template is correct when building from a custom managed image.
 func TestVirtualMachineDeployment08(t *testing.T) {
 	config := map[string]interface{}{
-		"location":                                 "ignore",
-		"subscription_id":                          "ignore",
-		"os_type":                                  constants.Target_Linux,
-		"communicator":                             "none",
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
 		"custom_managed_image_resource_group_name": "CustomManagedImageResourceGroupName",
 		"custom_managed_image_name":                "CustomManagedImageName",
 		"managed_image_name":                       "ManagedImageName",
@@ -355,6 +355,76 @@ func TestVirtualMachineDeployment10(t *testing.T) {
 	}
 }
 
+// Ensure the VM template is correct when building with additional unmanaged disks
+func TestVirtualMachineDeployment11(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
+		"image_publisher": "--image-publisher--",
+		"image_offer":     "--image-offer--",
+		"image_sku":       "--image-sku--",
+		"image_version":   "--version--",
+
+		"disk_additional_size": []uint{32},
+
+		"resource_group_name":    "packergroup",
+		"storage_account":        "packerartifacts",
+		"capture_name_prefix":    "packer",
+		"capture_container_name": "packerimages",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building with additional managed disks
+func TestVirtualMachineDeployment12(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
+		"image_publisher": "--image-publisher--",
+		"image_offer":     "--image-offer--",
+		"image_sku":       "--image-sku--",
+		"image_version":   "--version--",
+
+		"disk_additional_size": []uint{32},
+
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
@@ -418,11 +488,11 @@ func TestKeyVaultDeployment02(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if params.ObjectId.Value != c.ObjectID {
-		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ObjectID)
+	if params.ObjectId.Value != c.ClientConfig.ObjectID {
+		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ClientConfig.ObjectID)
 	}
-	if params.TenantId.Value != c.TenantID {
-		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.TenantID)
+	if params.TenantId.Value != c.ClientConfig.TenantID {
+		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.ClientConfig.TenantID)
 	}
 	if params.KeyVaultName.Value != c.tmpKeyVaultName {
 		t.Errorf("Expected template parameter 'KeyVaultName' to be %s, but got %s.", params.KeyVaultName.Value, c.tmpKeyVaultName)
@@ -444,6 +514,52 @@ func TestKeyVaultDeployment03(t *testing.T) {
 
 	c, _, _ := newConfig(tags, getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
 	deployment, err := GetKeyVaultDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPlanInfo01(t *testing.T) {
+	planInfo := map[string]interface{}{
+		"plan_info": map[string]string{
+			"plan_name":      "planName00",
+			"plan_product":   "planProduct00",
+			"plan_publisher": "planPublisher00",
+		},
+	}
+
+	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPlanInfo02(t *testing.T) {
+	planInfo := map[string]interface{}{
+		"azure_tags": map[string]string{
+			"dept": "engineering",
+		},
+		"plan_info": map[string]string{
+			"plan_name":           "planName00",
+			"plan_product":        "planProduct00",
+			"plan_publisher":      "planPublisher00",
+			"plan_promotion_code": "planPromotionCode00",
+		},
+	}
+
+	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(c)
 	if err != nil {
 		t.Fatal(err)
 	}

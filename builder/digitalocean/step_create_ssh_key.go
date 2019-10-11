@@ -13,8 +13,8 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -25,9 +25,10 @@ type stepCreateSSHKey struct {
 	keyId int
 }
 
-func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
+	c := state.Get("config").(*Config)
 
 	ui.Say("Creating temporary ssh key for droplet...")
 
@@ -41,8 +42,8 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 		Bytes:   priv_der,
 	}
 
-	// Set the private key in the statebag for later
-	state.Put("privateKey", string(pem.EncodeToMemory(&priv_blk)))
+	// Set the private key in the config for later
+	c.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 
 	// Marshal the public key into SSH compatible format
 	// TODO properly handle the public key error

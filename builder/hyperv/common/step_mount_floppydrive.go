@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 const (
@@ -20,7 +22,7 @@ type StepMountFloppydrive struct {
 	floppyPath string
 }
 
-func (s *StepMountFloppydrive) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountFloppydrive) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Generation > 1 {
 		return multistep.ActionContinue
 	}
@@ -91,7 +93,7 @@ func (s *StepMountFloppydrive) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepMountFloppydrive) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	tempdir, err := tmp.Dir("hyperv")
 	if err != nil {
 		return "", err
 	}

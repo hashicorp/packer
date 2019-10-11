@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // This step attaches the ISO to the virtual machine.
@@ -23,7 +25,7 @@ type StepAttachFloppy struct {
 	floppyPath string
 }
 
-func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
 	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
@@ -104,7 +106,7 @@ func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepAttachFloppy) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	tempdir, err := tmp.Dir("virtualbox")
 	if err != nil {
 		return "", err
 	}

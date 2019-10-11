@@ -2,13 +2,14 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepShutdown is a step that shuts down the machine. It first attempts to do
@@ -28,7 +29,7 @@ type StepShutdown struct {
 }
 
 // Run shuts down the VM.
-func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -44,7 +45,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
-		if err := comm.Start(cmd); err != nil {
+		if err := comm.Start(ctx, cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

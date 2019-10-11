@@ -1,13 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepStopEBSBackedInstance struct {
@@ -15,7 +17,7 @@ type StepStopEBSBackedInstance struct {
 	DisableStopInstance bool
 }
 
-func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
@@ -39,29 +41,26 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 		// does not exist.
 
 		// Work around this by retrying a few times, up to about 5 minutes.
-		err := common.Retry(10, 60, 6, func(i uint) (bool, error) {
-			ui.Message(fmt.Sprintf("Stopping instance, attempt %d", i+1))
+		err := retry.Config{
+			Tries: 6,
+			ShouldRetry: func(error) bool {
+				if awsErr, ok := err.(awserr.Error); ok {
+					switch awsErr.Code() {
+					case "InvalidInstanceID.NotFound":
+						return true
+					}
+				}
+				return false
+			},
+			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			ui.Message(fmt.Sprintf("Stopping instance"))
 
 			_, err = ec2conn.StopInstances(&ec2.StopInstancesInput{
 				InstanceIds: []*string{instance.InstanceId},
 			})
 
-			if err == nil {
-				// success
-				return true, nil
-			}
-
-			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() == "InvalidInstanceID.NotFound" {
-					ui.Message(fmt.Sprintf(
-						"Error stopping instance; will retry ..."+
-							"Error: %s", err))
-					// retry
-					return false, nil
-				}
-			}
-			// errored, but not in expected way. Don't want to retry
-			return true, err
+			return err
 		})
 
 		if err != nil {
@@ -77,9 +76,11 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 
 	// Wait for the instance to actually stop
 	ui.Say("Waiting for the instance to stop...")
-	err = ec2conn.WaitUntilInstanceStopped(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{instance.InstanceId},
-	})
+	err = ec2conn.WaitUntilInstanceStoppedWithContext(ctx,
+		&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{instance.InstanceId},
+		},
+		getWaiterOptions()...)
 
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)

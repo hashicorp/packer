@@ -1,19 +1,38 @@
+//go:generate struct-markdown
+
 package ebssurrogate
 
 import (
 	"errors"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type RootBlockDevice struct {
-	SourceDeviceName    string `mapstructure:"source_device_name"`
-	DeviceName          string `mapstructure:"device_name"`
-	DeleteOnTermination bool   `mapstructure:"delete_on_termination"`
-	IOPS                int64  `mapstructure:"iops"`
-	VolumeType          string `mapstructure:"volume_type"`
-	VolumeSize          int64  `mapstructure:"volume_size"`
+	SourceDeviceName string `mapstructure:"source_device_name"`
+	// The device name exposed to the instance (for
+	// example, /dev/sdh or xvdh). Required for every device in the block
+	// device mapping.
+	DeviceName string `mapstructure:"device_name" required:"false"`
+	// Indicates whether the EBS volume is
+	// deleted on instance termination. Default false. NOTE: If this
+	// value is not explicitly set to true and volumes are not cleaned up by
+	// an alternative method, additional volumes will accumulate after every
+	// build.
+	DeleteOnTermination bool `mapstructure:"delete_on_termination" required:"false"`
+	// The number of I/O operations per second (IOPS) that
+	// the volume supports. See the documentation on
+	// IOPs
+	// for more information
+	IOPS int64 `mapstructure:"iops" required:"false"`
+	// The volume type. gp2 for General Purpose
+	// (SSD) volumes, io1 for Provisioned IOPS (SSD) volumes, st1 for
+	// Throughput Optimized HDD, sc1 for Cold HDD, and standard for
+	// Magnetic volumes.
+	VolumeType string `mapstructure:"volume_type" required:"false"`
+	// The size of the volume, in GiB. Required if
+	// not specifying a snapshot_id.
+	VolumeSize int64 `mapstructure:"volume_size" required:"false"`
 }
 
 func (c *RootBlockDevice) Prepare(ctx *interpolate.Context) []error {
@@ -44,22 +63,4 @@ func (c *RootBlockDevice) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func (d *RootBlockDevice) createBlockDeviceMapping(snapshotId string) *ec2.BlockDeviceMapping {
-	rootBlockDevice := &ec2.EbsBlockDevice{
-		SnapshotId:          aws.String(snapshotId),
-		VolumeType:          aws.String(d.VolumeType),
-		VolumeSize:          aws.Int64(d.VolumeSize),
-		DeleteOnTermination: aws.Bool(d.DeleteOnTermination),
-	}
-
-	if d.IOPS != 0 {
-		rootBlockDevice.Iops = aws.Int64(d.IOPS)
-	}
-
-	return &ec2.BlockDeviceMapping{
-		DeviceName: aws.String(d.DeviceName),
-		Ebs:        rootBlockDevice,
-	}
 }

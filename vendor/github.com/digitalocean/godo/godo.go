@@ -14,11 +14,10 @@ import (
 	"time"
 
 	"github.com/google/go-querystring/query"
-	headerLink "github.com/tent/http-link-go"
 )
 
 const (
-	libraryVersion = "1.0.0"
+	libraryVersion = "1.11.1"
 	defaultBaseURL = "https://api.digitalocean.com/"
 	userAgent      = "godo/" + libraryVersion
 	mediaType      = "application/json"
@@ -46,6 +45,7 @@ type Client struct {
 	// Services used for communicating with the API
 	Account           AccountService
 	Actions           ActionsService
+	CDNs              CDNService
 	Domains           DomainsService
 	Droplets          DropletsService
 	DropletActions    DropletActionsService
@@ -62,6 +62,11 @@ type Client struct {
 	Tags              TagsService
 	LoadBalancers     LoadBalancersService
 	Certificates      CertificatesService
+	Firewalls         FirewallsService
+	Projects          ProjectsService
+	Kubernetes        KubernetesService
+	Databases         DatabasesService
+	VPCs              VPCsService
 
 	// Optional function called after every successful request made to the DO APIs
 	onRequestCompleted RequestCompletionCallback
@@ -156,22 +161,28 @@ func NewClient(httpClient *http.Client) *Client {
 	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
 	c.Account = &AccountServiceOp{client: c}
 	c.Actions = &ActionsServiceOp{client: c}
+	c.CDNs = &CDNServiceOp{client: c}
+	c.Certificates = &CertificatesServiceOp{client: c}
 	c.Domains = &DomainsServiceOp{client: c}
 	c.Droplets = &DropletsServiceOp{client: c}
 	c.DropletActions = &DropletActionsServiceOp{client: c}
+	c.Firewalls = &FirewallsServiceOp{client: c}
 	c.FloatingIPs = &FloatingIPsServiceOp{client: c}
 	c.FloatingIPActions = &FloatingIPActionsServiceOp{client: c}
 	c.Images = &ImagesServiceOp{client: c}
 	c.ImageActions = &ImageActionsServiceOp{client: c}
 	c.Keys = &KeysServiceOp{client: c}
+	c.LoadBalancers = &LoadBalancersServiceOp{client: c}
+	c.Projects = &ProjectsServiceOp{client: c}
 	c.Regions = &RegionsServiceOp{client: c}
-	c.Snapshots = &SnapshotsServiceOp{client: c}
 	c.Sizes = &SizesServiceOp{client: c}
+	c.Snapshots = &SnapshotsServiceOp{client: c}
 	c.Storage = &StorageServiceOp{client: c}
 	c.StorageActions = &StorageActionsServiceOp{client: c}
 	c.Tags = &TagsServiceOp{client: c}
-	c.LoadBalancers = &LoadBalancersServiceOp{client: c}
-	c.Certificates = &CertificatesServiceOp{client: c}
+	c.Kubernetes = &KubernetesServiceOp{client: c}
+	c.Databases = &DatabasesServiceOp{client: c}
+	c.VPCs = &VPCsServiceOp{client: c}
 
 	return c
 }
@@ -207,7 +218,7 @@ func SetBaseURL(bu string) ClientOpt {
 // SetUserAgent is a client option for setting the user agent.
 func SetUserAgent(ua string) ClientOpt {
 	return func(c *Client) error {
-		c.UserAgent = fmt.Sprintf("%s+%s", ua, c.UserAgent)
+		c.UserAgent = fmt.Sprintf("%s %s", ua, c.UserAgent)
 		return nil
 	}
 }
@@ -236,7 +247,6 @@ func (c *Client) NewRequest(ctx context.Context, method, urlStr string, body int
 		return nil, err
 	}
 
-	req = req.WithContext(ctx)
 	req.Header.Add("Content-Type", mediaType)
 	req.Header.Add("Accept", mediaType)
 	req.Header.Add("User-Agent", c.UserAgent)
@@ -254,25 +264,6 @@ func newResponse(r *http.Response) *Response {
 	response.populateRate()
 
 	return &response
-}
-
-func (r *Response) links() (map[string]headerLink.Link, error) {
-	if linkText, ok := r.Response.Header["Link"]; ok {
-		links, err := headerLink.Parse(linkText[0])
-
-		if err != nil {
-			return nil, err
-		}
-
-		linkMap := map[string]headerLink.Link{}
-		for _, link := range links {
-			linkMap[link.Rel] = link
-		}
-
-		return linkMap, nil
-	}
-
-	return map[string]headerLink.Link{}, nil
 }
 
 // populateRate parses the rate related headers and populates the response Rate.
@@ -293,8 +284,8 @@ func (r *Response) populateRate() {
 // Do sends an API request and returns the API response. The API response is JSON decoded and stored in the value
 // pointed to by v, or returned as an error if an API error has occurred. If v implements the io.Writer interface,
 // the raw response will be written to v, without attempting to decode it.
-func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
-	resp, err := c.client.Do(req)
+func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Response, error) {
+	resp, err := DoRequestWithClient(ctx, c.client, req)
 	if err != nil {
 		return nil, err
 	}
@@ -332,6 +323,21 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	return response, err
 }
+
+// DoRequest submits an HTTP request.
+func DoRequest(ctx context.Context, req *http.Request) (*http.Response, error) {
+	return DoRequestWithClient(ctx, http.DefaultClient, req)
+}
+
+// DoRequestWithClient submits an HTTP request using the specified client.
+func DoRequestWithClient(
+	ctx context.Context,
+	client *http.Client,
+	req *http.Request) (*http.Response, error) {
+	req = req.WithContext(ctx)
+	return client.Do(req)
+}
+
 func (r *ErrorResponse) Error() string {
 	if r.RequestID != "" {
 		return fmt.Sprintf("%v %v: %d (request %q) %v",
@@ -354,7 +360,7 @@ func CheckResponse(r *http.Response) error {
 	if err == nil && len(data) > 0 {
 		err := json.Unmarshal(data, errorResponse)
 		if err != nil {
-			return err
+			errorResponse.Message = string(data)
 		}
 	}
 

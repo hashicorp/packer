@@ -1,12 +1,13 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +27,7 @@ func TestStepCreateInstance(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 
 	// Verify state
 	nameRaw, ok := state.GetOk("instance_name")
@@ -67,7 +68,7 @@ func TestStepCreateInstance_fromFamily(t *testing.T) {
 		d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 		// run the step
-		assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+		assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 
 		// cleanup
 		step.Cleanup(state)
@@ -93,7 +94,7 @@ func TestStepCreateInstance_windowsNeedsPassword(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	c.Comm.Type = "winrm"
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -142,7 +143,7 @@ func TestStepCreateInstance_windowsPasswordSet(t *testing.T) {
 	config.Comm.WinRMPassword = "password"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -188,7 +189,7 @@ func TestStepCreateInstance_error(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")
@@ -212,7 +213,7 @@ func TestStepCreateInstance_errorOnChannel(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")
@@ -238,13 +239,61 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")
 	assert.True(t, ok, "State should have an error.")
 	_, ok = state.GetOk("instance_name")
 	assert.False(t, ok, "State should not have an instance name.")
+}
+
+func TestStepCreateInstance_noServiceAccount(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	c.DisableDefaultServiceAccount = true
+	c.ServiceAccountEmail = ""
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// cleanup
+	step.Cleanup(state)
+
+	// Check args passed to the driver.
+	assert.Equal(t, d.RunInstanceConfig.DisableDefaultServiceAccount, c.DisableDefaultServiceAccount, "Incorrect value for DisableDefaultServiceAccount passed to driver.")
+	assert.Equal(t, d.RunInstanceConfig.ServiceAccountEmail, c.ServiceAccountEmail, "Incorrect value for ServiceAccountEmail passed to driver.")
+}
+
+func TestStepCreateInstance_customServiceAccount(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	c.DisableDefaultServiceAccount = true
+	c.ServiceAccountEmail = "custom-service-account"
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// cleanup
+	step.Cleanup(state)
+
+	// Check args passed to the driver.
+	assert.Equal(t, d.RunInstanceConfig.DisableDefaultServiceAccount, c.DisableDefaultServiceAccount, "Incorrect value for DisableDefaultServiceAccount passed to driver.")
+	assert.Equal(t, d.RunInstanceConfig.ServiceAccountEmail, c.ServiceAccountEmail, "Incorrect value for ServiceAccountEmail passed to driver.")
 }
 
 func TestCreateInstanceMetadata(t *testing.T) {
@@ -275,4 +324,21 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 
 	// ensure the ssh metadata hasn't changed
 	assert.Equal(t, metadata["sshKeys"], sshKeys, "Instance metadata should not have been modified")
+}
+
+func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
+	state := testState(t)
+	c := state.Get("config").(*Config)
+	image := StubImage("test-image", "test-project", []string{}, 100)
+	content := testMetadataFileContent
+	fileName := testMetadataFile(t)
+	c.MetadataFiles["user-data"] = fileName
+
+	// create our metadata
+	metadata, err := c.createInstanceMetadata(image, "")
+
+	assert.True(t, err == nil, "Metadata creation should have succeeded.")
+
+	// ensure the user-data key in metadata is updated with file content
+	assert.Equal(t, metadata["user-data"], content, "user-data field of the instance metadata should have been updated.")
 }

@@ -1,10 +1,11 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,12 +22,11 @@ func TestStepCreateImage(t *testing.T) {
 	d := state.Get("driver").(*DriverMock)
 
 	// These are the values of the image the driver will return.
-	d.CreateImageResultLicenses = []string{"test-license"}
 	d.CreateImageResultProjectId = "test-project"
 	d.CreateImageResultSizeGb = 100
 
 	// run the step
-	action := step.Run(state)
+	action := step.Run(context.Background(), state)
 	assert.Equal(t, action, multistep.ActionContinue, "Step did not pass.")
 
 	uncastImage, ok := state.GetOk("image")
@@ -35,7 +35,6 @@ func TestStepCreateImage(t *testing.T) {
 	assert.True(t, ok, "Image in state is not an Image.")
 
 	// Verify created Image results.
-	assert.Equal(t, image.Licenses, d.CreateImageResultLicenses, "Created image licenses don't match the licenses returned by the driver.")
 	assert.Equal(t, image.Name, c.ImageName, "Created image does not match config name.")
 	assert.Equal(t, image.ProjectId, d.CreateImageResultProjectId, "Created image project does not match driver project.")
 	assert.Equal(t, image.SizeGb, d.CreateImageResultSizeGb, "Created image size does not match the size returned by the driver.")
@@ -47,6 +46,8 @@ func TestStepCreateImage(t *testing.T) {
 	assert.Equal(t, d.CreateImageZone, c.Zone, "Incorrect image zone passed to driver.")
 	assert.Equal(t, d.CreateImageDisk, c.DiskName, "Incorrect disk passed to driver.")
 	assert.Equal(t, d.CreateImageLabels, c.ImageLabels, "Incorrect image_labels passed to driver.")
+	assert.Equal(t, d.CreateImageLicenses, c.ImageLicenses, "Incorrect image_licenses passed to driver.")
+	assert.Equal(t, d.CreateImageEncryptionKey, c.ImageEncryptionKey, "Incorrect image_encryption_key passed to driver.")
 }
 
 func TestStepCreateImage_errorOnChannel(t *testing.T) {
@@ -61,7 +62,7 @@ func TestStepCreateImage_errorOnChannel(t *testing.T) {
 	driver.CreateImageErrCh = errCh
 
 	// run the step
-	action := step.Run(state)
+	action := step.Run(context.Background(), state)
 	assert.Equal(t, action, multistep.ActionHalt, "Step should not have passed.")
 	_, ok := state.GetOk("error")
 	assert.True(t, ok, "State should have an error.")

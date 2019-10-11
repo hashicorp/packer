@@ -1,6 +1,7 @@
 package profitbricks
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,14 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepCreateServer struct{}
 
-func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 

@@ -1,15 +1,16 @@
 package oci
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepImage struct{}
 
-func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver     = state.Get("driver").(Driver)
 		ui         = state.Get("ui").(packer.Ui)
@@ -18,7 +19,7 @@ func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Creating image from instance...")
 
-	image, err := driver.CreateImage(instanceID)
+	image, err := driver.CreateImage(ctx, instanceID)
 	if err != nil {
 		err = fmt.Errorf("Error creating image from instance: %s", err)
 		ui.Error(err.Error())
@@ -26,7 +27,7 @@ func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	err = driver.WaitForImageCreation(image.ID)
+	err = driver.WaitForImageCreation(ctx, *image.Id)
 	if err != nil {
 		err = fmt.Errorf("Error waiting for image creation to finish: %s", err)
 		ui.Error(err.Error())

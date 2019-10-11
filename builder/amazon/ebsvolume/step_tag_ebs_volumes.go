@@ -1,13 +1,15 @@
 package ebsvolume
 
 import (
+	"context"
 	"fmt"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type stepTagEBSVolumes struct {
@@ -15,16 +17,19 @@ type stepTagEBSVolumes struct {
 	Ctx           interpolate.Context
 }
 
-func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
-	sourceAMI := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
 	volumes := make(EbsVolumes)
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			if configVolumeMapping.DeviceName == *instanceBlockDevices.DeviceName {
+				if configVolumeMapping.DeleteOnTermination {
+					continue
+				}
 				volumes[*ec2conn.Config.Region] = append(
 					volumes[*ec2conn.Config.Region],
 					*instanceBlockDevices.Ebs.VolumeId)
@@ -34,8 +39,50 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("ebsvolumes", volumes)
 
 	if len(s.VolumeMapping) > 0 {
-		ui.Say("Tagging EBS volumes...")
+		// If run_volume_tags were set in the template any attached EBS
+		// volume will have had these tags applied when the instance was
+		// created. We now need to remove these tags to ensure only the EBS
+		// volume tags are applied (if any)
+		if config.VolumeRunTags.IsSet() {
+			ui.Say("Removing any tags applied to EBS volumes when the source instance was created...")
 
+			ui.Message("Compiling list of existing tags to remove...")
+			existingTags, err := config.VolumeRunTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			if err != nil {
+				err := fmt.Errorf("Error generating list of tags to remove: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+			existingTags.Report(ui)
+
+			// Generate the list of volumes with tags to delete.
+			// Looping over the instance block device mappings allows us to
+			// obtain the volumeId
+			volumeIds := []string{}
+			for _, mapping := range s.VolumeMapping {
+				for _, v := range instance.BlockDeviceMappings {
+					if *v.DeviceName == mapping.DeviceName {
+						volumeIds = append(volumeIds, *v.Ebs.VolumeId)
+					}
+				}
+			}
+
+			// Delete the tags
+			ui.Message(fmt.Sprintf("Deleting 'run_volume_tags' on EBS Volumes: %s", strings.Join(volumeIds, ", ")))
+			_, err = ec2conn.DeleteTags(&ec2.DeleteTagsInput{
+				Resources: aws.StringSlice(volumeIds),
+				Tags:      existingTags,
+			})
+			if err != nil {
+				err := fmt.Errorf("Error deleting tags on EBS Volumes %s: %s", strings.Join(volumeIds, ", "), err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+
+		ui.Say("Tagging EBS volumes...")
 		toTag := map[string][]*ec2.Tag{}
 		for _, mapping := range s.VolumeMapping {
 			if len(mapping.Tags) == 0 {
@@ -43,15 +90,19 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 				continue
 			}
 
-			tags, err := awscommon.ConvertToEC2Tags(mapping.Tags, *ec2conn.Config.Region, *sourceAMI.ImageId, s.Ctx)
+			ui.Message(fmt.Sprintf("Compiling list of tags to apply to volume on %s...", mapping.DeviceName))
+			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
-				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
+				err := fmt.Errorf("Error generating tags for device %s: %s", mapping.DeviceName, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-			awscommon.ReportTags(ui, tags)
+			tags.Report(ui)
 
+			// Generate the map of volumes and associated tags to apply.
+			// Looping over the instance block device mappings allows us to
+			// obtain the volumeId
 			for _, v := range instance.BlockDeviceMappings {
 				if *v.DeviceName == mapping.DeviceName {
 					toTag[*v.Ebs.VolumeId] = tags
@@ -59,9 +110,11 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 			}
 		}
 
+		// Apply the tags
 		for volumeId, tags := range toTag {
+			ui.Message(fmt.Sprintf("Applying tags to EBS Volume: %s", volumeId))
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-				Resources: []*string{&volumeId},
+				Resources: aws.StringSlice([]string{volumeId}),
 				Tags:      tags,
 			})
 			if err != nil {
@@ -70,7 +123,6 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-
 		}
 	}
 

@@ -14,9 +14,9 @@ multiple builders depending on the strategy you want to use to build the AMI.
 Packer supports the following builders at the moment:
 
 -   [amazon-ebs](/docs/builders/amazon-ebs.html) - Create EBS-backed AMIs by
-    launching a source AMI and re-packaging it into a new AMI
-    after provisioning. If in doubt, use this builder, which is the easiest to
-    get started with.
+    launching a source AMI and re-packaging it into a new AMI after
+    provisioning. If in doubt, use this builder, which is the easiest to get
+    started with.
 
 -   [amazon-instance](/docs/builders/amazon-instance.html) - Create
     instance-store AMIs by launching and provisioning a source instance, then
@@ -43,55 +43,90 @@ generally recommends EBS-backed images nowadays.
 Packer is able to create Amazon EBS Volumes which are preinitialized with a
 filesystem and data.
 
--   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS volumes
-    by launching a source AMI with block devices mapped. Provision the instance,
-    then destroy it, retaining the EBS volumes.
+-   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS
+    volumes by launching a source AMI with block devices mapped. Provision the
+    instance, then destroy it, retaining the EBS volumes.
 
 <span id="specifying-amazon-credentials"></span>
 
-## Specifying Amazon Credentials
+## Authentication
 
-When you use any of the amazon builders, you must provide credentials to the API
-in the form of an access key id and secret. These look like:
+The AWS provider offers a flexible means of providing credentials for
+authentication. The following methods are supported, in this order, and
+explained below:
 
-    access key id:     AKIAIOSFODNN7EXAMPLE
-    secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+-   Static credentials
+-   Environment variables
+-   Shared credentials file
+-   EC2 Role
 
-If you use other AWS tools you may already have these configured. If so, packer
-will try to use them, *unless* they are specified in your packer template.
-Credentials are resolved in the following order:
+### Static Credentials
 
-1.  Values hard-coded in the packer template are always authoritative.
-2.  *Variables* in the packer template may be resolved from command-line flags
-    or from environment variables. Please read about [User
-    Variables](https://www.packer.io/docs/templates/user-variables.html)
-    for details.
-3.  If no credentials are found, packer falls back to automatic lookup.
+Static credentials can be provided in the form of an access key id and secret.
+These look like:
 
-### Automatic Lookup
+``` json
+{
+    "access_key": "AKIAIOSFODNN7EXAMPLE",
+    "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
 
-Packer depends on the [AWS
-SDK](https://aws.amazon.com/documentation/sdk-for-go/) to perform automatic
-lookup using *credential chains*. In short, the SDK looks for credentials in
-the following order:
+### Environment variables
 
-1.  Environment variables.
-2.  Shared credentials file.
-3.  If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
+You can provide your credentials via the `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY`, environment variables, representing your AWS Access
+Key and AWS Secret Key, respectively. Note that setting your AWS credentials
+using either these environment variables will override the use of
+`AWS_SHARED_CREDENTIALS_FILE` and `AWS_PROFILE`. The `AWS_DEFAULT_REGION` and
+`AWS_SESSION_TOKEN` environment variables are also used, if applicable:
 
-Please refer to the SDK's documentation on [specifying
-credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)
-for more information.
+Usage:
 
-## Using an IAM Task or Instance Role
+    $ export AWS_ACCESS_KEY_ID="anaccesskey"
+    $ export AWS_SECRET_ACCESS_KEY="asecretkey"
+    $ export AWS_DEFAULT_REGION="us-west-2"
+    $ packer build packer.json
 
-If AWS keys are not specified in the template, a
-[shared credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-or through environment variables Packer will use credentials provided by
-the task's or instance's IAM role, if it has one.
+### Shared Credentials file
 
-The following policy document provides the minimal set permissions necessary for
-Packer to work:
+You can use an AWS credentials file to specify your credentials. The default
+location is $HOME/.aws/credentials on Linux and OS X, or
+"%USERPROFILE%.aws\\credentials" for Windows users. If we fail to detect
+credentials inline, or in the environment, Packer will check this location. You
+can optionally specify a different location in the configuration by setting the
+environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
+
+The format for the credentials file is like so
+
+    [default]
+    aws_access_key_id=<your access key id>
+    aws_secret_access_key=<your secret access key>
+
+You may also configure the profile to use by setting the `profile`
+configuration option, or setting the `AWS_PROFILE` environment variable:
+
+``` json
+{
+    "profile": "customprofile",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
+
+### IAM Task or Instance Role
+
+Finally, Packer will use credentials provided by the task's or instance's IAM
+role, if it has one.
+
+This is a preferred approach over any other when running in EC2 as you can
+avoid hard coding credentials. Instead these are leased on-the-fly by Packer,
+which reduces the chance of leakage.
+
+The following policy document provides the minimal set permissions necessary
+for Packer to work:
 
 ``` json
 {
@@ -108,15 +143,15 @@ Packer to work:
         "ec2:CreateSnapshot",
         "ec2:CreateTags",
         "ec2:CreateVolume",
-        "ec2:DeleteKeypair",
+        "ec2:DeleteKeyPair",
         "ec2:DeleteSecurityGroup",
         "ec2:DeleteSnapshot",
         "ec2:DeleteVolume",
         "ec2:DeregisterImage",
         "ec2:DescribeImageAttribute",
         "ec2:DescribeImages",
-        "ec2:DescribeInstanceStatus",
         "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
         "ec2:DescribeRegions",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSnapshots",
@@ -137,6 +172,16 @@ Packer to work:
   }]
 }
 ```
+
+Note that if you'd like to create a spot instance, you must also add:
+
+    ec2:CreateLaunchTemplate,
+    ec2:DeleteLaunchTemplate,
+    ec2:CreateFleet
+
+If you have the `spot_price` parameter set to `auto`, you must also add:
+
+    ec2:DescribeSpotPriceHistory
 
 ## Troubleshooting
 
@@ -174,6 +219,24 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
-current time. If you're on Linux, you can try setting the time with ntp by
-running `sudo ntpd -q`.
+<http://www.time.gov/>. On
+Linux/OS X, you can run the `date` command to get the current time. If you're
+on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
+
+### `exceeded wait attempts` while waiting for tasks to complete
+
+We use the AWS SDK's built-in waiters to wait for longer-running tasks to
+complete. These waiters have default delays between queries and maximum number
+of queries that don't always work for our users.
+
+If you find that you are being rate-limited or have exceeded your max wait
+attempts, you can override the defaults by setting the following packer
+environment variables (note that these will apply to all aws tasks that we have
+to wait for):
+
+`AWS_MAX_ATTEMPTS` - This is how many times to re-send a status update request.
+Excepting tasks that we know can take an extremely long time, this defaults to
+40tries.
+
+`AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
+requests. Generally defaults to 2 or 5 seconds, depending on the task.

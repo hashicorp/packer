@@ -1,10 +1,10 @@
 ---
 description: |
     Templates are JSON files that configure the various components of Packer in
-    order to create one or more machine images. Templates are portable, static,
-    and readable and writable by both humans and computers. This has the added
-    benefit of being able to not only create and modify templates by hand, but
-    also write scripts to dynamically create or modify templates.
+    order to create one or more machine images. Templates are portable, static, and
+    readable and writable by both humans and computers. This has the added benefit
+    of being able to not only create and modify templates by hand, but also write
+    scripts to dynamically create or modify templates.
 layout: docs
 page_title: Templates
 sidebar_current: 'docs-templates'
@@ -30,8 +30,8 @@ Along with each key, it is noted whether it is required or not.
 
 -   `builders` (*required*) is an array of one or more objects that defines the
     builders that will be used to create machine images for this template, and
-    configures each of those builders. For more information on how to define and
-    configure a builder, read the sub-section on [configuring builders in
+    configures each of those builders. For more information on how to define
+    and configure a builder, read the sub-section on [configuring builders in
     templates](/docs/templates/builders.html).
 
 -   `description` (optional) is a string providing a description of what the
@@ -44,24 +44,24 @@ Along with each key, it is noted whether it is required or not.
     can't be specified because Packer retains backwards compatibility with
     `packer fix`.
 
--   `post-processors` (optional) is an array of one or more objects that defines
-    the various post-processing steps to take with the built images. If not
-    specified, then no post-processing will be done. For more information on
-    what post-processors do and how they're defined, read the sub-section on
+-   `post-processors` (optional) is an array of one or more objects that
+    defines the various post-processing steps to take with the built images. If
+    not specified, then no post-processing will be done. For more information
+    on what post-processors do and how they're defined, read the sub-section on
     [configuring post-processors in
     templates](/docs/templates/post-processors.html).
 
 -   `provisioners` (optional) is an array of one or more objects that defines
-    the provisioners that will be used to install and configure software for the
-    machines created by each of the builders. If it is not specified, then no
-    provisioners will be run. For more information on how to define and
+    the provisioners that will be used to install and configure software for
+    the machines created by each of the builders. If it is not specified, then
+    no provisioners will be run. For more information on how to define and
     configure a provisioner, read the sub-section on [configuring provisioners
     in templates](/docs/templates/provisioners.html).
 
 -   `variables` (optional) is an object of one or more key/value strings that
     defines user variables contained in the template. If it is not specified,
-    then no variables are defined. For more information on how to define and use
-    user variables, read the sub-section on [user variables in
+    then no variables are defined. For more information on how to define and
+    use user variables, read the sub-section on [user variables in
     templates](/docs/templates/user-variables.html).
 
 ## Comments
@@ -84,9 +84,14 @@ builders, provisioners, etc. will still result in validation errors.
 
 ## Example Template
 
-Below is an example of a basic template that could be invoked with `packer build`. It would create an instance in AWS, and once running copy a script to it and run that script using SSH.
+Below is an example of a basic template that could be invoked with
+`packer build`. It would create an instance in AWS, and once running copy a
+script to it and run that script using SSH.
 
--&gt; **Note:** This example requires an account with Amazon Web Services. There are a number of parameters which need to be provided for a functional build to take place. See the [Amazon builder](/docs/builders/amazon.html) documentation for more information.
+-&gt; **Note:** This example requires an account with Amazon Web Services.
+There are a number of parameters which need to be provided for a functional
+build to take place. See the [Amazon builder](/docs/builders/amazon.html)
+documentation for more information.
 
 ``` json
 {

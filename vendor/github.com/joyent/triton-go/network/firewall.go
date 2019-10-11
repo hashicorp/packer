@@ -1,15 +1,22 @@
+//
+// Copyright (c) 2018, Joyent, Inc. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+
 package network
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-
+	"path"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
+	"github.com/pkg/errors"
 )
 
 type FirewallClient struct {
@@ -37,23 +44,23 @@ type FirewallRule struct {
 type ListRulesInput struct{}
 
 func (c *FirewallClient) ListRules(ctx context.Context, _ *ListRulesInput) ([]*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules", c.client.AccountName)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListRules request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list firewall rules")
 	}
 
 	var result []*FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListRules response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list firewall rules response")
 	}
 
 	return result, nil
@@ -64,23 +71,23 @@ type GetRuleInput struct {
 }
 
 func (c *FirewallClient) GetRule(ctx context.Context, input *GetRuleInput) (*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules/%s", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing GetRule request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to get firewall rule")
 	}
 
 	var result *FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding GetRule response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode get firewall rule response")
 	}
 
 	return result, nil
@@ -93,10 +100,10 @@ type CreateRuleInput struct {
 }
 
 func (c *FirewallClient) CreateRule(ctx context.Context, input *CreateRuleInput) (*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules", c.client.AccountName)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules")
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -104,13 +111,13 @@ func (c *FirewallClient) CreateRule(ctx context.Context, input *CreateRuleInput)
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing CreateRule request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to create firewall rule")
 	}
 
 	var result *FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding CreateRule response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode create firewall rule response")
 	}
 
 	return result, nil
@@ -124,10 +131,10 @@ type UpdateRuleInput struct {
 }
 
 func (c *FirewallClient) UpdateRule(ctx context.Context, input *UpdateRuleInput) (*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules/%s", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -135,13 +142,13 @@ func (c *FirewallClient) UpdateRule(ctx context.Context, input *UpdateRuleInput)
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing UpdateRule request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to update firewall rule")
 	}
 
 	var result *FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding UpdateRule response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode update firewall rule response")
 	}
 
 	return result, nil
@@ -152,10 +159,10 @@ type EnableRuleInput struct {
 }
 
 func (c *FirewallClient) EnableRule(ctx context.Context, input *EnableRuleInput) (*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules/%s/enable", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID, "enable")
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -163,13 +170,13 @@ func (c *FirewallClient) EnableRule(ctx context.Context, input *EnableRuleInput)
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing EnableRule request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to enable firewall rule")
 	}
 
 	var result *FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding EnableRule response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode enable firewall rule response")
 	}
 
 	return result, nil
@@ -180,10 +187,10 @@ type DisableRuleInput struct {
 }
 
 func (c *FirewallClient) DisableRule(ctx context.Context, input *DisableRuleInput) (*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/fwrules/%s/disable", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID, "disable")
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -191,13 +198,13 @@ func (c *FirewallClient) DisableRule(ctx context.Context, input *DisableRuleInpu
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing DisableRule request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to disable firewall rule")
 	}
 
 	var result *FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding DisableRule response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode disable firewall rule response")
 	}
 
 	return result, nil
@@ -208,17 +215,17 @@ type DeleteRuleInput struct {
 }
 
 func (c *FirewallClient) DeleteRule(ctx context.Context, input *DeleteRuleInput) error {
-	path := fmt.Sprintf("/%s/fwrules/%s", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodDelete,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return errwrap.Wrapf("Error executing DeleteRule request: {{err}}", err)
+		return errors.Wrap(err, "unable to delete firewall rule")
 	}
 
 	return nil
@@ -229,23 +236,23 @@ type ListMachineRulesInput struct {
 }
 
 func (c *FirewallClient) ListMachineRules(ctx context.Context, input *ListMachineRulesInput) ([]*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/machines/%s/fwrules", c.client.AccountName, input.MachineID)
+	fullPath := path.Join("/", c.client.AccountName, "machines", input.MachineID, "fwrules")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListMachineRules request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list machine firewall rules")
 	}
 
 	var result []*FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListMachineRules response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list machine firewall rules response")
 	}
 
 	return result, nil
@@ -278,23 +285,23 @@ type Machine struct {
 }
 
 func (c *FirewallClient) ListRuleMachines(ctx context.Context, input *ListRuleMachinesInput) ([]*Machine, error) {
-	path := fmt.Sprintf("/%s/fwrules/%s/machines", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "fwrules", input.ID, "machines")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListRuleMachines request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list firewall rule machines")
 	}
 
 	var result []*Machine
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListRuleMachines response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list firewall rule machines response")
 	}
 
 	return result, nil

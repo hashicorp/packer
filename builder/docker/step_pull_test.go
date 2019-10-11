@@ -1,9 +1,11 @@
 package docker
 
 import (
+	"context"
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepPull_impl(t *testing.T) {
@@ -19,7 +21,7 @@ func TestStepPull(t *testing.T) {
 	driver := state.Get("driver").(*MockDriver)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -41,7 +43,7 @@ func TestStepPull_error(t *testing.T) {
 	driver.PullError = errors.New("foo")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -62,7 +64,7 @@ func TestStepPull_login(t *testing.T) {
 	config.Login = true
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -91,7 +93,7 @@ func TestStepPull_noPull(t *testing.T) {
 	driver := state.Get("driver").(*MockDriver)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 

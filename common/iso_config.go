@@ -1,124 +1,132 @@
+//go:generate struct-markdown
+
 package common
 
 import (
-	"bufio"
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"net/http"
+	"log"
 	"net/url"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 
+	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// ISOConfig contains configuration for downloading ISO images.
+// By default, Packer will symlink, download or copy image files to the Packer
+// cache into a "`hash($iso_url+$iso_checksum).$iso_target_extension`" file.
+// Packer uses [hashicorp/go-getter](https://github.com/hashicorp/go-getter) in
+// file mode in order to perform a download.
+//
+// go-getter supports the following protocols:
+//
+// * Local files
+// * Git
+// * Mercurial
+// * HTTP
+// * Amazon S3
+//
+//
+// \~&gt; On windows - when referencing a local iso - if packer is running
+// without symlinking rights, the iso will be copied to the cache folder. Read
+// [Symlinks in Windows 10
+// !](https://blogs.windows.com/buildingapps/2016/12/02/symlinks-windows-10/)
+// for more info.
+//
+// Examples:
+// go-getter can guess the checksum type based on `iso_checksum` len.
+//
+// ``` json
+// {
+//   "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
+//   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
+// }
+// ```
+//
+// ``` json
+// {
+//   "iso_checksum_type": "file",
+//   "iso_checksum": "ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
+//   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
+// }
+// ```
+//
+// ``` json
+// {
+//   "iso_checksum_url": "./shasums.txt",
+//   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
+// }
+// ```
+//
+// ``` json
+// {
+//   "iso_checksum_type": "sha256",
+//   "iso_checksum_url": "./shasums.txt",
+//   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
+// }
+// ```
+//
 type ISOConfig struct {
-	ISOChecksum     string   `mapstructure:"iso_checksum"`
-	ISOChecksumURL  string   `mapstructure:"iso_checksum_url"`
-	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
-	ISOUrls         []string `mapstructure:"iso_urls"`
-	TargetPath      string   `mapstructure:"iso_target_path"`
-	TargetExtension string   `mapstructure:"iso_target_extension"`
-	RawSingleISOUrl string   `mapstructure:"iso_url"`
+	// The checksum for the ISO file or virtual hard drive file. The algorithm
+	// to use when computing the checksum can be optionally specified with
+	// `iso_checksum_type`. When `iso_checksum_type` is not set packer will
+	// guess the checksumming type based on `iso_checksum` length.
+	// `iso_checksum` can be also be a file or an URL, in which case
+	// `iso_checksum_type` must be set to `file`; the go-getter will download
+	// it and use the first hash found.
+	ISOChecksum string `mapstructure:"iso_checksum" required:"true"`
+	// An URL to a checksum file containing a checksum for the ISO file. At
+	// least one of `iso_checksum` and `iso_checksum_url` must be defined.
+	// `iso_checksum_url` will be ignored if `iso_checksum` is non empty.
+	ISOChecksumURL string `mapstructure:"iso_checksum_url"`
+	// The algorithm to be used when computing the checksum of the file
+	// specified in `iso_checksum`. Currently, valid values are "", "none",
+	// "md5", "sha1", "sha256", "sha512" or "file". Since the validity of ISO
+	// and virtual disk files are typically crucial to a successful build,
+	// Packer performs a check of any supplied media by default. While setting
+	// "none" will cause Packer to skip this check, corruption of large files
+	// such as ISOs and virtual hard drives can occur from time to time. As
+	// such, skipping this check is not recommended. `iso_checksum_type` must
+	// be set to `file` when `iso_checksum` is an url.
+	ISOChecksumType string `mapstructure:"iso_checksum_type"`
+	// A URL to the ISO containing the installation image or virtual hard drive
+	// (VHD or VHDX) file to clone.
+	RawSingleISOUrl string `mapstructure:"iso_url" required:"true"`
+	// Multiple URLs for the ISO to download. Packer will try these in order.
+	// If anything goes wrong attempting to download or while downloading a
+	// single URL, it will move on to the next. All URLs must point to the same
+	// file (same checksum). By default this is empty and `iso_url` is used.
+	// Only one of `iso_url` or `iso_urls` can be specified.
+	ISOUrls []string `mapstructure:"iso_urls"`
+	// The path where the iso should be saved after download. By default will
+	// go in the packer cache, with a hash of the original filename and
+	// checksum as its name.
+	TargetPath string `mapstructure:"iso_target_path"`
+	// The extension of the iso file after download. This defaults to `iso`.
+	TargetExtension string `mapstructure:"iso_target_extension"`
 }
 
 func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
-	if c.RawSingleISOUrl == "" && len(c.ISOUrls) == 0 {
+	if len(c.ISOUrls) != 0 && c.RawSingleISOUrl != "" {
 		errs = append(
-			errs, errors.New("One of iso_url or iso_urls must be specified."))
+			errs, errors.New("Only one of iso_url or iso_urls must be specified"))
 		return
-	} else if c.RawSingleISOUrl != "" && len(c.ISOUrls) > 0 {
+	}
+
+	if c.RawSingleISOUrl != "" {
+		// make sure only array is set
+		c.ISOUrls = append([]string{c.RawSingleISOUrl}, c.ISOUrls...)
+		c.RawSingleISOUrl = ""
+	}
+	if len(c.ISOUrls) == 0 {
 		errs = append(
-			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
+			errs, errors.New("One of iso_url or iso_urls must be specified"))
 		return
-	} else if c.RawSingleISOUrl != "" {
-		c.ISOUrls = []string{c.RawSingleISOUrl}
 	}
 
-	if c.ISOChecksumType == "" {
-		errs = append(
-			errs, errors.New("The iso_checksum_type must be specified."))
-	} else {
-		c.ISOChecksumType = strings.ToLower(c.ISOChecksumType)
-		if c.ISOChecksumType != "none" {
-			if c.ISOChecksum == "" && c.ISOChecksumURL == "" {
-				errs = append(
-					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
-				return warnings, errs
-			} else {
-				if h := HashForType(c.ISOChecksumType); h == nil {
-					errs = append(
-						errs, fmt.Errorf("Unsupported checksum type: %s", c.ISOChecksumType))
-					return warnings, errs
-				}
-
-				// If iso_checksum has no value use iso_checksum_url instead.
-				if c.ISOChecksum == "" {
-					u, err := url.Parse(c.ISOChecksumURL)
-					if err != nil {
-						errs = append(errs,
-							fmt.Errorf("Error parsing checksum: %s", err))
-						return warnings, errs
-					}
-					switch u.Scheme {
-					case "http", "https":
-						res, err := http.Get(c.ISOChecksumURL)
-						c.ISOChecksum = ""
-						if err != nil {
-							errs = append(errs,
-								fmt.Errorf("Error getting checksum from url: %s", c.ISOChecksumURL))
-							return warnings, errs
-						}
-						defer res.Body.Close()
-						err = c.parseCheckSumFile(bufio.NewReader(res.Body))
-						if err != nil {
-							errs = append(errs, err)
-							return warnings, errs
-						}
-					case "file":
-						path := u.Path
-
-						if runtime.GOOS == "windows" && len(path) > 2 && path[0] == '/' && path[2] == ':' {
-							path = strings.TrimLeft(path, "/")
-						}
-
-						file, err := os.Open(path)
-						if err != nil {
-							errs = append(errs, err)
-							return warnings, errs
-						}
-						err = c.parseCheckSumFile(bufio.NewReader(file))
-						if err != nil {
-							errs = append(errs, err)
-							return warnings, errs
-						}
-
-					case "":
-						break
-					default:
-						errs = append(errs,
-							fmt.Errorf("Error parsing checksum url: %s, scheme not supported: %s", c.ISOChecksumURL, u.Scheme))
-						return warnings, errs
-					}
-				}
-			}
-		}
-	}
-
-	c.ISOChecksum = strings.ToLower(c.ISOChecksum)
-
-	for i, url := range c.ISOUrls {
-		url, err := DownloadableURL(url)
-		if err != nil {
-			errs = append(
-				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
-		} else {
-			c.ISOUrls[i] = url
-		}
-	}
+	c.ISOChecksumType = strings.ToLower(c.ISOChecksumType)
 
 	if c.TargetExtension == "" {
 		c.TargetExtension = "iso"
@@ -130,57 +138,51 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 		warnings = append(warnings,
 			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
 				"a checksum is highly recommended.")
+		return warnings, errs
+	}
+
+	if c.ISOChecksumURL != "" {
+		if c.ISOChecksum != "" {
+			warnings = append(warnings, "You have provided both an "+
+				"iso_checksum and an iso_checksum_url. Discarding the "+
+				"iso_checksum_url and using the checksum.")
+		} else {
+			if strings.HasSuffix(strings.ToLower(c.ISOChecksumURL), ".iso") {
+				errs = append(errs, fmt.Errorf("Error parsing checksum:"+
+					" .iso is not a valid checksum extension"))
+			}
+			// go-getter auto-parses checksum files
+			c.ISOChecksumType = "file"
+			c.ISOChecksum = c.ISOChecksumURL
+		}
+	}
+
+	if c.ISOChecksum == "" {
+		errs = append(errs, fmt.Errorf("A checksum must be specified"))
+	}
+	if c.ISOChecksumType == "file" {
+		u, err := url.Parse(c.ISOUrls[0])
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Printf("get working directory: %v", err)
+			// here we ignore the error in case the
+			// working directory is not needed.
+		}
+		gc := getter.Client{
+			Dst:     "no-op",
+			Src:     u.String(),
+			Pwd:     wd,
+			Dir:     false,
+			Getters: getter.Getters,
+		}
+		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
+		if cksum == nil || err != nil {
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+		} else {
+			c.ISOChecksumType = cksum.Type
+			c.ISOChecksum = hex.EncodeToString(cksum.Value)
+		}
 	}
 
 	return warnings, errs
-}
-
-func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
-	u, err := url.Parse(c.ISOUrls[0])
-	if err != nil {
-		return err
-	}
-
-	checksumurl, err := url.Parse(c.ISOChecksumURL)
-	if err != nil {
-		return err
-	}
-
-	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), u.Path)
-	if err != nil {
-		return err
-	}
-
-	filename := filepath.Base(u.Path)
-
-	errNotFound := fmt.Errorf("No checksum for %q or %q found at: %s", filename, relpath, c.ISOChecksumURL)
-	for {
-		line, err := rd.ReadString('\n')
-		if err != nil && line == "" {
-			break
-		}
-		parts := strings.Fields(line)
-		if len(parts) < 2 {
-			continue
-		}
-		if strings.ToLower(parts[0]) == c.ISOChecksumType {
-			// BSD-style checksum
-			if parts[1] == fmt.Sprintf("(%s)", filename) || parts[1] == fmt.Sprintf("(%s)", relpath) ||
-				parts[1] == fmt.Sprintf("(./%s)", relpath) {
-				c.ISOChecksum = parts[3]
-				return nil
-			}
-		} else {
-			// Standard checksum
-			if parts[1][0] == '*' {
-				// Binary mode
-				parts[1] = parts[1][1:]
-			}
-			if parts[1] == filename || parts[1] == relpath || parts[1] == "./"+relpath {
-				c.ISOChecksum = parts[0]
-				return nil
-			}
-		}
-	}
-	return errNotFound
 }

@@ -2,10 +2,12 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step uploads a file containing the VirtualBox version, which
@@ -14,7 +16,7 @@ type StepUploadVersion struct {
 	Path string
 }
 
-func (s *StepUploadVersion) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

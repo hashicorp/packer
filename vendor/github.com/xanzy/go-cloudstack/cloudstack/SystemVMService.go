@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,22 +24,40 @@ import (
 	"strings"
 )
 
-type StartSystemVmParams struct {
+type ChangeServiceForSystemVmParams struct {
 	p map[string]interface{}
 }
 
-func (p *StartSystemVmParams) toURLValues() url.Values {
+func (p *ChangeServiceForSystemVmParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
+	if v, found := p.p["details"]; found {
+		i := 0
+		for k, vv := range v.(map[string]string) {
+			u.Set(fmt.Sprintf("details[%d].%s", i, k), vv)
+			i++
+		}
+	}
 	if v, found := p.p["id"]; found {
 		u.Set("id", v.(string))
+	}
+	if v, found := p.p["serviceofferingid"]; found {
+		u.Set("serviceofferingid", v.(string))
 	}
 	return u
 }
 
-func (p *StartSystemVmParams) SetId(v string) {
+func (p *ChangeServiceForSystemVmParams) SetDetails(v map[string]string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["details"] = v
+	return
+}
+
+func (p *ChangeServiceForSystemVmParams) SetId(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
@@ -47,287 +65,70 @@ func (p *StartSystemVmParams) SetId(v string) {
 	return
 }
 
-// You should always use this function to get a new StartSystemVmParams instance,
+func (p *ChangeServiceForSystemVmParams) SetServiceofferingid(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["serviceofferingid"] = v
+	return
+}
+
+// You should always use this function to get a new ChangeServiceForSystemVmParams instance,
 // as then you are sure you have configured all required params
-func (s *SystemVMService) NewStartSystemVmParams(id string) *StartSystemVmParams {
-	p := &StartSystemVmParams{}
+func (s *SystemVMService) NewChangeServiceForSystemVmParams(id string, serviceofferingid string) *ChangeServiceForSystemVmParams {
+	p := &ChangeServiceForSystemVmParams{}
 	p.p = make(map[string]interface{})
 	p.p["id"] = id
+	p.p["serviceofferingid"] = serviceofferingid
 	return p
 }
 
-// Starts a system virtual machine.
-func (s *SystemVMService) StartSystemVm(p *StartSystemVmParams) (*StartSystemVmResponse, error) {
-	resp, err := s.cs.newRequest("startSystemVm", p.toURLValues())
+// Changes the service offering for a system vm (console proxy or secondary storage). The system vm must be in a "Stopped" state for this command to take effect.
+func (s *SystemVMService) ChangeServiceForSystemVm(p *ChangeServiceForSystemVmParams) (*ChangeServiceForSystemVmResponse, error) {
+	resp, err := s.cs.newRequest("changeServiceForSystemVm", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r StartSystemVmResponse
+	var r ChangeServiceForSystemVmResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
 
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
 	return &r, nil
 }
 
-type StartSystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
-}
-
-type RebootSystemVmParams struct {
-	p map[string]interface{}
-}
-
-func (p *RebootSystemVmParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *RebootSystemVmParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new RebootSystemVmParams instance,
-// as then you are sure you have configured all required params
-func (s *SystemVMService) NewRebootSystemVmParams(id string) *RebootSystemVmParams {
-	p := &RebootSystemVmParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Reboots a system VM.
-func (s *SystemVMService) RebootSystemVm(p *RebootSystemVmParams) (*RebootSystemVmResponse, error) {
-	resp, err := s.cs.newRequest("rebootSystemVm", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r RebootSystemVmResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type RebootSystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
-}
-
-type StopSystemVmParams struct {
-	p map[string]interface{}
-}
-
-func (p *StopSystemVmParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["forced"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("forced", vv)
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	return u
-}
-
-func (p *StopSystemVmParams) SetForced(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["forced"] = v
-	return
-}
-
-func (p *StopSystemVmParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-// You should always use this function to get a new StopSystemVmParams instance,
-// as then you are sure you have configured all required params
-func (s *SystemVMService) NewStopSystemVmParams(id string) *StopSystemVmParams {
-	p := &StopSystemVmParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Stops a system VM.
-func (s *SystemVMService) StopSystemVm(p *StopSystemVmParams) (*StopSystemVmResponse, error) {
-	resp, err := s.cs.newRequest("stopSystemVm", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r StopSystemVmResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
-	// If we have a async client, we need to wait for the async result
-	if s.cs.async {
-		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
-		if err != nil {
-			if err == AsyncTimeoutErr {
-				return &r, err
-			}
-			return nil, err
-		}
-
-		b, err = getRawValue(b)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := json.Unmarshal(b, &r); err != nil {
-			return nil, err
-		}
-	}
-	return &r, nil
-}
-
-type StopSystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+type ChangeServiceForSystemVmResponse struct {
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }
 
 type DestroySystemVmParams struct {
@@ -393,39 +194,41 @@ func (s *SystemVMService) DestroySystemVm(p *DestroySystemVmParams) (*DestroySys
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type DestroySystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }
 
 type ListSystemVmsParams struct {
@@ -578,7 +381,7 @@ func (s *SystemVMService) GetSystemVmID(name string, opts ...OptionFunc) (string
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -628,7 +431,7 @@ func (s *SystemVMService) GetSystemVmByID(id string, opts ...OptionFunc) (*Syste
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -665,6 +468,7 @@ func (s *SystemVMService) ListSystemVms(p *ListSystemVmsParams) (*ListSystemVmsR
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -674,34 +478,36 @@ type ListSystemVmsResponse struct {
 }
 
 type SystemVm struct {
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }
 
 type MigrateSystemVmParams struct {
@@ -779,76 +585,59 @@ func (s *SystemVMService) MigrateSystemVm(p *MigrateSystemVmParams) (*MigrateSys
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type MigrateSystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }
 
-type ChangeServiceForSystemVmParams struct {
+type RebootSystemVmParams struct {
 	p map[string]interface{}
 }
 
-func (p *ChangeServiceForSystemVmParams) toURLValues() url.Values {
+func (p *RebootSystemVmParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
 	}
-	if v, found := p.p["details"]; found {
-		i := 0
-		for k, vv := range v.(map[string]string) {
-			u.Set(fmt.Sprintf("details[%d].key", i), k)
-			u.Set(fmt.Sprintf("details[%d].value", i), vv)
-			i++
-		}
-	}
 	if v, found := p.p["id"]; found {
 		u.Set("id", v.(string))
-	}
-	if v, found := p.p["serviceofferingid"]; found {
-		u.Set("serviceofferingid", v.(string))
 	}
 	return u
 }
 
-func (p *ChangeServiceForSystemVmParams) SetDetails(v map[string]string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["details"] = v
-	return
-}
-
-func (p *ChangeServiceForSystemVmParams) SetId(v string) {
+func (p *RebootSystemVmParams) SetId(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
@@ -856,67 +645,81 @@ func (p *ChangeServiceForSystemVmParams) SetId(v string) {
 	return
 }
 
-func (p *ChangeServiceForSystemVmParams) SetServiceofferingid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["serviceofferingid"] = v
-	return
-}
-
-// You should always use this function to get a new ChangeServiceForSystemVmParams instance,
+// You should always use this function to get a new RebootSystemVmParams instance,
 // as then you are sure you have configured all required params
-func (s *SystemVMService) NewChangeServiceForSystemVmParams(id string, serviceofferingid string) *ChangeServiceForSystemVmParams {
-	p := &ChangeServiceForSystemVmParams{}
+func (s *SystemVMService) NewRebootSystemVmParams(id string) *RebootSystemVmParams {
+	p := &RebootSystemVmParams{}
 	p.p = make(map[string]interface{})
 	p.p["id"] = id
-	p.p["serviceofferingid"] = serviceofferingid
 	return p
 }
 
-// Changes the service offering for a system vm (console proxy or secondary storage). The system vm must be in a "Stopped" state for this command to take effect.
-func (s *SystemVMService) ChangeServiceForSystemVm(p *ChangeServiceForSystemVmParams) (*ChangeServiceForSystemVmResponse, error) {
-	resp, err := s.cs.newRequest("changeServiceForSystemVm", p.toURLValues())
+// Reboots a system VM.
+func (s *SystemVMService) RebootSystemVm(p *RebootSystemVmParams) (*RebootSystemVmResponse, error) {
+	resp, err := s.cs.newRequest("rebootSystemVm", p.toURLValues())
 	if err != nil {
 		return nil, err
 	}
 
-	var r ChangeServiceForSystemVmResponse
+	var r RebootSystemVmResponse
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
 	return &r, nil
 }
 
-type ChangeServiceForSystemVmResponse struct {
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+type RebootSystemVmResponse struct {
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }
 
 type ScaleSystemVmParams struct {
@@ -931,8 +734,7 @@ func (p *ScaleSystemVmParams) toURLValues() url.Values {
 	if v, found := p.p["details"]; found {
 		i := 0
 		for k, vv := range v.(map[string]string) {
-			u.Set(fmt.Sprintf("details[%d].key", i), k)
-			u.Set(fmt.Sprintf("details[%d].value", i), vv)
+			u.Set(fmt.Sprintf("details[%d].%s", i, k), vv)
 			i++
 		}
 	}
@@ -1010,37 +812,251 @@ func (s *SystemVMService) ScaleSystemVm(p *ScaleSystemVmParams) (*ScaleSystemVmR
 			return nil, err
 		}
 	}
+
 	return &r, nil
 }
 
 type ScaleSystemVmResponse struct {
-	JobID                string `json:"jobid,omitempty"`
-	Activeviewersessions int    `json:"activeviewersessions,omitempty"`
-	Created              string `json:"created,omitempty"`
-	Dns1                 string `json:"dns1,omitempty"`
-	Dns2                 string `json:"dns2,omitempty"`
-	Gateway              string `json:"gateway,omitempty"`
-	Hostid               string `json:"hostid,omitempty"`
-	Hostname             string `json:"hostname,omitempty"`
-	Hypervisor           string `json:"hypervisor,omitempty"`
-	Id                   string `json:"id,omitempty"`
-	Jobid                string `json:"jobid,omitempty"`
-	Jobstatus            int    `json:"jobstatus,omitempty"`
-	Linklocalip          string `json:"linklocalip,omitempty"`
-	Linklocalmacaddress  string `json:"linklocalmacaddress,omitempty"`
-	Linklocalnetmask     string `json:"linklocalnetmask,omitempty"`
-	Name                 string `json:"name,omitempty"`
-	Networkdomain        string `json:"networkdomain,omitempty"`
-	Podid                string `json:"podid,omitempty"`
-	Privateip            string `json:"privateip,omitempty"`
-	Privatemacaddress    string `json:"privatemacaddress,omitempty"`
-	Privatenetmask       string `json:"privatenetmask,omitempty"`
-	Publicip             string `json:"publicip,omitempty"`
-	Publicmacaddress     string `json:"publicmacaddress,omitempty"`
-	Publicnetmask        string `json:"publicnetmask,omitempty"`
-	State                string `json:"state,omitempty"`
-	Systemvmtype         string `json:"systemvmtype,omitempty"`
-	Templateid           string `json:"templateid,omitempty"`
-	Zoneid               string `json:"zoneid,omitempty"`
-	Zonename             string `json:"zonename,omitempty"`
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
+}
+
+type StartSystemVmParams struct {
+	p map[string]interface{}
+}
+
+func (p *StartSystemVmParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *StartSystemVmParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new StartSystemVmParams instance,
+// as then you are sure you have configured all required params
+func (s *SystemVMService) NewStartSystemVmParams(id string) *StartSystemVmParams {
+	p := &StartSystemVmParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Starts a system virtual machine.
+func (s *SystemVMService) StartSystemVm(p *StartSystemVmParams) (*StartSystemVmResponse, error) {
+	resp, err := s.cs.newRequest("startSystemVm", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r StartSystemVmResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type StartSystemVmResponse struct {
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
+}
+
+type StopSystemVmParams struct {
+	p map[string]interface{}
+}
+
+func (p *StopSystemVmParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["forced"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("forced", vv)
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	return u
+}
+
+func (p *StopSystemVmParams) SetForced(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["forced"] = v
+	return
+}
+
+func (p *StopSystemVmParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+// You should always use this function to get a new StopSystemVmParams instance,
+// as then you are sure you have configured all required params
+func (s *SystemVMService) NewStopSystemVmParams(id string) *StopSystemVmParams {
+	p := &StopSystemVmParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Stops a system VM.
+func (s *SystemVMService) StopSystemVm(p *StopSystemVmParams) (*StopSystemVmResponse, error) {
+	resp, err := s.cs.newRequest("stopSystemVm", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r StopSystemVmResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	// If we have a async client, we need to wait for the async result
+	if s.cs.async {
+		b, err := s.cs.GetAsyncJobResult(r.JobID, s.cs.timeout)
+		if err != nil {
+			if err == AsyncTimeoutErr {
+				return &r, err
+			}
+			return nil, err
+		}
+
+		b, err = getRawValue(b)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(b, &r); err != nil {
+			return nil, err
+		}
+	}
+
+	return &r, nil
+}
+
+type StopSystemVmResponse struct {
+	Activeviewersessions int      `json:"activeviewersessions"`
+	Created              string   `json:"created"`
+	Dns1                 string   `json:"dns1"`
+	Dns2                 string   `json:"dns2"`
+	Gateway              string   `json:"gateway"`
+	Guestvlan            string   `json:"guestvlan"`
+	Hostid               string   `json:"hostid"`
+	Hostname             string   `json:"hostname"`
+	Hypervisor           string   `json:"hypervisor"`
+	Id                   string   `json:"id"`
+	JobID                string   `json:"jobid"`
+	Jobstatus            int      `json:"jobstatus"`
+	Linklocalip          string   `json:"linklocalip"`
+	Linklocalmacaddress  string   `json:"linklocalmacaddress"`
+	Linklocalnetmask     string   `json:"linklocalnetmask"`
+	Name                 string   `json:"name"`
+	Networkdomain        string   `json:"networkdomain"`
+	Podid                string   `json:"podid"`
+	Privateip            string   `json:"privateip"`
+	Privatemacaddress    string   `json:"privatemacaddress"`
+	Privatenetmask       string   `json:"privatenetmask"`
+	Publicip             string   `json:"publicip"`
+	Publicmacaddress     string   `json:"publicmacaddress"`
+	Publicnetmask        string   `json:"publicnetmask"`
+	Publicvlan           []string `json:"publicvlan"`
+	State                string   `json:"state"`
+	Systemvmtype         string   `json:"systemvmtype"`
+	Templateid           string   `json:"templateid"`
+	Zoneid               string   `json:"zoneid"`
+	Zonename             string   `json:"zonename"`
 }

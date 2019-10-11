@@ -83,7 +83,7 @@ func decodePkcs8ShroudedKeyBag(asn1Data, password []byte) (privateKey interface{
 
 	ret := new(asn1.RawValue)
 	if err = unmarshal(pkData, ret); err != nil {
-		return nil, errors.New("pkcs12: error unmarshaling decrypted private key: " + err.Error())
+		return nil, errors.New("pkcs12: error unmarshalling decrypted private key: " + err.Error())
 	}
 
 	if privateKey, err = x509.ParsePKCS8PrivateKey(pkData); err != nil {

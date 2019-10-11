@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type StepModifyAMIAttributes struct {
@@ -21,18 +22,11 @@ type StepModifyAMIAttributes struct {
 	Ctx            interpolate.Context
 }
 
-func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-
-	var sourceAMI string
-	if rawSourceAMI, hasSourceAMI := state.GetOk("source_image"); hasSourceAMI {
-		sourceAMI = *rawSourceAMI.(*ec2.Image).ImageId
-	} else {
-		sourceAMI = ""
-	}
 	snapshots := state.Get("snapshots").(map[string][]string)
 
 	// Determine if there is any work to do.
@@ -49,10 +43,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 	}
 
 	var err error
-	s.Ctx.Data = &BuildInfoTemplate{
-		SourceAMI:   sourceAMI,
-		BuildRegion: *ec2conn.Config.Region,
-	}
+	s.Ctx.Data = extractBuildInfo(*ec2conn.Config.Region, state)
 	s.Description, err = interpolate.Render(s.Description, &s.Ctx)
 	if err != nil {
 		err = fmt.Errorf("Error interpolating AMI description: %s", err)

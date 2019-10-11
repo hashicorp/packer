@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -200,6 +201,43 @@ func TestFuncTemplatePath(t *testing.T) {
 	}
 }
 
+func TestFuncSplit(t *testing.T) {
+	cases := []struct {
+		Input         string
+		Output        string
+		ErrorExpected bool
+	}{
+		{
+			`{{split build_name "-" 0}}`,
+			"foo",
+			false,
+		},
+		{
+			`{{split build_name "-" 1}}`,
+			"bar",
+			false,
+		},
+		{
+			`{{split build_name "-" 2}}`,
+			"",
+			true,
+		},
+	}
+
+	ctx := &Context{BuildName: "foo-bar"}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if (err == nil) == tc.ErrorExpected {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
 func TestFuncTimestamp(t *testing.T) {
 	expected := strconv.FormatInt(InitTime.Unix(), 10)
 
@@ -276,5 +314,50 @@ func TestFuncPackerVersion(t *testing.T) {
 	if !strings.HasPrefix(result, version.Version) {
 		t.Fatalf("Expected input to include: %s\n\nGot: %s",
 			version.Version, result)
+	}
+}
+
+func TestReplaceFuncs(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+
+		{
+			`{{ "foo-bar-baz" | replace "-" "/" 1}}`,
+			`foo/bar-baz`,
+		},
+
+		{
+			`{{ replace "-" "/" 1 "foo-bar-baz" }}`,
+			`foo/bar-baz`,
+		},
+
+		{
+			`{{ "I Am Henry VIII" | replace_all " " "-" }}`,
+			`I-Am-Henry-VIII`,
+		},
+
+		{
+			`{{ replace_all " " "-" "I Am Henry VIII" }}`,
+			`I-Am-Henry-VIII`,
+		},
+	}
+
+	ctx := &Context{
+		UserVariables: map[string]string{
+			"fee": "-foo-",
+		},
+	}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if diff := cmp.Diff(tc.Output, result); diff != "" {
+			t.Fatalf("Unexpected output: %s", diff)
+		}
 	}
 }

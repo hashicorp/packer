@@ -10,7 +10,9 @@ import (
 
 func testConfig() *Config {
 	return &Config{
-		SSHUsername: "root",
+		SSH: SSH{
+			SSHUsername: "root",
+		},
 	}
 }
 
@@ -41,8 +43,10 @@ func TestConfig_badtype(t *testing.T) {
 
 func TestConfig_winrm_noport(t *testing.T) {
 	c := &Config{
-		Type:      "winrm",
-		WinRMUser: "admin",
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser: "admin",
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
@@ -56,9 +60,11 @@ func TestConfig_winrm_noport(t *testing.T) {
 
 func TestConfig_winrm_noport_ssl(t *testing.T) {
 	c := &Config{
-		Type:        "winrm",
-		WinRMUser:   "admin",
-		WinRMUseSSL: true,
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser:   "admin",
+			WinRMUseSSL: true,
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
@@ -72,9 +78,11 @@ func TestConfig_winrm_noport_ssl(t *testing.T) {
 
 func TestConfig_winrm_port(t *testing.T) {
 	c := &Config{
-		Type:      "winrm",
-		WinRMUser: "admin",
-		WinRMPort: 5509,
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser: "admin",
+			WinRMPort: 5509,
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
@@ -88,10 +96,12 @@ func TestConfig_winrm_port(t *testing.T) {
 
 func TestConfig_winrm_port_ssl(t *testing.T) {
 	c := &Config{
-		Type:        "winrm",
-		WinRMUser:   "admin",
-		WinRMPort:   5510,
-		WinRMUseSSL: true,
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser:   "admin",
+			WinRMPort:   5510,
+			WinRMUseSSL: true,
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
@@ -105,9 +115,11 @@ func TestConfig_winrm_port_ssl(t *testing.T) {
 
 func TestConfig_winrm_use_ntlm(t *testing.T) {
 	c := &Config{
-		Type:         "winrm",
-		WinRMUser:    "admin",
-		WinRMUseNTLM: true,
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser:    "admin",
+			WinRMUseNTLM: true,
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)
@@ -128,8 +140,10 @@ func TestConfig_winrm_use_ntlm(t *testing.T) {
 
 func TestConfig_winrm(t *testing.T) {
 	c := &Config{
-		Type:      "winrm",
-		WinRMUser: "admin",
+		Type: "winrm",
+		WinRM: WinRM{
+			WinRMUser: "admin",
+		},
 	}
 	if err := c.Prepare(testContext(t)); len(err) > 0 {
 		t.Fatalf("bad: %#v", err)

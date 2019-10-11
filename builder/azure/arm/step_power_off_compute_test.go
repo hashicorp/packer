@@ -1,23 +1,24 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepPowerOffComputeShouldFailIfPowerOffFails(t *testing.T) {
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(string, string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		powerOff: func(context.Context, string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepPowerOffCompute()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -29,14 +30,14 @@ func TestStepPowerOffComputeShouldFailIfPowerOffFails(t *testing.T) {
 
 func TestStepPowerOffComputeShouldPassIfPowerOffPasses(t *testing.T) {
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(string, string, <-chan struct{}) error { return nil },
+		powerOff: func(context.Context, string, string) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepPowerOffCompute()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -51,7 +52,7 @@ func TestStepPowerOffComputeShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualComputeName string
 
 	var testSubject = &StepPowerOffCompute{
-		powerOff: func(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
+		powerOff: func(ctx context.Context, resourceGroupName string, computeName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 
@@ -62,7 +63,7 @@ func TestStepPowerOffComputeShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepPowerOffCompute()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

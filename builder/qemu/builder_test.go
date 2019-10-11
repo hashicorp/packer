@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -94,46 +95,6 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_BootWait(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test a default boot_wait
-	delete(config, "boot_wait")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.RawBootWait != "10s" {
-		t.Fatalf("bad value: %s", b.config.RawBootWait)
-	}
-
-	// Test with a bad boot_wait
-	config["boot_wait"] = "this is not good"
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	config["boot_wait"] = "5s"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -208,11 +169,11 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 
-	if b.config.DiskSize != 40960 {
-		t.Fatalf("bad size: %d", b.config.DiskSize)
+	if b.config.DiskSize != "40960M" {
+		t.Fatalf("bad size: %s", b.config.DiskSize)
 	}
 
-	config["disk_size"] = 60000
+	config["disk_size"] = "60000M"
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -222,8 +183,38 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.DiskSize != 60000 {
-		t.Fatalf("bad size: %d", b.config.DiskSize)
+	if b.config.DiskSize != "60000M" {
+		t.Fatalf("bad size: %s", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["disk_additional_size"] = []string{"1M"}
+	config["disk_image"] = true
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+
+	delete(config, "disk_image")
+	config["disk_additional_size"] = []string{"1M"}
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.AdditionalDiskSize[0] != "1M" {
+		t.Fatalf("bad size: %s", b.config.AdditionalDiskSize)
 	}
 }
 
@@ -254,6 +245,49 @@ func TestBuilderPrepare_Format(t *testing.T) {
 
 	// Good
 	config["format"] = "raw"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_UseBackingFile(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["use_backing_file"] = true
+
+	// Bad: iso_url is not a disk_image
+	config["disk_image"] = false
+	config["format"] = "qcow2"
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad: format is not 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "raw"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good: iso_url is a disk image and format is 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "qcow2"
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -563,5 +597,26 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 
 	if !reflect.DeepEqual(b.config.QemuArgs, expected) {
 		t.Fatalf("bad: %#v", b.config.QemuArgs)
+	}
+}
+
+func TestBuilderPrepare_VNCPassword(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["vnc_use_password"] = true
+	config["output_directory"] = "not-a-real-directory"
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	expected := filepath.Join("not-a-real-directory", "packer-foo.monitor")
+	if !reflect.DeepEqual(b.config.QMPSocketPath, expected) {
+		t.Fatalf("Bad QMP socket Path: %s", b.config.QMPSocketPath)
 	}
 }

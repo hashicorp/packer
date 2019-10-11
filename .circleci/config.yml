@@ -1,0 +1,202 @@
+orbs:
+  win: circleci/windows@1.0.0
+version: 2.1
+
+executors:
+  golang:
+    docker:
+      - image: circleci/golang:1.13
+  darwin:
+    macos:
+      xcode: "9.0"
+
+commands:
+  install-go-run-tests-unix:
+    parameters:
+      GOOS:
+        type: string
+      GOVERSION:
+        type: string
+    steps:
+      - checkout
+      - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.<< parameters.GOOS >>-amd64.tar.gz | tar -C ~/ -xz
+      - run: ~/go/bin/go test ./...
+  install-go-run-tests-windows:
+    parameters:
+      GOVERSION:
+        type: string
+    steps:
+      - checkout
+      - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.windows-amd64.zip --output ~/go<< parameters.GOVERSION >>.windows-amd64.zip
+      - run: unzip ~/go<< parameters.GOVERSION >>.windows-amd64.zip -d ~/
+      - run: ~/go/bin/go test ./...
+  build-and-persist-packer-binary:
+    parameters:
+      GOOS:
+        type: string
+    steps:
+      - checkout
+      - run: GOOS=<< parameters.GOOS >> go build -ldflags="-s -w" -o ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH) .
+      - run: zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH).zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
+      - run: rm ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./pkg/
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+jobs:
+  test-linux:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - checkout
+      - run: make ci
+  test-darwin:
+    executor: darwin
+    working_directory: ~/go/src/github.com/hashicorp/packer
+    environment:
+      GO111MODULE: "off"
+    steps:
+      - install-go-run-tests-unix:
+          GOOS: darwin
+          GOVERSION: "1.13"
+  test-windows:
+    executor:
+      name: win/vs2019
+      shell: bash.exe
+    steps:
+      - install-go-run-tests-windows:
+          GOVERSION: "1.13"
+  check-vendor-vs-mod:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    environment:
+      GO111MODULE: "off"
+    steps:
+      - checkout
+      - run: GO111MODULE=on go run . --help
+      - run: make check-vendor-vs-mod
+  check-fmt:
+    executor: golang
+    steps:
+      - checkout
+      - run: make fmt-check
+  check-generate:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - checkout
+      - run: make generate-check
+  build_linux:
+    executor: golang
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: linux
+  build_windows:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: windows
+  build_darwin:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: darwin
+  build_freebsd:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: freebsd
+  build_solaris:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: solaris
+  build_openbsd:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: openbsd
+  store_artifacts:
+    executor: golang
+    steps:
+      - attach_workspace:
+          at: .
+      - store_artifacts:
+          path: ./pkg/
+          destination: /
+  publish-github-tag-release:
+    docker:
+      - image: cibuilds/github:0.10
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - attach_workspace:
+          at: .
+      - run: |
+          ghr -prerelease -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-linux
+      - test-darwin
+      - test-windows
+  check-code:
+    jobs:
+      - check-vendor-vs-mod
+      - check-fmt
+      - check-generate
+  build_packer_binaries:
+    jobs:
+      - build_linux:
+          filters:
+            tags:
+              only: /.*/
+      - build_darwin:
+          filters:
+            tags:
+              only: /.*/
+      - build_windows:
+          filters:
+            tags:
+              only: /.*/
+      - build_freebsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_openbsd:
+          filters:
+            tags:
+              only: /.*/
+      - build_solaris:
+          filters:
+            tags:
+              only: /.*/
+      - store_artifacts:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
+      - publish-github-tag-release:
+          requires:
+            - build_linux
+            - build_darwin
+            - build_windows
+            - build_freebsd
+            - build_openbsd
+            - build_solaris
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: nightly

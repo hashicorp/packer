@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 const (
@@ -39,7 +40,7 @@ func (ps *PowerShellCmd) Run(fileContents string, params ...string) error {
 func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, error) {
 	path, err := ps.getPowerShellPath()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Cannot find PowerShell in the path")
 	}
 
 	filename, err := saveScript(fileContents)
@@ -121,7 +122,7 @@ func (ps *PowerShellCmd) getPowerShellPath() (string, error) {
 }
 
 func saveScript(fileContents string) (string, error) {
-	file, err := ioutil.TempFile(os.TempDir(), "ps")
+	file, err := tmp.File("powershell")
 	if err != nil {
 		return "", err
 	}
@@ -239,8 +240,8 @@ param([string]$moduleName)
 
 func HasVirtualMachineVirtualizationExtensions() (bool, error) {
 
-	var script = `	
-(GET-Command Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
+	var script = `
+(GET-Command Hyper-V\Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
 `
 
 	var ps PowerShellCmd
@@ -258,7 +259,7 @@ func DoesVirtualMachineExist(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-return (Get-VM | ?{$_.Name -eq $vmName}) -ne $null
+return (Hyper-V\Get-VM | ?{$_.Name -eq $vmName}) -ne $null
 `
 
 	var ps PowerShellCmd
@@ -276,7 +277,7 @@ func DoesVirtualMachineSnapshotExist(vmName string, snapshotName string) (bool, 
 
 	var script = `
 param([string]$vmName, [string]$snapshotName)
-return (Get-VMSnapshot -VMName $vmName | ?{$_.Name -eq $snapshotName}) -ne $null
+return (Hyper-V\Get-VMSnapshot -VMName $vmName | ?{$_.Name -eq $snapshotName}) -ne $null
 `
 
 	var ps PowerShellCmd
@@ -294,7 +295,7 @@ func IsVirtualMachineOn(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 `
 
@@ -312,7 +313,7 @@ $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 func GetVirtualMachineGeneration(vmName string) (uint, error) {
 	var script = `
 param([string]$vmName)
-$generation = Get-Vm -Name $vmName | %{$_.Generation}
+$generation = Hyper-V\Get-Vm -Name $vmName | %{$_.Generation}
 if (!$generation){
     $generation = 1
 }
@@ -344,7 +345,7 @@ param([string]$path,[string]$productKey)
 $unattend = [xml](Get-Content -Path $path)
 $ns = @{ un = 'urn:schemas-microsoft-com:unattend' }
 
-$setupNode = $unattend | 
+$setupNode = $unattend |
   Select-Xml -XPath '//un:settings[@pass = "specialize"]/un:component[@name = "Microsoft-Windows-Shell-Setup"]' -Namespace $ns |
   Select-Object -ExpandProperty Node
 

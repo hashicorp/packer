@@ -1,9 +1,11 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
+
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type Box struct {
@@ -23,7 +25,7 @@ func (b *Box) HasVersion(version string) (bool, *Version) {
 type stepVerifyBox struct {
 }
 
-func (s *stepVerifyBox) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepVerifyBox) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
@@ -41,6 +43,9 @@ func (s *stepVerifyBox) Run(state multistep.StateBag) multistep.StepAction {
 	if resp.StatusCode != 200 {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+		}
 		state.Put("error", fmt.Errorf("Error retrieving box: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}

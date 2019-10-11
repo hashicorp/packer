@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package common
 
 import (
@@ -17,9 +19,26 @@ const (
 
 // ToolsConfig contains the builder configuration related to Parallels Tools.
 type ToolsConfig struct {
-	ParallelsToolsFlavor    string `mapstructure:"parallels_tools_flavor"`
-	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path"`
-	ParallelsToolsMode      string `mapstructure:"parallels_tools_mode"`
+	// The flavor of the Parallels Tools ISO to
+	// install into the VM. Valid values are "win", "lin", "mac", "os2"
+	// and "other". This can be omitted only if parallels_tools_mode
+	// is "disable".
+	ParallelsToolsFlavor string `mapstructure:"parallels_tools_flavor" required:"true"`
+	// The path in the virtual machine to
+	// upload Parallels Tools. This only takes effect if parallels_tools_mode
+	// is "upload". This is a configuration
+	// template that has a single
+	// valid variable: Flavor, which will be the value of
+	// parallels_tools_flavor. By default this is "prl-tools-{{.Flavor}}.iso"
+	// which should upload into the login directory of the user.
+	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path" required:"false"`
+	// The method by which Parallels Tools are
+	// made available to the guest for installation. Valid options are "upload",
+	// "attach", or "disable". If the mode is "attach" the Parallels Tools ISO will
+	// be attached as a CD device to the virtual machine. If the mode is "upload"
+	// the Parallels Tools ISO will be uploaded to the path specified by
+	// parallels_tools_guest_path. The default value is "upload".
+	ParallelsToolsMode string `mapstructure:"parallels_tools_mode" required:"false"`
 }
 
 // Prepare validates & sets up configuration options related to Parallels Tools.

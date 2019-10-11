@@ -1,12 +1,13 @@
 package communicator
 
 import (
-	"io/ioutil"
 	"testing"
+
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 func TestPEM(t *testing.T) string {
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := tmp.File("packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

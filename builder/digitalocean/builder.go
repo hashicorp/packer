@@ -12,8 +12,8 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/oauth2"
 )
 
@@ -35,8 +35,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	return nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+	client := godo.NewClient(oauth2.NewClient(context.TODO(), &apiTokenSource{
 		AccessToken: b.config.APIToken,
 	}))
 	if b.config.APIURL != "" {
@@ -71,7 +71,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -86,18 +86,23 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepDropletInfo),
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
+			Host:      communicator.CommHost(b.config.Comm.SSHHost, "droplet_ip"),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		new(stepShutdown),
 		new(stepPowerOff),
-		new(stepSnapshot),
+		&stepSnapshot{
+			snapshotTimeout: b.config.SnapshotTimeout,
+		},
 	}
 
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -110,18 +115,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		snapshotName: state.Get("snapshot_name").(string),
-		snapshotId:   state.Get("snapshot_image_id").(int),
-		regionNames:  state.Get("regions").([]string),
-		client:       client,
+		SnapshotName: state.Get("snapshot_name").(string),
+		SnapshotId:   state.Get("snapshot_image_id").(int),
+		RegionNames:  state.Get("regions").([]string),
+		Client:       client,
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

@@ -1,15 +1,17 @@
 package lxd
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"context"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepProvision provisions the container
 type StepProvision struct{}
 
-func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -23,7 +25,7 @@ func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Provision
 	log.Println("Running the provision hook")
-	if err := hook.Run(packer.HookProvision, ui, comm, nil); err != nil {
+	if err := hook.Run(ctx, packer.HookProvision, ui, comm, nil); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

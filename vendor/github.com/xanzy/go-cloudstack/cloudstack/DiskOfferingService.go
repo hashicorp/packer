@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Sander van Harmelen
+// Copyright 2018, Sander van Harmelen
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,9 +37,25 @@ func (p *CreateDiskOfferingParams) toURLValues() url.Values {
 		vv := strconv.FormatInt(v.(int64), 10)
 		u.Set("bytesreadrate", vv)
 	}
+	if v, found := p.p["bytesreadratemax"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("bytesreadratemax", vv)
+	}
+	if v, found := p.p["bytesreadratemaxlength"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("bytesreadratemaxlength", vv)
+	}
 	if v, found := p.p["byteswriterate"]; found {
 		vv := strconv.FormatInt(v.(int64), 10)
 		u.Set("byteswriterate", vv)
+	}
+	if v, found := p.p["byteswriteratemax"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("byteswriteratemax", vv)
+	}
+	if v, found := p.p["byteswriteratemaxlength"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("byteswriteratemaxlength", vv)
 	}
 	if v, found := p.p["customized"]; found {
 		vv := strconv.FormatBool(v.(bool))
@@ -71,9 +87,25 @@ func (p *CreateDiskOfferingParams) toURLValues() url.Values {
 		vv := strconv.FormatInt(v.(int64), 10)
 		u.Set("iopsreadrate", vv)
 	}
+	if v, found := p.p["iopsreadratemax"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("iopsreadratemax", vv)
+	}
+	if v, found := p.p["iopsreadratemaxlength"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("iopsreadratemaxlength", vv)
+	}
 	if v, found := p.p["iopswriterate"]; found {
 		vv := strconv.FormatInt(v.(int64), 10)
 		u.Set("iopswriterate", vv)
+	}
+	if v, found := p.p["iopswriteratemax"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("iopswriteratemax", vv)
+	}
+	if v, found := p.p["iopswriteratemaxlength"]; found {
+		vv := strconv.FormatInt(v.(int64), 10)
+		u.Set("iopswriteratemaxlength", vv)
 	}
 	if v, found := p.p["maxiops"]; found {
 		vv := strconv.FormatInt(v.(int64), 10)
@@ -106,11 +138,43 @@ func (p *CreateDiskOfferingParams) SetBytesreadrate(v int64) {
 	return
 }
 
+func (p *CreateDiskOfferingParams) SetBytesreadratemax(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["bytesreadratemax"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetBytesreadratemaxlength(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["bytesreadratemaxlength"] = v
+	return
+}
+
 func (p *CreateDiskOfferingParams) SetByteswriterate(v int64) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
 	p.p["byteswriterate"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetByteswriteratemax(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["byteswriteratemax"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetByteswriteratemaxlength(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["byteswriteratemaxlength"] = v
 	return
 }
 
@@ -178,11 +242,43 @@ func (p *CreateDiskOfferingParams) SetIopsreadrate(v int64) {
 	return
 }
 
+func (p *CreateDiskOfferingParams) SetIopsreadratemax(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["iopsreadratemax"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetIopsreadratemaxlength(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["iopsreadratemaxlength"] = v
+	return
+}
+
 func (p *CreateDiskOfferingParams) SetIopswriterate(v int64) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
 	}
 	p.p["iopswriterate"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetIopswriteratemax(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["iopswriteratemax"] = v
+	return
+}
+
+func (p *CreateDiskOfferingParams) SetIopswriteratemaxlength(v int64) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["iopswriteratemaxlength"] = v
 	return
 }
 
@@ -255,147 +351,42 @@ func (s *DiskOfferingService) CreateDiskOffering(p *CreateDiskOfferingParams) (*
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type CreateDiskOfferingResponse struct {
-	CacheMode                 string `json:"cacheMode,omitempty"`
-	Created                   string `json:"created,omitempty"`
-	DiskBytesReadRate         int64  `json:"diskBytesReadRate,omitempty"`
-	DiskBytesWriteRate        int64  `json:"diskBytesWriteRate,omitempty"`
-	DiskIopsReadRate          int64  `json:"diskIopsReadRate,omitempty"`
-	DiskIopsWriteRate         int64  `json:"diskIopsWriteRate,omitempty"`
-	Disksize                  int64  `json:"disksize,omitempty"`
-	Displayoffering           bool   `json:"displayoffering,omitempty"`
-	Displaytext               string `json:"displaytext,omitempty"`
-	Domain                    string `json:"domain,omitempty"`
-	Domainid                  string `json:"domainid,omitempty"`
-	Hypervisorsnapshotreserve int    `json:"hypervisorsnapshotreserve,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Iscustomized              bool   `json:"iscustomized,omitempty"`
-	Iscustomizediops          bool   `json:"iscustomizediops,omitempty"`
-	Maxiops                   int64  `json:"maxiops,omitempty"`
-	Miniops                   int64  `json:"miniops,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Provisioningtype          string `json:"provisioningtype,omitempty"`
-	Storagetype               string `json:"storagetype,omitempty"`
-	Tags                      string `json:"tags,omitempty"`
-}
-
-type UpdateDiskOfferingParams struct {
-	p map[string]interface{}
-}
-
-func (p *UpdateDiskOfferingParams) toURLValues() url.Values {
-	u := url.Values{}
-	if p.p == nil {
-		return u
-	}
-	if v, found := p.p["displayoffering"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("displayoffering", vv)
-	}
-	if v, found := p.p["displaytext"]; found {
-		u.Set("displaytext", v.(string))
-	}
-	if v, found := p.p["id"]; found {
-		u.Set("id", v.(string))
-	}
-	if v, found := p.p["name"]; found {
-		u.Set("name", v.(string))
-	}
-	if v, found := p.p["sortkey"]; found {
-		vv := strconv.Itoa(v.(int))
-		u.Set("sortkey", vv)
-	}
-	return u
-}
-
-func (p *UpdateDiskOfferingParams) SetDisplayoffering(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["displayoffering"] = v
-	return
-}
-
-func (p *UpdateDiskOfferingParams) SetDisplaytext(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["displaytext"] = v
-	return
-}
-
-func (p *UpdateDiskOfferingParams) SetId(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["id"] = v
-	return
-}
-
-func (p *UpdateDiskOfferingParams) SetName(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["name"] = v
-	return
-}
-
-func (p *UpdateDiskOfferingParams) SetSortkey(v int) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["sortkey"] = v
-	return
-}
-
-// You should always use this function to get a new UpdateDiskOfferingParams instance,
-// as then you are sure you have configured all required params
-func (s *DiskOfferingService) NewUpdateDiskOfferingParams(id string) *UpdateDiskOfferingParams {
-	p := &UpdateDiskOfferingParams{}
-	p.p = make(map[string]interface{})
-	p.p["id"] = id
-	return p
-}
-
-// Updates a disk offering.
-func (s *DiskOfferingService) UpdateDiskOffering(p *UpdateDiskOfferingParams) (*UpdateDiskOfferingResponse, error) {
-	resp, err := s.cs.newRequest("updateDiskOffering", p.toURLValues())
-	if err != nil {
-		return nil, err
-	}
-
-	var r UpdateDiskOfferingResponse
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
-}
-
-type UpdateDiskOfferingResponse struct {
-	CacheMode                 string `json:"cacheMode,omitempty"`
-	Created                   string `json:"created,omitempty"`
-	DiskBytesReadRate         int64  `json:"diskBytesReadRate,omitempty"`
-	DiskBytesWriteRate        int64  `json:"diskBytesWriteRate,omitempty"`
-	DiskIopsReadRate          int64  `json:"diskIopsReadRate,omitempty"`
-	DiskIopsWriteRate         int64  `json:"diskIopsWriteRate,omitempty"`
-	Disksize                  int64  `json:"disksize,omitempty"`
-	Displayoffering           bool   `json:"displayoffering,omitempty"`
-	Displaytext               string `json:"displaytext,omitempty"`
-	Domain                    string `json:"domain,omitempty"`
-	Domainid                  string `json:"domainid,omitempty"`
-	Hypervisorsnapshotreserve int    `json:"hypervisorsnapshotreserve,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Iscustomized              bool   `json:"iscustomized,omitempty"`
-	Iscustomizediops          bool   `json:"iscustomizediops,omitempty"`
-	Maxiops                   int64  `json:"maxiops,omitempty"`
-	Miniops                   int64  `json:"miniops,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Provisioningtype          string `json:"provisioningtype,omitempty"`
-	Storagetype               string `json:"storagetype,omitempty"`
-	Tags                      string `json:"tags,omitempty"`
+	CacheMode                   string `json:"cacheMode"`
+	Created                     string `json:"created"`
+	DiskBytesReadRate           int64  `json:"diskBytesReadRate"`
+	DiskBytesReadRateMax        int64  `json:"diskBytesReadRateMax"`
+	DiskBytesReadRateMaxLength  int64  `json:"diskBytesReadRateMaxLength"`
+	DiskBytesWriteRate          int64  `json:"diskBytesWriteRate"`
+	DiskBytesWriteRateMax       int64  `json:"diskBytesWriteRateMax"`
+	DiskBytesWriteRateMaxLength int64  `json:"diskBytesWriteRateMaxLength"`
+	DiskIopsReadRate            int64  `json:"diskIopsReadRate"`
+	DiskIopsReadRateMax         int64  `json:"diskIopsReadRateMax"`
+	DiskIopsReadRateMaxLength   int64  `json:"diskIopsReadRateMaxLength"`
+	DiskIopsWriteRate           int64  `json:"diskIopsWriteRate"`
+	DiskIopsWriteRateMax        int64  `json:"diskIopsWriteRateMax"`
+	DiskIopsWriteRateMaxLength  int64  `json:"diskIopsWriteRateMaxLength"`
+	Disksize                    int64  `json:"disksize"`
+	Displayoffering             bool   `json:"displayoffering"`
+	Displaytext                 string `json:"displaytext"`
+	Domain                      string `json:"domain"`
+	Domainid                    string `json:"domainid"`
+	Hypervisorsnapshotreserve   int    `json:"hypervisorsnapshotreserve"`
+	Id                          string `json:"id"`
+	Iscustomized                bool   `json:"iscustomized"`
+	Iscustomizediops            bool   `json:"iscustomizediops"`
+	JobID                       string `json:"jobid"`
+	Jobstatus                   int    `json:"jobstatus"`
+	Maxiops                     int64  `json:"maxiops"`
+	Miniops                     int64  `json:"miniops"`
+	Name                        string `json:"name"`
+	Provisioningtype            string `json:"provisioningtype"`
+	Storagetype                 string `json:"storagetype"`
+	Tags                        string `json:"tags"`
 }
 
 type DeleteDiskOfferingParams struct {
@@ -441,12 +432,42 @@ func (s *DiskOfferingService) DeleteDiskOffering(p *DeleteDiskOfferingParams) (*
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
 type DeleteDiskOfferingResponse struct {
-	Displaytext string `json:"displaytext,omitempty"`
-	Success     string `json:"success,omitempty"`
+	Displaytext string `json:"displaytext"`
+	JobID       string `json:"jobid"`
+	Jobstatus   int    `json:"jobstatus"`
+	Success     bool   `json:"success"`
+}
+
+func (r *DeleteDiskOfferingResponse) UnmarshalJSON(b []byte) error {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	if success, ok := m["success"].(string); ok {
+		m["success"] = success == "true"
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if ostypeid, ok := m["ostypeid"].(float64); ok {
+		m["ostypeid"] = strconv.Itoa(int(ostypeid))
+		b, err = json.Marshal(m)
+		if err != nil {
+			return err
+		}
+	}
+
+	type alias DeleteDiskOfferingResponse
+	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ListDiskOfferingsParams struct {
@@ -568,7 +589,7 @@ func (s *DiskOfferingService) GetDiskOfferingID(name string, opts ...OptionFunc)
 
 	p.p["name"] = name
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return "", -1, err
 		}
@@ -618,7 +639,7 @@ func (s *DiskOfferingService) GetDiskOfferingByID(id string, opts ...OptionFunc)
 
 	p.p["id"] = id
 
-	for _, fn := range opts {
+	for _, fn := range append(s.cs.options, opts...) {
 		if err := fn(s.cs, p); err != nil {
 			return nil, -1, err
 		}
@@ -655,6 +676,7 @@ func (s *DiskOfferingService) ListDiskOfferings(p *ListDiskOfferingsParams) (*Li
 	if err := json.Unmarshal(resp, &r); err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -664,25 +686,162 @@ type ListDiskOfferingsResponse struct {
 }
 
 type DiskOffering struct {
-	CacheMode                 string `json:"cacheMode,omitempty"`
-	Created                   string `json:"created,omitempty"`
-	DiskBytesReadRate         int64  `json:"diskBytesReadRate,omitempty"`
-	DiskBytesWriteRate        int64  `json:"diskBytesWriteRate,omitempty"`
-	DiskIopsReadRate          int64  `json:"diskIopsReadRate,omitempty"`
-	DiskIopsWriteRate         int64  `json:"diskIopsWriteRate,omitempty"`
-	Disksize                  int64  `json:"disksize,omitempty"`
-	Displayoffering           bool   `json:"displayoffering,omitempty"`
-	Displaytext               string `json:"displaytext,omitempty"`
-	Domain                    string `json:"domain,omitempty"`
-	Domainid                  string `json:"domainid,omitempty"`
-	Hypervisorsnapshotreserve int    `json:"hypervisorsnapshotreserve,omitempty"`
-	Id                        string `json:"id,omitempty"`
-	Iscustomized              bool   `json:"iscustomized,omitempty"`
-	Iscustomizediops          bool   `json:"iscustomizediops,omitempty"`
-	Maxiops                   int64  `json:"maxiops,omitempty"`
-	Miniops                   int64  `json:"miniops,omitempty"`
-	Name                      string `json:"name,omitempty"`
-	Provisioningtype          string `json:"provisioningtype,omitempty"`
-	Storagetype               string `json:"storagetype,omitempty"`
-	Tags                      string `json:"tags,omitempty"`
+	CacheMode                   string `json:"cacheMode"`
+	Created                     string `json:"created"`
+	DiskBytesReadRate           int64  `json:"diskBytesReadRate"`
+	DiskBytesReadRateMax        int64  `json:"diskBytesReadRateMax"`
+	DiskBytesReadRateMaxLength  int64  `json:"diskBytesReadRateMaxLength"`
+	DiskBytesWriteRate          int64  `json:"diskBytesWriteRate"`
+	DiskBytesWriteRateMax       int64  `json:"diskBytesWriteRateMax"`
+	DiskBytesWriteRateMaxLength int64  `json:"diskBytesWriteRateMaxLength"`
+	DiskIopsReadRate            int64  `json:"diskIopsReadRate"`
+	DiskIopsReadRateMax         int64  `json:"diskIopsReadRateMax"`
+	DiskIopsReadRateMaxLength   int64  `json:"diskIopsReadRateMaxLength"`
+	DiskIopsWriteRate           int64  `json:"diskIopsWriteRate"`
+	DiskIopsWriteRateMax        int64  `json:"diskIopsWriteRateMax"`
+	DiskIopsWriteRateMaxLength  int64  `json:"diskIopsWriteRateMaxLength"`
+	Disksize                    int64  `json:"disksize"`
+	Displayoffering             bool   `json:"displayoffering"`
+	Displaytext                 string `json:"displaytext"`
+	Domain                      string `json:"domain"`
+	Domainid                    string `json:"domainid"`
+	Hypervisorsnapshotreserve   int    `json:"hypervisorsnapshotreserve"`
+	Id                          string `json:"id"`
+	Iscustomized                bool   `json:"iscustomized"`
+	Iscustomizediops            bool   `json:"iscustomizediops"`
+	JobID                       string `json:"jobid"`
+	Jobstatus                   int    `json:"jobstatus"`
+	Maxiops                     int64  `json:"maxiops"`
+	Miniops                     int64  `json:"miniops"`
+	Name                        string `json:"name"`
+	Provisioningtype            string `json:"provisioningtype"`
+	Storagetype                 string `json:"storagetype"`
+	Tags                        string `json:"tags"`
+}
+
+type UpdateDiskOfferingParams struct {
+	p map[string]interface{}
+}
+
+func (p *UpdateDiskOfferingParams) toURLValues() url.Values {
+	u := url.Values{}
+	if p.p == nil {
+		return u
+	}
+	if v, found := p.p["displayoffering"]; found {
+		vv := strconv.FormatBool(v.(bool))
+		u.Set("displayoffering", vv)
+	}
+	if v, found := p.p["displaytext"]; found {
+		u.Set("displaytext", v.(string))
+	}
+	if v, found := p.p["id"]; found {
+		u.Set("id", v.(string))
+	}
+	if v, found := p.p["name"]; found {
+		u.Set("name", v.(string))
+	}
+	if v, found := p.p["sortkey"]; found {
+		vv := strconv.Itoa(v.(int))
+		u.Set("sortkey", vv)
+	}
+	return u
+}
+
+func (p *UpdateDiskOfferingParams) SetDisplayoffering(v bool) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["displayoffering"] = v
+	return
+}
+
+func (p *UpdateDiskOfferingParams) SetDisplaytext(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["displaytext"] = v
+	return
+}
+
+func (p *UpdateDiskOfferingParams) SetId(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["id"] = v
+	return
+}
+
+func (p *UpdateDiskOfferingParams) SetName(v string) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["name"] = v
+	return
+}
+
+func (p *UpdateDiskOfferingParams) SetSortkey(v int) {
+	if p.p == nil {
+		p.p = make(map[string]interface{})
+	}
+	p.p["sortkey"] = v
+	return
+}
+
+// You should always use this function to get a new UpdateDiskOfferingParams instance,
+// as then you are sure you have configured all required params
+func (s *DiskOfferingService) NewUpdateDiskOfferingParams(id string) *UpdateDiskOfferingParams {
+	p := &UpdateDiskOfferingParams{}
+	p.p = make(map[string]interface{})
+	p.p["id"] = id
+	return p
+}
+
+// Updates a disk offering.
+func (s *DiskOfferingService) UpdateDiskOffering(p *UpdateDiskOfferingParams) (*UpdateDiskOfferingResponse, error) {
+	resp, err := s.cs.newRequest("updateDiskOffering", p.toURLValues())
+	if err != nil {
+		return nil, err
+	}
+
+	var r UpdateDiskOfferingResponse
+	if err := json.Unmarshal(resp, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+type UpdateDiskOfferingResponse struct {
+	CacheMode                   string `json:"cacheMode"`
+	Created                     string `json:"created"`
+	DiskBytesReadRate           int64  `json:"diskBytesReadRate"`
+	DiskBytesReadRateMax        int64  `json:"diskBytesReadRateMax"`
+	DiskBytesReadRateMaxLength  int64  `json:"diskBytesReadRateMaxLength"`
+	DiskBytesWriteRate          int64  `json:"diskBytesWriteRate"`
+	DiskBytesWriteRateMax       int64  `json:"diskBytesWriteRateMax"`
+	DiskBytesWriteRateMaxLength int64  `json:"diskBytesWriteRateMaxLength"`
+	DiskIopsReadRate            int64  `json:"diskIopsReadRate"`
+	DiskIopsReadRateMax         int64  `json:"diskIopsReadRateMax"`
+	DiskIopsReadRateMaxLength   int64  `json:"diskIopsReadRateMaxLength"`
+	DiskIopsWriteRate           int64  `json:"diskIopsWriteRate"`
+	DiskIopsWriteRateMax        int64  `json:"diskIopsWriteRateMax"`
+	DiskIopsWriteRateMaxLength  int64  `json:"diskIopsWriteRateMaxLength"`
+	Disksize                    int64  `json:"disksize"`
+	Displayoffering             bool   `json:"displayoffering"`
+	Displaytext                 string `json:"displaytext"`
+	Domain                      string `json:"domain"`
+	Domainid                    string `json:"domainid"`
+	Hypervisorsnapshotreserve   int    `json:"hypervisorsnapshotreserve"`
+	Id                          string `json:"id"`
+	Iscustomized                bool   `json:"iscustomized"`
+	Iscustomizediops            bool   `json:"iscustomizediops"`
+	JobID                       string `json:"jobid"`
+	Jobstatus                   int    `json:"jobstatus"`
+	Maxiops                     int64  `json:"maxiops"`
+	Miniops                     int64  `json:"miniops"`
+	Name                        string `json:"name"`
+	Provisioningtype            string `json:"provisioningtype"`
+	Storagetype                 string `json:"storagetype"`
+	Tags                        string `json:"tags"`
 }

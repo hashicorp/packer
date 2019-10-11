@@ -1,13 +1,14 @@
 package qemu
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
@@ -23,7 +24,7 @@ import (
 //   <nothing>
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -32,7 +33,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		cancelCh := make(chan struct{}, 1)
 		go func() {
 			defer close(cancelCh)
-			<-time.After(config.shutdownTimeout)
+			<-time.After(config.ShutdownTimeout)
 		}()
 		ui.Say("Waiting for shutdown...")
 		if ok := driver.WaitForShutdown(cancelCh); ok {
@@ -51,7 +52,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", config.ShutdownCommand)
 		cmd := &packer.RemoteCmd{Command: config.ShutdownCommand}
-		if err := cmd.StartWithUi(comm, ui); err != nil {
+		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -62,10 +63,10 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		cancelCh := make(chan struct{}, 1)
 		go func() {
 			defer close(cancelCh)
-			<-time.After(config.shutdownTimeout)
+			<-time.After(config.ShutdownTimeout)
 		}()
 
-		log.Printf("Waiting max %s for shutdown to complete", config.shutdownTimeout)
+		log.Printf("Waiting max %s for shutdown to complete", config.ShutdownTimeout)
 		if ok := driver.WaitForShutdown(cancelCh); !ok {
 			err := errors.New("Timeout while waiting for machine to shut down.")
 			state.Put("error", err)

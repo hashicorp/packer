@@ -1,0 +1,12 @@
+{
+    "variables": {
+        "foo": "bar"
+    },
+    "sensitive-variables": [
+    	"foo"
+    ],
+    "builders": [{
+        "type": "test",
+        "value": "{{build_name}}"
+    }]
+}

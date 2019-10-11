@@ -2,6 +2,7 @@ package docker
 
 import (
 	"archive/tar"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,17 +26,19 @@ type Communicator struct {
 	Config        *Config
 	ContainerUser string
 	lock          sync.Mutex
+	EntryPoint    []string
 }
 
-func (c *Communicator) Start(remote *packer.RemoteCmd) error {
+var _ packer.Communicator = new(Communicator)
+
+func (c *Communicator) Start(ctx context.Context, remote *packer.RemoteCmd) error {
 	dockerArgs := []string{
 		"exec",
 		"-i",
 		c.ContainerID,
-		"/bin/sh",
-		"-c",
-		fmt.Sprintf("(%s)", remote.Command),
 	}
+	dockerArgs = append(dockerArgs, c.EntryPoint...)
+	dockerArgs = append(dockerArgs, fmt.Sprintf("(%s)", remote.Command))
 
 	if c.Config.Pty {
 		dockerArgs = append(dockerArgs[:2], append([]string{"-t"}, dockerArgs[2:]...)...)
@@ -105,7 +108,6 @@ func (c *Communicator) uploadReader(dst string, src io.Reader) error {
 
 // uploadFile uses docker cp to copy the file from the host to the container
 func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) error {
-
 	// command format: docker cp /path/to/infile containerid:/path/to/outfile
 	log.Printf("Copying to %s on container %s.", dst, c.ContainerID)
 
@@ -231,6 +233,11 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 		return fmt.Errorf("Failed to open pipe: %s", err)
 	}
 
+	stderrP, err := localCmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open stderr pipe: %s", err)
+	}
+
 	if err = localCmd.Start(); err != nil {
 		return fmt.Errorf("Failed to start download: %s", err)
 	}
@@ -238,9 +245,17 @@ func (c *Communicator) Download(src string, dst io.Writer) error {
 	// When you use - to send docker cp to stdout it is streamed as a tar; this
 	// enables it to work with directories. We don't actually support
 	// directories in Download() but we still need to handle the tar format.
+
 	archive := tar.NewReader(pipe)
 	_, err = archive.Next()
 	if err != nil {
+		// see if we can get a useful error message from stderr, since stdout
+		// is messed up.
+		if stderrOut, err := ioutil.ReadAll(stderrP); err == nil {
+			if string(stderrOut) != "" {
+				return fmt.Errorf("Error downloading file: %s", string(stderrOut))
+			}
+		}
 		return fmt.Errorf("Failed to read header from tar stream: %s", err)
 	}
 

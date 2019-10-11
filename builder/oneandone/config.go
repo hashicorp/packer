@@ -2,6 +2,9 @@ package oneandone
 
 import (
 	"errors"
+	"os"
+	"strings"
+
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -9,8 +12,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"os"
-	"strings"
 )
 
 type Config struct {
@@ -19,7 +20,6 @@ type Config struct {
 
 	Token          string `mapstructure:"token"`
 	Url            string `mapstructure:"url"`
-	SSHKey         string
 	SnapshotName   string `mapstructure:"image_name"`
 	DataCenterName string `mapstructure:"data_center_name"`
 	DataCenterId   string
@@ -108,7 +108,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
-	common.ScrubConfig(c, c.Token)
-
+	packer.LogSecretFilter.Set(c.Token)
 	return &c, nil, nil
 }

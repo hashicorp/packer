@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -97,12 +96,23 @@ func (d *DockerDriver) Export(id string, dst io.Writer) error {
 	return nil
 }
 
-func (d *DockerDriver) Import(path string, repo string) (string, error) {
+func (d *DockerDriver) Import(path string, changes []string, repo string) (string, error) {
 	var stdout, stderr bytes.Buffer
-	cmd := exec.Command("docker", "import", "-", repo)
+
+	args := []string{"import"}
+
+	for _, change := range changes {
+		args = append(args, "--change", change)
+	}
+
+	args = append(args, "-")
+	args = append(args, repo)
+
+	cmd := exec.Command("docker", args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	stdin, err := cmd.StdinPipe()
+
 	if err != nil {
 		return "", err
 	}
@@ -113,6 +123,8 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 		return "", err
 	}
 	defer file.Close()
+
+	log.Printf("Importing tarball with args: %v", args)
 
 	if err := cmd.Start(); err != nil {
 		return "", err
@@ -248,8 +260,8 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 	// Build up the template data
 	var tplData startContainerTemplate
 	tplData.Image = config.Image
-	ctx := *d.Ctx
-	ctx.Data = &tplData
+	ictx := *d.Ctx
+	ictx.Data = &tplData
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
@@ -257,15 +269,10 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "--privileged")
 	}
 	for host, guest := range config.Volumes {
-		if runtime.GOOS == "windows" {
-			// docker-toolbox can't handle the normal C:\filepath format in CLI
-			host = strings.Replace(host, "\\", "/", -1)
-			host = strings.Replace(host, "C:/", "/c/", 1)
-		}
 		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
 	}
 	for _, v := range config.RunCommand {
-		v, err := interpolate.Render(v, &ctx)
+		v, err := interpolate.Render(v, &ictx)
 		if err != nil {
 			return "", err
 		}
@@ -301,6 +308,13 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 }
 
 func (d *DockerDriver) StopContainer(id string) error {
+	if err := exec.Command("docker", "stop", id).Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DockerDriver) KillContainer(id string) error {
 	if err := exec.Command("docker", "kill", id).Run(); err != nil {
 		return err
 	}

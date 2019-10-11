@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepMountSecondaryDvdImages struct {
@@ -18,7 +20,7 @@ type DvdControllerProperties struct {
 	Existing           bool
 }
 
-func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountSecondaryDvdImages) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Mounting secondary DVD images...")
@@ -56,7 +58,8 @@ func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.St
 			return multistep.ActionHalt
 		}
 
-		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
+		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber,
+			controllerLocation))
 	}
 
 	return multistep.ActionContinue

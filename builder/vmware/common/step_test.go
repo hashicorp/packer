@@ -2,9 +2,10 @@ package common
 
 import (
 	"bytes"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testState(t *testing.T) multistep.StateBag {
@@ -14,5 +15,6 @@ func testState(t *testing.T) multistep.StateBag {
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})
+	state.Put("temporaryDevices", []string{})
 	return state
 }

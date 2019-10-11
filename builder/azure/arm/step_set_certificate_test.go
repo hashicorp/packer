@@ -1,10 +1,11 @@
 package arm
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepSetCertificateShouldPassIfGetPasses(t *testing.T) {
@@ -16,7 +17,7 @@ func TestStepSetCertificateShouldPassIfGetPasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepSetCertificate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -35,7 +36,7 @@ func TestStepSetCertificateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepSetCertificate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

@@ -16,21 +16,18 @@ environment:
 clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
-  - set GO15VENDOREXPERIMENT=1
+  - set GO111MODULE=off
   - echo %Path%
   - go version
   - go env
-  - go get github.com/mitchellh/gox
-  - go get golang.org/x/tools/cmd/stringer
 
 build_script:
   - git rev-parse HEAD
  # go test $(go list ./... | grep -v vendor)
   - ps: |
-      go.exe test (go.exe list ./... `
+      go.exe test -timeout=2m (go.exe list ./... `
       |? { -not $_.Contains('/vendor/') } `
       |? { $_ -ne 'github.com/hashicorp/packer/builder/parallels/common' } `
-      |? { $_ -ne 'github.com/hashicorp/packer/common' }`
       |? { $_ -ne 'github.com/hashicorp/packer/provisioner/ansible' })
 
 test: off

@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+
 package common
 
 import (
@@ -10,10 +12,17 @@ import (
 
 type SSHConfig struct {
 	Comm communicator.Config `mapstructure:",squash"`
-
-	SSHHostPortMin    uint `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    uint `mapstructure:"ssh_host_port_max"`
-	SSHSkipNatMapping bool `mapstructure:"ssh_skip_nat_mapping"`
+	// The minimum and
+	// maximum port to use for the SSH port on the host machine which is forwarded
+	// to the SSH port on the guest machine. Because Packer often runs in parallel,
+	// Packer will choose a randomly available port in this range to use as the
+	// host port. By default this is 2222 to 4444.
+	SSHHostPortMin int `mapstructure:"ssh_host_port_min" required:"false"`
+	SSHHostPortMax int `mapstructure:"ssh_host_port_max"`
+	// Defaults to false. When enabled, Packer
+	// does not setup forwarded port mapping for SSH requests and uses ssh_port
+	// on the host to communicate to the virtual machine.
+	SSHSkipNatMapping bool `mapstructure:"ssh_skip_nat_mapping" required:"false"`
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove

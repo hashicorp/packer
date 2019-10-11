@@ -1,12 +1,13 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type bundleCmdData struct {
@@ -23,7 +24,7 @@ type StepBundleVolume struct {
 	Debug bool
 }
 
-func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepBundleVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -58,13 +59,13 @@ func (s *StepBundleVolume) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say(fmt.Sprintf("Running: %s", config.BundleVolCommand))
 	}
 
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		state.Put("error", fmt.Errorf("Error bundling volume: %s", err))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		state.Put("error", fmt.Errorf(
 			"Volume bundling failed. Please see the output above for more\n"+
 				"details on what went wrong.\n\n"+

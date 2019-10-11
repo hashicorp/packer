@@ -9,9 +9,11 @@ package arm
 // used to determine values without use of a client.
 
 import (
+	"context"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"strings"
+
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 )
 
 type resourceResolver struct {
@@ -22,7 +24,7 @@ type resourceResolver struct {
 
 func newResourceResolver(client *AzureClient) *resourceResolver {
 	return &resourceResolver{
-		client: client,
+		client:                          client,
 		findVirtualNetworkResourceGroup: findVirtualNetworkResourceGroup,
 		findVirtualNetworkSubnet:        findVirtualNetworkSubnet,
 	}
@@ -71,14 +73,18 @@ func getResourceGroupNameFromId(id string) string {
 }
 
 func findManagedImageByName(client *AzureClient, name, resourceGroupName string) (*compute.Image, error) {
-	images, err := client.ImagesClient.ListByResourceGroup(resourceGroupName)
+	images, err := client.ImagesClient.ListByResourceGroupComplete(context.TODO(), resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, image := range *images.Value {
+	for images.NotDone() {
+		image := images.Value()
 		if strings.EqualFold(name, *image.Name) {
 			return &image, nil
+		}
+		if err = images.Next(); err != nil {
+			return nil, err
 		}
 	}
 
@@ -86,17 +92,20 @@ func findManagedImageByName(client *AzureClient, name, resourceGroupName string)
 }
 
 func findVirtualNetworkResourceGroup(client *AzureClient, name string) (string, error) {
-	virtualNetworks, err := client.VirtualNetworksClient.ListAll()
+	virtualNetworks, err := client.VirtualNetworksClient.ListAllComplete(context.TODO())
 	if err != nil {
 		return "", err
 	}
 
 	resourceGroupNames := make([]string, 0)
-
-	for _, virtualNetwork := range *virtualNetworks.Value {
+	for virtualNetworks.NotDone() {
+		virtualNetwork := virtualNetworks.Value()
 		if strings.EqualFold(name, *virtualNetwork.Name) {
 			rgn := getResourceGroupNameFromId(*virtualNetwork.ID)
 			resourceGroupNames = append(resourceGroupNames, rgn)
+		}
+		if err = virtualNetworks.Next(); err != nil {
+			return "", err
 		}
 	}
 
@@ -112,19 +121,21 @@ func findVirtualNetworkResourceGroup(client *AzureClient, name string) (string, 
 }
 
 func findVirtualNetworkSubnet(client *AzureClient, resourceGroupName string, name string) (string, error) {
-	subnets, err := client.SubnetsClient.List(resourceGroupName, name)
+	subnets, err := client.SubnetsClient.List(context.TODO(), resourceGroupName, name)
 	if err != nil {
 		return "", err
 	}
 
-	if len(*subnets.Value) == 0 {
+	subnetList := subnets.Values() // only first page of subnets, but only interested in ==0 or >1
+
+	if len(subnetList) == 0 {
 		return "", fmt.Errorf("Cannot find a subnet in the resource group %q associated with the virtual network called %q", resourceGroupName, name)
 	}
 
-	if len(*subnets.Value) > 1 {
-		return "", fmt.Errorf("Found multiple subnets in the resource group %q associated with the  virtual network called %q, please use virtual_network_subnet_name and virtual_network_resource_group_name to disambiguate", resourceGroupName, name)
+	if len(subnetList) > 1 {
+		return "", fmt.Errorf("Found multiple subnets in the resource group %q associated with the virtual network called %q, please use virtual_network_subnet_name and virtual_network_resource_group_name to disambiguate", resourceGroupName, name)
 	}
 
-	subnet := (*subnets.Value)[0]
+	subnet := subnetList[0]
 	return *subnet.Name, nil
 }

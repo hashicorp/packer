@@ -1,0 +1,9 @@
+{
+	"variables": {
+		"name": null
+	},
+    "builders": [{
+        "name": "{{upper `name`}}",
+        "type": "test"
+    }]
+}

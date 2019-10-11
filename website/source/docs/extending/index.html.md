@@ -12,5 +12,5 @@ sidebar_current: 'docs-extending'
 
 Packer is designed to be extensible. Because the surface area for workloads is
 infinite, Packer supports plugins for builders, provisioners, and
-post-processors. To learn more about the different customizations, please choose
-a link from the sidebar.
+post-processors. To learn more about the different customizations, please
+choose a link from the sidebar.

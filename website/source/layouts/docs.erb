@@ -12,14 +12,14 @@
           <li<%= sidebar_current("docs-commands-build") %>>
             <a href="/docs/commands/build.html"><tt>build</tt></a>
           </li>
+          <li<%= sidebar_current("docs-commands-console") %>>
+            <a href="/docs/commands/console.html"><tt>console</tt></a>
+          </li>
           <li<%= sidebar_current("docs-commands-fix") %>>
             <a href="/docs/commands/fix.html"><tt>fix</tt></a>
           </li>
           <li<%= sidebar_current("docs-commands-inspect") %>>
             <a href="/docs/commands/inspect.html"><tt>inspect</tt></a>
-          </li>
-          <li<%= sidebar_current("docs-commands-push") %>>
-            <a href="/docs/commands/push.html"><tt>push</tt></a>
           </li>
           <li<%= sidebar_current("docs-commands-validate") %>>
             <a href="/docs/commands/validate.html"><tt>validate</tt></a>
@@ -45,9 +45,6 @@
           <li<%= sidebar_current("docs-templates-provisioners") %>>
             <a href="/docs/templates/provisioners.html">Provisioners</a>
           </li>
-          <li<%= sidebar_current("docs-templates-push") %>>
-            <a href="/docs/templates/push.html">Push</a>
-          </li>
           <li<%= sidebar_current("docs-templates-user-variables") %>>
             <a href="/docs/templates/user-variables.html">User Variables</a>
           </li>
@@ -56,11 +53,23 @@
 
       <hr>
 
+      <li<%= sidebar_current("docs-communicators") %>>
+        <a href="/docs/communicators/index.html">Communicators</a>
+        <ul class="nav">
+          <li<%= sidebar_current("docs-communicators-ssh") %>>
+            <a href="/docs/communicators/ssh.html">SSH</a>
+          </li>
+          <li<%= sidebar_current("docs-communicators-winrm") %>>
+            <a href="/docs/communicators/winrm.html">WINRM</a>
+          </li>
+        </ul>
+      </li>
+
       <li<%= sidebar_current("docs-builders") %>>
         <a href="/docs/builders/index.html">Builders</a>
         <ul class="nav">
           <li<%= sidebar_current("docs-builders-alicloud") %>>
-             <a href="/docs/builders/alicloud-ecs.html">Alicloud ECS</a>
+            <a href="/docs/builders/alicloud-ecs.html">Alicloud ECS</a>
           </li>
           <li<%= sidebar_current("docs-builders-amazon") %>>
             <a href="/docs/builders/amazon.html">Amazon EC2</a>
@@ -105,6 +114,12 @@
           <li<%= sidebar_current("docs-builders-googlecompute") %>>
             <a href="/docs/builders/googlecompute.html">Google Cloud</a>
           </li>
+          <li<%= sidebar_current("docs-builders-hetzner-cloud") %>>
+            <a href="/docs/builders/hetzner-cloud.html">Hetzner Cloud</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-hyperone") %>>
+            <a href="/docs/builders/hyperone.html">HyperOne</a>
+          </li>
           <li<%= sidebar_current("docs-builders-hyperv") %>>
             <a href="/docs/builders/hyperv.html">Hyper-V</a>
             <ul class="nav">
@@ -116,11 +131,17 @@
               </li>
             </ul>
           </li>
+          <li<%= sidebar_current("docs-builders-linode") %>>
+            <a href="/docs/builders/linode.html">Linode</a>
+          </li>
           <li<%= sidebar_current("docs-builders-lxc") %>>
             <a href="/docs/builders/lxc.html">LXC</a>
           </li>
           <li<%= sidebar_current("docs-builders-lxd") %>>
             <a href="/docs/builders/lxd.html">LXD</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-ncloud") %>>
+            <a href="/docs/builders/ncloud.html">NAVER Cloud</a>
           </li>
           <li<%= sidebar_current("docs-builders-null") %>>
             <a href="/docs/builders/null.html">Null</a>
@@ -131,8 +152,33 @@
           <li<%= sidebar_current("docs-builders-openstack") %>>
             <a href="/docs/builders/openstack.html">OpenStack</a>
           </li>
-          <li<%= sidebar_current("docs-builders-oracle-oci") %>>
-            <a href="/docs/builders/oracle-oci.html">Oracle OCI</a>
+          <li<%= sidebar_current("docs-builders-oracle") %>>
+            <a href="/docs/builders/oracle.html">Oracle</a>
+            <ul class="nav">
+              <li<%= sidebar_current("docs-builders-oracle-classic") %>>
+                <a href="/docs/builders/oracle-classic.html">Oracle Classic</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-oracle-oci") %>>
+                <a href="/docs/builders/oracle-oci.html">Oracle OCI</a>
+              </li>
+            </ul>
+          </li>
+          <li<%= sidebar_current("docs-builders-osc") %>>
+            <a href="/docs/builders/outscale.html">Outscale</a>
+            <ul class="nav">
+              <li<%= sidebar_current("docs-builders-osc-chroot") %>>
+                <a href="/docs/builders/osc-chroot.html">chroot</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-osc-bsubacked") %>>
+                <a href="/docs/builders/osc-bsu.html">BSU</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-osc-bsusurrogate") %>>
+                <a href="/docs/builders/osc-bsusurrogate.html">BSU Surrogate</a>
+              </li>
+               <li<%= sidebar_current("docs-builders-osc-bsuvolume") %>>
+                <a href="/docs/builders/osc-bsuvolume.html">BSU Volume</a>
+              </li>
+            </ul>
           </li>
           <li<%= sidebar_current("docs-builders-parallels") %>>
             <a href="/docs/builders/parallels.html">Parallels</a>
@@ -148,11 +194,29 @@
           <li<%= sidebar_current("docs-builders-profitbricks") %>>
             <a href="/docs/builders/profitbricks.html">ProfitBricks</a>
           </li>
+          <li<%= sidebar_current("docs-builders-proxmox") %>>
+            <a href="/docs/builders/proxmox.html">Proxmox</a>
+          </li>
           <li<%= sidebar_current("docs-builders-qemu") %>>
             <a href="/docs/builders/qemu.html">QEMU</a>
           </li>
+          <li<%= sidebar_current("docs-builders-scaleway") %>>
+            <a href="/docs/builders/scaleway.html">Scaleway</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-tencentcloud-cvm") %>>
+            <a href="/docs/builders/tencentcloud-cvm.html">Tencent Cloud</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-jdcloud") %>>
+            <a href="/docs/builders/jdcloud.html">JDCloud</a>
+          </li>
           <li<%= sidebar_current("docs-builders-triton") %>>
             <a href="/docs/builders/triton.html">Triton</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-ucloud-uhost") %>>
+            <a href="/docs/builders/ucloud-uhost.html">UCloud</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-vagrant") %>>
+            <a href="/docs/builders/vagrant.html">Vagrant</a>
           </li>
           <li<%= sidebar_current("docs-builders-virtualbox") %>>
             <a href="/docs/builders/virtualbox.html">VirtualBox</a>
@@ -162,6 +226,9 @@
               </li>
               <li<%= sidebar_current("docs-builders-virtualbox-ovf") %>>
                 <a href="/docs/builders/virtualbox-ovf.html">OVF</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-virtualbox-vm") %>>
+                <a href="/docs/builders/virtualbox-vm.html">VM</a>
               </li>
             </ul>
           </li>
@@ -176,6 +243,9 @@
               </li>
             </ul>
           </li>
+          <li<%= sidebar_current("docs-builders-yandex") %>>
+            <a href="/docs/builders/yandex.html">Yandex.Cloud</a>
+          </li>
           <li<%= sidebar_current("docs-builders-custom") %>>
             <a href="/docs/builders/custom.html">Custom</a>
           </li>
@@ -188,7 +258,10 @@
             <a href="/docs/provisioners/ansible-local.html">Ansible Local</a>
           </li>
           <li<%= sidebar_current("docs-provisioners-ansible-remote")%>>
-            <a href="/docs/provisioners/ansible.html">Ansible Remote</a>
+            <a href="/docs/provisioners/ansible.html">Ansible (Remote)</a>
+          </li>
+          <li<%= sidebar_current("docs-provisioners-breakpoint")%>>
+            <a href="/docs/provisioners/breakpoint.html">Breakpoint</a>
           </li>
           <li<%= sidebar_current("docs-provisioners-chef-client")%>>
             <a href="/docs/provisioners/chef-client.html">Chef Client</a>
@@ -201,6 +274,9 @@
           </li>
           <li<%= sidebar_current("docs-provisioners-file")%>>
             <a href="/docs/provisioners/file.html">File</a>
+          </li>
+          <li<%= sidebar_current("docs-provisioners-inspec")%>>
+            <a href="/docs/provisioners/inspec.html">InSpec</a>
           </li>
           <li<%= sidebar_current("docs-provisioners-powershell")%>>
             <a href="/docs/provisioners/powershell.html">PowerShell</a>
@@ -235,7 +311,7 @@
         <a href="/docs/post-processors/index.html">Post-Processors</a>
         <ul class="nav">
           <li<%= sidebar_current("docs-post-processors-alicloud-import") %>>
-              <a href="/docs/post-processors/alicloud-import.html">Alicloud Import</a>
+            <a href="/docs/post-processors/alicloud-import.html">Alicloud Import</a>
           </li>
           <li<%= sidebar_current("docs-post-processors-amazon-import") %>>
             <a href="/docs/post-processors/amazon-import.html">Amazon Import</a>
@@ -243,14 +319,14 @@
           <li<%= sidebar_current("docs-post-processors-artifice") %>>
             <a href="/docs/post-processors/artifice.html">Artifice</a>
           </li>
-          <li<%= sidebar_current("docs-post-processors-atlas") %>>
-            <a href="/docs/post-processors/atlas.html">Atlas</a>
-          </li>
           <li<%= sidebar_current("docs-post-processors-compress") %>>
             <a href="/docs/post-processors/compress.html">Compress</a>
           </li>
           <li<%= sidebar_current("docs-post-processors-checksum") %>>
             <a href="/docs/post-processors/checksum.html">Checksum</a>
+          </li>
+          <li<%= sidebar_current("docs-post-processors-digitalocean-import") %>>
+            <a href="/docs/post-processors/digitalocean-import.html">DigitalOcean Import</a>
           </li>
           <li<%= sidebar_current("docs-post-processors-docker-import") %>>
             <a href="/docs/post-processors/docker-import.html">Docker Import</a>
@@ -264,8 +340,14 @@
           <li<%= sidebar_current("docs-post-processors-docker-tag") %>>
             <a href="/docs/post-processors/docker-tag.html">Docker Tag</a>
           </li>
+          <li<%= sidebar_current("docs-post-processors-exoscale-import") %>>
+            <a href="/docs/post-processors/exoscale-import.html">Exoscale Import</a>
+          </li>
           <li<%= sidebar_current("docs-post-processors-googlecompute-export") %>>
             <a href="/docs/post-processors/googlecompute-export.html">Google Compute Export</a>
+          </li>
+          <li<%= sidebar_current("docs-post-processors-googlecompute-import") %>>
+            <a href="/docs/post-processors/googlecompute-import.html">Google Compute Import</a>
           </li>
           <li<%= sidebar_current("docs-post-processors-manifest") %>>
             <a href="/docs/post-processors/manifest.html">Manifest</a>

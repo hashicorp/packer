@@ -16,6 +16,7 @@ func TestIPAddress(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	d := Parallels9Driver{
 		dhcpLeaseFile: tf.Name(),
@@ -62,9 +63,9 @@ func TestIPAddress(t *testing.T) {
 func TestXMLParseConfig(t *testing.T) {
 	td, err := ioutil.TempDir("", "configpvs")
 	if err != nil {
-		t.Fatalf("Error creating temp file: %s", err)
+		t.Fatalf("Error creating temp dir: %s", err)
 	}
-	defer os.Remove(td)
+	defer os.RemoveAll(td)
 
 	config := []byte(`
 <ExampleParallelsConfig>

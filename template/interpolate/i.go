@@ -18,6 +18,9 @@ type Context struct {
 	// "user" function reads from.
 	UserVariables map[string]string
 
+	// SensitiveVariables is a list of variables to sanitize.
+	SensitiveVariables []string
+
 	// EnableEnv enables the env function
 	EnableEnv bool
 
@@ -31,6 +34,11 @@ type Context struct {
 	BuildName    string
 	BuildType    string
 	TemplatePath string
+}
+
+// NewContext returns an initialized empty context.
+func NewContext() *Context {
+	return &Context{}
 }
 
 // Render is shorthand for constructing an I and calling Render.
@@ -50,16 +58,16 @@ type I struct {
 }
 
 // Render renders the interpolation with the given context.
-func (i *I) Render(ctx *Context) (string, error) {
-	tpl, err := i.template(ctx)
+func (i *I) Render(ictx *Context) (string, error) {
+	tpl, err := i.template(ictx)
 	if err != nil {
 		return "", err
 	}
 
 	var result bytes.Buffer
 	var data interface{}
-	if ctx != nil {
-		data = ctx.Data
+	if ictx != nil {
+		data = ictx.Data
 	}
 	if err := tpl.Execute(&result, data); err != nil {
 		return "", err
