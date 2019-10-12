@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -26,25 +27,25 @@ type stepCreateInstance struct {
 }
 
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating Instance...")
 	resp, err := conn.CreateUHostInstance(s.buildCreateInstanceRequest(state))
 	if err != nil {
-		return halt(state, err, "Error on creating instance")
+		return ucloudcommon.Halt(state, err, "Error on creating instance")
 	}
 	instanceId := resp.UHostIds[0]
 
 	err = retry.Config{
 		Tries: 20,
 		ShouldRetry: func(err error) bool {
-			return isExpectedStateError(err)
+			return ucloudcommon.IsExpectedStateError(err)
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
-		inst, err := client.describeUHostById(instanceId)
+		inst, err := client.DescribeUHostById(instanceId)
 		if err != nil {
 			return err
 		}
@@ -57,27 +58,27 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			return fmt.Errorf("install failed")
 		}
 
-		if inst == nil || inst.State != instanceStateRunning {
-			return newExpectedStateError("instance", instanceId)
+		if inst == nil || inst.State != ucloudcommon.InstanceStateRunning {
+			return ucloudcommon.NewExpectedStateError("instance", instanceId)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on waiting for instance %q to become available", instanceId))
+		return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on waiting for instance %q to become available", instanceId))
 	}
 
 	ui.Message(fmt.Sprintf("Creating instance %q complete", instanceId))
-	instance, err := client.describeUHostById(instanceId)
+	instance, err := client.DescribeUHostById(instanceId)
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on reading instance when creating %q", instanceId))
+		return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on reading instance when creating %q", instanceId))
 	}
 
 	s.instanceId = instanceId
 	state.Put("instance", instance)
 
-	if instance.BootDiskState != bootDiskStateNormal {
+	if instance.BootDiskState != ucloudcommon.BootDiskStateNormal {
 		ui.Say("Waiting for boot disk of instance initialized")
 		if s.BootDiskType == "local_normal" || s.BootDiskType == "local_ssd" {
 			ui.Message(fmt.Sprintf("Warning: It takes around 10 mins for boot disk initialization when `boot_disk_type` is %q", s.BootDiskType))
@@ -86,23 +87,23 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		err = retry.Config{
 			Tries: 200,
 			ShouldRetry: func(err error) bool {
-				return isExpectedStateError(err)
+				return ucloudcommon.IsExpectedStateError(err)
 			},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
-			inst, err := client.describeUHostById(instanceId)
+			inst, err := client.DescribeUHostById(instanceId)
 			if err != nil {
 				return err
 			}
-			if inst.BootDiskState != bootDiskStateNormal {
-				return newExpectedStateError("boot_disk of instance", instanceId)
+			if inst.BootDiskState != ucloudcommon.BootDiskStateNormal {
+				return ucloudcommon.NewExpectedStateError("boot_disk of instance", instanceId)
 			}
 
 			return nil
 		})
 
 		if err != nil {
-			return halt(state, err, fmt.Sprintf("Error on waiting for boot disk of instance %q initialized", instanceId))
+			return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on waiting for boot disk of instance %q initialized", instanceId))
 		}
 
 		ui.Message(fmt.Sprintf("Waiting for boot disk of instance %q initialized complete", instanceId))
@@ -127,12 +128,12 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		ui.Say("Deleting instance...")
 	}
 
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 
-	instance, err := client.describeUHostById(s.instanceId)
+	instance, err := client.DescribeUHostById(s.instanceId)
 	if err != nil {
-		if isNotFoundError(err) {
+		if ucloudcommon.IsNotFoundError(err) {
 			return
 		}
 		ui.Error(fmt.Sprintf("Error on reading instance when deleting %q, %s",
@@ -140,7 +141,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	if instance.State != instanceStateStopped {
+	if instance.State != ucloudcommon.InstanceStateStopped {
 		stopReq := conn.NewStopUHostInstanceRequest()
 		stopReq.UHostId = ucloud.String(s.instanceId)
 		if _, err = conn.StopUHostInstance(stopReq); err != nil {
@@ -152,17 +153,17 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		err = retry.Config{
 			Tries: 30,
 			ShouldRetry: func(err error) bool {
-				return isExpectedStateError(err)
+				return ucloudcommon.IsExpectedStateError(err)
 			},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
-			instance, err := client.describeUHostById(s.instanceId)
+			instance, err := client.DescribeUHostById(s.instanceId)
 			if err != nil {
 				return err
 			}
 
-			if instance.State != instanceStateStopped {
-				return newExpectedStateError("instance", s.instanceId)
+			if instance.State != ucloudcommon.InstanceStateStopped {
+				return ucloudcommon.NewExpectedStateError("instance", s.instanceId)
 			}
 
 			return nil
@@ -188,10 +189,10 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	err = retry.Config{
 		Tries:       30,
-		ShouldRetry: func(err error) bool { return !isNotFoundError(err) },
+		ShouldRetry: func(err error) bool { return !ucloudcommon.IsNotFoundError(err) },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
-		_, err := client.describeUHostById(s.instanceId)
+		_, err := client.DescribeUHostById(s.instanceId)
 		return err
 	})
 
@@ -205,8 +206,8 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 }
 
 func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag) *uhost.CreateUHostInstanceRequest {
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	srcImage := state.Get("source_image").(*uhost.UHostImageSet)
 	config := state.Get("config").(*Config)
 	connectConfig := &config.RunConfig.Comm
@@ -218,16 +219,16 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 
 	if password == "" {
 		password = fmt.Sprintf("%s%s%s",
-			s.randStringFromCharSet(5, defaultPasswordStr),
-			s.randStringFromCharSet(1, defaultPasswordSpe),
-			s.randStringFromCharSet(5, defaultPasswordNum))
+			s.randStringFromCharSet(5, ucloudcommon.DefaultPasswordStr),
+			s.randStringFromCharSet(1, ucloudcommon.DefaultPasswordSpe),
+			s.randStringFromCharSet(5, ucloudcommon.DefaultPasswordNum))
 		if srcImage.OsType == "Linux" {
 			connectConfig.SSHPassword = password
 		}
 	}
 
 	req := conn.NewCreateUHostInstanceRequest()
-	t, _ := parseInstanceType(s.InstanceType)
+	t, _ := ucloudcommon.ParseInstanceType(s.InstanceType)
 
 	req.CPU = ucloud.Int(t.CPU)
 	req.Memory = ucloud.Int(t.Memory)
@@ -237,6 +238,13 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 	req.ImageId = ucloud.String(s.SourceImageId)
 	req.ChargeType = ucloud.String("Dynamic")
 	req.Password = ucloud.String(password)
+
+	req.MachineType = ucloud.String("N")
+	req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
+	if t.HostType == "o" {
+		req.MachineType = ucloud.String("O")
+		req.MinimalCpuPlatform = ucloud.String("Intel/Cascadelake")
+	}
 
 	if v, ok := state.GetOk("security_group_id"); ok {
 		req.SecurityGroupId = ucloud.String(v.(string))
@@ -253,14 +261,14 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 	bootDisk := uhost.UHostDisk{}
 	bootDisk.IsBoot = ucloud.String("true")
 	bootDisk.Size = ucloud.Int(srcImage.ImageSize)
-	bootDisk.Type = ucloud.String(bootDiskTypeMap[s.BootDiskType])
+	bootDisk.Type = ucloud.String(ucloudcommon.BootDiskTypeMap.Convert(s.BootDiskType))
 
 	req.Disks = append(req.Disks, bootDisk)
 
 	if !s.UsePrivateIp {
 		operatorName := ucloud.String("International")
 		if strings.HasPrefix(s.Region, "cn-") {
-			operatorName = ucloud.String("Bgp")
+			operatorName = ucloud.String("BGP")
 		}
 		networkInterface := uhost.CreateUHostInstanceParamNetworkInterface{
 			EIP: &uhost.CreateUHostInstanceParamNetworkInterfaceEIP{

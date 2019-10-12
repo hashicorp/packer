@@ -59,7 +59,6 @@ type CommonBase struct {
 	retryCount  int
 	timeout     time.Duration
 	requestTime time.Time
-	requestUUID string
 }
 
 // SetRetryCount will set retry count of request

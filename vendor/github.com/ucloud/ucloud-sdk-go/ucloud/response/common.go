@@ -16,6 +16,9 @@ type Common interface {
 
 	GetRequest() request.Common
 	SetRequest(request.Common)
+
+	SetRequestUUID(string)
+	GetRequestUUID() string
 }
 
 // CommonBase has common attribute and method,
@@ -24,6 +27,8 @@ type CommonBase struct {
 	Action  string
 	RetCode int
 	Message string
+
+	requestUUID string
 
 	request request.Common
 }
@@ -52,4 +57,14 @@ func (c *CommonBase) GetRequest() request.Common {
 // GetRequest will return the latest retried request of current action
 func (c *CommonBase) SetRequest(req request.Common) {
 	c.request = req
+}
+
+// SetRequestUUID will set uuid of request
+func (c *CommonBase) SetRequestUUID(uuid string) {
+	c.requestUUID = uuid
+}
+
+// GetRequestUUID will get uuid of request
+func (c *CommonBase) GetRequestUUID() string {
+	return c.requestUUID
 }

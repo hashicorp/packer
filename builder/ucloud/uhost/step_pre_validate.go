@@ -2,6 +2,7 @@ package uhost
 
 import (
 	"context"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -10,20 +11,20 @@ type stepPreValidate struct {
 	ProjectId         string
 	Region            string
 	Zone              string
-	ImageDestinations []ImageDestination
+	ImageDestinations []ucloudcommon.ImageDestination
 }
 
 func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if err := s.validateProjectIds(state); err != nil {
-		return halt(state, err, "")
+		return ucloudcommon.Halt(state, err, "")
 	}
 
 	if err := s.validateRegions(state); err != nil {
-		return halt(state, err, "")
+		return ucloudcommon.Halt(state, err, "")
 	}
 
 	if err := s.validateZones(state); err != nil {
-		return halt(state, err, "")
+		return ucloudcommon.Halt(state, err, "")
 	}
 
 	return multistep.ActionContinue

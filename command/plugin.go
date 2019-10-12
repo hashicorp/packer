@@ -74,6 +74,7 @@ import (
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
+	ucloudimportpostprocessor "github.com/hashicorp/packer/post-processor/ucloud-import"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
@@ -172,6 +173,7 @@ var Provisioners = map[string]packer.Provisioner{
 
 var PostProcessors = map[string]packer.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
+	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),

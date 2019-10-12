@@ -114,7 +114,8 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.71+incompatible
-	github.com/ucloud/ucloud-sdk-go v0.8.7
+	github.com/ucloud/ucloud-sdk-go v0.11.1
+	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190730023212-866b183392c4
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
@@ -127,7 +128,6 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190425145619-16072639606e
 	golang.org/x/text v0.3.1 // indirect
-	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
 	google.golang.org/api v0.4.0
 	google.golang.org/grpc v1.20.1
 	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
