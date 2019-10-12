@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common/retry"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 )
 
 type stepCopyUCloudImage struct {
-	ImageDestinations []ImageDestination
+	ImageDestinations []ucloudcommon.ImageDestination
 	RegionId          string
 	ProjectId         string
 }
@@ -23,13 +24,13 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionContinue
 	}
 
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	ui := state.Get("ui").(packer.Ui)
 
 	srcImageId := state.Get("image_id").(string)
-	artifactImages := state.Get("ucloud_images").(*imageInfoSet)
-	expectedImages := newImageInfoSet(nil)
+	artifactImages := state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet)
+	expectedImages := ucloudcommon.NewImageInfoSet(nil)
 	ui.Say(fmt.Sprintf("Copying images from %q...", srcImageId))
 	for _, v := range s.ImageDestinations {
 		if v.ProjectId == s.ProjectId && v.Region == s.RegionId {
@@ -45,10 +46,10 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 
 		resp, err := conn.CopyCustomImage(req)
 		if err != nil {
-			return halt(state, err, fmt.Sprintf("Error on copying image %q to %s:%s", srcImageId, v.ProjectId, v.Region))
+			return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on copying image %q to %s:%s", srcImageId, v.ProjectId, v.Region))
 		}
 
-		image := imageInfo{
+		image := ucloudcommon.ImageInfo{
 			Region:    v.Region,
 			ProjectId: v.ProjectId,
 			ImageId:   resp.TargetImageId,
@@ -63,23 +64,23 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 
 	err := retry.Config{
 		Tries:       200,
-		ShouldRetry: func(err error) bool { return isNotCompleteError(err) },
+		ShouldRetry: func(err error) bool { return ucloudcommon.IsNotCompleteError(err) },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		for _, v := range expectedImages.GetAll() {
-			imageSet, err := client.describeImageByInfo(v.ProjectId, v.Region, v.ImageId)
+			imageSet, err := client.DescribeImageByInfo(v.ProjectId, v.Region, v.ImageId)
 			if err != nil {
 				return fmt.Errorf("reading %s:%s:%s failed, %s", v.ProjectId, v.Region, v.ImageId, err)
 			}
 
-			if imageSet.State == imageStateAvailable {
+			if imageSet.State == ucloudcommon.ImageStateAvailable {
 				expectedImages.Remove(v.Id())
 				continue
 			}
 		}
 
 		if len(expectedImages.GetAll()) != 0 {
-			return newNotCompleteError("copying image")
+			return ucloudcommon.NewNotCompleteError("copying image")
 		}
 
 		return nil
@@ -91,7 +92,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 			s = append(s, fmt.Sprintf("%s:%s:%s", v.ProjectId, v.Region, v.ImageId))
 		}
 
-		return halt(state, err, fmt.Sprintf("Error on waiting for copying images %q to become available", strings.Join(s, ",")))
+		return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on waiting for copying images %q to become available", strings.Join(s, ",")))
 	}
 
 	ui.Message(fmt.Sprintf("Copying image complete"))
@@ -107,7 +108,7 @@ func (s *stepCopyUCloudImage) Cleanup(state multistep.StateBag) {
 	}
 
 	srcImageId := state.Get("image_id").(string)
-	ucloudImages := state.Get("ucloud_images").(*imageInfoSet)
+	ucloudImages := state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet)
 	imageInfos := ucloudImages.GetAll()
 	if len(imageInfos) == 0 {
 		return
@@ -116,8 +117,8 @@ func (s *stepCopyUCloudImage) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	ui.Say(fmt.Sprintf("Deleting copied image because of cancellation or error..."))
 
 	for _, v := range imageInfos {

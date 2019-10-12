@@ -90,6 +90,9 @@ type CreateUHostInstanceRequest struct {
 	// 防火墙Id，默认：Web推荐防火墙。如何查询SecurityGroupId请参见 [DescribeSecurityGroup](../unet-api/describe_security_group.html)
 	SecurityGroupId *string `required:"false"`
 
+	// 硬件隔离组id。可通过DescribeIsolationGroup获取。
+	IsolationGroup *string `required:"false"`
+
 	// 【暂不支持】cloudinit方式下，用户初始化脚本
 	UserDataScript *string `required:"false"`
 
@@ -110,6 +113,12 @@ type CreateUHostInstanceRequest struct {
 
 	// 最低cpu平台，枚举值["Intel/Auto", "Intel/LvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake", "Intel/Cascadelake"(只有O型云主机可选)]
 	MinimalCpuPlatform *string `required:"false"`
+
+	// 【批量创建主机时必填】最大创建主机数量，取值范围是[1,100];
+	MaxCount *int `required:"false"`
+
+	// GPU类型，枚举值["K80", "P40", "V100"]，MachineType为G时必填
+	GpuType *string `required:"false"`
 
 	// NetworkInterface
 	NetworkInterface []CreateUHostInstanceParamNetworkInterface

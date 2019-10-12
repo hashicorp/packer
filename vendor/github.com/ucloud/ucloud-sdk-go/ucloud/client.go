@@ -16,6 +16,10 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud/response"
 )
 
+type ClientMeta struct {
+	Product string
+}
+
 // Client 客户端
 type Client struct {
 	// configurations
@@ -31,6 +35,9 @@ type Client struct {
 	httpRequestHandlers  []HttpRequestHandler
 	responseHandlers     []ResponseHandler
 	httpResponseHandlers []HttpResponseHandler
+
+	// client information injection
+	meta ClientMeta
 }
 
 // NewClient will create an client of ucloud sdk
@@ -38,6 +45,7 @@ func NewClient(config *Config, credential *auth.Credential) *Client {
 	client := Client{
 		credential: credential,
 		config:     config,
+		meta:       ClientMeta{},
 	}
 
 	client.requestHandlers = append(client.requestHandlers, defaultRequestHandlers...)
@@ -49,6 +57,12 @@ func NewClient(config *Config, credential *auth.Credential) *Client {
 	client.logger.SetLevel(config.LogLevel)
 
 	return &client
+}
+
+func NewClientWithMeta(config *Config, credential *auth.Credential, meta ClientMeta) *Client {
+	client := NewClient(config, credential)
+	client.meta = meta
+	return client
 }
 
 // SetHttpClient will setup a http client
@@ -65,6 +79,11 @@ func (c *Client) GetCredential() *auth.Credential {
 // GetConfig will return the config of client.
 func (c *Client) GetConfig() *Config {
 	return c.config
+}
+
+// GetMeta will return the meta data of client.
+func (c *Client) GetMeta() ClientMeta {
+	return c.meta
 }
 
 // SetLogger will set the logger of client
@@ -131,6 +150,9 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 		}
 
 		err = c.unmarshalHTTPResponse(body, resp)
+
+		uuid := httpResp.GetHeaders().Get(headerKeyRequestUUID)
+		resp.SetRequestUUID(uuid)
 	}
 
 	// use response middle to build and convert response when response has been created.

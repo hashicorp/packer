@@ -133,8 +133,9 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.94+incompatible
-	github.com/ucloud/ucloud-sdk-go v0.8.7
-	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
+	github.com/ucloud/ucloud-sdk-go v0.11.1
+	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190730023212-866b183392c4
+	github.com/ugorji/go v0.0.0-20180813092308-00b869d2f4a5
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0

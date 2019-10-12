@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/url"
 	"sort"
-	"strings"
 )
 
 // Credential is the information of credential keys
@@ -25,32 +24,44 @@ func NewCredential() Credential {
 
 // CreateSign will encode query string to credential signature.
 func (c *Credential) CreateSign(query string) string {
-	// replace "=" "&"
-	str := strings.Replace(query, "&", "", -1)
-	str = strings.Replace(str, "=", "", -1)
-
-	// crypto by SHA1
-	strUnescaped, _ := url.QueryUnescape(str)
-	h := sha1.New()
-	s := strUnescaped + c.PrivateKey
-	io.WriteString(h, s)
-	bs := h.Sum(nil)
-	result := hex.EncodeToString(bs)
-
-	return result
+	urlValues, err := url.ParseQuery(query)
+	if err != nil {
+		return ""
+	}
+	urlValues.Set("PublicKey", c.PublicKey)
+	return c.verifyAc(urlValues)
 }
 
 // BuildCredentialedQuery will build query string with signature query param.
-func (c *Credential) BuildCredentialedQuery(query map[string]string) string {
-	var queryList []string
-	for k, v := range query {
-		queryList = append(queryList, k+"="+url.QueryEscape(v))
+func (c *Credential) BuildCredentialedQuery(params map[string]string) string {
+	urlValues := url.Values{}
+	for k, v := range params {
+		urlValues.Set(k, v)
 	}
-	queryList = append(queryList, "PublicKey="+url.QueryEscape(c.PublicKey))
-	sort.Strings(queryList)
-	queryString := strings.Join(queryList, "&")
+	urlValues.Set("PublicKey", c.PublicKey)
+	urlValues.Set("Signature", c.verifyAc(urlValues))
+	return urlValues.Encode()
+}
 
-	sign := c.CreateSign(queryString)
-	queryString = queryString + "&Signature=" + sign
-	return queryString
+func (c *Credential) verifyAc(urlValues url.Values) string {
+	// sort keys
+	var keys []string
+	for k := range urlValues {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	signQuery := ""
+	for _, k := range keys {
+		signQuery += k + urlValues.Get(k)
+	}
+	signQuery += c.PrivateKey
+	return encodeSha1(signQuery)
+}
+
+func encodeSha1(s string) string {
+	h := sha1.New()
+	_, _ = io.WriteString(h, s)
+	bs := h.Sum(nil)
+	return hex.EncodeToString(bs)
 }
