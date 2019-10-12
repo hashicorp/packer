@@ -4,7 +4,13 @@ import (
 	"time"
 
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/version"
 )
+
+// Version is the version of sdk
+const Version = version.Version
+
+const headerKeyRequestUUID = "X-UCLOUD-REQUEST-UUID"
 
 // Config is the config of ucloud sdk, use for setting up client
 type Config struct {

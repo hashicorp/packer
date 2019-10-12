@@ -26,7 +26,7 @@ In addition to the options listed here, a
 [communicator](../templates/communicator.html) can be configured for this
 builder.
 
-\~&gt; **Note:** The bulider doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH anthentication with `ssh_username` (Required) and `ssh_password` (Optional).  The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
+\~&gt; **Note:** The builder doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH authentication with `ssh_username` (Required) and `ssh_password` (Optional).  The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
 
 ### Required:
 
@@ -59,7 +59,7 @@ builder.
 
 -   `vpc_id` - (string) The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 
--   `subnet_id` - (string) The ID of subnet under VPC. If  `vpc_id` is defined, the `subnet_id` is mandatory required. If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
+-   `subnet_id` - (string) The ID of subnet under the VPC. If  `vpc_id` is defined, the `subnet_id` is mandatory required. If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
 
 -   `security_group` - (string) The ID of the fire wall associated to UHost instance. If `security_group` is not defined, 
     the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default. It is supported by ICMP fire wall protocols.

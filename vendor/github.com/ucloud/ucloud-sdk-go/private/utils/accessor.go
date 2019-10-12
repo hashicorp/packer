@@ -57,7 +57,10 @@ func ValueAtPath(v interface{}, path string) (interface{}, error) {
 	}
 
 	if rv.Kind() == reflect.Struct {
-		itemV := rv.FieldByName(components[0])
+		itemV := rv.FieldByNameFunc(func(s string) bool {
+			return strings.ToLower(s) == strings.ToLower(components[0])
+		})
+
 		if !itemV.IsValid() {
 			return nil, errors.Errorf("path %s is invalid for struct", path)
 		}
