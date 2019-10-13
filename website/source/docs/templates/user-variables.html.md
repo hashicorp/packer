@@ -123,7 +123,7 @@ environment variables, as specified in the
 Secrets can be read from [Vault](https://www.vaultproject.io/) and used within
 your template as user variables. the `vault` function is available *only*
 within the default value of a user variable, allowing you to default a user
-variable to an environment variable.
+variable to a vault secret.
 
 An example of using a v2 kv engine:
 
