@@ -2,6 +2,8 @@ package uhost
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/hashicorp/packer/version"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
@@ -10,7 +12,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
-	"os"
 )
 
 type AccessConfig struct {
