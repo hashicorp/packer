@@ -36,7 +36,7 @@ type Config struct {
 	SkipClean            bool              `mapstructure:"skip_clean"`
 	VaultGCPOauthEngine  string            `mapstructure:"vault_gcp_oauth_engine"`
 
-	Account *jwt.Config
+	account *jwt.Config
 	ctx     interpolate.Context
 }
 
@@ -76,7 +76,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
-		p.config.Account = cfg
+		p.config.account = cfg
 	}
 
 	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
@@ -105,7 +105,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	client, err := googlecompute.NewClientGCE(p.config.Account, p.config.VaultGCPOauthEngine)
+	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}

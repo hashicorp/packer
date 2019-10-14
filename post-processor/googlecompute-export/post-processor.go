@@ -28,7 +28,7 @@ type Config struct {
 	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
 	Zone                string   `mapstructure:"zone"`
 
-	Account *jwt.Config
+	account *jwt.Config
 	ctx     interpolate.Context
 }
 
@@ -108,14 +108,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		if err != nil {
 			return nil, false, false, err
 		}
-		p.config.Account = cfg
+		p.config.account = cfg
 	}
 	if p.config.AccountFile != "" {
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
-		p.config.Account = cfg
+		p.config.account = cfg
 	}
 
 	// Set up exporter instance configuration.
@@ -150,7 +150,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	exporterConfig.CalcTimeout()
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
-		p.config.Account, p.config.VaultGCPOauthEngine)
+		p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}
