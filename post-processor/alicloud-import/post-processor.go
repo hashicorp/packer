@@ -3,13 +3,13 @@ package alicloudimport
 import (
 	"context"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
@@ -61,7 +61,6 @@ type Config struct {
 	OSSKey                          string            `mapstructure:"oss_key_name"`
 	SkipClean                       bool              `mapstructure:"skip_clean"`
 	Tags                            map[string]string `mapstructure:"tags"`
-	AlicloudImageName               string            `mapstructure:"image_name"`
 	AlicloudImageDescription        string            `mapstructure:"image_description"`
 	AlicloudImageShareAccounts      []string          `mapstructure:"image_share_account"`
 	AlicloudImageDestinationRegions []string          `mapstructure:"image_copy_regions"`
