@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,BlockDevices,BlockDevice
 
 // The chroot package is able to create an Amazon AMI without requiring the
 // launch of a new instance for every build. It does this by attaching and
@@ -37,7 +38,7 @@ type Config struct {
 	// entry for your root volume, `root_volume_size` and `root_device_name`.
 	// See the [BlockDevices](#block-devices-configuration) documentation for
 	// fields.
-	AMIMappings BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	AMIMappings awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" hcl2-schema-generator:"ami_block_device_mappings,direct" required:"false"`
 	// This is a list of devices to mount into the chroot environment. This
 	// configuration parameter requires some additional documentation which is
 	// in the Chroot Mounts section. Please read that section for more
