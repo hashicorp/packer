@@ -3,6 +3,8 @@ package googlecompute
 import (
 	"strings"
 	"text/template"
+
+	packertpl "github.com/hashicorp/packer/common/template"
 )
 
 func isalphanumeric(b byte) bool {
