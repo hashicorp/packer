@@ -35,4 +35,5 @@ func templateCleanImageName(s string) string {
 
 var TemplateFuncs = template.FuncMap{
 	"clean_resource_name": templateCleanImageName,
+	"clean_image_name":    packertpl.DeprecatedTemplateFunc("clean_image_name", "clean_resource_name", templateCleanImageName),
 }
