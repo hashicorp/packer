@@ -1,9 +1,12 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // The ucloud-uhost contains a packer.Builder implementation that
 // builds uhost images for UCloud UHost instance.
 package uhost
 
 import (
 	"context"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"

@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type BlockDevice
 
 package common
 
