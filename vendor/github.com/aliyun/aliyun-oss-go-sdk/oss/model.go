@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Response Http response from oss
+// Response defines HTTP response from OSS
 type Response struct {
 	StatusCode int
 	Headers    http.Header
@@ -15,38 +15,46 @@ type Response struct {
 	ServerCRC  uint64
 }
 
-// PutObjectRequest The request of DoPutObject
+func (r *Response) Read(p []byte) (n int, err error) {
+	return r.Body.Read(p)
+}
+
+func (r *Response) Close() error {
+	return r.Body.Close()
+}
+
+// PutObjectRequest is the request of DoPutObject
 type PutObjectRequest struct {
 	ObjectKey string
 	Reader    io.Reader
 }
 
-// GetObjectRequest The request of DoGetObject
+// GetObjectRequest is the request of DoGetObject
 type GetObjectRequest struct {
 	ObjectKey string
 }
 
-// GetObjectResult The result of DoGetObject
+// GetObjectResult is the result of DoGetObject
 type GetObjectResult struct {
 	Response  *Response
 	ClientCRC hash.Hash64
 	ServerCRC uint64
 }
 
-// AppendObjectRequest  The requtest of DoAppendObject
+// AppendObjectRequest is the requtest of DoAppendObject
 type AppendObjectRequest struct {
 	ObjectKey string
 	Reader    io.Reader
 	Position  int64
 }
 
-// AppendObjectResult The result of DoAppendObject
+// AppendObjectResult is the result of DoAppendObject
 type AppendObjectResult struct {
 	NextPosition int64
 	CRC          uint64
 }
 
-// UploadPartRequest The request of DoUploadPart
+// UploadPartRequest is the request of DoUploadPart
 type UploadPartRequest struct {
 	InitResult *InitiateMultipartUploadResult
 	Reader     io.Reader
@@ -54,7 +62,7 @@ type UploadPartRequest struct {
 	PartNumber int
 }
 
-// UploadPartResult The result of DoUploadPart
+// UploadPartResult is the result of DoUploadPart
 type UploadPartResult struct {
 	Part UploadPart
 }

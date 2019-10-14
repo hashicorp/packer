@@ -235,7 +235,7 @@ var extToMimeType = map[string]string{
 }
 
 // TypeByExtension returns the MIME type associated with the file extension ext.
-// 获取文件类型，选项ContentType使用
+// gets the file's MIME type for HTTP header Content-Type
 func TypeByExtension(filePath string) string {
 	typ := mime.TypeByExtension(path.Ext(filePath))
 	if typ == "" {

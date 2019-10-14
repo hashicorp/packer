@@ -5,26 +5,28 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
 )
 
+// InitiateMultipartUpload initializes multipart upload
 //
-// InitiateMultipartUpload 初始化分片上传任务。
+// objectKey    object name
+// options    the object constricts for upload. The valid options are CacheControl, ContentDisposition, ContentEncoding, Expires,
+//            ServerSideEncryption, Meta, check out the following link:
+//            https://help.aliyun.com/document_detail/oss/api-reference/multipart-upload/InitiateMultipartUpload.html
 //
-// objectKey  Object名称。
-// options    上传时可以指定Object的属性，可选属性有CacheControl、ContentDisposition、ContentEncoding、Expires、
-// ServerSideEncryption、Meta，具体含义请参考
-// https://help.aliyun.com/document_detail/oss/api-reference/multipart-upload/InitiateMultipartUpload.html
-//
-// InitiateMultipartUploadResult 初始化后操作成功的返回值，用于后面的UploadPartFromFile、UploadPartCopy等操作。error为nil时有效。
-// error  操作成功error为nil，非nil为错误信息。
+// InitiateMultipartUploadResult    the return value of the InitiateMultipartUpload, which is used for calls later on such as UploadPartFromFile,UploadPartCopy.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) InitiateMultipartUpload(objectKey string, options ...Option) (InitiateMultipartUploadResult, error) {
 	var imur InitiateMultipartUploadResult
 	opts := addContentType(options, objectKey)
-	resp, err := bucket.do("POST", objectKey, "uploads", "uploads", opts, nil, nil)
+	params := map[string]interface{}{}
+	params["uploads"] = nil
+	resp, err := bucket.do("POST", objectKey, params, opts, nil, nil)
 	if err != nil {
 		return imur, err
 	}
@@ -34,23 +36,20 @@ func (bucket Bucket) InitiateMultipartUpload(objectKey string, options ...Option
 	return imur, err
 }
 
+// UploadPart uploads parts
 //
-// UploadPart 上传分片。
+// After initializing a Multipart Upload, the upload Id and object key could be used for uploading the parts.
+// Each part has its part number (ranges from 1 to 10,000). And for each upload Id, the part number identifies the position of the part in the whole file.
+// And thus with the same part number and upload Id, another part upload will overwrite the data.
+// Except the last one, minimal part size is 100KB. There's no limit on the last part size.
 //
-// 初始化一个Multipart Upload之后，可以根据指定的Object名和Upload ID来分片（Part）上传数据。
-// 每一个上传的Part都有一个标识它的号码（part number，范围是1~10000）。对于同一个Upload ID，
-// 该号码不但唯一标识这一片数据，也标识了这片数据在整个文件内的相对位置。如果您用同一个part号码，上传了新的数据，
-// 那么OSS上已有的这个号码的Part数据将被覆盖。除了最后一片Part以外，其他的part最小为100KB；
-// 最后一片Part没有大小限制。
+// imur    the returned value of InitiateMultipartUpload.
+// reader    io.Reader the reader for the part's data.
+// size    the part size.
+// partNumber    the part number (ranges from 1 to 10,000). Invalid part number will lead to InvalidArgument error.
 //
-// imur        InitiateMultipartUpload成功后的返回值。
-// reader      io.Reader 需要分片上传的reader。
-// size        本次上传片Part的大小。
-// partNumber  本次上传片(Part)的编号，范围是1~10000。如果超出范围，OSS将返回InvalidArgument错误。
-//
-// UploadPart 上传成功的返回值，两个成员PartNumber、ETag。PartNumber片编号，即传入参数partNumber；
-// ETag及上传数据的MD5。error为nil时有效。
-// error 操作成功error为nil，非nil为错误信息。
+// UploadPart    the return value of the upload part. It consists of PartNumber and ETag. It's valid when error is nil.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) UploadPart(imur InitiateMultipartUploadResult, reader io.Reader,
 	partSize int64, partNumber int, options ...Option) (UploadPart, error) {
@@ -66,18 +65,16 @@ func (bucket Bucket) UploadPart(imur InitiateMultipartUploadResult, reader io.Re
 	return result.Part, err
 }
 
+// UploadPartFromFile uploads part from the file.
 //
-// UploadPartFromFile 上传分片。
+// imur    the return value of a successful InitiateMultipartUpload.
+// filePath    the local file path to upload.
+// startPosition    the start position in the local file.
+// partSize    the part size.
+// partNumber    the part number (from 1 to 10,000)
 //
-// imur           InitiateMultipartUpload成功后的返回值。
-// filePath       需要分片上传的本地文件。
-// startPosition  本次上传文件片的起始位置。
-// partSize       本次上传文件片的大小。
-// partNumber     本次上传文件片的编号，范围是1~10000。
-//
-// UploadPart 上传成功的返回值，两个成员PartNumber、ETag。PartNumber片编号，传入参数partNumber；
-// ETag上传数据的MD5。error为nil时有效。
-// error 操作成功error为nil，非nil为错误信息。
+// UploadPart    the return value consists of PartNumber and ETag.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) UploadPartFromFile(imur InitiateMultipartUploadResult, filePath string,
 	startPosition, partSize int64, partNumber int, options ...Option) (UploadPart, error) {
@@ -101,19 +98,20 @@ func (bucket Bucket) UploadPartFromFile(imur InitiateMultipartUploadResult, file
 	return result.Part, err
 }
 
+// DoUploadPart does the actual part upload.
 //
-// DoUploadPart 上传分片。
+// request    part upload request
 //
-// request 上传分片请求。
-//
-// UploadPartResult 上传分片请求返回值。
-// error  操作无错误为nil，非nil为错误信息。
+// UploadPartResult    the result of uploading part.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) DoUploadPart(request *UploadPartRequest, options []Option) (*UploadPartResult, error) {
 	listener := getProgressListener(options)
-	params := "partNumber=" + strconv.Itoa(request.PartNumber) + "&uploadId=" + request.InitResult.UploadID
-	opts := []Option{ContentLength(request.PartSize)}
-	resp, err := bucket.do("PUT", request.InitResult.Key, params, params, opts,
+	options = append(options, ContentLength(request.PartSize))
+	params := map[string]interface{}{}
+	params["partNumber"] = strconv.Itoa(request.PartNumber)
+	params["uploadId"] = request.InitResult.UploadID
+	resp, err := bucket.do("PUT", request.InitResult.Key, params, options,
 		&io.LimitedReader{R: request.Reader, N: request.PartSize}, listener)
 	if err != nil {
 		return &UploadPartResult{}, err
@@ -135,32 +133,32 @@ func (bucket Bucket) DoUploadPart(request *UploadPartRequest, options []Option) 
 	return &UploadPartResult{part}, nil
 }
 
+// UploadPartCopy uploads part copy
 //
-// UploadPartCopy 拷贝分片。
+// imur    the return value of InitiateMultipartUpload
+// copySrc    source Object name
+// startPosition    the part's start index in the source file
+// partSize    the part size
+// partNumber    the part number, ranges from 1 to 10,000. If it exceeds the range OSS returns InvalidArgument error.
+// options    the constraints of source object for the copy. The copy happens only when these contraints are met. Otherwise it returns error.
+//            CopySourceIfNoneMatch, CopySourceIfModifiedSince  CopySourceIfUnmodifiedSince, check out the following link for the detail
+//            https://help.aliyun.com/document_detail/oss/api-reference/multipart-upload/UploadPartCopy.html
 //
-// imur           InitiateMultipartUpload成功后的返回值。
-// copySrc        源Object名称。
-// startPosition  本次拷贝片(Part)在源Object的起始位置。
-// partSize       本次拷贝片的大小。
-// partNumber     本次拷贝片的编号，范围是1~10000。如果超出范围，OSS将返回InvalidArgument错误。
-// options        copy时源Object的限制条件，满足限制条件时copy，不满足时返回错误。可选条件有CopySourceIfMatch、
-// CopySourceIfNoneMatch、CopySourceIfModifiedSince  CopySourceIfUnmodifiedSince，具体含义请参看
-// https://help.aliyun.com/document_detail/oss/api-reference/multipart-upload/UploadPartCopy.html
-//
-// UploadPart 上传成功的返回值，两个成员PartNumber、ETag。PartNumber片(Part)编号，即传入参数partNumber；
-// ETag及上传数据的MD5。error为nil时有效。
-// error 操作成功error为nil，非nil为错误信息。
+// UploadPart    the return value consists of PartNumber and ETag.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) UploadPartCopy(imur InitiateMultipartUploadResult, srcBucketName, srcObjectKey string,
 	startPosition, partSize int64, partNumber int, options ...Option) (UploadPart, error) {
 	var out UploadPartCopyResult
 	var part UploadPart
 
-	opts := []Option{CopySource(srcBucketName, srcObjectKey),
+	opts := []Option{CopySource(srcBucketName, url.QueryEscape(srcObjectKey)),
 		CopySourceRange(startPosition, partSize)}
 	opts = append(opts, options...)
-	params := "partNumber=" + strconv.Itoa(partNumber) + "&uploadId=" + imur.UploadID
-	resp, err := bucket.do("PUT", imur.Key, params, params, opts, nil, nil)
+	params := map[string]interface{}{}
+	params["partNumber"] = strconv.Itoa(partNumber)
+	params["uploadId"] = imur.UploadID
+	resp, err := bucket.do("PUT", imur.Key, params, opts, nil, nil)
 	if err != nil {
 		return part, err
 	}
@@ -176,17 +174,16 @@ func (bucket Bucket) UploadPartCopy(imur InitiateMultipartUploadResult, srcBucke
 	return part, nil
 }
 
+// CompleteMultipartUpload completes the multipart upload.
 //
-// CompleteMultipartUpload 提交分片上传任务。
+// imur    the return value of InitiateMultipartUpload.
+// parts    the array of return value of UploadPart/UploadPartFromFile/UploadPartCopy.
 //
-// imur   InitiateMultipartUpload的返回值。
-// parts  UploadPart/UploadPartFromFile/UploadPartCopy返回值组成的数组。
-//
-// CompleteMultipartUploadResponse  操作成功后的返回值。error为nil时有效。
-// error  操作成功error为nil，非nil为错误信息。
+// CompleteMultipartUploadResponse    the return value when the call succeeds. Only valid when the error is nil.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) CompleteMultipartUpload(imur InitiateMultipartUploadResult,
-	parts []UploadPart) (CompleteMultipartUploadResult, error) {
+	parts []UploadPart, options ...Option) (CompleteMultipartUploadResult, error) {
 	var out CompleteMultipartUploadResult
 
 	sort.Sort(uploadParts(parts))
@@ -199,8 +196,9 @@ func (bucket Bucket) CompleteMultipartUpload(imur InitiateMultipartUploadResult,
 	buffer := new(bytes.Buffer)
 	buffer.Write(bs)
 
-	params := "uploadId=" + imur.UploadID
-	resp, err := bucket.do("POST", imur.Key, params, params, nil, buffer, nil)
+	params := map[string]interface{}{}
+	params["uploadId"] = imur.UploadID
+	resp, err := bucket.do("POST", imur.Key, params, options, buffer, nil)
 	if err != nil {
 		return out, err
 	}
@@ -210,16 +208,16 @@ func (bucket Bucket) CompleteMultipartUpload(imur InitiateMultipartUploadResult,
 	return out, err
 }
 
+// AbortMultipartUpload aborts the multipart upload.
 //
-// AbortMultipartUpload 取消分片上传任务。
+// imur    the return value of InitiateMultipartUpload.
 //
-// imur  InitiateMultipartUpload的返回值。
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
-// error  操作成功error为nil，非nil为错误信息。
-//
-func (bucket Bucket) AbortMultipartUpload(imur InitiateMultipartUploadResult) error {
-	params := "uploadId=" + imur.UploadID
-	resp, err := bucket.do("DELETE", imur.Key, params, params, nil, nil, nil)
+func (bucket Bucket) AbortMultipartUpload(imur InitiateMultipartUploadResult, options ...Option) error {
+	params := map[string]interface{}{}
+	params["uploadId"] = imur.UploadID
+	resp, err := bucket.do("DELETE", imur.Key, params, options, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -227,46 +225,57 @@ func (bucket Bucket) AbortMultipartUpload(imur InitiateMultipartUploadResult) er
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
+// ListUploadedParts lists the uploaded parts.
 //
-// ListUploadedParts 列出指定上传任务已经上传的分片。
+// imur    the return value of InitiateMultipartUpload.
 //
-// imur  InitiateMultipartUpload的返回值。
+// ListUploadedPartsResponse    the return value if it succeeds, only valid when error is nil.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
-// ListUploadedPartsResponse  操作成功后的返回值，成员UploadedParts已经上传/拷贝的片。error为nil时该返回值有效。
-// error  操作成功error为nil，非nil为错误信息。
-//
-func (bucket Bucket) ListUploadedParts(imur InitiateMultipartUploadResult) (ListUploadedPartsResult, error) {
+func (bucket Bucket) ListUploadedParts(imur InitiateMultipartUploadResult, options ...Option) (ListUploadedPartsResult, error) {
 	var out ListUploadedPartsResult
-	params := "uploadId=" + imur.UploadID
-	resp, err := bucket.do("GET", imur.Key, params, params, nil, nil, nil)
+	options = append(options, EncodingType("url"))
+
+	params := map[string]interface{}{}
+	params, err := getRawParams(options)
+	if err != nil {
+		return out, err
+	}
+
+	params["uploadId"] = imur.UploadID
+	resp, err := bucket.do("GET", imur.Key, params, nil, nil, nil)
 	if err != nil {
 		return out, err
 	}
 	defer resp.Body.Close()
 
 	err = xmlUnmarshal(resp.Body, &out)
+	if err != nil {
+		return out, err
+	}
+	err = decodeListUploadedPartsResult(&out)
 	return out, err
 }
 
+// ListMultipartUploads lists all ongoing multipart upload tasks
 //
-// ListMultipartUploads 列出所有未上传完整的multipart任务列表。
+// options    listObject's filter. Prefix specifies the returned object's prefix; KeyMarker specifies the returned object's start point in lexicographic order;
+//            MaxKeys specifies the max entries to return; Delimiter is the character for grouping object keys.
 //
-// options  ListObject的筛选行为。Prefix返回object的前缀，KeyMarker返回object的起始位置，MaxUploads最大数目默认1000，
-// Delimiter用于对Object名字进行分组的字符，所有名字包含指定的前缀且第一次出现delimiter字符之间的object。
-//
-// ListMultipartUploadResponse  操作成功后的返回值，error为nil时该返回值有效。
-// error  操作成功error为nil，非nil为错误信息。
+// ListMultipartUploadResponse    the return value if it succeeds, only valid when error is nil.
+// error    it's nil if the operation succeeds, otherwise it's an error object.
 //
 func (bucket Bucket) ListMultipartUploads(options ...Option) (ListMultipartUploadResult, error) {
 	var out ListMultipartUploadResult
 
 	options = append(options, EncodingType("url"))
-	params, err := handleParams(options)
+	params, err := getRawParams(options)
 	if err != nil {
 		return out, err
 	}
+	params["uploads"] = nil
 
-	resp, err := bucket.do("GET", "", "uploads&"+params, "uploads", nil, nil, nil)
+	resp, err := bucket.do("GET", "", params, options, nil, nil)
 	if err != nil {
 		return out, err
 	}
