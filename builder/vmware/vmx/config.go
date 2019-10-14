@@ -43,11 +43,6 @@ type Config struct {
 	// scenarios. Most users will wish to create a full clone instead. Defaults
 	// to false.
 	Linked bool `mapstructure:"linked" required:"false"`
-	// The type of remote machine that will be used to
-	// build this VM rather than a local desktop product. The only value accepted
-	// for this currently is esx5. If this is not set, a desktop product will
-	// be used. By default, this is not set.
-	RemoteType string `mapstructure:"remote_type" required:"false"`
 	// Path to the source VMX file to clone. If
 	// remote_type is enabled then this specifies a path on the remote_host.
 	SourcePath string `mapstructure:"source_path" required:"true"`
