@@ -72,7 +72,7 @@ type Config struct {
 	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
 	//  }
 	//  ```
-	ImageEncryptionKey *compute.CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
+	ImageEncryptionKey *CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
 	// The name of the image family to which the resulting image belongs. You
 	// can create disks by specifying an image family instead of a specific
 	// image name. The image family always returns its latest image that is not
@@ -181,7 +181,7 @@ type Config struct {
 	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
 
-	Account            *jwt.Config
+	account            *jwt.Config
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
@@ -344,7 +344,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
-		c.Account = cfg
+		c.account = cfg
 	}
 
 	if c.OmitExternalIP && c.Address != "" {
@@ -390,4 +390,24 @@ func (c *Config) CalcTimeout() error {
 	}
 	c.stateTimeout = stateTimeout
 	return nil
+}
+
+type CustomerEncryptionKey struct {
+	// KmsKeyName: The name of the encryption key that is stored in Google
+	// Cloud KMS.
+	KmsKeyName string `json:"kmsKeyName,omitempty"`
+
+	// RawKey: Specifies a 256-bit customer-supplied encryption key, encoded
+	// in RFC 4648 base64 to either encrypt or decrypt this resource.
+	RawKey string `json:"rawKey,omitempty"`
+}
+
+func (k *CustomerEncryptionKey) ComputeType() *compute.CustomerEncryptionKey {
+	if k == nil {
+		return nil
+	}
+	return &compute.CustomerEncryptionKey{
+		KmsKeyName: k.KmsKeyName,
+		RawKey:     k.RawKey,
+	}
 }
