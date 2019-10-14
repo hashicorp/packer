@@ -55,18 +55,18 @@ type Config struct {
 
 	UseLinuxPathing bool `mapstructure:"use_linux_pathing"`
 
-	Ctx interpolate.Context
+	ctx interpolate.Context
 }
 
 func Decode(config *Config, raws ...interface{}) error {
 	//Create passthrough for winrm password so we can fill it in once we know it
-	config.Ctx.Data = &EnvVarsTemplate{
+	config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: `{{.WinRMPassword}}`,
 	}
 
 	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
 		Interpolate:        true,
-		InterpolateContext: &config.Ctx,
+		InterpolateContext: &config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
