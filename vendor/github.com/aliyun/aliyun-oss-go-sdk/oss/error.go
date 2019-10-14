@@ -10,28 +10,33 @@ import (
 // ServiceError contains fields of the error response from Oss Service REST API.
 type ServiceError struct {
 	XMLName    xml.Name `xml:"Error"`
-	Code       string   `xml:"Code"`      // OSS返回给用户的错误码
-	Message    string   `xml:"Message"`   // OSS给出的详细错误信息
-	RequestID  string   `xml:"RequestId"` // 用于唯一标识该次请求的UUID
-	HostID     string   `xml:"HostId"`    // 用于标识访问的OSS集群
-	RawMessage string   // OSS返回的原始消息内容
-	StatusCode int      // HTTP状态码
+	Code       string   `xml:"Code"`      // The error code returned from OSS to the caller
+	Message    string   `xml:"Message"`   // The detail error message from OSS
+	RequestID  string   `xml:"RequestId"` // The UUID used to uniquely identify the request
+	HostID     string   `xml:"HostId"`    // The OSS server cluster's Id
+	Endpoint   string   `xml:"Endpoint"`
+	RawMessage string   // The raw messages from OSS
+	StatusCode int      // HTTP status code
 }
 
-// Implement interface error
+// Error implements interface error
 func (e ServiceError) Error() string {
-	return fmt.Sprintf("oss: service returned error: StatusCode=%d, ErrorCode=%s, ErrorMessage=%s, RequestId=%s",
-		e.StatusCode, e.Code, e.Message, e.RequestID)
+	if e.Endpoint == "" {
+		return fmt.Sprintf("oss: service returned error: StatusCode=%d, ErrorCode=%s, ErrorMessage=\"%s\", RequestId=%s",
+			e.StatusCode, e.Code, e.Message, e.RequestID)
+	}
+	return fmt.Sprintf("oss: service returned error: StatusCode=%d, ErrorCode=%s, ErrorMessage=\"%s\", RequestId=%s, Endpoint=%s",
+		e.StatusCode, e.Code, e.Message, e.RequestID, e.Endpoint)
 }
 
 // UnexpectedStatusCodeError is returned when a storage service responds with neither an error
 // nor with an HTTP status code indicating success.
 type UnexpectedStatusCodeError struct {
-	allowed []int // 预期OSS返回HTTP状态码
-	got     int   // OSS实际返回HTTP状态码
+	allowed []int // The expected HTTP stats code returned from OSS
+	got     int   // The actual HTTP status code from OSS
 }
 
-// Implement interface error
+// Error implements interface error
 func (e UnexpectedStatusCodeError) Error() string {
 	s := func(i int) string { return fmt.Sprintf("%d %s", i, http.StatusText(i)) }
 
@@ -62,16 +67,23 @@ func checkRespCode(respCode int, allowed []int) error {
 
 // CRCCheckError is returned when crc check is inconsistent between client and server
 type CRCCheckError struct {
-	clientCRC uint64 // 客户端计算的CRC64值
-	serverCRC uint64 // 服务端计算的CRC64值
-	operation string // 上传操作，如PutObject/AppendObject/UploadPart等
-	requestID string // 本次操作的RequestID
+	clientCRC uint64 // Calculated CRC64 in client
+	serverCRC uint64 // Calculated CRC64 in server
+	operation string // Upload operations such as PutObject/AppendObject/UploadPart, etc
+	requestID string // The request id of this operation
 }
 
-// Implement interface error
+// Error implements interface error
 func (e CRCCheckError) Error() string {
 	return fmt.Sprintf("oss: the crc of %s is inconsistent, client %d but server %d; request id is %s",
 		e.operation, e.clientCRC, e.serverCRC, e.requestID)
+}
+
+func checkDownloadCRC(clientCRC, serverCRC uint64) error {
+	if clientCRC == serverCRC {
+		return nil
+	}
+	return CRCCheckError{clientCRC, serverCRC, "DownloadFile", ""}
 }
 
 func checkCRC(resp *Response, operation string) error {
