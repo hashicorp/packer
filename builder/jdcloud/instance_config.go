@@ -2,6 +2,7 @@ package jdcloud
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
