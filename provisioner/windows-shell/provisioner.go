@@ -30,11 +30,6 @@ var retryableSleep = 2 * time.Second
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
-	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes, {{ .Vars }}
-	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand string `mapstructure:"execute_command"`
-
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
 	// This can be set high to allow for reboots.
