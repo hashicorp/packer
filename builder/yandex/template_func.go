@@ -1,9 +1,7 @@
 package yandex
 
-import (
-	"strings"
-	"text/template"
-)
+import "strings"
+import "text/template"
 
 func isalphanumeric(b byte) bool {
 	if '0' <= b && b <= '9' {
@@ -15,9 +13,9 @@ func isalphanumeric(b byte) bool {
 	return false
 }
 
-// Clean up resource name by replacing invalid characters with "-"
+// Clean up image name by replacing invalid characters with "-"
 // and converting upper cases to lower cases
-func templateCleanResourceName(s string) string {
+func templateCleanImageName(s string) string {
 	if reImageFamily.MatchString(s) {
 		return s
 	}
@@ -34,5 +32,5 @@ func templateCleanResourceName(s string) string {
 }
 
 var TemplateFuncs = template.FuncMap{
-	"clean_resource_name": templateCleanResourceName,
+	"clean_image_name": templateCleanImageName,
 }
