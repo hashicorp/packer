@@ -23,7 +23,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	ConfigProvider ocicommon.ConfigurationProvider
+	configProvider ocicommon.ConfigurationProvider
 
 	AccessCfgFile        string `mapstructure:"access_cfg_file"`
 	AccessCfgFileAccount string `mapstructure:"access_cfg_file_account"`
@@ -67,6 +67,10 @@ type Config struct {
 	DefinedTags map[string]map[string]interface{} `mapstructure:"defined_tags"`
 
 	ctx interpolate.Context
+}
+
+func (c *Config) ConfigProvider() ocicommon.ConfigurationProvider {
+	return c.configProvider
 }
 
 func NewConfig(raws ...interface{}) (*Config, error) {
@@ -158,7 +162,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 			errs, errors.New("'key_file' must be specified"))
 	}
 
-	c.ConfigProvider = configProvider
+	c.configProvider = configProvider
 
 	if c.AvailabilityDomain == "" {
 		errs = packer.MultiErrorAppend(
