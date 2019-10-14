@@ -277,8 +277,8 @@ func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
 		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.ClientConfig.CloudEnvironmentName)
 	}
 
-	if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != "AzurePublicCloud" {
-		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.ClientConfig.CloudEnvironment)
+	if c.ClientConfig.CloudEnvironment() == nil || c.ClientConfig.CloudEnvironment().Name != "AzurePublicCloud" {
+		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.ClientConfig.CloudEnvironment())
 	}
 }
 
@@ -327,8 +327,8 @@ func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if c.ClientConfig.CloudEnvironment == nil || c.ClientConfig.CloudEnvironment.Name != x.environmentName {
-			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.ClientConfig.CloudEnvironment)
+		if c.ClientConfig.CloudEnvironment() == nil || c.ClientConfig.CloudEnvironment().Name != x.environmentName {
+			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.ClientConfig.CloudEnvironment())
 		}
 	}
 }
