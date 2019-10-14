@@ -49,13 +49,6 @@
       Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
       VMware clients. For ESXi, refer to the proper ESXi documentation.
     
--   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
-    format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install ovftool. This option
-    currently only works when option remote_type is set to "esx5".
-    Since ovftool is only capable of password based authentication
-    remote_password must be set when exporting the VM.
-    
 -   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
     by the cdrom device. This is chosen by default based on the disk adapter
     type. VMware tends to lean towards ide for the cdrom device unless

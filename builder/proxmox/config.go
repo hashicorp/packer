@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig
+
 package proxmox
 
 import (

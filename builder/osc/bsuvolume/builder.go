@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,BlockDevice
+
 // The ebsvolume package contains a packer.Builder implementation that
 // builds EBS volumes for Outscale using an ephemeral instance,
 package bsuvolume

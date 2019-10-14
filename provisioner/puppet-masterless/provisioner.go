@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // Package puppetmasterless implements a provisioner for Packer that executes
 // Puppet on the remote machine, configured to apply a local manifest
 // versus connecting to a Puppet master.
