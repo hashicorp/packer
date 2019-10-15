@@ -187,6 +187,14 @@
     3.  PlanPublisher
     4.  PlanPromotionCode
     
+-   `polling_duration_timeout` (time.Duration) - The default PollingDuration for azure is 15mins, this property will override
+    that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
+    If your Packer build is failing on the
+    ARM deployment step with the error `Original Error:
+    context deadline exceeded`, then you probably need to increase this timeout from
+    its default of "15m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
 -   `os_type` (string) - If either Linux or Windows is specified Packer will
     automatically configure authentication credentials for the provisioned
     machine. For Linux this configures an SSH authorized key. For Windows
