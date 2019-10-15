@@ -90,17 +90,7 @@ To get the credentials above, we will need to install the Azure CLI. Please
 refer to Microsoft's official [installation
 guide](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
 
--&gt; The guides below also use a tool called
-[`jq`](https://stedolan.github.io/jq/) to simplify the output from the Azure
-CLI, though this is optional. If you use homebrew you can simply
-`brew install node jq`.
-
-You can also use the Azure CLI in Docker. It also comes with `jq`
-pre-installed:
-
-``` shell
-$ docker run -it microsoft/azure-cli
-```
+The guides below use [JMESPath](http://jmespath.org/) queries to select and reformat output from the AZ CLI commands. JMESPath is [part of the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/query-azure-cli?view=azure-cli-latest) and can be used in the same way as the `jq` tool.
 
 ## Guided Setup
 
@@ -148,14 +138,10 @@ below:
 Get your account information
 
 ``` shell
-$ az account list --output json | jq -r '.[].name'
+$ az account list --output table --query '[].{Name:name,subscription_id:id}'
 $ az account set --subscription ACCOUNTNAME
-$ az account show --output json | jq -r '.id'
+$ az account show --output json --query 'id'
 ```
-
--&gt; Throughout this document when you see a command pipe to `jq` you may
-instead omit `--output json` and everything after it, but the output will be
-more verbose. For example you can simply run `az account list` instead.
 
 This will print out one line that look like this:
 
@@ -235,7 +221,7 @@ granular permissions, though this is out of scope. You can see a list of
 pre-configured roles via:
 
 ``` shell
-$ az role definition list --output json | jq ".[] | {name:.roleName, description:.description}"
+$ az role definition list --output table --query '[].{name:roleName, description:description}'
 ```
 
 If you would rather use a certificate to autenticate your service principal,
