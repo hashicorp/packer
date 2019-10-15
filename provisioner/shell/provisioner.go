@@ -266,6 +266,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			p.config.envVarFile = remoteVFName
 			return nil
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	// Create environment variables to set before executing the command
