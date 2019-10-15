@@ -11,8 +11,11 @@ contrib.go.opencensus.io/exporter/ocagent
 # github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 github.com/1and1/oneandone-cloudserver-sdk-go
 # github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
+github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute
+github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute/computeapi
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
+github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute/computeapi
 github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network
 github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions
 github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources
@@ -23,6 +26,8 @@ github.com/Azure/azure-sdk-for-go/version
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/adal
 github.com/Azure/go-autorest/autorest/azure
+github.com/Azure/go-autorest/autorest/azure/auth
+github.com/Azure/go-autorest/autorest/azure/cli
 github.com/Azure/go-autorest/autorest/date
 github.com/Azure/go-autorest/autorest/to
 github.com/Azure/go-autorest/autorest/validation
@@ -169,6 +174,8 @@ github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
 github.com/digitalocean/go-qemu/qmp
 # github.com/digitalocean/godo v1.11.1
 github.com/digitalocean/godo
+# github.com/dimchansky/utfbom v1.1.0
+github.com/dimchansky/utfbom
 # github.com/docker/docker v0.0.0-20180422163414-57142e89befe
 github.com/docker/docker/pkg/namesgenerator
 # github.com/dustin/go-humanize v1.0.0
@@ -605,6 +612,8 @@ golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/internal/chacha20
 golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/md4
+golang.org/x/crypto/pkcs12
+golang.org/x/crypto/pkcs12/internal/rc2
 golang.org/x/crypto/poly1305
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/agent
