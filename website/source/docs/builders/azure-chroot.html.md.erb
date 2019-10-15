@@ -15,10 +15,11 @@ The `azure-chroot` builder is able to build Azure managed disk (MD) images. For
 more information on managed disks, see [Azure Managed Disks Overview](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/managed-disks-overview).
 
 The difference between this builder and the `azure-arm` builder is that this
-builder is able to build a managed disk image without launching an Azure VM 
-instance. This can dramatically speed up image builds. It also allows for more
-deterministic image content and enables some capabilities that are not possible
-with the `azure-arm` builder.
+builder is able to build a managed disk image without launching a new Azure VM
+for every build, but instead use an already-running Azure VM. This can
+dramatically speed up image builds. It also allows for more deterministic image
+content and enables some capabilities that are not possible with the
+`azure-arm` builder.
 
 > **This is an advanced builder** If you're just getting started with Packer,
 it is recommend to start with the [azure-arm builder](/docs/builders/azure-arm.html),
@@ -57,7 +58,7 @@ information.
 
 <%= partial "partials/builder/azure/common/client/_Config-not-required.html" %>
 
-### Azure chroot builder specific options 
+### Azure chroot builder specific options
 
 #### Required:
 <%= partial "partials/builder/azure/chroot/_Config-required.html" %>
@@ -154,7 +155,7 @@ updated Debian image:
 
 ### Using a Service Principal
 Here is an example that creates a Debian image with updated packages. Specify
-all environment variables (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, 
+all environment variables (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`,
 `ARM_SUBSCRIPTION_ID`) to use a service principal.
 The identity you choose should have permission to create disks and images and also
 to update your VM.
@@ -175,7 +176,7 @@ subscription where the resulting image will be created.
     "client_id": "{{user `client_id`}}",
     "client_secret": "{{user `client_secret`}}",
     "subscription_id": "{{user `subscription_id`}}",
-    
+
     "image_resource_id": "/subscriptions/{{user `subscription_id`}}/resourceGroups/{{user `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 
     "source": "credativ:Debian:9:latest"
