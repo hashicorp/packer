@@ -49,8 +49,7 @@ func (da diskAttacher) WaitForDevice(ctx context.Context, lun int32) (device str
 		link, err := os.Readlink(path)
 		if err == nil {
 			return filepath.Abs("/dev/disk/azure/scsi1/" + link)
-		}
-		if err != nil && err != os.ErrNotExist {
+		} else if err != os.ErrNotExist {
 			if pe, ok := err.(*os.PathError); ok && pe.Err != syscall.ENOENT {
 				return "", err
 			}
