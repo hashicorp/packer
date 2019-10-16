@@ -169,6 +169,14 @@ type Config struct {
 	ctx interpolate.Context
 }
 
+func (c *Config) GetContext() interpolate.Context {
+	return c.ctx
+}
+
+type interpolateContextProvider interface {
+	GetContext() interpolate.Context
+}
+
 type wrappedCommandTemplate struct {
 	Command string
 }
@@ -393,8 +401,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
 		},
-		&StepMountExtra{},
-		&StepCopyFiles{},
+		&StepMountExtra{
+			ChrootMounts: b.config.ChrootMounts,
+		},
+		&StepCopyFiles{
+			Files: b.config.CopyFiles,
+		},
 		&StepChrootProvision{},
 		&StepEarlyCleanup{},
 		&StepSnapshot{},

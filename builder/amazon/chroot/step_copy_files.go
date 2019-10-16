@@ -17,20 +17,20 @@ import (
 //   copy_files_cleanup CleanupFunc - A function to clean up the copied files
 //   early.
 type StepCopyFiles struct {
+	Files []string
 	files []string
 }
 
 func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	stderr := new(bytes.Buffer)
 
-	s.files = make([]string, 0, len(config.CopyFiles))
-	if len(config.CopyFiles) > 0 {
+	s.files = make([]string, 0, len(s.Files))
+	if len(s.Files) > 0 {
 		ui.Say("Copying files from host to chroot...")
-		for _, path := range config.CopyFiles {
+		for _, path := range s.Files {
 			ui.Message(path)
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)

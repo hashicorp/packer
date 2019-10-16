@@ -7,7 +7,7 @@
 /docs/command-line/machine-readable.html        /docs/commands/index.html
 /docs/command-line/introduction.html            /docs/commands/index.html
 /docs/templates/introduction.html               /docs/templates/index.html
-/docs/builders/azure-arm.html                   /docs/builders/azure.html
+/docs/builders/azure-setup.html                 /docs/builders/azure.html
 /docs/templates/veewee-to-packer.html           /guides/veewee-to-packer.html
 /docs/extend/developing-plugins.html            /docs/extending/plugins.html
 /docs/extending/developing-plugins.html         /docs/extending/plugins.html

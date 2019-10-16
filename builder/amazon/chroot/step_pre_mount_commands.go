@@ -17,7 +17,7 @@ type StepPreMountCommands struct {
 }
 
 func (s *StepPreMountCommands) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(interpolateContextProvider)
 	device := state.Get("device").(string)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
@@ -26,7 +26,7 @@ func (s *StepPreMountCommands) Run(ctx context.Context, state multistep.StateBag
 		return multistep.ActionContinue
 	}
 
-	ictx := config.ctx
+	ictx := config.GetContext()
 	ictx.Data = &preMountCommandsData{Device: device}
 
 	ui.Say("Running device setup commands...")

@@ -104,6 +104,8 @@ github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8 h1:N7nH2py78L
 github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8/go.mod h1:/YnlngP1PARC0SKAZx6kaAEMOp8bNTQGqS+Ka3MctNI=
 github.com/digitalocean/godo v1.11.1 h1:OsTh37YFKk+g6DnAOrkXJ9oDArTkRx5UTkBJ2EWAO38=
 github.com/digitalocean/godo v1.11.1/go.mod h1:h6faOIcZ8lWIwNQ+DN7b3CgX4Kwby5T+nbpNqkUIozU=
+github.com/dimchansky/utfbom v1.1.0 h1:FcM3g+nofKgUteL8dm/UpdRXNC9KmADgTpLKsu0TRo4=
+github.com/dimchansky/utfbom v1.1.0/go.mod h1:rO41eb7gLfo8SF1jd9F8HplJm1Fewwi4mQvIirEdv+8=
 github.com/dnaeon/go-vcr v1.0.0 h1:1QZ+ahihvRvppcJnFvuoHAdnZTf1PqKjO4Ftr1cfQTo=
 github.com/dnaeon/go-vcr v1.0.0/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
 github.com/docker/docker v0.0.0-20180422163414-57142e89befe h1:VW8TnWi0CZgg7oCv0wH6evNwkzcJg/emnw4HrVIWws4=

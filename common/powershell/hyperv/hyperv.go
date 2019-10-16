@@ -32,7 +32,7 @@ type scriptOptions struct {
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
 param([string]$switchName, [int]$addressIndex)
-$HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
+$HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName | Select-Object -First 1
 if ($HostVMAdapter){
   $HostNetAdapter = Get-NetAdapter | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
   if ($HostNetAdapter){
