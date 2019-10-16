@@ -17,19 +17,19 @@ import (
 // Produces:
 //   mount_extra_cleanup CleanupFunc - To perform early cleanup
 type StepMountExtra struct {
-	mounts []string
+	ChrootMounts [][]string
+	mounts       []string
 }
 
 func (s *StepMountExtra) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
-	s.mounts = make([]string, 0, len(config.ChrootMounts))
+	s.mounts = make([]string, 0, len(s.ChrootMounts))
 
 	ui.Say("Mounting additional paths within the chroot...")
-	for _, mountInfo := range config.ChrootMounts {
+	for _, mountInfo := range s.ChrootMounts {
 		innerPath := mountPath + mountInfo[2]
 
 		if err := os.MkdirAll(innerPath, 0755); err != nil {

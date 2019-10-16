@@ -1,8 +1,8 @@
 ---
 description: 'Packer supports building VHDs in Azure Resource manager.'
 layout: docs
-page_title: 'Azure - Builders'
-sidebar_current: 'docs-builders-azure'
+page_title: 'Azure arm - Builders'
+sidebar_current: 'docs-builders-azure-arm'
 ---
 
 # Azure Resource Manager Builder
@@ -23,7 +23,7 @@ VM from your build artifact.
 
 Azure uses a combination of OAuth and Active Directory to authorize requests to
 the ARM API. Learn how to [authorize access to
-ARM](/docs/builders/azure-setup.html).
+ARM](/docs/builders/azure.html#authentication-for-azure).
 
 The documentation below references command output from the [Azure
 CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
@@ -36,12 +36,12 @@ addition to the options listed here, a
 builder.
 
 ### Required options for authentication:
-If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure-setup.html#managed-identities-for-azure-resources)
+If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure.html#azure-managed-identity)
 you don't need to specify any additional configuration options.
 If you would like to use interactive user authentication, you should specify
 `subscription_id` only. Packer will use cached credentials or redirect you
 to a website to log in.
-If you want to use a [service principal](/docs/builders/azure-setup.html#create-a-service-principal)
+If you want to use a [service principal](/docs/builders/azure.html#azure-active-directory-service-principal)
 you should specify `subscription_id`, `client_id` and one of `client_secret`,
 `client_cert_path` or `client_jwt`.
 

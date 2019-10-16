@@ -1,6 +1,8 @@
 ## 1.4.5 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/azure-arm: Allow specification of polling duration [GH-8226]
+* builder/azure-chroot: Add Azure chroot builder [GH-8185]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
 * builder/proxmos: Add ability to select CPU type [GH-8201]
 * builder/proxmox: Add support for SCSI controller selection [GH-8199]

@@ -312,6 +312,14 @@ type Config struct {
 	// 4.  PlanPromotionCode
 	//
 	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
+	// The default PollingDuration for azure is 15mins, this property will override
+	// that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
+	// If your Packer build is failing on the
+	// ARM deployment step with the error `Original Error:
+	// context deadline exceeded`, then you probably need to increase this timeout from
+	// its default of "15m" (valid time units include `s` for seconds, `m` for
+	// minutes, and `h` for hours.)
+	PollingDurationTimeout time.Duration `mapstructure:"polling_duration_timeout" required:"false"`
 	// If either Linux or Windows is specified Packer will
 	// automatically configure authentication credentials for the provisioned
 	// machine. For Linux this configures an SSH authorized key. For Windows
@@ -888,6 +896,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			c.AzureTags["PlanPublisher"] = &c.PlanInfo.PlanPublisher
 			c.AzureTags["PlanPromotionCode"] = &c.PlanInfo.PlanPromotionCode
 		}
+	}
+
+	/////////////////////////////////////////////
+	// Polling Duration Timeout
+	if c.PollingDurationTimeout == 0 {
+		// In the sdk, the default is 15 m.
+		c.PollingDurationTimeout = 15 * time.Minute
 	}
 
 	/////////////////////////////////////////////
