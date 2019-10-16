@@ -169,133 +169,152 @@ func TestParser_ParseFile(t *testing.T) {
 			false,
 		},
 
-		// {
-		// 	"duplicate " + sourceLabel, defaultParser,
-		// 	args{"testdata/sources/basic.pkr.hcl", &PackerConfig{
-		// 		Sources: map[SourceRef]*Source{
-		// 			SourceRef{
-		// 				Type: "amazon-ebs",
-		// 				Name: "ubuntu-1604",
-		// 			}: {
-		// 				Type: "amazon-ebs",
-		// 				Name: "ubuntu-1604",
-		// 				Cfg:  &amazonebs.FlatConfig{RawRegion: "eu-west-3", InstanceType: "t2.micro"},
-		// 			},
-		// 		},
-		// 	},
-		// 	},
-		// 	&PackerConfig{
-		// 		Sources: map[SourceRef]*Source{
-		// 			SourceRef{
-		// 				Type: "virtualbox-iso",
-		// 				Name: "ubuntu-1204",
-		// 			}: {
-		// 				Type: "virtualbox-iso",
-		// 				Name: "ubuntu-1204",
-		// 				Cfg: &iso.FlatConfig{
-		// 					HTTPDir:         "xxx",
-		// 					ISOChecksum:     "769474248a3897f4865817446f9a4a53",
-		// 					ISOChecksumType: "md5",
-		// 					RawSingleISOUrl: "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
-		// 					BootCommand:     []string{"..."},
-		// 					ShutdownCommand: "echo 'vagrant' | sudo -S shutdown -P now",
-		// 					RawBootWait:     "10s",
-		// 				},
-		// 			},
-		// 			SourceRef{
-		// 				Type: "amazon-ebs",
-		// 				Name: "ubuntu-1604",
-		// 			}: {
-		// 				Type: "amazon-ebs",
-		// 				Name: "ubuntu-1604",
-		// 				Cfg:  &amazonebs.FlatConfig{RawRegion: "eu-west-3", InstanceType: "t2.micro"},
-		// 			},
-		// 			SourceRef{
-		// 				Type: "amazon-ebs",
-		// 				Name: "that-ubuntu-1.0",
-		// 			}: {
-		// 				Type: "amazon-ebs",
-		// 				Name: "that-ubuntu-1.0",
-		// 				Cfg:  &amazonebs.FlatConfig{RawRegion: "eu-west-3", InstanceType: "t2.micro"},
-		// 			},
-		// 		},
-		// 	},
-		// 	true,
-		// },
+		{
+			"duplicate " + sourceLabel, defaultParser,
+			args{"testdata/sources/basic.pkr.hcl", &PackerConfig{
+				Sources: map[SourceRef]*Source{
+					SourceRef{
+						Type: "virtualbox-iso",
+						Name: "ubuntu-1204",
+					}: {
+						Type: "virtualbox-iso",
+						Name: "ubuntu-1204",
+						Cfg: &iso.FlatConfig{
+							HTTPDir: strPtr("xxx"),
+						},
+					},
+				},
+			},
+			},
+			&PackerConfig{
+				Sources: map[SourceRef]*Source{
+					SourceRef{
+						Type: "virtualbox-iso",
+						Name: "ubuntu-1204",
+					}: {
+						Type: "virtualbox-iso",
+						Name: "ubuntu-1204",
+						Cfg: &iso.FlatConfig{
+							HTTPDir: strPtr("xxx"),
+						},
+					},
+					SourceRef{
+						Type: "amazon-ebs",
+						Name: "ubuntu-1604",
+					}: {
+						Type: "amazon-ebs",
+						Name: "ubuntu-1604",
+						Cfg: &amazonebs.FlatConfig{
+							RawRegion:            strPtr("eu-west-3"),
+							AMIEncryptBootVolume: boolPtr(true),
+							InstanceType:         strPtr("t2.micro"),
+							SourceAmiFilter: &awscommon.FlatAmiFilterOptions{
+								Filters: map[string]string{
+									"name":                "ubuntu/images/*ubuntu-xenial-{16.04}-amd64-server-*",
+									"root-device-type":    "ebs",
+									"virtualization-type": "hvm",
+								},
+								Owners: []string{"099720109477"},
+							},
+							AMIMappings:    []awscommon.FlatBlockDevice{},
+							LaunchMappings: []awscommon.FlatBlockDevice{},
+						},
+					},
+					SourceRef{
+						Type: "amazon-ebs",
+						Name: "that-ubuntu-1.0",
+					}: {
+						Type: "amazon-ebs",
+						Name: "that-ubuntu-1.0",
+						Cfg: &amazonebs.FlatConfig{
+							RawRegion:            strPtr("eu-west-3"),
+							AMIEncryptBootVolume: boolPtr(true),
+							InstanceType:         strPtr("t2.micro"),
+							SourceAmiFilter: &awscommon.FlatAmiFilterOptions{
+								MostRecent: boolPtr(true),
+							},
+							AMIMappings:    []awscommon.FlatBlockDevice{},
+							LaunchMappings: []awscommon.FlatBlockDevice{},
+						},
+					},
+				},
+			},
+			true,
+		},
 
-		// {"valid variables load", defaultParser,
-		// 	args{"testdata/variables/basic.pkr.hcl", new(PackerConfig)},
-		// 	&PackerConfig{
-		// 		Variables: PackerV1Variables{
-		// 			"image_name": "foo-image-{{user `my_secret`}}",
-		// 			"key":        "value",
-		// 			"my_secret":  "foo",
-		// 		},
-		// 	},
-		// 	false,
-		// },
+		{"valid variables load", defaultParser,
+			args{"testdata/variables/basic.pkr.hcl", new(PackerConfig)},
+			&PackerConfig{
+				Variables: PackerV1Variables{
+					"image_name": "foo-image-{{user `my_secret`}}",
+					"key":        "value",
+					"my_secret":  "foo",
+				},
+			},
+			false,
+		},
 
-		// {"valid " + buildLabel + " load", defaultParser,
-		// 	args{"testdata/build/basic.pkr.hcl", new(PackerConfig)},
-		// 	&PackerConfig{
-		// 		Builds: Builds{
-		// 			{
-		// 				Froms: BuildFromList{
-		// 					{
-		// 						Src: SourceRef{"amazon-ebs", "ubuntu-1604"},
-		// 					},
-		// 					{
-		// 						Src: SourceRef{"virtualbox-iso", "ubuntu-1204"},
-		// 					},
-		// 				},
-		// 				ProvisionerGroups: ProvisionerGroups{
-		// 					&ProvisionerGroup{
-		// 						CommunicatorRef: CommunicatorRef{"ssh", "vagrant"},
-		// 						Provisioners: []Provisioner{
-		// 							{Cfg: &shell.FlatConfig{
-		// 								Inline: []string{"echo '{{user `my_secret`}}' :D"},
-		// 							}},
-		// 							{Cfg: &shell.FlatConfig{
-		// 								Scripts:        []string{"script-1.sh", "script-2.sh"},
-		// 								ValidExitCodes: []int{0, 42},
-		// 							}},
-		// 							{Cfg: &file.FlatConfig{
-		// 								Source:      "app.tar.gz",
-		// 								Destination: "/tmp/app.tar.gz",
-		// 							}},
-		// 						},
-		// 					},
-		// 				},
-		// 				PostProvisionerGroups: ProvisionerGroups{
-		// 					&ProvisionerGroup{
-		// 						Provisioners: []Provisioner{
-		// 							{Cfg: &amazon_import.FlatConfig{
-		// 								Name: "that-ubuntu-1.0",
-		// 							}},
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 			&Build{
-		// 				Froms: BuildFromList{
-		// 					{
-		// 						Src: SourceRef{"amazon", "that-ubuntu-1"},
-		// 					},
-		// 				},
-		// 				ProvisionerGroups: ProvisionerGroups{
-		// 					&ProvisionerGroup{
-		// 						Provisioners: []Provisioner{
-		// 							{Cfg: &shell.FlatConfig{
-		// 								Inline: []string{"echo HOLY GUACAMOLE !"},
-		// 							}},
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	false,
-		// },
+		{"valid " + buildLabel + " load", defaultParser,
+			args{"testdata/build/basic.pkr.hcl", new(PackerConfig)},
+			&PackerConfig{
+				Builds: Builds{
+					{
+						Froms: BuildFromList{
+							{
+								Src: SourceRef{"amazon-ebs", "ubuntu-1604"},
+							},
+							{
+								Src: SourceRef{"virtualbox-iso", "ubuntu-1204"},
+							},
+						},
+						ProvisionerGroups: ProvisionerGroups{
+							&ProvisionerGroup{
+								CommunicatorRef: CommunicatorRef{"ssh", "vagrant"},
+								Provisioners: []Provisioner{
+									{Cfg: &shell.FlatConfig{
+										Inline: []string{"echo '{{user `my_secret`}}' :D"},
+									}},
+									{Cfg: &shell.FlatConfig{
+										Scripts:        []string{"script-1.sh", "script-2.sh"},
+										ValidExitCodes: []int{0, 42},
+									}},
+									{Cfg: &file.FlatConfig{
+										Source:      strPtr("app.tar.gz"),
+										Destination: strPtr("/tmp/app.tar.gz"),
+									}},
+								},
+							},
+						},
+						PostProvisionerGroups: ProvisionerGroups{
+							&ProvisionerGroup{
+								Provisioners: []Provisioner{
+									{Cfg: &amazon_import.FlatConfig{
+										Name: strPtr("that-ubuntu-1.0"),
+									}},
+								},
+							},
+						},
+					},
+					&Build{
+						Froms: BuildFromList{
+							{
+								Src: SourceRef{"amazon", "that-ubuntu-1"},
+							},
+						},
+						ProvisionerGroups: ProvisionerGroups{
+							&ProvisionerGroup{
+								Provisioners: []Provisioner{
+									{Cfg: &shell.FlatConfig{
+										Inline: []string{"echo HOLY GUACAMOLE !"},
+									}},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
