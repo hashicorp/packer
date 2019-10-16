@@ -56,6 +56,7 @@ type FlatConfig struct {
 	VirtualNetworkResourceGroupName     *string                            `mapstructure:"virtual_network_resource_group_name" required:"false" cty:"virtual_network_resource_group_name"`
 	CustomDataFile                      *string                            `mapstructure:"custom_data_file" required:"false" cty:"custom_data_file"`
 	PlanInfo                            *FlatPlanInformation               `mapstructure:"plan_info" required:"false" cty:"plan_info"`
+	PollingDurationTimeout              *string                            `mapstructure:"polling_duration_timeout" required:"false" cty:"polling_duration_timeout"`
 	OSType                              *string                            `mapstructure:"os_type" required:"false" cty:"os_type"`
 	OSDiskSizeGB                        *int32                             `mapstructure:"os_disk_size_gb" required:"false" cty:"os_disk_size_gb"`
 	AdditionalDiskSize                  []int32                            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size"`
@@ -161,6 +162,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"virtual_network_resource_group_name":      &hcldec.AttrSpec{Name: "virtual_network_resource_group_name", Type: cty.String, Required: false},
 		"custom_data_file":                         &hcldec.AttrSpec{Name: "custom_data_file", Type: cty.String, Required: false},
 		"plan_info":                                &hcldec.BlockSpec{TypeName: "plan_info", Nested: hcldec.ObjectSpec((*FlatPlanInformation)(nil).HCL2Spec())},
+		"polling_duration_timeout":                 &hcldec.AttrSpec{Name: "polling_duration_timeout", Type: cty.String, Required: false},
 		"os_type":                                  &hcldec.AttrSpec{Name: "os_type", Type: cty.String, Required: false},
 		"os_disk_size_gb":                          &hcldec.AttrSpec{Name: "os_disk_size_gb", Type: cty.Number, Required: false},
 		"disk_additional_size":                     &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
