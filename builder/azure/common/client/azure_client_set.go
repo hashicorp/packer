@@ -33,7 +33,7 @@ type azureClientSet struct {
 }
 
 func New(c Config, say func(string)) (AzureClientSet, error) {
-	token, err := c.GetServicePrincipalToken(say, c.CloudEnvironment.ResourceManagerEndpoint)
+	token, err := c.GetServicePrincipalToken(say, c.CloudEnvironment().ResourceManagerEndpoint)
 	if err != nil {
 		return nil, err
 	}
