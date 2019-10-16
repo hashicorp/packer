@@ -49,7 +49,7 @@ var (
 
 // Usage is a replacement usage function for the flags package.
 func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of flatten-mapstructure:\n")
+	fmt.Fprintf(os.Stderr, "Usage of mapstructure-to-hcl2:\n")
 	fmt.Fprintf(os.Stderr, "\tflatten-mapstructure [flags] -type T[,T...] pkg\n")
 	fmt.Fprintf(os.Stderr, "Flags:\n")
 	flag.PrintDefaults()
@@ -57,7 +57,7 @@ func Usage() {
 
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix("flatten-mapstructure: ")
+	log.SetPrefix("mapstructure-to-hcl2: ")
 	flag.Usage = Usage
 	flag.Parse()
 	if len(*typeNames) == 0 {
@@ -76,7 +76,7 @@ func main() {
 	if goFile := os.Getenv("GOFILE"); goFile != "" {
 		outputPath = goFile[:len(goFile)-2] + "hcl2spec.go"
 	}
-	log.SetPrefix(fmt.Sprintf("flatten-mapstructure: %s.%v: ", os.Getenv("GOPACKAGE"), typeNames))
+	log.SetPrefix(fmt.Sprintf("mapstructure-to-hcl2: %s.%v: ", os.Getenv("GOPACKAGE"), typeNames))
 
 	cfg := &packages.Config{
 		Mode: packages.LoadSyntax,
