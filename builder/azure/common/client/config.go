@@ -207,12 +207,12 @@ func (c Config) GetServicePrincipalTokens(say func(string)) (
 	err error) {
 
 	servicePrincipalToken, err = c.GetServicePrincipalToken(say,
-		c.CloudEnvironment.ResourceManagerEndpoint)
+		c.CloudEnvironment().ResourceManagerEndpoint)
 	if err != nil {
 		return nil, nil, err
 	}
 	servicePrincipalTokenVault, err = c.GetServicePrincipalToken(say,
-		strings.TrimRight(c.CloudEnvironment.KeyVaultEndpoint, "/"))
+		strings.TrimRight(c.CloudEnvironment().KeyVaultEndpoint, "/"))
 	if err != nil {
 		return nil, nil, err
 	}
