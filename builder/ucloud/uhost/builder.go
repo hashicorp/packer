@@ -120,9 +120,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepStopInstance{},
 		&stepCreateImage{},
 		&stepCopyUCloudImage{
-			ImageDestinations: b.config.ImageDestinations,
-			RegionId:          b.config.Region,
-			ProjectId:         b.config.ProjectId,
+			ImageDestinations:     b.config.ImageDestinations,
+			RegionId:              b.config.Region,
+			ProjectId:             b.config.ProjectId,
+			WaitImageReadyTimeout: b.config.WaitImageReadyTimeout,
 		},
 	}
 

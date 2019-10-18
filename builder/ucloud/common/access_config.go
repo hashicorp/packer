@@ -37,6 +37,8 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 		cfg.BaseUrl = c.BaseUrl
 	}
 	cfg.UserAgent = fmt.Sprintf("Packer-UCloud/%s", version.FormattedVersion())
+	// set default max retry count
+	cfg.MaxRetries = 3
 
 	cred := auth.NewCredential()
 	cred.PublicKey = c.PublicKey

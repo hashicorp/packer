@@ -14,9 +14,10 @@ import (
 )
 
 type stepCopyUCloudImage struct {
-	ImageDestinations []ucloudcommon.ImageDestination
-	RegionId          string
-	ProjectId         string
+	ImageDestinations     []ucloudcommon.ImageDestination
+	RegionId              string
+	ProjectId             string
+	WaitImageReadyTimeout int
 }
 
 func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -63,9 +64,11 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 	ui.Message("Waiting for the copied images to become available...")
 
 	err := retry.Config{
-		Tries:       200,
-		ShouldRetry: func(err error) bool { return ucloudcommon.IsNotCompleteError(err) },
-		RetryDelay:  (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
+		StartTimeout: time.Duration(s.WaitImageReadyTimeout) * time.Second,
+		ShouldRetry: func(err error) bool {
+			return ucloudcommon.IsNotCompleteError(err)
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		for _, v := range expectedImages.GetAll() {
 			imageSet, err := client.DescribeImageByInfo(v.ProjectId, v.Region, v.ImageId)

@@ -18,6 +18,10 @@ const (
 	IpTypePrivate         = "Private"
 )
 
+const (
+	DefaultCreateImageTimeOut = 3600
+)
+
 var BootDiskTypeMap = NewStringConverter(map[string]string{
 	"cloud_ssd":    "CLOUD_SSD",
 	"local_normal": "LOCAL_NORMAL",

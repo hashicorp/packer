@@ -243,7 +243,6 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 	req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
 	if t.HostType == "o" {
 		req.MachineType = ucloud.String("O")
-		req.MinimalCpuPlatform = ucloud.String("Intel/Cascadelake")
 	}
 
 	if v, ok := state.GetOk("security_group_id"); ok {

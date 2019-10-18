@@ -38,7 +38,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	ui.Message(fmt.Sprintf("Waiting for the created image %q to become available...", resp.ImageId))
 
 	err = retry.Config{
-		Tries: 200,
+		StartTimeout: time.Duration(config.WaitImageReadyTimeout) * time.Second,
 		ShouldRetry: func(err error) bool {
 			return ucloudcommon.IsExpectedStateError(err)
 		},
