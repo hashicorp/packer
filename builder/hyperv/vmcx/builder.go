@@ -59,6 +59,14 @@ type Config struct {
 	// Windows installs, which look for an Autounattend.xml file on removable
 	// media. By default, no secondary ISO will be attached.
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images" required:"false"`
+	// The size or sizes of any
+	// additional hard disks for the VM in megabytes. If this is not specified
+	// then the VM will only contain a primary hard disk. Additional drives
+	// will be attached to the SCSI interface only. The builder uses
+	// expandable rather than fixed-size virtual hard disks, so the actual
+	// file representing the disk will not use the full size unless it is
+	// full.
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
 	// If set to attach then attach and
 	// mount the ISO image specified in guest_additions_path. If set to
 	// none then guest additions are not attached and mounted; This is the
@@ -67,10 +75,8 @@ type Config struct {
 	// The path to the ISO image for guest
 	// additions.
 	GuestAdditionsPath string `mapstructure:"guest_additions_path" required:"false"`
-
 	// This is the path to a directory containing an exported virtual machine.
 	CloneFromVMCXPath string `mapstructure:"clone_from_vmcx_path"`
-
 	// This is the name of the virtual machine to clone from.
 	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
 	// The name of a snapshot in the
@@ -354,7 +360,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	numberOfIsos := len(b.config.SecondaryDvdImages)
+	numberOfIsos := len(b.config.SecondaryDvdImages) + len(b.config.AdditionalDiskSize)
 
 	if b.config.GuestAdditionsMode == "attach" {
 		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
@@ -524,6 +530,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			MacAddress:                     b.config.MacAddress,
 			KeepRegistered:                 b.config.KeepRegistered,
+			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},
