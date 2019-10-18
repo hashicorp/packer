@@ -1,22 +1,16 @@
 {"variables": {
-  "build_timestamp": "{{isotime \"20060102150405\"}}",
-  "cpus": "1",
+  "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+  "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+  "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}",
   "disk_size": "4096",
-  "git_revision": "__unknown_git_revision__",
   "headless": "",
-  "http_proxy": "{{env `http_proxy`}}",
-  "https_proxy": "{{env `https_proxy`}}",
-  "iso_checksum": "7002b56184180591a8fa08c2fe0c7338",
+  "iso_checksum": "0da4a1206e7642906e33c0f155d2f835",
   "iso_checksum_type": "md5",
-  "iso_name": "CentOS-7-x86_64-Minimal-1908.iso",
-  "ks_path": "centos-6.8/ks.cfg",
-  "memory": "512",
-  "metadata": "floppy/dummy_metadata.json",
-  "mirror": "https://mirrors.sjtug.sjtu.edu.cn/centos",
-  "mirror_directory": "7.7.1908/isos/x86_64",
-  "no_proxy": "{{env `no_proxy`}}",
-  "template": "centos-7.7-x86_64",
-  "version": "2.1.TIMESTAMP"
+  "iso_name": "CentOS-6.10-x86_64-minimal.iso",
+  "ks_path": "centos-6.10/ks.cfg",
+  "mirror": "http://mirrors.ustc.edu.cn/centos",
+  "mirror_directory": "6.10/isos/x86_64",
+  "template": "centos-6.10-x86_64"
 },
   "builders":[
     {
@@ -33,7 +27,7 @@
       "iso_url": "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
       "output_directory": "packer-{{user `template`}}-qemu",
       "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
-      "ssh_password": "vagrant",
+      "ssh_password": "ucloud_2019",
       "ssh_port": 22,
       "ssh_username": "root",
       "ssh_timeout": "10000s",
@@ -50,12 +44,15 @@
   "post-processors":[
     {
       "type":"ucloud-import",
-      "ufile_bucket_name": "packer",
-      "image_name": "packer_import",
+      "public_key": "{{user `ucloud_public_key`}}",
+      "private_key": "{{user `ucloud_private_key`}}",
+      "project_id": "{{user `ucloud_project_id`}}",
+      "region":"cn-bj2",
+      "ufile_bucket_name": "packer-test",
+      "image_name": "packer_import_test",
       "image_os_type": "CentOS",
-      "image_os_name": "CentOS 6.8 64位",
-      "format": "raw",
-      "region":"cn-bj2"
+      "image_os_name": "CentOS 6.10 64位",
+      "format": "raw"
     }
   ]
 }

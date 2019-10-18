@@ -173,7 +173,6 @@ var Provisioners = map[string]packer.Provisioner{
 
 var PostProcessors = map[string]packer.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
-	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),
@@ -188,6 +187,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),
 	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
+	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),

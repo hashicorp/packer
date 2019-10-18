@@ -33,6 +33,8 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 	cfg.Region = c.Region
 	cfg.ProjectId = c.ProjectId
 	cfg.UserAgent = fmt.Sprintf("Packer-UCloud/%s", version.FormattedVersion())
+	// set default max retry count
+	cfg.MaxRetries = 3
 
 	cred := auth.NewCredential()
 	cred.PublicKey = c.PublicKey
