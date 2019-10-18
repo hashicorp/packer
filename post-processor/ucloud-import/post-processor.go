@@ -24,6 +24,13 @@ const (
 	VHDFileFormat   = "vhd"
 	VMDKFileFormat  = "vmdk"
 	QCOW2FileFormat = "qcow2"
+
+	CentOSOsType  = "CentOS"
+	UbuntuOsType  = "Ubuntu"
+	WindowsOsType = "Windows"
+	RedHatOsType  = "RedHat"
+	DebianOsType  = "Debian"
+	OtherOsType   = "Other"
 )
 
 var regionForFileMap = ucloudcommon.NewStringConverter(map[string]string{
@@ -43,14 +50,15 @@ type Config struct {
 	ucloudcommon.AccessConfig `mapstructure:",squash"`
 
 	// Variables specific to this post processor
-	UFileBucket      string `mapstructure:"ufile_bucket_name"`
-	UFileKey         string `mapstructure:"ufile_key_name"`
-	SkipClean        bool   `mapstructure:"skip_clean"`
-	ImageName        string `mapstructure:"image_name"`
-	ImageDescription string `mapstructure:"image_description"`
-	OSType           string `mapstructure:"image_os_type"`
-	OSName           string `mapstructure:"image_os_name"`
-	Format           string `mapstructure:"format"`
+	UFileBucket           string `mapstructure:"ufile_bucket_name"`
+	UFileKey              string `mapstructure:"ufile_key_name"`
+	SkipClean             bool   `mapstructure:"skip_clean"`
+	ImageName             string `mapstructure:"image_name"`
+	ImageDescription      string `mapstructure:"image_description"`
+	OSType                string `mapstructure:"image_os_type"`
+	OSName                string `mapstructure:"image_os_name"`
+	Format                string `mapstructure:"format"`
+	WaitImageReadyTimeout int    `mapstructure:"wait_image_ready_timeout"`
 
 	ctx interpolate.Context
 }
@@ -76,8 +84,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Set defaults
 	if p.config.UFileKey == "" {
-		//fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
 		p.config.UFileKey = "packer-import-{{timestamp}}." + p.config.Format
+	}
+
+	if p.config.WaitImageReadyTimeout <= 0 {
+		p.config.WaitImageReadyTimeout = ucloudcommon.DefaultCreateImageTimeOut
 	}
 
 	errs := new(packer.MultiError)
@@ -95,8 +106,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	templates := map[string]*string{
 		"ufile_bucket_name": &p.config.UFileBucket,
 		"image_name":        &p.config.ImageName,
-		"image_os_type":     &p.config.OSName,
-		"image_os_name":     &p.config.OSType,
+		"image_os_type":     &p.config.OSType,
+		"image_os_name":     &p.config.OSName,
+		"format":            &p.config.Format,
 	}
 	// Check out required params are defined
 	for key, ptr := range templates {
@@ -106,11 +118,23 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
+	imageName := p.config.ImageName
+	if !ucloudcommon.ImageNamePattern.MatchString(imageName) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("expected %q to be 1-63 characters and only support chinese, english, numbers, '-_,.:[]', got %q", "image_name", imageName))
+	}
+
+	switch p.config.OSType {
+	case CentOSOsType, UbuntuOsType, WindowsOsType, RedHatOsType, DebianOsType, OtherOsType:
+	default:
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("expected %q only be one of 'CentOS', 'Ubuntu', 'Windows', 'RedHat', 'Debian' or 'Other', got %q", "image_os_type", p.config.OSType))
+	}
+
 	switch p.config.Format {
 	case VHDFileFormat, RAWFileFormat, VMDKFileFormat, QCOW2FileFormat:
 	default:
 		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("invalid format '%s'. Only 'raw', 'vhd', 'vmdk', or 'qcow2' are allowed", p.config.Format))
+			errs, fmt.Errorf("expected %q only be one of 'raw', 'vhd', 'vmdk', or 'qcow2', got %q", "format", p.config.Format))
 	}
 
 	// Anything which flagged return back up the stack
@@ -128,7 +152,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	client, err := p.config.Client()
 	if err != nil {
-		return nil, false, false, err
+		return nil, false, false, fmt.Errorf("Failed to connect ucloud client %s", err)
 	}
 	uhostconn := client.UHostConn
 	ufileconn := client.UFileConn
@@ -139,9 +163,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("Error rendering ufile_key_name template: %s", err)
 	}
 
-	log.Printf("Rendered ufile_key_name as %s", p.config.UFileKey)
+	ui.Message(fmt.Sprintf("Rendered ufile_key_name as %s", p.config.UFileKey))
 
-	log.Println("Looking for image in artifact")
+	ui.Message("Looking for image in artifact")
 	// Locate the files output from the builder
 	var source string
 	for _, path := range artifact.Files() {
@@ -156,8 +180,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
 	}
 
-	region := regionForFileMap.Convert(p.config.Region)
-	projectId := p.config.ProjectId
+	convertedRegion := regionForFileMap.Convert(p.config.Region)
 	keyName := p.config.UFileKey
 	bucketName := p.config.UFileBucket
 
@@ -165,43 +188,42 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		PublicKey:  p.config.PublicKey,
 		PrivateKey: p.config.PrivateKey,
 		BucketName: bucketName,
-		FileHost:   fmt.Sprintf(region + ".ufileos.com"),
+		FileHost:   fmt.Sprintf(convertedRegion + ".ufileos.com"),
 		BucketHost: "api.ucloud.cn",
 	}
+
+	// query or create bucket
+	if err := queryOrCreateBucket(ufileconn, config); err != nil {
+		return nil, false, false, fmt.Errorf("Failed to query or create bucket, %s", err)
+	}
+
+	bucketUrl := fmt.Sprintf("http://" + bucketName + "." + convertedRegion + ".ufileos.com")
+
+	ui.Say(fmt.Sprintf("Waiting for uploading image file %s to UFile: %s/%s...", source, bucketUrl, p.config.UFileKey))
+
+	// upload file to bucket
+	ufileUrl, err := uploadFile(ufileconn, config, keyName, source)
 	if err != nil {
-		return nil, false, false, fmt.Errorf("Load config error %s", err)
+		return nil, false, false, fmt.Errorf("Failed to Upload image file, %s", err)
 	}
 
-	if err := queryOrCreateBucket(ufileconn, config, region, projectId); err != nil {
-		return nil, false, false, fmt.Errorf("Query or create bucket error %s", err)
-	}
+	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile %s", source, ufileUrl))
 
-	bucketUrl := fmt.Sprintf("http://" + bucketName + "." + region + ".ufileos.com")
-	ui.Say(fmt.Sprintf("Waiting for uploading file %s to %s/%s...", source, bucketUrl, p.config.UFileKey))
-
-	privateUrl, err := uploadFile(config, keyName, source, projectId)
-	if err != nil {
-		return nil, false, false, fmt.Errorf("Upload file error %s", err)
-	}
-
-	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile %s", source, privateUrl))
-
-	importImageRequest := p.buildImportImageRequest(uhostconn, privateUrl)
+	importImageRequest := p.buildImportImageRequest(uhostconn, ufileUrl)
 	importImageResponse, err := uhostconn.ImportCustomImage(importImageRequest)
 	if err != nil {
-		return nil, false, false, fmt.Errorf("Failed to import from %s/%s: %s", bucketUrl, p.config.UFileKey, err)
+		return nil, false, false, fmt.Errorf("Failed to import image from %s/%s, %s", bucketUrl, p.config.UFileKey, err)
 	}
-
-	imageId := importImageResponse.ImageId
 
 	ui.Say(fmt.Sprintf("Waiting for importing %s/%s to ucloud...", bucketUrl, p.config.UFileKey))
 
+	imageId := importImageResponse.ImageId
 	err = retry.Config{
-		Tries: 30,
+		StartTimeout: time.Duration(p.config.WaitImageReadyTimeout) * time.Second,
 		ShouldRetry: func(err error) bool {
 			return ucloudcommon.IsExpectedStateError(err)
 		},
-		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		image, err := client.DescribeImageById(imageId)
 		if err != nil {
@@ -209,7 +231,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		}
 
 		if image.State == ucloudcommon.ImageStateUnavailable {
-			return fmt.Errorf("Unavailable importing image %s", imageId)
+			return fmt.Errorf("Unavailable importing image %q", imageId)
 		}
 
 		if image.State != ucloudcommon.ImageStateAvailable {
@@ -225,7 +247,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	// Add the reported UCloud image ID to the artifact list
-	ui.Say(fmt.Sprintf("Importing created ucloud image ID %s in region %s Finished.", imageId, p.config.Region))
+	ui.Say(fmt.Sprintf("Importing created ucloud image %q in region %q Complete.", imageId, p.config.Region))
 	images := []ucloudcommon.ImageInfo{
 		{
 			ImageId:   imageId,
@@ -241,9 +263,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	if !p.config.SkipClean {
-		ui.Message(fmt.Sprintf("Deleting import source %s/%s/%s", bucketUrl, p.config.UFileBucket, p.config.UFileKey))
+		ui.Message(fmt.Sprintf("Deleting import source UFile: %s/%s", p.config.UFileBucket, p.config.UFileKey))
 		if err = deleteFile(config, p.config.UFileKey); err != nil {
-			return nil, false, false, fmt.Errorf("Failed to delete %s/%s/%s: %s", bucketUrl, p.config.UFileBucket, p.config.UFileKey, err)
+			return nil, false, false, fmt.Errorf("Failed to delete UFile: %s/%s, %s", p.config.UFileBucket, p.config.UFileKey, err)
 		}
 	}
 
@@ -262,7 +284,7 @@ func (p *PostProcessor) buildImportImageRequest(conn *uhost.UHostClient, private
 	return req
 }
 
-func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config, region, projectId string) error {
+func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config) error {
 	var limit = 100
 	var offset int
 	var bucketList []ufile.UFileBucketSet
@@ -272,7 +294,7 @@ func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config, region, 
 		req.Offset = ucloud.Int(offset)
 		resp, err := conn.DescribeBucket(req)
 		if err != nil {
-			return fmt.Errorf("error on reading bucket list, %s", err)
+			return fmt.Errorf("error on reading bucket list when create bucket, %s", err)
 		}
 
 		if resp == nil || len(resp.DataSet) < 1 {
@@ -307,32 +329,30 @@ func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config, region, 
 	return nil
 }
 
-func uploadFile(config *ufsdk.Config, keyName, filePath, projectId string) (string, error) {
+func uploadFile(conn *ufile.UFileClient, config *ufsdk.Config, keyName, source string) (string, error) {
 	reqFile, err := ufsdk.NewFileRequest(config, nil)
 	if err != nil {
-		return "", fmt.Errorf("NewFileErr:%s", err)
+		return "", fmt.Errorf("error on building upload file request, %s", err)
 	}
 
-	err = reqFile.AsyncMPut(filePath, keyName, "")
+	// upload file in segments
+	err = reqFile.AsyncMPut(source, keyName, "")
 	if err != nil {
-		return "", fmt.Errorf("AsyncMPutErr:%s, Response:%s", err, reqFile.DumpResponse(true))
+		return "", fmt.Errorf("error on upload file, %s, details: %s", err, reqFile.DumpResponse(true))
 	}
 
-	reqBucket, err := ufsdk.NewBucketRequest(config, nil)
+	reqBucket := conn.NewDescribeBucketRequest()
+	reqBucket.BucketName = ucloud.String(config.BucketName)
+	resp, err := conn.DescribeBucket(reqBucket)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error on reading bucket list when upload file, %s", err)
 	}
 
-	bucketList, err := reqBucket.DescribeBucket(config.BucketName, 0, 1, projectId)
-	if err != nil {
-		return "", nil
-	}
-
-	if bucketList.DataSet[0].Type == "private" {
+	if resp.DataSet[0].Type == "private" {
 		return reqFile.GetPrivateURL(keyName, 24*60*60), nil
 	}
 
-	return reqBucket.GetPublicURL(keyName), nil
+	return reqFile.GetPublicURL(keyName), nil
 }
 
 func deleteFile(config *ufsdk.Config, keyName string) error {

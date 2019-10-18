@@ -83,6 +83,8 @@ builder.
     -   `name` (string) - The copied image name. If not defined, builder will use `image_name` as default name.  
 
     -   `description` (number) - The copied image description.
+    
+- `wait_image_ready_timeout` (int)Timeout of creating image or copying image. The default timeout is 3600 seconds if this option is not set or is set to 0.
 
 ## Examples
 
