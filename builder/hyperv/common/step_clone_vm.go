@@ -32,6 +32,7 @@ type StepCloneVM struct {
 	EnableVirtualizationExtensions bool
 	MacAddress                     string
 	KeepRegistered                 bool
+	AdditionalDiskSize             []uint
 }
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -122,6 +123,20 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+	}
+
+	if len(s.AdditionalDiskSize) > 0 {
+		for index, size := range s.AdditionalDiskSize {
+			diskSize := int64(size * 1024 * 1024)
+			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
+			err = driver.AddVirtualMachineHardDrive(s.VMName, path, diskFile, diskSize, diskBlockSize, "SCSI")
+			if err != nil {
+				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 
