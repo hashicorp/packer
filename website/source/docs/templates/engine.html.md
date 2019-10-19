@@ -41,7 +41,7 @@ Here is a full list of the available functions for reference.
     will convert upper cases to lower cases and replace illegal characters with
     a "-" character.  Example:
 
-   `"mybuild-{{isotime | clean_resource_name}}"` will become
+   `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid Azure image names must match the regex
@@ -57,15 +57,16 @@ Here is a full list of the available functions for reference.
     clean_resource_name}}"` will cause your build to fail because the image
     name will start with a number, which is why in the above example we prepend
     the isotime with "mybuild".
-    Exact behavior of `clean_resource_name` will depend on which builder it is
-    being applied to; refer to build-specific docs below for more detail on how
-    each function will behave.
 -   `env` - Returns environment variables. See example in [using home
     variable](/docs/templates/user-variables.html#using-home-variable)
 -   `isotime [FORMAT]` - UTC time, which can be
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below in [the `isotime` format
     reference](/docs/templates/engine.html#isotime-function-format-reference).
+    `strftime FORMAT` - UTC time, formated using the ISO C standard format
+    `FORMAT`. See
+    [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
+    of available format specifier.
 -   `lower` - Lowercases the string.
 -   `packer_version` - Returns Packer version.
 -   `pwd` - The working directory while executing Packer.
@@ -83,19 +84,19 @@ Here is a full list of the available functions for reference.
 
 #### Specific to Amazon builders:
 
--   `clean_resource_name` - AMI names
+-   `clean_ami_name` - DEPRECATED use `clean_resource_name` instead - AMI names
     can only contain certain characters. This function will replace illegal
     characters with a '-" character. Example usage since ":" is not a legal AMI
-    name is: `{{isotime | clean_resource_name}}`.
+    name is: `{{isotime | clean_ami_name}}`.
 
 #### Specific to Google Compute builders:
 
--   `clean_resource_name` - GCE
+-   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - GCE
     image names can only contain certain characters and the maximum length is
     63. This function will convert upper cases to lower cases and replace
         illegal characters with a "-" character. Example:
 
-    `"mybuild-{{isotime | clean_resource_name}}"` will become
+    `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid GCE image names must match the regex
@@ -110,12 +111,12 @@ Here is a full list of the available functions for reference.
 
 #### Specific to Azure builders:
 
--   `clean_resource_name` - Azure
+-   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - Azure
     managed image names can only contain certain characters and the maximum
     length is 80. This function will replace illegal characters with a "-"
     character. Example:
 
-    `"mybuild-{{isotime | clean_resource_name}}"` will become
+    `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid Azure image names must match the regex

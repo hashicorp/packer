@@ -30,15 +30,15 @@ builder.
     or set the `TENCENTCLOUD_SECRET_KEY` environment variable.
 
 -   `region` (string) - The region where your cvm will be launch. You should
-    reference [Region and Zone](https://cloud.tencent.com/document/product/213/6091)
+    reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
      for parameter taking.
 
 -   `zone` (string) - The zone where your cvm will be launch. You should
-    reference [Region and Zone](https://cloud.tencent.com/document/product/213/6091)
+    reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
      for parameter taking.
 
 -   `instance_type` (string) - The instance type your cvm will be launched by.
-    You should reference [Instace Type](https://cloud.tencent.com/document/product/213/11518)
+    You should reference [Instace Type](https://intl.cloud.tencent.com/document/product/213/11518)
      for parameter taking.
 
 -   `source_image_id` (string) - The base image id of Image you want to create
@@ -81,7 +81,7 @@ builder.
 -   `instance_name` (string) - Instance name.
 
 -   `disk_type` (string) - Root disk type your cvm will be launched by. you could
-    reference [Disk Type](https://cloud.tencent.com/document/api/213/15753#SystemDisk)
+    reference [Disk Type](https://intl.cloud.tencent.com/document/product/213/15753#SystemDisk)
     for parameter taking.
 
 -   `disk_size` (number) - Root disk size your cvm will be launched by. values range(in GB):
