@@ -146,11 +146,9 @@ type Config struct {
 	// one of the other listed interfaces. Using the `scsi` interface under
 	// these circumstances will cause the build to fail.
 	DiskInterface string `mapstructure:"disk_interface" required:"false"`
-	// The size in bytes, suffixes of the first letter of common byte types
-	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
-	// Will create the of the hard disk of the VM. By default, this is
-	// `40960M` (40 GB).
-	DiskSize string `mapstructure:"disk_size" required:"false"`
+	// The size, in megabytes, of the hard disk to create
+	// for the VM. By default, this is 40960 (40 GB).
+	DiskSize uint `mapstructure:"disk_size" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
 	// default, this is set to `writeback`.
@@ -318,6 +316,7 @@ type Config struct {
 	// "BUILDNAME" is the name of the build. Currently, no file extension will be
 	// used unless it is specified in this option.
 	VMName string `mapstructure:"vm_name" required:"false"`
+
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
 	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
@@ -345,10 +344,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
+
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	if b.config.DiskSize == "" || b.config.DiskSize == "0" {
-		b.config.DiskSize = "40960M"
+	if b.config.DiskSize == 0 {
+		b.config.DiskSize = 40960
 	}
 
 	if b.config.DiskCache == "" {
@@ -700,7 +700,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact.state["diskPaths"] = diskpaths
 	}
 	artifact.state["diskType"] = b.config.Format
-	artifact.state["diskSize"] = b.config.DiskSize
+	artifact.state["diskSize"] = uint64(b.config.DiskSize)
 	artifact.state["domainType"] = b.config.Accelerator
 
 	return artifact, nil

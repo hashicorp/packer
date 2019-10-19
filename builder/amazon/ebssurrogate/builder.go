@@ -306,6 +306,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			Architecture:             b.config.Architecture,
 			LaunchOmitMap:            b.config.LaunchMappings.GetOmissions(),
+			AMISkipBuildRegion:       b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,

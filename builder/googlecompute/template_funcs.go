@@ -3,6 +3,8 @@ package googlecompute
 import (
 	"strings"
 	"text/template"
+
+	packertpl "github.com/hashicorp/packer/common/template"
 )
 
 func isalphanumeric(b byte) bool {
@@ -35,4 +37,5 @@ func templateCleanImageName(s string) string {
 
 var TemplateFuncs = template.FuncMap{
 	"clean_resource_name": templateCleanImageName,
+	"clean_image_name":    packertpl.DeprecatedTemplateFunc("clean_image_name", "clean_resource_name", templateCleanImageName),
 }

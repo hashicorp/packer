@@ -1,7 +1,14 @@
-## 1.5.0 (Upcoming)
+## 1.4.5 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/azure-arm: Allow specification of polling duration [GH-8226]
+* builder/azure-chroot: Add Azure chroot builder [GH-8185]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
+* builder/proxmos: Add ability to select CPU type [GH-8201]
+* builder/proxmox: Add support for SCSI controller selection [GH-8199]
+* communicator/winrm: Prevent busy loop while waiting for WinRM connection
+    [GH-8213]
+* core: Add strftime function in templates [GH-8208]
 
 ### BUG FIXES:
 * builder/amazon: Fix spot instance bug where builder would fail if one
@@ -13,12 +20,8 @@
     already shut down [GH-8176]
 * post-processor/digitalocean-import: Fix panic when 'image_regions' not set
     [GH-8179]
-
-### BACKWARDS INCOMPATIBILITIES:
-* builder/qemu: Provide disk size as a string [GH-7546]
-* core: Finish deprecating old tempalte functions clean_ami_name and
-    clean_image_name in favor of generic clean_resource_name [GH-8193]
-
+* provisioner/powershell: Fix powershell syntax error causing failed builds
+    [GH-8195]
 
 ## 1.4.4 (October 1, 2019)
 
