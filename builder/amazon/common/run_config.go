@@ -45,6 +45,15 @@ type VpcFilterOptions struct {
 	Filters map[*string]*string
 }
 
+type PolicyDocument struct {
+	Version   string
+	Statement []struct {
+		Effect   string
+		Action   []string
+		Resource string
+	}
+}
+
 func (d *VpcFilterOptions) Empty() bool {
 	return len(d.Filters) == 0
 }
@@ -123,7 +132,26 @@ type RunConfig struct {
 	// The name of an [IAM instance
 	// profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
 	// to launch the EC2 instance with.
-	IamInstanceProfile string `mapstructure:"iam_instance_profile" required:"false"`
+	IamInstanceProfile                        string          `mapstructure:"iam_instance_profile" required:"false"`
+	// Temporary IAM instance profile policy document
+	// If IamInstanceProfile is specified it will be used instead. Example:
+	//
+	// ```json
+	//{
+	//	"Version": "2012-10-17",
+	//	"Statement": [
+	//		{
+	//			"Action": [
+	//			"logs:*"
+	//			],
+	//			"Effect": "Allow",
+	//			"Resource": "*"
+	//		}
+	//	]
+	//}
+	// ```
+	//
+	TemporaryIamInstanceProfilePolicyDocument *PolicyDocument `mapstructure:"temporary_iam_instance_profile_policy_document" required:"false"`
 	// Automatically terminate instances on
 	// shutdown in case Packer exits ungracefully. Possible values are stop and
 	// terminate. Defaults to stop.

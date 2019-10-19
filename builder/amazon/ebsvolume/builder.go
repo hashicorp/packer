@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -141,12 +142,14 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 	ec2conn := ec2.New(session)
+	iam := iam.New(session)
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("access_config", &b.config.AccessConfig)
 	state.Put("ec2", ec2conn)
+	state.Put("iam", iam)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -162,7 +165,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
-			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
@@ -184,7 +186,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EbsOptimized:                      b.config.EbsOptimized,
 			EnableT2Unlimited:                 b.config.EnableT2Unlimited,
 			ExpectedRootDevice:                "ebs",
-			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
@@ -223,6 +224,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
+		},
+		&awscommon.StepIamInstanceProfile{
+			IamInstanceProfile:                        b.config.IamInstanceProfile,
+			TemporaryIamInstanceProfilePolicyDocument: b.config.TemporaryIamInstanceProfilePolicyDocument,
 		},
 		instanceStep,
 		&stepTagEBSVolumes{

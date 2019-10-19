@@ -73,6 +73,7 @@ func tStateSpot() multistep.StateBag {
 	})
 	state.Put("availability_zone", "us-east-1c")
 	state.Put("securityGroupIds", []string{"sg-0b8984db72f213dc3"})
+	state.Put("iamInstanceProfile", "packer-123")
 	state.Put("subnet_id", "subnet-077fde4e")
 	state.Put("source_image", "")
 	return state
@@ -91,7 +92,6 @@ func getBasicStep() *StepRunSpotInstance {
 		},
 		EbsOptimized:                      false,
 		ExpectedRootDevice:                "ebs",
-		IamInstanceProfile:                "",
 		InstanceInitiatedShutdownBehavior: "stop",
 		InstanceType:                      "t2.micro",
 		SourceAMI:                         "",
