@@ -3,16 +3,15 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"github.com/aws/aws-sdk-go/aws"
+	"log"
 	"time"
 
+	"encoding/json"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"encoding/json"
-
 )
 
 type StepIamInstanceProfile struct {
@@ -87,8 +86,8 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 		ui.Say(fmt.Sprintf("Creating temporary role for this instance: %s", profileName))
 
 		roleResp, err := iamsvc.CreateRole(&iam.CreateRoleInput{
-			RoleName:   aws.String(profileName),
-			Description: aws.String("Temporary role for Packer"),
+			RoleName:                 aws.String(profileName),
+			Description:              aws.String("Temporary role for Packer"),
 			AssumeRolePolicyDocument: aws.String("{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Principal\": {\"Service\": \"ec2.amazonaws.com\"},\"Action\": \"sts:AssumeRole\"}]}"),
 		})
 		if err != nil {
@@ -115,8 +114,8 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 		ui.Say(fmt.Sprintf("Attaching policy to the temporary role: %s", profileName))
 
 		_, err = iamsvc.PutRolePolicy(&iam.PutRolePolicyInput{
-			RoleName: roleResp.Role.RoleName,
-			PolicyName:aws.String(profileName),
+			RoleName:       roleResp.Role.RoleName,
+			PolicyName:     aws.String(profileName),
 			PolicyDocument: aws.String(string(policy)),
 		})
 		if err != nil {
@@ -128,7 +127,7 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 		s.createdPolicyName = aws.StringValue(roleResp.Role.RoleName)
 
 		_, err = iamsvc.AddRoleToInstanceProfile(&iam.AddRoleToInstanceProfileInput{
-			RoleName: roleResp.Role.RoleName,
+			RoleName:            roleResp.Role.RoleName,
 			InstanceProfileName: profileResp.InstanceProfile.InstanceProfileName,
 		})
 		if err != nil {
@@ -140,7 +139,7 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 		s.roleIsAttached = true
 		state.Put("iamInstanceProfile", aws.StringValue(profileResp.InstanceProfile.InstanceProfileName))
 
-		time.Sleep(5*time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 	return multistep.ActionContinue
@@ -156,7 +155,7 @@ func (s *StepIamInstanceProfile) Cleanup(state multistep.StateBag) {
 
 		_, err := iamsvc.RemoveRoleFromInstanceProfile(&iam.RemoveRoleFromInstanceProfileInput{
 			InstanceProfileName: aws.String(s.createdInstanceProfileName),
-			RoleName: aws.String(s.createdRoleName),
+			RoleName:            aws.String(s.createdRoleName),
 		})
 		if err != nil {
 			ui.Error(fmt.Sprintf(
@@ -168,7 +167,7 @@ func (s *StepIamInstanceProfile) Cleanup(state multistep.StateBag) {
 		ui.Say("Removing policy from temporary role...")
 		iamsvc.DeleteRolePolicy(&iam.DeleteRolePolicyInput{
 			PolicyName: aws.String(s.createdPolicyName),
-			RoleName: aws.String(s.createdRoleName),
+			RoleName:   aws.String(s.createdRoleName),
 		})
 	}
 	if s.createdRoleName != "" {
