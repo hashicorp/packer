@@ -132,7 +132,7 @@ type RunConfig struct {
 	// The name of an [IAM instance
 	// profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
 	// to launch the EC2 instance with.
-	IamInstanceProfile                        string          `mapstructure:"iam_instance_profile" required:"false"`
+	IamInstanceProfile string `mapstructure:"iam_instance_profile" required:"false"`
 	// Temporary IAM instance profile policy document
 	// If IamInstanceProfile is specified it will be used instead. Example:
 	//
