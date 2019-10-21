@@ -35,7 +35,6 @@ const (
 	DefaultPassword = ""
 )
 
-// AccessConfig is for common configuration related to AWS access
 type CommonConfig struct {
 	common.FloppyConfig `mapstructure:",squash"`
 	// The block size of the VHD to be created.
