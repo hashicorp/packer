@@ -3,19 +3,29 @@
 ### IMPROVEMENTS:
 * builder/azure-arm: Allow specification of polling duration [GH-8226]
 * builder/azure-chroot: Add Azure chroot builder [GH-8185]
+* builder/azure: Deploy NSG if list of IP addresses is provided in config
+    [GH-8203]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
 * builder/proxmos: Add ability to select CPU type [GH-8201]
 * builder/proxmox: Add support for SCSI controller selection [GH-8199]
+* builder/tencent: Add retry on remote api call [GH-8250]
 * communicator/winrm: Prevent busy loop while waiting for WinRM connection
     [GH-8213]
 * core: Add strftime function in templates [GH-8208]
 
 ### BUG FIXES:
+* builder/amazon: Fix region copy for non-ebs amazon builders [GH-8212]
 * builder/amazon: Fix spot instance bug where builder would fail if one
     availability zone could not support the requested spot instance type, even
     if another AZ could do so. [GH-8184]
+* builder/azure: Fix build failure after a retry config generation error.
+    [GH-8209]
 * builder/docker: Use a unique temp dir for each build to prevent concurrent
     builds from stomping on each other [GH-8192]
+* builder/hyperv: Improve filter for determining which files to compact
+    [GH-8248]
+* builder/hyperv: Use first adapter, rather than failing, when multiple
+    adapters are attached to host OS's VM switch [GH-8234]
 * builder/openstack: Warn instead of failing on terminate if instance is
     already shut down [GH-8176]
 * post-processor/digitalocean-import: Fix panic when 'image_regions' not set
