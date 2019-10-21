@@ -210,3 +210,36 @@ func TestSharedImageGallery00(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Linux build with Network Security Group
+func TestNetworkSecurityGroup00(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.SetMarketPlaceImage("Canonical", "UbuntuServer", "16.04", "latest", compute.CachingTypesReadWrite)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.SetNetworkSecurityGroup([]string{"127.0.0.1", "192.168.100.0/24"}, 123)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
