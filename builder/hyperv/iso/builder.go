@@ -53,7 +53,6 @@ type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.ISOConfig               `mapstructure:",squash"`
-	common.FloppyConfig            `mapstructure:",squash"`
 	bootcommand.BootConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig      `mapstructure:",squash"`
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
@@ -108,7 +107,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)

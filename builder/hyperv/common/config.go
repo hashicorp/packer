@@ -153,8 +153,8 @@ type CommonConfig struct {
 
 func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) ([]error, []string) {
 	// Accumulate any errors and warns
-	errs := make([]error, 0)
-	warns := make([]string, 0)
+	var errs []error
+	var warns []string
 
 	if c.VMName == "" {
 		c.VMName = fmt.Sprintf("packer-%s", pc.PackerBuildName)
@@ -178,12 +178,12 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 	}
 
 	if len(c.AdditionalDiskSize) > 64 {
-		err := fmt.Errorf("VM's currently support a maximum of 64 additional SCSI attached disks.")
-		errs = append(errs, err)
+		errs = append(errs, fmt.Errorf("VM's currently support a maximum of 64 additional SCSI attached disks."))
 	}
 
 	// Errors
-	errs = c.FloppyConfig.Prepare(ctx)
+	floppyerrs := c.FloppyConfig.Prepare(ctx)
+	errs = append(errs, floppyerrs...)
 	if c.GuestAdditionsMode == "" {
 		if c.GuestAdditionsPath != "" {
 			c.GuestAdditionsMode = "attach"
