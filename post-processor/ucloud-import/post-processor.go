@@ -24,13 +24,6 @@ const (
 	VHDFileFormat   = "vhd"
 	VMDKFileFormat  = "vmdk"
 	QCOW2FileFormat = "qcow2"
-
-	CentOSOsType  = "CentOS"
-	UbuntuOsType  = "Ubuntu"
-	WindowsOsType = "Windows"
-	RedHatOsType  = "RedHat"
-	DebianOsType  = "Debian"
-	OtherOsType   = "Other"
 )
 
 var regionForFileMap = ucloudcommon.NewStringConverter(map[string]string{
@@ -123,13 +116,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("expected %q to be 1-63 characters and only support chinese, english, numbers, '-_,.:[]', got %q", "image_name", imageName))
 	}
 
-	switch p.config.OSType {
-	case CentOSOsType, UbuntuOsType, WindowsOsType, RedHatOsType, DebianOsType, OtherOsType:
-	default:
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("expected %q only be one of 'CentOS', 'Ubuntu', 'Windows', 'RedHat', 'Debian' or 'Other', got %q", "image_os_type", p.config.OSType))
-	}
-
 	switch p.config.Format {
 	case VHDFileFormat, RAWFileFormat, VMDKFileFormat, QCOW2FileFormat:
 	default:
@@ -207,7 +193,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("Failed to Upload image file, %s", err)
 	}
 
-	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile %s", source, ufileUrl))
+	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile %s/%s", source, bucketUrl, p.config.UFileKey))
 
 	importImageRequest := p.buildImportImageRequest(uhostconn, ufileUrl)
 	importImageResponse, err := uhostconn.ImportCustomImage(importImageRequest)
