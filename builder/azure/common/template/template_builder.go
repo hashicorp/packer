@@ -3,9 +3,11 @@ package template
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -13,11 +15,12 @@ const (
 	jsonPrefix = ""
 	jsonIndent = "  "
 
-	resourceKeyVaults         = "Microsoft.KeyVault/vaults"
-	resourceNetworkInterfaces = "Microsoft.Network/networkInterfaces"
-	resourcePublicIPAddresses = "Microsoft.Network/publicIPAddresses"
-	resourceVirtualMachine    = "Microsoft.Compute/virtualMachines"
-	resourceVirtualNetworks   = "Microsoft.Network/virtualNetworks"
+	resourceKeyVaults             = "Microsoft.KeyVault/vaults"
+	resourceNetworkInterfaces     = "Microsoft.Network/networkInterfaces"
+	resourcePublicIPAddresses     = "Microsoft.Network/publicIPAddresses"
+	resourceVirtualMachine        = "Microsoft.Compute/virtualMachines"
+	resourceVirtualNetworks       = "Microsoft.Network/virtualNetworks"
+	resourceNetworkSecurityGroups = "Microsoft.Network/networkSecurityGroups"
 
 	variableSshKeyPath = "sshKeyPath"
 )
@@ -309,6 +312,39 @@ func (s *TemplateBuilder) SetPrivateVirtualNetworkWithPublicIp(virtualNetworkRes
 	return nil
 }
 
+func (s *TemplateBuilder) SetNetworkSecurityGroup(ipAddresses []string, port int) error {
+	nsgResource, dependency, resourceId := s.createNsgResource(ipAddresses, port)
+	if err := s.addResource(nsgResource); err != nil {
+		return err
+	}
+
+	vnetResource, err := s.getResourceByType(resourceVirtualNetworks)
+	if err != nil {
+		return err
+	}
+	s.deleteResourceByType(resourceVirtualNetworks)
+
+	s.addResourceDependency(vnetResource, dependency)
+
+	if vnetResource.Properties == nil || vnetResource.Properties.Subnets == nil || len(*vnetResource.Properties.Subnets) != 1 {
+		return fmt.Errorf("template: could not find virtual network/subnet to add default network security group to")
+	}
+	subnet := ((*vnetResource.Properties.Subnets)[0])
+	if subnet.SubnetPropertiesFormat == nil {
+		subnet.SubnetPropertiesFormat = &network.SubnetPropertiesFormat{}
+	}
+	if subnet.SubnetPropertiesFormat.NetworkSecurityGroup != nil {
+		return fmt.Errorf("template: subnet already has an associated network security group")
+	}
+	subnet.SubnetPropertiesFormat.NetworkSecurityGroup = &network.SecurityGroup{
+		ID: to.StringPtr(resourceId),
+	}
+
+	s.addResource(vnetResource)
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
 	if tags == nil || len(*tags) == 0 {
 		return nil
@@ -366,6 +402,18 @@ func (s *TemplateBuilder) toVariable(name string) string {
 	return fmt.Sprintf("[variables('%s')]", name)
 }
 
+func (s *TemplateBuilder) addResource(newResource *Resource) error {
+	for _, resource := range *s.template.Resources {
+		if *resource.Type == *newResource.Type {
+			return fmt.Errorf("template: found an existing resource of type %s", *resource.Type)
+		}
+	}
+
+	resources := append(*s.template.Resources, *newResource)
+	s.template.Resources = &resources
+	return nil
+}
+
 func (s *TemplateBuilder) deleteResourceByType(resourceType string) {
 	resources := make([]Resource, 0)
 
@@ -379,6 +427,15 @@ func (s *TemplateBuilder) deleteResourceByType(resourceType string) {
 	s.template.Resources = &resources
 }
 
+func (s *TemplateBuilder) addResourceDependency(resource *Resource, dep string) {
+	if resource.DependsOn != nil {
+		deps := append(*resource.DependsOn, dep)
+		resource.DependsOn = &deps
+	} else {
+		resource.DependsOn = &[]string{dep}
+	}
+}
+
 func (s *TemplateBuilder) deleteResourceDependency(resource *Resource, predicate func(string) bool) {
 	deps := make([]string, 0)
 
@@ -389,6 +446,38 @@ func (s *TemplateBuilder) deleteResourceDependency(resource *Resource, predicate
 	}
 
 	*resource.DependsOn = deps
+}
+
+func (s *TemplateBuilder) createNsgResource(srcIpAddresses []string, port int) (*Resource, string, string) {
+	resource := &Resource{
+		ApiVersion: to.StringPtr("[variables('networkSecurityGroupsApiVersion')]"),
+		Name:       to.StringPtr("[parameters('nsgName')]"),
+		Type:       to.StringPtr(resourceNetworkSecurityGroups),
+		Location:   to.StringPtr("[variables('location')]"),
+		Properties: &Properties{
+			SecurityRules: &[]network.SecurityRule{
+				{
+					Name: to.StringPtr("AllowIPsToSshWinRMInbound"),
+					SecurityRulePropertiesFormat: &network.SecurityRulePropertiesFormat{
+						Description:              to.StringPtr("Allow inbound traffic from specified IP addresses"),
+						Protocol:                 network.SecurityRuleProtocolTCP,
+						Priority:                 to.Int32Ptr(100),
+						Access:                   network.SecurityRuleAccessAllow,
+						Direction:                network.SecurityRuleDirectionInbound,
+						SourceAddressPrefixes:    &srcIpAddresses,
+						SourcePortRange:          to.StringPtr("*"),
+						DestinationAddressPrefix: to.StringPtr("VirtualNetwork"),
+						DestinationPortRange:     to.StringPtr(strconv.Itoa(port)),
+					},
+				},
+			},
+		},
+	}
+
+	dependency := fmt.Sprintf("[concat('%s/', parameters('nsgName'))]", resourceNetworkSecurityGroups)
+	resourceId := fmt.Sprintf("[resourceId('%s', parameters('nsgName'))]", resourceNetworkSecurityGroups)
+
+	return resource, dependency, resourceId
 }
 
 // See https://github.com/Azure/azure-quickstart-templates for a extensive list of templates.
@@ -496,6 +585,9 @@ const BasicTemplate = `{
 	"virtualNetworkName": {
       "type": "string"
 	},
+    "nsgName": {
+      "type": "string"
+    },
     "vmSize": {
       "type": "string"
     },
@@ -510,6 +602,7 @@ const BasicTemplate = `{
     "networkInterfacesApiVersion": "2017-04-01",
     "publicIPAddressApiVersion": "2017-04-01",
     "virtualNetworksApiVersion": "2017-04-01",
+    "networkSecurityGroupsApiVersion": "2019-04-01",
     "location": "[resourceGroup().location]",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
