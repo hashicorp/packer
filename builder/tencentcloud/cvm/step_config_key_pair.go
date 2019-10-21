@@ -6,12 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
-	"time"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -19,83 +16,79 @@ type stepConfigKeyPair struct {
 	Debug        bool
 	Comm         *communicator.Config
 	DebugKeyPath string
-
-	keyID string
+	keyID        string
 }
 
 func (s *stepConfigKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	client := state.Get("cvm_client").(*cvm.Client)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
-		ui.Say("Using existing SSH private key")
+		Say(state, "Using existing SSH private key", "")
 		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"loading configured private key file failed: %s", err))
-			return multistep.ActionHalt
+			return Halt(state, err, fmt.Sprintf("Failed to load configured private key(%s)", s.Comm.SSHPrivateKeyFile))
 		}
-
 		s.Comm.SSHPrivateKey = privateKeyBytes
-
+		Message(state, fmt.Sprintf("Loaded %d bytes private key data", len(s.Comm.SSHPrivateKey)), "")
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
-		ui.Say("Using SSH Agent with key pair in source image")
-		return multistep.ActionContinue
-	}
-
-	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
+	if s.Comm.SSHAgentAuth {
+		if s.Comm.SSHKeyPairName == "" {
+			Say(state, "Using SSH agent with key pair in source image", "")
+			return multistep.ActionContinue
+		}
+		Say(state, fmt.Sprintf("Using SSH agent with exists key pair(%s)", s.Comm.SSHKeyPairName), "")
 		return multistep.ActionContinue
 	}
 
 	if s.Comm.SSHTemporaryKeyPairName == "" {
-		ui.Say("Not using temporary keypair")
+		Say(state, "Not to use temporary keypair", "")
 		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
-	client := state.Get("cvm_client").(*cvm.Client)
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
+	Say(state, s.Comm.SSHTemporaryKeyPairName, "Trying to create a new keypair")
+
 	req := cvm.NewCreateKeyPairRequest()
 	req.KeyName = &s.Comm.SSHTemporaryKeyPairName
 	defaultProjectId := int64(0)
 	req.ProjectId = &defaultProjectId
-	resp, err := client.CreateKeyPair(req)
+	var resp *cvm.CreateKeyPairResponse
+	err := Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = client.CreateKeyPair(req)
+		return e
+	})
 	if err != nil {
-		state.Put("error", fmt.Errorf("creating temporary keypair failed: %s", err.Error()))
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to create keypair")
 	}
 
 	// set keyId to delete when Cleanup
 	s.keyID = *resp.Response.KeyPair.KeyId
-	state.Put("temporary_key_pair_id", resp.Response.KeyPair.KeyId)
+	state.Put("temporary_key_pair_id", s.keyID)
+	Message(state, s.keyID, "Keypair created")
 
 	s.Comm.SSHKeyPairName = *resp.Response.KeyPair.KeyId
 	s.Comm.SSHPrivateKey = []byte(*resp.Response.KeyPair.PrivateKey)
 
 	if s.Debug {
-		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+		Message(state, fmt.Sprintf("Saving temporary key to %s for debug purposes", s.DebugKeyPath), "")
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
-			state.Put("error", fmt.Errorf("creating debug key file failed:%s", err.Error()))
-			return multistep.ActionHalt
+			return Halt(state, err, "Failed to saving debug key file")
 		}
 		defer f.Close()
-
 		if _, err := f.Write([]byte(*resp.Response.KeyPair.PrivateKey)); err != nil {
-			state.Put("error", fmt.Errorf("writing debug key file failed:%s", err.Error()))
-			return multistep.ActionHalt
+			return Halt(state, err, "Failed to writing debug key file")
 		}
-
 		if runtime.GOOS != "windows" {
 			if err := f.Chmod(0600); err != nil {
-				state.Put("error", fmt.Errorf("setting debug key file's permission failed:%s", err.Error()))
-				return multistep.ActionHalt
+				return Halt(state, err, "Failed to chmod debug key file")
 			}
 		}
 	}
+
 	return multistep.ActionContinue
 }
 
@@ -103,28 +96,25 @@ func (s *stepConfigKeyPair) Cleanup(state multistep.StateBag) {
 	if s.Comm.SSHPrivateKeyFile != "" || (s.Comm.SSHKeyPairName == "" && s.keyID == "") {
 		return
 	}
+
 	ctx := context.TODO()
-
 	client := state.Get("cvm_client").(*cvm.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deleting temporary keypair...")
+	SayClean(state, "keypair")
+
 	req := cvm.NewDeleteKeyPairsRequest()
 	req.KeyIds = []*string{&s.keyID}
-	err := retry.Config{
-		Tries:      60,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 5 * time.Second, MaxBackoff: 5 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		_, err := client.DeleteKeyPairs(req)
-		return err
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := client.DeleteKeyPairs(req)
+		return e
 	})
 	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"delete keypair failed, please delete it manually, keyId: %s, err: %s", s.keyID, err.Error()))
+		Error(state, err, fmt.Sprintf("Failed to delete keypair(%s), please delete it manually", s.keyID))
 	}
+
 	if s.Debug {
 		if err := os.Remove(s.DebugKeyPath); err != nil {
-			ui.Error(fmt.Sprintf("delete debug key file %s failed: %s", s.DebugKeyPath, err.Error()))
+			Error(state, err, fmt.Sprintf("Failed to delete debug key file(%s), please delete it manually", s.DebugKeyPath))
 		}
 	}
 }
