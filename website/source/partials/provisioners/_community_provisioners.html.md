@@ -1,0 +1,9 @@
+### Community Provisioners
+
+- [Comment Provisioner](https://github.com/SwampDragons/packer-provisioner-comment) -
+  Example provisioner that allows you to annotate your build with bubble-text
+  comments.
+
+- [Windows Update provisioner](https://github.com/rgl/packer-provisioner-windows-update) -
+  A provisioner for gracefully handling windows updates and the reboots they
+  cause.
