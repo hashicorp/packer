@@ -18,8 +18,7 @@ customized images based on an existing base images.
 
 The following configuration options are available for building Tencentcloud images.
 In addition to the options listed here,
-a [communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+a [communicator](/docs/templates/communicator.html) can be configured for this builder.
 
 ### Required:
 
@@ -31,15 +30,15 @@ builder.
 
 -   `region` (string) - The region where your cvm will be launch. You should
     reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
-     for parameter taking.
+    for parameter taking.
 
 -   `zone` (string) - The zone where your cvm will be launch. You should
     reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
-     for parameter taking.
+    for parameter taking.
 
 -   `instance_type` (string) - The instance type your cvm will be launched by.
     You should reference [Instace Type](https://intl.cloud.tencent.com/document/product/213/11518)
-     for parameter taking.
+    for parameter taking.
 
 -   `source_image_id` (string) - The base image id of Image you want to create
     your customized image from.
@@ -50,25 +49,20 @@ builder.
 
 ### Optional:
 
--   `force_poweroff` (boolean) - Whether to force power off cvm when create image.
-    Default value is `false`.
+-   `force_poweroff` (boolean) - Indicates whether to perform a forced shutdown to
+    create an image when soft shutdown fails. Default value is `false`.
 
-    Your cvm will try to shutdown normally; if shutdown failed and `force_poweroff`
-    set, your cvm will be powered off, otherwise task will fail.
+-   `image_description` (string) - Image description. It should no more than 60 characters.
 
--   `image_description` (string) - Image description.
-
--   `reboot` (boolean) - Whether shutdown cvm to create Image. Default value is
-    `false`.
-
-    If `reboot` is not set and cvm is running, create image task will fail.
+-   `reboot` (boolean, **deprecated**) - Whether shutdown cvm to create Image.
+    Please refer to parameter `force_poweroff`.
 
 -   `sysprep` (boolean) - Whether enable Sysprep during creating windows image.
 
--   `image_copy_regions` (array of strings) - regions that will be copied to after
+-   `image_copy_regions` (array of strings) - Regions that will be copied to after
     your image created.
 
--   `image_share_accounts` (array of strings) - accounts that will be shared to
+-   `image_share_accounts` (array of strings) - Accounts that will be shared to
     after your image created.
 
 -   `skip_region_validation` (boolean) - Do not check region and zone when validate.
@@ -77,6 +71,9 @@ builder.
     Default value is `false`.
 
     If not set, you could access your cvm from the same vpc.
+
+-   `internet_max_bandwidth_out` (number) - Max bandwidth out your cvm will be launched by(in MB).
+    values can be set between 1 ~ 100.
 
 -   `instance_name` (string) - Instance name.
 
@@ -103,7 +100,7 @@ builder.
 -   `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, packer will
     create a vpc for you named this parameter.
 
--   `cidr_block` (boolean) - Specify cider block of the vpc you will create if `vpc_id` not set
+-   `cidr_block` (boolean) - Specify cider block of the vpc you will create if `vpc_id` is not set.
 
 -   `subnet_id` (string) - Specify subnet your cvm will be launched by.
 
@@ -111,14 +108,11 @@ builder.
     create a subnet for you named this parameter.
 
 -   `subnect_cidr_block` (boolean) - Specify cider block of the subnet you will create if
-    `subnet_id` not set
-
--   `internet_max_bandwidth_out` (number) - Max bandwidth out your cvm will be launched by(in MB).
-    values can be set between 1 ~ 100.
+    `subnet_id` is not set.
 
 -   `security_group_id` (string) - Specify security group your cvm will be launched by.
 
--   `security_group_name` (string) - Specify security name you will create if `security_group_id` not set.
+-   `security_group_name` (string) - Specify security name you will create if `security_group_id` is not set.
 
 -   `user_data` (string) - userdata.
 
@@ -139,29 +133,34 @@ Here is a basic example for Tencentcloud.
     "secret_id": "{{env `TENCENTCLOUD_ACCESS_KEY`}}",
     "secret_key": "{{env `TENCENTCLOUD_SECRET_KEY`}}"
   },
-  "builders": [{
-    "type": "tencentcloud-cvm",
-    "secret_id": "{{user `secret_id`}}",
-    "secret_key": "{{user `secret_key`}}",
-    "region": "ap-guangzhou",
-    "zone": "ap-guangzhou-3",
-    "instance_type": "S3.SMALL1",
-    "source_image_id": "img-oikl1tzv",
-    "ssh_username" : "root",
-    "image_name": "packerTest2",
-    "packer_debug": true,
-    "associate_public_ip_address": true,
-    "run_tags": {
-      "good": "luck"
+  "builders": [
+    {
+      "type": "tencentcloud-cvm",
+      "secret_id": "{{user `secret_id`}}",
+      "secret_key": "{{user `secret_key`}}",
+      "region": "ap-guangzhou",
+      "zone": "ap-guangzhou-4",
+      "instance_type": "S4.SMALL1",
+      "source_image_id": "img-oikl1tzv",
+      "ssh_username": "root",
+      "image_name": "PackerTest",
+      "disk_type": "CLOUD_PREMIUM",
+      "packer_debug": true,
+      "associate_public_ip_address": true,
+      "run_tags": {
+        "good": "luck"
+      }
     }
-  }],
-  "provisioners": [{
-    "type": "shell",
-    "inline": [
-      "sleep 30",
-      "yum install redis.x86_64 -y"
-    ]
-  }]
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30",
+        "yum install redis.x86_64 -y"
+      ]
+    }
+  ]
 }
 ```
 
