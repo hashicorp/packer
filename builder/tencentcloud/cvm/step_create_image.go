@@ -3,12 +3,8 @@ package cvm
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -17,17 +13,18 @@ type stepCreateImage struct {
 }
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	client := state.Get("cvm_client").(*cvm.Client)
-	ui := state.Get("ui").(packer.Ui)
+
+	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*cvm.Instance)
 
-	ui.Say(fmt.Sprintf("Creating image %s", config.ImageName))
+	Say(state, config.ImageName, "Trying to create a new image")
 
 	req := cvm.NewCreateImageRequest()
 	req.ImageName = &config.ImageName
 	req.ImageDescription = &config.ImageDescription
 	req.InstanceId = instance.InstanceId
+
 	// TODO: We should allow user to specify which data disk should be
 	// included into created image.
 	var dataDiskIds []*string
@@ -46,51 +43,24 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		req.ForcePoweroff = &False
 	}
 
-	if config.Reboot {
-		req.Reboot = &True
-	} else {
-		req.Reboot = &False
-	}
-
 	if config.Sysprep {
 		req.Sysprep = &True
 	} else {
 		req.Sysprep = &False
 	}
 
-	err := retry.Config{
-		Tries: 60,
-		RetryDelay: (&retry.Backoff{
-			InitialBackoff: 5 * time.Second,
-			MaxBackoff:     5 * time.Second,
-			Multiplier:     2,
-		}).Linear,
-		ShouldRetry: func(err error) bool {
-			if e, ok := err.(*errors.TencentCloudSDKError); ok {
-				if e.Code == "InvalidImageName.Duplicate" {
-					return false
-				}
-			}
-			return true
-		},
-	}.Run(ctx, func(ctx context.Context) error {
-		_, err := client.CreateImage(req)
-		return err
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := client.CreateImage(req)
+		return e
 	})
-
 	if err != nil {
-		err := fmt.Errorf("create image failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to create image")
 	}
 
+	Message(state, "Waiting for image ready", "")
 	err = WaitForImageReady(client, config.ImageName, "NORMAL", 3600)
 	if err != nil {
-		err := fmt.Errorf("create image failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to wait for image ready")
 	}
 
 	describeReq := cvm.NewDescribeImagesRequest()
@@ -101,21 +71,24 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 			Values: []*string{&config.ImageName},
 		},
 	}
-	describeResp, err := client.DescribeImages(describeReq)
+
+	var describeResp *cvm.DescribeImagesResponse
+	err = Retry(ctx, func(ctx context.Context) error {
+		var e error
+		describeResp, e = client.DescribeImages(describeReq)
+		return e
+	})
 	if err != nil {
-		err := fmt.Errorf("wait image ready failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to wait for image ready")
 	}
+
 	if *describeResp.Response.TotalCount == 0 {
-		err := fmt.Errorf("create image(%s) failed", config.ImageName)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, fmt.Errorf("No image return"), "Failed to crate image")
 	}
+
 	s.imageId = *describeResp.Response.ImageSet[0].ImageId
 	state.Put("image", describeResp.Response.ImageSet[0])
+	Message(state, s.imageId, "Image created")
 
 	tencentCloudImages := make(map[string]string)
 	tencentCloudImages[config.Region] = s.imageId
@@ -128,20 +101,25 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 	if s.imageId == "" {
 		return
 	}
+
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 	if !cancelled && !halted {
 		return
 	}
 
+	ctx := context.TODO()
 	client := state.Get("cvm_client").(*cvm.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Delete image because of cancellation or error...")
+	SayClean(state, "image")
+
 	req := cvm.NewDeleteImagesRequest()
 	req.ImageIds = []*string{&s.imageId}
-	_, err := client.DeleteImages(req)
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := client.DeleteImages(req)
+		return e
+	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("delete image(%s) failed", s.imageId))
+		Error(state, err, fmt.Sprintf("Failed to delete image(%s), please delete it manually", s.imageId))
 	}
 }

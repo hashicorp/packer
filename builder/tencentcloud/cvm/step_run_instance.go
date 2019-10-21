@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -32,8 +29,8 @@ type stepRunInstance struct {
 
 func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("cvm_client").(*cvm.Client)
+
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
 	source_image := state.Get("source_image").(*cvm.Image)
 	vpc_id := state.Get("vpc_id").(string)
 	subnet_id := state.Get("subnet_id").(string)
@@ -43,15 +40,14 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	if password == "" && config.Comm.WinRMPassword != "" {
 		password = config.Comm.WinRMPassword
 	}
+
 	userData, err := s.getUserData(state)
 	if err != nil {
-		err := fmt.Errorf("get user_data failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to get user_data")
 	}
 
-	ui.Say("Creating Instance.")
+	Say(state, "Trying to create a new instance", "")
+
 	// config RunInstances parameters
 	POSTPAID_BY_HOUR := "POSTPAID_BY_HOUR"
 	req := cvm.NewRunInstancesRequest()
@@ -71,7 +67,7 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	// System disk snapshot is mandatory, so if there are additional data disks,
 	// length will be larger than 1.
 	if source_image.SnapshotSet != nil && len(source_image.SnapshotSet) > 1 {
-		ui.Say("Use source image snapshot data disks, ignore user data disk settings.")
+		Message(state, "Use source image snapshot data disks, ignore user data disk settings", "")
 		var dataDisks []*cvm.DataDisk
 		for _, snapshot := range source_image.SnapshotSet {
 			if *snapshot.DiskUsage == "DATA_DISK" {
@@ -144,44 +140,49 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 		}
 	}
 
-	resp, err := client.RunInstances(req)
+	var resp *cvm.RunInstancesResponse
+	err = Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = client.RunInstances(req)
+		return e
+	})
 	if err != nil {
-		err := fmt.Errorf("create instance failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to run instance")
 	}
+
 	if len(resp.Response.InstanceIdSet) != 1 {
-		err := fmt.Errorf("create instance failed: %d instance(s) created", len(resp.Response.InstanceIdSet))
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, fmt.Errorf("No instance return"), "Failed to run instance")
 	}
+
 	s.instanceId = *resp.Response.InstanceIdSet[0]
+	Message(state, "Waiting for instance ready", "")
 
 	err = WaitForInstance(client, s.instanceId, "RUNNING", 1800)
 	if err != nil {
-		err := fmt.Errorf("wait instance launch failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to wait for instance ready")
 	}
 
 	describeReq := cvm.NewDescribeInstancesRequest()
 	describeReq.InstanceIds = []*string{&s.instanceId}
-	describeResp, err := client.DescribeInstances(describeReq)
+	var describeResp *cvm.DescribeInstancesResponse
+	err = Retry(ctx, func(ctx context.Context) error {
+		var e error
+		describeResp, e = client.DescribeInstances(describeReq)
+		return e
+	})
 	if err != nil {
-		err := fmt.Errorf("wait instance launch failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to wait for instance ready")
 	}
+
 	state.Put("instance", describeResp.Response.InstanceSet[0])
+	Message(state, s.instanceId, "Instance created")
+
 	return multistep.ActionContinue
 }
 
 func (s *stepRunInstance) getUserData(state multistep.StateBag) (string, error) {
 	userData := s.UserData
+
 	if userData == "" && s.UserDataFile != "" {
 		data, err := ioutil.ReadFile(s.UserDataFile)
 		if err != nil {
@@ -189,8 +190,10 @@ func (s *stepRunInstance) getUserData(state multistep.StateBag) (string, error) 
 		}
 		userData = string(data)
 	}
+
 	userData = base64.StdEncoding.EncodeToString([]byte(userData))
-	log.Printf(fmt.Sprintf("user_data: %s", userData))
+	log.Printf(fmt.Sprintf("[DEBUG]getUserData: user_data: %s", userData))
+
 	return userData, nil
 }
 
@@ -198,24 +201,19 @@ func (s *stepRunInstance) Cleanup(state multistep.StateBag) {
 	if s.instanceId == "" {
 		return
 	}
-	MessageClean(state, "Instance")
+
+	ctx := context.TODO()
 	client := state.Get("cvm_client").(*cvm.Client)
-	ui := state.Get("ui").(packer.Ui)
+
+	SayClean(state, "instance")
+
 	req := cvm.NewTerminateInstancesRequest()
 	req.InstanceIds = []*string{&s.instanceId}
-	ctx := context.TODO()
-	err := retry.Config{
-		Tries: 60,
-		RetryDelay: (&retry.Backoff{
-			InitialBackoff: 5 * time.Second,
-			MaxBackoff:     5 * time.Second,
-			Multiplier:     2,
-		}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		_, err := client.TerminateInstances(req)
-		return err
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := client.TerminateInstances(req)
+		return e
 	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("terminate instance(%s) failed: %s", s.instanceId, err.Error()))
+		Error(state, err, fmt.Sprintf("Failed to terminate instance(%s), please delete it manually", s.instanceId))
 	}
 }

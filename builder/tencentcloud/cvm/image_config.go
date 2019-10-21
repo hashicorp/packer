@@ -36,6 +36,7 @@ type TencentCloudImageConfig struct {
 
 func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+
 	cf.ForcePoweroff = true
 	if cf.ImageName == "" {
 		errs = append(errs, fmt.Errorf("image_name must be specified"))
@@ -68,17 +69,10 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 		cf.ImageCopyRegions = regions
 	}
+
 	if len(errs) > 0 {
 		return errs
 	}
-	return nil
-}
 
-func validRegion(region string) error {
-	for _, valid := range ValidRegions {
-		if Region(region) == valid {
-			return nil
-		}
-	}
-	return fmt.Errorf("unknown region: %s", region)
+	return nil
 }
