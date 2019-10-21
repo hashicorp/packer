@@ -861,7 +861,7 @@ func CompactDisks(path string) (result string, err error) {
 	var script = `
 param([string]$srcPath)
 
-$disks = Get-ChildItem -Path $srcPath -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+$disks = Get-ChildItem -Path $srcPath -Recurse -ErrorAction SilentlyContinue |where {$_.extension -in ".vhdx",".vhd"} |foreach { $_.FullName }
 # Failure to find any disks is treated as a 'soft' error. Simply print out
 # a warning and exit
 if ($disks.Length -eq 0) {
