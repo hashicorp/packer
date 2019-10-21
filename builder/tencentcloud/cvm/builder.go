@@ -49,13 +49,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudAccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudImageConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudRunConfig.Prepare(&b.config.ctx)...)
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.SecretId, b.config.SecretKey)
-	log.Println(b.config)
+	log.Printf("[DEBUG]packer config: %v", b.config)
+
 	return nil, nil
 }
 
@@ -64,17 +64,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if err != nil {
 		return nil, err
 	}
+
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("cvm_client", cvmClient)
 	state.Put("vpc_client", vpcClient)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	var steps []multistep.Step
 
 	// Build the steps
+	var steps []multistep.Step
 	steps = []multistep.Step{
-		&stepCheckSourceImage{b.config.SourceImageId},
+		&stepPreValidate{},
+		&stepCheckSourceImage{
+			b.config.SourceImageId,
+		},
 		&stepConfigKeyPair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.Comm,
@@ -94,7 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepConfigSecurityGroup{
 			SecurityGroupId:   b.config.SecurityGroupId,
 			SecurityGroupName: b.config.SecurityGroupName,
-			Description:       "a simple security group",
+			Description:       "securitygroup for packer",
 		},
 		&stepRunInstance{
 			InstanceType:             b.config.InstanceType,
@@ -119,7 +123,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.TencentCloudRunConfig.Comm,
 		},
-		// We need this step to detach temporary key from instance, otherwise
+		// We need this step to detach keypair from instance, otherwise
 		// it always fails to delete the key.
 		&stepDetachTempKeyPair{},
 		&stepCreateImage{},
@@ -148,5 +152,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		BuilderIdValue:     BuilderId,
 		Client:             cvmClient,
 	}
+
 	return artifact, nil
 }

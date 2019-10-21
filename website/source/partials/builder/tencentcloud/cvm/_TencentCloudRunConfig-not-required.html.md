@@ -42,7 +42,7 @@
 -   `internet_max_bandwidth_out` (int64) - Max bandwidth out your cvm will be launched by(in MB).
     values can be set between 1 ~ 100.
     
--   `security_group_id` (string) - Specify security group your cvm will be launched by.
+-   `security_group_id` (string) - Specify securitygroup your cvm will be launched by.
     
 -   `security_group_name` (string) - Specify security name you will create if security_group_id not set.
     

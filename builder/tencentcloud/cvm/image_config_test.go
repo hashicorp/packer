@@ -31,5 +31,4 @@ func TestTencentCloudImageConfig_Prepare(t *testing.T) {
 	if err := cf.Prepare(nil); err != nil {
 		t.Fatalf("shouldn't have err:%v", err)
 	}
-
 }
