@@ -70,6 +70,10 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
+### Required:
+
+<%= partial "partials/builder/hyperv/common/CommonConfig" %>
+
 ### Optional:
 
 -   `output_directory` (string) - This setting specifies the directory that
@@ -81,6 +85,7 @@ builder.
     "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
 <%= partial "partials/builder/hyperv/iso/Config-not-required" %>
+<%= partial "partials/builder/hyperv/common/CommonConfig-not-required" %>
 
 ## Http directory configuration reference
 
