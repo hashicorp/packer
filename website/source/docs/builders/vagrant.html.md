@@ -30,6 +30,12 @@ by setting the `skip package` option. You can also change the behavior so that
 rather than initializing a new Vagrant workspace, you use an already defined
 one, by using `global_id` instead of `source_box`.
 
+Please note that if you are using the Vagrant builder, then the Vagrant
+post-processor is unnecesary because the output of the Vagrant builder is
+already a Vagrant box; using that post-processor with the Vagrant builder will
+cause your build to fail. Similarly, since Vagrant boxes are already compressed,
+the Compress post-processor will not work with this builder.
+
 ## Configuration Reference
 ### Required:
 
