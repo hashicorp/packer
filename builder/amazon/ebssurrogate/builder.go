@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/iam"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
@@ -164,7 +165,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if err != nil {
 		return nil, err
 	}
+
 	ec2conn := ec2.New(session)
+	iam := iam.New(session)
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
@@ -172,6 +175,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("access_config", &b.config.AccessConfig)
 	state.Put("ami_config", &b.config.AMIConfig)
 	state.Put("ec2", ec2conn)
+	state.Put("iam", iam)
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -255,6 +259,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
+		},
+		&awscommon.StepIamInstanceProfile{
+			IamInstanceProfile:                        b.config.IamInstanceProfile,
+			TemporaryIamInstanceProfilePolicyDocument: b.config.TemporaryIamInstanceProfilePolicyDocument,
 		},
 		&awscommon.StepCleanupVolumes{
 			LaunchMappings: b.config.LaunchMappings.Common(),
