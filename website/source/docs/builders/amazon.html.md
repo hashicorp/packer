@@ -209,6 +209,30 @@ work, but specifics will depend on your use-case.
 }
 ```
 
+In case when you're creating a temporary instance profile you will require to have following
+IAM policies.
+
+``` json
+{
+    "Sid": "PackerIAMCreateRole",
+    "Effect": "Allow",
+    "Action": [
+        "iam:PassRole",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:GetRole",
+        "iam:GetInstanceProfile",
+        "iam:DeleteRolePolicy",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:PutRolePolicy",
+        "iam:AddRoleToInstanceProfile"
+    ],
+    "Resource": "*"
+}
+```
+
 ### Checking that system time is current
 
 Amazon uses the current time as part of the [request signing
