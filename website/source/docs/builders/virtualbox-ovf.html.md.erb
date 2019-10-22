@@ -135,7 +135,6 @@ necessary for this build to succeed and can be found further down the page.
 ### Boot Configuration
 
 <%= partial "partials/common/bootcommand/BootConfig" %>
-<%= partial "partials/common/bootcommand/VNCConfig" %>
 
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
@@ -157,7 +156,6 @@ contention. If you notice missing keys, you can tune this delay by specifying
 
 #### Optional:
 
-<%= partial "partials/common/bootcommand/VNCConfig-not-required" %>
 <%= partial "partials/common/bootcommand/BootConfig-not-required" %>
 
 <%= partial "partials/builders/boot-command" %>
