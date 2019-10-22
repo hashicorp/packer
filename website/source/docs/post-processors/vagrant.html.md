@@ -45,6 +45,11 @@ providers.
 post-processor doesn't support creating boxes for a provider you care about,
 please help by contributing to Packer and adding support for it.
 
+Please note that if you are using the Vagrant builder, then the Vagrant
+post-processor is unnecesary because the output of the Vagrant builder is
+already a Vagrant box; using this post-processor with the Vagrant builder will
+cause your build to fail.
+
 ## Configuration
 
 The simplest way to use the post-processor is to just enable it. No
