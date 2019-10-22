@@ -545,7 +545,11 @@ func v3auth(cloud *Cloud, opts *ClientOpts) (*gophercloud.AuthOptions, error) {
 	scope := new(gophercloud.AuthScope)
 
 	// Application credentials don't support scope
-	if !isApplicationCredential(cloud.AuthInfo) {
+	if isApplicationCredential(cloud.AuthInfo) {
+		// If Domain* is set, but UserDomain* or ProjectDomain* aren't,
+		// then use Domain* as the default setting.
+		cloud = setDomainIfNeeded(cloud)
+	} else {
 		if !isProjectScoped(cloud.AuthInfo) {
 			if cloud.AuthInfo.DomainID != "" {
 				scope.DomainID = cloud.AuthInfo.DomainID

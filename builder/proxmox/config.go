@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig
+
 package proxmox
 
 import (
@@ -27,7 +29,7 @@ type Config struct {
 	Comm                   communicator.Config `mapstructure:",squash"`
 
 	ProxmoxURLRaw      string `mapstructure:"proxmox_url"`
-	ProxmoxURL         *url.URL
+	proxmoxURL         *url.URL
 	SkipCertValidation bool   `mapstructure:"insecure_skip_tls_verify"`
 	Username           string `mapstructure:"username"`
 	Password           string `mapstructure:"password"`
@@ -184,7 +186,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ProxmoxURLRaw == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("proxmox_url must be specified"))
 	}
-	if c.ProxmoxURL, err = url.Parse(c.ProxmoxURLRaw); err != nil {
+	if c.proxmoxURL, err = url.Parse(c.ProxmoxURLRaw); err != nil {
 		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("Could not parse proxmox_url: %s", err)))
 	}
 	if c.ISOFile == "" {

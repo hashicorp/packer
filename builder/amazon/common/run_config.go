@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions
 
 package common
 
@@ -18,9 +19,17 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type AmiFilterOptions struct {
-	Filters    map[*string]*string
-	Owners     []*string
+	Filters    map[string]string
+	Owners     []string
 	MostRecent bool `mapstructure:"most_recent"`
+}
+
+func (d *AmiFilterOptions) GetOwners() []*string {
+	res := make([]*string, 0, len(d.Owners))
+	for _, owner := range d.Owners {
+		res = append(res, &owner)
+	}
+	return res
 }
 
 func (d *AmiFilterOptions) Empty() bool {
@@ -32,7 +41,7 @@ func (d *AmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	Filters  map[*string]*string
+	Filters  map[string]string
 	MostFree bool `mapstructure:"most_free"`
 	Random   bool `mapstructure:"random"`
 }
@@ -42,7 +51,7 @@ func (d *SubnetFilterOptions) Empty() bool {
 }
 
 type VpcFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
 }
 
 type PolicyDocument struct {
@@ -59,7 +68,7 @@ func (d *VpcFilterOptions) Empty() bool {
 }
 
 type SecurityGroupFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
 }
 
 func (d *SecurityGroupFilterOptions) Empty() bool {
