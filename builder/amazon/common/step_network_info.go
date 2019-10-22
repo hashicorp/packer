@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"sort"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -53,7 +52,7 @@ func (s *StepNetworkInfo) Run(ctx context.Context, state multistep.StateBag) mul
 	if s.VpcId == "" && !s.VpcFilter.Empty() {
 		params := &ec2.DescribeVpcsInput{}
 		params.Filters = buildEc2Filters(s.VpcFilter.Filters)
-		s.VpcFilter.Filters[aws.String("state")] = aws.String("available")
+		s.VpcFilter.Filters["state"] = "available"
 
 		log.Printf("Using VPC Filters %v", params)
 
@@ -79,13 +78,13 @@ func (s *StepNetworkInfo) Run(ctx context.Context, state multistep.StateBag) mul
 	// Subnet
 	if s.SubnetId == "" && !s.SubnetFilter.Empty() {
 		params := &ec2.DescribeSubnetsInput{}
-		s.SubnetFilter.Filters[aws.String("state")] = aws.String("available")
+		s.SubnetFilter.Filters["state"] = "available"
 
 		if s.VpcId != "" {
-			s.SubnetFilter.Filters[aws.String("vpc-id")] = &s.VpcId
+			s.SubnetFilter.Filters["vpc-id"] = s.VpcId
 		}
 		if s.AvailabilityZone != "" {
-			s.SubnetFilter.Filters[aws.String("availability-zone")] = &s.AvailabilityZone
+			s.SubnetFilter.Filters["availabilityZone"] = s.AvailabilityZone
 		}
 		params.Filters = buildEc2Filters(s.SubnetFilter.Filters)
 		log.Printf("Using Subnet Filters %v", params)

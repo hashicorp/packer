@@ -1,21 +1,19 @@
 package oss
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
-	"net/url"
-	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type optionType string
 
 const (
-	optionParam optionType = "HTTPParameter" // URL参数
-	optionHTTP  optionType = "HTTPHeader"    // HTTP头
-	optionArg   optionType = "FuncArgument"  // 函数参数
+	optionParam optionType = "HTTPParameter" // URL parameter
+	optionHTTP  optionType = "HTTPHeader"    // HTTP header
+	optionArg   optionType = "FuncArgument"  // Function argument
 )
 
 const (
@@ -24,6 +22,7 @@ const (
 	checkpointConfig   = "x-cp-config"
 	initCRC64          = "init-crc64"
 	progressListener   = "x-progress-listener"
+	storageClass       = "storage-class"
 )
 
 type (
@@ -32,7 +31,7 @@ type (
 		Type  optionType
 	}
 
-	// Option http option
+	// Option HTTP option
 	Option func(map[string]optionValue) error
 )
 
@@ -66,6 +65,11 @@ func ContentEncoding(value string) Option {
 	return setHeader(HTTPHeaderContentEncoding, value)
 }
 
+// ContentLanguage is an option to set Content-Language header
+func ContentLanguage(value string) Option {
+	return setHeader(HTTPHeaderContentLanguage, value)
+}
+
 // ContentMD5 is an option to set Content-MD5 header
 func ContentMD5(value string) Option {
 	return setHeader(HTTPHeaderContentMD5, value)
@@ -84,6 +88,11 @@ func Meta(key, value string) Option {
 // Range is an option to set Range header, [start, end]
 func Range(start, end int64) Option {
 	return setHeader(HTTPHeaderRange, fmt.Sprintf("bytes=%d-%d", start, end))
+}
+
+// NormalizedRange is an option to set Range header, such as 1024-2048 or 1024- or -2048
+func NormalizedRange(nr string) Option {
+	return setHeader(HTTPHeaderRange, fmt.Sprintf("bytes=%s", strings.TrimSpace(nr)))
 }
 
 // AcceptEncoding is an option to set Accept-Encoding header
@@ -153,14 +162,44 @@ func ServerSideEncryption(value string) Option {
 	return setHeader(HTTPHeaderOssServerSideEncryption, value)
 }
 
+// ServerSideEncryptionKeyID is an option to set X-Oss-Server-Side-Encryption-Key-Id header
+func ServerSideEncryptionKeyID(value string) Option {
+	return setHeader(HTTPHeaderOssServerSideEncryptionKeyID, value)
+}
+
 // ObjectACL is an option to set X-Oss-Object-Acl header
 func ObjectACL(acl ACLType) Option {
 	return setHeader(HTTPHeaderOssObjectACL, string(acl))
 }
 
+// symlinkTarget is an option to set X-Oss-Symlink-Target
+func symlinkTarget(targetObjectKey string) Option {
+	return setHeader(HTTPHeaderOssSymlinkTarget, targetObjectKey)
+}
+
 // Origin is an option to set Origin header
 func Origin(value string) Option {
 	return setHeader(HTTPHeaderOrigin, value)
+}
+
+// ObjectStorageClass is an option to set the storage class of object
+func ObjectStorageClass(storageClass StorageClassType) Option {
+	return setHeader(HTTPHeaderOssStorageClass, string(storageClass))
+}
+
+// Callback is an option to set callback values
+func Callback(callback string) Option {
+	return setHeader(HTTPHeaderOssCallback, callback)
+}
+
+// CallbackVar is an option to set callback user defined values
+func CallbackVar(callbackVar string) Option {
+	return setHeader(HTTPHeaderOssCallbackVar, callbackVar)
+}
+
+// RequestPayer is an option to set payer who pay for the request
+func RequestPayer(payerType PayerType) Option {
+	return setHeader(HTTPHeaderOSSRequester, string(payerType))
 }
 
 // Delimiter is an option to set delimiler parameter
@@ -203,28 +242,49 @@ func UploadIDMarker(value string) Option {
 	return addParam("upload-id-marker", value)
 }
 
-// DeleteObjectsQuiet DeleteObjects详细(verbose)模式或简单(quiet)模式，默认详细模式。
+// MaxParts is an option to set max-parts parameter
+func MaxParts(value int) Option {
+	return addParam("max-parts", strconv.Itoa(value))
+}
+
+// PartNumberMarker is an option to set part-number-marker parameter
+func PartNumberMarker(value int) Option {
+	return addParam("part-number-marker", strconv.Itoa(value))
+}
+
+// DeleteObjectsQuiet false:DeleteObjects in verbose mode; true:DeleteObjects in quite mode. Default is false.
 func DeleteObjectsQuiet(isQuiet bool) Option {
 	return addArg(deleteObjectsQuiet, isQuiet)
 }
 
-// 断点续传配置，包括是否启用、cp文件
+// StorageClass bucket storage class
+func StorageClass(value StorageClassType) Option {
+	return addArg(storageClass, value)
+}
+
+// Checkpoint configuration
 type cpConfig struct {
 	IsEnable bool
 	FilePath string
+	DirPath  string
 }
 
-// Checkpoint DownloadFile/UploadFile是否开启checkpoint及checkpoint文件路径
+// Checkpoint sets the isEnable flag and checkpoint file path for DownloadFile/UploadFile.
 func Checkpoint(isEnable bool, filePath string) Option {
-	return addArg(checkpointConfig, &cpConfig{isEnable, filePath})
+	return addArg(checkpointConfig, &cpConfig{IsEnable: isEnable, FilePath: filePath})
 }
 
-// Routines DownloadFile/UploadFile并发数
+// CheckpointDir sets the isEnable flag and checkpoint dir path for DownloadFile/UploadFile.
+func CheckpointDir(isEnable bool, dirPath string) Option {
+	return addArg(checkpointConfig, &cpConfig{IsEnable: isEnable, DirPath: dirPath})
+}
+
+// Routines DownloadFile/UploadFile routine count
 func Routines(n int) Option {
 	return addArg(routineNum, n)
 }
 
-// InitCRC AppendObject CRC的校验的初始值
+// InitCRC Init AppendObject CRC
 func InitCRC(initCRC uint64) Option {
 	return addArg(initCRC64, initCRC)
 }
@@ -232,6 +292,41 @@ func InitCRC(initCRC uint64) Option {
 // Progress set progress listener
 func Progress(listener ProgressListener) Option {
 	return addArg(progressListener, listener)
+}
+
+// ResponseContentType is an option to set response-content-type param
+func ResponseContentType(value string) Option {
+	return addParam("response-content-type", value)
+}
+
+// ResponseContentLanguage is an option to set response-content-language param
+func ResponseContentLanguage(value string) Option {
+	return addParam("response-content-language", value)
+}
+
+// ResponseExpires is an option to set response-expires param
+func ResponseExpires(value string) Option {
+	return addParam("response-expires", value)
+}
+
+// ResponseCacheControl is an option to set response-cache-control param
+func ResponseCacheControl(value string) Option {
+	return addParam("response-cache-control", value)
+}
+
+// ResponseContentDisposition is an option to set response-content-disposition param
+func ResponseContentDisposition(value string) Option {
+	return addParam("response-content-disposition", value)
+}
+
+// ResponseContentEncoding is an option to set response-content-encoding param
+func ResponseContentEncoding(value string) Option {
+	return addParam("response-content-encoding", value)
+}
+
+// Process is an option to set x-oss-process param
+func Process(value string) Option {
+	return addParam("x-oss-process", value)
 }
 
 func setHeader(key string, value interface{}) Option {
@@ -282,40 +377,27 @@ func handleOptions(headers map[string]string, options []Option) error {
 	return nil
 }
 
-func handleParams(options []Option) (string, error) {
-	// option
+func getRawParams(options []Option) (map[string]interface{}, error) {
+	// Option
 	params := map[string]optionValue{}
 	for _, option := range options {
 		if option != nil {
 			if err := option(params); err != nil {
-				return "", err
+				return nil, err
 			}
 		}
 	}
 
-	// sort
-	var buf bytes.Buffer
-	keys := make([]string, 0, len(params))
+	paramsm := map[string]interface{}{}
+	// Serialize
 	for k, v := range params {
 		if v.Type == optionParam {
-			keys = append(keys, k)
+			vs := params[k]
+			paramsm[k] = vs.Value.(string)
 		}
 	}
-	sort.Strings(keys)
 
-	// serialize
-	for _, k := range keys {
-		vs := params[k]
-		prefix := url.QueryEscape(k) + "="
-
-		if buf.Len() > 0 {
-			buf.WriteByte('&')
-		}
-		buf.WriteString(prefix)
-		buf.WriteString(url.QueryEscape(vs.Value.(string)))
-	}
-
-	return buf.String(), nil
+	return paramsm, nil
 }
 
 func findOption(options []Option, param string, defaultVal interface{}) (interface{}, error) {

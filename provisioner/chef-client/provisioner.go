@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that uses
 // Chef to provision the remote machine, specifically with chef-client (that is,
 // with a Chef server).

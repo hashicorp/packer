@@ -27,7 +27,7 @@ type Config struct {
 	// USGovernment. Defaults to Public. Long forms such as
 	// USGovernmentCloud and AzureUSGovernmentCloud are also supported.
 	CloudEnvironmentName string `mapstructure:"cloud_environment_name" required:"false"`
-	CloudEnvironment     *azure.Environment
+	cloudEnvironment     *azure.Environment
 
 	// Authentication fields
 
@@ -72,6 +72,10 @@ func (c *Config) SetDefaultValues() error {
 	return c.setCloudEnvironment()
 }
 
+func (c *Config) CloudEnvironment() *azure.Environment {
+	return c.cloudEnvironment
+}
+
 func (c *Config) setCloudEnvironment() error {
 	lookup := map[string]string{
 		"CHINA":           "AzureChinaCloud",
@@ -102,7 +106,7 @@ func (c *Config) setCloudEnvironment() error {
 	}
 
 	env, err := azure.EnvironmentFromName(envName)
-	c.CloudEnvironment = &env
+	c.cloudEnvironment = &env
 	return err
 }
 
@@ -203,12 +207,12 @@ func (c Config) GetServicePrincipalTokens(say func(string)) (
 	err error) {
 
 	servicePrincipalToken, err = c.GetServicePrincipalToken(say,
-		c.CloudEnvironment.ResourceManagerEndpoint)
+		c.CloudEnvironment().ResourceManagerEndpoint)
 	if err != nil {
 		return nil, nil, err
 	}
 	servicePrincipalTokenVault, err = c.GetServicePrincipalToken(say,
-		strings.TrimRight(c.CloudEnvironment.KeyVaultEndpoint, "/"))
+		strings.TrimRight(c.CloudEnvironment().KeyVaultEndpoint, "/"))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -224,22 +228,22 @@ func (c Config) GetServicePrincipalToken(
 	switch c.authType {
 	case authTypeDeviceLogin:
 		say("Getting tokens using device flow")
-		auth = NewDeviceFlowOAuthTokenProvider(*c.CloudEnvironment, say, c.TenantID)
+		auth = NewDeviceFlowOAuthTokenProvider(*c.cloudEnvironment, say, c.TenantID)
 	case authTypeMSI:
 		say("Getting tokens using Managed Identity for Azure")
-		auth = NewMSIOAuthTokenProvider(*c.CloudEnvironment)
+		auth = NewMSIOAuthTokenProvider(*c.cloudEnvironment)
 	case authTypeClientSecret:
 		say("Getting tokens using client secret")
-		auth = NewSecretOAuthTokenProvider(*c.CloudEnvironment, c.ClientID, c.ClientSecret, c.TenantID)
+		auth = NewSecretOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientSecret, c.TenantID)
 	case authTypeClientCert:
 		say("Getting tokens using client certificate")
-		auth, err = NewCertOAuthTokenProvider(*c.CloudEnvironment, c.ClientID, c.ClientCertPath, c.TenantID)
+		auth, err = NewCertOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientCertPath, c.TenantID)
 		if err != nil {
 			return nil, err
 		}
 	case authTypeClientBearerJWT:
 		say("Getting tokens using client bearer JWT")
-		auth = NewJWTOAuthTokenProvider(*c.CloudEnvironment, c.ClientID, c.ClientJWT, c.TenantID)
+		auth = NewJWTOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientJWT, c.TenantID)
 	default:
 		panic("authType not set, call FillParameters, or set explicitly")
 	}
@@ -283,7 +287,7 @@ func (c *Config) FillParameters() error {
 		c.SubscriptionID = subscriptionID
 	}
 
-	if c.CloudEnvironment == nil {
+	if c.cloudEnvironment == nil {
 		err := c.setCloudEnvironment()
 		if err != nil {
 			return err
@@ -291,7 +295,7 @@ func (c *Config) FillParameters() error {
 	}
 
 	if c.TenantID == "" {
-		tenantID, err := findTenantID(*c.CloudEnvironment, c.SubscriptionID)
+		tenantID, err := findTenantID(*c.cloudEnvironment, c.SubscriptionID)
 		if err != nil {
 			return err
 		}

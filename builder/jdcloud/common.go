@@ -1,16 +1,19 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package jdcloud
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/template/interpolate"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
-	"log"
-	"strings"
-	"sync"
-	"time"
 )
 
 const (
