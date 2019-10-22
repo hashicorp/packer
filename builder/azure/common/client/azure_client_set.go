@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute/computeapi"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/hashicorp/packer/helper/useragent"
 )
 
 type AzureClientSet interface {
@@ -33,6 +34,10 @@ type azureClientSet struct {
 }
 
 func New(c Config, say func(string)) (AzureClientSet, error) {
+	return new(c, say)
+}
+
+func new(c Config, say func(string)) (*azureClientSet, error) {
 	token, err := c.GetServicePrincipalToken(say, c.CloudEnvironment().ResourceManagerEndpoint)
 	if err != nil {
 		return nil, err
@@ -46,12 +51,16 @@ func New(c Config, say func(string)) (AzureClientSet, error) {
 }
 
 func (s azureClientSet) configureAutorestClient(c *autorest.Client) {
+	c.AddToUserAgent(useragent.String())
 	c.Authorizer = s.authorizer
 	c.Sender = s.sender
 }
 
 func (s azureClientSet) MetadataClient() MetadataClientAPI {
-	return metadataClient{s.sender}
+	return metadataClient{
+		s.sender,
+		useragent.String(),
+	}
 }
 
 func (s azureClientSet) DisksClient() computeapi.DisksClientAPI {
