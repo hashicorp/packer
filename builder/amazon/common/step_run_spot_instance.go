@@ -31,7 +31,6 @@ type StepRunSpotInstance struct {
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
-	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	SourceAMI                         string
@@ -69,12 +68,14 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 		launchMappingRequests = append(launchMappingRequests, launchRequest)
 	}
 
+	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
+
 	// Create a launch template.
 	templateData := ec2.RequestLaunchTemplateData{
 		BlockDeviceMappings:   launchMappingRequests,
 		DisableApiTermination: aws.Bool(false),
 		EbsOptimized:          &s.EbsOptimized,
-		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: &s.IamInstanceProfile},
+		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: iamInstanceProfile},
 		ImageId:               &s.SourceAMI,
 		InstanceMarketOptions: marketOptions,
 		Placement: &ec2.LaunchTemplatePlacementRequest{

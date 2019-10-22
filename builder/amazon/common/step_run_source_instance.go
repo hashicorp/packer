@@ -28,7 +28,6 @@ type StepRunSourceInstance struct {
 	EbsOptimized                      bool
 	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
-	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	IsRestricted                      bool
@@ -45,6 +44,8 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
+	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
+
 	ui := state.Get("ui").(packer.Ui)
 
 	userData := s.UserData
@@ -110,7 +111,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		UserData:            &userData,
 		MaxCount:            aws.Int64(1),
 		MinCount:            aws.Int64(1),
-		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: iamInstanceProfile},
 		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
 		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
