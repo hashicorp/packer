@@ -6,7 +6,7 @@
 * builder/azure: Deploy NSG if list of IP addresses is provided in config
     [GH-8203]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
-* builder/proxmos: Add ability to select CPU type [GH-8201]
+* builder/proxmox: Add ability to select CPU type [GH-8201]
 * builder/proxmox: Add support for SCSI controller selection [GH-8199]
 * builder/tencent: Add retry on remote api call [GH-8250]
 * communicator/winrm: Prevent busy loop while waiting for WinRM connection
