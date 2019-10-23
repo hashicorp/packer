@@ -27,6 +27,7 @@ type ComputeInfo struct {
 // metadataClient implements MetadataClient
 type metadataClient struct {
 	autorest.Sender
+	UserAgent string
 }
 
 var _ MetadataClientAPI = metadataClient{}
@@ -38,6 +39,7 @@ func (client metadataClient) GetComputeInfo() (*ComputeInfo, error) {
 	req, err := autorest.CreatePreparer(
 		autorest.AsGet(),
 		autorest.WithHeader("Metadata", "true"),
+		autorest.WithUserAgent(client.UserAgent),
 		autorest.WithBaseURL(imdsURL),
 	).Prepare((&http.Request{}))
 	if err != nil {
