@@ -94,11 +94,12 @@ Allowed metadata fields that can be changed are:
 
 -   CMD
     -   String, supports both array (escaped) and string form
-    -   EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
-    -   EX: `"CMD nginx -g daemon off;"`
+    -   EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"` corresponds to Docker exec form
+    -   EX: `"CMD nginx -g daemon off;"` corresponds to Docker shell form, invokes a command shell first
 -   ENTRYPOINT
-    -   String
-    -   EX: `"ENTRYPOINT /var/www/start.sh"`
+    -   String, supports both array (escaped) and string form
+    -   EX: `"ENTRYPOINT [\"/bin/sh\", \"-c\", \"/var/www/start.sh\"]"` corresponds to Docker exec form
+    -   EX: `"ENTRYPOINT /var/www/start.sh"` corresponds to Docker shell form, invokes a command shell first
 -   ENV
     -   String, note there is no equal sign:
     -   EX: `"ENV HOSTNAME www.example.com"` not

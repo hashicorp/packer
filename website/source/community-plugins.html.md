@@ -1,17 +1,19 @@
 ---
 layout: "community"
-page_title: "Community Maintained Plugins"
-sidebar_current: "community-plugins"
+page_title: "Community vs HashiCorp Maintained Plugins"
+sidebar_current: "community-or-hashicorp-plugins"
 description: |-
   Packer maintains these core plugins.
 ---
 
-# Community Maintained Plugins
+# HashiCorp Maintained Plugins
 
 The following plugins (i.e. Builders, Provisioners, and Post-Processors) are
 maintained by HashiCorp. Any plugins not on this list are maintained by the
 community, and not actively contributed to by HashiCorp, although they are
-still distributed with Packer.
+still distributed with Packer. If you are interested in seeing features or
+bugfixes to these plugins, please consider making a pull request, or asking the
+HashiCorp maintainters for advice on how to get started contributing.
 
 ## Builders
 

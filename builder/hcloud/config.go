@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,imageFilter
+
 package hcloud
 
 import (

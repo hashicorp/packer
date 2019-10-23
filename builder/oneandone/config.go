@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package oneandone
 
 import (
@@ -23,10 +25,9 @@ type Config struct {
 	SnapshotName   string `mapstructure:"image_name"`
 	DataCenterName string `mapstructure:"data_center_name"`
 	DataCenterId   string
-	Image          string              `mapstructure:"source_image_name"`
-	DiskSize       int                 `mapstructure:"disk_size"`
-	Retries        int                 `mapstructure:"retries"`
-	CommConfig     communicator.Config `mapstructure:",squash"`
+	Image          string `mapstructure:"source_image_name"`
+	DiskSize       int    `mapstructure:"disk_size"`
+	Retries        int    `mapstructure:"retries"`
 	ctx            interpolate.Context
 }
 

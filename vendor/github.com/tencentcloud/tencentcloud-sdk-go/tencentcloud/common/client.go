@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 )
@@ -18,6 +20,7 @@ type Client struct {
 	region          string
 	httpClient      *http.Client
 	httpProfile     *profile.HttpProfile
+	profile         *profile.ClientProfile
 	credential      *Credential
 	signMethod      string
 	unsignedPayload bool
@@ -47,6 +50,8 @@ func (c *Client) Send(request tchttp.Request, response tchttp.Response) (err err
 }
 
 func (c *Client) sendWithSignatureV1(request tchttp.Request, response tchttp.Response) (err error) {
+	// TODO: not an elegant way, it should be done in common params, but finally it need to refactor
+	request.GetParams()["Language"] = c.profile.Language
 	err = tchttp.ConstructParams(request)
 	if err != nil {
 		return err
@@ -62,10 +67,18 @@ func (c *Client) sendWithSignatureV1(request tchttp.Request, response tchttp.Res
 	if request.GetHttpMethod() == "POST" {
 		httpRequest.Header["Content-Type"] = []string{"application/x-www-form-urlencoded"}
 	}
-	//log.Printf("[DEBUG] http request=%v", httpRequest)
+	if c.debug {
+		outbytes, err := httputil.DumpRequest(httpRequest, true)
+		if err != nil {
+			log.Printf("[ERROR] dump request failed because %s", err)
+			return err
+		}
+		log.Printf("[DEBUG] http request = %s", outbytes)
+	}
 	httpResponse, err := c.httpClient.Do(httpRequest)
 	if err != nil {
-		return err
+		msg := fmt.Sprintf("Fail to get response because %s", err)
+		return errors.NewTencentCloudSDKError("ClientError.NetworkError", msg, "")
 	}
 	err = tchttp.ParseFromHttpResponse(httpResponse, response)
 	return err
@@ -78,6 +91,7 @@ func (c *Client) sendWithSignatureV3(request tchttp.Request, response tchttp.Res
 		"X-TC-Version":       request.GetVersion(),
 		"X-TC-Timestamp":     request.GetParams()["Timestamp"],
 		"X-TC-RequestClient": request.GetParams()["RequestClient"],
+		"X-TC-Language":      c.profile.Language,
 	}
 	if c.region != "" {
 		headers["X-TC-Region"] = c.region
@@ -184,10 +198,18 @@ func (c *Client) sendWithSignatureV3(request tchttp.Request, response tchttp.Res
 	for k, v := range headers {
 		httpRequest.Header[k] = []string{v}
 	}
-	//log.Printf("[DEBUG] http request=%v, body=%v", httpRequest, requestPayload)
+	if c.debug {
+		outbytes, err := httputil.DumpRequest(httpRequest, true)
+		if err != nil {
+			log.Printf("[ERROR] dump request failed because %s", err)
+			return err
+		}
+		log.Printf("[DEBUG] http request = %s", outbytes)
+	}
 	httpResponse, err := c.httpClient.Do(httpRequest)
 	if err != nil {
-		return err
+		msg := fmt.Sprintf("Fail to get response because %s", err)
+		return errors.NewTencentCloudSDKError("ClientError.NetworkError", msg, "")
 	}
 	err = tchttp.ParseFromHttpResponse(httpResponse, response)
 	return err
@@ -200,7 +222,7 @@ func (c *Client) GetRegion() string {
 func (c *Client) Init(region string) *Client {
 	c.httpClient = &http.Client{}
 	c.region = region
-	c.signMethod = "HmacSHA256"
+	c.signMethod = "TC3-HMAC-SHA256"
 	c.debug = false
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	return c
@@ -217,6 +239,7 @@ func (c *Client) WithCredential(cred *Credential) *Client {
 }
 
 func (c *Client) WithProfile(clientProfile *profile.ClientProfile) *Client {
+	c.profile = clientProfile
 	c.signMethod = clientProfile.SignMethod
 	c.unsignedPayload = clientProfile.UnsignedPayload
 	c.httpProfile = clientProfile.HttpProfile
@@ -229,7 +252,7 @@ func (c *Client) WithSignatureMethod(method string) *Client {
 	return c
 }
 
-func (c *Client) WithHttpTransport (transport http.RoundTripper) *Client {
+func (c *Client) WithHttpTransport(transport http.RoundTripper) *Client {
 	c.httpClient.Transport = transport
 	return c
 }

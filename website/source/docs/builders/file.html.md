@@ -18,8 +18,8 @@ wait times.
 
 ## Basic Example
 
-Below is a fully functioning example. It doesn't do anything useful, since no
-provisioners are defined, but it will connect to the specified host via ssh.
+Below is a fully functioning example. It create a file at `target` with the
+specified `content`.
 
 ``` json
 {

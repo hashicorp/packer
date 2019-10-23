@@ -14,6 +14,9 @@
     "nicName": {
       "type": "string"
     },
+    "nsgName": {
+      "type": "string"
+    },
     "osDiskName": {
       "type": "string"
     },
@@ -119,6 +122,7 @@
     "location": "[resourceGroup().location]",
     "managedDiskApiVersion": "2017-03-30",
     "networkInterfacesApiVersion": "2017-04-01",
+    "networkSecurityGroupsApiVersion": "2019-04-01",
     "publicIPAddressApiVersion": "2017-04-01",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",

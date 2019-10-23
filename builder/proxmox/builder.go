@@ -41,7 +41,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: b.config.SkipCertValidation,
 	}
-	b.proxmoxClient, err = proxmox.NewClient(b.config.ProxmoxURL.String(), nil, tlsConfig)
+	b.proxmoxClient, err = proxmox.NewClient(b.config.proxmoxURL.String(), nil, tlsConfig)
 	if err != nil {
 		return nil, err
 	}

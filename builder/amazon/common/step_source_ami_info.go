@@ -58,7 +58,7 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
 	}
 	if len(s.AmiFilters.Owners) > 0 {
-		params.Owners = s.AmiFilters.Owners
+		params.Owners = s.AmiFilters.GetOwners()
 	}
 
 	log.Printf("Using AMI Filters %v", params)

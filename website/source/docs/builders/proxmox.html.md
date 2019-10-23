@@ -73,6 +73,10 @@ builder.
 -   `sockets` (int) - How many CPU sockets to give the virtual machine.
     Defaults to `1`
 
+-   `cpu_type` (string) - The CPU type to emulate. See the Proxmox API
+    documentation for the complete list of accepted values. For best
+    performance, set this to `host`. Defaults to `kvm64`.
+
 -   `os` (string) - The operating system. Can be `wxp`, `w2k`, `w2k3`, `w2k8`,
     `wvista`, `win7`, `win8`, `win10`, `l24` (Linux 2.4), `l26` (Linux 2.6+),
     `solaris` or `other`. Defaults to `other`.
@@ -151,6 +155,10 @@ builder.
 -   `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
     then `qemu-guest-agent` must be installed on the guest. When disabled, then 
     `ssh_host` should be used. Defaults to `true`.
+
+-   `scsi_controller` (string) - The SCSI controller model to emulate. Can be `lsi`,
+    `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
+    Defaults to `lsi`.
 
 ## Example: Fedora with kickstart
 

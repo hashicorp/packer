@@ -71,6 +71,12 @@ func (s *StepSetSnapshot) Cleanup(state multistep.StateBag) {
 		} else {
 			ui.Say(fmt.Sprintf("Reverting to snapshot %s on virtual machine %s", s.revertToSnapshot, s.Name))
 			snapshotTree, err := driver.LoadSnapshots(s.Name)
+			if err != nil {
+				err := fmt.Errorf("error loading virtual machine %s snapshots: %v", s.Name, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return
+			}
 			revertTo := snapshotTree.GetSnapshotByUUID(s.revertToSnapshot)
 			if nil == revertTo {
 				err := fmt.Errorf("Snapshot with UUID %s not found for VM %s", s.revertToSnapshot, s.Name)

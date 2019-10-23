@@ -63,6 +63,10 @@ Here is a full list of the available functions for reference.
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below in [the `isotime` format
     reference](/docs/templates/engine.html#isotime-function-format-reference).
+    `strftime FORMAT` - UTC time, formated using the ISO C standard format
+    `FORMAT`. See
+    [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
+    of available format specifier.
 -   `lower` - Lowercases the string.
 -   `packer_version` - Returns Packer version.
 -   `pwd` - The working directory while executing Packer.

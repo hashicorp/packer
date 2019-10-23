@@ -136,7 +136,7 @@ provision when creating a Windows server.
         {
           "type": "powershell",
           "inline": [
-            "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
+            "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet /mode:vm \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
           ]
         }
       ]

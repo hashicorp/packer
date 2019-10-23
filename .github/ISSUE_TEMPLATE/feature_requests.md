@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: If you have something you think Packer could improve or add support for.
-
+labels: enhancement
 ---
 
 Please search the existing issues for relevant feature requests, and use the
