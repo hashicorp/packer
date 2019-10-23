@@ -12,6 +12,8 @@ Type: `ucloud-import`
 
  The Packer UCloud Import post-processor takes the RAW, VHD, VMDK, or qcow2 artifact from various builders and imports it to UCloud customized image list for UHost Instance.
 
+~> **Note**  Some regions don't support image import. You may refer to [ucloud console](https://console.ucloud.cn/uhost/uimage) for detail. If you want to import to such regions, please import the image in `cn-bj2` at first, and then copying the image to the target region.
+
 ## How Does it Work?
 
 The import process operates by making a temporary copy of the RAW, VHD, VMDK, or qcow2 to an UFile bucket, and calling an import task in UHost on the RAW, VHD, VMDK, or qcow2 file. Once completed, an UCloud UHost Image is returned. The temporary RAW, VHD, VMDK, or qcow2 copy in UFile can be discarded after the import is complete.
@@ -33,7 +35,7 @@ are two categories: required and optional parameters.
 
 -   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only support Chinese, English, numbers, '-_,.:[]'.
 
--   `ufile_bucket_name` (string) - The name of the ufile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import. If the Bucket isn't exist, post-process will create it for you.
+-   `ufile_bucket_name` (string) - The name of the ufile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import. This bucket must exist when the post-processor is run.
 
 -   `image_os_type` (string) - Type of the OS. Possible values are: `CentOS`, `Ubuntu`, `Windows`, `RedHat`, `Debian`, `Other`.
 
