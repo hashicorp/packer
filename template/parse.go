@@ -371,7 +371,7 @@ func Parse(r io.Reader) (*Template, error) {
 			if unused[0] == '_' {
 				commentVal, ok := unusedMap[unused].(string)
 				if !ok {
-					return nil, fmt.Errorf("Failed to cast root level comment value to string")
+					return nil, fmt.Errorf("Failed to cast root level comment value in comment \"%s\" to string.", unused)
 				}
 
 				comment := map[string]string{
