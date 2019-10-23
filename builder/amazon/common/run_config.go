@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions
+//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement
 
 package common
 
@@ -54,13 +54,15 @@ type VpcFilterOptions struct {
 	Filters map[string]string
 }
 
+type Statement struct {
+	Effect   string
+	Action   []string
+	Resource string
+}
+
 type PolicyDocument struct {
 	Version   string
-	Statement []struct {
-		Effect   string
-		Action   []string
-		Resource string
-	}
+	Statement []Statement
 }
 
 func (d *VpcFilterOptions) Empty() bool {
