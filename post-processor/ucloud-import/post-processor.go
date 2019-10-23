@@ -178,9 +178,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		BucketHost: "api.ucloud.cn",
 	}
 
-	// query or create bucket
-	if err := queryOrCreateBucket(ufileconn, config); err != nil {
-		return nil, false, false, fmt.Errorf("Failed to query or create bucket, %s", err)
+	// query bucket
+	if err := queryBucket(ufileconn, config); err != nil {
+		return nil, false, false, fmt.Errorf("Failed to query bucket, %s", err)
 	}
 
 	bucketUrl := fmt.Sprintf("http://" + bucketName + "." + convertedRegion + ".ufileos.com")
@@ -270,7 +270,7 @@ func (p *PostProcessor) buildImportImageRequest(conn *uhost.UHostClient, private
 	return req
 }
 
-func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config) error {
+func queryBucket(conn *ufile.UFileClient, config *ufsdk.Config) error {
 	var limit = 100
 	var offset int
 	var bucketList []ufile.UFileBucketSet
@@ -302,14 +302,7 @@ func queryOrCreateBucket(conn *ufile.UFileClient, config *ufsdk.Config) error {
 	}
 
 	if !ucloudcommon.IsStringIn(config.BucketName, bucketNames) {
-		req := conn.NewCreateBucketRequest()
-		req.BucketName = ucloud.String(config.BucketName)
-		req.Type = ucloud.String("private")
-
-		_, err := conn.CreateBucket(req)
-		if err != nil {
-			return fmt.Errorf("error on creating bucket %s, %s", config.BucketName, err)
-		}
+		return fmt.Errorf("the bucket %s is not exit", config.BucketName)
 	}
 
 	return nil
@@ -335,7 +328,7 @@ func uploadFile(conn *ufile.UFileClient, config *ufsdk.Config, keyName, source s
 	}
 
 	if resp.DataSet[0].Type == "private" {
-		return reqFile.GetPrivateURL(keyName, 24*60*60), nil
+		return reqFile.GetPrivateURL(keyName, time.Duration(24*60*60)*time.Second), nil
 	}
 
 	return reqFile.GetPublicURL(keyName), nil
