@@ -35,11 +35,11 @@ are two categories: required and optional parameters.
 
 -   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only support Chinese, English, numbers, '-_,.:[]'.
 
--   `ufile_bucket_name` (string) - The name of the ufile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import. This bucket must exist when the post-processor is run.
+-   `ufile_bucket_name` (string) - The name of the UFile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import. This bucket must exist when the post-processor is run.
 
--   `image_os_type` (string) - Type of the OS. Possible values are: `CentOS`, `Ubuntu`, `Windows`, `RedHat`, `Debian`, `Other`.
+-   `image_os_type` (string) - Type of the OS. Possible values are: `CentOS`, `Ubuntu`, `Windows`, `RedHat`, `Debian`, `Other`. You may refer to [ucloud_api_docs](https://docs.ucloud.cn/api/uhost-api/import_custom_image) for detail.
 
--   `image_os_name` (string) - The name of OS. Such as: `CentOS 7.2 64位`, set `Other` When `image_os_type` is `Other`.
+-   `image_os_name` (string) - The name of OS. Such as: `CentOS 7.2 64位`, set `Other` When `image_os_type` is `Other`. You may refer to [ucloud_api_docs](https://docs.ucloud.cn/api/uhost-api/import_custom_image) for detail.
 
 -   `format` (string) - The format of the import image , Possible values are: `raw`, `vhd`, `vmdk`, or `qcow2`.
 
