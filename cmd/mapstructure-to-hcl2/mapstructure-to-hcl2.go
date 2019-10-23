@@ -343,7 +343,7 @@ func getUsedImports(s *types.Struct) map[NamePath]*types.Package {
 			fieldType = p.Elem()
 		}
 		if p, ok := fieldType.(*types.Slice); ok {
-			fieldType = p.Underlying()
+			fieldType = p.Elem()
 		}
 		namedType, ok := fieldType.(*types.Named)
 		if !ok {
