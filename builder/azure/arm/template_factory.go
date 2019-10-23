@@ -40,6 +40,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
 		VirtualNetworkName:         &template.TemplateParameter{Value: config.tmpVirtualNetworkName},
+		NsgName:                    &template.TemplateParameter{Value: config.tmpNsgName},
 		VMSize:                     &template.TemplateParameter{Value: config.VMSize},
 		VMName:                     &template.TemplateParameter{Value: config.tmpComputeName},
 	}
@@ -115,6 +116,13 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)
+	}
+
+	if config.AllowedInboundIpAddresses != nil && len(config.AllowedInboundIpAddresses) >= 1 && config.Comm.Port() != 0 {
+		err = builder.SetNetworkSecurityGroup(config.AllowedInboundIpAddresses, config.Comm.Port())
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	builder.SetTags(&config.AzureTags)

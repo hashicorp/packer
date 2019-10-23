@@ -141,6 +141,25 @@ func TestFuncIsotime(t *testing.T) {
 	}
 }
 
+func TestFuncStrftime(t *testing.T) {
+	ctx := &Context{}
+	i := &I{Value: "{{strftime \"%Y-%m-%dT%H:%M:%S%z\"}}"}
+	result, err := i.Render(ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := time.Parse("2006-01-02T15:04:05-0700", result)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC()
+	if currentTime.Sub(val) > 2*time.Second {
+		t.Fatalf("val: %v (current: %v)", val, currentTime)
+	}
+}
+
 func TestFuncPwd(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {

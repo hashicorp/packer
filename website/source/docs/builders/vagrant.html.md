@@ -30,6 +30,12 @@ by setting the `skip package` option. You can also change the behavior so that
 rather than initializing a new Vagrant workspace, you use an already defined
 one, by using `global_id` instead of `source_box`.
 
+Please note that if you are using the Vagrant builder, then the Vagrant
+post-processor is unnecesary because the output of the Vagrant builder is
+already a Vagrant box; using that post-processor with the Vagrant builder will
+cause your build to fail. Similarly, since Vagrant boxes are already compressed,
+the Compress post-processor will not work with this builder.
+
 ## Configuration Reference
 ### Required:
 
@@ -76,7 +82,7 @@ one, by using `global_id` instead of `source_box`.
 
 -   `template` (string) - a path to a golang template for a
     vagrantfile. Our default template can be found
-    [here](https://github.com/hashicorp/packer/blob/a6d1d852bb0643e3593cc5d3dfe5ed80c4409b65/builder/vagrant/step_create_vagrantfile.go#L23-L30). So far the only template variables available to you are {{ .BoxName }} and
+    [here](https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L23-L37). So far the only template variables available to you are {{ .BoxName }} and
     {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
     `synced_folder`.
 

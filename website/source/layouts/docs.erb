@@ -53,6 +53,18 @@
 
       <hr>
 
+      <li<%= sidebar_current("docs-communicators") %>>
+        <a href="/docs/communicators/index.html">Communicators</a>
+        <ul class="nav">
+          <li<%= sidebar_current("docs-communicators-ssh") %>>
+            <a href="/docs/communicators/ssh.html">SSH</a>
+          </li>
+          <li<%= sidebar_current("docs-communicators-winrm") %>>
+            <a href="/docs/communicators/winrm.html">WINRM</a>
+          </li>
+        </ul>
+      </li>
+
       <li<%= sidebar_current("docs-builders") %>>
         <a href="/docs/builders/index.html">Builders</a>
         <ul class="nav">
@@ -82,8 +94,11 @@
           <li<%= sidebar_current("docs-builders-azure") %>>
             <a href="/docs/builders/azure.html">Azure</a>
             <ul class="nav">
-              <li<%= sidebar_current("docs-builders-azure-setup") %>>
-                <a href="/docs/builders/azure-setup.html">Setup</a>
+              <li<%= sidebar_current("docs-builders-azure-arm") %>>
+                <a href="/docs/builders/azure-arm.html">ARM</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-azure-chroot") %>>
+                <a href="/docs/builders/azure-chroot.html">chroot</a>
               </li>
             </ul>
           </li>
@@ -237,6 +252,9 @@
           <li<%= sidebar_current("docs-builders-custom") %>>
             <a href="/docs/builders/custom.html">Custom</a>
           </li>
+          <li<%= sidebar_current("docs-builders-community") %>>
+            <a href="/docs/builders/community-supported.html">Community-Supported</a>
+          </li>
         </ul>
       </li>
       <li<%= sidebar_current("docs-provisioners")%>>
@@ -292,6 +310,9 @@
           </li>
           <li<%= sidebar_current("docs-provisioners-custom")%>>
             <a href="/docs/provisioners/custom.html">Custom</a>
+          </li>
+          <li<%= sidebar_current("docs-provisioners-community") %>>
+            <a href="/docs/provisioners/community-supported.html">Community-Supported</a>
           </li>
         </ul>
       </li>

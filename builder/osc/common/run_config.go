@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type SecurityGroupFilterOptions,OmiFilterOptions,SubnetFilterOptions,NetFilterOptions,BlockDevice
+
 package common
 
 import (

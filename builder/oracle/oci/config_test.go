@@ -32,6 +32,9 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"metadata": map[string]string{
 			"key": "value",
 		},
+		"defined_tags": map[string]map[string]interface{}{
+			"namespace": {"key": "value"},
+		},
 	}
 }
 
@@ -114,7 +117,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
 
-		tenancy, err := c.ConfigProvider.TenancyOCID()
+		tenancy, err := c.configProvider.TenancyOCID()
 		if err != nil {
 			t.Fatalf("Unexpected error getting tenancy ocid: %v", err)
 		}
@@ -133,7 +136,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
 
-		region, err := c.ConfigProvider.Region()
+		region, err := c.configProvider.Region()
 		if err != nil {
 			t.Fatalf("Unexpected error getting region: %v", err)
 		}
@@ -185,7 +188,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
 
-		user, _ := c.ConfigProvider.UserOCID()
+		user, _ := c.configProvider.UserOCID()
 		if user != expected {
 			t.Errorf("Expected ConfigProvider.UserOCID: %s, got %s", expected, user)
 		}
@@ -201,7 +204,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
 
-		tenancy, _ := c.ConfigProvider.TenancyOCID()
+		tenancy, _ := c.configProvider.TenancyOCID()
 		if tenancy != expected {
 			t.Errorf("Expected ConfigProvider.TenancyOCID: %s, got %s", expected, tenancy)
 		}
@@ -217,7 +220,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
 
-		region, _ := c.ConfigProvider.Region()
+		region, _ := c.configProvider.Region()
 		if region != expected {
 			t.Errorf("Expected ConfigProvider.Region: %s, got %s", expected, region)
 		}
@@ -233,7 +236,7 @@ func TestConfig(t *testing.T) {
 			t.Fatalf("Unexpected error in configuration: %+v", errs)
 		}
 
-		fingerprint, _ := c.ConfigProvider.KeyFingerprint()
+		fingerprint, _ := c.configProvider.KeyFingerprint()
 		if fingerprint != expected {
 			t.Errorf("Expected ConfigProvider.KeyFingerprint: %s, got %s", expected, fingerprint)
 		}

@@ -1,10 +1,12 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type tencentCloudDataDisk
 
 package cvm
 
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -68,7 +70,7 @@ type TencentCloudRunConfig struct {
 	// Max bandwidth out your cvm will be launched by(in MB).
 	// values can be set between 1 ~ 100.
 	InternetMaxBandwidthOut int64 `mapstructure:"internet_max_bandwidth_out" required:"false"`
-	// Specify security group your cvm will be launched by.
+	// Specify securitygroup your cvm will be launched by.
 	SecurityGroupId string `mapstructure:"security_group_id" required:"false"`
 	// Specify security name you will create if security_group_id not set.
 	SecurityGroupName string `mapstructure:"security_group_name" required:"false"`
@@ -92,10 +94,11 @@ var ValidCBSType = []string{
 }
 
 func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
+	packerId := fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
 	if cf.Comm.SSHKeyPairName == "" && cf.Comm.SSHTemporaryKeyPairName == "" &&
 		cf.Comm.SSHPrivateKeyFile == "" && cf.Comm.SSHPassword == "" && cf.Comm.WinRMPassword == "" {
 		//tencentcloud support key pair name length max to 25
-		cf.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
+		cf.Comm.SSHTemporaryKeyPairName = packerId
 	}
 
 	errs := cf.Comm.Prepare(ctx)
@@ -126,7 +129,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if cf.VpcId == "" {
 		if cf.VpcName == "" {
-			cf.VpcName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+			cf.VpcName = packerId
 		}
 		if cf.CidrBlock == "" {
 			cf.CidrBlock = "10.0.0.0/16"
@@ -135,9 +138,10 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New("can't set subnet_id without set vpc_id"))
 		}
 	}
+
 	if cf.SubnetId == "" {
 		if cf.SubnetName == "" {
-			cf.SubnetName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+			cf.SubnetName = packerId
 		}
 		if cf.SubnectCidrBlock == "" {
 			cf.SubnectCidrBlock = "10.0.8.0/24"
@@ -145,7 +149,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.SecurityGroupId == "" && cf.SecurityGroupName == "" {
-		cf.SecurityGroupName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		cf.SecurityGroupName = packerId
 	}
 
 	if cf.DiskType != "" && !checkDiskType(cf.DiskType) {
@@ -163,12 +167,17 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.InstanceName == "" {
-		cf.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+		cf.InstanceName = packerId
 	}
 
 	if cf.HostName == "" {
-		cf.HostName = cf.InstanceName[:15]
+		cf.HostName = cf.InstanceName
 	}
+
+	if len(cf.HostName) > 15 {
+		cf.HostName = cf.HostName[:15]
+	}
+	cf.HostName = strings.Replace(cf.HostName, "_", "-", -1)
 
 	if cf.RunTags == nil {
 		cf.RunTags = make(map[string]string)
@@ -183,5 +192,6 @@ func checkDiskType(diskType string) bool {
 			return true
 		}
 	}
+
 	return false
 }

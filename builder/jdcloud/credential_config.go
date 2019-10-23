@@ -2,11 +2,12 @@ package jdcloud
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
-	"os"
 )
 
 type JDCloudCredentialConfig struct {
@@ -67,19 +68,19 @@ func (jd *JDCloudCredentialConfig) ValidateKeyPair() error {
 	return nil
 }
 
-func (config *JDCloudCredentialConfig) validateRegion() error {
+func (jd *JDCloudCredentialConfig) validateRegion() error {
 	regionArray := []string{"cn-north-1", "cn-south-1", "cn-east-1", "cn-east-2"}
 	for _, item := range regionArray {
-		if item == config.RegionId {
+		if item == jd.RegionId {
 			return nil
 		}
 	}
 	return fmt.Errorf("[PRE-FLIGHT] Invalid RegionId:%s. "+
-		"Legit RegionId are: {cn-north-1, cn-south-1, cn-east-1, cn-east-2}", config.RegionId)
+		"Legit RegionId are: {cn-north-1, cn-south-1, cn-east-1, cn-east-2}", jd.RegionId)
 }
 
-func (config *JDCloudCredentialConfig) validateAz() error {
-	if len(config.Az) == 0 {
+func (jd *JDCloudCredentialConfig) validateAz() error {
+	if len(jd.Az) == 0 {
 		return fmt.Errorf("[PRE-FLIGHT] az info missing")
 	}
 	return nil

@@ -2,14 +2,9 @@ package cvm
 
 import (
 	"context"
-	"time"
-
 	"fmt"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/pkg/errors"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
@@ -22,42 +17,51 @@ type stepConfigSecurityGroup struct {
 
 func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	if len(s.SecurityGroupId) != 0 { // use existing security group
+	if len(s.SecurityGroupId) != 0 {
+		Say(state, s.SecurityGroupId, "Trying to use existing securitygroup")
 		req := vpc.NewDescribeSecurityGroupsRequest()
 		req.SecurityGroupIds = []*string{&s.SecurityGroupId}
-		resp, err := vpcClient.DescribeSecurityGroups(req)
+		var resp *vpc.DescribeSecurityGroupsResponse
+		err := Retry(ctx, func(ctx context.Context) error {
+			var e error
+			resp, e = vpcClient.DescribeSecurityGroups(req)
+			return e
+		})
 		if err != nil {
-			ui.Error(fmt.Sprintf("query security group failed: %s", err.Error()))
-			state.Put("error", err)
-			return multistep.ActionHalt
+			return Halt(state, err, "Failed to get securitygroup info")
 		}
 		if *resp.Response.TotalCount > 0 {
-			state.Put("security_group_id", s.SecurityGroupId)
 			s.isCreate = false
+			state.Put("security_group_id", s.SecurityGroupId)
+			Message(state, *resp.Response.SecurityGroupSet[0].SecurityGroupName, "Securitygroup found")
 			return multistep.ActionContinue
 		}
-		message := fmt.Sprintf("the specified security group(%s) does not exist", s.SecurityGroupId)
-		ui.Error(message)
-		state.Put("error", errors.New(message))
-		return multistep.ActionHalt
+		return Halt(state, fmt.Errorf("The specified securitygroup(%s) does not exists", s.SecurityGroupId), "")
 	}
-	// create a new security group
+
+	Say(state, "Trying to create a new securitygroup", "")
+
 	req := vpc.NewCreateSecurityGroupRequest()
 	req.GroupName = &s.SecurityGroupName
 	req.GroupDescription = &s.Description
-	resp, err := vpcClient.CreateSecurityGroup(req)
+	var resp *vpc.CreateSecurityGroupResponse
+	err := Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = vpcClient.CreateSecurityGroup(req)
+		return e
+	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("create security group failed: %s", err.Error()))
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to create securitygroup")
 	}
+
+	s.isCreate = true
 	s.SecurityGroupId = *resp.Response.SecurityGroup.SecurityGroupId
 	state.Put("security_group_id", s.SecurityGroupId)
-	s.isCreate = true
+	Message(state, s.SecurityGroupId, "Securitygroup created")
 
-	// bind security group ingress police
+	// bind securitygroup ingress police
+	Say(state, "Trying to create securitygroup polices", "")
 	pReq := vpc.NewCreateSecurityGroupPoliciesRequest()
 	ACCEPT := "ACCEPT"
 	DEFAULT_CIDR := "0.0.0.0/0"
@@ -70,14 +74,15 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 			},
 		},
 	}
-	_, err = vpcClient.CreateSecurityGroupPolicies(pReq)
+	err = Retry(ctx, func(ctx context.Context) error {
+		_, e := vpcClient.CreateSecurityGroupPolicies(pReq)
+		return e
+	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("bind security group police failed: %s", err.Error()))
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to create securitygroup polices")
 	}
 
-	// bind security group engress police
+	// bind securitygroup engress police
 	pReq = vpc.NewCreateSecurityGroupPoliciesRequest()
 	pReq.SecurityGroupId = &s.SecurityGroupId
 	pReq.SecurityGroupPolicySet = &vpc.SecurityGroupPolicySet{
@@ -88,12 +93,15 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 			},
 		},
 	}
-	_, err = vpcClient.CreateSecurityGroupPolicies(pReq)
+	err = Retry(ctx, func(ctx context.Context) error {
+		_, e := vpcClient.CreateSecurityGroupPolicies(pReq)
+		return e
+	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("bind security group police failed: %s", err.Error()))
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to create securitygroup polices")
 	}
+
+	Message(state, "Securitygroup polices created", "")
 
 	return multistep.ActionContinue
 }
@@ -102,23 +110,19 @@ func (s *stepConfigSecurityGroup) Cleanup(state multistep.StateBag) {
 	if !s.isCreate {
 		return
 	}
+
 	ctx := context.TODO()
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	MessageClean(state, "Security Group")
+	SayClean(state, "securitygroup")
+
 	req := vpc.NewDeleteSecurityGroupRequest()
 	req.SecurityGroupId = &s.SecurityGroupId
-	err := retry.Config{
-		Tries:      60,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 5 * time.Second, MaxBackoff: 5 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		_, err := vpcClient.DeleteSecurityGroup(req)
-		return err
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := vpcClient.DeleteSecurityGroup(req)
+		return e
 	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("delete security group(%s) failed: %s, you need to delete it by hand",
-			s.SecurityGroupId, err.Error()))
-		return
+		Error(state, err, fmt.Sprintf("Failed to delete securitygroup(%s), please delete it manually", s.SecurityGroupId))
 	}
 }

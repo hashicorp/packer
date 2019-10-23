@@ -14,11 +14,6 @@
     scenarios. Most users will wish to create a full clone instead. Defaults
     to false.
     
--   `remote_type` (string) - The type of remote machine that will be used to
-    build this VM rather than a local desktop product. The only value accepted
-    for this currently is esx5. If this is not set, a desktop product will
-    be used. By default, this is not set.
-    
 -   `vm_name` (string) - This is the name of the VMX file for the new virtual
     machine, without the file extension. By default this is packer-BUILDNAME,
     where "BUILDNAME" is the name of the build.

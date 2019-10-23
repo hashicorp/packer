@@ -3,12 +3,8 @@ package cvm
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/pkg/errors"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
@@ -21,69 +17,69 @@ type stepConfigVPC struct {
 
 func (s *stepConfigVPC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	if len(s.VpcId) != 0 { // exist vpc
-		ui.Say(fmt.Sprintf("Trying to use existing vpc(%s)", s.VpcId))
+	if len(s.VpcId) != 0 {
+		Say(state, s.VpcId, "Trying to use existing vpc")
 		req := vpc.NewDescribeVpcsRequest()
 		req.VpcIds = []*string{&s.VpcId}
-		resp, err := vpcClient.DescribeVpcs(req)
+		var resp *vpc.DescribeVpcsResponse
+		err := Retry(ctx, func(ctx context.Context) error {
+			var e error
+			resp, e = vpcClient.DescribeVpcs(req)
+			return e
+		})
 		if err != nil {
-			ui.Error(fmt.Sprintf("query vpc failed: %s", err.Error()))
-			state.Put("error", err)
-			return multistep.ActionHalt
+			return Halt(state, err, "Failed to get vpc info")
 		}
 		if *resp.Response.TotalCount > 0 {
-			vpc0 := *resp.Response.VpcSet[0]
-			state.Put("vpc_id", *vpc0.VpcId)
 			s.isCreate = false
+			state.Put("vpc_id", *resp.Response.VpcSet[0].VpcId)
+			Message(state, *resp.Response.VpcSet[0].VpcName, "Vpc found")
 			return multistep.ActionContinue
 		}
-		message := fmt.Sprintf("the specified vpc(%s) does not exist", s.VpcId)
-		state.Put("error", errors.New(message))
-		ui.Error(message)
-		return multistep.ActionHalt
-	} else { // create a new vpc, tencentcloud create vpc api is synchronous, no need to wait for create.
-		ui.Say(fmt.Sprintf("Trying to create a new vpc"))
-		req := vpc.NewCreateVpcRequest()
-		req.VpcName = &s.VpcName
-		req.CidrBlock = &s.CidrBlock
-		resp, err := vpcClient.CreateVpc(req)
-		if err != nil {
-			ui.Error(fmt.Sprintf("create vpc failed: %s", err.Error()))
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		vpc0 := *resp.Response.Vpc
-		state.Put("vpc_id", *vpc0.VpcId)
-		s.VpcId = *vpc0.VpcId
-		s.isCreate = true
-		return multistep.ActionContinue
+		return Halt(state, fmt.Errorf("The specified vpc(%s) does not exist", s.VpcId), "")
 	}
+
+	Say(state, "Trying to create a new vpc", "")
+
+	req := vpc.NewCreateVpcRequest()
+	req.VpcName = &s.VpcName
+	req.CidrBlock = &s.CidrBlock
+	var resp *vpc.CreateVpcResponse
+	err := Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = vpcClient.CreateVpc(req)
+		return e
+	})
+	if err != nil {
+		return Halt(state, err, "Failed to create vpc")
+	}
+
+	s.isCreate = true
+	s.VpcId = *resp.Response.Vpc.VpcId
+	state.Put("vpc_id", s.VpcId)
+	Message(state, s.VpcId, "Vpc created")
+
+	return multistep.ActionContinue
 }
 
 func (s *stepConfigVPC) Cleanup(state multistep.StateBag) {
 	if !s.isCreate {
 		return
 	}
+
 	ctx := context.TODO()
-
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
-	ui := state.Get("ui").(packer.Ui)
 
-	MessageClean(state, "VPC")
+	SayClean(state, "vpc")
+
 	req := vpc.NewDeleteVpcRequest()
 	req.VpcId = &s.VpcId
-	err := retry.Config{
-		Tries:      60,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 5 * time.Second, MaxBackoff: 5 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		_, err := vpcClient.DeleteVpc(req)
-		return err
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := vpcClient.DeleteVpc(req)
+		return e
 	})
 	if err != nil {
-		ui.Error(fmt.Sprintf("delete vpc(%s) failed: %s, you need to delete it by hand",
-			s.VpcId, err.Error()))
-		return
+		Error(state, err, fmt.Sprintf("Failed to delete vpc(%s), please delete it manually", s.VpcId))
 	}
 }

@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that executes
 // shell scripts within the remote machine.
 package shell
@@ -266,6 +268,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			p.config.envVarFile = remoteVFName
 			return nil
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	// Create environment variables to set before executing the command

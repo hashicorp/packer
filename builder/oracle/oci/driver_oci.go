@@ -20,12 +20,12 @@ type driverOCI struct {
 
 // NewDriverOCI Creates a new driverOCI with a connected compute client and a connected vcn client.
 func NewDriverOCI(cfg *Config) (Driver, error) {
-	coreClient, err := core.NewComputeClientWithConfigurationProvider(cfg.ConfigProvider)
+	coreClient, err := core.NewComputeClientWithConfigurationProvider(cfg.configProvider)
 	if err != nil {
 		return nil, err
 	}
 
-	vcnClient, err := core.NewVirtualNetworkClientWithConfigurationProvider(cfg.ConfigProvider)
+	vcnClient, err := core.NewVirtualNetworkClientWithConfigurationProvider(cfg.configProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +81,7 @@ func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, err
 		InstanceId:    &id,
 		DisplayName:   &d.cfg.ImageName,
 		FreeformTags:  d.cfg.Tags,
+		DefinedTags:   d.cfg.DefinedTags,
 	}})
 
 	if err != nil {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -14,32 +13,31 @@ type stepCheckSourceImage struct {
 }
 
 func (s *stepCheckSourceImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("cvm_client").(*cvm.Client)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	client := state.Get("cvm_client").(*cvm.Client)
+
+	Say(state, config.SourceImageId, "Trying to check source image")
 
 	req := cvm.NewDescribeImagesRequest()
 	req.ImageIds = []*string{&config.SourceImageId}
 	req.InstanceType = &config.InstanceType
-
-	resp, err := client.DescribeImages(req)
+	var resp *cvm.DescribeImagesResponse
+	err := Retry(ctx, func(ctx context.Context) error {
+		var err error
+		resp, err = client.DescribeImages(req)
+		return err
+	})
 	if err != nil {
-		err := fmt.Errorf("querying image info failed: %s", err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to get source image info")
 	}
 
-	if *resp.Response.TotalCount > 0 { // public image or private image.
+	if *resp.Response.TotalCount > 0 {
 		state.Put("source_image", resp.Response.ImageSet[0])
-		ui.Message(fmt.Sprintf("Image found: %s", *resp.Response.ImageSet[0].ImageId))
+		Message(state, *resp.Response.ImageSet[0].ImageName, "Image found")
 		return multistep.ActionContinue
 	}
-	// later market image will be included.
-	err = fmt.Errorf("no image founded under current instance_type(%s) restriction", config.InstanceType)
-	state.Put("error", err)
-	ui.Error(err.Error())
-	return multistep.ActionHalt
+
+	return Halt(state, fmt.Errorf("No image found under current instance_type(%s) restriction", config.InstanceType), "")
 }
 
 func (s *stepCheckSourceImage) Cleanup(bag multistep.StateBag) {}

@@ -235,7 +235,7 @@ Now save the following text in a file named `firstrun.json`:
             "access_key": "{{user `aws_access_key`}}",
             "ami_name": "packer-linux-aws-demo-{{timestamp}}",
             "instance_type": "t2.micro",
-            "region": "us-east-1",
+            "region": "{{user `region`}}",
             "secret_key": "{{user `aws_secret_key`}}",
             "source_ami_filter": {
               "filters": {

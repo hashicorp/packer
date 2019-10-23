@@ -425,6 +425,40 @@ func TestVirtualMachineDeployment12(t *testing.T) {
 	}
 }
 
+// Ensure the VM template is correct when building with list of allowed IP addresses
+func TestVirtualMachineDeployment13(t *testing.T) {
+	config := map[string]interface{}{
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"os_type":                           constants.Target_Windows,
+		"communicator":                      "winrm",
+		"winrm_username":                    "ignore",
+		"image_publisher":                   "--image-publisher--",
+		"image_offer":                       "--image-offer--",
+		"image_sku":                         "--image-sku--",
+		"image_version":                     "--version--",
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
+		"allowed_inbound_ip_addresses":      []string{"127.0.0.1", "192.168.100.0/24"},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.tmpKeyVaultName = "--keyvault-name--"
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())

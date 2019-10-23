@@ -743,6 +743,56 @@ func (c *Client) DescribeRegions(request *DescribeRegionsRequest) (response *Des
     return
 }
 
+func NewDescribeReservedInstancesRequest() (request *DescribeReservedInstancesRequest) {
+    request = &DescribeReservedInstancesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("cvm", APIVersion, "DescribeReservedInstances")
+    return
+}
+
+func NewDescribeReservedInstancesResponse() (response *DescribeReservedInstancesResponse) {
+    response = &DescribeReservedInstancesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DescribeReservedInstances)可提供列出用户已购买的预留实例
+func (c *Client) DescribeReservedInstances(request *DescribeReservedInstancesRequest) (response *DescribeReservedInstancesResponse, err error) {
+    if request == nil {
+        request = NewDescribeReservedInstancesRequest()
+    }
+    response = NewDescribeReservedInstancesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeReservedInstancesOfferingsRequest() (request *DescribeReservedInstancesOfferingsRequest) {
+    request = &DescribeReservedInstancesOfferingsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("cvm", APIVersion, "DescribeReservedInstancesOfferings")
+    return
+}
+
+func NewDescribeReservedInstancesOfferingsResponse() (response *DescribeReservedInstancesOfferingsResponse) {
+    response = &DescribeReservedInstancesOfferingsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DescribeReservedInstancesOfferings)供用户列出可购买的预留实例配置
+func (c *Client) DescribeReservedInstancesOfferings(request *DescribeReservedInstancesOfferingsRequest) (response *DescribeReservedInstancesOfferingsResponse, err error) {
+    if request == nil {
+        request = NewDescribeReservedInstancesOfferingsRequest()
+    }
+    response = NewDescribeReservedInstancesOfferingsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeZoneInstanceConfigInfosRequest() (request *DescribeZoneInstanceConfigInfosRequest) {
     request = &DescribeZoneInstanceConfigInfosRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -863,7 +913,7 @@ func NewImportImageResponse() (response *ImportImageResponse) {
     return
 }
 
-// 本接口(ImportImage)用于导入镜像，导入后的镜像可用于创建实例。
+// 本接口(ImportImage)用于导入镜像，导入后的镜像可用于创建实例。 
 func (c *Client) ImportImage(request *ImportImageRequest) (response *ImportImageResponse, err error) {
     if request == nil {
         request = NewImportImageRequest()
@@ -972,7 +1022,11 @@ func NewInquiryPriceResetInstanceResponse() (response *InquiryPriceResetInstance
     return
 }
 
-// 本接口 (InquiryPriceResetInstance) 用于重装实例询价。* 如果指定了`ImageId`参数，则使用指定的镜像进行重装询价；否则按照当前实例使用的镜像进行重装询价。* 目前只支持[系统盘类型](/document/api/213/9452#block_device)是`CLOUD_BASIC`、`CLOUD_PREMIUM`、`CLOUD_SSD`类型的实例使用该接口实现`Linux`和`Windows`操作系统切换的重装询价。* 目前不支持海外地域的实例使用该接口实现`Linux`和`Windows`操作系统切换的重装询价。
+// 本接口 (InquiryPriceResetInstance) 用于重装实例询价。
+// 
+// * 如果指定了`ImageId`参数，则使用指定的镜像进行重装询价；否则按照当前实例使用的镜像进行重装询价。
+// * 目前只支持[系统盘类型](/document/api/213/9452#block_device)是`CLOUD_BASIC`、`CLOUD_PREMIUM`、`CLOUD_SSD`类型的实例使用该接口实现`Linux`和`Windows`操作系统切换的重装询价。
+// * 目前不支持海外地域的实例使用该接口实现`Linux`和`Windows`操作系统切换的重装询价。
 func (c *Client) InquiryPriceResetInstance(request *InquiryPriceResetInstanceRequest) (response *InquiryPriceResetInstanceResponse, err error) {
     if request == nil {
         request = NewInquiryPriceResetInstanceRequest()
@@ -1370,6 +1424,31 @@ func (c *Client) ModifyKeyPairAttribute(request *ModifyKeyPairAttributeRequest) 
         request = NewModifyKeyPairAttributeRequest()
     }
     response = NewModifyKeyPairAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewPurchaseReservedInstancesOfferingRequest() (request *PurchaseReservedInstancesOfferingRequest) {
+    request = &PurchaseReservedInstancesOfferingRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("cvm", APIVersion, "PurchaseReservedInstancesOffering")
+    return
+}
+
+func NewPurchaseReservedInstancesOfferingResponse() (response *PurchaseReservedInstancesOfferingResponse) {
+    response = &PurchaseReservedInstancesOfferingResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(PurchaseReservedInstancesOffering)用于用户购买一个或者多个指定配置的预留实例
+func (c *Client) PurchaseReservedInstancesOffering(request *PurchaseReservedInstancesOfferingRequest) (response *PurchaseReservedInstancesOfferingResponse, err error) {
+    if request == nil {
+        request = NewPurchaseReservedInstancesOfferingRequest()
+    }
+    response = NewPurchaseReservedInstancesOfferingResponse()
     err = c.Send(request, response)
     return
 }

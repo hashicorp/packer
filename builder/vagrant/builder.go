@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
 
 package vagrant
 
@@ -27,17 +28,14 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-type SSHConfig struct {
-	Comm communicator.Config `mapstructure:",squash"`
-}
-
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	common.HTTPConfig      `mapstructure:",squash"`
 	common.ISOConfig       `mapstructure:",squash"`
 	common.FloppyConfig    `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
-	SSHConfig              `mapstructure:",squash"`
+
+	Comm communicator.Config `mapstructure:",squash"`
 	// The directory to create that will contain your output box. We always
 	// create this directory and run from inside of it to prevent Vagrant init
 	// collisions. If unset, it will be set to packer- plus your buildname.
@@ -281,9 +279,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			b.config.GlobalID,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.SSHConfig.Comm,
+			Config:    &b.config.Comm,
 			Host:      CommHost(),
-			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
 		&StepPackage{

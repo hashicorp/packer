@@ -1,6 +1,6 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/chroot/builder.go; DO NOT EDIT MANUALLY -->
 
--   `ami_block_device_mappings` (BlockDevices) - Add one or more [block device
+-   `ami_block_device_mappings` (awscommon.BlockDevices) - Add one or more [block device
     mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. If this field is populated, and you are building from an
     existing source image, the block device mappings in the source image

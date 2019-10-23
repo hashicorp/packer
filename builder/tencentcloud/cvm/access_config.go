@@ -3,6 +3,7 @@
 package cvm
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -71,49 +72,67 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 		vpc_client *vpc.Client
 		resp       *cvm.DescribeZonesResponse
 	)
+
 	if err = cf.validateRegion(); err != nil {
 		return nil, nil, err
 	}
-	credential := common.NewCredential(
-		cf.SecretId, cf.SecretKey)
+
+	if cf.Zone == "" {
+		return nil, nil, fmt.Errorf("parameter zone must be set")
+	}
+
+	credential := common.NewCredential(cf.SecretId, cf.SecretKey)
 	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.ReqMethod = "POST"
+	cpf.HttpProfile.ReqTimeout = 300
+	cpf.Language = "en-US"
+
 	if cvm_client, err = cvm.NewClient(credential, cf.Region, cpf); err != nil {
 		return nil, nil, err
 	}
+
 	if vpc_client, err = vpc.NewClient(credential, cf.Region, cpf); err != nil {
 		return nil, nil, err
 	}
-	if resp, err = cvm_client.DescribeZones(nil); err != nil {
+
+	ctx := context.TODO()
+	err = Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = cvm_client.DescribeZones(nil)
+		return e
+	})
+	if err != nil {
 		return nil, nil, err
 	}
-	if cf.Zone != "" {
-		for _, zone := range resp.Response.ZoneSet {
-			if cf.Zone == *zone.Zone {
-				return cvm_client, vpc_client, nil
-			}
+
+	for _, zone := range resp.Response.ZoneSet {
+		if cf.Zone == *zone.Zone {
+			return cvm_client, vpc_client, nil
 		}
-		return nil, nil, fmt.Errorf("unknown zone: %s", cf.Zone)
-	} else {
-		return nil, nil, fmt.Errorf("zone must be set")
 	}
+
+	return nil, nil, fmt.Errorf("unknown zone: %s", cf.Zone)
 }
 
 func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+
 	if err := cf.Config(); err != nil {
 		errs = append(errs, err)
 	}
 
 	if cf.Region == "" {
-		errs = append(errs, fmt.Errorf("region must be set"))
+		errs = append(errs, fmt.Errorf("parameter region must be set"))
 	} else if !cf.SkipValidation {
 		if err := cf.validateRegion(); err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	if len(errs) > 0 {
 		return errs
 	}
+
 	return nil
 }
 
@@ -121,20 +140,28 @@ func (cf *TencentCloudAccessConfig) Config() error {
 	if cf.SecretId == "" {
 		cf.SecretId = os.Getenv("TENCENTCLOUD_SECRET_ID")
 	}
+
 	if cf.SecretKey == "" {
 		cf.SecretKey = os.Getenv("TENCENTCLOUD_SECRET_KEY")
 	}
+
 	if cf.SecretId == "" || cf.SecretKey == "" {
-		return fmt.Errorf("TENCENTCLOUD_SECRET_ID and TENCENTCLOUD_SECRET_KEY must be set")
+		return fmt.Errorf("parameter secret_id and secret_key must be set")
 	}
+
 	return nil
 }
 
 func (cf *TencentCloudAccessConfig) validateRegion() error {
+	return validRegion(cf.Region)
+}
+
+func validRegion(region string) error {
 	for _, valid := range ValidRegions {
-		if valid == Region(cf.Region) {
+		if Region(region) == valid {
 			return nil
 		}
 	}
-	return fmt.Errorf("unknown region: %s", cf.Region)
+
+	return fmt.Errorf("unknown region: %s", region)
 }

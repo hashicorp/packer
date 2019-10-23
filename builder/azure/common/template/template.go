@@ -91,10 +91,11 @@ type Properties struct {
 	PublicIPAllocatedMethod      *network.IPAllocationMethod         `json:"publicIPAllocationMethod,omitempty"`
 	Sku                          *Sku                                `json:"sku,omitempty"`
 	//StorageProfile3              *compute.StorageProfile             `json:"storageProfile,omitempty"`
-	StorageProfile *StorageProfileUnion `json:"storageProfile,omitempty"`
-	Subnets        *[]network.Subnet    `json:"subnets,omitempty"`
-	TenantId       *string              `json:"tenantId,omitempty"`
-	Value          *string              `json:"value,omitempty"`
+	StorageProfile *StorageProfileUnion    `json:"storageProfile,omitempty"`
+	Subnets        *[]network.Subnet       `json:"subnets,omitempty"`
+	SecurityRules  *[]network.SecurityRule `json:"securityRules,omitempty"`
+	TenantId       *string                 `json:"tenantId,omitempty"`
+	Value          *string                 `json:"value,omitempty"`
 }
 
 type AccessPolicies struct {

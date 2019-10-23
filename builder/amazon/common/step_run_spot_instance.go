@@ -31,7 +31,6 @@ type StepRunSpotInstance struct {
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
-	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	SourceAMI                         string
@@ -69,12 +68,14 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 		launchMappingRequests = append(launchMappingRequests, launchRequest)
 	}
 
+	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
+
 	// Create a launch template.
 	templateData := ec2.RequestLaunchTemplateData{
 		BlockDeviceMappings:   launchMappingRequests,
 		DisableApiTermination: aws.Bool(false),
 		EbsOptimized:          &s.EbsOptimized,
-		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: &s.IamInstanceProfile},
+		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: iamInstanceProfile},
 		ImageId:               &s.SourceAMI,
 		InstanceMarketOptions: marketOptions,
 		Placement: &ec2.LaunchTemplatePlacementRequest{
@@ -274,15 +275,20 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	if len(createOutput.Errors) > 0 {
-		errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
-		for _, outErr := range createOutput.Errors {
-			errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+	if len(createOutput.Instances) == 0 {
+		// We can end up with errors because one of the allowed availability
+		// zones doesn't have one of the allowed instance types; as long as
+		// an instance is launched, these errors aren't important.
+		if len(createOutput.Errors) > 0 {
+			errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
+			for _, outErr := range createOutput.Errors {
+				errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+			}
+			err = fmt.Errorf(errString)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
-		err = fmt.Errorf(errString)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
 	}
 
 	instanceId = *createOutput.Instances[0].InstanceIds[0]

@@ -41,6 +41,10 @@ func TestTempNameShouldCreatePrefixedRandomNames(t *testing.T) {
 	if strings.Index(tempName.VirtualNetworkName, "pkrvn") != 0 {
 		t.Errorf("Expected VirtualNetworkName to begin with 'pkrvn', but got '%s'!", tempName.VirtualNetworkName)
 	}
+
+	if strings.Index(tempName.NsgName, "pkrsg") != 0 {
+		t.Errorf("Expected NsgName to begin with 'pkrsg', but got '%s'!", tempName.NsgName)
+	}
 }
 
 func TestTempAdminPassword(t *testing.T) {
@@ -91,5 +95,9 @@ func TestTempNameShouldHaveSameSuffix(t *testing.T) {
 
 	if strings.HasSuffix(tempName.VirtualNetworkName, suffix) != true {
 		t.Errorf("Expected VirtualNetworkName to end with '%s', but the value is '%s'!", suffix, tempName.VirtualNetworkName)
+	}
+
+	if strings.HasSuffix(tempName.NsgName, suffix) != true {
+		t.Errorf("Expected NsgName to end with '%s', but the value is '%s'!", suffix, tempName.NsgName)
 	}
 }

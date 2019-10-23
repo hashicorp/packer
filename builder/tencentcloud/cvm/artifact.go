@@ -1,6 +1,7 @@
 package cvm
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
@@ -29,8 +30,8 @@ func (a *Artifact) Id() string {
 	for region, imageId := range a.TencentCloudImages {
 		parts = append(parts, fmt.Sprintf("%s:%s", region, imageId))
 	}
-
 	sort.Strings(parts)
+
 	return strings.Join(parts, ",")
 }
 
@@ -40,7 +41,8 @@ func (a *Artifact) String() string {
 		parts = append(parts, fmt.Sprintf("%s: %s", region, imageId))
 	}
 	sort.Strings(parts)
-	return fmt.Sprintf("Tencentcloud images(%s) were created:\n\n", strings.Join(parts, "\n"))
+
+	return fmt.Sprintf("Tencentcloud images(%s) were created.\n\n", strings.Join(parts, "\n"))
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -53,6 +55,7 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
+	ctx := context.TODO()
 	errors := make([]error, 0)
 
 	for region, imageId := range a.TencentCloudImages {
@@ -60,22 +63,31 @@ func (a *Artifact) Destroy() error {
 
 		describeReq := cvm.NewDescribeImagesRequest()
 		describeReq.ImageIds = []*string{&imageId}
-
-		describeResp, err := a.Client.DescribeImages(describeReq)
+		var describeResp *cvm.DescribeImagesResponse
+		err := Retry(ctx, func(ctx context.Context) error {
+			var e error
+			describeResp, e = a.Client.DescribeImages(describeReq)
+			return e
+		})
 		if err != nil {
 			errors = append(errors, err)
 			continue
 		}
+
 		if *describeResp.Response.TotalCount == 0 {
 			errors = append(errors, fmt.Errorf(
 				"describe images failed, region(%s) ImageId(%s)", region, imageId))
 		}
 
+		var shareAccountIds []*string = nil
 		describeShareReq := cvm.NewDescribeImageSharePermissionRequest()
 		describeShareReq.ImageId = &imageId
-
-		describeShareResp, err := a.Client.DescribeImageSharePermission(describeShareReq)
-		var shareAccountIds []*string = nil
+		var describeShareResp *cvm.DescribeImageSharePermissionResponse
+		err = Retry(ctx, func(ctx context.Context) error {
+			var e error
+			describeShareResp, e = a.Client.DescribeImageSharePermission(describeShareReq)
+			return e
+		})
 		if err != nil {
 			errors = append(errors, err)
 		} else {
@@ -90,7 +102,10 @@ func (a *Artifact) Destroy() error {
 			cancelShareReq.AccountIds = shareAccountIds
 			CANCEL := "CANCEL"
 			cancelShareReq.Permission = &CANCEL
-			_, err := a.Client.ModifyImageSharePermission(cancelShareReq)
+			err := Retry(ctx, func(ctx context.Context) error {
+				_, e := a.Client.ModifyImageSharePermission(cancelShareReq)
+				return e
+			})
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -98,8 +113,10 @@ func (a *Artifact) Destroy() error {
 
 		deleteReq := cvm.NewDeleteImagesRequest()
 		deleteReq.ImageIds = []*string{&imageId}
-
-		_, err = a.Client.DeleteImages(deleteReq)
+		err = Retry(ctx, func(ctx context.Context) error {
+			_, e := a.Client.DeleteImages(deleteReq)
+			return e
+		})
 		if err != nil {
 			errors = append(errors, err)
 		}
@@ -120,5 +137,6 @@ func (a *Artifact) stateAtlasMetadata() interface{} {
 		k := fmt.Sprintf("region.%s", region)
 		metadata[k] = imageId
 	}
+
 	return metadata
 }

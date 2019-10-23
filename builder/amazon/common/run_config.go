@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions
 
 package common
 
@@ -18,9 +19,17 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type AmiFilterOptions struct {
-	Filters    map[*string]*string
-	Owners     []*string
+	Filters    map[string]string
+	Owners     []string
 	MostRecent bool `mapstructure:"most_recent"`
+}
+
+func (d *AmiFilterOptions) GetOwners() []*string {
+	res := make([]*string, 0, len(d.Owners))
+	for _, owner := range d.Owners {
+		res = append(res, &owner)
+	}
+	return res
 }
 
 func (d *AmiFilterOptions) Empty() bool {
@@ -32,7 +41,7 @@ func (d *AmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	Filters  map[*string]*string
+	Filters  map[string]string
 	MostFree bool `mapstructure:"most_free"`
 	Random   bool `mapstructure:"random"`
 }
@@ -42,7 +51,16 @@ func (d *SubnetFilterOptions) Empty() bool {
 }
 
 type VpcFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
+}
+
+type PolicyDocument struct {
+	Version   string
+	Statement []struct {
+		Effect   string
+		Action   []string
+		Resource string
+	}
 }
 
 func (d *VpcFilterOptions) Empty() bool {
@@ -50,7 +68,7 @@ func (d *VpcFilterOptions) Empty() bool {
 }
 
 type SecurityGroupFilterOptions struct {
-	Filters map[*string]*string
+	Filters map[string]string
 }
 
 func (d *SecurityGroupFilterOptions) Empty() bool {
@@ -124,6 +142,25 @@ type RunConfig struct {
 	// profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
 	// to launch the EC2 instance with.
 	IamInstanceProfile string `mapstructure:"iam_instance_profile" required:"false"`
+	// Temporary IAM instance profile policy document
+	// If IamInstanceProfile is specified it will be used instead. Example:
+	//
+	// ```json
+	//{
+	//	"Version": "2012-10-17",
+	//	"Statement": [
+	//		{
+	//			"Action": [
+	//			"logs:*"
+	//			],
+	//			"Effect": "Allow",
+	//			"Resource": "*"
+	//		}
+	//	]
+	//}
+	// ```
+	//
+	TemporaryIamInstanceProfilePolicyDocument *PolicyDocument `mapstructure:"temporary_iam_instance_profile_policy_document" required:"false"`
 	// Automatically terminate instances on
 	// shutdown in case Packer exits ungracefully. Possible values are stop and
 	// terminate. Defaults to stop.
