@@ -162,6 +162,10 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 	}
 	if c.ISOChecksumType == "file" {
 		u, err := url.Parse(c.ISOUrls[0])
+		if err != nil {
+			errs = append(errs, fmt.Errorf("error parsing URL <%s>: %s",
+				c.ISOUrls[0], err))
+		}
 		wd, err := os.Getwd()
 		if err != nil {
 			log.Printf("get working directory: %v", err)
