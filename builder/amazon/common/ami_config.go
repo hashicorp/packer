@@ -23,10 +23,9 @@ type AMIConfig struct {
 	// engine, see Build template
 	// data for more information.
 	AMIDescription string `mapstructure:"ami_description" required:"false"`
-	// The description to set for the resulting AMI(s). By default this
-	// description is empty. This is a [template
-	// engine](../templates/engine.html), see [Build template
-	// data](#build-template-data) for more information.
+	// The type of virtualization for the AMI
+	// you are building. This option is required to register HVM images. Can be
+	// paravirtual (default) or hvm.
 	AMIVirtType string `mapstructure:"ami_virtualization_type" required:"false"`
 	// A list of account IDs that have access to
 	// launch the resulting AMI(s). By default no additional users other than the
