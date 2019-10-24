@@ -197,13 +197,13 @@ func testAccPreCheck(t *testing.T) {
 
 func TestUCloudClientBaseUrlConfigurable(t *testing.T) {
 	const url = "baseUrl"
-	access := &AccessConfig{BaseUrl: url}
+	access := &ucloudcommon.AccessConfig{BaseUrl: url}
 	client, err := access.Client()
 	assert.Nil(t, err)
-	assert.Equal(t, url, client.uaccountconn.Client.GetConfig().BaseUrl, "account conn's base url not configurable")
-	assert.Equal(t, url, client.uhostconn.Client.GetConfig().BaseUrl, "host conn's base url not configurable")
-	assert.Equal(t, url, client.unetconn.Client.GetConfig().BaseUrl, "net conn's base url not configurable")
-	assert.Equal(t, url, client.vpcconn.Client.GetConfig().BaseUrl, "vpc conn's base url not configurable")
+	assert.Equal(t, url, client.UAccountConn.Client.GetConfig().BaseUrl, "account conn's base url not configurable")
+	assert.Equal(t, url, client.UHostConn.Client.GetConfig().BaseUrl, "host conn's base url not configurable")
+	assert.Equal(t, url, client.UNetConn.Client.GetConfig().BaseUrl, "net conn's base url not configurable")
+	assert.Equal(t, url, client.VPCConn.Client.GetConfig().BaseUrl, "vpc conn's base url not configurable")
 }
 
 func testUCloudClient() (*ucloudcommon.UCloudClient, error) {
