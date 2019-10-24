@@ -12,7 +12,7 @@ type ExpectedStateError struct {
 	message string
 }
 
-type NotCompleteError struct {
+type NotCompletedError struct {
 	message string
 }
 
@@ -24,7 +24,7 @@ func (e *NotFoundError) Error() string {
 	return e.message
 }
 
-func (e *NotCompleteError) Error() string {
+func (e *NotCompletedError) Error() string {
 	return e.message
 }
 
@@ -36,8 +36,8 @@ func NewExpectedStateError(product, id string) error {
 	return &ExpectedStateError{fmt.Sprintf("the %s %s not be expected state", product, id)}
 }
 
-func NewNotCompleteError(product string) error {
-	return &NotCompleteError{fmt.Sprintf("%s is not completed", product)}
+func NewNotCompletedError(product string) error {
+	return &NotCompletedError{fmt.Sprintf("%s is not completed", product)}
 }
 
 func IsNotFoundError(err error) bool {
@@ -55,7 +55,7 @@ func IsExpectedStateError(err error) bool {
 }
 
 func IsNotCompleteError(err error) bool {
-	if _, ok := err.(*NotCompleteError); ok {
+	if _, ok := err.(*NotCompletedError); ok {
 		return true
 	}
 	return false

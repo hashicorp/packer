@@ -45,7 +45,7 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.WaitImageReadyTimeout <= 0 {
-		c.WaitImageReadyTimeout = DefaultCreateImageTimeOut
+		c.WaitImageReadyTimeout = DefaultCreateImageTimeout
 	}
 
 	if len(errs) > 0 {

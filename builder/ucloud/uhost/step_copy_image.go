@@ -83,7 +83,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 		}
 
 		if len(expectedImages.GetAll()) != 0 {
-			return ucloudcommon.NewNotCompleteError("copying image")
+			return ucloudcommon.NewNotCompletedError("copying image")
 		}
 
 		return nil
