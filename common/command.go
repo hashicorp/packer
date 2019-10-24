@@ -1,4 +1,4 @@
-package chroot
+package common
 
 import (
 	"os/exec"

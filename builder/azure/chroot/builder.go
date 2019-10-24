@@ -317,7 +317,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("azureclient", azcli)
-	state.Put("wrappedCommand", chroot.CommandWrapper(wrappedCommand))
+	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
 
 	info, err := azcli.MetadataClient().GetComputeInfo()
 	if err != nil {

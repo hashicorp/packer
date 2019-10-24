@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"syscall"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -24,7 +25,7 @@ type StepMountExtra struct {
 func (s *StepMountExtra) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	s.mounts = make([]string, 0, len(s.ChrootMounts))
 
@@ -58,7 +59,7 @@ func (s *StepMountExtra) Run(ctx context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		cmd := ShellCommand(mountCommand)
+		cmd := common.ShellCommand(mountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			err := fmt.Errorf(
@@ -89,7 +90,7 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		return nil
 	}
 
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 	for len(s.mounts) > 0 {
 		var path string
 		lastIndex := len(s.mounts) - 1
@@ -103,7 +104,7 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		// Before attempting to unmount,
 		// check to see if path is already unmounted
 		stderr := new(bytes.Buffer)
-		cmd := ShellCommand(grepCommand)
+		cmd := common.ShellCommand(grepCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			if exitError, ok := err.(*exec.ExitError); ok {
@@ -124,7 +125,7 @@ func (s *StepMountExtra) CleanupFunc(state multistep.StateBag) error {
 		}
 
 		stderr = new(bytes.Buffer)
-		cmd = ShellCommand(unmountCommand)
+		cmd = common.ShellCommand(unmountCommand)
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf(
