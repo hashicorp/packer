@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/common"
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx interpolate.Context, ui packer.Ui) error {
+func RunLocalCommands(commands []string, wrappedCommand common.CommandWrapper, ictx interpolate.Context, ui packer.Ui) error {
 	ctx := context.TODO()
 	for _, rawCmd := range commands {
 		intCmd, err := interpolate.Render(rawCmd, &ictx)

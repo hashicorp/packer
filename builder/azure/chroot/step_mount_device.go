@@ -6,14 +6,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/builder/amazon/chroot"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var _ multistep.Step = &StepMountDevice{}
@@ -30,7 +31,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 	ui := state.Get("ui").(packer.Ui)
 	device := state.Get("device").(string)
 	config := state.Get("config").(*Config)
-	wrappedCommand := state.Get("wrappedCommand").(chroot.CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	ictx := config.ctx
 
@@ -83,7 +84,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 	log.Printf("[DEBUG] (step mount) mount command is %s", mountCommand)
-	cmd := chroot.ShellCommand(mountCommand)
+	cmd := common.ShellCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf(
@@ -114,7 +115,7 @@ func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(chroot.CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	ui.Say("Unmounting the root device...")
 	unmountCommand, err := wrappedCommand(fmt.Sprintf("umount %s", s.mountPath))
@@ -122,7 +123,7 @@ func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
 		return fmt.Errorf("error creating unmount command: %s", err)
 	}
 
-	cmd := chroot.ShellCommand(unmountCommand)
+	cmd := common.ShellCommand(unmountCommand)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error unmounting root device: %s", err)
 	}
