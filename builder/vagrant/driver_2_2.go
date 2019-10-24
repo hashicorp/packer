@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-version"
 )
@@ -197,17 +198,53 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 	cmd.Env = append(os.Environ(), fmt.Sprintf("VAGRANT_CWD=%s", d.VagrantCWD))
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
 
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
+	cmd.Start()
+
+	stdoutString := ""
+	stderrString := ""
+
+	donech := make(chan bool)
+
+	go func() {
+		for {
+			select {
+			case <-donech:
+				line := stdout.String()
+				if line != "" {
+					log.Printf("[vagrant driver] stdout: %s", line)
+				}
+				stdoutString += line
+				line = stderr.String()
+				if line != "" {
+					log.Printf("[vagrant driver] stderr: %s", line)
+				}
+				stderrString += line
+			default:
+				line, _ := stdout.ReadString('\n')
+				if line != "" {
+					log.Printf("[vagrant driver] stdout: %s", line)
+					stdoutString += line
+
+				}
+				line, _ = stderr.ReadString('\n')
+				if line != "" {
+					log.Printf("[vagrant driver] stderr: %s", line)
+					stderrString += line
+
+				}
+				time.Sleep(500)
+			}
+		}
+	}()
+
+	err := cmd.Wait()
+
+	donech <- true
 
 	if _, ok := err.(*exec.ExitError); ok {
 		err = fmt.Errorf("Vagrant error: %s", stderrString)
 	}
-
-	log.Printf("[vagrant driver] stdout: %s", stdoutString)
-	log.Printf("[vagrant driver] stderr: %s", stderrString)
 
 	return stdoutString, stderrString, err
 }
