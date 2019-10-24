@@ -5,10 +5,9 @@
     engine, see Build template
     data for more information.
     
--   `ami_virtualization_type` (string) - The description to set for the resulting AMI(s). By default this
-    description is empty. This is a [template
-    engine](../templates/engine.html), see [Build template
-    data](#build-template-data) for more information.
+-   `ami_virtualization_type` (string) - The type of virtualization for the AMI
+    you are building. This option is required to register HVM images. Can be
+    paravirtual (default) or hvm.
     
 -   `ami_users` ([]string) - A list of account IDs that have access to
     launch the resulting AMI(s). By default no additional users other than the
