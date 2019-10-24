@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/chroot"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -171,10 +172,6 @@ type Config struct {
 
 func (c *Config) GetContext() interpolate.Context {
 	return c.ctx
-}
-
-type interpolateContextProvider interface {
-	GetContext() interpolate.Context
 }
 
 type wrappedCommandTemplate struct {
@@ -356,7 +353,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
+	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -391,24 +388,24 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
-		&StepPreMountCommands{
+		&chroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
 		},
-		&StepPostMountCommands{
+		&chroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
 		},
-		&StepMountExtra{
+		&chroot.StepMountExtra{
 			ChrootMounts: b.config.ChrootMounts,
 		},
-		&StepCopyFiles{
+		&chroot.StepCopyFiles{
 			Files: b.config.CopyFiles,
 		},
-		&StepChrootProvision{},
-		&StepEarlyCleanup{},
+		&chroot.StepChrootProvision{},
+		&chroot.StepEarlyCleanup{},
 		&StepSnapshot{},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,

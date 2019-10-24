@@ -3,6 +3,7 @@ package chroot
 import (
 	"context"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,7 +21,7 @@ func (s *StepPreMountCommands) Run(ctx context.Context, state multistep.StateBag
 	config := state.Get("config").(interpolateContextProvider)
 	device := state.Get("device").(string)
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	if len(s.Commands) == 0 {
 		return multistep.ActionContinue
