@@ -14,10 +14,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/builder/amazon/chroot"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/chroot"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
