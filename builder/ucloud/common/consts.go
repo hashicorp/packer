@@ -8,18 +8,20 @@ const (
 )
 
 const (
-	OsTypeWindows         = "Windows"
-	SecurityGroupNonWeb   = "recommend non web"
-	InstanceStateRunning  = "Running"
-	InstanceStateStopped  = "Stopped"
-	BootDiskStateNormal   = "Normal"
+	InstanceStateRunning = "Running"
+	InstanceStateStopped = "Stopped"
+
 	ImageStateAvailable   = "Available"
 	ImageStateUnavailable = "Unavailable"
-	IpTypePrivate         = "Private"
+
+	BootDiskStateNormal = "Normal"
+	OsTypeWindows       = "Windows"
+	SecurityGroupNonWeb = "recommend non web"
+	IpTypePrivate       = "Private"
 )
 
 const (
-	DefaultCreateImageTimeOut = 3600
+	DefaultCreateImageTimeout = 3600
 )
 
 var BootDiskTypeMap = NewStringConverter(map[string]string{

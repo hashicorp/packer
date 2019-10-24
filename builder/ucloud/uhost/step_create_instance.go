@@ -267,7 +267,7 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 	if !s.UsePrivateIp {
 		operatorName := ucloud.String("International")
 		if strings.HasPrefix(s.Region, "cn-") {
-			operatorName = ucloud.String("BGP")
+			operatorName = ucloud.String("Bgp")
 		}
 		networkInterface := uhost.CreateUHostInstanceParamNetworkInterface{
 			EIP: &uhost.CreateUHostInstanceParamNetworkInterfaceEIP{

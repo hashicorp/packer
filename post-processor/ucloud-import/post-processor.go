@@ -19,11 +19,12 @@ import (
 )
 
 const (
-	BuilderId       = "packer.post-processor.ucloud-import"
-	RAWFileFormat   = "raw"
-	VHDFileFormat   = "vhd"
-	VMDKFileFormat  = "vmdk"
-	QCOW2FileFormat = "qcow2"
+	BuilderId = "packer.post-processor.ucloud-import"
+
+	ImageFileFormatRAW   = "raw"
+	ImageFileFormatVHD   = "vhd"
+	ImageFileFormatVMDK  = "vmdk"
+	ImageFileFormatQCOW2 = "qcow2"
 )
 
 var regionForFileMap = ucloudcommon.NewStringConverter(map[string]string{
@@ -81,7 +82,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.WaitImageReadyTimeout <= 0 {
-		p.config.WaitImageReadyTimeout = ucloudcommon.DefaultCreateImageTimeOut
+		p.config.WaitImageReadyTimeout = ucloudcommon.DefaultCreateImageTimeout
 	}
 
 	errs := new(packer.MultiError)
@@ -117,7 +118,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	switch p.config.Format {
-	case VHDFileFormat, RAWFileFormat, VMDKFileFormat, QCOW2FileFormat:
+	case ImageFileFormatVHD, ImageFileFormatRAW, ImageFileFormatVMDK, ImageFileFormatQCOW2:
 	default:
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("expected %q only be one of 'raw', 'vhd', 'vmdk', or 'qcow2', got %q", "format", p.config.Format))
