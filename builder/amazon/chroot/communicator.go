@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
 )
@@ -21,7 +22,7 @@ import (
 // commands locally but within a chroot.
 type Communicator struct {
 	Chroot     string
-	CmdWrapper CommandWrapper
+	CmdWrapper common.CommandWrapper
 }
 
 func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
@@ -33,7 +34,7 @@ func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
 		return err
 	}
 
-	localCmd := ShellCommand(command)
+	localCmd := common.ShellCommand(command)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
@@ -83,7 +84,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 		return err
 	}
 
-	return ShellCommand(cpCmd).Run()
+	return common.ShellCommand(cpCmd).Run()
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
@@ -105,7 +106,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	}
 
 	var stderr bytes.Buffer
-	cmd := ShellCommand(cpCmd)
+	cmd := common.ShellCommand(cpCmd)
 	cmd.Env = append(cmd.Env, "LANG=C")
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Stderr = &stderr

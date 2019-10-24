@@ -7,6 +7,7 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -24,7 +25,7 @@ type StepCopyFiles struct {
 func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 	stderr := new(bytes.Buffer)
 
 	s.files = make([]string, 0, len(s.Files))
@@ -44,7 +45,7 @@ func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multi
 			}
 
 			stderr.Reset()
-			cmd := ShellCommand(cmdText)
+			cmd := common.ShellCommand(cmdText)
 			cmd.Stderr = stderr
 			if err := cmd.Run(); err != nil {
 				err := fmt.Errorf(
@@ -70,7 +71,7 @@ func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 	if s.files != nil {
 		for _, file := range s.files {
 			log.Printf("Removing: %s", file)
@@ -79,7 +80,7 @@ func (s *StepCopyFiles) CleanupFunc(state multistep.StateBag) error {
 				return err
 			}
 
-			localCmd := ShellCommand(localCmdText)
+			localCmd := common.ShellCommand(localCmdText)
 			if err := localCmd.Run(); err != nil {
 				return err
 			}

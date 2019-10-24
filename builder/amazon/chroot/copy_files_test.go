@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime"
 	"testing"
+
+	"github.com/hashicorp/packer/common"
 )
 
 func TestCopyFile(t *testing.T) {
@@ -26,7 +28,7 @@ func TestCopyFile(t *testing.T) {
 	}
 	first.Sync()
 
-	cmd := ShellCommand(fmt.Sprintf("cp %s %s", first.Name(), newName))
+	cmd := common.ShellCommand(fmt.Sprintf("cp %s %s", first.Name(), newName))
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("Couldn't copy file")
 	}
