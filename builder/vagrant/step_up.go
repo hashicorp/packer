@@ -33,7 +33,7 @@ func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.St
 	driver := state.Get("driver").(VagrantDriver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Calling Vagrant Up...")
+	ui.Say("Calling Vagrant Up (this can take some time)...")
 
 	_, _, err := driver.Up(s.generateArgs())
 
