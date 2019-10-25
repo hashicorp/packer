@@ -29,7 +29,7 @@ are two categories: required and optional parameters.
 
 -   `private_key` - (string) This is the UCloud private key. It must be provided, but it can also be sourced from the `UCLOUD_PRIVATE_KEY` environment variable.
 
--   `project_id` - (string) This is the UCloud project id. It must be provided, but it can also be sourced from the `UCLOUD_PROJECT_ID` environment variables.
+-   `project_id` - (string) This is the UCloud project id. It must be provided, but it can also be sourced from the `UCLOUD_PROJECT_ID` environment variable.
 
 -   `region` - (string) This is the UCloud region. It must be provided, but it can also be sourced from the `UCLOUD_REGION` environment variable.
 
