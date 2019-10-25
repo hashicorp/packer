@@ -48,7 +48,7 @@ are two categories: required and optional parameters.
 
 -   `ufile_key_name` (string) - The name of the object key in `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied to import.
 
--   `skip_clean` (boolean) - Whether we should skip removing the RAW, VHD, VMDK, or qcow2 file uploaded to UFile after the import process has completed. Possible values are: `true` as leave it in the UFile bucket, `false` as clean it out.(Default: `false`).
+-   `skip_clean` (boolean) - Whether we should skip removing the RAW, VHD, VMDK, or qcow2 file uploaded to UFile after the import process has completed. Possible values are: `true` to leave it in the UFile bucket, `false` to remove it. (Default: `false`).
 
 -   `image_description` (string) - The description of the image.
 
