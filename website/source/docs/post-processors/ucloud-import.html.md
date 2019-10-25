@@ -31,7 +31,7 @@ are two categories: required and optional parameters.
 
 -   `project_id` - (string) This is the UCloud project id. It must be provided, but it can also be sourced from the `UCLOUD_PROJECT_ID` environment variables.
 
--   `region` - (string) This is the UCloud region. It must be provided, but it can also be sourced from the `UCLOUD_REGION` environment variables.
+-   `region` - (string) This is the UCloud region. It must be provided, but it can also be sourced from the `UCLOUD_REGION` environment variable.
 
 -   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only support Chinese, English, numbers, '-_,.:[]'.
 
