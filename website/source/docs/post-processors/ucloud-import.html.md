@@ -33,7 +33,7 @@ are two categories: required and optional parameters.
 
 -   `region` - (string) This is the UCloud region. It must be provided, but it can also be sourced from the `UCLOUD_REGION` environment variable.
 
--   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only support Chinese, English, numbers, '-_,.:[]'.
+-   `image_name` - (string) The name of the user-defined image, which contains 1-63 characters and only supports Chinese, English, numbers, '-_,.:[]'.
 
 -   `ufile_bucket_name` (string) - The name of the UFile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import. This bucket must exist when the post-processor is run.
 
