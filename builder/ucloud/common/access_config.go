@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/hashicorp/packer/template/interpolate"
@@ -66,6 +67,12 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.Region == "" {
 		errs = append(errs, fmt.Errorf("%q must be set", "region"))
+	}
+
+	if c.BaseUrl != "" {
+		if _, err := url.Parse(c.BaseUrl); err != nil {
+			errs = append(errs, fmt.Errorf("%q is invalid, should be an valid ucloud base_url, got %q, parse error: %s", "base_url", c.BaseUrl, err))
+		}
 	}
 
 	if len(errs) > 0 {

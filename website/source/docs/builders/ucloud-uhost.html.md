@@ -48,6 +48,8 @@ builder.
 
 ### Optional:
 
+- `base_url` - (string) This is the base url. (Default: `https://api.ucloud.cn`).
+
 -   `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance via a private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
 
 \~&gt; **Note:**  By default (`use_ssh_private_ip` is `false`), the launched uhost instance will be connecting with extranet by bounding with an EIP  (elastic public ip) automatically, which bandwidth is 30 Mb by default and paid by traffic.

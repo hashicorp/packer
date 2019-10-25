@@ -45,6 +45,7 @@ are two categories: required and optional parameters.
 
 ### Optional:
 
+-   `base_url` - (string) This is the base url. (Default: `https://api.ucloud.cn`).
 
 -   `ufile_key_name` (string) - The name of the object key in `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied to import.
 
