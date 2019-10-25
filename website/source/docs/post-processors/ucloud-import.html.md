@@ -12,7 +12,7 @@ Type: `ucloud-import`
 
  The Packer UCloud Import post-processor takes the RAW, VHD, VMDK, or qcow2 artifact from various builders and imports it to UCloud customized image list for UHost Instance.
 
-~> **Note**  Some regions don't support image import. You may refer to [ucloud console](https://console.ucloud.cn/uhost/uimage) for detail. If you want to import to such regions, please import the image in `cn-bj2` at first, and then copying the image to the target region.
+~> **Note**  Some regions don't support image import. You may refer to [ucloud console](https://console.ucloud.cn/uhost/uimage) for more detail. If you want to import to unsupported regions, please import the image in `cn-bj2` first, and then copy the image to the target region.
 
 ## How Does it Work?
 
