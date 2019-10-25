@@ -14,6 +14,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	ufsdk "github.com/ufilesdk-dev/ufile-gosdk"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -26,11 +27,6 @@ const (
 	ImageFileFormatVMDK  = "vmdk"
 	ImageFileFormatQCOW2 = "qcow2"
 )
-
-var regionForFileMap = ucloudcommon.NewStringConverter(map[string]string{
-	"cn-bj2": "cn-bj",
-	"cn-bj1": "cn-bj",
-})
 
 var imageFormatMap = ucloudcommon.NewStringConverter(map[string]string{
 	"raw":  "RAW",
@@ -167,26 +163,38 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
 	}
 
-	convertedRegion := regionForFileMap.Convert(p.config.Region)
 	keyName := p.config.UFileKey
 	bucketName := p.config.UFileBucket
+
+	// query bucket
+	domain, err := queryBucket(ufileconn, bucketName)
+	if err != nil {
+		return nil, false, false, fmt.Errorf("Failed to query bucket, %s", err)
+	}
+
+	var bucketHost string
+	if p.config.BaseUrl != "" {
+		// skip error because it has been validated by prepare
+		urlObj, _ := url.Parse(p.config.BaseUrl)
+		if err != nil {
+
+		}
+		bucketHost = urlObj.Host
+	} else {
+		bucketHost = "api.ucloud.cn"
+	}
+
+	fileHost := strings.SplitN(domain, ".", 2)[1]
 
 	config := &ufsdk.Config{
 		PublicKey:  p.config.PublicKey,
 		PrivateKey: p.config.PrivateKey,
 		BucketName: bucketName,
-		FileHost:   fmt.Sprintf(convertedRegion + ".ufileos.com"),
-		BucketHost: "api.ucloud.cn",
+		FileHost:   fileHost,
+		BucketHost: bucketHost,
 	}
 
-	// query bucket
-	if err := queryBucket(ufileconn, config); err != nil {
-		return nil, false, false, fmt.Errorf("Failed to query bucket, %s", err)
-	}
-
-	bucketUrl := fmt.Sprintf("http://" + bucketName + "." + convertedRegion + ".ufileos.com")
-
-	ui.Say(fmt.Sprintf("Waiting for uploading image file %s to UFile: %s/%s...", source, bucketUrl, p.config.UFileKey))
+	ui.Say(fmt.Sprintf("Waiting for uploading image file %s to UFile: %s/%s...", source, bucketName, keyName))
 
 	// upload file to bucket
 	ufileUrl, err := uploadFile(ufileconn, config, keyName, source)
@@ -194,15 +202,15 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("Failed to Upload image file, %s", err)
 	}
 
-	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile %s/%s", source, bucketUrl, p.config.UFileKey))
+	ui.Say(fmt.Sprintf("Image file %s has been uploaded to UFile: %s/%s", source, bucketName, keyName))
 
 	importImageRequest := p.buildImportImageRequest(uhostconn, ufileUrl)
 	importImageResponse, err := uhostconn.ImportCustomImage(importImageRequest)
 	if err != nil {
-		return nil, false, false, fmt.Errorf("Failed to import image from %s/%s, %s", bucketUrl, p.config.UFileKey, err)
+		return nil, false, false, fmt.Errorf("Failed to import image from UFile: %s/%s, %s", bucketName, keyName, err)
 	}
 
-	ui.Say(fmt.Sprintf("Waiting for importing %s/%s to ucloud...", bucketUrl, p.config.UFileKey))
+	ui.Say(fmt.Sprintf("Waiting for importing image from UFile: %s/%s ...", bucketName, keyName))
 
 	imageId := importImageResponse.ImageId
 	err = retry.Config{
@@ -229,8 +237,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	})
 
 	if err != nil {
-		return nil, false, false, fmt.Errorf("Error on waiting for importing image %q, %s",
-			imageId, err.Error())
+		return nil, false, false, fmt.Errorf("Error on waiting for importing image %q from UFile: %s/%s, %s",
+			imageId, bucketName, keyName, err)
 	}
 
 	// Add the reported UCloud image ID to the artifact list
@@ -271,42 +279,19 @@ func (p *PostProcessor) buildImportImageRequest(conn *uhost.UHostClient, private
 	return req
 }
 
-func queryBucket(conn *ufile.UFileClient, config *ufsdk.Config) error {
-	var limit = 100
-	var offset int
-	var bucketList []ufile.UFileBucketSet
-	for {
-		req := conn.NewDescribeBucketRequest()
-		req.Limit = ucloud.Int(limit)
-		req.Offset = ucloud.Int(offset)
-		resp, err := conn.DescribeBucket(req)
-		if err != nil {
-			return fmt.Errorf("error on reading bucket list when create bucket, %s", err)
-		}
-
-		if resp == nil || len(resp.DataSet) < 1 {
-			break
-		}
-
-		bucketList = append(bucketList, resp.DataSet...)
-
-		if len(resp.DataSet) < limit {
-			break
-		}
-
-		offset = offset + limit
+func queryBucket(conn *ufile.UFileClient, bucketName string) (string, error) {
+	req := conn.NewDescribeBucketRequest()
+	req.BucketName = ucloud.String(bucketName)
+	resp, err := conn.DescribeBucket(req)
+	if err != nil {
+		return "", fmt.Errorf("error on reading bucket %q when create bucket, %s", bucketName, err)
 	}
 
-	var bucketNames []string
-	for _, v := range bucketList {
-		bucketNames = append(bucketNames, v.BucketName)
+	if len(resp.DataSet) < 1 {
+		return "", fmt.Errorf("the bucket %s is not exit", bucketName)
 	}
 
-	if !ucloudcommon.IsStringIn(config.BucketName, bucketNames) {
-		return fmt.Errorf("the bucket %s is not exit", config.BucketName)
-	}
-
-	return nil
+	return resp.DataSet[0].Domain.Src[0], nil
 }
 
 func uploadFile(conn *ufile.UFileClient, config *ufsdk.Config, keyName, source string) (string, error) {
