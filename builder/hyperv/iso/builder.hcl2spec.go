@@ -26,9 +26,6 @@ type FlatConfig struct {
 	ISOUrls                        []string          `mapstructure:"iso_urls" cty:"iso_urls"`
 	TargetPath                     *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
 	TargetExtension                *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
-	FloppyFiles                    []string          `mapstructure:"floppy_files" cty:"floppy_files"`
-	FloppyDirectories              []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
-	FloppyLabel                    *string           `mapstructure:"floppy_label" cty:"floppy_label"`
 	RawBootGroupInterval           *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
 	RawBootWait                    *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand                    []string          `mapstructure:"boot_command" cty:"boot_command"`
@@ -74,12 +71,13 @@ type FlatConfig struct {
 	WinRMUseSSL                    *bool             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl"`
 	WinRMInsecure                  *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM                   *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
-	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout             *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
-	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size"`
+	FloppyFiles                    []string          `mapstructure:"floppy_files" cty:"floppy_files"`
+	FloppyDirectories              []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
+	FloppyLabel                    *string           `mapstructure:"floppy_label" cty:"floppy_label"`
 	DiskBlockSize                  *uint             `mapstructure:"disk_block_size" required:"false" cty:"disk_block_size"`
 	RamSize                        *uint             `mapstructure:"memory" required:"false" cty:"memory"`
 	SecondaryDvdImages             []string          `mapstructure:"secondary_iso_images" required:"false" cty:"secondary_iso_images"`
+	AdditionalDiskSize             []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size"`
 	GuestAdditionsMode             *string           `mapstructure:"guest_additions_mode" required:"false" cty:"guest_additions_mode"`
 	GuestAdditionsPath             *string           `mapstructure:"guest_additions_path" required:"false" cty:"guest_additions_path"`
 	VMName                         *string           `mapstructure:"vm_name" required:"false" cty:"vm_name"`
@@ -90,7 +88,6 @@ type FlatConfig struct {
 	Cpu                            *uint             `mapstructure:"cpus" required:"false" cty:"cpus"`
 	Generation                     *uint             `mapstructure:"generation" required:"false" cty:"generation"`
 	EnableMacSpoofing              *bool             `mapstructure:"enable_mac_spoofing" required:"false" cty:"enable_mac_spoofing"`
-	UseLegacyNetworkAdapter        *bool             `mapstructure:"use_legacy_network_adapter" required:"false" cty:"use_legacy_network_adapter"`
 	EnableDynamicMemory            *bool             `mapstructure:"enable_dynamic_memory" required:"false" cty:"enable_dynamic_memory"`
 	EnableSecureBoot               *bool             `mapstructure:"enable_secure_boot" required:"false" cty:"enable_secure_boot"`
 	SecureBootTemplate             *string           `mapstructure:"secure_boot_template" required:"false" cty:"secure_boot_template"`
@@ -98,12 +95,15 @@ type FlatConfig struct {
 	TempPath                       *string           `mapstructure:"temp_path" required:"false" cty:"temp_path"`
 	Version                        *string           `mapstructure:"configuration_version" required:"false" cty:"configuration_version"`
 	KeepRegistered                 *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered"`
-	AdditionalDiskSize             []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size"`
 	SkipCompaction                 *bool             `mapstructure:"skip_compaction" required:"false" cty:"skip_compaction"`
 	SkipExport                     *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
+	Headless                       *bool             `mapstructure:"headless" required:"false" cty:"headless"`
+	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
+	RawShutdownTimeout             *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size"`
+	UseLegacyNetworkAdapter        *bool             `mapstructure:"use_legacy_network_adapter" required:"false" cty:"use_legacy_network_adapter"`
 	DifferencingDisk               *bool             `mapstructure:"differencing_disk" required:"false" cty:"differencing_disk"`
 	FixedVHD                       *bool             `mapstructure:"use_fixed_vhd_format" required:"false" cty:"use_fixed_vhd_format"`
-	Headless                       *bool             `mapstructure:"headless" required:"false" cty:"headless"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -132,9 +132,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_urls":                         &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
 		"iso_target_path":                  &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
 		"iso_target_extension":             &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
-		"floppy_files":                     &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
-		"floppy_dirs":                      &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
-		"floppy_label":                     &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"boot_keygroup_interval":           &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                        &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                     &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -180,12 +177,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                    &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":                   &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                   &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
-		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
-		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
-		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
+		"floppy_files":                     &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
+		"floppy_dirs":                      &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
+		"floppy_label":                     &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"disk_block_size":                  &hcldec.AttrSpec{Name: "disk_block_size", Type: cty.Number, Required: false},
 		"memory":                           &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"secondary_iso_images":             &hcldec.AttrSpec{Name: "secondary_iso_images", Type: cty.List(cty.String), Required: false},
+		"disk_additional_size":             &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"guest_additions_mode":             &hcldec.AttrSpec{Name: "guest_additions_mode", Type: cty.String, Required: false},
 		"guest_additions_path":             &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"vm_name":                          &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
@@ -196,7 +194,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cpus":                             &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"generation":                       &hcldec.AttrSpec{Name: "generation", Type: cty.Number, Required: false},
 		"enable_mac_spoofing":              &hcldec.AttrSpec{Name: "enable_mac_spoofing", Type: cty.Bool, Required: false},
-		"use_legacy_network_adapter":       &hcldec.AttrSpec{Name: "use_legacy_network_adapter", Type: cty.Bool, Required: false},
 		"enable_dynamic_memory":            &hcldec.AttrSpec{Name: "enable_dynamic_memory", Type: cty.Bool, Required: false},
 		"enable_secure_boot":               &hcldec.AttrSpec{Name: "enable_secure_boot", Type: cty.Bool, Required: false},
 		"secure_boot_template":             &hcldec.AttrSpec{Name: "secure_boot_template", Type: cty.String, Required: false},
@@ -204,12 +201,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"temp_path":                        &hcldec.AttrSpec{Name: "temp_path", Type: cty.String, Required: false},
 		"configuration_version":            &hcldec.AttrSpec{Name: "configuration_version", Type: cty.String, Required: false},
 		"keep_registered":                  &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
-		"disk_additional_size":             &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"skip_compaction":                  &hcldec.AttrSpec{Name: "skip_compaction", Type: cty.Bool, Required: false},
 		"skip_export":                      &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
+		"headless":                         &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
+		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
+		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
+		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
+		"use_legacy_network_adapter":       &hcldec.AttrSpec{Name: "use_legacy_network_adapter", Type: cty.Bool, Required: false},
 		"differencing_disk":                &hcldec.AttrSpec{Name: "differencing_disk", Type: cty.Bool, Required: false},
 		"use_fixed_vhd_format":             &hcldec.AttrSpec{Name: "use_fixed_vhd_format", Type: cty.Bool, Required: false},
-		"headless":                         &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 	}
 	return s
 }
