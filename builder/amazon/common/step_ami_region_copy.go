@@ -83,9 +83,16 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			s.RegionKeyIds = make(map[string]string)
 		}
 
-		// Make sure the kms_key_id for the original region is in the map
-		if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
-			s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+		// Make sure the kms_key_id for the original region is in the map, as
+		// long as the AMIKmsKeyId isn't being defaulted.
+		if s.AMIKmsKeyId != "" {
+			if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
+				s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+			}
+		} else {
+			if regionKey, ok := s.RegionKeyIds[s.OriginalRegion]; ok {
+				s.AMIKmsKeyId = regionKey
+			}
 		}
 	}
 
