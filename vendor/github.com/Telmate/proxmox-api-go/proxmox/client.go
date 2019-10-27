@@ -3,12 +3,14 @@ package proxmox
 // inspired by https://github.com/Telmate/vagrant-proxmox/blob/master/lib/vagrant-proxmox/proxmox/connection.rb
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"regexp"
@@ -57,7 +59,7 @@ func (vmr *VmRef) SetVmType(vmType string) {
 	return
 }
 
-func (vmr *VmRef) GetVmType() (string) {
+func (vmr *VmRef) GetVmType() string {
 	return vmr.vmType
 }
 
@@ -90,7 +92,7 @@ func NewClient(apiUrl string, hclient *http.Client, tls *tls.Config) (client *Cl
 func (c *Client) Login(username string, password string, otp string) (err error) {
 	c.Username = username
 	c.Password = password
-	c.Otp      = otp
+	c.Otp = otp
 	return c.session.Login(username, password, otp)
 }
 
@@ -135,6 +137,10 @@ func (c *Client) GetVmInfo(vmr *VmRef) (vmInfo map[string]interface{}, err error
 			vmInfo = vm
 			vmr.node = vmInfo["node"].(string)
 			vmr.vmType = vmInfo["type"].(string)
+			vmr.pool = ""
+			if vmInfo["pool"] != nil {
+				vmr.pool = vmInfo["pool"].(string)
+			}
 			return
 		}
 	}
@@ -150,6 +156,10 @@ func (c *Client) GetVmRefByName(vmName string) (vmr *VmRef, err error) {
 			vmr = NewVmRef(int(vm["vmid"].(float64)))
 			vmr.node = vm["node"].(string)
 			vmr.vmType = vm["type"].(string)
+			vmr.pool = ""
+			if vm["pool"] != nil {
+				vmr.pool = vm["pool"].(string)
+			}
 			return
 		}
 	}
@@ -667,6 +677,50 @@ func (c *Client) DeleteVMDisks(
 	return nil
 }
 
+func (c *Client) Upload(node string, storage string, contentType string, filename string, file io.Reader) error {
+	body, mimetype, err := createUploadBody(contentType, filename, file)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%s/nodes/%s/storage/%s/upload", c.session.ApiUrl, node, storage)
+	req, err := c.session.NewRequest(http.MethodPost, url, nil, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", mimetype)
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.session.Do(req)
+	return err
+}
+
+func createUploadBody(contentType string, filename string, r io.Reader) (io.Reader, string, error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+
+	err := w.WriteField("content", contentType)
+	if err != nil {
+		return nil, "", err
+	}
+
+	fw, err := w.CreateFormFile("filename", filename)
+	if err != nil {
+		return nil, "", err
+	}
+	_, err = io.Copy(fw, r)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = w.Close()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &buf, w.FormDataContentType(), nil
+}
+
 // getStorageAndVolumeName - Extract disk storage and disk volume, since disk name is saved
 // in Proxmox with its storage.
 func getStorageAndVolumeName(
@@ -684,4 +738,52 @@ func getStorageAndVolumeName(
 	}
 
 	return storageName, volumeName
+}
+
+func (c *Client) UpdateVMPool(vmr *VmRef, pool string) (exitStatus interface{}, err error) {
+	// Same pool
+	if vmr.pool == pool {
+		return
+	}
+
+	// Remove from old pool
+	if vmr.pool != "" {
+		paramMap := map[string]interface{}{
+			"vms":    vmr.vmId,
+			"delete": 1,
+		}
+		reqbody := ParamsToBody(paramMap)
+		url := fmt.Sprintf("/pools/%s", vmr.pool)
+		resp, err := c.session.Put(url, nil, nil, &reqbody)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	// Add to the new pool
+	if pool != "" {
+		paramMap := map[string]interface{}{
+			"vms": vmr.vmId,
+		}
+		reqbody := ParamsToBody(paramMap)
+		url := fmt.Sprintf("/pools/%s", pool)
+		resp, err := c.session.Put(url, nil, nil, &reqbody)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+		} else {
+			return nil, err
+		}
+	}
+	return
 }
