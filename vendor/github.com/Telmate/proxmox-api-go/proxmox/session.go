@@ -163,7 +163,7 @@ func (s *Session) Do(req *http.Request) (*http.Response, error) {
 
 	if *Debug {
 		d, _ := httputil.DumpRequestOut(req, true)
-		log.Printf(">>>>>>>>>> REQUEST:\n", string(d))
+		log.Printf(">>>>>>>>>> REQUEST:\n%v", string(d))
 	}
 
 	resp, err := s.httpClient.Do(req)
@@ -174,7 +174,7 @@ func (s *Session) Do(req *http.Request) (*http.Response, error) {
 
 	if *Debug {
 		dr, _ := httputil.DumpResponse(resp, true)
-		log.Printf("<<<<<<<<<< RESULT:\n", string(dr))
+		log.Printf("<<<<<<<<<< RESULT:\n%v", string(dr))
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
