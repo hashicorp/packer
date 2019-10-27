@@ -78,6 +78,8 @@ type Config struct {
 	// The name of the instance. Defaults to
 	// "packer-UUID" where UUID is dynamically generated.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
+	// The display name of the instance. Defaults to "Created by Packer".
+	InstanceDisplayName string `mapstructure:"instance_display_name" required:"false"`
 	// The name or ID of the network to connect the instance
 	// to.
 	Network string `mapstructure:"network" required:"true"`
@@ -208,6 +210,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.InstanceName == "" {
 		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	}
+
+	if c.InstanceDisplayName == "" {
+		c.InstanceDisplayName = "Created by Packer"
 	}
 
 	if c.TemplateName == "" {

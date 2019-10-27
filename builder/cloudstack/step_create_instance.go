@@ -44,7 +44,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	// Configure the instance.
 	p.SetName(config.InstanceName)
-	p.SetDisplayname("Created by Packer")
+	p.SetDisplayname(config.InstanceDisplayName)
 
 	if len(config.Comm.SSHKeyPairName) != 0 {
 		ui.Message(fmt.Sprintf("Using keypair: %s", config.Comm.SSHKeyPairName))
