@@ -61,6 +61,8 @@ github.com/PuerkitoBio/goquery
 github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 github.com/Telmate/proxmox-api-go/proxmox
+# github.com/agext/levenshtein v1.2.1
+github.com/agext/levenshtein
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 github.com/aliyun/alibaba-cloud-sdk-go/sdk
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth
@@ -88,6 +90,8 @@ github.com/antchfx/xpath
 github.com/antchfx/xquery/xml
 # github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
 github.com/antihax/optional
+# github.com/apparentlymart/go-textseg v1.0.0
+github.com/apparentlymart/go-textseg/textseg
 # github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 github.com/approvals/go-approval-tests
 github.com/approvals/go-approval-tests/reporters
@@ -237,6 +241,7 @@ github.com/golang/protobuf/ptypes/wrappers
 github.com/golang/snappy
 # github.com/google/go-cmp v0.3.0
 github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/cmpopts
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
@@ -325,6 +330,14 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
+# github.com/hashicorp/hcl/v2 v2.0.0
+github.com/hashicorp/hcl/v2
+github.com/hashicorp/hcl/v2/gohcl
+github.com/hashicorp/hcl/v2/hcldec
+github.com/hashicorp/hcl/v2/hclparse
+github.com/hashicorp/hcl/v2/hclsyntax
+github.com/hashicorp/hcl/v2/hclwrite
+github.com/hashicorp/hcl/v2/json
 # github.com/hashicorp/serf v0.8.2
 github.com/hashicorp/serf/coordinate
 # github.com/hashicorp/vault v1.1.0
@@ -411,6 +424,8 @@ github.com/mitchellh/go-homedir
 github.com/mitchellh/go-testing-interface
 # github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 github.com/mitchellh/go-vnc
+# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
+github.com/mitchellh/go-wordwrap
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
 # github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
@@ -587,6 +602,14 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
+# github.com/zclconf/go-cty v1.1.0
+github.com/zclconf/go-cty/cty
+github.com/zclconf/go-cty/cty/convert
+github.com/zclconf/go-cty/cty/function
+github.com/zclconf/go-cty/cty/function/stdlib
+github.com/zclconf/go-cty/cty/gocty
+github.com/zclconf/go-cty/cty/json
+github.com/zclconf/go-cty/cty/set
 # go.opencensus.io v0.22.0
 go.opencensus.io
 go.opencensus.io/internal
@@ -670,6 +693,14 @@ golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 golang.org/x/time/rate
+# golang.org/x/tools v0.0.0-20190628153133-6cdbf07be9d0
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/gcimporter
+golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/go/packages
+golang.org/x/tools/internal/fastwalk
+golang.org/x/tools/internal/gopathwalk
+golang.org/x/tools/internal/semver
 # google.golang.org/api v0.9.0
 google.golang.org/api/compute/v1
 google.golang.org/api/gensupport
