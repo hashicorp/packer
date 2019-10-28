@@ -6,54 +6,53 @@ import (
 	"time"
 )
 
-// ListBucketsResult defines the result object from ListBuckets request
+// ListBucketsResult ListBuckets请求返回的结果
 type ListBucketsResult struct {
 	XMLName     xml.Name           `xml:"ListAllMyBucketsResult"`
-	Prefix      string             `xml:"Prefix"`         // The prefix in this query
-	Marker      string             `xml:"Marker"`         // The marker filter
-	MaxKeys     int                `xml:"MaxKeys"`        // The max entry count to return. This information is returned when IsTruncated is true.
-	IsTruncated bool               `xml:"IsTruncated"`    // Flag true means there's remaining buckets to return.
-	NextMarker  string             `xml:"NextMarker"`     // The marker filter for the next list call
-	Owner       Owner              `xml:"Owner"`          // The owner information
-	Buckets     []BucketProperties `xml:"Buckets>Bucket"` // The bucket list
+	Prefix      string             `xml:"Prefix"`         // 本次查询结果的前缀
+	Marker      string             `xml:"Marker"`         // 标明查询的起点，未全部返回时有此节点
+	MaxKeys     int                `xml:"MaxKeys"`        // 返回结果的最大数目，未全部返回时有此节点
+	IsTruncated bool               `xml:"IsTruncated"`    // 所有的结果是否已经全部返回
+	NextMarker  string             `xml:"NextMarker"`     // 表示下一次查询的起点
+	Owner       Owner              `xml:"Owner"`          // 拥有者信息
+	Buckets     []BucketProperties `xml:"Buckets>Bucket"` // Bucket列表
 }
 
-// BucketProperties defines bucket properties
+// BucketProperties Bucket信息
 type BucketProperties struct {
 	XMLName      xml.Name  `xml:"Bucket"`
-	Name         string    `xml:"Name"`         // Bucket name
-	Location     string    `xml:"Location"`     // Bucket datacenter
-	CreationDate time.Time `xml:"CreationDate"` // Bucket create time
-	StorageClass string    `xml:"StorageClass"` // Bucket storage class
+	Name         string    `xml:"Name"`         // Bucket名称
+	Location     string    `xml:"Location"`     // Bucket所在的数据中心
+	CreationDate time.Time `xml:"CreationDate"` // Bucket创建时间
 }
 
-// GetBucketACLResult defines GetBucketACL request's result
+// GetBucketACLResult GetBucketACL请求返回的结果
 type GetBucketACLResult struct {
 	XMLName xml.Name `xml:"AccessControlPolicy"`
-	ACL     string   `xml:"AccessControlList>Grant"` // Bucket ACL
-	Owner   Owner    `xml:"Owner"`                   // Bucket owner
+	ACL     string   `xml:"AccessControlList>Grant"` // Bucket权限
+	Owner   Owner    `xml:"Owner"`                   // Bucket拥有者信息
 }
 
-// LifecycleConfiguration is the Bucket Lifecycle configuration
+// LifecycleConfiguration Bucket的Lifecycle配置
 type LifecycleConfiguration struct {
 	XMLName xml.Name        `xml:"LifecycleConfiguration"`
 	Rules   []LifecycleRule `xml:"Rule"`
 }
 
-// LifecycleRule defines Lifecycle rules
+// LifecycleRule Lifecycle规则
 type LifecycleRule struct {
 	XMLName    xml.Name            `xml:"Rule"`
-	ID         string              `xml:"ID"`         // The rule ID
-	Prefix     string              `xml:"Prefix"`     // The object key prefix
-	Status     string              `xml:"Status"`     // The rule status (enabled or not)
-	Expiration LifecycleExpiration `xml:"Expiration"` // The expiration property
+	ID         string              `xml:"ID"`         // 规则唯一的ID
+	Prefix     string              `xml:"Prefix"`     // 规则所适用Object的前缀
+	Status     string              `xml:"Status"`     // 规则是否生效
+	Expiration LifecycleExpiration `xml:"Expiration"` // 规则的过期属性
 }
 
-// LifecycleExpiration defines the rule's expiration property
+// LifecycleExpiration 规则的过期属性
 type LifecycleExpiration struct {
 	XMLName xml.Name  `xml:"Expiration"`
-	Days    int       `xml:"Days,omitempty"` // Relative expiration time: The expiration time in days after the last modified time
-	Date    time.Time `xml:"Date,omitempty"` // Absolute expiration time: The expiration time in date.
+	Days    int       `xml:"Days,omitempty"` // 最后修改时间过后多少天生效
+	Date    time.Time `xml:"Date,omitempty"` // 指定规则何时生效
 }
 
 type lifecycleXML struct {
@@ -94,7 +93,7 @@ func convLifecycleRule(rules []LifecycleRule) []lifecycleRule {
 	return rs
 }
 
-// BuildLifecycleRuleByDays builds a lifecycle rule with specified expiration days
+// BuildLifecycleRuleByDays 指定过期天数构建Lifecycle规则
 func BuildLifecycleRuleByDays(id, prefix string, status bool, days int) LifecycleRule {
 	var statusStr = "Enabled"
 	if !status {
@@ -104,7 +103,7 @@ func BuildLifecycleRuleByDays(id, prefix string, status bool, days int) Lifecycl
 		Expiration: LifecycleExpiration{Days: days}}
 }
 
-// BuildLifecycleRuleByDate builds a lifecycle rule with specified expiration time.
+// BuildLifecycleRuleByDate 指定过期时间构建Lifecycle规则
 func BuildLifecycleRuleByDate(id, prefix string, status bool, year, month, day int) LifecycleRule {
 	var statusStr = "Enabled"
 	if !status {
@@ -115,172 +114,171 @@ func BuildLifecycleRuleByDate(id, prefix string, status bool, year, month, day i
 		Expiration: LifecycleExpiration{Date: date}}
 }
 
-// GetBucketLifecycleResult defines GetBucketLifecycle's result object
+// GetBucketLifecycleResult GetBucketLifecycle请求请求结果
 type GetBucketLifecycleResult LifecycleConfiguration
 
-// RefererXML defines Referer configuration
+// RefererXML Referer配置
 type RefererXML struct {
 	XMLName           xml.Name `xml:"RefererConfiguration"`
-	AllowEmptyReferer bool     `xml:"AllowEmptyReferer"`   // Allow empty referrer
-	RefererList       []string `xml:"RefererList>Referer"` // Referer whitelist
+	AllowEmptyReferer bool     `xml:"AllowEmptyReferer"`   // 是否允许referer字段为空的请求访问
+	RefererList       []string `xml:"RefererList>Referer"` // referer访问白名单
 }
 
-// GetBucketRefererResult defines result object for GetBucketReferer request
+// GetBucketRefererResult GetBucketReferer请教返回结果
 type GetBucketRefererResult RefererXML
 
-// LoggingXML defines logging configuration
+// LoggingXML Logging配置
 type LoggingXML struct {
 	XMLName        xml.Name       `xml:"BucketLoggingStatus"`
-	LoggingEnabled LoggingEnabled `xml:"LoggingEnabled"` // The logging configuration information
+	LoggingEnabled LoggingEnabled `xml:"LoggingEnabled"` // 访问日志信息容器
 }
 
 type loggingXMLEmpty struct {
 	XMLName xml.Name `xml:"BucketLoggingStatus"`
 }
 
-// LoggingEnabled defines the logging configuration information
+// LoggingEnabled 访问日志信息容器
 type LoggingEnabled struct {
 	XMLName      xml.Name `xml:"LoggingEnabled"`
-	TargetBucket string   `xml:"TargetBucket"` // The bucket name for storing the log files
-	TargetPrefix string   `xml:"TargetPrefix"` // The log file prefix
+	TargetBucket string   `xml:"TargetBucket"` //存放访问日志的Bucket
+	TargetPrefix string   `xml:"TargetPrefix"` //保存访问日志的文件前缀
 }
 
-// GetBucketLoggingResult defines the result from GetBucketLogging request
+// GetBucketLoggingResult GetBucketLogging请求返回结果
 type GetBucketLoggingResult LoggingXML
 
-// WebsiteXML defines Website configuration
+// WebsiteXML Website配置
 type WebsiteXML struct {
 	XMLName       xml.Name      `xml:"WebsiteConfiguration"`
-	IndexDocument IndexDocument `xml:"IndexDocument"` // The index page
-	ErrorDocument ErrorDocument `xml:"ErrorDocument"` // The error page
+	IndexDocument IndexDocument `xml:"IndexDocument"` // 目录URL时添加的索引文件
+	ErrorDocument ErrorDocument `xml:"ErrorDocument"` // 404错误时使用的文件
 }
 
-// IndexDocument defines the index page info
+// IndexDocument 目录URL时添加的索引文件
 type IndexDocument struct {
 	XMLName xml.Name `xml:"IndexDocument"`
-	Suffix  string   `xml:"Suffix"` // The file name for the index page
+	Suffix  string   `xml:"Suffix"` // 目录URL时添加的索引文件名
 }
 
-// ErrorDocument defines the 404 error page info
+// ErrorDocument 404错误时使用的文件
 type ErrorDocument struct {
 	XMLName xml.Name `xml:"ErrorDocument"`
-	Key     string   `xml:"Key"` // 404 error file name
+	Key     string   `xml:"Key"` // 404错误时使用的文件名
 }
 
-// GetBucketWebsiteResult defines the result from GetBucketWebsite request.
+// GetBucketWebsiteResult GetBucketWebsite请求返回结果
 type GetBucketWebsiteResult WebsiteXML
 
-// CORSXML defines CORS configuration
+// CORSXML CORS配置
 type CORSXML struct {
 	XMLName   xml.Name   `xml:"CORSConfiguration"`
-	CORSRules []CORSRule `xml:"CORSRule"` // CORS rules
+	CORSRules []CORSRule `xml:"CORSRule"` // CORS规则列表
 }
 
-// CORSRule defines CORS rules
+// CORSRule CORS规则
 type CORSRule struct {
 	XMLName       xml.Name `xml:"CORSRule"`
-	AllowedOrigin []string `xml:"AllowedOrigin"` // Allowed origins. By default it's wildcard '*'
-	AllowedMethod []string `xml:"AllowedMethod"` // Allowed methods
-	AllowedHeader []string `xml:"AllowedHeader"` // Allowed headers
-	ExposeHeader  []string `xml:"ExposeHeader"`  // Allowed response headers
-	MaxAgeSeconds int      `xml:"MaxAgeSeconds"` // Max cache ages in seconds
+	AllowedOrigin []string `xml:"AllowedOrigin"` // 允许的来源，默认通配符"*"
+	AllowedMethod []string `xml:"AllowedMethod"` // 允许的方法
+	AllowedHeader []string `xml:"AllowedHeader"` // 允许的请求头
+	ExposeHeader  []string `xml:"ExposeHeader"`  // 允许的响应头
+	MaxAgeSeconds int      `xml:"MaxAgeSeconds"` // 最大的缓存时间
 }
 
-// GetBucketCORSResult defines the result from GetBucketCORS request.
+// GetBucketCORSResult GetBucketCORS请求返回的结果
 type GetBucketCORSResult CORSXML
 
-// GetBucketInfoResult defines the result from GetBucketInfo request.
+// GetBucketInfoResult GetBucketInfo请求返回结果
 type GetBucketInfoResult struct {
-	XMLName    xml.Name   `xml:"BucketInfo"`
-	BucketInfo BucketInfo `xml:"Bucket"`
+	XMLName        xml.Name `xml:"BucketInfo"`
+	BucketInfo     BucketInfo   `xml:"Bucket"`
 }
 
-// BucketInfo defines Bucket information
+// BucketInfo Bucket信息
 type BucketInfo struct {
 	XMLName          xml.Name  `xml:"Bucket"`
-	Name             string    `xml:"Name"`                    // Bucket name
-	Location         string    `xml:"Location"`                // Bucket datacenter
-	CreationDate     time.Time `xml:"CreationDate"`            // Bucket creation time
-	ExtranetEndpoint string    `xml:"ExtranetEndpoint"`        // Bucket external endpoint
-	IntranetEndpoint string    `xml:"IntranetEndpoint"`        // Bucket internal endpoint
-	ACL              string    `xml:"AccessControlList>Grant"` // Bucket ACL
-	Owner            Owner     `xml:"Owner"`                   // Bucket owner
-	StorageClass     string    `xml:"StorageClass"`            // Bucket storage class
+	Name             string    `xml:"Name"`                    // Bucket名称
+	Location         string    `xml:"Location"`                // Bucket所在的数据中心
+	CreationDate     time.Time `xml:"CreationDate"`            // Bucket创建时间
+	ExtranetEndpoint string    `xml:"ExtranetEndpoint"`        // Bucket访问的外网域名 
+	IntranetEndpoint string    `xml:"IntranetEndpoint"`        // Bucket访问的内网域名
+	ACL              string    `xml:"AccessControlList>Grant"` // Bucket权限
+	Owner            Owner     `xml:"Owner"`                   // Bucket拥有者信息
 }
 
-// ListObjectsResult defines the result from ListObjects request
+// ListObjectsResult ListObjects请求返回结果
 type ListObjectsResult struct {
 	XMLName        xml.Name           `xml:"ListBucketResult"`
-	Prefix         string             `xml:"Prefix"`                // The object prefix
-	Marker         string             `xml:"Marker"`                // The marker filter.
-	MaxKeys        int                `xml:"MaxKeys"`               // Max keys to return
-	Delimiter      string             `xml:"Delimiter"`             // The delimiter for grouping objects' name
-	IsTruncated    bool               `xml:"IsTruncated"`           // Flag indicates if all results are returned (when it's false)
-	NextMarker     string             `xml:"NextMarker"`            // The start point of the next query
-	Objects        []ObjectProperties `xml:"Contents"`              // Object list
-	CommonPrefixes []string           `xml:"CommonPrefixes>Prefix"` // You can think of commonprefixes as "folders" whose names end with the delimiter
+	Prefix         string             `xml:"Prefix"`                // 本次查询结果的开始前缀
+	Marker         string             `xml:"Marker"`                // 这次查询的起点
+	MaxKeys        int                `xml:"MaxKeys"`               // 请求返回结果的最大数目
+	Delimiter      string             `xml:"Delimiter"`             // 对Object名字进行分组的字符
+	IsTruncated    bool               `xml:"IsTruncated"`           // 是否所有的结果都已经返回
+	NextMarker     string             `xml:"NextMarker"`            // 下一次查询的起点
+	Objects        []ObjectProperties `xml:"Contents"`              // Object类别
+	CommonPrefixes []string           `xml:"CommonPrefixes>Prefix"` // 以delimiter结尾并有共同前缀的Object的集合
 }
 
-// ObjectProperties defines Objecct properties
+// ObjectProperties Objecct属性
 type ObjectProperties struct {
 	XMLName      xml.Name  `xml:"Contents"`
-	Key          string    `xml:"Key"`          // Object key
-	Type         string    `xml:"Type"`         // Object type
-	Size         int64     `xml:"Size"`         // Object size
-	ETag         string    `xml:"ETag"`         // Object ETag
-	Owner        Owner     `xml:"Owner"`        // Object owner information
-	LastModified time.Time `xml:"LastModified"` // Object last modified time
-	StorageClass string    `xml:"StorageClass"` // Object storage class (Standard, IA, Archive)
+	Key          string    `xml:"Key"`          // Object的Key
+	Type         string    `xml:"Type"`         // Object Type
+	Size         int64     `xml:"Size"`         // Object的长度字节数
+	ETag         string    `xml:"ETag"`         // 标示Object的内容
+	Owner        Owner     `xml:"Owner"`        // 保存Object拥有者信息的容器
+	LastModified time.Time `xml:"LastModified"` // Object最后修改时间
+	StorageClass string    `xml:"StorageClass"` // Object的存储类型，目前只能是Standard
 }
 
-// Owner defines Bucket/Object's owner
+// Owner Bucket/Object的owner
 type Owner struct {
 	XMLName     xml.Name `xml:"Owner"`
-	ID          string   `xml:"ID"`          // Owner ID
-	DisplayName string   `xml:"DisplayName"` // Owner's display name
+	ID          string   `xml:"ID"`          // 用户ID
+	DisplayName string   `xml:"DisplayName"` // Owner名字
 }
 
-// CopyObjectResult defines result object of CopyObject
+// CopyObjectResult CopyObject请求返回的结果
 type CopyObjectResult struct {
 	XMLName      xml.Name  `xml:"CopyObjectResult"`
-	LastModified time.Time `xml:"LastModified"` // New object's last modified time.
-	ETag         string    `xml:"ETag"`         // New object's ETag
+	LastModified time.Time `xml:"LastModified"` // 新Object最后更新时间
+	ETag         string    `xml:"ETag"`         // 新Object的ETag值
 }
 
-// GetObjectACLResult defines result of GetObjectACL request
+// GetObjectACLResult GetObjectACL请求返回的结果
 type GetObjectACLResult GetBucketACLResult
 
 type deleteXML struct {
 	XMLName xml.Name       `xml:"Delete"`
-	Objects []DeleteObject `xml:"Object"` // Objects to delete
-	Quiet   bool           `xml:"Quiet"`  // Flag of quiet mode.
+	Objects []DeleteObject `xml:"Object"` // 删除的所有Object
+	Quiet   bool           `xml:"Quiet"`  // 安静响应模式
 }
 
-// DeleteObject defines the struct for deleting object
+// DeleteObject 删除的Object
 type DeleteObject struct {
 	XMLName xml.Name `xml:"Object"`
-	Key     string   `xml:"Key"` // Object name
+	Key     string   `xml:"Key"` // Object名称
 }
 
-// DeleteObjectsResult defines result of DeleteObjects request
+// DeleteObjectsResult DeleteObjects请求返回结果
 type DeleteObjectsResult struct {
 	XMLName        xml.Name `xml:"DeleteResult"`
-	DeletedObjects []string `xml:"Deleted>Key"` // Deleted object list
+	DeletedObjects []string `xml:"Deleted>Key"` // 删除的Object列表
 }
 
-// InitiateMultipartUploadResult defines result of InitiateMultipartUpload request
+// InitiateMultipartUploadResult InitiateMultipartUpload请求返回结果
 type InitiateMultipartUploadResult struct {
 	XMLName  xml.Name `xml:"InitiateMultipartUploadResult"`
-	Bucket   string   `xml:"Bucket"`   // Bucket name
-	Key      string   `xml:"Key"`      // Object name to upload
-	UploadID string   `xml:"UploadId"` // Generated UploadId
+	Bucket   string   `xml:"Bucket"`   // Bucket名称
+	Key      string   `xml:"Key"`      // 上传Object名称
+	UploadID string   `xml:"UploadId"` // 生成的UploadId
 }
 
-// UploadPart defines the upload/copy part
+// UploadPart 上传/拷贝的分片
 type UploadPart struct {
 	XMLName    xml.Name `xml:"Part"`
-	PartNumber int      `xml:"PartNumber"` // Part number
-	ETag       string   `xml:"ETag"`       // ETag value of the part's data
+	PartNumber int      `xml:"PartNumber"` // Part编号
+	ETag       string   `xml:"ETag"`       // ETag缓存码
 }
 
 type uploadParts []UploadPart
@@ -297,10 +295,10 @@ func (slice uploadParts) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
-// UploadPartCopyResult defines result object of multipart copy request.
+// UploadPartCopyResult 拷贝分片请求返回的结果
 type UploadPartCopyResult struct {
 	XMLName      xml.Name  `xml:"CopyPartResult"`
-	LastModified time.Time `xml:"LastModified"` // Last modified time
+	LastModified time.Time `xml:"LastModified"` // 最后修改时间
 	ETag         string    `xml:"ETag"`         // ETag
 }
 
@@ -309,69 +307,61 @@ type completeMultipartUploadXML struct {
 	Part    []UploadPart `xml:"Part"`
 }
 
-// CompleteMultipartUploadResult defines result object of CompleteMultipartUploadRequest
+// CompleteMultipartUploadResult 提交分片上传任务返回结果
 type CompleteMultipartUploadResult struct {
 	XMLName  xml.Name `xml:"CompleteMultipartUploadResult"`
-	Location string   `xml:"Location"` // Object URL
-	Bucket   string   `xml:"Bucket"`   // Bucket name
-	ETag     string   `xml:"ETag"`     // Object ETag
-	Key      string   `xml:"Key"`      // Object name
+	Location string   `xml:"Location"` // Object的URL
+	Bucket   string   `xml:"Bucket"`   // Bucket名称
+	ETag     string   `xml:"ETag"`     // Object的ETag
+	Key      string   `xml:"Key"`      // Object的名字
 }
 
-// ListUploadedPartsResult defines result object of ListUploadedParts
+// ListUploadedPartsResult ListUploadedParts请求返回结果
 type ListUploadedPartsResult struct {
 	XMLName              xml.Name       `xml:"ListPartsResult"`
-	Bucket               string         `xml:"Bucket"`               // Bucket name
-	Key                  string         `xml:"Key"`                  // Object name
-	UploadID             string         `xml:"UploadId"`             // Upload ID
-	NextPartNumberMarker string         `xml:"NextPartNumberMarker"` // Next part number
-	MaxParts             int            `xml:"MaxParts"`             // Max parts count
-	IsTruncated          bool           `xml:"IsTruncated"`          // Flag indicates all entries returned.false: all entries returned.
-	UploadedParts        []UploadedPart `xml:"Part"`                 // Uploaded parts
+	Bucket               string         `xml:"Bucket"`               // Bucket名称
+	Key                  string         `xml:"Key"`                  // Object名称
+	UploadID             string         `xml:"UploadId"`             // 上传Id
+	NextPartNumberMarker string         `xml:"NextPartNumberMarker"` // 下一个Part的位置
+	MaxParts             int            `xml:"MaxParts"`             // 最大Part个数
+	IsTruncated          bool           `xml:"IsTruncated"`          // 是否完全上传完成
+	UploadedParts        []UploadedPart `xml:"Part"`                 // 已完成的Part
 }
 
-// UploadedPart defines uploaded part
+// UploadedPart 该任务已经上传的分片
 type UploadedPart struct {
 	XMLName      xml.Name  `xml:"Part"`
-	PartNumber   int       `xml:"PartNumber"`   // Part number
-	LastModified time.Time `xml:"LastModified"` // Last modified time
-	ETag         string    `xml:"ETag"`         // ETag cache
-	Size         int       `xml:"Size"`         // Part size
+	PartNumber   int       `xml:"PartNumber"`   // Part编号
+	LastModified time.Time `xml:"LastModified"` // 最后一次修改时间
+	ETag         string    `xml:"ETag"`         // ETag缓存码
+	Size         int       `xml:"Size"`         // Part大小
 }
 
-// ListMultipartUploadResult defines result object of ListMultipartUpload
+// ListMultipartUploadResult ListMultipartUpload请求返回结果
 type ListMultipartUploadResult struct {
 	XMLName            xml.Name            `xml:"ListMultipartUploadsResult"`
-	Bucket             string              `xml:"Bucket"`                // Bucket name
-	Delimiter          string              `xml:"Delimiter"`             // Delimiter for grouping object.
-	Prefix             string              `xml:"Prefix"`                // Object prefix
-	KeyMarker          string              `xml:"KeyMarker"`             // Object key marker
-	UploadIDMarker     string              `xml:"UploadIdMarker"`        // UploadId marker
-	NextKeyMarker      string              `xml:"NextKeyMarker"`         // Next key marker, if not all entries returned.
-	NextUploadIDMarker string              `xml:"NextUploadIdMarker"`    // Next uploadId marker, if not all entries returned.
-	MaxUploads         int                 `xml:"MaxUploads"`            // Max uploads to return
-	IsTruncated        bool                `xml:"IsTruncated"`           // Flag indicates all entries are returned.
-	Uploads            []UncompletedUpload `xml:"Upload"`                // Ongoing uploads (not completed, not aborted)
-	CommonPrefixes     []string            `xml:"CommonPrefixes>Prefix"` // Common prefixes list.
+	Bucket             string              `xml:"Bucket"`                // Bucket名称
+	Delimiter          string              `xml:"Delimiter"`             // 分组分割符
+	Prefix             string              `xml:"Prefix"`                // 筛选前缀
+	KeyMarker          string              `xml:"KeyMarker"`             // 起始Object位置
+	UploadIDMarker     string              `xml:"UploadIdMarker"`        // 起始UploadId位置
+	NextKeyMarker      string              `xml:"NextKeyMarker"`         // 如果没有全部返回，标明接下去的KeyMarker位置
+	NextUploadIDMarker string              `xml:"NextUploadIdMarker"`    // 如果没有全部返回，标明接下去的UploadId位置
+	MaxUploads         int                 `xml:"MaxUploads"`            // 返回最大Upload数目
+	IsTruncated        bool                `xml:"IsTruncated"`           // 是否完全返回
+	Uploads            []UncompletedUpload `xml:"Upload"`                // 未完成上传的MultipartUpload
+	CommonPrefixes     []string            `xml:"CommonPrefixes>Prefix"` // 所有名字包含指定的前缀且第一次出现delimiter字符之间的object作为一组的分组结果
 }
 
-// UncompletedUpload structure wraps an uncompleted upload task
+// UncompletedUpload 未完成的Upload任务
 type UncompletedUpload struct {
 	XMLName   xml.Name  `xml:"Upload"`
-	Key       string    `xml:"Key"`       // Object name
-	UploadID  string    `xml:"UploadId"`  // The UploadId
-	Initiated time.Time `xml:"Initiated"` // Initialization time in the format such as 2012-02-23T04:18:23.000Z
+	Key       string    `xml:"Key"`       // Object名称
+	UploadID  string    `xml:"UploadId"`  // 对应UploadId
+	Initiated time.Time `xml:"Initiated"` // 初始化时间，格式2012-02-23T04:18:23.000Z
 }
 
-// ProcessObjectResult defines result object of ProcessObject
-type ProcessObjectResult struct {
-	Bucket   string `json:"bucket"`
-	FileSize int    `json:"fileSize"`
-	Object   string `json:"object"`
-	Status   string `json:"status"`
-}
-
-// decodeDeleteObjectsResult decodes deleting objects result in URL encoding
+// 解析URL编码
 func decodeDeleteObjectsResult(result *DeleteObjectsResult) error {
 	var err error
 	for i := 0; i < len(result.DeletedObjects); i++ {
@@ -383,7 +373,7 @@ func decodeDeleteObjectsResult(result *DeleteObjectsResult) error {
 	return nil
 }
 
-// decodeListObjectsResult decodes list objects result in URL encoding
+// 解析URL编码
 func decodeListObjectsResult(result *ListObjectsResult) error {
 	var err error
 	result.Prefix, err = url.QueryUnescape(result.Prefix)
@@ -417,17 +407,7 @@ func decodeListObjectsResult(result *ListObjectsResult) error {
 	return nil
 }
 
-// decodeListUploadedPartsResult decodes
-func decodeListUploadedPartsResult(result *ListUploadedPartsResult) error {
-	var err error
-	result.Key, err = url.QueryUnescape(result.Key)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// decodeListMultipartUploadResult decodes list multipart upload result in URL encoding
+// 解析URL编码
 func decodeListMultipartUploadResult(result *ListMultipartUploadResult) error {
 	var err error
 	result.Prefix, err = url.QueryUnescape(result.Prefix)
@@ -459,10 +439,4 @@ func decodeListMultipartUploadResult(result *ListMultipartUploadResult) error {
 		}
 	}
 	return nil
-}
-
-// createBucketConfiguration defines the configuration for creating a bucket.
-type createBucketConfiguration struct {
-	XMLName      xml.Name         `xml:"CreateBucketConfiguration"`
-	StorageClass StorageClassType `xml:"StorageClass,omitempty"`
 }

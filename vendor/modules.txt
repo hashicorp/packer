@@ -35,21 +35,21 @@ github.com/Azure/go-autorest/logger
 github.com/Azure/go-autorest/tracing
 # github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4
 github.com/Azure/go-ntlmssp
-# github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
+# github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 github.com/ChrisTrenkamp/goxpath
 github.com/ChrisTrenkamp/goxpath/internal/execxp
-github.com/ChrisTrenkamp/goxpath/internal/execxp/findutil
-github.com/ChrisTrenkamp/goxpath/internal/execxp/intfns
+github.com/ChrisTrenkamp/goxpath/internal/lexer
+github.com/ChrisTrenkamp/goxpath/internal/parser
+github.com/ChrisTrenkamp/goxpath/internal/parser/findutil
+github.com/ChrisTrenkamp/goxpath/internal/parser/intfns
+github.com/ChrisTrenkamp/goxpath/internal/parser/pathexpr
+github.com/ChrisTrenkamp/goxpath/internal/xconst
 github.com/ChrisTrenkamp/goxpath/internal/xsort
-github.com/ChrisTrenkamp/goxpath/lexer
-github.com/ChrisTrenkamp/goxpath/parser
-github.com/ChrisTrenkamp/goxpath/parser/pathexpr
 github.com/ChrisTrenkamp/goxpath/tree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
-github.com/ChrisTrenkamp/goxpath/xconst
 # github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
 github.com/NaverCloudPlatform/ncloud-sdk-go/common
 github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
@@ -61,7 +61,7 @@ github.com/PuerkitoBio/goquery
 github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20190815172943-ef9222844e60
 github.com/Telmate/proxmox-api-go/proxmox
-# github.com/agext/levenshtein v1.2.2
+# github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
 # github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 github.com/aliyun/alibaba-cloud-sdk-go/sdk
@@ -76,7 +76,7 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
 github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
 github.com/aliyun/alibaba-cloud-sdk-go/services/ram
-# github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20190103054945-8205d1f41e70
+# github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/andybalholm/cascadia v1.0.0
 github.com/andybalholm/cascadia
@@ -84,9 +84,9 @@ github.com/andybalholm/cascadia
 github.com/antchfx/htmlquery
 # github.com/antchfx/xmlquery v1.0.0
 github.com/antchfx/xmlquery
-# github.com/antchfx/xpath v0.0.0-20190129040759-c8489ed3251e
+# github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
 github.com/antchfx/xpath
-# github.com/antchfx/xquery v0.0.0-20180515051857-ad5b8c7a47b0
+# github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607
 github.com/antchfx/xquery/xml
 # github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
 github.com/antihax/optional
@@ -187,7 +187,7 @@ github.com/docker/docker/pkg/namesgenerator
 github.com/dustin/go-humanize
 # github.com/dylanmei/iso8601 v0.1.0
 github.com/dylanmei/iso8601
-# github.com/dylanmei/winrmtest v0.0.0-20190225150635-99b7fe2fddf1
+# github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 github.com/dylanmei/winrmtest
 # github.com/exoscale/egoscale v0.18.1
 github.com/exoscale/egoscale
@@ -250,7 +250,7 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/go-querystring/query
 # github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 github.com/google/shlex
-# github.com/google/uuid v1.1.1
+# github.com/google/uuid v1.0.0
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
@@ -277,9 +277,9 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/flo
 github.com/gophercloud/gophercloud/openstack/networking/v2/networks
 github.com/gophercloud/gophercloud/openstack/utils
 github.com/gophercloud/gophercloud/pagination
-# github.com/gophercloud/utils v0.0.0-20190128072930-fbb6ab446f01
+# github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6
 github.com/gophercloud/utils/openstack/clientconfig
-# github.com/gorilla/websocket v1.4.0
+# github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777
 github.com/gorilla/websocket
 # github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 github.com/grpc-ecosystem/go-grpc-middleware
@@ -291,11 +291,11 @@ github.com/grpc-ecosystem/grpc-gateway/utilities
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-checkpoint v0.5.0
+# github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.0
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-getter v1.4.0
+# github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
 github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
 # github.com/hashicorp/go-immutable-radix v1.0.0
@@ -308,7 +308,7 @@ github.com/hashicorp/go-oracle-terraform/compute
 github.com/hashicorp/go-oracle-terraform/opc
 # github.com/hashicorp/go-retryablehttp v0.5.2
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-rootcerts v1.0.0
+# github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90
 github.com/hashicorp/go-rootcerts
 # github.com/hashicorp/go-safetemp v1.0.0
 github.com/hashicorp/go-safetemp
@@ -379,7 +379,7 @@ github.com/joyent/triton-go/errors
 github.com/joyent/triton-go/network
 # github.com/json-iterator/go v1.1.6
 github.com/json-iterator/go
-# github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+# github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 github.com/kardianos/osext
 # github.com/kennygrant/sanitize v1.2.4
 github.com/kennygrant/sanitize
@@ -397,14 +397,17 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/kr/fs
 # github.com/linode/linodego v0.7.1
 github.com/linode/linodego
+# github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c
+github.com/masterzen/azure-sdk-for-go/core/http
+github.com/masterzen/azure-sdk-for-go/core/tls
 # github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786
 github.com/masterzen/simplexml/dom
-# github.com/masterzen/winrm v0.0.0-20190223112901-5e5c9a7fe54b
+# github.com/masterzen/winrm v0.0.0-20180224160350-7e40f93ae939
 github.com/masterzen/winrm
 github.com/masterzen/winrm/soap
-# github.com/mattn/go-colorable v0.1.1
+# github.com/mattn/go-colorable v0.0.9
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.5
+# github.com/mattn/go-isatty v0.0.4
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
@@ -415,21 +418,21 @@ github.com/mitchellh/cli
 # github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 github.com/mitchellh/go-fs
 github.com/mitchellh/go-fs/fat
-# github.com/mitchellh/go-homedir v1.1.0
+# github.com/mitchellh/go-homedir v1.0.0
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v1.0.0
 github.com/mitchellh/go-testing-interface
 # github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 github.com/mitchellh/go-vnc
-# github.com/mitchellh/go-wordwrap v1.0.0
+# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
 github.com/mitchellh/go-wordwrap
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
 # github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 github.com/mitchellh/mapstructure
-# github.com/mitchellh/panicwrap v0.0.0-20190213213626-17011010aaa4
+# github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
 github.com/mitchellh/panicwrap
-# github.com/mitchellh/prefixedio v0.0.0-20190213213902-5733675afd51
+# github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 github.com/mitchellh/prefixedio
 # github.com/mitchellh/reflectwalk v1.0.0
 github.com/mitchellh/reflectwalk
@@ -462,7 +465,7 @@ github.com/pkg/errors
 github.com/pkg/sftp
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/posener/complete v1.2.1
+# github.com/posener/complete v1.1.1
 github.com/posener/complete
 github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
@@ -518,7 +521,7 @@ github.com/ucloud/ucloud-sdk-go/ucloud/log
 github.com/ucloud/ucloud-sdk-go/ucloud/request
 github.com/ucloud/ucloud-sdk-go/ucloud/response
 github.com/ucloud/ucloud-sdk-go/ucloud/version
-# github.com/ugorji/go v0.0.0-20180813092308-00b869d2f4a5
+# github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5
 github.com/ulikunitz/xz
@@ -626,7 +629,7 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+# golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
@@ -663,7 +666,7 @@ golang.org/x/oauth2/jwt
 # golang.org/x/sync v0.0.0-20190423024810-112230192c58
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa
+# golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
