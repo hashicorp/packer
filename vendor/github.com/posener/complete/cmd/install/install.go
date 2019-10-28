@@ -51,7 +51,7 @@ func Uninstall(cmd string) error {
 	for _, i := range is {
 		errI := i.Uninstall(cmd, bin)
 		if errI != nil {
-			err = multierror.Append(err, errI)
+			multierror.Append(err, errI)
 		}
 	}
 

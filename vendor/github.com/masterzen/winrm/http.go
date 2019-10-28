@@ -39,27 +39,19 @@ func body(response *http.Response) (string, error) {
 
 type clientRequest struct {
 	transport http.RoundTripper
-	dial func(network, addr string) (net.Conn, error)
 }
 
 func (c *clientRequest) Transport(endpoint *Endpoint) error {
-
-	dial := (&net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}).Dial
-
-	if c.dial != nil {
-		dial = c.dial
-	}
-
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: endpoint.Insecure,
 			ServerName:         endpoint.TLSServerName,
 		},
-		Dial: dial,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
 		ResponseHeaderTimeout: endpoint.Timeout,
 	}
 
@@ -106,11 +98,4 @@ func (c clientRequest) Post(client *Client, request *soap.SoapMessage) (string, 
 	}()
 
 	return body, err
-}
-
-
-func NewClientWithDial(dial func(network, addr string) (net.Conn, error)) *clientRequest {
-	return &clientRequest{
-		dial:dial,
-	}
 }
