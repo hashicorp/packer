@@ -66,15 +66,10 @@ func (n *Node) InnerText() string {
 
 func outputXML(buf *bytes.Buffer, n *Node) {
 	if n.Type == TextNode || n.Type == CommentNode {
-		xml.EscapeText(buf, []byte(strings.TrimSpace(n.Data)))
+		buf.WriteString(strings.TrimSpace(n.Data))
 		return
 	}
-	if n.Type == DeclarationNode {
-		buf.WriteString("<?" + n.Data)
-	} else {
-		buf.WriteString("<" + n.Data)
-	}
-
+	buf.WriteString("<" + n.Data)
 	for _, attr := range n.Attr {
 		if attr.Name.Space != "" {
 			buf.WriteString(fmt.Sprintf(` %s:%s="%s"`, attr.Name.Space, attr.Name.Local, attr.Value))
@@ -82,17 +77,11 @@ func outputXML(buf *bytes.Buffer, n *Node) {
 			buf.WriteString(fmt.Sprintf(` %s="%s"`, attr.Name.Local, attr.Value))
 		}
 	}
-	if n.Type == DeclarationNode {
-		buf.WriteString("?>")
-	} else {
-		buf.WriteString(">")
-	}
+	buf.WriteString(">")
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
 		outputXML(buf, child)
 	}
-	if n.Type != DeclarationNode {
-		buf.WriteString(fmt.Sprintf("</%s>", n.Data))
-	}
+	buf.WriteString(fmt.Sprintf("</%s>", n.Data))
 }
 
 // OutputXML returns the text that including tags name.
@@ -139,9 +128,6 @@ func addChild(parent, n *Node) {
 }
 
 func addSibling(sibling, n *Node) {
-	for t := sibling.NextSibling; t != nil; t = t.NextSibling {
-		sibling = t
-	}
 	n.Parent = sibling.Parent
 	sibling.NextSibling = n
 	n.PrevSibling = sibling
@@ -257,5 +243,10 @@ quit:
 
 // Parse returns the parse tree for the XML from the given Reader.
 func Parse(r io.Reader) (*Node, error) {
+	return parse(r)
+}
+
+// ParseXML returns the parse tree for the XML from the given Reader.Deprecated.
+func ParseXML(r io.Reader) (*Node, error) {
 	return parse(r)
 }

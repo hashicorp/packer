@@ -19,6 +19,7 @@ import (
 type PreparedMessage struct {
 	messageType int
 	data        []byte
+	err         error
 	mu          sync.Mutex
 	frames      map[prepareKey]*preparedFrame
 }

@@ -2,77 +2,35 @@ package oss
 
 import "os"
 
-// ACLType bucket/object ACL
+// ACLType Bucket/Object的访问控制
 type ACLType string
 
 const (
-	// ACLPrivate definition : private read and write
+	// ACLPrivate 私有读写
 	ACLPrivate ACLType = "private"
 
-	// ACLPublicRead definition : public read and private write
+	// ACLPublicRead 公共读私有写
 	ACLPublicRead ACLType = "public-read"
 
-	// ACLPublicReadWrite definition : public read and public write
+	// ACLPublicReadWrite 公共读写
 	ACLPublicReadWrite ACLType = "public-read-write"
 
-	// ACLDefault Object. It's only applicable for object.
+	// ACLDefault Object默认权限，Bucket无此权限
 	ACLDefault ACLType = "default"
 )
 
-// MetadataDirectiveType specifying whether use the metadata of source object when copying object.
+// MetadataDirectiveType 对象COPY时新对象是否使用原对象的Meta
 type MetadataDirectiveType string
 
 const (
-	// MetaCopy the target object's metadata is copied from the source one
+	// MetaCopy 目标对象使用源对象的META
 	MetaCopy MetadataDirectiveType = "COPY"
 
-	// MetaReplace the target object's metadata is created as part of the copy request (not same as the source one)
+	// MetaReplace 目标对象使用自定义的META
 	MetaReplace MetadataDirectiveType = "REPLACE"
 )
 
-// StorageClassType bucket storage type
-type StorageClassType string
-
-const (
-	// StorageStandard standard
-	StorageStandard StorageClassType = "Standard"
-
-	// StorageIA infrequent access
-	StorageIA StorageClassType = "IA"
-
-	// StorageArchive archive
-	StorageArchive StorageClassType = "Archive"
-)
-
-// PayerType the type of request payer
-type PayerType string
-
-const (
-	// Requester the requester who send the request
-	Requester PayerType = "requester"
-)
-
-// HTTPMethod HTTP request method
-type HTTPMethod string
-
-const (
-	// HTTPGet HTTP GET
-	HTTPGet HTTPMethod = "GET"
-
-	// HTTPPut HTTP PUT
-	HTTPPut HTTPMethod = "PUT"
-
-	// HTTPHead HTTP HEAD
-	HTTPHead HTTPMethod = "HEAD"
-
-	// HTTPPost HTTP POST
-	HTTPPost HTTPMethod = "POST"
-
-	// HTTPDelete HTTP DELETE
-	HTTPDelete HTTPMethod = "DELETE"
-)
-
-// HTTP headers
+// Http头标签
 const (
 	HTTPHeaderAcceptEncoding     string = "Accept-Encoding"
 	HTTPHeaderAuthorization             = "Authorization"
@@ -103,7 +61,6 @@ const (
 	HTTPHeaderOssObjectACL                   = "X-Oss-Object-Acl"
 	HTTPHeaderOssSecurityToken               = "X-Oss-Security-Token"
 	HTTPHeaderOssServerSideEncryption        = "X-Oss-Server-Side-Encryption"
-	HTTPHeaderOssServerSideEncryptionKeyID   = "X-Oss-Server-Side-Encryption-Key-Id"
 	HTTPHeaderOssCopySource                  = "X-Oss-Copy-Source"
 	HTTPHeaderOssCopySourceRange             = "X-Oss-Copy-Source-Range"
 	HTTPHeaderOssCopySourceIfMatch           = "X-Oss-Copy-Source-If-Match"
@@ -114,32 +71,19 @@ const (
 	HTTPHeaderOssNextAppendPosition          = "X-Oss-Next-Append-Position"
 	HTTPHeaderOssRequestID                   = "X-Oss-Request-Id"
 	HTTPHeaderOssCRC64                       = "X-Oss-Hash-Crc64ecma"
-	HTTPHeaderOssSymlinkTarget               = "X-Oss-Symlink-Target"
-	HTTPHeaderOssStorageClass                = "X-Oss-Storage-Class"
-	HTTPHeaderOssCallback                    = "X-Oss-Callback"
-	HTTPHeaderOssCallbackVar                 = "X-Oss-Callback-Var"
-	HTTPHeaderOSSRequester                   = "X-Oss-Request-Payer"
 )
 
-// HTTP Param
+// 其它常量
 const (
-	HTTPParamExpires       = "Expires"
-	HTTPParamAccessKeyID   = "OSSAccessKeyId"
-	HTTPParamSignature     = "Signature"
-	HTTPParamSecurityToken = "security-token"
-)
+	MaxPartSize = 5 * 1024 * 1024 * 1024 // 文件片最大值，5GB
+	MinPartSize = 100 * 1024             // 文件片最小值，100KBß
 
-// Other constants
-const (
-	MaxPartSize = 5 * 1024 * 1024 * 1024 // Max part size, 5GB
-	MinPartSize = 100 * 1024             // Min part size, 100KB
+	FilePermMode = os.FileMode(0664) // 新建文件默认权限
 
-	FilePermMode = os.FileMode(0664) // Default file permission
+	TempFilePrefix = "oss-go-temp-" // 临时文件前缀
+	TempFileSuffix = ".temp"        // 临时文件后缀
 
-	TempFilePrefix = "oss-go-temp-" // Temp file prefix
-	TempFileSuffix = ".temp"        // Temp file suffix
+	CheckpointFileSuffix = ".cp" // Checkpoint文件后缀
 
-	CheckpointFileSuffix = ".cp" // Checkpoint file suffix
-
-	Version = "1.9.2" // Go SDK version
+	Version = "1.3.0" // Go sdk版本
 )
