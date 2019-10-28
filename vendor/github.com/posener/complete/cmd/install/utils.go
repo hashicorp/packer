@@ -115,10 +115,7 @@ func removeContentToTempFile(name, content string) (string, error) {
 		if str == content {
 			continue
 		}
-		_, err = wf.WriteString(str + "\n")
-		if err != nil {
-			return "", err
-		}
+		wf.WriteString(str + "\n")
 		prefix = prefix[:0]
 	}
 	return wf.Name(), nil

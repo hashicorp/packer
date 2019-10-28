@@ -7,17 +7,9 @@ XPath
 
 XPath is Go package provides selecting nodes from XML, HTML or other documents using XPath expression.
 
-Implementation
-===
+[XQuery](https://github.com/antchfx/xquery) : lets you extract data from HTML/XML documents using XPath package.
 
-- [htmlquery](https://github.com/antchfx/htmlquery) - an XPath query package for HTML document
-
-- [xmlquery](https://github.com/antchfx/xmlquery) - an XPath query package for XML document.
-
-- [jsonquery](https://github.com/antchfx/jsonquery) - an XPath query package for JSON document
-
-Supported Features
-===
+### Features
 
 #### The basic XPath patterns.
 
@@ -53,10 +45,7 @@ Supported Features
 
 - `//b` : Returns elements in the entire document matching b.
 
-- `a|b` : All nodes matching a or b, union operation(not boolean or).
-
-- `(a, b, c)` : Evaluates each of its operands and concatenates the resulting sequences, in order, into a single result sequence
-
+- `a|b` : All nodes matching a or b.
 
 #### Node Axes 
 
@@ -108,60 +97,23 @@ Supported Features
     * a div b	Divide
     * a mod b	Floating point mod, like Java.
 
-- `a or b` : Boolean `or` operation.
-
-- `a and b` : Boolean `and` operation.
-
 - `(expr)` : Parenthesized expressions.
 
-- `fun(arg1, ..., argn)` : Function calls:
+- `fun(arg1, ..., argn)` : Function calls.
 
-| Function | Supported |
-| --- | --- |
-`boolean()`| ✓ |
-`ceiling()`| ✓ |
-`choose()`| ✗ |
-`concat()`| ✓ |
-`contains()`| ✓ |
-`count()`| ✓ |
-`current()`| ✗ |
-`document()`| ✗ |
-`element-available()`| ✗ |
-`ends-with()`| ✓ |
-`false()`| ✓ |
-`floor()`| ✓ |
-`format-number()`| ✗ |
-`function-available()`| ✗ |
-`generate-id()`| ✗ |
-`id()`| ✗ |
-`key()`| ✗ |
-`lang()`| ✗ |
-`last()`| ✓ |
-`local-name()`| ✓ |
-`name()`| ✓ |
-`namespace-uri()`| ✓ |
-`normalize-space()`| ✓ |
-`not()`| ✓ |
-`number()`| ✓ |
-`position()`| ✓ |
-`round()`| ✓ |
-`starts-with()`| ✓ |
-`string()`| ✓ |
-`string-length()`| ✓ |
-`substring()`| ✓ |
-`substring-after()`| ✓ |
-`substring-before()`| ✓ |
-`sum()`| ✓ |
-`system-property()`| ✗ |
-`translate()`| ✓ |
-`true()`| ✓ |
-`unparsed-entity-url()` | ✗ |
+    * position()
+    * last()
+    * count( node-set )
+    * name()
+    * starts-with( string, string )
+    * normalize-space( string )
+    * substring( string , start [, length] )
+    * not( expression )
+    * string-length( [string] )
+    * contains( string, string )
+    * sum( node-set )
+    * concat( string1 , string2 [, stringn]* )
 
-Changelogs
-===
+- `a or b` : Boolean or.
 
-2019-01-29
--  improvement `normalize-space` function. [#32](https://github.com/antchfx/xpath/issues/32)
-
-2018-12-07
--  supports XPath 2.0 Sequence expressions. [#30](https://github.com/antchfx/xpath/pull/30) by [@minherz](https://github.com/minherz).
+- `a and b` : Boolean and.

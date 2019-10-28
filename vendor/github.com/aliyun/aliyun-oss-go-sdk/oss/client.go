@@ -11,68 +11,70 @@ import (
 	"time"
 )
 
-// Client SDK's entry point. It's for bucket related options such as create/delete/set bucket (such as set/get ACL/lifecycle/referer/logging/website).
-// Object related operations are done by Bucket class.
-// Users use oss.New to create Client instance.
+//
+// Client Sdk的入口，Client的方法可以完成bucket的各种操作，如create/delete bucket，
+// set/get acl/lifecycle/referer/logging/website等。文件(object)的上传下载通过Bucket完成。
+// 用户用oss.New创建Client。
 //
 type (
-	// Client OSS client
+	// Client oss client
 	Client struct {
-		Config     *Config      // OSS client configuration
-		Conn       *Conn        // Send HTTP request
-		HTTPClient *http.Client //http.Client to use - if nil will make its own
+		Config *Config // Oss Client configure
+		Conn   *Conn   // Send http request
 	}
 
 	// ClientOption client option such as UseCname, Timeout, SecurityToken.
 	ClientOption func(*Client)
 )
 
-// New creates a new client.
 //
-// endpoint    the OSS datacenter endpoint such as http://oss-cn-hangzhou.aliyuncs.com .
-// accessKeyId    access key Id.
-// accessKeySecret    access key secret.
+// New 生成一个新的Client。
 //
-// Client    creates the new client instance, the returned value is valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// endpoint        用户Bucket所在数据中心的访问域名，如http://oss-cn-hangzhou.aliyuncs.com。
+// accessKeyId     用户标识。
+// accessKeySecret 用户密钥。
+//
+// Client 生成的新Client。error为nil时有效。
+// error  操作无错误时为nil，非nil时表示操作出错。
 //
 func New(endpoint, accessKeyID, accessKeySecret string, options ...ClientOption) (*Client, error) {
-	// Configuration
+	// configuration
 	config := getDefaultOssConfig()
 	config.Endpoint = endpoint
 	config.AccessKeyID = accessKeyID
 	config.AccessKeySecret = accessKeySecret
 
-	// URL parse
+	// url parse
 	url := &urlMaker{}
 	url.Init(config.Endpoint, config.IsCname, config.IsUseProxy)
 
-	// HTTP connect
+	// http connect
 	conn := &Conn{config: config, url: url}
 
-	// OSS client
+	// oss client
 	client := &Client{
-		Config: config,
-		Conn:   conn,
+		config,
+		conn,
 	}
 
-	// Client options parse
+	// client options parse
 	for _, option := range options {
 		option(client)
 	}
 
-	// Create HTTP connection
-	err := conn.init(config, url, client.HTTPClient)
+	// create http connect
+	err := conn.init(config, url)
 
 	return client, err
 }
 
-// Bucket gets the bucket instance.
 //
-// bucketName    the bucket name.
-// Bucket    the bucket object, when error is nil.
+// Bucket 取存储空间（Bucket）的对象实例。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+// Bucket     新的Bucket。error为nil时有效。
+//
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) Bucket(bucketName string) (*Bucket, error) {
 	return &Bucket{
@@ -81,36 +83,21 @@ func (client Client) Bucket(bucketName string) (*Bucket, error) {
 	}, nil
 }
 
-// CreateBucket creates a bucket.
 //
-// bucketName    the bucket name, it's globably unique and immutable. The bucket name can only consist of lowercase letters, numbers and dash ('-').
-//               It must start with lowercase letter or number and the length can only be between 3 and 255.
-// options    options for creating the bucket, with optional ACL. The ACL could be ACLPrivate, ACLPublicRead, and ACLPublicReadWrite. By default it's ACLPrivate.
-//            It could also be specified with StorageClass option, which supports StorageStandard, StorageIA(infrequent access), StorageArchive.
+// CreateBucket 创建Bucket。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName bucket名称，在整个OSS中具有全局唯一性，且不能修改。bucket名称的只能包括小写字母，数字和短横线-，
+// 必须以小写字母或者数字开头，长度必须在3-255字节之间。
+// options  创建bucket的选项。您可以使用选项ACL，指定bucket的访问权限。Bucket有以下三种访问权限，私有读写（ACLPrivate）、
+// 公共读私有写（ACLPublicRead），公共读公共写(ACLPublicReadWrite)，默认访问权限是私有读写。
+//
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) CreateBucket(bucketName string, options ...Option) error {
 	headers := make(map[string]string)
 	handleOptions(headers, options)
 
-	buffer := new(bytes.Buffer)
-
-	isOptSet, val, _ := isOptionSet(options, storageClass)
-	if isOptSet {
-		cbConfig := createBucketConfiguration{StorageClass: val.(StorageClassType)}
-		bs, err := xml.Marshal(cbConfig)
-		if err != nil {
-			return err
-		}
-		buffer.Write(bs)
-
-		contentType := http.DetectContentType(buffer.Bytes())
-		headers[HTTPHeaderContentType] = contentType
-	}
-
-	params := map[string]interface{}{}
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "", "", headers, nil)
 	if err != nil {
 		return err
 	}
@@ -119,25 +106,25 @@ func (client Client) CreateBucket(bucketName string, options ...Option) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// ListBuckets lists buckets of the current account under the given endpoint, with optional filters.
 //
-// options    specifies the filters such as Prefix, Marker and MaxKeys. Prefix is the bucket name's prefix filter.
-//            And marker makes sure the returned buckets' name are greater than it in lexicographic order.
-//            Maxkeys limits the max keys to return, and by default it's 100 and up to 1000.
-//            For the common usage scenario, please check out list_bucket.go in the sample.
-// ListBucketsResponse    the response object if error is nil.
+// ListBuckets 获取当前用户下的bucket。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// options 指定ListBuckets的筛选行为，Prefix、Marker、MaxKeys三个选项。Prefix限定前缀。
+// Marker设定从Marker之后的第一个开始返回。MaxKeys限定此次返回的最大数目，默认为100。
+// 常用使用场景的实现，参数示例程序list_bucket.go。
+// ListBucketsResponse 操作成功后的返回值，error为nil时该返回值有效。
+//
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) ListBuckets(options ...Option) (ListBucketsResult, error) {
 	var out ListBucketsResult
 
-	params, err := getRawParams(options)
+	params, err := handleParams(options)
 	if err != nil {
 		return out, err
 	}
 
-	resp, err := client.do("GET", "", params, nil, nil)
+	resp, err := client.do("GET", "", params, "", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -147,12 +134,13 @@ func (client Client) ListBuckets(options ...Option) (ListBucketsResult, error) {
 	return out, err
 }
 
-// IsBucketExist checks if the bucket exists
 //
-// bucketName    the bucket name.
+// IsBucketExist Bucket是否存在。
 //
-// bool    true if it exists, and it's only valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// bool  存储空间是否存在。error为nil时有效。
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) IsBucketExist(bucketName string) (bool, error) {
 	listRes, err := client.ListBuckets(Prefix(bucketName), MaxKeys(1))
@@ -166,15 +154,15 @@ func (client Client) IsBucketExist(bucketName string) (bool, error) {
 	return false, nil
 }
 
-// DeleteBucket deletes the bucket. Only empty bucket can be deleted (no object and parts).
 //
-// bucketName    the bucket name.
+// DeleteBucket 删除空存储空间。非空时请先清理Object、Upload。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) DeleteBucket(bucketName string) error {
-	params := map[string]interface{}{}
-	resp, err := client.do("DELETE", bucketName, params, nil, nil)
+	resp, err := client.do("DELETE", bucketName, "", "", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -183,20 +171,19 @@ func (client Client) DeleteBucket(bucketName string) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
-// GetBucketLocation gets the bucket location.
 //
-// Checks out the following link for more information :
+// GetBucketLocation 查看Bucket所属数据中心位置的信息。
+//
+// 如果您想了解"访问域名和数据中心"详细信息，请参看
 // https://help.aliyun.com/document_detail/oss/user_guide/oss_concept/endpoint.html
 //
-// bucketName    the bucket name
+// bucketName 存储空间名称。
 //
-// string    bucket's datacenter location
-// error    it's nil if no error, otherwise it's an error object.
+// string Bucket所属的数据中心位置信息。
+// error  操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) GetBucketLocation(bucketName string) (string, error) {
-	params := map[string]interface{}{}
-	params["location"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "location", "location", nil, nil)
 	if err != nil {
 		return "", err
 	}
@@ -207,17 +194,18 @@ func (client Client) GetBucketLocation(bucketName string) (string, error) {
 	return LocationConstraint, err
 }
 
-// SetBucketACL sets bucket's ACL.
 //
-// bucketName    the bucket name
-// bucketAcl    the bucket ACL: ACLPrivate, ACLPublicRead and ACLPublicReadWrite.
+// SetBucketACL 修改Bucket的访问权限。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+// bucketAcl  bucket的访问权限。Bucket有以下三种访问权限，Bucket有以下三种访问权限，私有读写（ACLPrivate）、
+// 公共读私有写（ACLPublicRead），公共读公共写(ACLPublicReadWrite)。
+//
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) SetBucketACL(bucketName string, bucketACL ACLType) error {
 	headers := map[string]string{HTTPHeaderOssACL: string(bucketACL)}
-	params := map[string]interface{}{}
-	resp, err := client.do("PUT", bucketName, params, headers, nil)
+	resp, err := client.do("PUT", bucketName, "", "", headers, nil)
 	if err != nil {
 		return err
 	}
@@ -225,18 +213,17 @@ func (client Client) SetBucketACL(bucketName string, bucketACL ACLType) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// GetBucketACL gets the bucket ACL.
 //
-// bucketName    the bucket name.
+// GetBucketACL 获得Bucket的访问权限。
 //
-// GetBucketAclResponse    the result object, and it's only valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// GetBucketAclResponse 操作成功后的返回值，error为nil时该返回值有效。
+// error 操作无错误时返回nil，非nil为错误信息。
 //
 func (client Client) GetBucketACL(bucketName string) (GetBucketACLResult, error) {
 	var out GetBucketACLResult
-	params := map[string]interface{}{}
-	params["acl"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "acl", "acl", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -246,16 +233,19 @@ func (client Client) GetBucketACL(bucketName string) (GetBucketACLResult, error)
 	return out, err
 }
 
-// SetBucketLifecycle sets the bucket's lifecycle.
 //
-// For more information, checks out following link:
+// SetBucketLifecycle 修改Bucket的生命周期设置。
+//
+// OSS提供Object生命周期管理来为用户管理对象。用户可以为某个Bucket定义生命周期配置，来为该Bucket的Object定义各种规则。
+// Bucket的拥有者可以通过SetBucketLifecycle来设置Bucket的Lifecycle配置。Lifecycle开启后，OSS将按照配置，
+// 定期自动删除与Lifecycle规则相匹配的Object。如果您想了解更多的生命周期的信息，请参看
 // https://help.aliyun.com/document_detail/oss/user_guide/manage_object/object_lifecycle.html
 //
-// bucketName    the bucket name.
-// rules    the lifecycle rules. There're two kind of rules: absolute time expiration and relative time expiration in days and day/month/year respectively.
-//          Check out sample/bucket_lifecycle.go for more details.
+// bucketName 存储空间名称。
+// rules 生命周期规则列表。生命周期规则有两种格式，指定绝对和相对过期时间，分布由days和year/month/day控制。
+// 具体用法请参考示例程序sample/bucket_lifecycle.go。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// error 操作无错误时返回error为nil，非nil为错误信息。
 //
 func (client Client) SetBucketLifecycle(bucketName string, rules []LifecycleRule) error {
 	lxml := lifecycleXML{Rules: convLifecycleRule(rules)}
@@ -270,9 +260,7 @@ func (client Client) SetBucketLifecycle(bucketName string, rules []LifecycleRule
 	headers := map[string]string{}
 	headers[HTTPHeaderContentType] = contentType
 
-	params := map[string]interface{}{}
-	params["lifecycle"] = nil
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "lifecycle", "lifecycle", headers, buffer)
 	if err != nil {
 		return err
 	}
@@ -280,17 +268,16 @@ func (client Client) SetBucketLifecycle(bucketName string, rules []LifecycleRule
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// DeleteBucketLifecycle deletes the bucket's lifecycle.
+//
+// DeleteBucketLifecycle 删除Bucket的生命周期设置。
 //
 //
-// bucketName    the bucket name.
+// bucketName 存储空间名称。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) DeleteBucketLifecycle(bucketName string) error {
-	params := map[string]interface{}{}
-	params["lifecycle"] = nil
-	resp, err := client.do("DELETE", bucketName, params, nil, nil)
+	resp, err := client.do("DELETE", bucketName, "lifecycle", "lifecycle", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -298,18 +285,17 @@ func (client Client) DeleteBucketLifecycle(bucketName string) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
-// GetBucketLifecycle gets the bucket's lifecycle settings.
 //
-// bucketName    the bucket name.
+// GetBucketLifecycle 查看Bucket的生命周期设置。
 //
-// GetBucketLifecycleResponse    the result object upon successful request. It's only valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// GetBucketLifecycleResponse 操作成功的返回值，error为nil时该返回值有效。Rules为该bucket上的规则列表。
+// error 操作无错误时为nil，非nil为错误信息。
 //
 func (client Client) GetBucketLifecycle(bucketName string) (GetBucketLifecycleResult, error) {
 	var out GetBucketLifecycleResult
-	params := map[string]interface{}{}
-	params["lifecycle"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "lifecycle", "lifecycle", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -319,20 +305,21 @@ func (client Client) GetBucketLifecycle(bucketName string) (GetBucketLifecycleRe
 	return out, err
 }
 
-// SetBucketReferer sets the bucket's referer whitelist and the flag if allowing empty referrer.
 //
-// To avoid stealing link on OSS data, OSS supports the HTTP referrer header. A whitelist referrer could be set either by API or web console, as well as
-// the allowing empty referrer flag. Note that this applies to requests from webbrowser only.
-// For example, for a bucket os-example and its referrer http://www.aliyun.com, all requests from this URL could access the bucket.
-// For more information, please check out this link :
+// SetBucketReferer 设置bucket的referer访问白名单和是否允许referer字段为空的请求访问。
+//
+// 防止用户在OSS上的数据被其他人盗用，OSS支持基于HTTP header中表头字段referer的防盗链方法。可以通过OSS控制台或者API的方式对
+// 一个bucket设置referer字段的白名单和是否允许referer字段为空的请求访问。例如，对于一个名为oss-example的bucket，
+// 设置其referer白名单为http://www.aliyun.com。则所有referer为http://www.aliyun.com的请求才能访问oss-example
+// 这个bucket中的object。如果您还需要了解更多信息，请参看
 // https://help.aliyun.com/document_detail/oss/user_guide/security_management/referer.html
 //
-// bucketName    the bucket name.
-// referers    the referrer white list. A bucket could have a referrer list and each referrer supports one '*' and multiple '?' as wildcards.
-//             The sample could be found in sample/bucket_referer.go
-// allowEmptyReferer    the flag of allowing empty referrer. By default it's true.
+// bucketName  存储空间名称。
+// referers  访问白名单列表。一个bucket可以支持多个referer参数。referer参数支持通配符"*"和"?"。
+// 用法请参看示例sample/bucket_referer.go
+// allowEmptyReferer  指定是否允许referer字段为空的请求访问。 默认为true。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) SetBucketReferer(bucketName string, referers []string, allowEmptyReferer bool) error {
 	rxml := RefererXML{}
@@ -356,9 +343,7 @@ func (client Client) SetBucketReferer(bucketName string, referers []string, allo
 	headers := map[string]string{}
 	headers[HTTPHeaderContentType] = contentType
 
-	params := map[string]interface{}{}
-	params["referer"] = nil
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "referer", "referer", headers, buffer)
 	if err != nil {
 		return err
 	}
@@ -366,18 +351,17 @@ func (client Client) SetBucketReferer(bucketName string, referers []string, allo
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// GetBucketReferer gets the bucket's referrer white list.
 //
-// bucketName    the bucket name.
+// GetBucketReferer 获得Bucket的白名单地址。
 //
-// GetBucketRefererResponse    the result object upon successful request. It's only valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// GetBucketRefererResponse 操作成功的返回值，error为nil时该返回值有效。
+// error 操作无错误时为nil，非nil为错误信息。
 //
 func (client Client) GetBucketReferer(bucketName string) (GetBucketRefererResult, error) {
 	var out GetBucketRefererResult
-	params := map[string]interface{}{}
-	params["referer"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "referer", "referer", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -387,17 +371,18 @@ func (client Client) GetBucketReferer(bucketName string) (GetBucketRefererResult
 	return out, err
 }
 
-// SetBucketLogging sets the bucket logging settings.
 //
-// OSS could automatically store the access log. Only the bucket owner could enable the logging.
-// Once enabled, OSS would save all the access log into hourly log files in a specified bucket.
-// For more information, please check out https://help.aliyun.com/document_detail/oss/user_guide/security_management/logging.html
+// SetBucketLogging 修改Bucket的日志设置。
 //
-// bucketName    bucket name to enable the log.
-// targetBucket    the target bucket name to store the log files.
-// targetPrefix    the log files' prefix.
+// OSS为您提供自动保存访问日志记录功能。Bucket的拥有者可以开启访问日志记录功能。当一个bucket开启访问日志记录功能后，
+// OSS自动将访问这个bucket的请求日志，以小时为单位，按照固定的命名规则，生成一个Object写入用户指定的bucket中。
+// 如果您需要更多，请参看 https://help.aliyun.com/document_detail/oss/user_guide/security_management/logging.html
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName   需要记录访问日志的Bucket。
+// targetBucket 访问日志记录到的Bucket。
+// targetPrefix bucketName中需要存储访问日志记录的object前缀。为空记录所有object的访问日志。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) SetBucketLogging(bucketName, targetBucket, targetPrefix string,
 	isEnable bool) error {
@@ -424,9 +409,7 @@ func (client Client) SetBucketLogging(bucketName, targetBucket, targetPrefix str
 	headers := map[string]string{}
 	headers[HTTPHeaderContentType] = contentType
 
-	params := map[string]interface{}{}
-	params["logging"] = nil
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "logging", "logging", headers, buffer)
 	if err != nil {
 		return err
 	}
@@ -434,16 +417,15 @@ func (client Client) SetBucketLogging(bucketName, targetBucket, targetPrefix str
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// DeleteBucketLogging deletes the logging configuration to disable the logging on the bucket.
 //
-// bucketName    the bucket name to disable the logging.
+// DeleteBucketLogging 删除Bucket的日志设置。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 需要删除访问日志的Bucket。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) DeleteBucketLogging(bucketName string) error {
-	params := map[string]interface{}{}
-	params["logging"] = nil
-	resp, err := client.do("DELETE", bucketName, params, nil, nil)
+	resp, err := client.do("DELETE", bucketName, "logging", "logging", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -451,18 +433,17 @@ func (client Client) DeleteBucketLogging(bucketName string) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
-// GetBucketLogging gets the bucket's logging settings
 //
-// bucketName    the bucket name
-// GetBucketLoggingResponse    the result object upon successful request. It's only valid when error is nil.
+// GetBucketLogging 获得Bucket的日志设置。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName  需要删除访问日志的Bucket。
+// GetBucketLoggingResponse  操作成功的返回值，error为nil时该返回值有效。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) GetBucketLogging(bucketName string) (GetBucketLoggingResult, error) {
 	var out GetBucketLoggingResult
-	params := map[string]interface{}{}
-	params["logging"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "logging", "logging", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -472,16 +453,17 @@ func (client Client) GetBucketLogging(bucketName string) (GetBucketLoggingResult
 	return out, err
 }
 
-// SetBucketWebsite sets the bucket's static website's index and error page.
 //
-// OSS supports static web site hosting for the bucket data. When the bucket is enabled with that, you can access the file in the bucket like the way to access a static website.
-// For more information, please check out: https://help.aliyun.com/document_detail/oss/user_guide/static_host_website.html
+// SetBucketWebsite 设置/修改Bucket的默认首页以及错误页。
 //
-// bucketName    the bucket name to enable static web site.
-// indexDocument    index page.
-// errorDocument    error page.
+// OSS支持静态网站托管，Website操作可以将一个bucket设置成静态网站托管模式 。您可以将自己的Bucket配置成静态网站托管模式。
+// 如果您需要更多，请参看 https://help.aliyun.com/document_detail/oss/user_guide/static_host_website.html
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName     需要设置Website的Bucket。
+// indexDocument  索引文档。
+// errorDocument  错误文档。
+//
+// error  操作无错误为nil，非nil为错误信息。
 //
 func (client Client) SetBucketWebsite(bucketName, indexDocument, errorDocument string) error {
 	wxml := WebsiteXML{}
@@ -499,9 +481,7 @@ func (client Client) SetBucketWebsite(bucketName, indexDocument, errorDocument s
 	headers := make(map[string]string)
 	headers[HTTPHeaderContentType] = contentType
 
-	params := map[string]interface{}{}
-	params["website"] = nil
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "website", "website", headers, buffer)
 	if err != nil {
 		return err
 	}
@@ -509,16 +489,15 @@ func (client Client) SetBucketWebsite(bucketName, indexDocument, errorDocument s
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// DeleteBucketWebsite deletes the bucket's static web site settings.
 //
-// bucketName    the bucket name.
+// DeleteBucketWebsite 删除Bucket的Website设置。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName  需要删除website设置的Bucket。
+//
+// error  操作无错误为nil，非nil为错误信息。
 //
 func (client Client) DeleteBucketWebsite(bucketName string) error {
-	params := map[string]interface{}{}
-	params["website"] = nil
-	resp, err := client.do("DELETE", bucketName, params, nil, nil)
+	resp, err := client.do("DELETE", bucketName, "website", "website", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -526,18 +505,17 @@ func (client Client) DeleteBucketWebsite(bucketName string) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
-// GetBucketWebsite gets the bucket's default page (index page) and the error page.
 //
-// bucketName    the bucket name
+// GetBucketWebsite 获得Bucket的默认首页以及错误页。
 //
-// GetBucketWebsiteResponse    the result object upon successful request. It's only valid when error is nil.
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 存储空间名称。
+//
+// GetBucketWebsiteResponse 操作成功的返回值，error为nil时该返回值有效。
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) GetBucketWebsite(bucketName string) (GetBucketWebsiteResult, error) {
 	var out GetBucketWebsiteResult
-	params := map[string]interface{}{}
-	params["website"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "website", "website", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -547,14 +525,15 @@ func (client Client) GetBucketWebsite(bucketName string) (GetBucketWebsiteResult
 	return out, err
 }
 
-// SetBucketCORS sets the bucket's CORS rules
 //
-// For more information, please check out https://help.aliyun.com/document_detail/oss/user_guide/security_management/cors.html
+// SetBucketCORS 设置Bucket的跨域访问(CORS)规则。
 //
-// bucketName    the bucket name
-// corsRules    the CORS rules to set. The related sample code is in sample/bucket_cors.go.
+// 跨域访问的更多信息，请参看 https://help.aliyun.com/document_detail/oss/user_guide/security_management/cors.html
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 需要设置Website的Bucket。
+// corsRules  待设置的CORS规则。用法请参看示例代码sample/bucket_cors.go。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) SetBucketCORS(bucketName string, corsRules []CORSRule) error {
 	corsxml := CORSXML{}
@@ -579,9 +558,7 @@ func (client Client) SetBucketCORS(bucketName string, corsRules []CORSRule) erro
 	headers := map[string]string{}
 	headers[HTTPHeaderContentType] = contentType
 
-	params := map[string]interface{}{}
-	params["cors"] = nil
-	resp, err := client.do("PUT", bucketName, params, headers, buffer)
+	resp, err := client.do("PUT", bucketName, "cors", "cors", headers, buffer)
 	if err != nil {
 		return err
 	}
@@ -589,16 +566,15 @@ func (client Client) SetBucketCORS(bucketName string, corsRules []CORSRule) erro
 	return checkRespCode(resp.StatusCode, []int{http.StatusOK})
 }
 
-// DeleteBucketCORS deletes the bucket's static website settings.
 //
-// bucketName    the bucket name.
+// DeleteBucketCORS 删除Bucket的Website设置。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName 需要删除cors设置的Bucket。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) DeleteBucketCORS(bucketName string) error {
-	params := map[string]interface{}{}
-	params["cors"] = nil
-	resp, err := client.do("DELETE", bucketName, params, nil, nil)
+	resp, err := client.do("DELETE", bucketName, "cors", "cors", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -606,18 +582,18 @@ func (client Client) DeleteBucketCORS(bucketName string) error {
 	return checkRespCode(resp.StatusCode, []int{http.StatusNoContent})
 }
 
-// GetBucketCORS gets the bucket's CORS settings.
 //
-// bucketName    the bucket name.
-// GetBucketCORSResult    the result object upon successful request. It's only valid when error is nil.
+// GetBucketCORS 获得Bucket的CORS设置。
 //
-// error    it's nil if no error, otherwise it's an error object.
+//
+// bucketName  存储空间名称。
+// GetBucketCORSResult  操作成功的返回值，error为nil时该返回值有效。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) GetBucketCORS(bucketName string) (GetBucketCORSResult, error) {
 	var out GetBucketCORSResult
-	params := map[string]interface{}{}
-	params["cors"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "cors", "cors", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -627,18 +603,17 @@ func (client Client) GetBucketCORS(bucketName string) (GetBucketCORSResult, erro
 	return out, err
 }
 
-// GetBucketInfo gets the bucket information.
 //
-// bucketName    the bucket name.
-// GetBucketInfoResult    the result object upon successful request. It's only valid when error is nil.
+// GetBucketInfo 获得Bucket的信息。
 //
-// error    it's nil if no error, otherwise it's an error object.
+// bucketName  存储空间名称。
+// GetBucketInfoResult  操作成功的返回值，error为nil时该返回值有效。
+//
+// error 操作无错误为nil，非nil为错误信息。
 //
 func (client Client) GetBucketInfo(bucketName string) (GetBucketInfoResult, error) {
 	var out GetBucketInfoResult
-	params := map[string]interface{}{}
-	params["bucketInfo"] = nil
-	resp, err := client.do("GET", bucketName, params, nil, nil)
+	resp, err := client.do("GET", bucketName, "bucketInfo", "bucketInfo", nil, nil)
 	if err != nil {
 		return out, err
 	}
@@ -648,9 +623,10 @@ func (client Client) GetBucketInfo(bucketName string) (GetBucketInfoResult, erro
 	return out, err
 }
 
-// UseCname sets the flag of using CName. By default it's false.
 //
-// isUseCname    true: the endpoint has the CName, false: the endpoint does not have cname. Default is false.
+// UseCname 设置是否使用CNAME，默认不使用。
+//
+// isUseCname true设置endpoint格式是cname格式，false为非cname格式，默认false
 //
 func UseCname(isUseCname bool) ClientOption {
 	return func(client *Client) {
@@ -659,10 +635,11 @@ func UseCname(isUseCname bool) ClientOption {
 	}
 }
 
-// Timeout sets the HTTP timeout in seconds.
 //
-// connectTimeoutSec    HTTP timeout in seconds. Default is 10 seconds. 0 means infinite (not recommended)
-// readWriteTimeout    HTTP read or write's timeout in seconds. Default is 20 seconds. 0 means infinite.
+// Timeout 设置HTTP超时时间。
+//
+// connectTimeoutSec HTTP链接超时时间，单位是秒，默认10秒。0表示永不超时。
+// readWriteTimeout  HTTP发送接受数据超时时间，单位是秒，默认20秒。0表示永不超时。
 //
 func Timeout(connectTimeoutSec, readWriteTimeout int64) ClientOption {
 	return func(client *Client) {
@@ -672,16 +649,15 @@ func Timeout(connectTimeoutSec, readWriteTimeout int64) ClientOption {
 			time.Second * time.Duration(readWriteTimeout)
 		client.Config.HTTPTimeout.HeaderTimeout =
 			time.Second * time.Duration(readWriteTimeout)
-		client.Config.HTTPTimeout.IdleConnTimeout =
-			time.Second * time.Duration(readWriteTimeout)
 		client.Config.HTTPTimeout.LongTimeout =
 			time.Second * time.Duration(readWriteTimeout*10)
 	}
 }
 
-// SecurityToken sets the temporary user's SecurityToken.
 //
-// token    STS token
+// SecurityToken 临时用户设置SecurityToken。
+//
+// token STS token
 //
 func SecurityToken(token string) ClientOption {
 	return func(client *Client) {
@@ -689,9 +665,10 @@ func SecurityToken(token string) ClientOption {
 	}
 }
 
-// EnableMD5 enables MD5 validation.
 //
-// isEnableMD5    true: enable MD5 validation; false: disable MD5 validation.
+// EnableMD5 是否启用MD5校验，默认启用。
+//
+// isEnableMD5 true启用MD5校验，false不启用MD5校验
 //
 func EnableMD5(isEnableMD5 bool) ClientOption {
 	return func(client *Client) {
@@ -699,9 +676,10 @@ func EnableMD5(isEnableMD5 bool) ClientOption {
 	}
 }
 
-// MD5ThresholdCalcInMemory sets the memory usage threshold for computing the MD5, default is 16MB.
 //
-// threshold    the memory threshold in bytes. When the uploaded content is more than 16MB, the temp file is used for computing the MD5.
+// MD5ThresholdCalcInMemory 使用内存计算MD5值的上限，默认16MB。
+//
+// threshold 单位Byte。上传内容小于threshold在MD5在内存中计算，大于使用临时文件计算MD5
 //
 func MD5ThresholdCalcInMemory(threshold int64) ClientOption {
 	return func(client *Client) {
@@ -709,9 +687,10 @@ func MD5ThresholdCalcInMemory(threshold int64) ClientOption {
 	}
 }
 
-// EnableCRC enables the CRC checksum. Default is true.
 //
-// isEnableCRC    true: enable CRC checksum; false: disable the CRC checksum.
+// EnableCRC 上传是否启用CRC校验，默认启用。
+//
+// isEnableCRC true启用CRC校验，false不启用CRC校验
 //
 func EnableCRC(isEnableCRC bool) ClientOption {
 	return func(client *Client) {
@@ -719,9 +698,10 @@ func EnableCRC(isEnableCRC bool) ClientOption {
 	}
 }
 
-// UserAgent specifies UserAgent. The default is aliyun-sdk-go/1.2.0 (windows/-/amd64;go1.5.2).
 //
-// userAgent    the user agent string.
+// UserAgent 指定UserAgent，默认如下aliyun-sdk-go/1.2.0 (windows/-/amd64;go1.5.2)。
+//
+// userAgent user agent字符串。
 //
 func UserAgent(userAgent string) ClientOption {
 	return func(client *Client) {
@@ -729,9 +709,10 @@ func UserAgent(userAgent string) ClientOption {
 	}
 }
 
-// Proxy sets the proxy (optional). The default is not using proxy.
 //
-// proxyHost    the proxy host in the format "host:port". For example, proxy.com:80 .
+// Proxy 设置代理服务器，默认不使用代理。
+//
+// proxyHost 代理服务器地址，格式是host或host:port
 //
 func Proxy(proxyHost string) ClientOption {
 	return func(client *Client) {
@@ -741,11 +722,12 @@ func Proxy(proxyHost string) ClientOption {
 	}
 }
 
-// AuthProxy sets the proxy information with user name and password.
 //
-// proxyHost    the proxy host in the format "host:port". For example, proxy.com:80 .
-// proxyUser    the proxy user name.
-// proxyPassword    the proxy password.
+// AuthProxy 设置需要认证的代理服务器，默认不使用代理。
+//
+// proxyHost 代理服务器地址，格式是host或host:port
+// proxyUser 代理服务器认证的用户名
+// proxyPassword 代理服务器认证的用户密码
 //
 func AuthProxy(proxyHost, proxyUser, proxyPassword string) ClientOption {
 	return func(client *Client) {
@@ -758,18 +740,9 @@ func AuthProxy(proxyHost, proxyUser, proxyPassword string) ClientOption {
 	}
 }
 
-//
-// HTTPClient sets the http.Client in use to the one passed in
-//
-func HTTPClient(HTTPClient *http.Client) ClientOption {
-	return func(client *Client) {
-		client.HTTPClient = HTTPClient
-	}
-}
-
 // Private
-func (client Client) do(method, bucketName string, params map[string]interface{},
+func (client Client) do(method, bucketName, urlParams, subResource string,
 	headers map[string]string, data io.Reader) (*Response, error) {
-	return client.Conn.Do(method, bucketName, "", params,
-		headers, data, 0, nil)
+	return client.Conn.Do(method, bucketName, "", urlParams,
+		subResource, headers, data, 0, nil)
 }
