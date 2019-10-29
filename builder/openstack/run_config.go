@@ -118,6 +118,10 @@ type RunConfig struct {
 	Networks []string `mapstructure:"networks" required:"false"`
 	// A list of ports by UUID to attach to this instance.
 	Ports []string `mapstructure:"ports" required:"false"`
+	// A list of network CIDRs to discover the network to attach to this instance.
+	// The first network whose subnet is contained within any of the given CIDRs
+	// is used. Ignored if either of the above two options are provided.
+	NetworkDiscoveryCIDRs []string `mapstructure:"network_discovery_cidrs" required:"false"`
 	// User data to apply when launching the instance. Note that you need to be
 	// careful about escaping characters due to the templates being JSON. It is
 	// often more convenient to use user_data_file, instead. Packer will not
