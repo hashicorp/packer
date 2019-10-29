@@ -45,6 +45,8 @@
 -   `instance_name` (string) - The name of the instance. Defaults to
     "packer-UUID" where UUID is dynamically generated.
     
+-   `instance_display_name` (string) - The display name of the instance. Defaults to "Created by Packer".
+    
 -   `project` (string) - The name or ID of the project to deploy the instance
     to.
     

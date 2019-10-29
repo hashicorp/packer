@@ -74,6 +74,7 @@ type FlatConfig struct {
 	Expunge                   *bool             `mapstructure:"expunge" required:"false" cty:"expunge"`
 	Hypervisor                *string           `mapstructure:"hypervisor" required:"false" cty:"hypervisor"`
 	InstanceName              *string           `mapstructure:"instance_name" required:"false" cty:"instance_name"`
+	InstanceDisplayName       *string           `mapstructure:"instance_display_name" required:"false" cty:"instance_display_name"`
 	Network                   *string           `mapstructure:"network" required:"true" cty:"network"`
 	Project                   *string           `mapstructure:"project" required:"false" cty:"project"`
 	PublicIPAddress           *string           `mapstructure:"public_ip_address" required:"false" cty:"public_ip_address"`
@@ -174,6 +175,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"expunge":                      &hcldec.AttrSpec{Name: "expunge", Type: cty.Bool, Required: false},
 		"hypervisor":                   &hcldec.AttrSpec{Name: "hypervisor", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
+		"instance_display_name":        &hcldec.AttrSpec{Name: "instance_display_name", Type: cty.String, Required: false},
 		"network":                      &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"project":                      &hcldec.AttrSpec{Name: "project", Type: cty.String, Required: false},
 		"public_ip_address":            &hcldec.AttrSpec{Name: "public_ip_address", Type: cty.String, Required: false},
