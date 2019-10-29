@@ -246,6 +246,19 @@ start](https://github.com/golang/go/wiki/Modules#quick-start) for examples.
 Please only apply the minimal vendor changes to get your PR to work. Packer
 does not attempt to track the latest version for each dependency.
 
+#### Code generation
+
+Packer relies on `go generate` to generate a [peg parser for boot
+commands](https://github.com/hashicorp/packer/blob/master/common/bootcommand/boot_command.go),
+[docs](https://github.com/hashicorp/packer/blob/master/website/source/partials/builder/amazon/chroot/_Config-not-required.html.md)
+and HCL2's bridging code. Packer's testing suite will run `make check-generate`
+to check that all the generated files Packer needs are what they should be.
+`make generate` re-generates all these file and can take a while depending on
+your machine's performances. To make it faster it is recommended to run
+localized code generation. Say you are working on the Amazon builder: running
+`go generate ./builder/amazon/...` will do that for you. Make sure that the
+latest code generation tool is installed by running `make install-gen-deps`.
+
 #### Running Unit Tests
 
 You can run tests for individual packages using commands like this:
