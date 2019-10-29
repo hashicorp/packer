@@ -5,66 +5,66 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 // LXC options for the Proxmox API
 type configLxc struct {
-	Ostemplate         string         `json:"ostemplate"`
-		Arch               string         `json:"arch"`
-		BWLimit            int            `json:"bwlimit,omitempty"`
-		CMode              string         `json:"cmode"`
-		Console            bool           `json:"console"`
-		Cores              int            `json:"cores,omitempty"`
-		CPULimit           int            `json:"cpulimit"`
-		CPUUnits           int            `json:"cpuunits"`
-		Description        string         `json:"description,omitempty"`
-		Features           QemuDevice     `json:"features,omitempty"`
-		Force              bool           `json:"force,omitempty"`
-		Hookscript         string         `json:"hookscript,omitempty"`
-		Hostname           string         `json:"hostname,omitempty"`
-		IgnoreUnpackErrors bool           `json:"ignore-unpack-errors,omitempty"`
-		Lock               string         `json:"lock,omitempty"`
-		Memory             int            `json:"memory"`
-		Mountpoints        QemuDevices    `json:"mountpoints,omitempty"`
-		Nameserver         string         `json:"nameserver,omitempty"`
-		Networks           QemuDevices    `json:"networks,omitempty"`
-		OnBoot             bool           `json:"onboot"`
-		OsType             string         `json:"ostype,omitempty"`
-		Password           string         `json:"password,omitempty"`
-		Pool               string         `json:"pool,omitempty"`
-		Protection         bool           `json:"protection"`
-		Restore            bool           `json:"restore,omitempty"`
-		RootFs             string         `json:"rootfs,omitempty"`
-		SearchDomain       string         `json:"searchdomain,omitempty"`
-		SSHPublicKeys      string         `json:"ssh-public-keys,omitempty"`
-		Start              bool           `json:"start"`
-		Startup            string         `json:"startup,omitempty"`
-		Storage            string         `json:"storage"`
-		Swap               int            `json:"swap"`
-		Template           bool           `json:"template,omitempty"`
-		Tty                int            `json:"tty"`
-		Unique             bool           `json:"unique,omitempty"`
-		Unprivileged       bool           `json:"unprivileged"`
-		Unused             []string       `json:"unused,omitempty"`
+	Ostemplate         string      `json:"ostemplate"`
+	Arch               string      `json:"arch"`
+	BWLimit            int         `json:"bwlimit,omitempty"`
+	CMode              string      `json:"cmode"`
+	Console            bool        `json:"console"`
+	Cores              int         `json:"cores,omitempty"`
+	CPULimit           int         `json:"cpulimit"`
+	CPUUnits           int         `json:"cpuunits"`
+	Description        string      `json:"description,omitempty"`
+	Features           QemuDevice  `json:"features,omitempty"`
+	Force              bool        `json:"force,omitempty"`
+	Hookscript         string      `json:"hookscript,omitempty"`
+	Hostname           string      `json:"hostname,omitempty"`
+	IgnoreUnpackErrors bool        `json:"ignore-unpack-errors,omitempty"`
+	Lock               string      `json:"lock,omitempty"`
+	Memory             int         `json:"memory"`
+	Mountpoints        QemuDevices `json:"mountpoints,omitempty"`
+	Nameserver         string      `json:"nameserver,omitempty"`
+	Networks           QemuDevices `json:"networks,omitempty"`
+	OnBoot             bool        `json:"onboot"`
+	OsType             string      `json:"ostype,omitempty"`
+	Password           string      `json:"password,omitempty"`
+	Pool               string      `json:"pool,omitempty"`
+	Protection         bool        `json:"protection"`
+	Restore            bool        `json:"restore,omitempty"`
+	RootFs             string      `json:"rootfs,omitempty"`
+	SearchDomain       string      `json:"searchdomain,omitempty"`
+	SSHPublicKeys      string      `json:"ssh-public-keys,omitempty"`
+	Start              bool        `json:"start"`
+	Startup            string      `json:"startup,omitempty"`
+	Storage            string      `json:"storage"`
+	Swap               int         `json:"swap"`
+	Template           bool        `json:"template,omitempty"`
+	Tty                int         `json:"tty"`
+	Unique             bool        `json:"unique,omitempty"`
+	Unprivileged       bool        `json:"unprivileged"`
+	Unused             []string    `json:"unused,omitempty"`
 }
 
-func NewConfigLxc() (configLxc) {
+func NewConfigLxc() configLxc {
 	return configLxc{
-		Arch: "amd64",
-		CMode: "tty",
-		Console: true,
-		CPULimit: 0,
-		CPUUnits: 1024,
-		Memory: 512,
-		OnBoot: false,
-		Protection: false,
-		Start: false,
-		Storage: "local",
-		Swap: 512,
-		Template: false,
-		Tty: 2,
+		Arch:         "amd64",
+		CMode:        "tty",
+		Console:      true,
+		CPULimit:     0,
+		CPUUnits:     1024,
+		Memory:       512,
+		OnBoot:       false,
+		Protection:   false,
+		Start:        false,
+		Storage:      "local",
+		Swap:         512,
+		Template:     false,
+		Tty:          2,
 		Unprivileged: false,
 	}
 }
@@ -162,7 +162,7 @@ func NewConfigLxcFromApi(vmr *VmRef, client *Client) (config *configLxc, err err
 	mpNames := []string{}
 
 	for k, _ := range lxcConfig {
-		if mpName:= rxMpName.FindStringSubmatch(k); len(mpName) > 0 {
+		if mpName := rxMpName.FindStringSubmatch(k); len(mpName) > 0 {
 			mpNames = append(mpNames, mpName[0])
 		}
 	}
@@ -175,7 +175,7 @@ func NewConfigLxcFromApi(vmr *VmRef, client *Client) (config *configLxc, err err
 		mpID, _ := strconv.Atoi(id[0])
 		// add mp id
 		mpConfMap := QemuDevice{
-			"id":      mpID,
+			"id": mpID,
 		}
 		// add rest of device config
 		mpConfMap.readDeviceConfig(mpConfList)
@@ -211,7 +211,7 @@ func NewConfigLxcFromApi(vmr *VmRef, client *Client) (config *configLxc, err err
 		nicID, _ := strconv.Atoi(id[0])
 		// add nic id
 		nicConfMap := QemuDevice{
-			"id":      nicID,
+			"id": nicID,
 		}
 		// add rest of device config
 		nicConfMap.readDeviceConfig(nicConfList)
