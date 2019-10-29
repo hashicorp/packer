@@ -98,6 +98,7 @@ type FlatConfig struct {
 	SecurityGroups              []string               `mapstructure:"security_groups" required:"false" cty:"security_groups"`
 	Networks                    []string               `mapstructure:"networks" required:"false" cty:"networks"`
 	Ports                       []string               `mapstructure:"ports" required:"false" cty:"ports"`
+	NetworkDiscoveryCIDRs       []string               `mapstructure:"network_discovery_cidrs" required:"false" cty:"network_discovery_cidrs"`
 	UserData                    *string                `mapstructure:"user_data" required:"false" cty:"user_data"`
 	UserDataFile                *string                `mapstructure:"user_data_file" required:"false" cty:"user_data_file"`
 	InstanceName                *string                `mapstructure:"instance_name" required:"false" cty:"instance_name"`
@@ -211,6 +212,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"security_groups":               &hcldec.AttrSpec{Name: "security_groups", Type: cty.List(cty.String), Required: false},
 		"networks":                      &hcldec.AttrSpec{Name: "networks", Type: cty.List(cty.String), Required: false},
 		"ports":                         &hcldec.AttrSpec{Name: "ports", Type: cty.List(cty.String), Required: false},
+		"network_discovery_cidrs":       &hcldec.AttrSpec{Name: "network_discovery_cidrs", Type: cty.List(cty.String), Required: false},
 		"user_data":                     &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":                &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
 		"instance_name":                 &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
