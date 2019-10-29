@@ -1,17 +1,30 @@
 ## 1.4.5 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: New option to specify IAM policy for a temporary instance
+    profile [GH-8247]
 * builder/azure-arm: Allow specification of polling duration [GH-8226]
 * builder/azure-chroot: Add Azure chroot builder [GH-8185]
 * builder/azure: Deploy NSG if list of IP addresses is provided in config
     [GH-8203]
+* builder/azure: Set correct user agent for Azure client set [GH-8259]
+* builder/cloudstack: Add instance_display_name for cloudstack builder
+    [GH-8280]
+* builder/hyperv: Add the additional_disk_size option tho the hyperv vmcx
+    builder. [GH-8246]
+* builder/openstack: Add option to discover provisioning network [GH-8279]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
 * builder/proxmox: Add ability to select CPU type [GH-8201]
 * builder/proxmox: Add support for SCSI controller selection [GH-8199]
+* builder/proxmoz: Bump Proxmox dependency: [GH-8241]
 * builder/tencent: Add retry on remote api call [GH-8250]
+* builder/vagrant: Pass through logs from vagrant in real time rather than
+    buffering until command is complete [GH-8274]
 * communicator/winrm: Prevent busy loop while waiting for WinRM connection
     [GH-8213]
 * core: Add strftime function in templates [GH-8208]
+* core: Improve error message when comment is bad [GH-8267]
+* Fix various dropped errors: [GH-8230] [GH-8265] [GH-8276] [GH-8281]
 
 ### BUG FIXES:
 * builder/amazon: Fix region copy for non-ebs amazon builders [GH-8212]
@@ -26,6 +39,8 @@
     [GH-8248]
 * builder/hyperv: Use first adapter, rather than failing, when multiple
     adapters are attached to host OS's VM switch [GH-8234]
+* builder/openstack: Fix setting openstack metadata for use_blockstorage_volume
+    [GH-8186]
 * builder/openstack: Warn instead of failing on terminate if instance is
     already shut down [GH-8176]
 * post-processor/digitalocean-import: Fix panic when 'image_regions' not set
