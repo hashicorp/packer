@@ -176,9 +176,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if p.config.BaseUrl != "" {
 		// skip error because it has been validated by prepare
 		urlObj, _ := url.Parse(p.config.BaseUrl)
-		if err != nil {
-
-		}
 		bucketHost = urlObj.Host
 	} else {
 		bucketHost = "api.ucloud.cn"
