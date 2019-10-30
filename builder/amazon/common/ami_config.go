@@ -170,16 +170,22 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		}
 	}
 
-	var kmsKeys []string
+	kmsKeys := make([]string, 0)
 	if len(c.AMIKmsKeyId) > 0 {
 		kmsKeys = append(kmsKeys, c.AMIKmsKeyId)
 	}
 	if len(c.AMIRegionKMSKeyIDs) > 0 {
 		for _, kmsKey := range c.AMIRegionKMSKeyIDs {
-			if len(kmsKey) == 0 {
-				kmsKeys = append(kmsKeys, c.AMIKmsKeyId)
+			if len(kmsKey) > 0 {
+				kmsKeys = append(kmsKeys, kmsKey)
 			}
 		}
+	}
+
+	if len(kmsKeys) > 0 && !c.AMIEncryptBootVolume.True() {
+		errs = append(errs, fmt.Errorf("If you have set either "+
+			"region_kms_key_ids or kms_key_id, encrypt_boot must also be true."))
+
 	}
 	for _, kmsKey := range kmsKeys {
 		if !validateKmsKey(kmsKey) {
@@ -188,8 +194,9 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	if len(c.SnapshotUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
-			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+		if len(c.AMIKmsKeyId) == 0 && len(c.AMIRegionKMSKeyIDs) == 0 && c.AMIEncryptBootVolume.True() {
+			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted "+
+				"with default KMS key, see https://www.packer.io/docs/builders/amazon-ebs.html#region_kms_key_ids for more information"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {
 			for _, kmsKey := range c.AMIRegionKMSKeyIDs {
