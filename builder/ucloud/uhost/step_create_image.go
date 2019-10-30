@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common/retry"
 	"time"
 
@@ -17,8 +18,8 @@ type stepCreateImage struct {
 }
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	instance := state.Get("instance").(*uhost.UHostInstanceSet)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
@@ -32,14 +33,14 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 
 	resp, err := conn.CreateCustomImage(req)
 	if err != nil {
-		return halt(state, err, "Error on creating image")
+		return ucloudcommon.Halt(state, err, "Error on creating image")
 	}
 	ui.Message(fmt.Sprintf("Waiting for the created image %q to become available...", resp.ImageId))
 
 	err = retry.Config{
-		Tries: 200,
+		StartTimeout: time.Duration(config.WaitImageReadyTimeout) * time.Second,
 		ShouldRetry: func(err error) bool {
-			return isExpectedStateError(err)
+			return ucloudcommon.IsExpectedStateError(err)
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 12 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
@@ -47,26 +48,26 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		if err != nil {
 			return err
 		}
-		if inst == nil || inst.State != imageStateAvailable {
-			return newExpectedStateError("image", resp.ImageId)
+		if inst == nil || inst.State != ucloudcommon.ImageStateAvailable {
+			return ucloudcommon.NewExpectedStateError("image", resp.ImageId)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on waiting for image %q to become available", resp.ImageId))
+		return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on waiting for image %q to become available", resp.ImageId))
 	}
 
 	imageSet, err := client.DescribeImageById(resp.ImageId)
 	if err != nil {
-		return halt(state, err, fmt.Sprintf("Error on reading image when creating %q", resp.ImageId))
+		return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on reading image when creating %q", resp.ImageId))
 	}
 
 	s.image = imageSet
 	state.Put("image_id", imageSet.ImageId)
 
-	images := []imageInfo{
+	images := []ucloudcommon.ImageInfo{
 		{
 			ImageId:   imageSet.ImageId,
 			ProjectId: config.ProjectId,
@@ -74,7 +75,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		},
 	}
 
-	state.Put("ucloud_images", newImageInfoSet(images))
+	state.Put("ucloud_images", ucloudcommon.NewImageInfoSet(images))
 	ui.Message(fmt.Sprintf("Creating image %q complete", imageSet.ImageId))
 	return multistep.ActionContinue
 }
@@ -89,8 +90,8 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*UCloudClient)
-	conn := client.uhostconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UHostConn
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting image because of cancellation or error...")

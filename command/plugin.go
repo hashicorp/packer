@@ -75,6 +75,7 @@ import (
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
+	ucloudimportpostprocessor "github.com/hashicorp/packer/post-processor/ucloud-import"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
@@ -188,6 +189,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),
 	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
+	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
