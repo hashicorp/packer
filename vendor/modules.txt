@@ -508,10 +508,11 @@ github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312
-# github.com/ucloud/ucloud-sdk-go v0.8.7
+# github.com/ucloud/ucloud-sdk-go v0.12.0
 github.com/ucloud/ucloud-sdk-go/private/protocol/http
 github.com/ucloud/ucloud-sdk-go/private/utils
 github.com/ucloud/ucloud-sdk-go/services/uaccount
+github.com/ucloud/ucloud-sdk-go/services/ufile
 github.com/ucloud/ucloud-sdk-go/services/uhost
 github.com/ucloud/ucloud-sdk-go/services/unet
 github.com/ucloud/ucloud-sdk-go/services/vpc
@@ -522,6 +523,8 @@ github.com/ucloud/ucloud-sdk-go/ucloud/log
 github.com/ucloud/ucloud-sdk-go/ucloud/request
 github.com/ucloud/ucloud-sdk-go/ucloud/response
 github.com/ucloud/ucloud-sdk-go/ucloud/version
+# github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
+github.com/ufilesdk-dev/ufile-gosdk
 # github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5

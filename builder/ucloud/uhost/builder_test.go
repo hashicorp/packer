@@ -1,6 +1,7 @@
 package uhost
 
 import (
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
@@ -120,7 +121,7 @@ func TestBuilderPrepare_ImageDestinations(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if !reflect.DeepEqual(b.config.ImageDestinations, []ImageDestination{
+	if !reflect.DeepEqual(b.config.ImageDestinations, []ucloudcommon.ImageDestination{
 		{
 			ProjectId:   "project1",
 			Region:      "region1",

@@ -1,11 +1,17 @@
 package request
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 )
+
+// ToBase64Query will encode a wrapped string as base64 wrapped string
+func ToBase64Query(s *string) *string {
+	return String(base64.StdEncoding.EncodeToString([]byte(StringValue(s))))
+}
 
 // ToQueryMap will convert a request to string map
 func ToQueryMap(req Common) (map[string]string, error) {
