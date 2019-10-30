@@ -88,9 +88,9 @@ type Config struct {
 	// What box version to use when initializing Vagrant.
 	BoxVersion string `mapstructure:"box_version" required:"false"`
 	// a path to a golang template for a vagrantfile. Our default template can
-	// be found here. So far the only template variables available to you are
-	// {{ .BoxName }} and {{ .SyncedFolder }}, which correspond to the Packer
-	// options box_name and synced_folder.
+	// be found here. The template variables available to you are
+	// {{ .BoxName }}, {{ .SyncedFolder }}, and {{.InsertKey}}, which
+	// correspond to the Packer options box_name, synced_folder, and insert_key.
 	Template string `mapstructure:"template" required:"false"`
 
 	SyncedFolder string `mapstructure:"synced_folder"`

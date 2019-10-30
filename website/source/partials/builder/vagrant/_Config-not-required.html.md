@@ -33,9 +33,9 @@
 -   `box_version` (string) - What box version to use when initializing Vagrant.
     
 -   `template` (string) - a path to a golang template for a vagrantfile. Our default template can
-    be found here. So far the only template variables available to you are
-    {{ .BoxName }} and {{ .SyncedFolder }}, which correspond to the Packer
-    options box_name and synced_folder.
+    be found here. The template variables available to you are
+    {{ .BoxName }}, {{ .SyncedFolder }}, and {{.InsertKey}}, which
+    correspond to the Packer options box_name, synced_folder, and insert_key.
     
 -   `synced_folder` (string) - Synced Folder
 -   `skip_add` (bool) - Don't call "vagrant add" to add the box to your local environment; this
