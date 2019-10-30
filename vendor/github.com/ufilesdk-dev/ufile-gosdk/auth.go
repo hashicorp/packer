@@ -30,7 +30,7 @@ func NewAuth(publicKey, privateKey string) Auth {
 //Authorization 构造一个主要用于上传文件的签名，返回 HMAC-Sh1 的签名字符串，可以直接填充到 HTTP authorization header 里面。
 //key 是传到 ufile 所使用的文件名，bucekt 是文件上传后存放的 bucket。
 //method 就是你当前这个 HTTP 请求的 Method。
-//header 就是你当前这个 HTTP 的 header，我们主要拿里面的 content-type 来做签名 hash 计算。
+//header 就是你当前这个 HTTP 的 header。
 func (A Auth) Authorization(method, bucket, key string, header http.Header) string {
 	var sigData string
 	method = strings.ToUpper(method)
@@ -40,6 +40,7 @@ func (A Auth) Authorization(method, bucket, key string, header http.Header) stri
 	date := header.Get("Date")
 
 	sigData = method + "\n" + md5 + "\n" + contentType + "\n" + date + "\n"
+	sigData += A.CanonicalizedUcloudHeaders(header)
 	resource := "/" + bucket + "/" + key
 	sigData += resource
 
@@ -113,4 +114,26 @@ func (A Auth) AuthorizationBucketMgr(query url.Values) string {
 
 	query.Add("Signature", fmt.Sprintf("%x", h.Sum(nil)))
 	return query.Encode()
+}
+
+//CanonicalizedUcloudHeaders 用于将自定义请求报头规范化为string
+//ucloudHeader 支持自定义请求头
+func (A Auth) CanonicalizedUcloudHeaders(ucloudHeader http.Header) string {
+	keys := make([]string, 0)
+	headers := make(map[string]string, 0)
+	for k := range ucloudHeader {
+		newkey := strings.ToLower(k)
+		if strings.HasPrefix(newkey, "x-ufile-") || strings.HasPrefix(newkey, "x-ucloud-") {
+			headers[newkey] = strings.TrimSpace(ucloudHeader[k][0])
+			keys = append(keys, newkey)
+		}
+	}
+	sort.Strings(keys)
+
+	s := ""
+	for _, k := range keys {
+		v := headers[k]
+		s += k + ":" + v + "\n"
+	}
+	return s
 }

@@ -378,3 +378,42 @@ func (u *UFileRequest) ClassSwitch(keyName string, storageClass string) (err err
 	req.Header.Add("authorization", authorization)
 	return u.request(req)
 }
+
+//Rename 重命名指定文件
+//keyName 需要被重命名的源文件
+//newKeyName 修改后的新文件名
+//force 如果已存在同名文件，值为"true"则覆盖，否则会操作失败
+func (u *UFileRequest) Rename(keyName, newKeyName, force string) (err error) {
+
+	query := url.Values{}
+	query.Add("newFileName", newKeyName)
+	query.Add("force", force)
+	reqURL := u.genFileURL(keyName) + "?" + query.Encode()
+
+	req, err := http.NewRequest("PUT", reqURL, nil)
+	if err != nil {
+		return err
+	}
+	authorization := u.Auth.Authorization("PUT", u.BucketName, keyName, req.Header)
+	req.Header.Add("authorization", authorization)
+	return u.request(req)
+}
+
+//Copy 从同组织下的源Bucket中拷贝指定文件到目的Bucket中，并以新文件名命名
+//dstkeyName 拷贝到目的Bucket后的新文件名
+//srcBucketName 待拷贝文件所在的源Bucket名称
+//srcKeyName 待拷贝文件名称
+func (u *UFileRequest) Copy(dstkeyName, srcBucketName, srcKeyName string) (err error) {
+
+	reqURL := u.genFileURL(dstkeyName)
+
+	req, err := http.NewRequest("PUT", reqURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("X-Ufile-Copy-Source", "/" + srcBucketName + "/" + srcKeyName)
+
+	authorization := u.Auth.Authorization("PUT", u.BucketName, dstkeyName, req.Header)
+	req.Header.Add("authorization", authorization)
+	return u.request(req)
+}
