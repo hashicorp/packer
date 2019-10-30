@@ -54,18 +54,13 @@ builder.
 
 \~&gt; **Note:**  By default (`use_ssh_private_ip` is `false`), the launched uhost instance will be connecting with extranet by bounding with an EIP  (elastic public ip) automatically, which bandwidth is 30 Mb by default and paid by traffic.
 
--   `internet_bandwidth` - (string) Maximum bandwidth to the EIP (elastic public ip), measured in Mbps (Mega bit per second). 
-    The ranges for bandwidth are: 1-200 to pay by traffic, 1-800 to pay by bandwith. (Default: `1`).
-    
--   `internet_charge_mode` -(Optional) The EIP (elastic public ip) charge mode associated to UHost instance. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth. (Default: `traffic`).
-
 -   `vpc_id` - (string) The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 
 -   `subnet_id` - (string) The ID of subnet under the VPC. If  `vpc_id` is defined, the `subnet_id` is mandatory required. If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
 
--   `security_group` - (string) The ID of the fire wall associated to UHost instance. If `security_group` is not defined, 
+-   `security_group_id` - (string) The ID of the fire wall associated to UHost instance. If `security_group_id` is not defined, 
     the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default. It is supported by ICMP fire wall protocols.
-    You may refer to [security group](https://docs.ucloud.cn/network/firewall/firewall.html).
+    You may refer to [security group_id](https://docs.ucloud.cn/network/firewall/firewall.html).
 
 -   `image_description` (string) - The description of the image.
 
