@@ -16,6 +16,10 @@
     the name to give it. If left blank, will default to "packer_" plus your
     buildname.
     
+-   `insert_key` (bool) - If true, Vagrant will automatically insert a keypair to use for SSH,
+    replacing Vagrant's default insecure key inside the machine if detected.
+    By default, Packer sets this to false.
+    
 -   `provider` (string) - The vagrant provider.
     This parameter is required when source_path have more than one provider,
     or when using vagrant-cloud post-processor. Defaults to unset.

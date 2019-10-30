@@ -67,6 +67,10 @@ type Config struct {
 	// the name to give it. If left blank, will default to "packer_" plus your
 	// buildname.
 	BoxName string `mapstructure:"box_name" required:"false"`
+	// If true, Vagrant will automatically insert a keypair to use for SSH,
+	// replacing Vagrant's default insecure key inside the machine if detected.
+	// By default, Packer sets this to false.
+	InsertKey bool `mapstructure:"insert_key" required:"false"`
 	// The vagrant provider.
 	// This parameter is required when source_path have more than one provider,
 	// or when using vagrant-cloud post-processor. Defaults to unset.
@@ -255,6 +259,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			BoxName:      b.config.BoxName,
 			OutputDir:    b.config.OutputDir,
 			GlobalID:     b.config.GlobalID,
+			InsertKey:    b.config.InsertKey,
 		},
 		&StepAddBox{
 			BoxVersion:   b.config.BoxVersion,
