@@ -20,6 +20,8 @@ var (
 
 	// ErrUnexpected is the error for any unexpected error
 	ErrUnexpected = "client.UnexpectedError"
+
+	ErrCredentialExpired = "client.CredentialExpiredError"
 )
 
 // ClientError is the ucloud common errorfor server response

@@ -9,12 +9,23 @@ import (
 	"io"
 	"net/url"
 	"sort"
+	"time"
 )
 
 // Credential is the information of credential keys
 type Credential struct {
-	PublicKey  string
+	// UCloud Public Key
+	PublicKey string
+
+	// UCloud Private Key
 	PrivateKey string
+
+	// UCloud STS token for temporary usage
+	SecurityToken string
+
+	// Time the credentials will expire.
+	CanExpire bool
+	Expires   time.Time
 }
 
 // NewCredential will return credential config with default values
@@ -38,9 +49,16 @@ func (c *Credential) BuildCredentialedQuery(params map[string]string) string {
 	for k, v := range params {
 		urlValues.Set(k, v)
 	}
+	if len(c.SecurityToken) != 0 {
+		urlValues.Set("SecurityToken", c.SecurityToken)
+	}
 	urlValues.Set("PublicKey", c.PublicKey)
 	urlValues.Set("Signature", c.verifyAc(urlValues))
 	return urlValues.Encode()
+}
+
+func (c *Credential) IsExpired() bool {
+	return c.CanExpire && time.Now().After(c.Expires)
 }
 
 func (c *Credential) verifyAc(urlValues url.Values) string {
