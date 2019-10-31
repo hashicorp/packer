@@ -34,7 +34,7 @@
         "managed_image_name": "TargetImageName",
         "managed_image_resource_group_name": "TargetResourceGroup"
     
--   `shared_image_gallery_timeout` (duration string. ex: "1h5m2s") - How long to wait for an image to be published to the shared image
+-   `shared_image_gallery_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
     gallery before timing out. If your Packer build is failing on the
     Publishing to Shared Image Gallery step with the error `Original Error:
     context deadline exceeded`, but the image is present when you check your
@@ -187,7 +187,7 @@
     3.  PlanPublisher
     4.  PlanPromotionCode
     
--   `polling_duration_timeout` (duration string. ex: "1h5m2s") - The default PollingDuration for azure is 15mins, this property will override
+-   `polling_duration_timeout` (duration string | ex: "1h5m2s") - The default PollingDuration for azure is 15mins, this property will override
     that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
     If your Packer build is failing on the
     ARM deployment step with the error `Original Error:

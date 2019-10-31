@@ -135,14 +135,14 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 		}
 	}
 	// If we're pausing, we wrap the provisioner in a special pauser.
-	if rawP.PauseBefore != "" {
+	if rawP.PauseBefore != 0 {
 		provisioner = &PausedProvisioner{
-			PauseBefore: rawP.PauseBefore.Duration(),
+			PauseBefore: rawP.PauseBefore,
 			Provisioner: provisioner,
 		}
-	} else if rawP.Timeout != "" {
+	} else if rawP.Timeout != 0 {
 		provisioner = &TimeoutProvisioner{
-			Timeout:     rawP.Timeout.Duration(),
+			Timeout:     rawP.Timeout,
 			Provisioner: provisioner,
 		}
 	}

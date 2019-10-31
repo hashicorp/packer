@@ -67,7 +67,6 @@ type FlatConfig struct {
 	RootSSHKey                *string           `mapstructure:"root_ssh_key" cty:"root_ssh_key"`
 	ImageLabel                *string           `mapstructure:"image_label" cty:"image_label"`
 	Description               *string           `mapstructure:"image_description" cty:"image_description"`
-	RawStateTimeout           *string           `mapstructure:"state_timeout" cty:"state_timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -137,7 +136,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"root_ssh_key":                 &hcldec.AttrSpec{Name: "root_ssh_key", Type: cty.String, Required: false},
 		"image_label":                  &hcldec.AttrSpec{Name: "image_label", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
-		"state_timeout":                &hcldec.AttrSpec{Name: "state_timeout", Type: cty.String, Required: false},
 	}
 	return s
 }

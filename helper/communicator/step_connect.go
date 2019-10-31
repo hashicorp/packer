@@ -112,8 +112,8 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 		return action
 	}
 
-	if s.Config.PauseBeforeConnect.Duration() > 0 {
-		cancelled := s.pause(s.Config.PauseBeforeConnect.Duration(), ctx)
+	if s.Config.PauseBeforeConnect > 0 {
+		cancelled := s.pause(s.Config.PauseBeforeConnect, ctx)
 		if cancelled {
 			return multistep.ActionHalt
 		}

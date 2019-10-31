@@ -36,10 +36,9 @@ type Config struct {
 	ImageLabel   string   `mapstructure:"image_label"`
 	Description  string   `mapstructure:"image_description"`
 
-	RawStateTimeout string `mapstructure:"state_timeout"`
+	StateTimeout time.Duration `mapstructure:"state_timeout"`
 
-	stateTimeout time.Duration
-	interCtx     interpolate.Context
+	interCtx interpolate.Context
 }
 
 func createRandomRootPassword() (string, error) {
@@ -101,14 +100,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.RawStateTimeout == "" {
-		c.stateTimeout = 5 * time.Minute
-	} else {
-		if stateTimeout, err := time.ParseDuration(c.RawStateTimeout); err == nil {
-			c.stateTimeout = stateTimeout
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to parse state timeout: %s", err))
-		}
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {

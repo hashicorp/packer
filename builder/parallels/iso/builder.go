@@ -224,12 +224,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&parallelscommon.StepRun{},
 		&parallelscommon.StepTypeBootCommand{
-			BootWait:       b.config.BootWait.Duration(),
+			BootWait:       b.config.BootWait,
 			BootCommand:    b.config.FlatBootCommand(),
 			HostInterfaces: b.config.HostInterfaces,
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
-			GroupInterval:  b.config.BootConfig.BootGroupInterval.Duration(),
+			GroupInterval:  b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -251,7 +251,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&parallelscommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout.Duration(),
+			Timeout: b.config.ShutdownTimeout,
 		},
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.PrlctlPost,

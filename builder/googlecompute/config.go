@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -120,7 +121,7 @@ type Config struct {
 	// If true, launch a preemptible instance.
 	Preemptible bool `mapstructure:"preemptible" required:"false"`
 	// The time to wait for instance state changes. Defaults to "5m".
-	StateTimeout config.DurationString `mapstructure:"state_timeout" required:"false"`
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 	// The region in which to launch the instance. Defaults to the region
 	// hosting the specified zone.
 	Region string `mapstructure:"region" required:"false"`
@@ -291,12 +292,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.MachineType = "n1-standard-1"
 	}
 
-	if c.StateTimeout == "" {
-		c.StateTimeout = "5m"
-	}
-
-	if err := c.StateTimeout.Validate(); err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing state_timeout: %s", err))
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {

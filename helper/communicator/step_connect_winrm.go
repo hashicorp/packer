@@ -49,7 +49,7 @@ func (s *StepConnectWinRM) Run(ctx context.Context, state multistep.StateBag) mu
 	}()
 
 	log.Printf("Waiting for WinRM, up to timeout: %s", s.Config.WinRMTimeout)
-	timeout := time.After(s.Config.WinRMTimeout.Duration())
+	timeout := time.After(s.Config.WinRMTimeout)
 	for {
 		// Wait for either WinRM to become available, a timeout to occur,
 		// or an interrupt to come through.
@@ -136,7 +136,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 			Port:               port,
 			Username:           user,
 			Password:           password,
-			Timeout:            s.Config.WinRMTimeout.Duration(),
+			Timeout:            s.Config.WinRMTimeout,
 			Https:              s.Config.WinRMUseSSL,
 			Insecure:           s.Config.WinRMInsecure,
 			TransportDecorator: s.Config.WinRMTransportDecorator,

@@ -33,7 +33,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		cancelCh := make(chan struct{}, 1)
 		go func() {
 			defer close(cancelCh)
-			<-time.After(config.ShutdownTimeout.Duration())
+			<-time.After(config.ShutdownTimeout)
 		}()
 		ui.Say("Waiting for shutdown...")
 		if ok := driver.WaitForShutdown(cancelCh); ok {
@@ -63,7 +63,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		cancelCh := make(chan struct{}, 1)
 		go func() {
 			defer close(cancelCh)
-			<-time.After(config.ShutdownTimeout.Duration())
+			<-time.After(config.ShutdownTimeout)
 		}()
 
 		log.Printf("Waiting max %s for shutdown to complete", config.ShutdownTimeout)

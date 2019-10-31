@@ -88,7 +88,7 @@
     
 -   `preemptible` (bool) - If true, launch a preemptible instance.
     
--   `state_timeout` (duration string. ex: "1h5m2s") - The time to wait for instance state changes. Defaults to "5m".
+-   `state_timeout` (duration string | ex: "1h5m2s") - The time to wait for instance state changes. Defaults to "5m".
     
 -   `region` (string) - The region in which to launch the instance. Defaults to the region
     hosting the specified zone.

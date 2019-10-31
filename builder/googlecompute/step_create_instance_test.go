@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/stretchr/testify/assert"
@@ -231,7 +232,7 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	errCh := make(chan error, 1)
 
 	config := state.Get("config").(*Config)
-	config.StateTimeout = "1ms"
+	config.StateTimeout = 1 * time.Millisecond
 
 	d := state.Get("driver").(*DriverMock)
 	d.RunInstanceErrCh = errCh

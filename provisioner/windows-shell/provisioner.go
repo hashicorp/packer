@@ -35,7 +35,7 @@ type Config struct {
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
 	// This can be set high to allow for reboots.
-	StartRetryTimeout config.DurationString `mapstructure:"start_retry_timeout"`
+	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
 
 	// This is used in the template generation to format environment variables
 	// inside the `ExecuteCommand` template.
@@ -79,8 +79,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Inline = nil
 	}
 
-	if p.config.StartRetryTimeout == "" {
-		p.config.StartRetryTimeout = "5m"
+	if p.config.StartRetryTimeout == 0 {
+		p.config.StartRetryTimeout = 5 * time.Minute
 	}
 
 	if p.config.RemotePath == "" {
@@ -202,7 +202,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		// and then the command is executed but the file doesn't exist
 		// any longer.
 		var cmd *packer.RemoteCmd
-		err = retry.Config{StartTimeout: p.config.StartRetryTimeout.Duration()}.Run(ctx, func(ctx context.Context) error {
+		err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}

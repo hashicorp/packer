@@ -11,7 +11,7 @@
     as ssh so you can execute packer builds on a remote host. Defaults to
     Empty.
     
--   `init_timeout` (string) - The timeout in seconds to wait for the the
+-   `init_timeout` (duration string | ex: "1h5m2s") - The timeout in seconds to wait for the the
     container to start. Defaults to 20 seconds.
     
 -   `create_options` ([]string) - Options to pass to lxc-create. For

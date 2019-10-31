@@ -44,7 +44,7 @@ type Config struct {
 	RestartCheckCommand string `mapstructure:"restart_check_command"`
 
 	// The timeout for waiting for the machine to restart
-	RestartTimeout config.DurationString `mapstructure:"restart_timeout"`
+	RestartTimeout time.Duration `mapstructure:"restart_timeout"`
 
 	// Whether to check the registry (see RegistryKeys) for pending reboots
 	CheckKey bool `mapstructure:"check_registry"`
@@ -85,11 +85,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RestartCheckCommand = DefaultRestartCheckCommand
 	}
 
-	if p.config.RestartTimeout == "" {
-		p.config.RestartTimeout = "5m"
-	}
-	if err := p.config.RestartTimeout.Validate(); err != nil {
-		return err
+	if p.config.RestartTimeout == 0 {
+		p.config.RestartTimeout = 5 * time.Minute
 	}
 
 	if len(p.config.RegistryKeys) == 0 {
@@ -110,7 +107,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 	var cmd *packer.RemoteCmd
 	command := p.config.RestartCommand
-	err := retry.Config{StartTimeout: p.config.RestartTimeout.Duration()}.Run(ctx, func(context.Context) error {
+	err := retry.Config{StartTimeout: p.config.RestartTimeout}.Run(ctx, func(context.Context) error {
 		cmd = &packer.RemoteCmd{Command: command}
 		return cmd.RunWithUi(ctx, comm, ui)
 	})
@@ -130,7 +127,7 @@ var waitForRestart = func(ctx context.Context, p *Provisioner, comm packer.Commu
 	ui := p.ui
 	ui.Say("Waiting for machine to restart...")
 	waitDone := make(chan bool, 1)
-	timeout := time.After(p.config.RestartTimeout.Duration())
+	timeout := time.After(p.config.RestartTimeout)
 	var err error
 
 	p.comm = comm

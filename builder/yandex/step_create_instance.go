@@ -112,7 +112,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 
-	ctx, cancel := context.WithTimeout(ctx, config.StateTimeout.Duration())
+	ctx, cancel := context.WithTimeout(ctx, config.StateTimeout)
 	defer cancel()
 
 	sourceImage, err := getImage(ctx, config, driver)
@@ -263,7 +263,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ctx, cancel := context.WithTimeout(context.Background(), config.StateTimeout.Duration())
+	ctx, cancel := context.WithTimeout(context.Background(), config.StateTimeout)
 	defer cancel()
 
 	if s.SerialLogFile != "" {

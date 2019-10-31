@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -118,7 +119,7 @@ type Config struct {
 	ctx interpolate.Context
 	// The time to wait for instance state changes.
 	// Defaults to `5m`.
-	StateTimeout config.DurationString `mapstructure:"state_timeout" required:"false"`
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -279,12 +280,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.StateTimeout == "" {
-		c.StateTimeout = "5m"
-	}
-
-	if err := c.StateTimeout.Validate(); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	// Check for any errors.

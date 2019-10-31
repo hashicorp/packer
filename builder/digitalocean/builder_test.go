@@ -165,7 +165,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.StateTimeout.Duration() != 6*time.Minute {
+	if b.config.StateTimeout != 6*time.Minute {
 		t.Errorf("invalid: %s", b.config.StateTimeout)
 	}
 
@@ -205,7 +205,7 @@ func TestBuilderPrepare_SnapshotTimeout(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.SnapshotTimeout.Duration() != 60*time.Minute {
+	if b.config.SnapshotTimeout != 60*time.Minute {
 		t.Errorf("invalid: %s", b.config.SnapshotTimeout)
 	}
 

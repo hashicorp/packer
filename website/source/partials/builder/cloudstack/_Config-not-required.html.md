@@ -1,6 +1,6 @@
 <!-- Code generated from the comments of the Config struct in builder/cloudstack/config.go; DO NOT EDIT MANUALLY -->
 
--   `async_timeout` (duration string. ex: "1h5m2s") - The time duration to wait for async calls to
+-   `async_timeout` (duration string | ex: "1h5m2s") - The time duration to wait for async calls to
     finish. Defaults to 30m.
     
 -   `http_get_only` (bool) - Some cloud providers only allow HTTP GET calls
@@ -32,7 +32,7 @@
     attached to a virtual machine. Defaults to `false`. This option is only
     available when using `source_iso`.
     
--   `eject_iso_delay` (duration string. ex: "1h5m2s") - Configure the duration time to wait, making sure virtual machine is able
+-   `eject_iso_delay` (duration string | ex: "1h5m2s") - Configure the duration time to wait, making sure virtual machine is able
     to finish installing OS before it ejects safely. Requires `eject_iso`
     set to `true` and this option is only available when using `source_iso`.
     

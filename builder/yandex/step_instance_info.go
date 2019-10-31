@@ -22,7 +22,7 @@ func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say(fmt.Sprintf("Waiting for instance with id %s to become active...", instanceID))
 
-	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout.Duration())
+	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
 	defer cancel()
 
 	instance, err := sdk.Compute().Instance().Get(ctx, &compute.GetInstanceRequest{

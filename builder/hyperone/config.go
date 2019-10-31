@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/json"
@@ -27,7 +28,7 @@ const (
 
 	defaultDiskType     = "ssd"
 	defaultImageService = "564639bc052c084e2f2e3266"
-	defaultStateTimeout = "5m"
+	defaultStateTimeout = 5 * time.Minute
 	defaultUserName     = "guru"
 )
 
@@ -50,7 +51,7 @@ type Config struct {
 	TokenLogin string `mapstructure:"token_login" required:"false"`
 	// Timeout for waiting on the API to complete
 	// a request. Defaults to 5m.
-	StateTimeout config.DurationString `mapstructure:"state_timeout" required:"false"`
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 	// ID or name of the image to launch server from.
 	SourceImage string `mapstructure:"source_image" required:"true"`
 	// The name of the resulting image. Defaults to
@@ -145,8 +146,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Comm.SSHUsername = defaultUserName
 	}
 
-	if c.Comm.SSHTimeout == "" {
-		c.Comm.SSHTimeout = "10m"
+	if c.Comm.SSHTimeout == 0 {
+		c.Comm.SSHTimeout = 10 * time.Minute
 	}
 
 	if c.APIURL == "" {
@@ -173,7 +174,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Project = cliConfig.Profile.Project.ID
 	}
 
-	if c.StateTimeout == "" {
+	if c.StateTimeout == 0 {
 		c.StateTimeout = defaultStateTimeout
 	}
 

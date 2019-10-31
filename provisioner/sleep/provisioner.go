@@ -11,7 +11,7 @@ import (
 )
 
 type Provisioner struct {
-	Duration config.DurationString
+	Duration time.Duration
 }
 
 var _ packer.Provisioner = new(Provisioner)
@@ -24,7 +24,7 @@ func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Commu
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case <-time.After(p.Duration.Duration()):
+	case <-time.After(p.Duration):
 		return nil
 	}
 }

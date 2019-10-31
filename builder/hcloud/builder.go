@@ -35,7 +35,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	opts := []hcloud.ClientOption{
 		hcloud.WithToken(b.config.HCloudToken),
 		hcloud.WithEndpoint(b.config.Endpoint),
-		hcloud.WithPollInterval(b.config.PollInterval.Duration()),
+		hcloud.WithPollInterval(b.config.PollInterval),
 		hcloud.WithApplication("hcloud-packer", pluginVersion),
 	}
 	b.hcloudClient = hcloud.NewClient(opts...)

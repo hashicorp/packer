@@ -1,8 +1,9 @@
 package common
 
 import (
+	"time"
+
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -12,13 +13,13 @@ type SSHConfig struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHWaitTimeout config.DurationString `mapstructure:"ssh_wait_timeout"`
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
 }
 
 // Prepare sets the default values for SSH communicator properties.
 func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {
 	// TODO: backwards compatibility, write fixer instead
-	if c.SSHWaitTimeout != "" {
+	if c.SSHWaitTimeout != 0 {
 		c.Comm.SSHTimeout = c.SSHWaitTimeout
 	}
 

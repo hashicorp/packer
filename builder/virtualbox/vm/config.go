@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
@@ -71,8 +72,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
 	}
 
-	if c.PostShutdownDelay == "" {
-		c.PostShutdownDelay = "2s"
+	if c.PostShutdownDelay == 0 {
+		c.PostShutdownDelay = 2 * time.Second
 	}
 
 	// Prepare the errors

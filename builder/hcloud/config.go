@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -25,7 +26,7 @@ type Config struct {
 	HCloudToken string `mapstructure:"token"`
 	Endpoint    string `mapstructure:"endpoint"`
 
-	PollInterval config.DurationString `mapstructure:"poll_interval"`
+	PollInterval time.Duration `mapstructure:"poll_interval"`
 
 	ServerName  string       `mapstructure:"server_name"`
 	Location    string       `mapstructure:"location"`
@@ -78,8 +79,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			c.Endpoint = hcloud.Endpoint
 		}
 	}
-	if c.PollInterval == "" {
-		c.PollInterval = "500ms"
+	if c.PollInterval == 0 {
+		c.PollInterval = 500 * time.Millisecond
 	}
 
 	if c.SnapshotName == "" {
