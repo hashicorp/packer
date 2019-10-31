@@ -193,9 +193,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"packer-%s-%d", b.config.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
-	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
+	switch b.config.HardDriveInterface {
+	case "ide", "sata", "scsi", "nvme":
+		// do nothing
+	default:
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
+			errs, errors.New("hard_drive_interface can only be ide, sata, nvme or scsi"))
 	}
 
 	if b.config.SATAPortCount == 0 {
