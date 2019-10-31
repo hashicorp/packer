@@ -24,8 +24,8 @@ type FlatConfig struct {
 	Scripts             []string          `cty:"scripts"`
 	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
 	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars"`
-	StartRetryTimeout   *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
 	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format"`
+	StartRetryTimeout   *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -52,8 +52,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
-		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},
 		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
+		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},
 	}
 	return s
 }
