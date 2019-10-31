@@ -1,14 +1,11 @@
 package common
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 )
 
 // Define a mock struct to be used in unit tests for common aws steps.
@@ -29,15 +26,4 @@ func (m *mockEC2Conn_ModifyEBS) ModifyInstanceAttribute(modifyInput *ec2.ModifyI
 		return output, fmt.Errorf("fake ModifyInstanceAttribute error")
 	}
 	return output, nil
-}
-
-// Create statebag for running test
-func fakeModifyEBSBackedInstanceState() multistep.StateBag {
-	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
-	})
-	state.Put("instance", "i-12345")
-	return state
 }
