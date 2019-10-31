@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -36,10 +35,7 @@ type Config struct {
 	ImageLabel   string   `mapstructure:"image_label"`
 	Description  string   `mapstructure:"image_description"`
 
-	RawStateTimeout string `mapstructure:"state_timeout"`
-
-	stateTimeout time.Duration
-	interCtx     interpolate.Context
+	interCtx interpolate.Context
 }
 
 func createRandomRootPassword() (string, error) {
@@ -98,16 +94,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RootPass, err = createRandomRootPassword()
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
-		}
-	}
-
-	if c.RawStateTimeout == "" {
-		c.stateTimeout = 5 * time.Minute
-	} else {
-		if stateTimeout, err := time.ParseDuration(c.RawStateTimeout); err == nil {
-			c.stateTimeout = stateTimeout
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to parse state timeout: %s", err))
 		}
 	}
 

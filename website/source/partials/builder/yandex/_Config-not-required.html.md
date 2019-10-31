@@ -73,6 +73,6 @@
     
 -   `zone` (string) - The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
     
--   `state_timeout` (time.Duration) - The time to wait for instance state changes.
+-   `state_timeout` (duration string | ex: "1h5m2s") - The time to wait for instance state changes.
     Defaults to `5m`.
     

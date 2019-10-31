@@ -52,7 +52,7 @@ func TestParser_Parse(t *testing.T) {
 							RawSingleISOUrl: strPtr("http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso"),
 							BootCommand:     []string{"..."},
 							ShutdownCommand: strPtr("echo 'vagrant' | sudo -S shutdown -P now"),
-							RawBootWait:     strPtr("10s"),
+							BootWait:        strPtr("10s"),
 							VBoxManage:      [][]string{},
 							VBoxManagePost:  [][]string{},
 						},

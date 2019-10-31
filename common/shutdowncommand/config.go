@@ -3,7 +3,6 @@
 package shutdowncommand
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/hashicorp/packer/template/interpolate"
@@ -23,22 +22,13 @@ type ShutdownConfig struct {
 	// virtual machine to actually shut down. If the machine doesn't shut down
 	// in this time it is considered an error. By default, the time out is "5m"
 	// (five minutes).
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout" required:"false"`
-
-	ShutdownTimeout time.Duration ``
+	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout" required:"false"`
 }
 
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
-	if c.RawShutdownTimeout == "" {
-		c.RawShutdownTimeout = "5m"
+	if c.ShutdownTimeout == 0 {
+		c.ShutdownTimeout = 5 * time.Minute
 	}
 
-	var errs []error
-	var err error
-	c.ShutdownTimeout, err = time.ParseDuration(c.RawShutdownTimeout)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
-	return errs
+	return nil
 }

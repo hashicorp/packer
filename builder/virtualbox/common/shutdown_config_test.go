@@ -26,17 +26,9 @@ func TestShutdownConfigPrepare_ShutdownTimeout(t *testing.T) {
 	var c *ShutdownConfig
 	var errs []error
 
-	// Test with a bad value
-	c = testShutdownConfig()
-	c.RawShutdownTimeout = "this is not good"
-	errs = c.Prepare(interpolate.NewContext())
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
 	// Test with a good one
 	c = testShutdownConfig()
-	c.RawShutdownTimeout = "5s"
+	c.ShutdownTimeout = 5 * time.Second
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
@@ -50,17 +42,9 @@ func TestShutdownConfigPrepare_PostShutdownDelay(t *testing.T) {
 	var c *ShutdownConfig
 	var errs []error
 
-	// Test with a bad value
-	c = testShutdownConfig()
-	c.RawPostShutdownDelay = "this is not good"
-	errs = c.Prepare(interpolate.NewContext())
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
 	// Test with default value
 	c = testShutdownConfig()
-	c.RawPostShutdownDelay = ""
+	c.PostShutdownDelay = 0
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
@@ -71,12 +55,12 @@ func TestShutdownConfigPrepare_PostShutdownDelay(t *testing.T) {
 
 	// Test with a good one
 	c = testShutdownConfig()
-	c.RawPostShutdownDelay = "5s"
+	c.PostShutdownDelay = 5 * time.Millisecond
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
-	if c.PostShutdownDelay != 5*time.Second {
+	if c.PostShutdownDelay != 5*time.Millisecond {
 		t.Fatalf("bad: %s", c.PostShutdownDelay)
 	}
 }

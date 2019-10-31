@@ -15,7 +15,7 @@
     that uses `docker exec` and `docker cp` to execute scripts and copy
     files.
     
--   `pause_before_connecting` (time.Duration) - We recommend that you enable SSH or WinRM as the very last step in your
+-   `pause_before_connecting` (duration string | ex: "1h5m2s") - We recommend that you enable SSH or WinRM as the very last step in your
     guest's bootstrap script, but sometimes you may have a race condition where
     you need Packer to wait before attempting to connect to your guest.
     
