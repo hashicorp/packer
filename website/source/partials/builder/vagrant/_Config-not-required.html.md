@@ -16,6 +16,10 @@
     the name to give it. If left blank, will default to "packer_" plus your
     buildname.
     
+-   `insert_key` (bool) - If true, Vagrant will automatically insert a keypair to use for SSH,
+    replacing Vagrant's default insecure key inside the machine if detected.
+    By default, Packer sets this to false.
+    
 -   `provider` (string) - The vagrant provider.
     This parameter is required when source_path have more than one provider,
     or when using vagrant-cloud post-processor. Defaults to unset.
@@ -29,9 +33,9 @@
 -   `box_version` (string) - What box version to use when initializing Vagrant.
     
 -   `template` (string) - a path to a golang template for a vagrantfile. Our default template can
-    be found here. So far the only template variables available to you are
-    {{ .BoxName }} and {{ .SyncedFolder }}, which correspond to the Packer
-    options box_name and synced_folder.
+    be found here. The template variables available to you are
+    {{ .BoxName }}, {{ .SyncedFolder }}, and {{.InsertKey}}, which
+    correspond to the Packer options box_name, synced_folder, and insert_key.
     
 -   `synced_folder` (string) - Synced Folder
 -   `skip_add` (bool) - Don't call "vagrant add" to add the box to your local environment; this
