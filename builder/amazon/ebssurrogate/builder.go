@@ -8,9 +8,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/iam"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -271,7 +271,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepGetPassword{
 			Debug:     b.config.PackerDebug,
 			Comm:      &b.config.RunConfig.Comm,
-			Timeout:   b.config.WindowsPasswordTimeout,
+			Timeout:   b.config.WindowsPasswordTimeout.Duration(),
 			BuildName: b.config.PackerBuildName,
 		},
 		&communicator.StepConnect{

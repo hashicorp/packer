@@ -1,0 +1,11 @@
+{
+    "builders": [{
+        "type": "foo"
+    }],
+
+    "provisioners": [{
+        "timeout": 555,
+        "type": "bar",
+        "only": ["foo"]
+    }]
+}

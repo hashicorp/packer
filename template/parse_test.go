@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -99,7 +98,7 @@ func TestParse(t *testing.T) {
 				Provisioners: []*Provisioner{
 					{
 						Type:        "something",
-						PauseBefore: 1 * time.Second,
+						PauseBefore: "1s",
 					},
 				},
 			},
@@ -112,7 +111,7 @@ func TestParse(t *testing.T) {
 				Provisioners: []*Provisioner{
 					{
 						Type:    "something",
-						Timeout: 5 * time.Minute,
+						Timeout: "5m",
 					},
 				},
 			},
@@ -356,6 +355,12 @@ func TestParse(t *testing.T) {
 				MinVersion: "1.2",
 			},
 			false,
+		},
+
+		{
+			"parse-bad-prov-timeout.json",
+			nil,
+			true,
 		},
 
 		{

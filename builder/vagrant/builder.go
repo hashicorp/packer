@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
@@ -155,8 +154,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.Comm.SSHTimeout == 0 {
-		b.config.Comm.SSHTimeout = 10 * time.Minute
+	if b.config.Comm.SSHTimeout == "" {
+		b.config.Comm.SSHTimeout = "10m"
 	}
 
 	if b.config.Comm.Type != "ssh" {

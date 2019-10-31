@@ -28,7 +28,7 @@ func TestShutdownConfigPrepare_ShutdownTimeout(t *testing.T) {
 
 	// Test with a bad value
 	c = testShutdownConfig()
-	c.RawShutdownTimeout = "this is not good"
+	c.ShutdownTimeout = "this is not good"
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatalf("should have error")
@@ -36,12 +36,12 @@ func TestShutdownConfigPrepare_ShutdownTimeout(t *testing.T) {
 
 	// Test with a good one
 	c = testShutdownConfig()
-	c.RawShutdownTimeout = "5s"
+	c.ShutdownTimeout = "5s"
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
-	if c.ShutdownTimeout != 5*time.Second {
+	if c.ShutdownTimeout.Duration() != 5*time.Second {
 		t.Fatalf("bad: %s", c.ShutdownTimeout)
 	}
 }

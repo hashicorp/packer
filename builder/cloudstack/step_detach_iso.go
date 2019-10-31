@@ -25,9 +25,9 @@ func (s *stepDetachIso) Run(ctx context.Context, state multistep.StateBag) multi
 	ui.Say("Checking attached iso...")
 
 	// Wait to make call detachIso
-	if config.EjectISODelay > 0 {
+	if config.EjectISODelay.Duration() > 0 {
 		ui.Message(fmt.Sprintf("Waiting for %v before detaching ISO from virtual machine...", config.EjectISODelay))
-		time.Sleep(config.EjectISODelay)
+		time.Sleep(config.EjectISODelay.Duration())
 	}
 
 	client := state.Get("client").(*cloudstack.CloudStackClient)

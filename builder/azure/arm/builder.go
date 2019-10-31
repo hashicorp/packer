@@ -80,8 +80,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
 		b.config.ClientConfig.CloudEnvironment(),
-		b.config.SharedGalleryTimeout,
-		b.config.PollingDurationTimeout,
+		b.config.SharedGalleryTimeout.Duration(),
+		b.config.PollingDurationTimeout.Duration(),
 		spnCloud,
 		spnKeyVault)
 

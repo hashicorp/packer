@@ -96,11 +96,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Headless: b.config.Headless,
 		},
 		&vboxcommon.StepTypeBootCommand{
-			BootWait:      b.config.BootWait,
+			BootWait:      b.config.BootWait.Duration(),
 			BootCommand:   b.config.FlatBootCommand(),
 			VMName:        b.config.VMName,
 			Ctx:           b.config.ctx,
-			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			GroupInterval: b.config.BootConfig.BootGroupInterval.Duration(),
 			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
@@ -124,8 +124,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
-			Delay:   b.config.PostShutdownDelay,
+			Timeout: b.config.ShutdownTimeout.Duration(),
+			Delay:   b.config.PostShutdownDelay.Duration(),
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,

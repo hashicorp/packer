@@ -31,7 +31,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RestartTimeout != 5*time.Minute {
+	if p.config.RestartTimeout.Duration() != 5*time.Minute {
 		t.Errorf("unexpected restart timeout: %s", p.config.RestartTimeout)
 	}
 
@@ -50,7 +50,7 @@ func TestProvisionerPrepare_ConfigRetryTimeout(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RestartTimeout != 1*time.Minute {
+	if p.config.RestartTimeout.Duration() != 1*time.Minute {
 		t.Errorf("unexpected restart timeout: %s", p.config.RestartTimeout)
 	}
 }

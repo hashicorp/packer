@@ -11,18 +11,18 @@ func TestConfigPrepare(t *testing.T) {
 
 	// Test a default boot_wait
 	c = new(BootConfig)
-	c.RawBootWait = ""
+	c.BootWait = ""
 	errs := c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
-	if c.RawBootWait != "10s" {
-		t.Fatalf("bad value: %s", c.RawBootWait)
+	if c.BootWait != "10s" {
+		t.Fatalf("bad value: %s", c.BootWait)
 	}
 
 	// Test with a bad boot_wait
 	c = new(BootConfig)
-	c.RawBootWait = "this is not good"
+	c.BootWait = "this is not good"
 	errs = c.Prepare(&interpolate.Context{})
 	if len(errs) == 0 {
 		t.Fatal("should error")
@@ -30,7 +30,7 @@ func TestConfigPrepare(t *testing.T) {
 
 	// Test with a good one
 	c = new(BootConfig)
-	c.RawBootWait = "5s"
+	c.BootWait = "5s"
 	errs = c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)

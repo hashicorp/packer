@@ -29,12 +29,11 @@ type FlatConfig struct {
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label"`
-	RawBootGroupInterval      *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait               *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval         *string           `cty:"boot_group_interval"`
 	DisableVNC                *bool             `mapstructure:"disable_vnc" cty:"disable_vnc"`
-	RawBootKeyInterval        *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
+	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
 	FusionAppPath             *string           `mapstructure:"fusion_app_path" required:"false" cty:"fusion_app_path"`
 	RemoteType                *string           `mapstructure:"remote_type" required:"false" cty:"remote_type"`
 	RemoteDatastore           *string           `mapstructure:"remote_datastore" required:"false" cty:"remote_datastore"`
@@ -62,7 +61,7 @@ type FlatConfig struct {
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max"`
 	VNCDisablePassword        *bool             `mapstructure:"vnc_disable_password" required:"false" cty:"vnc_disable_password"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout        *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect        *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
 	SSHHost                   *string           `mapstructure:"ssh_host" cty:"ssh_host"`
@@ -161,7 +160,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":         &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                      &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":            &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"disable_vnc":                    &hcldec.AttrSpec{Name: "disable_vnc", Type: cty.Bool, Required: false},
 		"boot_key_interval":              &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
 		"fusion_app_path":                &hcldec.AttrSpec{Name: "fusion_app_path", Type: cty.String, Required: false},

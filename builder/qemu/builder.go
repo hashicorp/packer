@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
@@ -320,7 +319,7 @@ type Config struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
+	SSHWaitTimeout config.DurationString `mapstructure:"ssh_wait_timeout" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
@@ -446,7 +445,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// TODO: backwards compatibility, write fixer instead
-	if b.config.SSHWaitTimeout != 0 {
+	if b.config.SSHWaitTimeout != "" {
 		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
 
@@ -461,6 +460,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	if es := b.config.Comm.Prepare(&b.config.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
+	}
+
+	if err := b.config.SSHWaitTimeout.Validate(); err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {

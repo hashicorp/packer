@@ -35,16 +35,17 @@ type Config struct {
 	SpacesKey    string `mapstructure:"spaces_key"`
 	SpacesSecret string `mapstructure:"spaces_secret"`
 
-	SpacesRegion string        `mapstructure:"spaces_region"`
-	SpaceName    string        `mapstructure:"space_name"`
-	ObjectName   string        `mapstructure:"space_object_name"`
-	SkipClean    bool          `mapstructure:"skip_clean"`
-	Tags         []string      `mapstructure:"image_tags"`
-	Name         string        `mapstructure:"image_name"`
-	Description  string        `mapstructure:"image_description"`
-	Distribution string        `mapstructure:"image_distribution"`
-	ImageRegions []string      `mapstructure:"image_regions"`
-	Timeout      time.Duration `mapstructure:"timeout"`
+	SpacesRegion string   `mapstructure:"spaces_region"`
+	SpaceName    string   `mapstructure:"space_name"`
+	ObjectName   string   `mapstructure:"space_object_name"`
+	SkipClean    bool     `mapstructure:"skip_clean"`
+	Tags         []string `mapstructure:"image_tags"`
+	Name         string   `mapstructure:"image_name"`
+	Description  string   `mapstructure:"image_description"`
+	Distribution string   `mapstructure:"image_distribution"`
+	ImageRegions []string `mapstructure:"image_regions"`
+
+	Timeout config.DurationString `mapstructure:"timeout"`
 
 	ctx interpolate.Context
 }
@@ -103,8 +104,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.Distribution = "Unkown"
 	}
 
-	if p.config.Timeout == 0 {
-		p.config.Timeout = 20 * time.Minute
+	if p.config.Timeout == "" {
+		p.config.Timeout = "20m"
 	}
 
 	errs := new(packer.MultiError)
@@ -207,7 +208,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	ui.Message(fmt.Sprintf("Waiting for import of image %s to complete (may take a while)", p.config.Name))
-	err = waitUntilImageAvailable(client, image.ID, p.config.Timeout)
+	err = waitUntilImageAvailable(client, image.ID, p.config.Timeout.Duration())
 	if err != nil {
 		return nil, false, false, fmt.Errorf("Import of image %s failed with error: %s", p.config.Name, err)
 	}
@@ -221,7 +222,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		regions = regions[:len(regions)-1]
 
 		ui.Message(fmt.Sprintf("Distributing image %s to additional regions: %v", p.config.Name, regions))
-		err = distributeImageToRegions(client, image.ID, regions, p.config.Timeout)
+		err = distributeImageToRegions(client, image.ID, regions, p.config.Timeout.Duration())
 		if err != nil {
 			return nil, false, false, err
 		}

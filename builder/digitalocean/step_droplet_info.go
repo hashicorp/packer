@@ -19,7 +19,7 @@ func (s *stepDropletInfo) Run(ctx context.Context, state multistep.StateBag) mul
 
 	ui.Say("Waiting for droplet to become active...")
 
-	err := waitForDropletState("active", dropletID, client, c.StateTimeout)
+	err := waitForDropletState("active", dropletID, client, c.StateTimeout.Duration())
 	if err != nil {
 		err := fmt.Errorf("Error waiting for droplet to become active: %s", err)
 		state.Put("error", err)

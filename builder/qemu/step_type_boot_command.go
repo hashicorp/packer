@@ -50,10 +50,10 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Wait the for the vm to boot.
-	if int64(config.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait.String()))
+	if int64(config.BootWait.Duration()) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait))
 		select {
-		case <-time.After(config.BootWait):
+		case <-time.After(config.BootWait.Duration()):
 			break
 		case <-ctx.Done():
 			return multistep.ActionHalt
@@ -105,7 +105,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		config.VMName,
 	}
 
-	d := bootcommand.NewVNCDriver(c, config.VNCConfig.BootKeyInterval)
+	d := bootcommand.NewVNCDriver(c, config.VNCConfig.BootKeyInterval.Duration())
 
 	ui.Say("Typing the boot command over VNC...")
 	command, err := interpolate.Render(config.VNCConfig.FlatBootCommand(), &configCtx)

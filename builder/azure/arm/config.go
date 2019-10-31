@@ -139,7 +139,7 @@ type Config struct {
 	// Azure dashboard, then you probably need to increase this timeout from
 	// its default of "60m" (valid time units include `s` for seconds, `m` for
 	// minutes, and `h` for hours.)
-	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
+	SharedGalleryTimeout config.DurationString `mapstructure:"shared_image_gallery_timeout"`
 	// PublisherName for your base image. See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
@@ -320,7 +320,7 @@ type Config struct {
 	// context deadline exceeded`, then you probably need to increase this timeout from
 	// its default of "15m" (valid time units include `s` for seconds, `m` for
 	// minutes, and `h` for hours.)
-	PollingDurationTimeout time.Duration `mapstructure:"polling_duration_timeout" required:"false"`
+	PollingDurationTimeout config.DurationString `mapstructure:"polling_duration_timeout" required:"false"`
 	// If either Linux or Windows is specified Packer will
 	// automatically configure authentication credentials for the provisioned
 	// machine. For Linux this configures an SSH authorized key. For Windows
@@ -550,8 +550,8 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 }
 
 func setSshValues(c *Config) error {
-	if c.Comm.SSHTimeout == 0 {
-		c.Comm.SSHTimeout = 20 * time.Minute
+	if c.Comm.SSHTimeout == "" {
+		c.Comm.SSHTimeout = "20m"
 	}
 
 	if c.Comm.SSHPrivateKeyFile != "" {
@@ -867,9 +867,9 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A list of replication_regions must be specified for shared_image_gallery_destination"))
 		}
 	}
-	if c.SharedGalleryTimeout == 0 {
+	if c.SharedGalleryTimeout == "" {
 		// default to a one-hour timeout. In the sdk, the default is 15 m.
-		c.SharedGalleryTimeout = 60 * time.Minute
+		c.SharedGalleryTimeout = "60m"
 	}
 
 	if c.ManagedImageOSDiskSnapshotName != "" {
@@ -920,9 +920,9 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Polling Duration Timeout
-	if c.PollingDurationTimeout == 0 {
+	if c.PollingDurationTimeout == "" {
 		// In the sdk, the default is 15 m.
-		c.PollingDurationTimeout = 15 * time.Minute
+		c.PollingDurationTimeout = "15m"
 	}
 
 	/////////////////////////////////////////////

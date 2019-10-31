@@ -4,9 +4,9 @@ package common
 
 import (
 	"errors"
-	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -26,7 +26,7 @@ type SSHConfig struct {
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
+	SSHWaitTimeout config.DurationString `mapstructure:"ssh_wait_timeout"`
 }
 
 func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {
@@ -43,7 +43,7 @@ func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// TODO: backwards compatibility, write fixer instead
-	if c.SSHWaitTimeout != 0 {
+	if c.SSHWaitTimeout != "" {
 		c.Comm.SSHTimeout = c.SSHWaitTimeout
 	}
 

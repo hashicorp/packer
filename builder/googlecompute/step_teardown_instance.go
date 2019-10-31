@@ -34,7 +34,7 @@ func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.stateTimeout):
+		case <-time.After(config.StateTimeout.Duration()):
 			err = errors.New("time out while waiting for instance to delete")
 		}
 	}
@@ -64,7 +64,7 @@ func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.stateTimeout):
+		case <-time.After(config.StateTimeout.Duration()):
 			err = errors.New("time out while waiting for disk to delete")
 		}
 	}

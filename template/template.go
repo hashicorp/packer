@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/helper/config"
 )
 
 // Template represents the parsed template that is used to configure
@@ -140,8 +140,8 @@ type Provisioner struct {
 	Type        string                 `json:"type"`
 	Config      map[string]interface{} `json:"config,omitempty"`
 	Override    map[string]interface{} `json:"override,omitempty"`
-	PauseBefore time.Duration          `mapstructure:"pause_before" json:"pause_before,omitempty"`
-	Timeout     time.Duration          `mapstructure:"timeout" json:"timeout,omitempty"`
+	PauseBefore config.DurationString  `mapstructure:"pause_before" json:"pause_before,omitempty"`
+	Timeout     config.DurationString  `mapstructure:"timeout" json:"timeout,omitempty"`
 }
 
 // MarshalJSON conducts the necessary flattening of the Provisioner struct

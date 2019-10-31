@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -32,12 +31,12 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
-	ImageName            string        `mapstructure:"image_name"`
-	Shape                string        `mapstructure:"shape"`
-	SourceImageList      string        `mapstructure:"source_image_list"`
-	SourceImageListEntry int           `mapstructure:"source_image_list_entry"`
-	SnapshotTimeout      time.Duration `mapstructure:"snapshot_timeout"`
-	DestImageList        string        `mapstructure:"dest_image_list"`
+	ImageName            string                `mapstructure:"image_name"`
+	Shape                string                `mapstructure:"shape"`
+	SourceImageList      string                `mapstructure:"source_image_list"`
+	SourceImageListEntry int                   `mapstructure:"source_image_list_entry"`
+	SnapshotTimeout      config.DurationString `mapstructure:"snapshot_timeout"`
+	DestImageList        string                `mapstructure:"dest_image_list"`
 	// Attributes and Attributes file are both optional and mutually exclusive.
 	Attributes     string `mapstructure:"attributes"`
 	AttributesFile string `mapstructure:"attributes_file"`
@@ -78,8 +77,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
 
-	if c.SnapshotTimeout == 0 {
-		c.SnapshotTimeout = 20 * time.Minute
+	if c.SnapshotTimeout == "" {
+		c.SnapshotTimeout = "20m"
 	}
 
 	// Validate that all required fields are present
