@@ -151,43 +151,6 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_StateTimeout(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test default
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Test set
-	config["state_timeout"] = "5m"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Test bad
-	config["state_timeout"] = "tubes"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-}
-
 func TestBuilderPrepare_ImageLabel(t *testing.T) {
 	var b Builder
 	config := testConfig()
