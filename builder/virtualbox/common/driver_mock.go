@@ -13,6 +13,10 @@ type DriverMock struct {
 	CreateSCSIControllerController string
 	CreateSCSIControllerErr        error
 
+	CreateNVMeControllerVM         string
+	CreateNVMeControllerController string
+	CreateNVMeControllerErr        error
+
 	DeleteCalled bool
 	DeleteName   string
 	DeleteErr    error
@@ -68,6 +72,12 @@ func (d *DriverMock) CreateSCSIController(vm string, controller string) error {
 	d.CreateSCSIControllerVM = vm
 	d.CreateSCSIControllerController = vm
 	return d.CreateSCSIControllerErr
+}
+
+func (d *DriverMock) CreateNVMeController(vm string, controller string, portcount int) error {
+	d.CreateNVMeControllerVM = vm
+	d.CreateNVMeControllerController = vm
+	return d.CreateNVMeControllerErr
 }
 
 func (d *DriverMock) Delete(name string) error {
