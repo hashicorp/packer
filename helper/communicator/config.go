@@ -470,7 +470,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	return errs
 }
 
-func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
+func (c *Config) prepareWinRM(ctx *interpolate.Context) (errs []error) {
 	if c.WinRMPort == 0 && c.WinRMUseSSL {
 		c.WinRMPort = 5986
 	} else if c.WinRMPort == 0 {
@@ -485,7 +485,6 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 		c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
 	}
 
-	var errs []error
 	if c.WinRMUser == "" {
 		errs = append(errs, errors.New("winrm_username must be specified."))
 	}

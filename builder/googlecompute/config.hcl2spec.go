@@ -82,7 +82,7 @@ type FlatConfig struct {
 	OmitExternalIP               *bool                      `mapstructure:"omit_external_ip" required:"false" cty:"omit_external_ip"`
 	OnHostMaintenance            *string                    `mapstructure:"on_host_maintenance" required:"false" cty:"on_host_maintenance"`
 	Preemptible                  *bool                      `mapstructure:"preemptible" required:"false" cty:"preemptible"`
-	RawStateTimeout              *string                    `mapstructure:"state_timeout" required:"false" cty:"state_timeout"`
+	StateTimeout                 *string                    `mapstructure:"state_timeout" required:"false" cty:"state_timeout"`
 	Region                       *string                    `mapstructure:"region" required:"false" cty:"region"`
 	Scopes                       []string                   `mapstructure:"scopes" required:"false" cty:"scopes"`
 	ServiceAccountEmail          *string                    `mapstructure:"service_account_email" required:"false" cty:"service_account_email"`

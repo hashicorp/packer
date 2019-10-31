@@ -20,11 +20,11 @@
 -   `snapshot_regions` ([]string) - The regions of the resulting
     snapshot that will appear in your account.
     
--   `state_timeout` (time.Duration) - The time to wait, as a duration string, for a
+-   `state_timeout` (duration string | ex: "1h5m2s") - The time to wait, as a duration string, for a
     droplet to enter a desired state (such as "active") before timing out. The
     default state timeout is "6m".
     
--   `snapshot_timeout` (time.Duration) - How long to wait for an image to be published to the shared image
+-   `snapshot_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
     gallery before timing out. If your Packer build is failing on the
     Publishing to Shared Image Gallery step with the error `Original Error:
     context deadline exceeded`, but the image is present when you check your

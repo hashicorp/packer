@@ -26,10 +26,9 @@ type FlatConfig struct {
 	ISOUrls                        []string          `mapstructure:"iso_urls" cty:"iso_urls"`
 	TargetPath                     *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
 	TargetExtension                *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
-	RawBootGroupInterval           *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait                    *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval              *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                       *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand                    []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval              *string           `cty:"boot_group_interval"`
 	OutputDir                      *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
 	Type                           *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect             *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
@@ -99,7 +98,7 @@ type FlatConfig struct {
 	SkipExport                     *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
 	Headless                       *bool             `mapstructure:"headless" required:"false" cty:"headless"`
 	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout             *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	ShutdownTimeout                *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size"`
 	UseLegacyNetworkAdapter        *bool             `mapstructure:"use_legacy_network_adapter" required:"false" cty:"use_legacy_network_adapter"`
 	DifferencingDisk               *bool             `mapstructure:"differencing_disk" required:"false" cty:"differencing_disk"`
@@ -135,7 +134,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":           &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                        &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                     &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":              &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"output_directory":                 &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
 		"communicator":                     &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":          &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},

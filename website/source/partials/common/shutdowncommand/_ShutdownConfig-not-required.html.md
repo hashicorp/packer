@@ -9,7 +9,7 @@
     reboots may fail) and instead specify the final shutdown command in your
     last script.
     
--   `shutdown_timeout` (string) - The amount of time to wait after executing the shutdown_command for the
+-   `shutdown_timeout` (duration string | ex: "1h5m2s") - The amount of time to wait after executing the shutdown_command for the
     virtual machine to actually shut down. If the machine doesn't shut down
     in this time it is considered an error. By default, the time out is "5m"
     (five minutes).

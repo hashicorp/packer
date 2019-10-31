@@ -14,7 +14,7 @@
     unencrypted connection and `5986` for SSL when `winrm_use_ssl` is set to
     true.
     
--   `winrm_timeout` (time.Duration) - The amount of time to wait for WinRM to become available. This defaults
+-   `winrm_timeout` (duration string | ex: "1h5m2s") - The amount of time to wait for WinRM to become available. This defaults
     to `30m` since setting up a Windows machine generally takes a long time.
     
 -   `winrm_use_ssl` (bool) - If `true`, use HTTPS for WinRM.

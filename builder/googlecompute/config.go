@@ -121,7 +121,7 @@ type Config struct {
 	// If true, launch a preemptible instance.
 	Preemptible bool `mapstructure:"preemptible" required:"false"`
 	// The time to wait for instance state changes. Defaults to "5m".
-	RawStateTimeout string `mapstructure:"state_timeout" required:"false"`
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 	// The region in which to launch the instance. Defaults to the region
 	// hosting the specified zone.
 	Region string `mapstructure:"region" required:"false"`
@@ -183,7 +183,6 @@ type Config struct {
 	Zone string `mapstructure:"zone" required:"true"`
 
 	account            *jwt.Config
-	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
 }
@@ -293,8 +292,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.MachineType = "n1-standard-1"
 	}
 
-	if c.RawStateTimeout == "" {
-		c.RawStateTimeout = "5m"
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
@@ -328,11 +327,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// get region from Zone
 		region := c.Zone[:len(c.Zone)-2]
 		c.Region = region
-	}
-
-	err = c.CalcTimeout()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	// Authenticating via an account file
@@ -382,15 +376,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	return c, nil, nil
-}
-
-func (c *Config) CalcTimeout() error {
-	stateTimeout, err := time.ParseDuration(c.RawStateTimeout)
-	if err != nil {
-		return fmt.Errorf("Failed parsing state_timeout: %s", err)
-	}
-	c.stateTimeout = stateTimeout
-	return nil
 }
 
 type CustomerEncryptionKey struct {

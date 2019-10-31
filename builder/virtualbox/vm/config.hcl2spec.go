@@ -22,10 +22,9 @@ type FlatConfig struct {
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label"`
-	RawBootGroupInterval      *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait               *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval         *string           `cty:"boot_group_interval"`
 	Format                    *string           `mapstructure:"format" required:"false" cty:"format"`
 	ExportOpts                []string          `mapstructure:"export_opts" required:"false" cty:"export_opts"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
@@ -78,8 +77,8 @@ type FlatConfig struct {
 	SSHSkipNatMapping         *bool             `mapstructure:"ssh_skip_nat_mapping" required:"false" cty:"ssh_skip_nat_mapping"`
 	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" cty:"ssh_wait_timeout"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout        *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
-	RawPostShutdownDelay      *string           `mapstructure:"post_shutdown_delay" required:"false" cty:"post_shutdown_delay"`
+	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	PostShutdownDelay         *string           `mapstructure:"post_shutdown_delay" required:"false" cty:"post_shutdown_delay"`
 	VBoxManage                [][]string        `mapstructure:"vboxmanage" required:"false" cty:"vboxmanage"`
 	VBoxManagePost            [][]string        `mapstructure:"vboxmanage_post" required:"false" cty:"vboxmanage_post"`
 	VBoxVersionFile           *string           `mapstructure:"virtualbox_version_file" required:"false" cty:"virtualbox_version_file"`
@@ -120,7 +119,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":          &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"format":                       &hcldec.AttrSpec{Name: "format", Type: cty.String, Required: false},
 		"export_opts":                  &hcldec.AttrSpec{Name: "export_opts", Type: cty.List(cty.String), Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
