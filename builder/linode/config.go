@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -35,8 +34,6 @@ type Config struct {
 	RootSSHKey   string   `mapstructure:"root_ssh_key"`
 	ImageLabel   string   `mapstructure:"image_label"`
 	Description  string   `mapstructure:"image_description"`
-
-	StateTimeout time.Duration `mapstructure:"state_timeout"`
 
 	interCtx interpolate.Context
 }
@@ -98,10 +95,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
 		}
-	}
-
-	if c.StateTimeout == 0 {
-		c.StateTimeout = 5 * time.Minute
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
