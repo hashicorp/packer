@@ -24,8 +24,7 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	common.HTTPConfig      `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
-	RawBootKeyInterval     string              `mapstructure:"boot_key_interval"`
-	BootKeyInterval        time.Duration       ``
+	BootKeyInterval        time.Duration       `mapstructure:"boot_key_interval"`
 	Comm                   communicator.Config `mapstructure:",squash"`
 
 	ProxmoxURLRaw      string `mapstructure:"proxmox_url"`
@@ -104,17 +103,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Password == "" {
 		c.Password = os.Getenv("PROXMOX_PASSWORD")
 	}
-	if c.RawBootKeyInterval == "" {
-		c.RawBootKeyInterval = os.Getenv(common.PackerKeyEnv)
-	}
-	if c.RawBootKeyInterval == "" {
-		c.BootKeyInterval = 5 * time.Millisecond
-	} else {
-		if interval, err := time.ParseDuration(c.RawBootKeyInterval); err == nil {
-			c.BootKeyInterval = interval
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Could not parse boot_key_interval: %v", err))
+	if c.BootKeyInterval == 0 && os.Getenv(common.PackerKeyEnv) != "" {
+		var err error
+		c.BootKeyInterval, err = time.ParseDuration(os.Getenv(common.PackerKeyEnv))
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+	if c.BootKeyInterval == 0 {
+		c.BootKeyInterval = 5 * time.Millisecond
 	}
 
 	if c.VMName == "" {

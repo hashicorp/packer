@@ -273,7 +273,7 @@ func (r *rawTemplate) decoder(
 	result interface{},
 	md *mapstructure.Metadata) *mapstructure.Decoder {
 	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		DecodeHook: nil,
+		DecodeHook: mapstructure.StringToTimeDurationHookFunc(),
 		Metadata:   md,
 		Result:     result,
 	})

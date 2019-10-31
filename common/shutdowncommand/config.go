@@ -3,7 +3,8 @@
 package shutdowncommand
 
 import (
-	"github.com/hashicorp/packer/helper/config"
+	"time"
+
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -21,16 +22,12 @@ type ShutdownConfig struct {
 	// virtual machine to actually shut down. If the machine doesn't shut down
 	// in this time it is considered an error. By default, the time out is "5m"
 	// (five minutes).
-	ShutdownTimeout config.DurationString `mapstructure:"shutdown_timeout" required:"false"`
+	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout" required:"false"`
 }
 
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
-	if c.ShutdownTimeout == "" {
-		c.ShutdownTimeout = "5m"
-	}
-
-	if err := c.ShutdownTimeout.Validate(); err != nil {
-		return []error{err}
+	if c.ShutdownTimeout == 0 {
+		c.ShutdownTimeout = 5 * time.Minute
 	}
 
 	return nil

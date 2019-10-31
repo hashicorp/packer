@@ -279,7 +279,7 @@
     subnet_id to be set. If this field is left blank, Packer will try to get
     the VPC ID from the subnet_id.
     
--   `windows_password_timeout` (duration string. ex: "1h5m2s") - The timeout for waiting for a Windows
+-   `windows_password_timeout` (duration string | ex: "1h5m2s") - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value:
     10m
     

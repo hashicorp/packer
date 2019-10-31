@@ -31,7 +31,8 @@ type Config struct {
 	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
 	// The timeout in seconds to wait for the the
 	// container to start. Defaults to 20 seconds.
-	RawInitTimeout string `mapstructure:"init_timeout" required:"false"`
+	InitTimeout time.Duration `mapstructure:"init_timeout" required:"false"`
+
 	// Options to pass to lxc-create. For
 	// instance, you can specify a custom LXC container configuration file with
 	// ["-f", "/path/to/lxc.conf"]. Defaults to []. See man 1 lxc-create for
@@ -62,7 +63,6 @@ type Config struct {
 	// container to reach. Note some distributions (Ubuntu) simulate run levels
 	// and may report 5 rather than 3.
 	TargetRunlevel int `mapstructure:"target_runlevel" required:"false"`
-	InitTimeout    time.Duration
 
 	ctx interpolate.Context
 }
@@ -98,13 +98,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.CommandWrapper = "{{.Command}}"
 	}
 
-	if c.RawInitTimeout == "" {
-		c.RawInitTimeout = "20s"
-	}
-
-	c.InitTimeout, err = time.ParseDuration(c.RawInitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing init_timeout: %s", err))
+	if c.InitTimeout == 0 {
+		c.InitTimeout = 20 * time.Second
 	}
 
 	if _, err := os.Stat(c.ConfigFile); os.IsNotExist(err) {

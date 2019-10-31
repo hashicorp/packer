@@ -9,10 +9,10 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -371,7 +371,7 @@ type RunConfig struct {
 	// The timeout for waiting for a Windows
 	// password for Windows instances. Defaults to 20 minutes. Example value:
 	// 10m
-	WindowsPasswordTimeout config.DurationString `mapstructure:"windows_password_timeout" required:"false"`
+	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`
@@ -389,8 +389,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.WindowsPasswordTimeout == "" {
-		c.WindowsPasswordTimeout = "20m"
+	if c.WindowsPasswordTimeout == 0 {
+		c.WindowsPasswordTimeout = 20 * time.Minute
 	}
 
 	if c.RunTags == nil {

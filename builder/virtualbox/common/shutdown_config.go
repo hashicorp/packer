@@ -3,9 +3,8 @@
 package common
 
 import (
-	"fmt"
+	"time"
 
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -22,31 +21,18 @@ type ShutdownConfig struct {
 	// shutdown_command for the virtual machine to actually shut down. If it
 	// doesn't shut down in this time, it is an error. By default, the timeout is
 	// 5m or five minutes.
-	ShutdownTimeout config.DurationString `mapstructure:"shutdown_timeout" required:"false"`
+	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout" required:"false"`
 	// The amount of time to wait after shutting
 	// down the virtual machine. If you get the error
 	// Error removing floppy controller, you might need to set this to 5m
 	// or so. By default, the delay is 0s or disabled.
-	PostShutdownDelay config.DurationString `mapstructure:"post_shutdown_delay" required:"false"`
+	PostShutdownDelay time.Duration `mapstructure:"post_shutdown_delay" required:"false"`
 }
 
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
-	if c.ShutdownTimeout == "" {
-		c.ShutdownTimeout = "5m"
+	if c.ShutdownTimeout == 0 {
+		c.ShutdownTimeout = 5 * time.Minute
 	}
 
-	if c.PostShutdownDelay == "" {
-		c.PostShutdownDelay = "0s"
-	}
-
-	var errs []error
-	if err := c.ShutdownTimeout.Validate(); err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
-	if err := c.PostShutdownDelay.Validate(); err != nil {
-		errs = append(errs, fmt.Errorf("Failed parsing post_shutdown_delay: %s", err))
-	}
-
-	return errs
+	return nil
 }

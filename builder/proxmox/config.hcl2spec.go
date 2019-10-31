@@ -22,7 +22,7 @@ type FlatConfig struct {
 	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
 	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	RawBootKeyInterval        *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
+	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect        *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
 	SSHHost                   *string           `mapstructure:"ssh_host" cty:"ssh_host"`

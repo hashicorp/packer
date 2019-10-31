@@ -154,7 +154,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		ui.Message("Waiting for creation operation to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(c.StateTimeout.Duration()):
+		case <-time.After(c.StateTimeout):
 			err = errors.New("time out while waiting for instance to create")
 		}
 	}
@@ -200,7 +200,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.StateTimeout.Duration()):
+		case <-time.After(config.StateTimeout):
 			err = errors.New("time out while waiting for instance to delete")
 		}
 	}
@@ -222,7 +222,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.StateTimeout.Duration()):
+		case <-time.After(config.StateTimeout):
 			err = errors.New("time out while waiting for disk to delete")
 		}
 	}

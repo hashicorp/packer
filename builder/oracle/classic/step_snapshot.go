@@ -28,7 +28,7 @@ func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	snapshotInput := &compute.CreateSnapshotInput{
 		Instance:     fmt.Sprintf("%s/%s", config.ImageName, instanceID),
 		MachineImage: config.ImageName,
-		Timeout:      config.SnapshotTimeout.Duration(),
+		Timeout:      config.SnapshotTimeout,
 	}
 
 	snap, err := snapshotClient.CreateSnapshot(snapshotInput)

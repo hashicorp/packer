@@ -46,10 +46,10 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionContinue
 	}
 
-	if int64(s.BootWait.Duration()) > 0 {
+	if int64(s.BootWait) > 0 {
 		ui.Say(fmt.Sprintf("Waiting %s for boot", s.BootWait))
 		select {
-		case <-time.After(s.BootWait.Duration()):
+		case <-time.After(s.BootWait):
 			break
 		case <-ctx.Done():
 			return multistep.ActionHalt

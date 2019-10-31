@@ -156,7 +156,7 @@ func TestStepInstanceInfo_errorTimeout(t *testing.T) {
 	state.Put("instance_name", "foo")
 
 	config := state.Get("config").(*Config)
-	config.StateTimeout = "1ms"
+	config.StateTimeout = 1 * time.Millisecond
 
 	driver := state.Get("driver").(*DriverMock)
 	driver.WaitForInstanceErrCh = errCh

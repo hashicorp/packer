@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
@@ -138,7 +139,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		Metadata:             exporterMetadata,
 		Network:              p.config.Network,
 		NetworkProjectId:     builderProjectId,
-		StateTimeout:         "5m",
+		StateTimeout:         5 * time.Minute,
 		SourceImageFamily:    "debian-9-worker",
 		SourceImageProjectId: "compute-image-tools",
 		Subnetwork:           p.config.Subnetwork,

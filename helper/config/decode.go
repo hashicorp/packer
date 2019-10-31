@@ -31,6 +31,7 @@ var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 	uint8ToStringHook,
 	stringToTrilean,
 	mapstructure.StringToSliceHookFunc(","),
+	mapstructure.StringToTimeDurationHookFunc(),
 }
 
 // Decode decodes the configuration into the target and optionally

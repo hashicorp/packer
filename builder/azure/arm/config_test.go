@@ -539,11 +539,11 @@ func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if c.Comm.SSHTimeout.Duration() != 1*time.Hour {
+	if c.Comm.SSHTimeout != 1*time.Hour {
 		t.Errorf("Expected Comm.SSHTimeout to be a duration of an hour, but got '%s' instead.", c.Comm.SSHTimeout)
 	}
 
-	if c.Comm.WinRMTimeout.Duration() != 2*time.Hour {
+	if c.Comm.WinRMTimeout != 2*time.Hour {
 		t.Errorf("Expected Comm.WinRMTimeout to be a durationof two hours, but got '%s' instead.", c.Comm.WinRMTimeout)
 	}
 }

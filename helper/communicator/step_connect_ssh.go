@@ -46,7 +46,7 @@ func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	}()
 
 	log.Printf("[INFO] Waiting for SSH, up to timeout: %s", s.Config.SSHTimeout)
-	timeout := time.After(s.Config.SSHTimeout.Duration())
+	timeout := time.After(s.Config.SSHTimeout)
 	for {
 		// Wait for either SSH to become available, a timeout to occur,
 		// or an interrupt to come through.
@@ -198,8 +198,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			Pty:                    s.Config.SSHPty,
 			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
-			KeepAliveInterval:      s.Config.SSHKeepAliveInterval.Duration(),
-			Timeout:                s.Config.SSHReadWriteTimeout.Duration(),
+			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
+			Timeout:                s.Config.SSHReadWriteTimeout,
 			Tunnels:                tunnels,
 		}
 

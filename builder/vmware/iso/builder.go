@@ -131,12 +131,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
-			BootWait:    b.config.BootWait.Duration(),
+			BootWait:    b.config.BootWait,
 			VNCEnabled:  !b.config.DisableVNC,
 			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
-			KeyInterval: b.config.VNCConfig.BootKeyInterval.Duration(),
+			KeyInterval: b.config.VNCConfig.BootKeyInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -155,7 +155,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout.Duration(),
+			Timeout: b.config.ShutdownTimeout,
 		},
 		&vmwcommon.StepCleanFiles{},
 		&vmwcommon.StepCompactDisk{

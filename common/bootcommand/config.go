@@ -5,8 +5,8 @@ package bootcommand
 import (
 	"fmt"
 	"strings"
+	"time"
 
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -112,13 +112,13 @@ type BootConfig struct {
 	// Packer to wait five seconds and one minute 30 seconds, respectively. If
 	// this isn't specified, a sensible default value is picked depending on
 	// the builder type.
-	BootGroupInterval config.DurationString `mapstructure:"boot_keygroup_interval"`
+	BootGroupInterval time.Duration `mapstructure:"boot_keygroup_interval"`
 	// The time to wait after booting the initial virtual machine before typing
 	// the `boot_command`. The value of this should be a duration. Examples are
 	// `5s` and `1m30s` which will cause Packer to wait five seconds and one
 	// minute 30 seconds, respectively. If this isn't specified, the default is
 	// `10s` or 10 seconds.
-	BootWait config.DurationString `mapstructure:"boot_wait"`
+	BootWait time.Duration `mapstructure:"boot_wait"`
 	// This is an array of commands to type when the virtual machine is first
 	// booted. The goal of these commands should be to type just enough to
 	// initialize the operating system installer. Special keys can be typed as
@@ -140,26 +140,12 @@ type VNCConfig struct {
 	// when this is true. Defaults to false.
 	DisableVNC bool `mapstructure:"disable_vnc"`
 	// Time in ms to wait between each key press
-	BootKeyInterval config.DurationString `mapstructure:"boot_key_interval"`
+	BootKeyInterval time.Duration `mapstructure:"boot_key_interval"`
 }
 
 func (c *BootConfig) Prepare(ctx *interpolate.Context) (errs []error) {
-	if c.BootWait == "" {
-		c.BootWait = "10s"
-	}
-
-	if err := c.BootWait.Validate(); err != nil {
-		errs = append(
-			errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
-	}
-
-	if c.BootGroupInterval == "" {
-		c.BootGroupInterval = "0ms"
-	}
-
-	if err := c.BootGroupInterval.Validate(); err != nil {
-		errs = append(
-			errs, fmt.Errorf("Failed parsing boot_keygroup_interval: %s", err))
+	if c.BootWait == 0 {
+		c.BootWait = 10 * time.Second
 	}
 
 	if c.BootCommand != nil {
@@ -182,15 +168,6 @@ func (c *VNCConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 	if len(c.BootCommand) > 0 && c.DisableVNC {
 		errs = append(errs,
 			fmt.Errorf("A boot command cannot be used when vnc is disabled."))
-	}
-
-	if c.BootKeyInterval == "" {
-		c.BootKeyInterval = "0ms"
-	}
-
-	if err := c.BootKeyInterval.Validate(); err != nil {
-		errs = append(
-			errs, fmt.Errorf("Failed parsing boot_key_interval: %s", err))
 	}
 
 	errs = append(errs, c.BootConfig.Prepare(ctx)...)
