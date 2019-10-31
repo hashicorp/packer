@@ -26,14 +26,13 @@ type FlatConfig struct {
 	ISOUrls                   []string          `mapstructure:"iso_urls" cty:"iso_urls"`
 	TargetPath                *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
 	TargetExtension           *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
-	RawBootGroupInterval      *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait               *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval         *string           `cty:"boot_group_interval"`
 	DisableVNC                *bool             `mapstructure:"disable_vnc" cty:"disable_vnc"`
-	RawBootKeyInterval        *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
+	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout        *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect        *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
 	SSHHost                   *string           `mapstructure:"ssh_host" cty:"ssh_host"`
@@ -141,7 +140,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":          &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"disable_vnc":                  &hcldec.AttrSpec{Name: "disable_vnc", Type: cty.Bool, Required: false},
 		"boot_key_interval":            &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
 		"shutdown_command":             &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},

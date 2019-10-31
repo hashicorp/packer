@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -35,7 +34,7 @@ type Config struct {
 	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// The time duration to wait for async calls to
 	// finish. Defaults to 30m.
-	AsyncTimeout time.Duration `mapstructure:"async_timeout" required:"false"`
+	AsyncTimeout config.DurationString `mapstructure:"async_timeout" required:"false"`
 	// Some cloud providers only allow HTTP GET calls
 	// to their CloudStack API. If using such a provider, you need to set this to
 	// true in order for the provider to only make GET calls and no POST calls.
@@ -68,7 +67,7 @@ type Config struct {
 	// Configure the duration time to wait, making sure virtual machine is able
 	// to finish installing OS before it ejects safely. Requires `eject_iso`
 	// set to `true` and this option is only available when using `source_iso`.
-	EjectISODelay time.Duration `mapstructure:"eject_iso_delay"`
+	EjectISODelay config.DurationString `mapstructure:"eject_iso_delay"`
 	// Set to true to expunge the instance when it is
 	// destroyed. Defaults to false.
 	Expunge bool `mapstructure:"expunge" required:"false"`
@@ -200,8 +199,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.SecretKey = os.Getenv("CLOUDSTACK_SECRET_KEY")
 	}
 
-	if c.AsyncTimeout == 0 {
-		c.AsyncTimeout = 30 * time.Minute
+	if c.AsyncTimeout == "" {
+		c.AsyncTimeout = "30m"
 	}
 
 	if len(c.CIDRList) == 0 {

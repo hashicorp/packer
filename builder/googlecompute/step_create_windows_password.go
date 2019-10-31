@@ -99,7 +99,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 		ui.Message("Waiting for windows password to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(c.stateTimeout):
+		case <-time.After(c.StateTimeout.Duration()):
 			err = errors.New("time out while waiting for the password to be created")
 		}
 	}

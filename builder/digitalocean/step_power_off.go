@@ -42,7 +42,7 @@ func (s *stepPowerOff) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	log.Println("Waiting for poweroff event to complete...")
-	err = waitForDropletState("off", dropletId, client, c.StateTimeout)
+	err = waitForDropletState("off", dropletId, client, c.StateTimeout.Duration())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -50,7 +50,7 @@ func (s *stepPowerOff) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	// Wait for the droplet to become unlocked for future steps
-	if err := waitForDropletUnlocked(client, dropletId, c.StateTimeout); err != nil {
+	if err := waitForDropletUnlocked(client, dropletId, c.StateTimeout.Duration()); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error powering off droplet: %s", err)
 		state.Put("error", err)

@@ -138,7 +138,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		Metadata:             exporterMetadata,
 		Network:              p.config.Network,
 		NetworkProjectId:     builderProjectId,
-		RawStateTimeout:      "5m",
+		StateTimeout:         "5m",
 		SourceImageFamily:    "debian-9-worker",
 		SourceImageProjectId: "compute-image-tools",
 		Subnetwork:           p.config.Subnetwork,
@@ -149,7 +149,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
 	}
-	exporterConfig.CalcTimeout()
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
 		p.config.account, p.config.VaultGCPOauthEngine)

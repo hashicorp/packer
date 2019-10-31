@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -510,7 +509,7 @@ func TestProvisionerProvision_UploadFails(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.ScriptUploadErrorMockCommunicator)
 	p.Prepare(config)
-	p.config.StartRetryTimeout = time.Second
+	p.config.StartRetryTimeout = "1s"
 	err := p.Provision(context.Background(), ui, comm)
 	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
 		t.Fatalf("expected Provision() error %q to contain %q",

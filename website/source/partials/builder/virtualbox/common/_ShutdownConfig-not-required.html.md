@@ -8,12 +8,12 @@
     since reboots may fail and specify the final shutdown command in your
     last script.
     
--   `shutdown_timeout` (string) - The amount of time to wait after executing the
+-   `shutdown_timeout` (duration string. ex: "1h5m2s") - The amount of time to wait after executing the
     shutdown_command for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     5m or five minutes.
     
--   `post_shutdown_delay` (string) - The amount of time to wait after shutting
+-   `post_shutdown_delay` (duration string. ex: "1h5m2s") - The amount of time to wait after shutting
     down the virtual machine. If you get the error
     Error removing floppy controller, you might need to set this to 5m
     or so. By default, the delay is 0s or disabled.

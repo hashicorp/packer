@@ -65,7 +65,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		}
 	}()
 
-	err = waitForDropletState("off", dropletId, client, c.StateTimeout)
+	err = waitForDropletState("off", dropletId, client, c.StateTimeout.Duration())
 	if err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
@@ -74,7 +74,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	if err := waitForDropletUnlocked(client, dropletId, c.StateTimeout); err != nil {
+	if err := waitForDropletUnlocked(client, dropletId, c.StateTimeout.Duration()); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
 		state.Put("error", err)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/helper/config"
 )
 
 func test1sConfig() map[string]interface{} {
@@ -20,7 +22,7 @@ func TestConfigPrepare_1s(t *testing.T) {
 		t.Fatalf("prerare failed: %v", err)
 	}
 
-	if p.Duration != time.Second {
+	if p.Duration.Duration() != time.Second {
 		t.Fatal("wrong duration")
 	}
 }
@@ -29,7 +31,7 @@ func TestProvisioner_Provision(t *testing.T) {
 	ctxCancelled, cancel := context.WithCancel(context.Background())
 	cancel()
 	type fields struct {
-		Duration time.Duration
+		Duration config.DurationString
 	}
 	type args struct {
 		ctx context.Context
@@ -40,8 +42,8 @@ func TestProvisioner_Provision(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"valid sleep", fields{time.Millisecond}, args{context.Background()}, false},
-		{"timeout", fields{time.Millisecond}, args{ctxCancelled}, true},
+		{"valid sleep", fields{"1ms"}, args{context.Background()}, false},
+		{"timeout", fields{"1ms"}, args{ctxCancelled}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

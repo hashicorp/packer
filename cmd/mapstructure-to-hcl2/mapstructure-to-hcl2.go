@@ -431,7 +431,7 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 		switch f := field.Type().(type) {
 		case *types.Named:
 			switch f.String() {
-			case "time.Duration":
+			case "time.Duration", "github.com/hashicorp/packer/helper/config.DurationString":
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.String]), field.Embedded())
 			case "github.com/hashicorp/packer/helper/config.Trilean": // TODO(azr): unhack this situation
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.Bool]), field.Embedded())

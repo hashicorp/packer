@@ -21,7 +21,7 @@ func (s *stepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 	instanceID := state.Get("instance_id").(string)
 
 	ui.Say("Stopping instance...")
-	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout.Duration())
 	defer cancel()
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Stop(ctx, &compute.StopInstanceRequest{
 		InstanceId: instanceID,

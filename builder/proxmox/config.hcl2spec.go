@@ -19,10 +19,9 @@ type FlatConfig struct {
 	HTTPDir                   *string           `mapstructure:"http_directory" cty:"http_directory"`
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max"`
-	RawBootGroupInterval      *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait               *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval         *string           `cty:"boot_group_interval"`
 	RawBootKeyInterval        *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect        *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
@@ -109,7 +108,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":          &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"boot_key_interval":            &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
 		"communicator":                 &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":      &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},

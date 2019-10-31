@@ -29,10 +29,9 @@ type FlatConfig struct {
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label"`
-	RawBootGroupInterval      *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
-	RawBootWait               *string           `mapstructure:"boot_wait" cty:"boot_wait"`
+	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
+	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
-	BootGroupInterval         *string           `cty:"boot_group_interval"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
 	CpuCount                  *int              `mapstructure:"cpus" required:"false" cty:"cpus"`
 	MemorySize                *int              `mapstructure:"memory" required:"false" cty:"memory"`
@@ -42,7 +41,7 @@ type FlatConfig struct {
 	PrlctlPost                [][]string        `mapstructure:"prlctl_post" required:"false" cty:"prlctl_post"`
 	PrlctlVersionFile         *string           `mapstructure:"prlctl_version_file" required:"false" cty:"prlctl_version_file"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
-	RawShutdownTimeout        *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
+	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect        *string           `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
 	SSHHost                   *string           `mapstructure:"ssh_host" cty:"ssh_host"`
@@ -128,7 +127,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
-		"boot_group_interval":          &hcldec.AttrSpec{Name: "boot_group_interval", Type: cty.String, Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
 		"cpus":                         &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},

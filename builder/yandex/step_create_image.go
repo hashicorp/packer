@@ -22,7 +22,7 @@ func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multis
 	diskID := state.Get("disk_id").(string)
 
 	ui.Say(fmt.Sprintf("Creating image: %v", c.ImageName))
-	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout.Duration())
 	defer cancel()
 
 	op, err := sdk.WrapOperation(sdk.Compute().Image().Create(ctx, &compute.CreateImageRequest{

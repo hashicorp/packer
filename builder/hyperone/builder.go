@@ -38,7 +38,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		cfg.BasePath = b.config.APIURL
 	}
 
-	prefer := fmt.Sprintf("respond-async,wait=%d", int(b.config.StateTimeout.Seconds()))
+	prefer := fmt.Sprintf("respond-async,wait=%d", int(b.config.StateTimeout.Duration().Seconds()))
 	cfg.AddDefaultHeader("Prefer", prefer)
 
 	b.client = openapi.NewAPIClient(cfg)

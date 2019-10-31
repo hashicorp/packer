@@ -318,10 +318,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand:   b.config.FlatBootCommand(),
-			BootWait:      b.config.BootWait,
+			BootWait:      b.config.BootWait.Duration(),
 			SwitchName:    b.config.SwitchName,
 			Ctx:           b.config.ctx,
-			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			GroupInterval: b.config.BootConfig.BootGroupInterval.Duration(),
 		},
 
 		// configure the communicator ssh, winrm
@@ -341,7 +341,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 		&hypervcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
+			Timeout: b.config.ShutdownTimeout.Duration(),
 		},
 
 		// wait for the vm to be powered off

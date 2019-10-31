@@ -229,7 +229,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepGetPassword{
 			Debug:     b.config.PackerDebug,
 			Comm:      &b.config.RunConfig.Comm,
-			Timeout:   b.config.WindowsPasswordTimeout,
+			Timeout:   b.config.WindowsPasswordTimeout.Duration(),
 			BuildName: b.config.PackerBuildName,
 		},
 		&communicator.StepConnect{

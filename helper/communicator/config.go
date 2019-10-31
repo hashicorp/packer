@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"time"
 
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
@@ -58,7 +58,7 @@ type Config struct {
 	// In this example, Packer will check whether it can connect, as normal. But once
 	// a connection attempt is successful, it will disconnect and then wait 10 minutes
 	// before connecting to the guest and beginning provisioning.
-	PauseBeforeConnect time.Duration `mapstructure:"pause_before_connecting"`
+	PauseBeforeConnect config.DurationString `mapstructure:"pause_before_connecting"`
 
 	SSH   `mapstructure:",squash"`
 	WinRM `mapstructure:",squash"`
@@ -104,7 +104,7 @@ type SSH struct {
 	// The time to wait for SSH to become available. Packer uses this to
 	// determine when the machine has booted so this is usually quite long.
 	// Example value: `10m`.
-	SSHTimeout time.Duration `mapstructure:"ssh_timeout"`
+	SSHTimeout config.DurationString `mapstructure:"ssh_timeout"`
 	// If true, the local SSH agent will be used to authenticate connections to
 	// the source instance. No temporary keypair will be created, and the
 	// values of `ssh_password` and `ssh_private_key_file` will be ignored. To
@@ -146,11 +146,11 @@ type SSH struct {
 	SSHProxyPassword string `mapstructure:"ssh_proxy_password"`
 	// How often to send "keep alive" messages to the server. Set to a negative
 	// value (`-1s`) to disable. Example value: `10s`. Defaults to `5s`.
-	SSHKeepAliveInterval time.Duration `mapstructure:"ssh_keep_alive_interval"`
+	SSHKeepAliveInterval config.DurationString `mapstructure:"ssh_keep_alive_interval"`
 	// The amount of time to wait for a remote command to end. This might be
 	// useful if, for example, packer hangs on a connection after a reboot.
 	// Example: `5m`. Disabled by default.
-	SSHReadWriteTimeout time.Duration `mapstructure:"ssh_read_write_timeout"`
+	SSHReadWriteTimeout config.DurationString `mapstructure:"ssh_read_write_timeout"`
 
 	// Tunneling
 
@@ -201,7 +201,7 @@ type WinRM struct {
 	WinRMPort int `mapstructure:"winrm_port"`
 	// The amount of time to wait for WinRM to become available. This defaults
 	// to `30m` since setting up a Windows machine generally takes a long time.
-	WinRMTimeout time.Duration `mapstructure:"winrm_timeout"`
+	WinRMTimeout config.DurationString `mapstructure:"winrm_timeout"`
 	// If `true`, use HTTPS for WinRM.
 	WinRMUseSSL bool `mapstructure:"winrm_use_ssl"`
 	// If `true`, do not check server certificate chain and host name.
@@ -370,12 +370,12 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		c.SSHPort = 22
 	}
 
-	if c.SSHTimeout == 0 {
-		c.SSHTimeout = 5 * time.Minute
+	if c.SSHTimeout == "" {
+		c.SSHTimeout = "5m"
 	}
 
-	if c.SSHKeepAliveInterval == 0 {
-		c.SSHKeepAliveInterval = 5 * time.Second
+	if c.SSHKeepAliveInterval == "" {
+		c.SSHKeepAliveInterval = "5s"
 	}
 
 	if c.SSHHandshakeAttempts == 0 {
@@ -404,6 +404,13 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 	// Validation
 	var errs []error
+
+	for _, d := range []config.DurationString{c.SSHTimeout, c.SSHKeepAliveInterval} {
+		if err := d.Validate(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	if c.SSHUsername == "" {
 		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
@@ -470,22 +477,25 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	return errs
 }
 
-func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
+func (c *Config) prepareWinRM(ctx *interpolate.Context) (errs []error) {
 	if c.WinRMPort == 0 && c.WinRMUseSSL {
 		c.WinRMPort = 5986
 	} else if c.WinRMPort == 0 {
 		c.WinRMPort = 5985
 	}
 
-	if c.WinRMTimeout == 0 {
-		c.WinRMTimeout = 30 * time.Minute
+	if c.WinRMTimeout == "" {
+		c.WinRMTimeout = "30m"
+	}
+
+	if err := c.WinRMTimeout.Validate(); err != nil {
+		errs = append(errs, err)
 	}
 
 	if c.WinRMUseNTLM == true {
 		c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
 	}
 
-	var errs []error
 	if c.WinRMUser == "" {
 		errs = append(errs, errors.New("winrm_username must be specified."))
 	}

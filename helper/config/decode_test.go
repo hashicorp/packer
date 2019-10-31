@@ -3,7 +3,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -12,7 +11,7 @@ func TestDecode(t *testing.T) {
 	type Target struct {
 		Name    string
 		Address string
-		Time    time.Duration
+		Time    DurationString
 		Trilean Trilean
 	}
 
@@ -31,7 +30,7 @@ func TestDecode(t *testing.T) {
 			},
 			&Target{
 				Name:    "bar",
-				Time:    5 * time.Second,
+				Time:    "5s",
 				Trilean: TriTrue,
 			},
 			nil,

@@ -78,11 +78,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&parallelscommon.StepRun{},
 		&parallelscommon.StepTypeBootCommand{
 			BootCommand:    b.config.FlatBootCommand(),
-			BootWait:       b.config.BootWait,
+			BootWait:       b.config.BootWait.Duration(),
 			HostInterfaces: []string{},
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
-			GroupInterval:  b.config.BootConfig.BootGroupInterval,
+			GroupInterval:  b.config.BootConfig.BootGroupInterval.Duration(),
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -101,7 +101,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(common.StepProvision),
 		&parallelscommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
+			Timeout: b.config.ShutdownTimeout.Duration(),
 		},
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.SSHConfig.Comm,

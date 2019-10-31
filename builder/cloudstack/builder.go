@@ -44,7 +44,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	)
 
 	// Set the time to wait before timing out
-	client.AsyncTimeout(int64(b.config.AsyncTimeout.Seconds()))
+	client.AsyncTimeout(int64(b.config.AsyncTimeout.Duration().Seconds()))
 
 	// Some CloudStack service providers only allow HTTP GET calls.
 	client.HTTPGETOnly = b.config.HTTPGetOnly
