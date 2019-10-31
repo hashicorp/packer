@@ -51,6 +51,18 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 	return d.VBoxManage(command...)
 }
 
+func (d *VBox42Driver) CreateNVMeController(vmName string, name string, portcount int) error {
+	command := []string{
+		"storagectl", vmName,
+		"--name", name,
+		"--add", "pcie",
+		"--controller", "NVMe",
+		"--portcount", strconv.Itoa(portcount),
+	}
+
+	return d.VBoxManage(command...)
+}
+
 func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 
 	command := []string{
