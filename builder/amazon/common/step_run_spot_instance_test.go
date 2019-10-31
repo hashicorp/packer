@@ -57,14 +57,6 @@ func (m *mockEC2ConnSpot) DescribeSpotPriceHistory(copyInput *ec2.DescribeSpotPr
 
 }
 
-func getMockConnSpot() ec2iface.EC2API {
-	mockConn := &mockEC2ConnSpot{
-		Config: aws.NewConfig(),
-	}
-
-	return mockConn
-}
-
 // Create statebag for running test
 func tStateSpot() multistep.StateBag {
 	state := new(multistep.BasicStateBag)
