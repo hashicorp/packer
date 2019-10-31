@@ -79,6 +79,7 @@ type FlatConfig struct {
 	Checksum                  *string           `mapstructure:"checksum" required:"false" cty:"checksum"`
 	ChecksumType              *string           `mapstructure:"checksum_type" required:"false" cty:"checksum_type"`
 	BoxName                   *string           `mapstructure:"box_name" required:"false" cty:"box_name"`
+	InsertKey                 *bool             `mapstructure:"insert_key" required:"false" cty:"insert_key"`
 	Provider                  *string           `mapstructure:"provider" required:"false" cty:"provider"`
 	VagrantfileTpl            *string           `mapstructure:"vagrantfile_template" cty:"vagrantfile_template"`
 	TeardownMethod            *string           `mapstructure:"teardown_method" required:"false" cty:"teardown_method"`
@@ -176,6 +177,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"checksum":                     &hcldec.AttrSpec{Name: "checksum", Type: cty.String, Required: false},
 		"checksum_type":                &hcldec.AttrSpec{Name: "checksum_type", Type: cty.String, Required: false},
 		"box_name":                     &hcldec.AttrSpec{Name: "box_name", Type: cty.String, Required: false},
+		"insert_key":                   &hcldec.AttrSpec{Name: "insert_key", Type: cty.Bool, Required: false},
 		"provider":                     &hcldec.AttrSpec{Name: "provider", Type: cty.String, Required: false},
 		"vagrantfile_template":         &hcldec.AttrSpec{Name: "vagrantfile_template", Type: cty.String, Required: false},
 		"teardown_method":              &hcldec.AttrSpec{Name: "teardown_method", Type: cty.String, Required: false},
