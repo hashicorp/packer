@@ -37,10 +37,6 @@ type Config struct {
 	// This can be set high to allow for reboots.
 	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
 
-	// This is used in the template generation to format environment variables
-	// inside the `ExecuteCommand` template.
-	EnvVarFormat string `mapstructure:"env_var_format"`
-
 	ctx interpolate.Context
 }
 

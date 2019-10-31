@@ -24,10 +24,10 @@ type FlatConfig struct {
 	Scripts                []string          `cty:"scripts"`
 	ValidExitCodes         []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
 	Vars                   []string          `mapstructure:"environment_vars" cty:"environment_vars"`
+	EnvVarFormat           *string           `mapstructure:"env_var_format" cty:"env_var_format"`
 	RemoteEnvVarPath       *string           `mapstructure:"remote_env_var_path" cty:"remote_env_var_path"`
 	ElevatedExecuteCommand *string           `mapstructure:"elevated_execute_command" cty:"elevated_execute_command"`
 	StartRetryTimeout      *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
-	EnvVarFormat           *string           `cty:"env_var_format"`
 	ElevatedEnvVarFormat   *string           `mapstructure:"elevated_env_var_format" cty:"elevated_env_var_format"`
 	ElevatedUser           *string           `mapstructure:"elevated_user" cty:"elevated_user"`
 	ElevatedPassword       *string           `mapstructure:"elevated_password" cty:"elevated_password"`
@@ -58,10 +58,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
+		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
 		"remote_env_var_path":        &hcldec.AttrSpec{Name: "remote_env_var_path", Type: cty.String, Required: false},
 		"elevated_execute_command":   &hcldec.AttrSpec{Name: "elevated_execute_command", Type: cty.String, Required: false},
 		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},
-		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
 		"elevated_env_var_format":    &hcldec.AttrSpec{Name: "elevated_env_var_format", Type: cty.String, Required: false},
 		"elevated_user":              &hcldec.AttrSpec{Name: "elevated_user", Type: cty.String, Required: false},
 		"elevated_password":          &hcldec.AttrSpec{Name: "elevated_password", Type: cty.String, Required: false},
