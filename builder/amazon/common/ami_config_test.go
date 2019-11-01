@@ -69,7 +69,6 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
-	errs = errs[:0]
 
 	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-1"}
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
