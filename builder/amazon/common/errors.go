@@ -24,7 +24,7 @@ type stsDecoder interface {
 func decodeAWSError(decoder stsDecoder, err error) error {
 
 	groups := encodedFailureMessagePattern.FindStringSubmatch(err.Error())
-	if groups != nil && len(groups) > 1 {
+	if len(groups) > 1 {
 		result, decodeErr := decoder.DecodeAuthorizationMessage(&sts.DecodeAuthorizationMessageInput{
 			EncodedMessage: aws.String(groups[2]),
 		})

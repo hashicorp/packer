@@ -4,66 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
-
-// Define a mock struct to be used in unit tests for common aws steps.
-type mockEC2ConnSpot struct {
-	ec2iface.EC2API
-	Config *aws.Config
-
-	// Counters to figure out what code path was taken
-	describeSpotPriceHistoryCount int
-}
-
-// Generates fake SpotPriceHistory data and returns it in the expected output
-// format. Also increments a
-func (m *mockEC2ConnSpot) DescribeSpotPriceHistory(copyInput *ec2.DescribeSpotPriceHistoryInput) (*ec2.DescribeSpotPriceHistoryOutput, error) {
-	m.describeSpotPriceHistoryCount++
-	testTime := time.Now().Add(-1 * time.Hour)
-	sp := []*ec2.SpotPrice{
-		{
-			AvailabilityZone:   aws.String("us-east-1c"),
-			InstanceType:       aws.String("t2.micro"),
-			ProductDescription: aws.String("Linux/UNIX"),
-			SpotPrice:          aws.String("0.003500"),
-			Timestamp:          &testTime,
-		},
-		{
-			AvailabilityZone:   aws.String("us-east-1f"),
-			InstanceType:       aws.String("t2.micro"),
-			ProductDescription: aws.String("Linux/UNIX"),
-			SpotPrice:          aws.String("0.003500"),
-			Timestamp:          &testTime,
-		},
-		{
-			AvailabilityZone:   aws.String("us-east-1b"),
-			InstanceType:       aws.String("t2.micro"),
-			ProductDescription: aws.String("Linux/UNIX"),
-			SpotPrice:          aws.String("0.003500"),
-			Timestamp:          &testTime,
-		},
-	}
-	output := &ec2.DescribeSpotPriceHistoryOutput{SpotPriceHistory: sp}
-
-	return output, nil
-
-}
-
-func getMockConnSpot() ec2iface.EC2API {
-	mockConn := &mockEC2ConnSpot{
-		Config: aws.NewConfig(),
-	}
-
-	return mockConn
-}
 
 // Create statebag for running test
 func tStateSpot() multistep.StateBag {
