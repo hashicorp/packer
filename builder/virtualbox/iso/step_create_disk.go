@@ -92,6 +92,10 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		controllerName = "SCSI Controller"
 	}
 
+	if config.HardDriveInterface == "pcie" {
+		controllerName = "NVMe Controller"
+	}
+
 	nonrotational := "off"
 	if config.HardDriveNonrotational {
 		nonrotational = "on"
