@@ -90,7 +90,8 @@ type Config struct {
 	// defaults to ide. When set to sata, the drive is attached to an AHCI SATA
 	// controller. When set to scsi, the drive is attached to an LsiLogic SCSI
 	// controller. When set to pcie, the drive is attached to an NVMe
-	// controller.
+	// controller. (Please note that when you use "pcie", you'll need to have
+	// Virtualbox 6 and an [extension pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack))
 	HardDriveInterface string `mapstructure:"hard_drive_interface" required:"false"`
 	// The number of ports available on any SATA controller created, defaults
 	// to 1. VirtualBox supports up to 30 ports on a maximum of 1 SATA
