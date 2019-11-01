@@ -299,10 +299,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			return nil, false, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
-		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
-			ImageId: &createdami,
-		})
-
+		// Clean up intermediary image now that it has successfully been renamed.
+		ui.Message("Destroying intermediary AMI...")
+		err = awscommon.DestroyAMIs([]*string{&createdami}, ec2conn)
 		if err != nil {
 			return nil, false, false, fmt.Errorf("Error deregistering existing AMI: %s", err)
 		}
