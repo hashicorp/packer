@@ -7,17 +7,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-func testHWConfig() *HWConfig {
-	return &HWConfig{
-		CpuCount:   1,
-		CoreCount:  1,
-		MemorySize: 512,
-
-		Sound: true,
-		USB:   true,
-	}
-}
-
 func TestHWConfigPrepare(t *testing.T) {
 	c := new(HWConfig)
 
