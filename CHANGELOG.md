@@ -1,10 +1,16 @@
-## 1.4.5 (Upcoming)
+## 1.5.0 (Upcoming)
+## 1.4.5 (November 4, 2019)
 
 ### IMPROVEMENTS:
+* added ucloud-import post-processsor to import custom image for UCloud UHost
+    instance [GH-8261]
 * builder/amazon: New option to specify IAM policy for a temporary instance
     profile [GH-8247]
+* builder/amazon: improved validation around encrypt_boot and kms_key_id for a
+    better experience [GH-8288]    
 * builder/azure-arm: Allow specification of polling duration [GH-8226]
-* builder/azure-chroot: Add Azure chroot builder [GH-8185]
+* builder/azure-chroot: Add Azure chroot builder [GH-8185] & refactored some
+    common code together after it [GH-8269]
 * builder/azure: Deploy NSG if list of IP addresses is provided in config
     [GH-8203]
 * builder/azure: Set correct user agent for Azure client set [GH-8259]
@@ -20,11 +26,15 @@
 * builder/tencent: Add retry on remote api call [GH-8250]
 * builder/vagrant: Pass through logs from vagrant in real time rather than
     buffering until command is complete [GH-8274]
+* builder/vagrant: add insert_key option for toggling whether to add Vagrant's
+    insecure key [GH-8274]
 * communicator/winrm: Prevent busy loop while waiting for WinRM connection
     [GH-8213]
 * core: Add strftime function in templates [GH-8208]
 * core: Improve error message when comment is bad [GH-8267]
-* Fix various dropped errors: [GH-8230] [GH-8265] [GH-8276] [GH-8281]
+* post-processor/amazon-import: delete intermediary snapshots [GH-8307]
+* Fix various dropped errors an removed unused code: [GH-8230] [GH-8265]
+    [GH-8276] [GH-8281] [GH-8309] [GH-8311] [GH-8304] [GH-8303] [GH-8293]
 
 ### BUG FIXES:
 * builder/amazon: Fix region copy for non-ebs amazon builders [GH-8212]
