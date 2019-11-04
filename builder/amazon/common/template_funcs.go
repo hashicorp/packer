@@ -39,5 +39,4 @@ func templateCleanAMIName(s string) string {
 
 var TemplateFuncs = template.FuncMap{
 	"clean_resource_name": templateCleanAMIName,
-	"clean_ami_name":      packertpl.DeprecatedTemplateFunc("clean_ami_name", "clean_resource_name", templateCleanAMIName),
 }
