@@ -407,7 +407,7 @@ func (c *Core) init() error {
 		}
 	}
 
-	if (changed == false) && (shouldRetry == true) {
+	if !changed && shouldRetry {
 		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
 			"the variable you're referencing has been defined; Packer treats "+
 			"all variables used to interpolate other user varaibles as "+
