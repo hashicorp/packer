@@ -89,13 +89,25 @@ type Config struct {
 	// The type of controller that the primary hard drive is attached to,
 	// defaults to ide. When set to sata, the drive is attached to an AHCI SATA
 	// controller. When set to scsi, the drive is attached to an LsiLogic SCSI
-	// controller.
+	// controller. When set to pcie, the drive is attached to an NVMe
+	// controller. Please note that when you use "pcie", you'll need to have
+	// Virtualbox 6, install an [extension
+	// pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
+	// and you will need to enable EFI mode for nvme to work, ex:
+	//   "vboxmanage": [
+	//       [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
+	//    ]
 	HardDriveInterface string `mapstructure:"hard_drive_interface" required:"false"`
 	// The number of ports available on any SATA controller created, defaults
 	// to 1. VirtualBox supports up to 30 ports on a maximum of 1 SATA
 	// controller. Increasing this value can be useful if you want to attach
 	// additional drives.
 	SATAPortCount int `mapstructure:"sata_port_count" required:"false"`
+	// The number of ports available on any NVMe controller created, defaults
+	// to 1. VirtualBox supports up to 255 ports on a maximum of 1 NVMe
+	// controller. Increasing this value can be useful if you want to attach
+	// additional drives.
+	NVMePortCount int `mapstructure:"nvme_port_count" required:"false"`
 	// Forces some guests (i.e. Windows 7+) to treat disks as SSDs and stops
 	// them from performing disk fragmentation. Also set hard_drive_discard to
 	// true to enable TRIM support.
@@ -193,9 +205,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"packer-%s-%d", b.config.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
-	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
+	switch b.config.HardDriveInterface {
+	case "ide", "sata", "scsi", "pcie":
+		// do nothing
+	default:
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
+			errs, errors.New("hard_drive_interface can only be ide, sata, pcie or scsi"))
 	}
 
 	if b.config.SATAPortCount == 0 {
@@ -205,6 +220,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.SATAPortCount > 30 {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("sata_port_count cannot be greater than 30"))
+	}
+
+	if b.config.NVMePortCount == 0 {
+		b.config.NVMePortCount = 1
+	}
+
+	if b.config.NVMePortCount > 255 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("nvme_port_count cannot be greater than 255"))
 	}
 
 	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
