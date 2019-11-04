@@ -47,10 +47,22 @@
 -   `hard_drive_interface` (string) - The type of controller that the primary hard drive is attached to,
     defaults to ide. When set to sata, the drive is attached to an AHCI SATA
     controller. When set to scsi, the drive is attached to an LsiLogic SCSI
-    controller.
+    controller. When set to pcie, the drive is attached to an NVMe
+    controller. Please note that when you use "pcie", you'll need to have
+    Virtualbox 6, install an [extension
+    pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
+    and you will need to enable EFI mode for nvme to work, ex:
+      "vboxmanage": [
+          [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
+       ]
     
 -   `sata_port_count` (int) - The number of ports available on any SATA controller created, defaults
     to 1. VirtualBox supports up to 30 ports on a maximum of 1 SATA
+    controller. Increasing this value can be useful if you want to attach
+    additional drives.
+    
+-   `nvme_port_count` (int) - The number of ports available on any NVMe controller created, defaults
+    to 1. VirtualBox supports up to 255 ports on a maximum of 1 NVMe
     controller. Increasing this value can be useful if you want to attach
     additional drives.
     

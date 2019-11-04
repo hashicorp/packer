@@ -104,6 +104,7 @@ type FlatConfig struct {
 	HardDriveDiscard          *bool             `mapstructure:"hard_drive_discard" required:"false" cty:"hard_drive_discard"`
 	HardDriveInterface        *string           `mapstructure:"hard_drive_interface" required:"false" cty:"hard_drive_interface"`
 	SATAPortCount             *int              `mapstructure:"sata_port_count" required:"false" cty:"sata_port_count"`
+	NVMePortCount             *int              `mapstructure:"nvme_port_count" required:"false" cty:"nvme_port_count"`
 	HardDriveNonrotational    *bool             `mapstructure:"hard_drive_nonrotational" required:"false" cty:"hard_drive_nonrotational"`
 	ISOInterface              *string           `mapstructure:"iso_interface" required:"false" cty:"iso_interface"`
 	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered"`
@@ -215,6 +216,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"hard_drive_discard":           &hcldec.AttrSpec{Name: "hard_drive_discard", Type: cty.Bool, Required: false},
 		"hard_drive_interface":         &hcldec.AttrSpec{Name: "hard_drive_interface", Type: cty.String, Required: false},
 		"sata_port_count":              &hcldec.AttrSpec{Name: "sata_port_count", Type: cty.Number, Required: false},
+		"nvme_port_count":              &hcldec.AttrSpec{Name: "nvme_port_count", Type: cty.Number, Required: false},
 		"hard_drive_nonrotational":     &hcldec.AttrSpec{Name: "hard_drive_nonrotational", Type: cty.Bool, Required: false},
 		"iso_interface":                &hcldec.AttrSpec{Name: "iso_interface", Type: cty.String, Required: false},
 		"keep_registered":              &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
