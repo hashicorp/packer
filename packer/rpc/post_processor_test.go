@@ -112,6 +112,9 @@ func TestPostProcessorRPC_cancel(t *testing.T) {
 	// Test Configure
 	config := 42
 	err := ppClient.Configure(config)
+	if err != nil {
+		t.Fatalf("error configuring post-processor client: %s", err)
+	}
 
 	// Test PostProcess
 	a := &packer.MockArtifact{
