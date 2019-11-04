@@ -21,7 +21,6 @@ type testBuild struct {
 	setDebugCalled   bool
 	setForceCalled   bool
 	setOnErrorCalled bool
-	cancelCalled     bool
 
 	errRunResult bool
 }
