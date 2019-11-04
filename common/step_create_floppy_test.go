@@ -98,7 +98,7 @@ func TestStepCreateFloppy(t *testing.T) {
 	}
 }
 
-func xxxTestStepCreateFloppy_missing(t *testing.T) {
+func TestStepCreateFloppy_missing(t *testing.T) {
 	state := testStepCreateFloppyState(t)
 	step := new(StepCreateFloppy)
 
@@ -143,7 +143,7 @@ func xxxTestStepCreateFloppy_missing(t *testing.T) {
 	}
 }
 
-func xxxTestStepCreateFloppy_notfound(t *testing.T) {
+func TestStepCreateFloppy_notfound(t *testing.T) {
 	state := testStepCreateFloppyState(t)
 	step := new(StepCreateFloppy)
 
