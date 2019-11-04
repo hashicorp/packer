@@ -10,7 +10,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -18,23 +17,6 @@ import (
 )
 
 const TestFixtures = "test-fixtures"
-
-// utility function for returning a directory structure as a list of strings
-func getDirectory(path string) []string {
-	var result []string
-	walk := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() && !strings.HasSuffix(path, "/") {
-			path = path + "/"
-		}
-		result = append(result, filepath.ToSlash(path))
-		return nil
-	}
-	filepath.Walk(path, walk)
-	return result
-}
 
 func TestStepCreateFloppy_Impl(t *testing.T) {
 	var raw interface{}
