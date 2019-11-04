@@ -47,8 +47,10 @@
     one of the other listed interfaces. Using the `scsi` interface under
     these circumstances will cause the build to fail.
     
--   `disk_size` (uint) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is 40960 (40 GB).
+-   `disk_size` (string) - The size in bytes, suffixes of the first letter of common byte types
+    like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
+    Will create the of the hard disk of the VM. By default, this is
+    `40960M` (40 GB).
     
 -   `disk_cache` (string) - The cache mode to use for disk. Allowed values include any of
     `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
