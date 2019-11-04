@@ -22,7 +22,9 @@
         a {
           color: $home-header-link-color;
 
-          &:hover, &:focus, &:active {
+          &:hover,
+          &:focus,
+          &:active {
             background-color: transparent;
             color: $home-header-link-color-hover;
 
@@ -142,14 +144,11 @@
   }
 
   .terminal {
+    @extend .g-type-code;
     border: 1px solid $white;
     background-color: $black;
     box-sizing: border-box;
     color: $white;
-    font-family: $font-monospace;
-    font-size: 0.844rem;
-    font-weight: $font-weight-reg;
-    line-height: 1.926em;
     margin: 20px auto;
     padding: 10px 20px 20px 20px;
 
@@ -167,7 +166,7 @@
 
     span.circle {
       &:before {
-        content: '\25CF';
+        content: "\25CF";
         color: $white;
         margin: 0 0 0 -4px;
         padding: 0;
