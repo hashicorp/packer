@@ -670,17 +670,6 @@ func TestSensitiveVars(t *testing.T) {
 	}
 }
 
-func testComponentFinder() *ComponentFinder {
-	builderFactory := func(n string) (Builder, error) { return new(MockBuilder), nil }
-	ppFactory := func(n string) (PostProcessor, error) { return new(MockPostProcessor), nil }
-	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
-	return &ComponentFinder{
-		Builder:       builderFactory,
-		PostProcessor: ppFactory,
-		Provisioner:   provFactory,
-	}
-}
-
 func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {
 	tpl, err := template.ParseFile(p)
 	if err != nil {
