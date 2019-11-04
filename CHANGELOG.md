@@ -28,6 +28,8 @@
     buffering until command is complete [GH-8274]
 * builder/vagrant: add insert_key option for toggling whether to add Vagrant's
     insecure key [GH-8274]
+* builder/virtualbox: enabled pcie disks usage, but this feature is in beta and
+  won't work out of the box yet [GH-8305]
 * communicator/winrm: Prevent busy loop while waiting for WinRM connection
     [GH-8213]
 * core: Add strftime function in templates [GH-8208]
