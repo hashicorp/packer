@@ -184,6 +184,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
+	if b.config.OutputVagrantfile != "" {
+		b.config.OutputVagrantfile, err = filepath.Abs(b.config.OutputVagrantfile)
+		if err != nil {
+			packer.MultiErrorAppend(errs,
+				fmt.Errorf("unable to determine absolute path for output vagrantfile: %s", err))
+		}
+	}
+
 	if b.config.TeardownMethod == "" {
 		// If we're using a box that's already opened on the system, don't
 		// automatically destroy it. If we open the box ourselves, then go ahead
