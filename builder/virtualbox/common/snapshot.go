@@ -35,7 +35,7 @@ func ParseSnapshotData(snapshotData string) (*VBoxSnapshot, error) {
 				node.IsCurrent = true
 			} else {
 				matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
-				if matches[1] == "Name" {
+				if len(matches) >= 2 && matches[1] == "Name" {
 					if nil == rootNode {
 						node = new(VBoxSnapshot)
 						rootNode = node
