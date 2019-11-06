@@ -134,3 +134,10 @@ func TestSnapshot_EnsureParents(t *testing.T) {
 		}
 	}
 }
+
+func TestSnapshot_WrongSnapshot(t *testing.T) {
+	rootNode, err := ParseSnapshotData(`Potato=
+	`)
+	assert.Nil(t, err)
+	assert.Nil(t, rootNode)
+}
