@@ -29,43 +29,47 @@ func ParseSnapshotData(snapshotData string) (*VBoxSnapshot, error) {
 
 	for scanner.Scan() {
 		txt := scanner.Text()
-		idx := strings.Index(txt, "=")
-		if idx > 0 {
-			if strings.HasPrefix(txt, "Current") {
-				node.IsCurrent = true
+		if !strings.Contains(txt, "=") {
+			log.Printf("Invalid key,value pair [%s]", txt)
+			continue
+		}
+		if strings.HasPrefix(txt, "Current") {
+			node.IsCurrent = true
+			continue
+		}
+		matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
+		if len(matches) < 2 {
+			continue
+		}
+
+		switch matches[1] {
+		case "UUID":
+			node.UUID = matches[4]
+		case "Name":
+			if nil == rootNode {
+				node = new(VBoxSnapshot)
+				rootNode = node
+				currentIndicator = matches[2]
 			} else {
-				matches := SnapshotNamePartsRe.FindStringSubmatch(txt)
-				if len(matches) >= 2 && matches[1] == "Name" {
-					if nil == rootNode {
-						node = new(VBoxSnapshot)
-						rootNode = node
-						currentIndicator = matches[2]
-					} else {
-						pathLenCur := strings.Count(currentIndicator, "-")
-						pathLen := strings.Count(matches[2], "-")
-						if pathLen > pathLenCur {
-							currentIndicator = matches[2]
-							parentStack.Push(node)
-						} else if pathLen < pathLenCur {
-							currentIndicator = matches[2]
-							for i := 0; i < pathLenCur-pathLen; i++ {
-								parentStack.Pop()
-							}
-						}
-						node = new(VBoxSnapshot)
-						parent := parentStack.Peek().(*VBoxSnapshot)
-						if nil != parent {
-							node.Parent = parent
-							parent.Children = append(parent.Children, node)
-						}
+				pathLenCur := strings.Count(currentIndicator, "-")
+				pathLen := strings.Count(matches[2], "-")
+				if pathLen > pathLenCur {
+					currentIndicator = matches[2]
+					parentStack.Push(node)
+				} else if pathLen < pathLenCur {
+					currentIndicator = matches[2]
+					for i := 0; i < pathLenCur-pathLen; i++ {
+						parentStack.Pop()
 					}
-					node.Name = matches[4]
-				} else if matches[1] == "UUID" {
-					node.UUID = matches[4]
+				}
+				node = new(VBoxSnapshot)
+				parent := parentStack.Peek().(*VBoxSnapshot)
+				if nil != parent {
+					node.Parent = parent
+					parent.Children = append(parent.Children, node)
 				}
 			}
-		} else {
-			log.Printf("Invalid key,value pair [%s]", txt)
+			node.Name = matches[4]
 		}
 	}
 	return rootNode, nil
