@@ -233,6 +233,21 @@ IAM policies.
 }
 ```
 
+In cases where you are using a KMS key for encryption, your key will need the
+following policies at a minimum:
+
+```json
+{
+    "Sid": "Allow use of the key",
+    "Effect": "Allow",
+    "Action": [
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*"
+    ],
+    "Resource": "*"
+}
+```
+
 ### Checking that system time is current
 
 Amazon uses the current time as part of the [request signing
@@ -264,3 +279,17 @@ Excepting tasks that we know can take an extremely long time, this defaults to
 
 `AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
 requests. Generally defaults to 2 or 5 seconds, depending on the task.
+
+### `ResourceNotReady: failed waiting for successful resource state`
+
+This error message can appear for several reasons, generally during image
+copy/encryption. It is often the result of a KMS misconfiguration. Examples of
+possible misconfigurations are:
+
+- You provided an invalid kms_key_id.
+- The kms key you provided is a valid key, but not in the region you've said to
+  use it in.
+- The kms key you provided is a valid key, but does not have all of the
+  necessary policy permissions for an image copy. (see above for the necessary
+  kms policies)
+- You are using STS credentials that expired during a long-running call.
