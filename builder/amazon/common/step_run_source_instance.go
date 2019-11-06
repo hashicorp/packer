@@ -175,7 +175,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 	}
 
-	runResp, err := ec2conn.RunInstances(runOpts)
+	runReq, runResp := ec2conn.RunInstancesRequest(runOpts)
+	runReq.RetryCount = 11
+	err = runReq.Send()
 	if err != nil {
 		err := fmt.Errorf("Error launching source instance: %s", err)
 		state.Put("error", err)
