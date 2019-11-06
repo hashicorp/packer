@@ -24,6 +24,7 @@ type FlatConfig struct {
 	Scripts             []string          `cty:"scripts"`
 	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
 	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars"`
+	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format"`
 	InlineShebang       *string           `mapstructure:"inline_shebang" cty:"inline_shebang"`
 	PauseAfter          *string           `mapstructure:"pause_after" cty:"pause_after"`
 	UseEnvVarFile       *bool             `mapstructure:"use_env_var_file" cty:"use_env_var_file"`
@@ -58,6 +59,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
+		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
 		"inline_shebang":             &hcldec.AttrSpec{Name: "inline_shebang", Type: cty.String, Required: false},
 		"pause_after":                &hcldec.AttrSpec{Name: "pause_after", Type: cty.String, Required: false},
 		"use_env_var_file":           &hcldec.AttrSpec{Name: "use_env_var_file", Type: cty.Bool, Required: false},

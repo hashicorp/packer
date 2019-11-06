@@ -286,6 +286,45 @@ func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
 	}
 }
 
+func TestProvisioner_createFlattenedEnvVars_withEnvVarFormat(t *testing.T) {
+	var flattenedEnvVars string
+	config := testConfig()
+
+	userEnvVarTests := [][]string{
+		{},                     // No user env var
+		{"FOO=bar"},            // Single user env var
+		{"FOO=bar's"},          // User env var with single quote in value
+		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
+		{"FOO=bar=baz"},        // User env var with value containing equals
+		{"FOO==bar"},           // User env var with value starting with equals
+	}
+	expected := []string{
+		`PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+		`FOO=bar PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+		`FOO=bar'"'"'s PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+		`BAZ=qux FOO=bar PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+		`FOO=bar=baz PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+		`FOO==bar PACKER_BUILDER_TYPE=iso PACKER_BUILD_NAME=vmware `,
+	}
+
+	p := new(Provisioner)
+
+	p.config.EnvVarFormat = "%s=%s "
+	p.Prepare(config)
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+
+	for i, expectedValue := range expected {
+		p.config.Vars = userEnvVarTests[i]
+		flattenedEnvVars = p.createFlattenedEnvVars()
+		if flattenedEnvVars != expectedValue {
+			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
+	}
+}
+
 func TestProvisioner_createEnvVarFileContent(t *testing.T) {
 	var flattenedEnvVars string
 	config := testConfig()
@@ -326,6 +365,7 @@ export PACKER_BUILD_NAME='vmware'
 	}
 
 	p := new(Provisioner)
+	p.config.UseEnvVarFile = true
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -337,6 +377,55 @@ export PACKER_BUILD_NAME='vmware'
 		flattenedEnvVars = p.createEnvVarFileContent()
 		if flattenedEnvVars != expectedValue {
 			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
+	}
+}
+
+func TestProvisioner_createEnvVarFileContent_withEnvVarFormat(t *testing.T) {
+	var flattenedEnvVars string
+	config := testConfig()
+
+	userEnvVarTests := [][]string{
+		{},                     // No user env var
+		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
+		{"FOO=bar=baz"},        // User env var with value containing equals
+		{"FOO==bar"},           // User env var with value starting with equals
+	}
+	expected := []string{
+		`PACKER_BUILDER_TYPE=iso
+PACKER_BUILD_NAME=vmware
+`,
+		`BAZ=qux
+FOO=bar
+PACKER_BUILDER_TYPE=iso
+PACKER_BUILD_NAME=vmware
+`,
+		`FOO=bar=baz
+PACKER_BUILDER_TYPE=iso
+PACKER_BUILD_NAME=vmware
+`,
+		`FOO==bar
+PACKER_BUILDER_TYPE=iso
+PACKER_BUILD_NAME=vmware
+`,
+	}
+
+	p := new(Provisioner)
+
+	p.config.UseEnvVarFile = true
+	//User provided env_var_format without export prefix
+	p.config.EnvVarFormat = "%s=%s\n"
+	p.Prepare(config)
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+
+	for i, expectedValue := range expected {
+		p.config.Vars = userEnvVarTests[i]
+		flattenedEnvVars = p.createEnvVarFileContent()
+		if flattenedEnvVars != expectedValue {
+			t.Fatalf("expected flattened env vars to be: %q, got %q.", expectedValue, flattenedEnvVars)
 		}
 	}
 }

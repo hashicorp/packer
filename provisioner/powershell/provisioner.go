@@ -56,10 +56,6 @@ type Config struct {
 	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
 
 	// This is used in the template generation to format environment variables
-	// inside the `ExecuteCommand` template.
-	EnvVarFormat string
-
-	// This is used in the template generation to format environment variables
 	// inside the `ElevatedExecuteCommand` template.
 	ElevatedEnvVarFormat string `mapstructure:"elevated_env_var_format"`
 
