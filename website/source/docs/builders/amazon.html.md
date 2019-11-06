@@ -236,7 +236,7 @@ IAM policies.
 In cases where you are using a KMS key for encryption, your key will need the
 following policies at a minimum:
 
-```
+```json
 {
     "Sid": "Allow use of the key",
     "Effect": "Allow",
