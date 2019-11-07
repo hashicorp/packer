@@ -9,7 +9,8 @@
     
 -   `client_secret` (string) - A password/secret registered for the AAD SP.
     
--   `client_cert_path` (string) - The path to a certificate that will be used to authenticate as the specified AAD SP.
+-   `client_cert_path` (string) - The path to a pem-encoded certificate that will be used to authenticate
+    as the specified AAD SP.
     
 -   `client_jwt` (string) - A JWT bearer token for client auth (RFC 7523, Sec. 2.2) that will be used
     to authenticate the AAD SP. Provides more control over token the expiration

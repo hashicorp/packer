@@ -36,7 +36,8 @@ type Config struct {
 	ClientID string `mapstructure:"client_id"`
 	// A password/secret registered for the AAD SP.
 	ClientSecret string `mapstructure:"client_secret"`
-	// The path to a certificate that will be used to authenticate as the specified AAD SP.
+	// The path to a pem-encoded certificate that will be used to authenticate
+	// as the specified AAD SP.
 	ClientCertPath string `mapstructure:"client_cert_path"`
 	// A JWT bearer token for client auth (RFC 7523, Sec. 2.2) that will be used
 	// to authenticate the AAD SP. Provides more control over token the expiration
