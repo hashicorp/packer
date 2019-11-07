@@ -58,9 +58,7 @@ func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string
 			err = fmt.Errorf("Failed with ResourceNotReady error, which can "+
 				"have a variety of causes. For help troubleshooting, check "+
 				"our docs: "+
-				"https://www.packer.io/docs/builders/amazon.html#"+
-				"resourcenotready-quot-exceeded-wait-attempts-quot-while-"+
-				"waiting-for-tasks-to-complete\n"+
+				"https://www.packer.io/docs/builders/amazon.html#resourcenotready-error\n"+
 				"original error: %s", err.Error())
 		}
 	}

@@ -262,9 +262,9 @@ If you suspect your system's date is wrong, you can compare it against
 Linux/OS X, you can run the `date` command to get the current time. If you're
 on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
 
-### ResourceNotReady
+### ResourceNotReady Error
 This error generally appears as either `ResourceNotReady: exceeded wait
-attempts`  `ResourceNotReady: failed waiting for successful resource state`.
+attempts` or `ResourceNotReady: failed waiting for successful resource state`.
 
 This opaque error gets returned from AWS's API for a number of reasons,
 generally during image copy/encryption. Possible reasons for the error include:
