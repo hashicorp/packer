@@ -29,7 +29,7 @@ func (s *stepShareImage) Run(ctx context.Context, state multistep.StateBag) mult
 	req.Permission = common.StringPtr("SHARE")
 	accounts := make([]*string, 0, len(s.ShareAccounts))
 	for _, account := range s.ShareAccounts {
-		accounts = append(accounts, &account)
+		accounts = append(accounts, common.StringPtr(account))
 	}
 	req.AccountIds = accounts
 	err := Retry(ctx, func(ctx context.Context) error {

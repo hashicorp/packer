@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -29,7 +30,7 @@ func (s *stepCopyImage) Run(ctx context.Context, state multistep.StateBag) multi
 	copyRegions := make([]*string, 0, len(s.DesinationRegions))
 	for _, region := range s.DesinationRegions {
 		if region != s.SourceRegion {
-			copyRegions = append(copyRegions, &region)
+			copyRegions = append(copyRegions, common.StringPtr(region))
 		}
 	}
 	req.DestinationRegions = copyRegions
