@@ -106,12 +106,6 @@ Template validated successfully.
 
 Next, let's build the image from this template.
 
-An astute reader may notice that we said earlier we'd be building an image with
-Redis pre-installed, and yet the template we made doesn't reference Redis
-anywhere. In fact, this part of the documentation will only cover making a first
-basic, non-provisioned image. The [next section on provisioning](./provision.html) will cover
-installing Redis.
-
 ## Your First Image
 
 With a properly validated template, it is time to build your first image. This
