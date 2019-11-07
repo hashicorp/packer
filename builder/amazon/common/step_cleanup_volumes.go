@@ -60,7 +60,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	})
 
 	if err != nil {
-		ui.Say(fmt.Sprintf("Error describing volumes: %s", err))
+		ui.Error(fmt.Sprintf("Error describing volumes: %s", err))
 		return
 	}
 
