@@ -1,24 +1,64 @@
 ## 1.5.0 (Upcoming)
+## 1.4.5 (November 4, 2019)
 
 ### IMPROVEMENTS:
+* added ucloud-import post-processsor to import custom image for UCloud UHost
+    instance [GH-8261]
+* builder/amazon: New option to specify IAM policy for a temporary instance
+    profile [GH-8247]
+* builder/amazon: improved validation around encrypt_boot and kms_key_id for a
+    better experience [GH-8288]    
+* builder/azure-arm: Allow specification of polling duration [GH-8226]
+* builder/azure-chroot: Add Azure chroot builder [GH-8185] & refactored some
+    common code together after it [GH-8269]
+* builder/azure: Deploy NSG if list of IP addresses is provided in config
+    [GH-8203]
+* builder/azure: Set correct user agent for Azure client set [GH-8259]
+* builder/cloudstack: Add instance_display_name for cloudstack builder
+    [GH-8280]
+* builder/hyperv: Add the additional_disk_size option tho the hyperv vmcx
+    builder. [GH-8246]
+* builder/openstack: Add option to discover provisioning network [GH-8279]
 * builder/oracle-oci: Support defined tags for oci builder [GH-8172]
+* builder/proxmox: Add ability to select CPU type [GH-8201]
+* builder/proxmox: Add support for SCSI controller selection [GH-8199]
+* builder/proxmoz: Bump Proxmox dependency: [GH-8241]
+* builder/tencent: Add retry on remote api call [GH-8250]
+* builder/vagrant: Pass through logs from vagrant in real time rather than
+    buffering until command is complete [GH-8274]
+* builder/vagrant: add insert_key option for toggling whether to add Vagrant's
+    insecure key [GH-8274]
+* builder/virtualbox: enabled pcie disks usage, but this feature is in beta and
+  won't work out of the box yet [GH-8305]
+* communicator/winrm: Prevent busy loop while waiting for WinRM connection
+    [GH-8213]
+* core: Add strftime function in templates [GH-8208]
+* core: Improve error message when comment is bad [GH-8267]
+* post-processor/amazon-import: delete intermediary snapshots [GH-8307]
+* Fix various dropped errors an removed unused code: [GH-8230] [GH-8265]
+    [GH-8276] [GH-8281] [GH-8309] [GH-8311] [GH-8304] [GH-8303] [GH-8293]
 
 ### BUG FIXES:
+* builder/amazon: Fix region copy for non-ebs amazon builders [GH-8212]
 * builder/amazon: Fix spot instance bug where builder would fail if one
     availability zone could not support the requested spot instance type, even
     if another AZ could do so. [GH-8184]
+* builder/azure: Fix build failure after a retry config generation error.
+    [GH-8209]
 * builder/docker: Use a unique temp dir for each build to prevent concurrent
     builds from stomping on each other [GH-8192]
+* builder/hyperv: Improve filter for determining which files to compact
+    [GH-8248]
+* builder/hyperv: Use first adapter, rather than failing, when multiple
+    adapters are attached to host OS's VM switch [GH-8234]
+* builder/openstack: Fix setting openstack metadata for use_blockstorage_volume
+    [GH-8186]
 * builder/openstack: Warn instead of failing on terminate if instance is
     already shut down [GH-8176]
 * post-processor/digitalocean-import: Fix panic when 'image_regions' not set
     [GH-8179]
-
-### BACKWARDS INCOMPATIBILITIES:
-* builder/qemu: Provide disk size as a string [GH-7546]
-* core: Finish deprecating old tempalte functions clean_ami_name and
-    clean_image_name in favor of generic clean_resource_name [GH-8193]
-
+* provisioner/powershell: Fix powershell syntax error causing failed builds
+    [GH-8195]
 
 ## 1.4.4 (October 1, 2019)
 

@@ -85,15 +85,10 @@ func (a *Artifact) Destroy() error {
 			errors = append(errors, err)
 		}
 
-		// Deregister ami
-		input := &ec2.DeregisterImageInput{
-			ImageId: &imageId,
-		}
-		if _, err := regionConn.DeregisterImage(input); err != nil {
+		err = DestroyAMIs([]*string{&imageId}, regionConn)
+		if err != nil {
 			errors = append(errors, err)
 		}
-
-		// TODO(mitchellh): Delete the snapshots associated with an AMI too
 	}
 
 	if len(errors) > 0 {

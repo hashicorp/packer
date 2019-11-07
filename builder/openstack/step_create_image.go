@@ -55,6 +55,20 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 			return multistep.ActionHalt
 		}
 		volume := state.Get("volume_id").(string)
+
+		// set ImageMetadata before uploading to glance so the new image captured the desired values
+		if len(config.ImageMetadata) > 0 {
+			err = volumeactions.SetImageMetadata(blockStorageClient, volume, volumeactions.ImageMetadataOpts{
+				Metadata: config.ImageMetadata,
+			}).ExtractErr()
+			if err != nil {
+				err := fmt.Errorf("Error setting image metadata: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+
 		image, err := volumeactions.UploadImage(blockStorageClient, volume, volumeactions.UploadImageOpts{
 			DiskFormat: config.ImageDiskFormat,
 			ImageName:  config.ImageName,
@@ -90,21 +104,6 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	if s.UseBlockStorageVolume {
-		volume := state.Get("volume_id").(string)
-		if len(config.ImageMetadata) > 0 {
-			err = volumeactions.SetImageMetadata(blockStorageClient, volume, volumeactions.ImageMetadataOpts{
-				Metadata: config.ImageMetadata,
-			}).ExtractErr()
-			if err != nil {
-				err := fmt.Errorf("Error setting image metadata: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-		}
 	}
 
 	return multistep.ActionContinue

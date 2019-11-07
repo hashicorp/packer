@@ -1,12 +1,12 @@
 <!-- Code generated from the comments of the BootConfig struct in common/bootcommand/config.go; DO NOT EDIT MANUALLY -->
 
--   `boot_keygroup_interval` (string) - Time to wait after sending a group of key pressses. The value of this
+-   `boot_keygroup_interval` (duration string | ex: "1h5m2s") - Time to wait after sending a group of key pressses. The value of this
     should be a duration. Examples are `5s` and `1m30s` which will cause
     Packer to wait five seconds and one minute 30 seconds, respectively. If
     this isn't specified, a sensible default value is picked depending on
     the builder type.
     
--   `boot_wait` (string) - The time to wait after booting the initial virtual machine before typing
+-   `boot_wait` (duration string | ex: "1h5m2s") - The time to wait after booting the initial virtual machine before typing
     the `boot_command`. The value of this should be a duration. Examples are
     `5s` and `1m30s` which will cause Packer to wait five seconds and one
     minute 30 seconds, respectively. If this isn't specified, the default is

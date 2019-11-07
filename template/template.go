@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Provisioner
+
 package template
 
 import (

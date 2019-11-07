@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,BlockDevices,BlockDevice
 
 // The chroot package is able to create an Amazon AMI without requiring the
 // launch of a new instance for every build. It does this by attaching and
@@ -14,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/chroot"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -37,7 +39,7 @@ type Config struct {
 	// entry for your root volume, `root_volume_size` and `root_device_name`.
 	// See the [BlockDevices](#block-devices-configuration) documentation for
 	// fields.
-	AMIMappings BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	AMIMappings awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" hcl2-schema-generator:"ami_block_device_mappings,direct" required:"false"`
 	// This is a list of devices to mount into the chroot environment. This
 	// configuration parameter requires some additional documentation which is
 	// in the Chroot Mounts section. Please read that section for more
@@ -166,6 +168,10 @@ type Config struct {
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
 
 	ctx interpolate.Context
+}
+
+func (c *Config) GetContext() interpolate.Context {
+	return c.ctx
 }
 
 type wrappedCommandTemplate struct {
@@ -347,7 +353,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
+	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -382,20 +388,24 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
-		&StepPreMountCommands{
+		&chroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
 		},
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
 		},
-		&StepPostMountCommands{
+		&chroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
 		},
-		&StepMountExtra{},
-		&StepCopyFiles{},
-		&StepChrootProvision{},
-		&StepEarlyCleanup{},
+		&chroot.StepMountExtra{
+			ChrootMounts: b.config.ChrootMounts,
+		},
+		&chroot.StepCopyFiles{
+			Files: b.config.CopyFiles,
+		},
+		&chroot.StepChrootProvision{},
+		&chroot.StepEarlyCleanup{},
 		&StepSnapshot{},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -408,6 +418,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			RootVolumeSize:           b.config.RootVolumeSize,
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
+			AMISkipBuildRegion:       b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,

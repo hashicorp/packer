@@ -19,6 +19,7 @@ type TempName struct {
 	SubnetName          string
 	PublicIPAddressName string
 	VirtualNetworkName  string
+	NsgName             string
 }
 
 func NewTempName() *TempName {
@@ -33,6 +34,7 @@ func NewTempName() *TempName {
 	tempName.PublicIPAddressName = fmt.Sprintf("pkrip%s", suffix)
 	tempName.SubnetName = fmt.Sprintf("pkrsn%s", suffix)
 	tempName.VirtualNetworkName = fmt.Sprintf("pkrvn%s", suffix)
+	tempName.NsgName = fmt.Sprintf("pkrsg%s", suffix)
 	tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
 
 	tempName.AdminPassword = generatePassword()

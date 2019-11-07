@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,ImageFilter,ImageFilterOptions
+
 // The openstack package contains a packer.Builder implementation that
 // builds Images for openstack.
 
@@ -99,6 +101,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
 			SourceProperties: b.config.SourceImageFilters.Filters.Properties,
 		},
+		&StepDiscoverNetwork{
+			Networks:              b.config.Networks,
+			NetworkDiscoveryCIDRs: b.config.NetworkDiscoveryCIDRs,
+			Ports:                 b.config.Ports,
+		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
 			VolumeName:             b.config.VolumeName,
@@ -108,8 +115,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRunSourceServer{
 			Name:                  b.config.InstanceName,
 			SecurityGroups:        b.config.SecurityGroups,
-			Networks:              b.config.Networks,
-			Ports:                 b.config.Ports,
 			AvailabilityZone:      b.config.AvailabilityZone,
 			UserData:              b.config.UserData,
 			UserDataFile:          b.config.UserDataFile,

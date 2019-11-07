@@ -111,6 +111,10 @@ func main() {
 			}
 			fieldType := string(b[field.Type.Pos()-1 : field.Type.End()-1])
 			fieldType = strings.ReplaceAll(fieldType, "*", `\*`)
+			switch fieldType {
+			case "time.Duration":
+				fieldType = `duration string | ex: "1h5m2s"`
+			}
 
 			field := Field{
 				Name: name,

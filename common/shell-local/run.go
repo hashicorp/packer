@@ -124,13 +124,13 @@ func createInlineScriptFile(config *Config) (string, error) {
 	}
 
 	// generate context so you can interpolate the command
-	config.Ctx.Data = &EnvVarsTemplate{
+	config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: getWinRMPassword(config.PackerBuildName),
 	}
 
 	for _, command := range config.Inline {
 		// interpolate command to check for template variables.
-		command, err := interpolate.Render(command, &config.Ctx)
+		command, err := interpolate.Render(command, &config.ctx)
 		if err != nil {
 			return "", err
 		}
@@ -155,7 +155,7 @@ func createInlineScriptFile(config *Config) (string, error) {
 // user-provided ExecuteCommand or defaulting to something that makes sense for
 // the host OS
 func createInterpolatedCommands(config *Config, script string, flattenedEnvVars string) ([]string, error) {
-	config.Ctx.Data = &ExecuteCommandTemplate{
+	config.ctx.Data = &ExecuteCommandTemplate{
 		Vars:          flattenedEnvVars,
 		Script:        script,
 		Command:       script,
@@ -164,7 +164,7 @@ func createInterpolatedCommands(config *Config, script string, flattenedEnvVars 
 
 	interpolatedCmds := make([]string, len(config.ExecuteCommand))
 	for i, cmd := range config.ExecuteCommand {
-		interpolatedCmd, err := interpolate.Render(cmd, &config.Ctx)
+		interpolatedCmd, err := interpolate.Render(cmd, &config.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("Error processing command: %s", err)
 		}
@@ -196,12 +196,12 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	}
 
 	// interpolate environment variables
-	config.Ctx.Data = &EnvVarsTemplate{
+	config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: getWinRMPassword(config.PackerBuildName),
 	}
 	// Split vars into key/value components
 	for _, envVar := range config.Vars {
-		envVar, err := interpolate.Render(envVar, &config.Ctx)
+		envVar, err := interpolate.Render(envVar, &config.ctx)
 		if err != nil {
 			return "", err
 		}

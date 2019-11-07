@@ -64,6 +64,24 @@
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
     
+-   `temporary_iam_instance_profile_policy_document` (\*PolicyDocument) - Temporary IAM instance profile policy document
+    If IamInstanceProfile is specified it will be used instead. Example:
+    
+    ```json
+    {
+    	"Version": "2012-10-17",
+    	"Statement": [
+    		{
+    			"Action": [
+    			"logs:*"
+    			],
+    			"Effect": "Allow",
+    			"Resource": "*"
+    		}
+    	]
+    }
+    ```
+    
 -   `shutdown_behavior` (string) - Automatically terminate instances on
     shutdown in case Packer exits ungracefully. Possible values are stop and
     terminate. Defaults to stop.
@@ -261,7 +279,7 @@
     subnet_id to be set. If this field is left blank, Packer will try to get
     the VPC ID from the subnet_id.
     
--   `windows_password_timeout` (time.Duration) - The timeout for waiting for a Windows
+-   `windows_password_timeout` (duration string | ex: "1h5m2s") - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value:
     10m
     

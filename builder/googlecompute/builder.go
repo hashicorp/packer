@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, b.config.Account, b.config.VaultGCPOauthEngine)
+		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, err
 	}

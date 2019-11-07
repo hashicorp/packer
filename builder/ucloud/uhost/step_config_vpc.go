@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -13,19 +14,19 @@ type stepConfigVPC struct {
 }
 
 func (s *stepConfigVPC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*UCloudClient)
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.VPCId) != 0 {
 		ui.Say(fmt.Sprintf("Trying to use specified vpc %q...", s.VPCId))
 
-		vpcSet, err := client.describeVPCById(s.VPCId)
+		vpcSet, err := client.DescribeVPCById(s.VPCId)
 		if err != nil {
-			if isNotFoundError(err) {
+			if ucloudcommon.IsNotFoundError(err) {
 				err = fmt.Errorf("the specified vpc %q does not exist", s.VPCId)
-				return halt(state, err, "")
+				return ucloudcommon.Halt(state, err, "")
 			}
-			return halt(state, err, fmt.Sprintf("Error on querying specified vpc %q", s.VPCId))
+			return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on querying specified vpc %q", s.VPCId))
 		}
 
 		state.Put("vpc_id", vpcSet.VPCId)

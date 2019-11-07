@@ -4,6 +4,7 @@ Package ucloud is a package of utilities to setup ucloud sdk and improve using e
 package ucloud
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ucloud/ucloud-sdk-go/private/utils"
@@ -15,6 +16,10 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/response"
 )
+
+type ClientMeta struct {
+	Product string
+}
 
 // Client 客户端
 type Client struct {
@@ -31,6 +36,9 @@ type Client struct {
 	httpRequestHandlers  []HttpRequestHandler
 	responseHandlers     []ResponseHandler
 	httpResponseHandlers []HttpResponseHandler
+
+	// client information injection
+	meta ClientMeta
 }
 
 // NewClient will create an client of ucloud sdk
@@ -38,6 +46,7 @@ func NewClient(config *Config, credential *auth.Credential) *Client {
 	client := Client{
 		credential: credential,
 		config:     config,
+		meta:       ClientMeta{},
 	}
 
 	client.requestHandlers = append(client.requestHandlers, defaultRequestHandlers...)
@@ -51,13 +60,19 @@ func NewClient(config *Config, credential *auth.Credential) *Client {
 	return &client
 }
 
+func NewClientWithMeta(config *Config, credential *auth.Credential, meta ClientMeta) *Client {
+	client := NewClient(config, credential)
+	client.meta = meta
+	return client
+}
+
 // SetHttpClient will setup a http client
 func (c *Client) SetHttpClient(httpClient http.Client) error {
 	c.httpClient = httpClient
 	return nil
 }
 
-// GetCredential will return the creadential config of client.
+// GetCredential will return the credential config of client.
 func (c *Client) GetCredential() *auth.Credential {
 	return c.credential
 }
@@ -65,6 +80,11 @@ func (c *Client) GetCredential() *auth.Credential {
 // GetConfig will return the config of client.
 func (c *Client) GetConfig() *Config {
 	return c.config
+}
+
+// GetMeta will return the meta data of client.
+func (c *Client) GetMeta() ClientMeta {
+	return c.meta
 }
 
 // SetLogger will set the logger of client
@@ -88,6 +108,13 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 	req.SetAction(action)
 	req.SetRequestTime(time.Now())
 	resp.SetRequest(req)
+
+	if c.credential.CanExpire && c.credential.IsExpired() {
+		return uerr.NewClientError(
+			uerr.ErrCredentialExpired,
+			fmt.Errorf("credential is expired at %s", c.credential.Expires.Format(time.RFC3339)),
+		)
+	}
 
 	for _, handler := range c.requestHandlers {
 		req, err = handler(c, req)
@@ -123,7 +150,7 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 
 	if err == nil {
 		// use patch object to resolve the http response body
-		// in general, it will be fix common server error before server bugfix is released.
+		// in general, it will be fix common server error before server bug fix is released.
 		body := httpResp.GetBody()
 
 		for _, patch := range patches {
@@ -131,6 +158,9 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 		}
 
 		err = c.unmarshalHTTPResponse(body, resp)
+
+		uuid := httpResp.GetHeaders().Get(headerKeyRequestUUID)
+		resp.SetRequestUUID(uuid)
 	}
 
 	// use response middle to build and convert response when response has been created.

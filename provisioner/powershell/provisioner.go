@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that executes powershell
 // scripts within the remote machine.
 package powershell
@@ -52,10 +54,6 @@ type Config struct {
 	// reached, if the provisioner can't start a process, it retries.  This
 	// can be set high to allow for reboots.
 	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
-
-	// This is used in the template generation to format environment variables
-	// inside the `ExecuteCommand` template.
-	EnvVarFormat string
 
 	// This is used in the template generation to format environment variables
 	// inside the `ElevatedExecuteCommand` template.

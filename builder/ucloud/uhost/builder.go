@@ -1,9 +1,13 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // The ucloud-uhost contains a packer.Builder implementation that
 // builds uhost images for UCloud UHost instance.
 package uhost
 
 import (
 	"context"
+
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -16,10 +20,10 @@ import (
 const BuilderId = "ucloud.uhost"
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	AccessConfig        `mapstructure:",squash"`
-	ImageConfig         `mapstructure:",squash"`
-	RunConfig           `mapstructure:",squash"`
+	common.PackerConfig       `mapstructure:",squash"`
+	ucloudcommon.AccessConfig `mapstructure:",squash"`
+	ucloudcommon.ImageConfig  `mapstructure:",squash"`
+	ucloudcommon.RunConfig    `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -108,7 +112,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: SSHHost(
+			Host: ucloudcommon.SSHHost(
 				b.config.UseSSHPrivateIp),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -116,9 +120,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepStopInstance{},
 		&stepCreateImage{},
 		&stepCopyUCloudImage{
-			ImageDestinations: b.config.ImageDestinations,
-			RegionId:          b.config.Region,
-			ProjectId:         b.config.ProjectId,
+			ImageDestinations:     b.config.ImageDestinations,
+			RegionId:              b.config.Region,
+			ProjectId:             b.config.ProjectId,
+			WaitImageReadyTimeout: b.config.WaitImageReadyTimeout,
 		},
 	}
 
@@ -137,8 +142,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Build the artifact and return it
-	artifact := &Artifact{
-		UCloudImages:   state.Get("ucloud_images").(*imageInfoSet),
+	artifact := &ucloudcommon.Artifact{
+		UCloudImages:   state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet),
 		BuilderIdValue: BuilderId,
 		Client:         client,
 	}

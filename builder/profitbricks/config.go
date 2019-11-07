@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package profitbricks
 
 import (
@@ -23,13 +25,12 @@ type Config struct {
 	Region       string `mapstructure:"location"`
 	Image        string `mapstructure:"image"`
 	SSHKey       string
-	SnapshotName string              `mapstructure:"snapshot_name"`
-	DiskSize     int                 `mapstructure:"disk_size"`
-	DiskType     string              `mapstructure:"disk_type"`
-	Cores        int                 `mapstructure:"cores"`
-	Ram          int                 `mapstructure:"ram"`
-	Retries      int                 `mapstructure:"retries"`
-	CommConfig   communicator.Config `mapstructure:",squash"`
+	SnapshotName string `mapstructure:"snapshot_name"`
+	DiskSize     int    `mapstructure:"disk_size"`
+	DiskType     string `mapstructure:"disk_type"`
+	Cores        int    `mapstructure:"cores"`
+	Ram          int    `mapstructure:"ram"`
+	Retries      int    `mapstructure:"retries"`
 	ctx          interpolate.Context
 }
 

@@ -39,17 +39,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Source != "" {
 		source, err := os.Open(b.config.Source)
-		defer source.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer source.Close()
 
 		// Create will truncate an existing file
 		target, err := os.Create(b.config.Target)
-		defer target.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer target.Close()
 
 		ui.Say(fmt.Sprintf("Copying %s to %s", source.Name(), target.Name()))
 		bytes, err := io.Copy(target, source)

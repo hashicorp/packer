@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -13,19 +14,19 @@ type stepConfigSecurityGroup struct {
 }
 
 func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*UCloudClient)
-	conn := client.unetconn
+	client := state.Get("client").(*ucloudcommon.UCloudClient)
+	conn := client.UNetConn
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.SecurityGroupId) != 0 {
 		ui.Say(fmt.Sprintf("Trying to use specified security group %q...", s.SecurityGroupId))
-		securityGroupSet, err := client.describeFirewallById(s.SecurityGroupId)
+		securityGroupSet, err := client.DescribeFirewallById(s.SecurityGroupId)
 		if err != nil {
-			if isNotFoundError(err) {
+			if ucloudcommon.IsNotFoundError(err) {
 				err = fmt.Errorf("the specified security group %q does not exist", s.SecurityGroupId)
-				return halt(state, err, "")
+				return ucloudcommon.Halt(state, err, "")
 			}
-			return halt(state, err, fmt.Sprintf("Error on querying specified security group %q", s.SecurityGroupId))
+			return ucloudcommon.Halt(state, err, fmt.Sprintf("Error on querying specified security group %q", s.SecurityGroupId))
 		}
 
 		state.Put("security_group_id", securityGroupSet.FWId)
@@ -44,7 +45,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 
 		resp, err := conn.DescribeFirewall(req)
 		if err != nil {
-			return halt(state, err, "Error on querying default security group")
+			return ucloudcommon.Halt(state, err, "Error on querying default security group")
 		}
 
 		if resp == nil || len(resp.DataSet) < 1 {
@@ -52,7 +53,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 		}
 
 		for _, item := range resp.DataSet {
-			if item.Type == securityGroupNonWeb {
+			if item.Type == ucloudcommon.SecurityGroupNonWeb {
 				securityGroupId = item.FWId
 				break
 			}
@@ -66,7 +67,7 @@ func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.State
 	}
 
 	if securityGroupId == "" {
-		return halt(state, fmt.Errorf("the default security group does not exist"), "")
+		return ucloudcommon.Halt(state, fmt.Errorf("the default security group does not exist"), "")
 	}
 
 	state.Put("security_group_id", securityGroupId)

@@ -72,3 +72,4 @@
 /post-processor/exoscale-import/        @falzm @mcorbin
 /post-processor/googlecompute-export/   crunkleton@google.com
 /post-processor/vsphere-template/       nelson@bennu.cl
+/post-processor/ucloud-import/          @shawnmssu

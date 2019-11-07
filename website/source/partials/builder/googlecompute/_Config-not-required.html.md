@@ -30,7 +30,7 @@
     
 -   `image_description` (string) - The description of the resulting image.
     
--   `image_encryption_key` (\*compute.CustomerEncryptionKey) - Image encryption key to apply to the created image. Possible values:
+-   `image_encryption_key` (\*CustomerEncryptionKey) - Image encryption key to apply to the created image. Possible values:
     * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
     * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
     
@@ -88,7 +88,7 @@
     
 -   `preemptible` (bool) - If true, launch a preemptible instance.
     
--   `state_timeout` (string) - The time to wait for instance state changes. Defaults to "5m".
+-   `state_timeout` (duration string | ex: "1h5m2s") - The time to wait for instance state changes. Defaults to "5m".
     
 -   `region` (string) - The region in which to launch the instance. Defaults to the region
     hosting the specified zone.

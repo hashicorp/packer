@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/google/uuid"
 	"github.com/gophercloud/gophercloud"
@@ -10,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
@@ -135,4 +137,44 @@ func GetFloatingIPNetworkIDByName(client *gophercloud.ServiceClient, networkName
 	}
 
 	return externalNetworks[0].ID, nil
+}
+
+// DiscoverProvisioningNetwork finds the first network whose subnet matches the given network ranges.
+func DiscoverProvisioningNetwork(client *gophercloud.ServiceClient, cidrs []string) (string, error) {
+	allPages, err := subnets.List(client, subnets.ListOpts{}).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	allSubnets, err := subnets.ExtractSubnets(allPages)
+	if err != nil {
+		return "", err
+	}
+
+	for _, subnet := range allSubnets {
+		_, tenantIPNet, err := net.ParseCIDR(subnet.CIDR)
+		if err != nil {
+			return "", err
+		}
+
+		for _, cidr := range cidrs {
+			_, candidateIPNet, err := net.ParseCIDR(cidr)
+			if err != nil {
+				return "", err
+			}
+
+			if containsNet(candidateIPNet, tenantIPNet) {
+				return subnet.NetworkID, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("failed to discover a provisioning network")
+}
+
+// containsNet returns true whenever IPNet `a` contains IPNet `b`
+func containsNet(a *net.IPNet, b *net.IPNet) bool {
+	aMask, _ := a.Mask.Size()
+	bMask, _ := b.Mask.Size()
+	return a.Contains(b.IP) && aMask <= bMask
 }

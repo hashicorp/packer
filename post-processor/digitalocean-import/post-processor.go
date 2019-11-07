@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package digitaloceanimport
 
 import (
@@ -33,16 +35,17 @@ type Config struct {
 	SpacesKey    string `mapstructure:"spaces_key"`
 	SpacesSecret string `mapstructure:"spaces_secret"`
 
-	SpacesRegion string        `mapstructure:"spaces_region"`
-	SpaceName    string        `mapstructure:"space_name"`
-	ObjectName   string        `mapstructure:"space_object_name"`
-	SkipClean    bool          `mapstructure:"skip_clean"`
-	Tags         []string      `mapstructure:"image_tags"`
-	Name         string        `mapstructure:"image_name"`
-	Description  string        `mapstructure:"image_description"`
-	Distribution string        `mapstructure:"image_distribution"`
-	ImageRegions []string      `mapstructure:"image_regions"`
-	Timeout      time.Duration `mapstructure:"timeout"`
+	SpacesRegion string   `mapstructure:"spaces_region"`
+	SpaceName    string   `mapstructure:"space_name"`
+	ObjectName   string   `mapstructure:"space_object_name"`
+	SkipClean    bool     `mapstructure:"skip_clean"`
+	Tags         []string `mapstructure:"image_tags"`
+	Name         string   `mapstructure:"image_name"`
+	Description  string   `mapstructure:"image_description"`
+	Distribution string   `mapstructure:"image_distribution"`
+	ImageRegions []string `mapstructure:"image_regions"`
+
+	Timeout time.Duration `mapstructure:"timeout"`
 
 	ctx interpolate.Context
 }

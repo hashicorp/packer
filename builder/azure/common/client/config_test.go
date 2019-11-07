@@ -133,7 +133,7 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 	getEnvOrSkip(t, "AZURE_DEVICE_LOGIN")
 	cfg := Config{
 		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
-		CloudEnvironment: getCloud(),
+		cloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
@@ -164,7 +164,7 @@ func Test_ClientConfig_ClientPassword(t *testing.T) {
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientSecret:     getEnvOrSkip(t, "AZURE_CLIENTSECRET"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		CloudEnvironment: getCloud(),
+		cloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
@@ -194,7 +194,7 @@ func Test_ClientConfig_ClientCert(t *testing.T) {
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientCertPath:   getEnvOrSkip(t, "AZURE_CLIENTCERT"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		CloudEnvironment: getCloud(),
+		cloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 
@@ -224,7 +224,7 @@ func Test_ClientConfig_ClientJWT(t *testing.T) {
 		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
 		ClientJWT:        getEnvOrSkip(t, "AZURE_CLIENTJWT"),
 		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
-		CloudEnvironment: getCloud(),
+		cloudEnvironment: getCloud(),
 	}
 	assertValid(t, cfg)
 

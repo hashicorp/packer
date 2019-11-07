@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
 
 package digitalocean
 
@@ -141,6 +142,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	var errs *packer.MultiError
+
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}

@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,imageFilter
+
 package hcloud
 
 import (
@@ -21,8 +23,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	HCloudToken  string        `mapstructure:"token"`
-	Endpoint     string        `mapstructure:"endpoint"`
+	HCloudToken string `mapstructure:"token"`
+	Endpoint    string `mapstructure:"endpoint"`
+
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 
 	ServerName  string       `mapstructure:"server_name"`

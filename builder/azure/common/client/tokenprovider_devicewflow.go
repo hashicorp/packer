@@ -6,7 +6,6 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
-	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 )
 
 func NewDeviceFlowOAuthTokenProvider(env azure.Environment, say func(string), tenantID string) oAuthTokenProvider {
@@ -36,5 +35,5 @@ func (tp *deviceflowOauthTokenProvider) getServicePrincipalTokenWithResource(res
 		tp.say(fmt.Sprintf("Getting token for %s", resource))
 	}
 
-	return packerAzureCommon.Authenticate(tp.env, tp.tenantID, tp.say, resource)
+	return Authenticate(tp.env, tp.tenantID, tp.say, resource)
 }
