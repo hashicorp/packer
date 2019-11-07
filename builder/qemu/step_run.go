@@ -170,8 +170,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	} else {
 		if qemuVersion.GreaterThanOrEqual(v2) {
-			if !config.UseDefaultDisplay {
-				defaultArgs["-display"] = "sdl"
+			if len(config.Display) > 0 {
+				if config.Display != "none" {
+					defaultArgs["-display"] = config.Display
+				}
+			} else if !config.UseDefaultDisplay {
+				defaultArgs["-display"] = "gtk"
 			}
 		} else {
 			ui.Message("WARNING: The version of qemu  on your host doesn't support display mode.\n" +
