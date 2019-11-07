@@ -856,6 +856,71 @@ type CcnRoute struct {
 	InstanceUin *string `json:"InstanceUin,omitempty" name:"InstanceUin"`
 }
 
+type CheckNetDetectStateRequest struct {
+	*tchttp.BaseRequest
+
+	// 探测目的IPv4地址数组，最多两个。
+	DetectDestinationIp []*string `json:"DetectDestinationIp,omitempty" name:"DetectDestinationIp" list`
+
+	// 下一跳类型，目前我们支持的类型有：
+	// VPN：VPN网关；
+	// DIRECTCONNECT：专线网关；
+	// PEERCONNECTION：对等连接；
+	// NAT：NAT网关；
+	// NORMAL_CVM：普通云主机；
+	NextHopType *string `json:"NextHopType,omitempty" name:"NextHopType"`
+
+	// 下一跳目的网关，取值与“下一跳类型”相关：
+	// 下一跳类型为VPN，取值VPN网关ID，形如：vpngw-12345678；
+	// 下一跳类型为DIRECTCONNECT，取值专线网关ID，形如：dcg-12345678；
+	// 下一跳类型为PEERCONNECTION，取值对等连接ID，形如：pcx-12345678；
+	// 下一跳类型为NAT，取值Nat网关，形如：nat-12345678；
+	// 下一跳类型为NORMAL_CVM，取值云主机IPv4地址，形如：10.0.0.12；
+	NextHopDestination *string `json:"NextHopDestination,omitempty" name:"NextHopDestination"`
+
+	// 网络探测实例ID。形如：netd-12345678。
+	NetDetectId *string `json:"NetDetectId,omitempty" name:"NetDetectId"`
+
+	// `VPC`实例`ID`。形如：`vpc-12345678`
+	VpcId *string `json:"VpcId,omitempty" name:"VpcId"`
+
+	// 子网实例ID。形如：subnet-12345678。
+	SubnetId *string `json:"SubnetId,omitempty" name:"SubnetId"`
+
+	// 网络探测名称，最大长度不能超过60个字节。
+	NetDetectName *string `json:"NetDetectName,omitempty" name:"NetDetectName"`
+}
+
+func (r *CheckNetDetectStateRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *CheckNetDetectStateRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type CheckNetDetectStateResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 网络探测验证结果对象数组。
+		NetDetectIpStateSet []*NetDetectIpState `json:"NetDetectIpStateSet,omitempty" name:"NetDetectIpStateSet" list`
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *CheckNetDetectStateResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *CheckNetDetectStateResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
 type ClassicLinkInstance struct {
 
 	// VPC实例ID
@@ -1450,6 +1515,71 @@ func (r *CreateNatGatewayResponse) ToJsonString() string {
 }
 
 func (r *CreateNatGatewayResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type CreateNetDetectRequest struct {
+	*tchttp.BaseRequest
+
+	// `VPC`实例`ID`。形如：`vpc-12345678`
+	VpcId *string `json:"VpcId,omitempty" name:"VpcId"`
+
+	// 子网实例ID。形如：subnet-12345678。
+	SubnetId *string `json:"SubnetId,omitempty" name:"SubnetId"`
+
+	// 网络探测名称，最大长度不能超过60个字节。
+	NetDetectName *string `json:"NetDetectName,omitempty" name:"NetDetectName"`
+
+	// 探测目的IPv4地址数组。最多两个。
+	DetectDestinationIp []*string `json:"DetectDestinationIp,omitempty" name:"DetectDestinationIp" list`
+
+	// 下一跳类型，目前我们支持的类型有：
+	// VPN：VPN网关；
+	// DIRECTCONNECT：专线网关；
+	// PEERCONNECTION：对等连接；
+	// NAT：NAT网关；
+	// NORMAL_CVM：普通云主机；
+	NextHopType *string `json:"NextHopType,omitempty" name:"NextHopType"`
+
+	// 下一跳目的网关，取值与“下一跳类型”相关：
+	// 下一跳类型为VPN，取值VPN网关ID，形如：vpngw-12345678；
+	// 下一跳类型为DIRECTCONNECT，取值专线网关ID，形如：dcg-12345678；
+	// 下一跳类型为PEERCONNECTION，取值对等连接ID，形如：pcx-12345678；
+	// 下一跳类型为NAT，取值Nat网关，形如：nat-12345678；
+	// 下一跳类型为NORMAL_CVM，取值云主机IPv4地址，形如：10.0.0.12；
+	NextHopDestination *string `json:"NextHopDestination,omitempty" name:"NextHopDestination"`
+
+	// 网络探测描述。
+	NetDetectDescription *string `json:"NetDetectDescription,omitempty" name:"NetDetectDescription"`
+}
+
+func (r *CreateNetDetectRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *CreateNetDetectRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type CreateNetDetectResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 网络探测（NetDetect）对象。
+		NetDetect *NetDetect `json:"NetDetect,omitempty" name:"NetDetect"`
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *CreateNetDetectResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *CreateNetDetectResponse) FromJsonString(s string) error {
     return json.Unmarshal([]byte(s), &r)
 }
 
@@ -2446,6 +2576,40 @@ func (r *DeleteNatGatewayResponse) ToJsonString() string {
 }
 
 func (r *DeleteNatGatewayResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DeleteNetDetectRequest struct {
+	*tchttp.BaseRequest
+
+	// 网络探测实例`ID`。形如：`netd-12345678`
+	NetDetectId *string `json:"NetDetectId,omitempty" name:"NetDetectId"`
+}
+
+func (r *DeleteNetDetectRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DeleteNetDetectRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DeleteNetDetectResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *DeleteNetDetectResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DeleteNetDetectResponse) FromJsonString(s string) error {
     return json.Unmarshal([]byte(s), &r)
 }
 
@@ -4026,6 +4190,113 @@ func (r *DescribeNatGatewaysResponse) ToJsonString() string {
 }
 
 func (r *DescribeNatGatewaysResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DescribeNetDetectStatesRequest struct {
+	*tchttp.BaseRequest
+
+	// 网络探测实例`ID`数组。形如：[`netd-12345678`]
+	NetDetectIds []*string `json:"NetDetectIds,omitempty" name:"NetDetectIds" list`
+
+	// 过滤条件，参数不支持同时指定NetDetectIds和Filters。
+	// <li>net-detect-id - String - （过滤条件）网络探测实例ID，形如：netd-12345678</li>
+	Filters []*Filter `json:"Filters,omitempty" name:"Filters" list`
+
+	// 偏移量，默认为0。
+	Offset *uint64 `json:"Offset,omitempty" name:"Offset"`
+
+	// 返回数量，默认为20，最大值为100。
+	Limit *uint64 `json:"Limit,omitempty" name:"Limit"`
+}
+
+func (r *DescribeNetDetectStatesRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DescribeNetDetectStatesRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DescribeNetDetectStatesResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 符合条件的网络探测验证结果对象数组。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+		NetDetectStateSet []*NetDetectState `json:"NetDetectStateSet,omitempty" name:"NetDetectStateSet" list`
+
+		// 符合条件的网络探测验证结果对象数量。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+		TotalCount *uint64 `json:"TotalCount,omitempty" name:"TotalCount"`
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *DescribeNetDetectStatesResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DescribeNetDetectStatesResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DescribeNetDetectsRequest struct {
+	*tchttp.BaseRequest
+
+	// 网络探测实例`ID`数组。形如：[`netd-12345678`]
+	NetDetectIds []*string `json:"NetDetectIds,omitempty" name:"NetDetectIds" list`
+
+	// 过滤条件，参数不支持同时指定NetDetectIds和Filters。
+	// <li>vpc-id - String - （过滤条件）VPC实例ID，形如：vpc-12345678</li>
+	// <li>net-detect-id - String - （过滤条件）网络探测实例ID，形如：netd-12345678</li>
+	// <li>subnet-id - String - （过滤条件）子网实例ID，形如：subnet-12345678</li>
+	// <li>net-detect-name - String - （过滤条件）网络探测名称</li>
+	Filters []*Filter `json:"Filters,omitempty" name:"Filters" list`
+
+	// 偏移量，默认为0。
+	Offset *uint64 `json:"Offset,omitempty" name:"Offset"`
+
+	// 返回数量，默认为20，最大值为100。
+	Limit *uint64 `json:"Limit,omitempty" name:"Limit"`
+}
+
+func (r *DescribeNetDetectsRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DescribeNetDetectsRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type DescribeNetDetectsResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 符合条件的网络探测对象数组。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+		NetDetectSet []*NetDetect `json:"NetDetectSet,omitempty" name:"NetDetectSet" list`
+
+		// 符合条件的网络探测对象数量。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+		TotalCount *uint64 `json:"TotalCount,omitempty" name:"TotalCount"`
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *DescribeNetDetectsResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *DescribeNetDetectsResponse) FromJsonString(s string) error {
     return json.Unmarshal([]byte(s), &r)
 }
 
@@ -6439,6 +6710,65 @@ func (r *ModifyNatGatewayDestinationIpPortTranslationNatRuleResponse) FromJsonSt
     return json.Unmarshal([]byte(s), &r)
 }
 
+type ModifyNetDetectRequest struct {
+	*tchttp.BaseRequest
+
+	// 网络探测实例`ID`。形如：`netd-12345678`
+	NetDetectId *string `json:"NetDetectId,omitempty" name:"NetDetectId"`
+
+	// 网络探测名称，最大长度不能超过60个字节。
+	NetDetectName *string `json:"NetDetectName,omitempty" name:"NetDetectName"`
+
+	// 探测目的IPv4地址数组，最多两个。
+	DetectDestinationIp []*string `json:"DetectDestinationIp,omitempty" name:"DetectDestinationIp" list`
+
+	// 下一跳类型，目前我们支持的类型有：
+	// VPN：VPN网关；
+	// DIRECTCONNECT：专线网关；
+	// PEERCONNECTION：对等连接；
+	// NAT：NAT网关；
+	// NORMAL_CVM：普通云主机；
+	NextHopType *string `json:"NextHopType,omitempty" name:"NextHopType"`
+
+	// 下一跳目的网关，取值与“下一跳类型”相关：
+	// 下一跳类型为VPN，取值VPN网关ID，形如：vpngw-12345678；
+	// 下一跳类型为DIRECTCONNECT，取值专线网关ID，形如：dcg-12345678；
+	// 下一跳类型为PEERCONNECTION，取值对等连接ID，形如：pcx-12345678；
+	// 下一跳类型为NAT，取值Nat网关，形如：nat-12345678；
+	// 下一跳类型为NORMAL_CVM，取值云主机IPv4地址，形如：10.0.0.12；
+	NextHopDestination *string `json:"NextHopDestination,omitempty" name:"NextHopDestination"`
+
+	// 网络探测描述。
+	NetDetectDescription *string `json:"NetDetectDescription,omitempty" name:"NetDetectDescription"`
+}
+
+func (r *ModifyNetDetectRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *ModifyNetDetectRequest) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
+type ModifyNetDetectResponse struct {
+	*tchttp.BaseResponse
+	Response *struct {
+
+		// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
+		RequestId *string `json:"RequestId,omitempty" name:"RequestId"`
+	} `json:"Response"`
+}
+
+func (r *ModifyNetDetectResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+func (r *ModifyNetDetectResponse) FromJsonString(s string) error {
+    return json.Unmarshal([]byte(s), &r)
+}
+
 type ModifyNetworkInterfaceAttributeRequest struct {
 	*tchttp.BaseRequest
 
@@ -6969,6 +7299,90 @@ type NatGatewayDestinationIpPortTranslationNatRule struct {
 	// NAT网关转发规则创建时间。
 	// 注意：此字段可能返回 null，表示取不到有效值。
 	CreatedTime *string `json:"CreatedTime,omitempty" name:"CreatedTime"`
+}
+
+type NetDetect struct {
+
+	// `VPC`实例`ID`。形如：`vpc-12345678`
+	VpcId *string `json:"VpcId,omitempty" name:"VpcId"`
+
+	// `VPC`实例名称。
+	VpcName *string `json:"VpcName,omitempty" name:"VpcName"`
+
+	// 子网实例ID。形如：subnet-12345678。
+	SubnetId *string `json:"SubnetId,omitempty" name:"SubnetId"`
+
+	// 子网实例名称。
+	SubnetName *string `json:"SubnetName,omitempty" name:"SubnetName"`
+
+	// 网络探测实例ID。形如：netd-12345678。
+	NetDetectId *string `json:"NetDetectId,omitempty" name:"NetDetectId"`
+
+	// 网络探测名称，最大长度不能超过60个字节。
+	NetDetectName *string `json:"NetDetectName,omitempty" name:"NetDetectName"`
+
+	// 探测目的IPv4地址数组，最多两个。
+	DetectDestinationIp []*string `json:"DetectDestinationIp,omitempty" name:"DetectDestinationIp" list`
+
+	// 系统自动分配的探测源IPv4数组。长度为2。
+	DetectSourceIp []*string `json:"DetectSourceIp,omitempty" name:"DetectSourceIp" list`
+
+	// 下一跳类型，目前我们支持的类型有：
+	// VPN：VPN网关；
+	// DIRECTCONNECT：专线网关；
+	// PEERCONNECTION：对等连接；
+	// NAT：NAT网关；
+	// NORMAL_CVM：普通云主机；
+	NextHopType *string `json:"NextHopType,omitempty" name:"NextHopType"`
+
+	// 下一跳目的网关，取值与“下一跳类型”相关：
+	// 下一跳类型为VPN，取值VPN网关ID，形如：vpngw-12345678；
+	// 下一跳类型为DIRECTCONNECT，取值专线网关ID，形如：dcg-12345678；
+	// 下一跳类型为PEERCONNECTION，取值对等连接ID，形如：pcx-12345678；
+	// 下一跳类型为NAT，取值Nat网关，形如：nat-12345678；
+	// 下一跳类型为NORMAL_CVM，取值云主机IPv4地址，形如：10.0.0.12；
+	NextHopDestination *string `json:"NextHopDestination,omitempty" name:"NextHopDestination"`
+
+	// 下一跳网关名称。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	NextHopName *string `json:"NextHopName,omitempty" name:"NextHopName"`
+
+	// 网络探测描述。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	NetDetectDescription *string `json:"NetDetectDescription,omitempty" name:"NetDetectDescription"`
+
+	// 创建时间。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	CreateTime *string `json:"CreateTime,omitempty" name:"CreateTime"`
+}
+
+type NetDetectIpState struct {
+
+	// 探测目的IPv4地址。
+	DetectDestinationIp *string `json:"DetectDestinationIp,omitempty" name:"DetectDestinationIp"`
+
+	// 探测结果。
+	// 0：成功；
+	// -1：查询不到路由丢包；
+	// -2：外出ACL丢包；
+	// -3：IN ACL丢包；
+	// -4：其他错误；
+	State *int64 `json:"State,omitempty" name:"State"`
+
+	// 时延，单位毫秒
+	Delay *uint64 `json:"Delay,omitempty" name:"Delay"`
+
+	// 丢包率
+	PacketLossRate *uint64 `json:"PacketLossRate,omitempty" name:"PacketLossRate"`
+}
+
+type NetDetectState struct {
+
+	// 网络探测实例ID。形如：netd-12345678。
+	NetDetectId *string `json:"NetDetectId,omitempty" name:"NetDetectId"`
+
+	// 网络探测目的IP验证结果对象数组。
+	NetDetectIpStateSet []*NetDetectIpState `json:"NetDetectIpStateSet,omitempty" name:"NetDetectIpStateSet" list`
 }
 
 type NetworkInterface struct {

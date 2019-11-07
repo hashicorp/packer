@@ -398,6 +398,31 @@ func (c *Client) AttachNetworkInterface(request *AttachNetworkInterfaceRequest) 
     return
 }
 
+func NewCheckNetDetectStateRequest() (request *CheckNetDetectStateRequest) {
+    request = &CheckNetDetectStateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CheckNetDetectState")
+    return
+}
+
+func NewCheckNetDetectStateResponse() (response *CheckNetDetectStateResponse) {
+    response = &CheckNetDetectStateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(CheckNetDetectState)用于验证网络探测。
+func (c *Client) CheckNetDetectState(request *CheckNetDetectStateRequest) (response *CheckNetDetectStateResponse, err error) {
+    if request == nil {
+        request = NewCheckNetDetectStateRequest()
+    }
+    response = NewCheckNetDetectStateResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateAddressTemplateRequest() (request *CreateAddressTemplateRequest) {
     request = &CreateAddressTemplateRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -729,6 +754,31 @@ func (c *Client) CreateNatGatewayDestinationIpPortTranslationNatRule(request *Cr
         request = NewCreateNatGatewayDestinationIpPortTranslationNatRuleRequest()
     }
     response = NewCreateNatGatewayDestinationIpPortTranslationNatRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateNetDetectRequest() (request *CreateNetDetectRequest) {
+    request = &CreateNetDetectRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateNetDetect")
+    return
+}
+
+func NewCreateNetDetectResponse() (response *CreateNetDetectResponse) {
+    response = &CreateNetDetectResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(CreateNetDetect)用于创建网络探测。
+func (c *Client) CreateNetDetect(request *CreateNetDetectRequest) (response *CreateNetDetectResponse, err error) {
+    if request == nil {
+        request = NewCreateNetDetectRequest()
+    }
+    response = NewCreateNetDetectResponse()
     err = c.Send(request, response)
     return
 }
@@ -1366,6 +1416,31 @@ func (c *Client) DeleteNatGatewayDestinationIpPortTranslationNatRule(request *De
         request = NewDeleteNatGatewayDestinationIpPortTranslationNatRuleRequest()
     }
     response = NewDeleteNatGatewayDestinationIpPortTranslationNatRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteNetDetectRequest() (request *DeleteNetDetectRequest) {
+    request = &DeleteNetDetectRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DeleteNetDetect")
+    return
+}
+
+func NewDeleteNetDetectResponse() (response *DeleteNetDetectResponse) {
+    response = &DeleteNetDetectResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DeleteNetDetect)用于删除网络探测实例。
+func (c *Client) DeleteNetDetect(request *DeleteNetDetectRequest) (response *DeleteNetDetectResponse, err error) {
+    if request == nil {
+        request = NewDeleteNetDetectRequest()
+    }
+    response = NewDeleteNetDetectResponse()
     err = c.Send(request, response)
     return
 }
@@ -2254,6 +2329,56 @@ func (c *Client) DescribeNatGateways(request *DescribeNatGatewaysRequest) (respo
         request = NewDescribeNatGatewaysRequest()
     }
     response = NewDescribeNatGatewaysResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeNetDetectStatesRequest() (request *DescribeNetDetectStatesRequest) {
+    request = &DescribeNetDetectStatesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeNetDetectStates")
+    return
+}
+
+func NewDescribeNetDetectStatesResponse() (response *DescribeNetDetectStatesResponse) {
+    response = &DescribeNetDetectStatesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DescribeNetDetectStates)用于查询网络探测验证结果列表。
+func (c *Client) DescribeNetDetectStates(request *DescribeNetDetectStatesRequest) (response *DescribeNetDetectStatesResponse, err error) {
+    if request == nil {
+        request = NewDescribeNetDetectStatesRequest()
+    }
+    response = NewDescribeNetDetectStatesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeNetDetectsRequest() (request *DescribeNetDetectsRequest) {
+    request = &DescribeNetDetectsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeNetDetects")
+    return
+}
+
+func NewDescribeNetDetectsResponse() (response *DescribeNetDetectsResponse) {
+    response = &DescribeNetDetectsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeNetDetects）用于查询网络探测列表。
+func (c *Client) DescribeNetDetects(request *DescribeNetDetectsRequest) (response *DescribeNetDetectsResponse, err error) {
+    if request == nil {
+        request = NewDescribeNetDetectsRequest()
+    }
+    response = NewDescribeNetDetectsResponse()
     err = c.Send(request, response)
     return
 }
@@ -3468,6 +3593,31 @@ func (c *Client) ModifyNatGatewayDestinationIpPortTranslationNatRule(request *Mo
         request = NewModifyNatGatewayDestinationIpPortTranslationNatRuleRequest()
     }
     response = NewModifyNatGatewayDestinationIpPortTranslationNatRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyNetDetectRequest() (request *ModifyNetDetectRequest) {
+    request = &ModifyNetDetectRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyNetDetect")
+    return
+}
+
+func NewModifyNetDetectResponse() (response *ModifyNetDetectResponse) {
+    response = &ModifyNetDetectResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(ModifyNetDetect)用于修改网络探测参数。
+func (c *Client) ModifyNetDetect(request *ModifyNetDetectRequest) (response *ModifyNetDetectResponse, err error) {
+    if request == nil {
+        request = NewModifyNetDetectRequest()
+    }
+    response = NewModifyNetDetectResponse()
     err = c.Send(request, response)
     return
 }
