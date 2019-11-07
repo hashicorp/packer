@@ -268,10 +268,10 @@ func (d *ESX5Driver) HostIP(multistep.StateBag) (string, error) {
 func (d *ESX5Driver) GuestIP(multistep.StateBag) (string, error) {
 	// GuestIP is defined by the user as d.Host..but let's validate it just to be sure
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", d.Host, d.Port))
-	defer conn.Close()
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	host, _, err := net.SplitHostPort(conn.RemoteAddr().String())
 	return host, err
@@ -280,10 +280,10 @@ func (d *ESX5Driver) GuestIP(multistep.StateBag) (string, error) {
 func (d *ESX5Driver) HostAddress(multistep.StateBag) (string, error) {
 	// make a connection
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", d.Host, d.Port))
-	defer conn.Close()
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	// get the local address (the host)
 	host, _, err := net.SplitHostPort(conn.LocalAddr().String())
