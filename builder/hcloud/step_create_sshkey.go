@@ -32,7 +32,11 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	ui.Say("Creating temporary ssh key for server...")
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2014)
-
+	if err != nil {
+		state.Put("error", fmt.Errorf("Error generating RSA key: %s", err))
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 	// ASN.1 DER encoded form
 	privDER := x509.MarshalPKCS1PrivateKey(priv)
 	privBLK := pem.Block{
@@ -45,8 +49,13 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	c.Comm.SSHPrivateKey = pem.EncodeToMemory(&privBLK)
 
 	// Marshal the public key into SSH compatible format
-	// TODO properly handle the public key error
-	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
+	pub, err := ssh.NewPublicKey(&priv.PublicKey)
+	if err != nil {
+		state.Put("error", fmt.Errorf("Error generating public key: %s", err))
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
 
 	// The name of the public key on the Hetzner Cloud
