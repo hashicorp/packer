@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -20,6 +21,8 @@ type StepPreValidate struct {
 	DestAmiName        string
 	ForceDeregister    bool
 	AMISkipBuildRegion bool
+	VpcId              string
+	SubnetId           string
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -76,12 +79,21 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")
 		return multistep.ActionContinue
 	}
+
 	if s.AMISkipBuildRegion {
 		ui.Say("skip_build_region was set; not prevalidating AMI name")
 		return multistep.ActionContinue
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+
+	// Validate VPC settings for non-default VPCs
+	ui.Say("Prevalidating any provided VPC information")
+	if err := s.checkVpc(ec2conn); err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s", s.DestAmiName))
 	req, resp := ec2conn.DescribeImagesRequest(&ec2.DescribeImagesInput{
@@ -91,13 +103,13 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 		}}})
 	req.RetryCount = 11
 
-	err := req.Send()
-	if err != nil {
-		err := fmt.Errorf("Error querying AMI: %s", err)
+	if err := req.Send(); err != nil {
+		err = fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
 	if len(resp.Images) > 0 {
 		err := fmt.Errorf("Error: AMI Name: '%s' is used by an existing AMI: %s", *resp.Images[0].Name, *resp.Images[0].ImageId)
 		state.Put("error", err)
@@ -108,4 +120,24 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	return multistep.ActionContinue
 }
 
+func (s *StepPreValidate) checkVpc(conn ec2iface.EC2API) error {
+	if s.VpcId != "" && s.SubnetId != "" {
+		// skip validation if both VpcId and SubnetId are provided; AWS API will error if something is wrong.
+		return nil
+	}
+
+	res, err := conn.DescribeVpcs(&ec2.DescribeVpcsInput{VpcIds: []*string{aws.String(s.VpcId)}})
+	if isAWSErr(err, "InvalidVpcID.NotFound", "") || err != nil {
+		return fmt.Errorf("Error retrieving VPC information for vpc_id %q", s.VpcId)
+	}
+
+	if res != nil && len(res.Vpcs) == 1 && res.Vpcs[0] != nil {
+		if isDefault := aws.BoolValue(res.Vpcs[0].IsDefault); !isDefault {
+			return fmt.Errorf("Error: subnet_id must be provided for non-default VPCs (%s)", s.VpcId)
+		}
+	}
+	return nil
+}
+
+// Cleanup ...
 func (s *StepPreValidate) Cleanup(multistep.StateBag) {}

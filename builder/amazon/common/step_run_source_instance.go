@@ -177,6 +177,14 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	runReq, runResp := ec2conn.RunInstancesRequest(runOpts)
 	runReq.RetryCount = 11
 	err = runReq.Send()
+
+	if isAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
+		err := fmt.Errorf("Error launching source instance: a valid Subnet Id was not specified")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	if err != nil {
 		err := fmt.Errorf("Error launching source instance: %s", err)
 		state.Put("error", err)
