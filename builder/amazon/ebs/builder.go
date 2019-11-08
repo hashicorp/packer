@@ -190,6 +190,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DestAmiName:        b.config.AMIName,
 			ForceDeregister:    b.config.AMIForceDeregister,
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
+			VpcId:              b.config.VpcId,
+			SubnetId:           b.config.SubnetId,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
