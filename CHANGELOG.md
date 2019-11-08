@@ -1,4 +1,22 @@
 ## 1.5.0 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/amazon: Retry runinstances aws api call to mitigate throttling
+    [GH-8342]
+* builder/qemu: Add display template option for qemu. [GH-7676]
+* core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
+* provisioner/shell: Add support for the `env_var_format` parameter [GH-8319]
+
+### BUG FIXES:
+* builder/vagrant: Use absolute path for Vagrantfile [GH-8321]
+* builder/virtualbox: Fix panic in snapshot builder. [GH-8336] [GH-8329]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: Complete deprecation of clean_ami_name template func
+    [GH-8320] [GH-8193]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
+
 ## 1.4.5 (November 4, 2019)
 
 ### IMPROVEMENTS:
@@ -7,7 +25,7 @@
 * builder/amazon: New option to specify IAM policy for a temporary instance
     profile [GH-8247]
 * builder/amazon: improved validation around encrypt_boot and kms_key_id for a
-    better experience [GH-8288]    
+    better experience [GH-8288]
 * builder/azure-arm: Allow specification of polling duration [GH-8226]
 * builder/azure-chroot: Add Azure chroot builder [GH-8185] & refactored some
     common code together after it [GH-8269]
