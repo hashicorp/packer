@@ -833,3 +833,8 @@ and ensuring the `hypervkvpd` service is started at boot. On Debian based
 machines, you may need `linux-cloud-tools-common` for `hv_kvp_daemon`. Failure
 to do this may cause packer to wait at `Waiting for SSH to become available...`
 before eventually timing out.
+
+Also note that while the operating system is still being installed by a preseed
+file, it is normal to see `Waiting for SSH/WinRM to be available` and
+`Error getting SSH/WinRM host: No ip address` error messages until the system
+is actually installed and ready to be connected to.
