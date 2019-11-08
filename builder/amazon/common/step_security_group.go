@@ -183,7 +183,8 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up security group. Please delete the group manually: %s", s.createdGroupId))
+			"Error cleaning up security group. Please delete the group manually:"+
+				" err: %s; security group ID: %s", err, s.createdGroupId))
 	}
 }
 
