@@ -6,6 +6,7 @@
 package vagrant
 
 import (
+	"archive/tar"
 	"compress/flate"
 	"context"
 	"fmt"
@@ -75,6 +76,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.configs[name] = config
 		if err := p.configureSingle(config, subRaws...); err != nil {
 			return fmt.Errorf("Error configuring %s: %s", name, err)
+		}
+	}
+
+	for _, src := range p.configs[""].Include {
+		info, err := os.Stat(src)
+		if err != nil {
+			return err
+		}
+
+		_, err = tar.FileInfoHeader(info, "")
+		if err != nil {
+			return err
 		}
 	}
 
