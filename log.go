@@ -43,6 +43,10 @@ func logOutput() (logOutput io.Writer, err error) {
 					}
 					os.Stderr.WriteString(fmt.Sprint(scanner.Text() + "\n"))
 				}
+				if err := scanner.Err(); err != nil {
+					os.Stderr.WriteString(err.Error())
+					w.Close()
+				}
 			}(scanner)
 			logOutput = w
 		}
