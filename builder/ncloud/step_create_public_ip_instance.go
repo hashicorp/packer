@@ -81,6 +81,9 @@ func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo str
 	s.Say(fmt.Sprintf("Public IP Instance [%s:%s] is created", publicIPInstance.PublicIPInstanceNo, publicIP))
 
 	err = s.waiterAssociatePublicIPToServerInstance(serverInstanceNo, publicIP)
+	if err != nil {
+		return nil, err
+	}
 
 	return &publicIPInstance, nil
 }
