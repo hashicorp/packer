@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
@@ -353,17 +352,12 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Retry creating tags for about 2.5 minutes
-	err = retry.Config{
-		Tries: 11,
-		ShouldRetry: func(error) bool {
-			if awsErr, ok := err.(awserr.Error); ok {
-				switch awsErr.Code() {
-				case "InvalidInstanceID.NotFound":
-					return true
-				}
-			}
-			return false
-		},
+	err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
+		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			return true
+		}
+		return false
+	},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{

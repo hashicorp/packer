@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -181,15 +180,17 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	c.session = sess
 
 	cp, err := c.session.Config.Credentials.Get()
-	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-			return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
-				"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
-				"for more information on providing credentials for the AWS Builder.")
-		} else {
-			return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
-		}
+
+	if isAWSErr(err, "NoCredentialProviders", "") {
+		return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
+			"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
+			"for more information on providing credentials for the AWS Builder.")
 	}
+
+	if err != nil {
+		return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+	}
+
 	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 
 	if c.DecodeAuthZMessages {

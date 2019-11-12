@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/hashicorp/packer/common/retry"
@@ -207,17 +206,12 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	// will fail. Retry a couple of times to try to mitigate that race.
 
 	var r *ec2.DescribeInstancesOutput
-	err = retry.Config{
-		Tries: 11,
-		ShouldRetry: func(err error) bool {
-			if awsErr, ok := err.(awserr.Error); ok {
-				switch awsErr.Code() {
-				case "InvalidInstanceID.NotFound":
-					return true
-				}
-			}
-			return false
-		},
+	err = retry.Config{Tries: 11, ShouldRetry: func(err error) bool {
+		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			return true
+		}
+		return false
+	},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		r, err = ec2conn.DescribeInstances(describeInstance)
@@ -254,17 +248,12 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	if s.IsRestricted {
 		ec2Tags.Report(ui)
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Config{
-			Tries: 11,
-			ShouldRetry: func(error) bool {
-				if awsErr, ok := err.(awserr.Error); ok {
-					switch awsErr.Code() {
-					case "InvalidInstanceID.NotFound":
-						return true
-					}
-				}
-				return false
-			},
+		err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
+			if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+				return true
+			}
+			return false
+		},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
