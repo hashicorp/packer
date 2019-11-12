@@ -3,11 +3,14 @@ package common
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
+// DestroyAMIs deregisters the AWS machine images in imageids from an active AWS account
 func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 		ImageIds: imageids,
@@ -46,4 +49,15 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 		}
 	}
 	return nil
+}
+
+// Returns true if the error matches all these conditions:
+//  * err is of type awserr.Error
+//  * Error.Code() matches code
+//  * Error.Message() contains message
+func isAWSErr(err error, code string, message string) bool {
+	if err, ok := err.(awserr.Error); ok {
+		return err.Code() == code && strings.Contains(err.Message(), message)
+	}
+	return false
 }
