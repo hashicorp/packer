@@ -53,10 +53,10 @@ func main() {
 
 	// Write our generated code to the command/plugin.go file
 	file, err := os.Create(target)
-	defer file.Close()
 	if err != nil {
 		log.Fatalf("Failed to open %s for writing: %s", target, err)
 	}
+	defer file.Close()
 
 	_, err = file.WriteString(output)
 	if err != nil {
