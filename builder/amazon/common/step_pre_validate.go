@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -36,7 +35,7 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 			err := retry.Config{
 				Tries: 11,
 				ShouldRetry: func(err error) bool {
-					if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "AuthFailure" {
+					if isAWSErr(err, "AuthFailure", "") {
 						log.Printf("Waiting for Vault-generated AWS credentials" +
 							" to pass authentication... trying again.")
 						return true
