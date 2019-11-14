@@ -53,7 +53,12 @@ func (s *stepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	}
 
 	_, err = io.Copy(configFile, originalConfigFile)
-
+	if err != nil {
+		err := fmt.Errorf("error copying file %s: %v", config.ConfigFile, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 	commands := make([][]string, 3)
 	commands[0] = []string{
 		"lxc-stop", "--name", name,
