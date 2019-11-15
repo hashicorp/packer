@@ -106,8 +106,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		pAddr = fmt.Sprintf("%s:%d", s.Config.SSHProxyHost, s.Config.SSHProxyPort)
 		if s.Config.SSHProxyUsername != "" {
 			pAuth = new(proxy.Auth)
-			pAuth.User = s.Config.SSHBastionUsername
-			pAuth.Password = s.Config.SSHBastionPassword
+			pAuth.User = s.Config.SSHProxyUsername
+			pAuth.Password = s.Config.SSHProxyPassword
 		}
 
 	}
