@@ -5,7 +5,7 @@ require (
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 	github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
 	github.com/Azure/go-autorest v12.0.0+incompatible
-	github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4 // indirect
+	github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
@@ -144,7 +144,7 @@ require (
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
 	github.com/zclconf/go-cty v1.1.0
-	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+	golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58

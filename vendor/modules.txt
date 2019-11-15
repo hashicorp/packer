@@ -33,7 +33,7 @@ github.com/Azure/go-autorest/autorest/to
 github.com/Azure/go-autorest/autorest/validation
 github.com/Azure/go-autorest/logger
 github.com/Azure/go-autorest/tracing
-# github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4
+# github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a
 github.com/Azure/go-ntlmssp
 # github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 github.com/ChrisTrenkamp/goxpath
@@ -633,11 +633,11 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+# golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
+golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
-golang.org/x/crypto/internal/chacha20
 golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/md4
 golang.org/x/crypto/pkcs12
