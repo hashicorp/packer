@@ -66,17 +66,16 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	ui.Say("Waiting for AMI to become ready...")
 	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); err != nil {
 		log.Printf("Error waiting for AMI: %s", err)
-		imagesResp, imerr := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
+		imResp, imerr := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 		if imerr != nil {
 			log.Printf("Unable to determine reason waiting for AMI failed: %s", err)
 			err = fmt.Errorf("Unknown error waiting for AMI; %s", err)
-		} else {
-			if len(imagesResp.Images) > 0 {
-				image := imagesResp.Images[0]
-				if image != nil {
-					stateReason := image.StateReason
-					err = fmt.Errorf("Error waiting for AMI. Reason: %s", stateReason)
-				}
+		}
+		if imResp != nil && len(imResp.Images) > 0 {
+			image := imResp.Images[0]
+			if image != nil {
+				stateReason := image.StateReason
+				err = fmt.Errorf("Error waiting for AMI. Reason: %s", stateReason)
 			}
 		}
 		state.Put("error", err)
