@@ -71,7 +71,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 			log.Printf("Unable to determine reason waiting for AMI failed: %s", err)
 			err = fmt.Errorf("Unknown error waiting for AMI; %s", err)
 		} else {
-			if imagesResp != nil && len(imagesResp.Images) > 0 {
+			if len(imagesResp.Images) > 0 {
 				image := imagesResp.Images[0]
 				if image != nil {
 					stateReason := image.StateReason
