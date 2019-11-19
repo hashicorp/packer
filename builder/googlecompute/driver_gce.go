@@ -493,6 +493,10 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 	dCopy := string(data)
 
 	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
+	if err != nil {
+		errCh <- err
+		return
+	}
 	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &dCopy})
 
 	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
