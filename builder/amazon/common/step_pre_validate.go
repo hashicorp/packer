@@ -121,8 +121,10 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 }
 
 func (s *StepPreValidate) checkVpc(conn ec2iface.EC2API) error {
-	if s.VpcId != "" && s.SubnetId != "" {
-		// skip validation if both VpcId and SubnetId are provided; AWS API will error if something is wrong.
+	if s.VpcId == "" || (s.VpcId != "" && s.SubnetId != "") {
+		// Skip validation if:
+		// * The user has not provided a VpcId.
+		// * Both VpcId and SubnetId are provided; AWS API will error if something is wrong.
 		return nil
 	}
 
