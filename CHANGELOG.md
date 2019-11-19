@@ -1,15 +1,31 @@
 ## 1.5.0 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Add validation for `subnet_id` when specifying `vpc_id`
+    [GH-8360] [GH-8387] [GH-8391]
 * builder/amazon: Retry runinstances aws api call to mitigate throttling
     [GH-8342]
 * builder/qemu: Add display template option for qemu. [GH-7676]
+* builder/qemu: When a user adds a new drive in qemuargs, process it to make
+    sure that necessary settings are applied to that drive. [GH-8380]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
+    [GH-8354] [GH-8361] [GH-8363] [GH-8370]
 * provisioner/shell: Add support for the `env_var_format` parameter [GH-8319]
 
 ### BUG FIXES:
+* builder/hyperv: Fix bug in checking VM name that could cause flakiness if
+    many VMs are defined. [GH-8357]
 * builder/vagrant: Use absolute path for Vagrantfile [GH-8321]
 * builder/virtualbox: Fix panic in snapshot builder. [GH-8336] [GH-8329]
+* communicator/winrm: Resolve ntlm nil pointer bug by bumping go-ntlmssp
+    dependency [GH-8369]
+* communicator: Fix proxy connection settings to use `SSHProxyUsername` and
+    `SSHProxyPassword` where relevant instead of bastion username and password.
+    [GH-8375]
+* core: Fix bug where Packer froze if asked to log an extremely long line
+    [GH-8356]
+* core: Update to newest version of go-tty to re-enable CTRL-S and CTRL-Q usage
+    [GH-8364]
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: Complete deprecation of clean_ami_name template func
