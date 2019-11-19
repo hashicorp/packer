@@ -130,7 +130,7 @@ func (s *StepPreValidate) checkVpc(conn ec2iface.EC2API) error {
 
 	res, err := conn.DescribeVpcs(&ec2.DescribeVpcsInput{VpcIds: []*string{aws.String(s.VpcId)}})
 	if isAWSErr(err, "InvalidVpcID.NotFound", "") || err != nil {
-		return fmt.Errorf("Error retrieving VPC information for vpc_id %q", s.VpcId)
+		return fmt.Errorf("Error retrieving VPC information for vpc_id %s: %s", s.VpcId, err)
 	}
 
 	if res != nil && len(res.Vpcs) == 1 && res.Vpcs[0] != nil {
