@@ -11,11 +11,8 @@ import (
 
 //DescribeVpcs mocks an ec2.DescribeVpcsOutput for a given input
 func (m *mockEC2Conn) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
-	m.lock.Lock()
-	m.copyImageCount++
-	m.lock.Unlock()
 
-	if input == nil || len(input.VpcIds) == 0 {
+	if input == nil || aws.StringValue(input.VpcIds[0]) == "" {
 		return nil, fmt.Errorf("oops looks like we need more input")
 	}
 
