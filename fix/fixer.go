@@ -44,6 +44,7 @@ func init() {
 		"vmware-compaction":          new(FixerVMwareCompaction),
 		"clean-image-name":           new(FixerCleanImageName),
 		"spot-price-auto-product":    new(FixerAmazonSpotPriceProductDeprecation),
+		"qemu-disk-size":             new(FixerQEMUDiskSize),
 	}
 
 	FixerOrder = []string{
@@ -71,5 +72,6 @@ func init() {
 		"hyperv-cpu-and-ram",
 		"clean-image-name",
 		"spot-price-auto-product",
+		"qemu-disk-size",
 	}
 }
