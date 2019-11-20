@@ -22,3 +22,9 @@
     engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
+-   `no_ephemeral` (bool) - If you set this flag, we'll add clauses to the
+    launch_block_device_mappings that make sure ephemeral drives don't show
+    up in the EC2 console. If you launched from the EC2 console, you'd get
+    this automatically, but the SDK does not provide this service.
+    This only applies when you are not running spot instances.
+    
