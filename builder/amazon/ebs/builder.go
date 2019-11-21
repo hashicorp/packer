@@ -172,6 +172,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
+			NoEphemeral:                       b.config.NoEphemeral,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
