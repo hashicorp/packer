@@ -123,13 +123,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
 	}
 
-	if b.config.IsSpotInstance() && (b.config.AMIENASupport.True() || b.config.AMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Spot instances do not support modification, which is required "+
-				"when either `ena_support` or `sriov_support` are set. Please ensure "+
-				"you use an AMI that already has either SR-IOV or ENA enabled."))
-	}
-
 	if b.config.RunConfig.SpotPriceAutoProduct != "" {
 		warns = append(warns, "spot_price_auto_product is deprecated and no "+
 			"longer necessary for Packer builds. In future versions of "+
@@ -294,6 +287,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
+			Skip:                     b.config.IsSpotInstance(),
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
