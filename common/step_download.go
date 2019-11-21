@@ -151,6 +151,9 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 			targetPath += "." + s.Extension
 		}
 		targetPath, err = packer.CachePath(targetPath)
+		if err != nil {
+			return "", fmt.Errorf("CachePath: %s", err)
+		}
 	}
 
 	lockFile := targetPath + ".lock"
