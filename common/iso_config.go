@@ -179,9 +179,13 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 			Dir:     false,
 			Getters: getter.Getters,
 		}
-		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
+		checksumURL := c.ISOChecksum
+		if c.ISOChecksumURL != "" {
+			checksumURL = c.ISOChecksumURL
+		}
+		cksum, err := gc.ChecksumFromFile(checksumURL, u)
 		if cksum == nil || err != nil {
-			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file [%s]. %v", checksumURL, err))
 		} else {
 			c.ISOChecksumType = cksum.Type
 			c.ISOChecksum = hex.EncodeToString(cksum.Value)
