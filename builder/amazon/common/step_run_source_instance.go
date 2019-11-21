@@ -127,10 +127,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		// don't clutter up console views and cause confusion.
 		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
 		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
-		for i := 0; i < len(DefaultEphemeralDeviceLetters); i++ {
-
+		for _, letter := range DefaultEphemeralDeviceLetters {
 			bd := &ec2.BlockDeviceMapping{
-				DeviceName: aws.String("xvdc" + string(DefaultEphemeralDeviceLetters[i])),
+				DeviceName: aws.String("xvdc" + string(letter)),
 				NoDevice:   aws.String(""),
 			}
 			runOpts.BlockDeviceMappings = append(runOpts.BlockDeviceMappings, bd)
