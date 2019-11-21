@@ -17,7 +17,7 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
 	Repository          *string           `mapstructure:"repository" cty:"repository"`
-	Tag                 *string           `mapstructure:"tag" cty:"tag"`
+	Tag                 []string          `mapstructure:"tag" cty:"tag"`
 	Force               *bool             `cty:"force"`
 }
 
@@ -38,7 +38,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"repository":                 &hcldec.AttrSpec{Name: "repository", Type: cty.String, Required: false},
-		"tag":                        &hcldec.AttrSpec{Name: "tag", Type: cty.String, Required: false},
+		"tag":                        &hcldec.AttrSpec{Name: "tag", Type: cty.List(cty.String), Required: false},
 		"force":                      &hcldec.AttrSpec{Name: "force", Type: cty.Bool, Required: false},
 	}
 	return s
