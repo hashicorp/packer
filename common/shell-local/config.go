@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/shell"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -19,14 +20,17 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	shell.Provisioner `mapstructure:",squash"`
+
 	// ** DEPRECATED: USE INLINE INSTEAD **
 	// ** Only Present for backwards compatibility **
 	// Command is the command to execute
 	Command string
 
-	// An inline script to execute. Multiple strings are all executed
-	// in the context of a single shell.
-	Inline []string
+	// The command used to execute the script. The '{{ .Path }}' variable
+	// should be used to specify where the script goes, {{ .Vars }}
+	// can be used to inject the environment_vars into the environment.
+	ExecuteCommand []string `mapstructure:"execute_command"`
 
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
@@ -37,24 +41,7 @@ type Config struct {
 	// The file extension to use for the file generated from the inline commands
 	TempfileExtension string `mapstructure:"tempfile_extension"`
 
-	// The local path of the shell script to upload and execute.
-	Script string
-
-	// An array of multiple scripts to run.
-	Scripts []string
-
-	// An array of environment variables that will be injected before
-	// your command(s) are executed.
-	Vars []string `mapstructure:"environment_vars"`
-
-	EnvVarFormat string `mapstructure:"env_var_format"`
 	// End dedupe with postprocessor
-
-	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes, {{ .Vars }}
-	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand []string `mapstructure:"execute_command"`
-
 	UseLinuxPathing bool `mapstructure:"use_linux_pathing"`
 
 	ctx interpolate.Context
