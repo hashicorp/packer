@@ -16,15 +16,15 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Binary              *bool             `cty:"binary"`
-	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command"`
 	Inline              []string          `cty:"inline"`
-	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path"`
 	Script              *string           `cty:"script"`
 	Scripts             []string          `cty:"scripts"`
 	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
 	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars"`
 	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format"`
+	Binary              *bool             `cty:"binary"`
+	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path"`
+	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command"`
 	InlineShebang       *string           `mapstructure:"inline_shebang" cty:"inline_shebang"`
 	PauseAfter          *string           `mapstructure:"pause_after" cty:"pause_after"`
 	UseEnvVarFile       *bool             `mapstructure:"use_env_var_file" cty:"use_env_var_file"`
@@ -51,15 +51,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
-		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"inline":                     &hcldec.AttrSpec{Name: "inline", Type: cty.List(cty.String), Required: false},
-		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
 		"script":                     &hcldec.AttrSpec{Name: "script", Type: cty.String, Required: false},
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
 		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
+		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
+		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
+		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"inline_shebang":             &hcldec.AttrSpec{Name: "inline_shebang", Type: cty.String, Required: false},
 		"pause_after":                &hcldec.AttrSpec{Name: "pause_after", Type: cty.String, Required: false},
 		"use_env_var_file":           &hcldec.AttrSpec{Name: "use_env_var_file", Type: cty.Bool, Required: false},
