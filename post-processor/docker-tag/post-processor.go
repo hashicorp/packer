@@ -19,8 +19,8 @@ const BuilderId = "packer.post-processor.docker-tag"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string `mapstructure:"repository"`
-	Tag        string `mapstructure:"tag"`
+	Repository string   `mapstructure:"repository"`
+	Tag        []string `mapstructure:"tag"`
 	Force      bool
 
 	ctx interpolate.Context
@@ -64,22 +64,25 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	importRepo := p.config.Repository
-	if p.config.Tag != "" {
-		importRepo += ":" + p.config.Tag
-	}
+	var lastTaggedRepo = importRepo
+	for _, tag := range p.config.Tag {
+		local := importRepo + ":" + tag
+		ui.Message("Tagging image: " + artifact.Id())
+		ui.Message("Repository: " + local)
 
-	ui.Message("Tagging image: " + artifact.Id())
-	ui.Message("Repository: " + importRepo)
-	err := driver.TagImage(artifact.Id(), importRepo, p.config.Force)
-	if err != nil {
-		return nil, false, true, err
+		err := driver.TagImage(artifact.Id(), local, p.config.Force)
+		if err != nil {
+			return nil, false, true, err
+		}
+
+		lastTaggedRepo = local
 	}
 
 	// Build the artifact
 	artifact = &docker.ImportArtifact{
 		BuilderIdValue: BuilderId,
 		Driver:         driver,
-		IdValue:        importRepo,
+		IdValue:        lastTaggedRepo,
 	}
 
 	// If we tag an image and then delete it, there was no point in creating the
