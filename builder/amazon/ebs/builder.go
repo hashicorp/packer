@@ -53,6 +53,16 @@ type Config struct {
 	// engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	// Relevant only to Windows guests: If you set this flag, we'll add clauses
+	// to the launch_block_device_mappings that make sure ephemeral drives
+	// don't show up in the EC2 console. If you launched from the EC2 console,
+	// you'd get this automatically, but the SDK does not provide this service.
+	// For more information, see
+	// https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/InstanceStorage.html.
+	// Because we don't validate the OS type of your guest, it is up to you to
+	// make sure you don't set this for *nix guests; behavior may be
+	// unpredictable.
+	NoEphemeral bool `mapstructure:"no_ephemeral" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -162,6 +172,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
+			NoEphemeral:                       b.config.NoEphemeral,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
@@ -181,6 +192,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
+			NoEphemeral:                       b.config.NoEphemeral,
 		}
 	}
 

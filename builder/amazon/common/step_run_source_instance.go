@@ -35,6 +35,7 @@ type StepRunSourceInstance struct {
 	UserData                          string
 	UserDataFile                      string
 	VolumeTags                        TagMap
+	NoEphemeral                       bool
 
 	instanceId string
 }
@@ -114,6 +115,25 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
 		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
+	}
+
+	if s.NoEphemeral {
+		// This is only relevant for windows guests. Ephemeral drives by
+		// default are assigned to drive names xvdca-xvdcz.
+		// When vms are launched from the AWS console, they're automatically
+		// removed from the block devices if the user hasn't said to use them,
+		// but the SDK does not perform this cleanup. The following code just
+		// manually removes the ephemeral drives from the mapping so that they
+		// don't clutter up console views and cause confusion.
+		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
+		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
+		for _, letter := range DefaultEphemeralDeviceLetters {
+			bd := &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("xvdc" + string(letter)),
+				NoDevice:   aws.String(""),
+			}
+			runOpts.BlockDeviceMappings = append(runOpts.BlockDeviceMappings, bd)
+		}
 	}
 
 	if s.EnableT2Unlimited {
