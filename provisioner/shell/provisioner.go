@@ -29,6 +29,8 @@ import (
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
+	shell.ProvisionerRemoteSpecific `mapstructure:",squash"`
+
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
 
