@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/shell"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -18,8 +17,6 @@ import (
 )
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
 	shell.Provisioner `mapstructure:",squash"`
 
 	// ** DEPRECATED: USE INLINE INSTEAD **
