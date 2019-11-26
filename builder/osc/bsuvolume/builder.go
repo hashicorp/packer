@@ -109,7 +109,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	log.Printf("[DEBUG] launch block devices %#v", b.config.launchBlockDevices)
 
 	instanceStep := &osccommon.StepRunSourceVm{
-		AssociatePublicIpAddress:    b.config.AssociatePublicIpAddress,
 		BlockDevices:                b.config.launchBlockDevices,
 		Comm:                        &b.config.RunConfig.Comm,
 		Ctx:                         b.config.ctx,
@@ -145,6 +144,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.RunConfig.Comm,
 			DebugKeyPath: fmt.Sprintf("oapi_%s.pem", b.config.PackerBuildName),
+		},
+		&osccommon.StepPublicIp{
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			Debug:                    b.config.PackerDebug,
 		},
 		&osccommon.StepSecurityGroup{
 			SecurityGroupFilter:   b.config.SecurityGroupFilter,

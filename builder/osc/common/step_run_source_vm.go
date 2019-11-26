@@ -23,7 +23,6 @@ const (
 )
 
 type StepRunSourceVm struct {
-	AssociatePublicIpAddress    bool
 	BlockDevices                BlockDevices
 	Comm                        *communicator.Config
 	Ctx                         interpolate.Context
@@ -158,20 +157,8 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 
 	subnetId := state.Get("subnet_id").(string)
 
-	if subnetId != "" && s.AssociatePublicIpAddress {
-		runOpts.Nics = []oapi.NicForVmCreation{
-			{
-				DeviceNumber: 0,
-				//AssociatePublicIpAddress: s.AssociatePublicIpAddress,
-				SubnetId:           subnetId,
-				SecurityGroupIds:   securityGroupIds,
-				DeleteOnVmDeletion: true,
-			},
-		}
-	} else {
-		runOpts.SubnetId = subnetId
-		runOpts.SecurityGroupIds = securityGroupIds
-	}
+	runOpts.SubnetId = subnetId
+	runOpts.SecurityGroupIds = securityGroupIds
 
 	if s.ExpectedRootDevice == "bsu" {
 		runOpts.VmInitiatedShutdownBehavior = s.VmInitiatedShutdownBehavior
@@ -224,7 +211,15 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		}
 	}
 
-	//TODO: LinkPublicIp i
+	if publicip_id, ok := state.Get("publicip_id").(string); ok {
+		ui.Say(fmt.Sprintf("Linking temporary PublicIp %s to instance %s", publicip_id, vmId))
+		_, err := oapiconn.POST_LinkPublicIp(oapi.LinkPublicIpRequest{PublicIpId: publicip_id, VmId: vmId})
+		if err != nil {
+			state.Put("error", fmt.Errorf("Error linking PublicIp to VM: %s", err))
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
 
 	resp, err := oapiconn.POST_ReadVms(request)
 
