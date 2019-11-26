@@ -30,7 +30,7 @@ type FlatConfig struct {
 	InventoryFile       *string           `mapstructure:"inventory_file" cty:"inventory_file"`
 	InventoryGroups     []string          `mapstructure:"inventory_groups" cty:"inventory_groups"`
 	GalaxyFile          *string           `mapstructure:"galaxy_file" cty:"galaxy_file"`
-	GalaxyCommand       *string           `cty:"galaxy_command"`
+	GalaxyCommand       *string           `mapstructure:"galaxy_command" cty:"galaxy_command"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
