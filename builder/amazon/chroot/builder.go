@@ -13,6 +13,7 @@ import (
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
@@ -181,6 +182,8 @@ type Builder struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs

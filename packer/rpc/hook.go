@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"net/rpc"
 	"sync"
 
 	"github.com/hashicorp/packer/packer"
@@ -12,8 +11,7 @@ import (
 // An implementation of packer.Hook where the hook is actually executed
 // over an RPC connection.
 type hook struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // HookServer wraps a packer.Hook implementation and makes it exportable
@@ -46,7 +44,7 @@ func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.C
 		select {
 		case <-ctx.Done():
 			log.Printf("Cancelling hook after context cancellation %v", ctx.Err())
-			if err := h.client.Call("Hook.Cancel", new(interface{}), new(interface{})); err != nil {
+			if err := h.client.Call(h.endpoint+".Cancel", new(interface{}), new(interface{})); err != nil {
 				log.Printf("Error cancelling builder: %s", err)
 			}
 		case <-done:
@@ -59,7 +57,7 @@ func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.C
 		StreamId: nextId,
 	}
 
-	return h.client.Call("Hook.Run", &args, new(interface{}))
+	return h.client.Call(h.endpoint+".Run", &args, new(interface{}))
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {

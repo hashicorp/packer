@@ -3,6 +3,9 @@ package jdcloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"time"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
@@ -11,8 +14,6 @@ import (
 	vpcApis "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis"
 	vpcClient "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-	"regexp"
-	"time"
 )
 
 type stepCreateJDCloudInstance struct {

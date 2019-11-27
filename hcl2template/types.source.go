@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/packer"
 )
 
 // A source field in an HCL file will load into the Source type.
@@ -14,34 +15,56 @@ type Source struct {
 	// Given name; if any
 	Name string
 
-	Cfg interface{}
-
-	HCL2Ref HCL2Ref
+	block *hcl.Block
 }
 
-func (p *Parser) decodeSource(block *hcl.Block, sourceSpecs map[string]Decodable) (*Source, hcl.Diagnostics) {
+func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
 	source := &Source{
-		Type: block.Labels[0],
-		Name: block.Labels[1],
+		Type:  block.Labels[0],
+		Name:  block.Labels[1],
+		block: block,
 	}
-	source.HCL2Ref.DeclRange = block.DefRange
-
 	var diags hcl.Diagnostics
 
-	sourceSpec, found := sourceSpecs[source.Type]
-	if !found {
+	if !p.BuilderSchemas.Has(source.Type) {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Unknown " + sourceLabel + " type",
-			Subject: &block.LabelRanges[0],
+			Summary:  "Unknown " + buildSourceLabel + " type " + source.Type,
+			Subject:  block.LabelRanges[0].Ptr(),
+			Detail:   fmt.Sprintf("known builders: %v", p.BuilderSchemas.List()),
+			Severity: hcl.DiagError,
 		})
-		return source, diags
+		return nil, diags
 	}
 
-	flatSource, moreDiags := decodeDecodable(block, nil, sourceSpec)
-	diags = append(diags, moreDiags...)
-	source.Cfg = flatSource
-
 	return source, diags
+}
+
+func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+
+	// calling BuilderSchemas will start a new builder plugin to ask about
+	// the schema of the builder; but we do not know yet if the builder is
+	// actually going to be used. This also allows to call the same builder
+	// more than once.
+	builder, err := p.BuilderSchemas.Start(source.Type)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary: "Failed to load " + sourceLabel + " type",
+			Detail:  err.Error(),
+			Subject: &source.block.LabelRanges[0],
+		})
+		return builder, diags
+	}
+
+	decoded, moreDiags := decodeHCL2Spec(source.block, nil, builder)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return nil, diags
+	}
+	warning, err := builder.Prepare(decoded)
+	moreDiags = warningErrorsToDiags(source.block, warning, err)
+	diags = append(diags, moreDiags...)
+	return builder, diags
 }
 
 func (source *Source) Ref() SourceRef {

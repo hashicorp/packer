@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -43,6 +44,8 @@ type EngineVarsTemplate struct {
 	BuildRegion string
 	SourceOMI   string
 }
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = osccommon.TemplateFuncs

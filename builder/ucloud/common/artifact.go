@@ -2,11 +2,12 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
 type Artifact struct {

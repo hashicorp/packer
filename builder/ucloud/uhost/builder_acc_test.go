@@ -2,11 +2,12 @@ package uhost
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 )

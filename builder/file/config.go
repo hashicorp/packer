@@ -22,8 +22,7 @@ type Config struct {
 	Content string `mapstructure:"content"`
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := []string{}
 
 	err := config.Decode(c, &config.DecodeOpts{
@@ -33,7 +32,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, warnings, err
+		return warnings, err
 	}
 
 	var errs *packer.MultiError
@@ -51,8 +50,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return warnings, errs
 	}
 
-	return c, warnings, nil
+	return warnings, nil
 }

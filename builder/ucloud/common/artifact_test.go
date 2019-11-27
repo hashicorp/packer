@@ -1,9 +1,10 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
