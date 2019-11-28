@@ -1,8 +1,6 @@
 package fix
 
 import (
-	"strings"
-
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -14,13 +12,6 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 	type template struct {
 		Provisioners []interface{}
 	}
-
-	var gcUnescape = strings.NewReplacer(
-		"`$", "$",
-		"`\"", "\"",
-		"``", "`",
-		"`'", "'",
-	)
 
 	// Decode the input into our structure, if we can
 	var tpl template
@@ -35,12 +26,11 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 			continue
 		}
 
-		if ok := provisioners["type"] == "ansible*" || provisioners["type"] == "ansible-local"; !ok {
+		if ok := provisioners["type"] == "ansible-local"; !ok {
 			continue
 		}
 
 		if _, ok := provisioners["galaxy_command"]; ok {
-			provisioners["galaxy_command"] = gcUnescape.Replace(provisioners["galaxy_command"].(string))
 
 			// drop galaxycommand if it is also included
 			if _, galaxyCommandIncluded := provisioners["galaxycommand"]; galaxyCommandIncluded {
@@ -54,7 +44,11 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 			if !ok {
 				continue
 			}
-			galaxyCommandString := gcUnescape.Replace(galaxyCommandRaw.(string))
+
+			galaxyCommandString, ok := galaxyCommandRaw.(string)
+			if !ok {
+				continue
+			}
 
 			delete(provisioners, "galaxycommand")
 			provisioners["galaxy_command"] = galaxyCommandString
@@ -72,5 +66,5 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 }
 
 func (FixerGalaxyCommand) Synopsis() string {
-	return `Removes escapes from user env vars and updates provisioners to use "galaxy_command" rather than "galaxycommand"`
+	return `Replaces "galaxycommad" in ansible-local provisioner configs with "galaxy_command"`
 }
