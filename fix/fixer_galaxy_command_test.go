@@ -17,12 +17,12 @@ func TestFixerGalaxyCommand_Fix(t *testing.T) {
 		// set galaxy_command
 		{
 			Input: map[string]interface{}{
-				"type":           "ansible",
+				"type":           "ansible-local",
 				"galaxy_command": "/usr/local/bin/ansible-galaxy",
 			},
 
 			Expected: map[string]interface{}{
-				"type":           "ansible",
+				"type":           "ansible-local",
 				"galaxy_command": "/usr/local/bin/ansible-galaxy",
 			},
 		},
