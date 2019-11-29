@@ -78,30 +78,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	// Test whether the host system is able to create a Vagrant box correctly
-	config := p.configs[""]
-
-	tempDir, err := tmp.Dir("packer")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tempDir)
-
-	if err := WriteMetadata(tempDir, make(map[string]string)); err != nil {
-		return err
-	}
-
-	tempBox, err := tmp.File("box-*.box")
-	if err != nil {
-		return err
-	}
-	defer tempBox.Close()
-	defer os.Remove(tempBox.Name())
-
-	if err := DirToBox(tempBox.Name(), tempDir, nil, config.CompressionLevel); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -109,6 +85,26 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	config := p.configs[""]
 	if specificConfig, ok := p.configs[name]; ok {
 		config = specificConfig
+	}
+
+	ui.Say("Creating a dummy Vagrant box to ensure the host system can create one correctly")
+
+	tempDir, err := tmp.Dir("packer")
+	if err != nil {
+		return nil, false, err
+	}
+	defer os.RemoveAll(tempDir)
+	if err := WriteMetadata(tempDir, make(map[string]string)); err != nil {
+		return nil, false, err
+	}
+	tempBox, err := tmp.File("box-*.box")
+	if err != nil {
+		return nil, false, err
+	}
+	defer tempBox.Close()
+	defer os.Remove(tempBox.Name())
+	if err := DirToBox(tempBox.Name(), tempDir, nil, config.CompressionLevel); err != nil {
+		return nil, false, err
 	}
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
