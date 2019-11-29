@@ -248,6 +248,15 @@ following policies at a minimum:
 }
 ```
 
+If you are using a key provided by a different account than the one you are
+using to run the Packer build, your key will also need
+
+``` json
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+```
+
+
 ### Checking that system time is current
 
 Amazon uses the current time as part of the [request signing

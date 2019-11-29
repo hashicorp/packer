@@ -425,6 +425,9 @@ func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
 	defer os.Remove(boxfile.Name())
 
 	provider, err := providerFromVagrantBox(boxfile.Name())
+	if err != nil {
+		t.Fatalf("error getting provider from vagrant box %s:%v", boxfile.Name(), err)
+	}
 	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
 	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }
@@ -443,6 +446,9 @@ func TestGetProvider_artifice(t *testing.T) {
 	defer os.Remove(boxfile.Name())
 
 	provider, err := getProvider("", boxfile.Name(), "artifice")
+	if err != nil {
+		t.Fatalf("error getting provider %s:%v", boxfile.Name(), err)
+	}
 	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
 	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }

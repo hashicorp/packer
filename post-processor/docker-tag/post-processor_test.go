@@ -13,7 +13,7 @@ import (
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"repository": "foo",
-		"tag":        "bar",
+		"tag":        "bar,buzz",
 	}
 }
 
@@ -63,15 +63,21 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !driver.TagImageCalled {
+	if driver.TagImageCalled != 2 {
 		t.Fatal("should call TagImage")
 	}
 	if driver.TagImageImageId != "1234567890abcdef" {
 		t.Fatal("bad image id")
 	}
-	if driver.TagImageRepo != "foo:bar" {
+
+	if driver.TagImageRepo[0] != "foo:bar" {
 		t.Fatal("bad repo")
 	}
+
+	if driver.TagImageRepo[1] != "foo:buzz" {
+		t.Fatal("bad repo")
+	}
+
 	if driver.TagImageForce {
 		t.Fatal("bad force. force=false in default")
 	}
@@ -105,13 +111,16 @@ func TestPostProcessor_PostProcess_Force(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !driver.TagImageCalled {
+	if driver.TagImageCalled != 2 {
 		t.Fatal("should call TagImage")
 	}
 	if driver.TagImageImageId != "1234567890abcdef" {
 		t.Fatal("bad image id")
 	}
-	if driver.TagImageRepo != "foo:bar" {
+	if driver.TagImageRepo[0] != "foo:bar" {
+		t.Fatal("bad repo")
+	}
+	if driver.TagImageRepo[1] != "foo:buzz" {
 		t.Fatal("bad repo")
 	}
 	if !driver.TagImageForce {

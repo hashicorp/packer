@@ -27,7 +27,8 @@ type AmiFilterOptions struct {
 func (d *AmiFilterOptions) GetOwners() []*string {
 	res := make([]*string, 0, len(d.Owners))
 	for _, owner := range d.Owners {
-		res = append(res, &owner)
+		i := owner
+		res = append(res, &i)
 	}
 	return res
 }

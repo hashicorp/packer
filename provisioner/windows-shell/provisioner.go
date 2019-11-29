@@ -32,6 +32,8 @@ var retryableSleep = 2 * time.Second
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
+	shell.ProvisionerRemoteSpecific `mapstructure:",squash"`
+
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
 	// This can be set high to allow for reboots.

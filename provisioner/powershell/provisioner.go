@@ -40,6 +40,8 @@ var psEscape = strings.NewReplacer(
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
+	shell.ProvisionerRemoteSpecific `mapstructure:",squash"`
+
 	// The remote path where the file containing the environment variables
 	// will be uploaded to. This should be set to a writable file that is in a
 	// pre-existing directory.

@@ -97,12 +97,9 @@ func Run(ctx context.Context, ui packer.Ui, config *Config) (bool, error) {
 					"Please see output above for more information.",
 				script)
 		}
-		if cmd.ExitStatus() != 0 {
-			return false, fmt.Errorf(
-				"Erroneous exit code %d while executing script: %s\n\n"+
-					"Please see output above for more information.",
-				cmd.ExitStatus(),
-				script)
+
+		if err := config.ValidExitCode(cmd.ExitStatus()); err != nil {
+			return false, err
 		}
 	}
 

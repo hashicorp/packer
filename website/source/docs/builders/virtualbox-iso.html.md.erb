@@ -244,3 +244,15 @@ Each command itself is an array of strings, where each string is an argument to
 template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.
+
+## Creating an EFI enabled VM
+
+If you want to create an EFI enabled VM, make sure you set the `iso_interface`
+to "sata". Otherwise your attached drive will not be bootable. Example:
+
+``` json
+      "iso_interface": "sata",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ]
+      ]
+```
