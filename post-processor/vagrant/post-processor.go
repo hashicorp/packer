@@ -87,7 +87,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	defer os.RemoveAll(tempDir)
 
-	if err := WriteMetadata(tempDir,  make(map[string]string)); err != nil {
+	if err := WriteMetadata(tempDir, make(map[string]string)); err != nil {
 		return err
 	}
 
