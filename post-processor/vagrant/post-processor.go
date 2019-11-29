@@ -6,7 +6,6 @@
 package vagrant
 
 import (
-	"archive/tar"
 	"compress/flate"
 	"context"
 	"fmt"
@@ -79,16 +78,28 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	for _, src := range p.configs[""].Include {
-		info, err := os.Stat(src)
-		if err != nil {
-			return err
-		}
+	// Test whether the host system is able to create a Vagrant box correctly
+	config := p.configs[""]
 
-		_, err = tar.FileInfoHeader(info, "")
-		if err != nil {
-			return err
-		}
+	tempDir, err := tmp.Dir("packer")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+
+	if err := WriteMetadata(tempDir,  make(map[string]string)); err != nil {
+		return err
+	}
+
+	tempBox, err := tmp.File("box-*.box")
+	if err != nil {
+		return err
+	}
+	defer tempBox.Close()
+	defer os.Remove(tempBox.Name())
+
+	if err := DirToBox(tempBox.Name(), tempDir, nil, config.CompressionLevel); err != nil {
+		return err
 	}
 
 	return nil
