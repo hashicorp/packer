@@ -3,55 +3,13 @@ description: |
     Communicators are the mechanism Packer uses to upload files, execute scripts,
     etc. with the machine being created.
 layout: docs
-page_title: 'Communicators - Templates'
-sidebar_current: 'docs-templates-communicators'
+page_title: 'Communicators - WinRM'
+sidebar_current: 'docs-communicators-winrm'
 ---
 
-# Template Communicators
+# WinRM Communicator
 
-Communicators are the mechanism Packer uses to upload files, execute scripts,
-etc. with the machine being created.
-
-Communicators are configured within the
-[builder](/docs/templates/builders.html) section. Packer currently supports
-three kinds of communicators:
-
--   `none` - No communicator will be used. If this is set, most provisioners
-    also can't be used.
-
--   `ssh` - An SSH connection will be established to the machine. This is
-    usually the default.
-
--   `winrm` - A WinRM connection will be established.
-
-In addition to the above, some builders have custom communicators they can use.
-For example, the Docker builder has a "docker" communicator that uses
-`docker exec` and `docker cp` to execute scripts and copy files.
-
-## Using a Communicator
-
-By default, the SSH communicator is usually used. Additional configuration may
-not even be necessary, since some builders such as Amazon automatically
-configure everything.
-
-However, to specify a communicator, you set the `communicator` key within a
-build. Multiple builds can have different communicators. Example:
-
-``` json
-{
-  "builders": [
-    {
-      "type": "amazon-ebs",
-      "communicator": "ssh"
-    }
-  ]
-}
-```
-
-After specifying the `communicator`, you can specify a number of other
-configuration parameters for that communicator. These are documented below.
-
-## WinRM Communicator
+The WinRM communicator connects to the host via WinRM if it is enabled and configured on the remote host. WinRM is not enabled by default on many base images; for an example of how to configure WinRM before provisioning in AWS, see [this page](https://www.packer.io/intro/getting-started/build-image.html#a-windows-example).
 
 The WinRM communicator has the following options.
 
@@ -84,27 +42,6 @@ The WinRM communicator has the following options.
 -   `winrm_use_ssl` (boolean) - If `true`, use HTTPS for WinRM.
 
 -   `winrm_username` (string) - The username to use to connect to WinRM.
-
-## Pausing Before Connecting
-We recommend that you enable SSH or WinRM as the very last step in your
-guest's bootstrap script, but sometimes you may have a race condition where
-you need Packer to wait before attempting to connect to your guest.
-
-If you end up in this situation, you can use the template option
-`pause_before_connecting`. By default, there is no pause. For example:
-
-```
-{
-  "communicator": "ssh",
-  "ssh_username": "myuser",
-  "pause_before_connecting": "10m"
-}
-```
-
-In this example, Packer will check whether it can connect, as normal. But once
-a connection attempt is successful, it will disconnect and then wait 10 minutes
-before connecting to the guest and beginning provisioning.
-
 
 ## Configuring WinRM as part of an Autounattend File
 
