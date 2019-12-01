@@ -62,7 +62,7 @@ your example_template's variable section:
 },
 ...
 ```
-and you enter `{{user `myvar`}}` in the Packer console, you'll see the value of
+and you enter ```{{user `myvar`}}``` in the Packer console, you'll see the value of
 myvar:
 
 ```
