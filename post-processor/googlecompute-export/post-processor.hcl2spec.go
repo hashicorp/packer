@@ -25,6 +25,7 @@ type FlatConfig struct {
 	Subnetwork          *string           `mapstructure:"subnetwork" cty:"subnetwork"`
 	VaultGCPOauthEngine *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine"`
 	Zone                *string           `mapstructure:"zone" cty:"zone"`
+	ServiceAccountEmail *string           `mapstructure:"service_account_email" cty:"service_account_email"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -52,6 +53,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"subnetwork":                 &hcldec.AttrSpec{Name: "subnetwork", Type: cty.String, Required: false},
 		"vault_gcp_oauth_engine":     &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 		"zone":                       &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
+		"service_account_email":      &hcldec.AttrSpec{Name: "service_account_email", Type: cty.String, Required: false},
 	}
 	return s
 }
