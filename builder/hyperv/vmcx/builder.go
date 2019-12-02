@@ -240,13 +240,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
 		steps = append(steps,
 			&common.StepDownload{
-				Checksum:     b.config.ISOChecksum,
-				ChecksumType: b.config.ISOChecksumType,
-				Description:  "ISO",
-				ResultKey:    "iso_path",
-				Url:          b.config.ISOUrls,
-				Extension:    b.config.TargetExtension,
-				TargetPath:   b.config.TargetPath,
+				Checksum:    b.config.ISOChecksum,
+				Description: "ISO",
+				ResultKey:   "iso_path",
+				Url:         b.config.ISOUrls,
+				Extension:   b.config.TargetExtension,
+				TargetPath:  b.config.TargetPath,
 			},
 		)
 	}

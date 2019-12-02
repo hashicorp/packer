@@ -11,7 +11,6 @@ import (
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"iso_checksum":           "foo",
-		"iso_checksum_type":      "md5",
 		"iso_url":                "http://www.google.com/",
 		"shutdown_command":       "yes",
 		"ssh_username":           "foo",

@@ -12,11 +12,10 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_checksum":      "foo",
-		"iso_checksum_type": "md5",
-		"iso_url":           "http://www.packer.io",
-		"shutdown_command":  "foo",
-		"ssh_username":      "foo",
+		"iso_checksum":     "foo",
+		"iso_url":          "http://www.packer.io",
+		"shutdown_command": "foo",
+		"ssh_username":     "foo",
 
 		packer.BuildNameConfigKey: "foo",
 	}

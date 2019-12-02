@@ -48,7 +48,6 @@ func TestParser_Parse(t *testing.T) {
 						Cfg: &iso.FlatConfig{
 							HTTPDir:         strPtr("xxx"),
 							ISOChecksum:     strPtr("769474248a3897f4865817446f9a4a53"),
-							ISOChecksumType: strPtr("md5"),
 							RawSingleISOUrl: strPtr("http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso"),
 							BootCommand:     []string{"..."},
 							ShutdownCommand: strPtr("echo 'vagrant' | sudo -S shutdown -P now"),

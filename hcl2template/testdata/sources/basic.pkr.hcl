@@ -2,7 +2,6 @@
 source "virtualbox-iso" "ubuntu-1204" {
     iso_url = "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso"
     iso_checksum = "769474248a3897f4865817446f9a4a53"
-    iso_checksum_type = "md5"
 
     boot_wait = "10s"
     http_directory = "xxx"

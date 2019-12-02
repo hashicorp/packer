@@ -27,8 +27,7 @@ import (
 //   ui    packer.Ui
 type StepDownload struct {
 	// The checksum and the type of the checksum for the download
-	Checksum     string
-	ChecksumType string
+	Checksum string
 
 	// A short description of the type of download being done. Example:
 	// "ISO" or "Guest Additions"
@@ -124,12 +123,8 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	if checksum := u.Query().Get("checksum"); checksum != "" {
 		s.Checksum = checksum
 	}
-	if s.ChecksumType != "" && s.ChecksumType != "none" {
+	if s.Checksum != "" && s.Checksum != "none" {
 		// add checksum to url query params as go getter will checksum for us
-		q := u.Query()
-		q.Set("checksum", s.ChecksumType+":"+s.Checksum)
-		u.RawQuery = q.Encode()
-	} else if s.Checksum != "" {
 		q := u.Query()
 		q.Set("checksum", s.Checksum)
 		u.RawQuery = q.Encode()

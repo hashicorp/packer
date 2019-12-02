@@ -455,7 +455,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.ISOSkipCache {
-		b.config.ISOChecksumType = "none"
+		b.config.ISOChecksum = "none"
 	}
 
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
@@ -575,13 +575,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps := []multistep.Step{}
 	if !b.config.ISOSkipCache {
 		steps = append(steps, &common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			Extension:    b.config.TargetExtension,
-			ResultKey:    "iso_path",
-			TargetPath:   b.config.TargetPath,
-			Url:          b.config.ISOUrls,
+			Checksum:    b.config.ISOChecksum,
+			Description: "ISO",
+			Extension:   b.config.TargetExtension,
+			ResultKey:   "iso_path",
+			TargetPath:  b.config.TargetPath,
+			Url:         b.config.ISOUrls,
 		},
 		)
 	} else {

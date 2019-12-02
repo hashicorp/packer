@@ -247,12 +247,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Download if source box isn't from vagrant cloud.
 	if strings.HasSuffix(b.config.SourceBox, ".box") {
 		steps = append(steps, &common.StepDownload{
-			Checksum:     b.config.Checksum,
-			ChecksumType: b.config.ChecksumType,
-			Description:  "Box",
-			Extension:    "box",
-			ResultKey:    "box_path",
-			Url:          []string{b.config.SourceBox},
+			Checksum:    b.config.Checksum,
+			Description: "Box",
+			Extension:   "box",
+			ResultKey:   "box_path",
+			Url:         []string{b.config.SourceBox},
 		})
 	}
 	steps = append(steps,

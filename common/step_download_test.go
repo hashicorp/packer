@@ -217,13 +217,12 @@ func TestStepDownload_Run(t *testing.T) {
 			dir := createTempDir(t)
 			defer os.RemoveAll(dir)
 			s := &StepDownload{
-				TargetPath:   tt.fields.TargetPath,
-				Checksum:     tt.fields.Checksum,
-				ChecksumType: tt.fields.ChecksumType,
-				ResultKey:    tt.fields.ResultKey,
-				Url:          tt.fields.Url,
-				Extension:    tt.fields.Extension,
-				Description:  tt.name,
+				TargetPath:  tt.fields.TargetPath,
+				Checksum:    tt.fields.Checksum,
+				ResultKey:   tt.fields.ResultKey,
+				Url:         tt.fields.Url,
+				Extension:   tt.fields.Extension,
+				Description: tt.name,
 			}
 			defer os.Setenv("PACKER_CACHE_DIR", os.Getenv("PACKER_CACHE_DIR"))
 			os.Setenv("PACKER_CACHE_DIR", dir)

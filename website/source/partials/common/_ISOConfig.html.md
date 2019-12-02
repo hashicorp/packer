@@ -30,23 +30,21 @@ go-getter can guess the checksum type based on `iso_checksum` len.
 
 ``` json
 {
-  "iso_checksum_type": "file",
-  "iso_checksum": "ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
+  "iso_checksum": "file:ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 }
 ```
 
 ``` json
 {
-  "iso_checksum_url": "./shasums.txt",
+  "iso_checksum": "file://./shasums.txt",
   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 }
 ```
 
 ``` json
 {
-  "iso_checksum_type": "sha256",
-  "iso_checksum_url": "./shasums.txt",
+  "iso_checksum": "file:./shasums.txt",
   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 }
 ```

@@ -183,14 +183,14 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 	return true, err
 }
 
-func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string) (string, error) {
 	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
 
 	log.Printf("Verifying checksum of %s", finalPath)
-	if d.VerifyChecksum(checksumType, checksum, finalPath) {
+	if d.VerifyChecksum(checksum, finalPath) {
 		log.Println("Initial checksum matched, no upload needed.")
 		return finalPath, nil
 	}
@@ -670,17 +670,28 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
-func (d *ESX5Driver) VerifyChecksum(ctype string, hash string, file string) bool {
-	if ctype == "none" {
+func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
+	if hash == "none" {
 		if err := d.sh("stat", strconv.Quote(file)); err != nil {
 			return false
 		}
-	} else {
-		stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
-		_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
-		if err != nil {
-			return false
-		}
+		return true
+	}
+
+	// TODO(azr): this will not work with checksums from files
+	vs := strings.SplitN(hash, ":", 2)
+	var ctype string
+	switch len(vs) {
+	case 2:
+		ctype, hash = vs[0], vs[1]
+	default:
+		return false
+	}
+
+	stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
+	_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
+	if err != nil {
+		return false
 	}
 
 	return true
