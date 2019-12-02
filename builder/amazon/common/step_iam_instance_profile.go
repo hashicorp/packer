@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aws/aws-sdk-go/aws"
-
 	"encoding/json"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
