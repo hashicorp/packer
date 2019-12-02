@@ -88,42 +88,19 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	// NOTE:lxc file push doesn't yet support directory uploads.
-	// As a work around, we tar up the folder, upload it as a file, then extract it
+	fileDestination := filepath.Join(c.ContainerName, dst)
 
-	// Don't use 'z' flag as compressing may take longer and the transfer is likely local.
-	// If this isn't the case, it is possible for the user to compress in another step then transfer.
-	// It wouldn't be possible to disable compression, without exposing this option.
-	tar, err := c.CmdWrapper(fmt.Sprintf("tar -cf - -C %s .", src))
+	cp, err := c.CmdWrapper(fmt.Sprintf("lxc file push -pr %s %s", src, fileDestination))
 	if err != nil {
 		return err
 	}
 
-	cp, err := c.CmdWrapper(fmt.Sprintf("lxc exec %s -- tar -xf - -C %s", c.ContainerName, dst))
-	if err != nil {
-		return err
-	}
-
-	tarCmd := ShellCommand(tar)
 	cpCmd := ShellCommand(cp)
-
-	cpCmd.Stdin, _ = tarCmd.StdoutPipe()
-	log.Printf("Starting tar command: %s", tar)
-	err = tarCmd.Start()
-	if err != nil {
-		return err
-	}
 
 	log.Printf("Running cp command: %s", cp)
 	err = cpCmd.Run()
 	if err != nil {
 		log.Printf("Error running cp command: %s", err)
-		return err
-	}
-
-	err = tarCmd.Wait()
-	if err != nil {
-		log.Printf("Error running tar command: %s", err)
 		return err
 	}
 
