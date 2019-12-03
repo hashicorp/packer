@@ -11,7 +11,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -147,10 +149,11 @@ type Config struct {
 	// one of the other listed interfaces. Using the `scsi` interface under
 	// these circumstances will cause the build to fail.
 	DiskInterface string `mapstructure:"disk_interface" required:"false"`
-	// The size in bytes, suffixes of the first letter of common byte types
-	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
-	// Will create the of the hard disk of the VM. By default, this is
-	// `40960M` (40 GB).
+	// The size in bytes of the hard disk of the VM. Suffix with the first
+	// letter of common byte types. Use "k" or "K" for kilobytes, "M" for
+	// megabytes, G for gigabytes, and T for terabytes. If no value is provided
+	// for disk_size, Packer uses a default of `40960M` (40 GB). If a disk_size
+	// number is provided with no units, Packer will default to Megabytes.
 	DiskSize string `mapstructure:"disk_size" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
@@ -354,6 +357,23 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == "" || b.config.DiskSize == "0" {
 		b.config.DiskSize = "40960M"
+	} else {
+		// Make sure supplied disk size is valid
+		// (digits, plus an optional valid unit character). e.g. 5000, 40G, 1t
+		re := regexp.MustCompile(`^[\d]+(b|k|m|g|t){0,1}$`)
+		matched := re.MatchString(strings.ToLower(b.config.DiskSize))
+		if !matched {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid disk size."))
+		} else {
+			// Okay, it's valid -- if it doesn't alreay have a suffix, then
+			// append "M" as the default unit.
+			re = regexp.MustCompile(`^[\d]+$`)
+			matched = re.MatchString(strings.ToLower(b.config.DiskSize))
+			if matched {
+				// Needs M added.
+				b.config.DiskSize = fmt.Sprintf("%sM", b.config.DiskSize)
+			}
+		}
 	}
 
 	if b.config.DiskCache == "" {
@@ -457,7 +477,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.ISOSkipCache {
 		b.config.ISOChecksumType = "none"
 	}
-
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)

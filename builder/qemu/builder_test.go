@@ -157,34 +157,38 @@ func TestBuilderPrepare_DiskCompaction(t *testing.T) {
 }
 
 func TestBuilderPrepare_DiskSize(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	delete(config, "disk_size")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("bad err: %s", err)
+	type testcase struct {
+		InputSize   string
+		OutputSize  string
+		ErrExpected bool
 	}
 
-	if b.config.DiskSize != "40960M" {
-		t.Fatalf("bad size: %s", b.config.DiskSize)
+	testCases := []testcase{
+		testcase{"", "40960M", false},       // not provided
+		testcase{"12345", "12345M", false},  // no unit given, defaults to M
+		testcase{"12345x", "12345x", true},  // invalid unit
+		testcase{"12345T", "12345T", false}, // terabytes
+		testcase{"12345b", "12345b", false}, // bytes get preserved when set.
+		testcase{"60000M", "60000M", false}, // Original test case
 	}
+	for _, tc := range testCases {
+		// Set input disk size
+		var b Builder
+		config := testConfig()
+		delete(config, "disk_size")
+		config["disk_size"] = tc.InputSize
 
-	config["disk_size"] = "60000M"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if (err == nil) == tc.ErrExpected {
+			t.Fatalf("bad: error when providing disk size %s; Err expected: %t; err recieved: %v", tc.InputSize, tc.ErrExpected, err)
+		}
 
-	if b.config.DiskSize != "60000M" {
-		t.Fatalf("bad size: %s", b.config.DiskSize)
+		if b.config.DiskSize != tc.OutputSize {
+			t.Fatalf("bad size: received: %s but expected %s", b.config.DiskSize, tc.OutputSize)
+		}
 	}
 }
 
