@@ -149,10 +149,11 @@ type Config struct {
 	// one of the other listed interfaces. Using the `scsi` interface under
 	// these circumstances will cause the build to fail.
 	DiskInterface string `mapstructure:"disk_interface" required:"false"`
-	// The size in bytes, suffixes of the first letter of common byte types
-	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
-	// Will create the of the hard disk of the VM. By default, this is
-	// `40960M` (40 GB).
+	// The size in bytes of the hard disk of the VM. Suffix with the first
+	// letter of common byte types. Use "k" or "K" for kilobytes, "M" for
+	// megabytes, G for gigabytes, and T for terabytes. If no value is provided
+	// for disk_size, Packer uses a default of `40960M` (40 GB). If a disk_size
+	// number is provided with no units, Packer will default to Megabytes.
 	DiskSize string `mapstructure:"disk_size" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
