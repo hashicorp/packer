@@ -9,7 +9,8 @@
 
 package openapi
 
+// NetworkPostIp struct for NetworkPostIp
 type NetworkPostIp struct {
-	Address string `json:"address,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Address string            `json:"address,omitempty"`
+	Tag     map[string]string `json:"tag,omitempty"`
 }

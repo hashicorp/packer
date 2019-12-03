@@ -62,7 +62,7 @@ type Config struct {
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	// Key/value pair tags to
 	// add to the created image.
-	ImageTags map[string]interface{} `mapstructure:"image_tags" required:"false"`
+	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
@@ -71,7 +71,7 @@ type Config struct {
 	VmName string `mapstructure:"vm_name" required:"false"`
 	// Key/value pair tags to
 	// add to the created server.
-	VmTags map[string]interface{} `mapstructure:"vm_tags" required:"false"`
+	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
 	// The name of the created disk.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// The type of the created disk. Defaults to ssd.

@@ -9,7 +9,8 @@
 
 package openapi
 
+// ProjectLimitDisk struct for ProjectLimitDisk
 type ProjectLimitDisk struct {
 	Count float32 `json:"count"`
-	Size float32 `json:"size"`
+	Size  float32 `json:"size"`
 }

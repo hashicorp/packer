@@ -9,6 +9,7 @@
 
 package openapi
 
+// OrganisationActionTransferAccept struct for OrganisationActionTransferAccept
 type OrganisationActionTransferAccept struct {
 	Payment string `json:"payment"`
 	Project string `json:"project"`

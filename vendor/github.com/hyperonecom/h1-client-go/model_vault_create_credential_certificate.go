@@ -10,7 +10,7 @@
 package openapi
 
 type VaultCreateCredentialCertificate struct {
-	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"`
-	Value string `json:"value,omitempty"`
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }

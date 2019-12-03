@@ -9,6 +9,7 @@
 
 package openapi
 
+// ProjectUpdate struct for ProjectUpdate
 type ProjectUpdate struct {
 	Name string `json:"name,omitempty"`
 }

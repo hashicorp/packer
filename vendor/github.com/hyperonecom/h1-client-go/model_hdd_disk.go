@@ -9,11 +9,12 @@
 
 package openapi
 
+// HddDisk struct for HddDisk
 type HddDisk struct {
-	Id string `json:"_id,omitempty"`
-	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"`
-	Size float32 `json:"size,omitempty"`
-	Processing bool `json:"processing,omitempty"`
-	Persistent bool `json:"persistent,omitempty"`
+	Id         string  `json:"id,omitempty"`
+	Name       string  `json:"name,omitempty"`
+	Type       string  `json:"type,omitempty"`
+	Size       float32 `json:"size,omitempty"`
+	Processing bool    `json:"processing,omitempty"`
+	Persistent bool    `json:"persistent,omitempty"`
 }

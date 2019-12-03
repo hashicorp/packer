@@ -9,6 +9,7 @@
 
 package openapi
 
+// ReservationActionAssign struct for ReservationActionAssign
 type ReservationActionAssign struct {
 	Resource string `json:"resource,omitempty"`
 }

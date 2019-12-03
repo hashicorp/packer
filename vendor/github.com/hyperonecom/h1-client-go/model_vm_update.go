@@ -9,7 +9,8 @@
 
 package openapi
 
+// VmUpdate struct for VmUpdate
 type VmUpdate struct {
 	UserMetadata string `json:"userMetadata,omitempty"`
-	Name string `json:"name,omitempty"`
+	Name         string `json:"name,omitempty"`
 }
