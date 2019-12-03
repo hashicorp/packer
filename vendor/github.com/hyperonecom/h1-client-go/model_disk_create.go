@@ -9,11 +9,13 @@
 
 package openapi
 
+// DiskCreate struct for DiskCreate
 type DiskCreate struct {
-	Service string `json:"service"`
-	Name string `json:"name,omitempty"`
-	Size float32 `json:"size,omitempty"`
-	Cloud string `json:"cloud,omitempty"`
-	Metadata DiskMetadata `json:"metadata,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Service  string            `json:"service"`
+	Name     string            `json:"name,omitempty"`
+	Size     float32           `json:"size,omitempty"`
+	Cloud    string            `json:"cloud,omitempty"`
+	Metadata DiskMetadata      `json:"metadata,omitempty"`
+	Source   string            `json:"source,omitempty"`
+	Tag      map[string]string `json:"tag,omitempty"`
 }

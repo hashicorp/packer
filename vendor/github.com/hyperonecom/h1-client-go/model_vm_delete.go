@@ -9,6 +9,7 @@
 
 package openapi
 
+// VmDelete struct for VmDelete
 type VmDelete struct {
 	RemoveDisks []string `json:"removeDisks,omitempty"`
 }

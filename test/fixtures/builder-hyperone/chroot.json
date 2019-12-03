@@ -21,7 +21,10 @@
             "apt-get install debootstrap",
             "debootstrap --arch amd64 bionic {{.MountPath}}"
         ],
-        "image_name": "packerbats-chroot-{{timestamp}}"
+        "image_name": "packerbats-chroot-{{timestamp}}",
+        "image_tags": {
+			"key2":"value2"
+		}
     }],
     "provisioners": []
 }

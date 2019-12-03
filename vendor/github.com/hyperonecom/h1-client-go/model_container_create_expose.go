@@ -10,6 +10,7 @@
 package openapi
 
 type ContainerCreateExpose struct {
-	Port float32 `json:"port,omitempty"`
-	Host string `json:"host,omitempty"`
+	Internal string `json:"internal"`
+	External string `json:"external"`
+	Protocol string `json:"protocol"`
 }

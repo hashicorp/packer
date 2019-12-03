@@ -9,6 +9,7 @@
 
 package openapi
 
+// VaultPatchCredentialcertificateId struct for VaultPatchCredentialcertificateId
 type VaultPatchCredentialcertificateId struct {
 	Name string `json:"name,omitempty"`
 }

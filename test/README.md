@@ -7,8 +7,8 @@ results are expected.
 Tests are run using [Bats](https://github.com/sstephenson/bats), and therefore
 Bash is required to run any tests.
 
-**Warning:** Many of these tests run using AWS, and therefore have a
-real-world cost associated with running the tests. Be aware of that prior
+**Warning:** Many of these tests run using cloud infrastructure, and therefore have
+a real-world cost associated with running the tests. Be aware of that prior
 to running the tests. Additionally, many tests will leave left-over artifacts
 (AMIs) that you'll have to manually clean up.
 

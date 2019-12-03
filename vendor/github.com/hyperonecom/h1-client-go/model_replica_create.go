@@ -9,7 +9,8 @@
 
 package openapi
 
+// ReplicaCreate struct for ReplicaCreate
 type ReplicaCreate struct {
 	Hostname string `json:"hostname"`
-	Secret string `json:"secret"`
+	Secret   string `json:"secret"`
 }

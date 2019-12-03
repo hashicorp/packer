@@ -8,28 +8,30 @@
  */
 
 package openapi
+
 import (
 	"time"
 )
 
+// Image struct for Image
 type Image struct {
-	Id string `json:"_id,omitempty"`
-	Name string `json:"name,omitempty"`
-	Services []ProjectServices `json:"services,omitempty"`
-	Flavour string `json:"flavour,omitempty"`
-	ModifiedOn time.Time `json:"modifiedOn,omitempty"`
-	ModifiedBy string `json:"modifiedBy,omitempty"`
-	CreatedBy string `json:"createdBy,omitempty"`
-	CreatedOn time.Time `json:"createdOn,omitempty"`
-	AccessRights []string `json:"accessRights,omitempty"`
-	Processing bool `json:"processing,omitempty"`
-	Created bool `json:"created,omitempty"`
-	Queue []Event `json:"queue,omitempty"`
-	State string `json:"state,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
-	Project string `json:"project,omitempty"`
-	Disks []ImageDisks `json:"disks,omitempty"`
-	FileSize float32 `json:"fileSize,omitempty"`
-	Vm ImageVm `json:"vm,omitempty"`
-	Description string `json:"description,omitempty"`
+	Id           string            `json:"id,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Services     []ProjectServices `json:"services,omitempty"`
+	Flavour      string            `json:"flavour,omitempty"`
+	ModifiedOn   time.Time         `json:"modifiedOn,omitempty"`
+	ModifiedBy   string            `json:"modifiedBy,omitempty"`
+	CreatedBy    string            `json:"createdBy,omitempty"`
+	CreatedOn    time.Time         `json:"createdOn,omitempty"`
+	AccessRights []string          `json:"accessRights,omitempty"`
+	Processing   bool              `json:"processing,omitempty"`
+	Created      bool              `json:"created,omitempty"`
+	Queue        []Event           `json:"queue,omitempty"`
+	State        string            `json:"state,omitempty"`
+	Tag          map[string]string `json:"tag,omitempty"`
+	Project      string            `json:"project,omitempty"`
+	Disks        []ImageDisks      `json:"disks,omitempty"`
+	FileSize     float32           `json:"fileSize,omitempty"`
+	Description  string            `json:"description,omitempty"`
+	License      []string          `json:"license,omitempty"`
 }

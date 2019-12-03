@@ -1,16 +1,6 @@
-// Copyright 2016 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2016 Google LLC.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 // Package bundler supports bundling (batching) of items. Bundling amortizes an
 // action with fixed costs over multiple items. For example, if an API provides
@@ -192,7 +182,7 @@ func (b *Bundler) add(item interface{}, size int) {
 	// (We could try to call Reset on the timer instead, but that would add a lot
 	// of complexity to the code just to save one small allocation.)
 	if b.flushTimer == nil {
-		b.flushTimer = time.AfterFunc(b.DelayThreshold, b.Flush)
+		b.flushTimer = time.AfterFunc(b.DelayThreshold, b.flushWithoutWait)
 	}
 
 	// If the current bundle equals the count threshold, close it.
@@ -234,6 +224,14 @@ func (b *Bundler) AddWait(ctx context.Context, item interface{}, size int) error
 	// resulting from locking the mutex after sem.Acquire returns.
 	b.add(item, size)
 	return nil
+}
+
+// flushWithoutWait forces the current bundle to be be flushed if non-empty (but
+// doesn't wait for any bundles to actually be handled).
+func (b *Bundler) flushWithoutWait() {
+	b.mu.Lock()
+	b.startFlushLocked()
+	b.mu.Unlock()
 }
 
 // Flush invokes the handler for all remaining items in the Bundler and waits

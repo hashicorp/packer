@@ -9,6 +9,7 @@
 
 package openapi
 
+// VaultUpdate struct for VaultUpdate
 type VaultUpdate struct {
 	Name string `json:"name,omitempty"`
 }

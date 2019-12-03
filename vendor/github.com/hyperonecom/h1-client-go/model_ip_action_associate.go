@@ -9,6 +9,7 @@
 
 package openapi
 
+// IpActionAssociate struct for IpActionAssociate
 type IpActionAssociate struct {
 	Ip string `json:"ip"`
 }

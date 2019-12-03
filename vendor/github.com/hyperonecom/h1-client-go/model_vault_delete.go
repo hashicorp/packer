@@ -9,6 +9,7 @@
 
 package openapi
 
+// VaultDelete struct for VaultDelete
 type VaultDelete struct {
 	RemoveAllSnapshots bool `json:"removeAllSnapshots,omitempty"`
 }
