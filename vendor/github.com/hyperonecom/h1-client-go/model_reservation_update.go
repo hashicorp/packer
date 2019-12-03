@@ -9,6 +9,7 @@
 
 package openapi
 
+// ReservationUpdate struct for ReservationUpdate
 type ReservationUpdate struct {
 	Name string `json:"name,omitempty"`
 }

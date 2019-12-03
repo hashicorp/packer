@@ -9,6 +9,7 @@
 
 package openapi
 
+// DiskActionResize struct for DiskActionResize
 type DiskActionResize struct {
 	Size float32 `json:"size,omitempty"`
 }

@@ -15,14 +15,14 @@
     
 -   `image_description` (string) - The description of the resulting image.
     
--   `image_tags` (map[string]interface{}) - Key/value pair tags to
+-   `image_tags` (map[string]string) - Key/value pair tags to
     add to the created image.
     
 -   `image_service` (string) - The service of the resulting image.
     
 -   `vm_name` (string) - The name of the created server.
     
--   `vm_tags` (map[string]interface{}) - Key/value pair tags to
+-   `vm_tags` (map[string]string) - Key/value pair tags to
     add to the created server.
     
 -   `disk_name` (string) - The name of the created disk.

@@ -9,7 +9,9 @@
 
 package openapi
 
+// ContainerCreateRegistry struct for ContainerCreateRegistry
 type ContainerCreateRegistry struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
+	Token    string `json:"token,omitempty"`
 }

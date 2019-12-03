@@ -9,11 +9,12 @@
 
 package openapi
 
+// FirewallPostEgress struct for FirewallPostEgress
 type FirewallPostEgress struct {
-	Name string `json:"name,omitempty"`
-	Action string `json:"action,omitempty"`
-	Priority float32 `json:"priority,omitempty"`
-	Filter []string `json:"filter,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	Action   string   `json:"action,omitempty"`
+	Priority float32  `json:"priority,omitempty"`
+	Filter   []string `json:"filter,omitempty"`
 	External []string `json:"external,omitempty"`
 	Internal []string `json:"internal,omitempty"`
 }

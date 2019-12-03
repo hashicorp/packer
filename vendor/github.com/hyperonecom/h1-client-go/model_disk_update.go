@@ -9,6 +9,7 @@
 
 package openapi
 
+// DiskUpdate struct for DiskUpdate
 type DiskUpdate struct {
 	Name string `json:"name,omitempty"`
 }

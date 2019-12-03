@@ -9,6 +9,7 @@
 
 package openapi
 
+// FirewallPostAccessrights struct for FirewallPostAccessrights
 type FirewallPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

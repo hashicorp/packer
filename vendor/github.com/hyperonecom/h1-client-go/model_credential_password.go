@@ -9,11 +9,13 @@
 
 package openapi
 
+// CredentialPassword struct for CredentialPassword
 type CredentialPassword struct {
-	CreatedBy string `json:"createdBy,omitempty"`
-	CreatedOn string `json:"createdOn,omitempty"`
-	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"`
-	Id string `json:"_id,omitempty"`
-	Value string `json:"value,omitempty"`
+	CreatedBy   string `json:"createdBy,omitempty"`
+	CreatedOn   string `json:"createdOn,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Id          string `json:"id,omitempty"`
+	Fingerprint string `json:"fingerprint,omitempty"`
+	Value       string `json:"value,omitempty"`
 }

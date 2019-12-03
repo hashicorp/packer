@@ -9,6 +9,7 @@
 
 package openapi
 
+// ProjectThreshold struct for ProjectThreshold
 type ProjectThreshold struct {
 	Credits ProjectThresholdCredits `json:"credits,omitempty"`
 }
