@@ -1,15 +1,24 @@
 ## 1.5.0 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Add no_ephemeral template option to remove ephemeral drives
+    from launch mappings. [GH-8393]
 * builder/amazon: Add validation for `subnet_id` when specifying `vpc_id`
     [GH-8360] [GH-8387] [GH-8391]
+* builder/amazon: allow enabling ena/sr-iov on ebssurrogate spot instances
+    [GH-8397]
 * builder/amazon: Retry runinstances aws api call to mitigate throttling
     [GH-8342]
 * builder/qemu: Add display template option for qemu. [GH-7676]
 * builder/qemu: When a user adds a new drive in qemuargs, process it to make
     sure that necessary settings are applied to that drive. [GH-8380]
+* builder/vmware: Fix error message when ovftool is missing [GH-8371]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
     [GH-8354] [GH-8361] [GH-8363] [GH-8370]
+* post-processor/shell-local: Add "valid_exit_codes" option to shell-local.
+    [GH-8401]
+* provisioner/shell-local: Add "valid_exit_codes" option to shell-local.
+    [GH-8401]
 * provisioner/shell: Add support for the `env_var_format` parameter [GH-8319]
 
 ### BUG FIXES:
@@ -24,8 +33,11 @@
     [GH-8375]
 * core: Fix bug where Packer froze if asked to log an extremely long line
     [GH-8356]
+* core: Fix iso_target_path option; don't cache when target path is non-nil
+    [GH-8394]
 * core: Update to newest version of go-tty to re-enable CTRL-S and CTRL-Q usage
     [GH-8364]
+
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: Complete deprecation of clean_ami_name template func
