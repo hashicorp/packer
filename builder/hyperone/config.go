@@ -293,7 +293,7 @@ type cliConfig struct {
 	Profile struct {
 		APIKey  string `json:"apiKey"`
 		Project struct {
-			ID string `json:"_id"`
+			ID string `json:"id"`
 		} `json:"project"`
 	} `json:"profile"`
 }
