@@ -20,7 +20,7 @@ import (
 type StepSnapshotVolumes struct {
 	LaunchDevices   []*ec2.BlockDeviceMapping
 	snapshotIds     map[string]string
-	snapshotMutex   sync.RWMutex
+	snapshotMutex   sync.Mutex
 	SnapshotOmitMap map[string]bool
 }
 
@@ -64,7 +64,6 @@ func (s *StepSnapshotVolumes) Run(ctx context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 
 	s.snapshotIds = map[string]string{}
-	s.snapshotMutex = sync.RWMutex{}
 
 	var wg sync.WaitGroup
 	var errs *multierror.Error
@@ -108,7 +107,7 @@ func (s *StepSnapshotVolumes) Cleanup(state multistep.StateBag) {
 		ec2conn := state.Get("ec2").(*ec2.EC2)
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshots since we cancelled or halted...")
-		s.snapshotMutex.RLock() // read lock
+		s.snapshotMutex.Lock()
 		for _, snapshotId := range s.snapshotIds {
 			_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotId: &snapshotId})
 			if err != nil {
