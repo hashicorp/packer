@@ -9,6 +9,7 @@
 
 package openapi
 
+// NetgwCreatePublic struct for NetgwCreatePublic
 type NetgwCreatePublic struct {
 	Ip string `json:"ip"`
 }

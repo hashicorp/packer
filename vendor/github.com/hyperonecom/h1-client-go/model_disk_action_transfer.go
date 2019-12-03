@@ -9,6 +9,7 @@
 
 package openapi
 
+// DiskActionTransfer struct for DiskActionTransfer
 type DiskActionTransfer struct {
 	Project string `json:"project"`
 }

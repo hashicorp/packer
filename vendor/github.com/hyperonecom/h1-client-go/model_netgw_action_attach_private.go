@@ -9,6 +9,7 @@
 
 package openapi
 
+// NetgwActionAttachPrivate struct for NetgwActionAttachPrivate
 type NetgwActionAttachPrivate struct {
 	Network string `json:"network"`
 }

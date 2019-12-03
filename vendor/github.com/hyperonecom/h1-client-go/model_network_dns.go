@@ -9,6 +9,7 @@
 
 package openapi
 
+// NetworkDns struct for NetworkDns
 type NetworkDns struct {
 	Nameservers []string `json:"nameservers,omitempty"`
 }

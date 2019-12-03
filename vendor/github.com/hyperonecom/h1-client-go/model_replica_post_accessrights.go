@@ -9,6 +9,7 @@
 
 package openapi
 
+// ReplicaPostAccessrights struct for ReplicaPostAccessrights
 type ReplicaPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

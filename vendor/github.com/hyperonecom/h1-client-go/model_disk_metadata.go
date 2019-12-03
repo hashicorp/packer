@@ -9,6 +9,7 @@
 
 package openapi
 
+// DiskMetadata struct for DiskMetadata
 type DiskMetadata struct {
 	Source DiskMetadataSource `json:"source,omitempty"`
 }

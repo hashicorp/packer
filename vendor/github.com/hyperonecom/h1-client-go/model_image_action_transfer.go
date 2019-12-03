@@ -9,6 +9,7 @@
 
 package openapi
 
+// ImageActionTransfer struct for ImageActionTransfer
 type ImageActionTransfer struct {
 	Project string `json:"project"`
 }

@@ -9,9 +9,10 @@
 
 package openapi
 
+// OrganisationBillingAddress struct for OrganisationBillingAddress
 type OrganisationBillingAddress struct {
-	Street string `json:"street"`
+	Street  string `json:"street"`
 	Zipcode string `json:"zipcode"`
-	City string `json:"city"`
+	City    string `json:"city"`
 	Country string `json:"country"`
 }

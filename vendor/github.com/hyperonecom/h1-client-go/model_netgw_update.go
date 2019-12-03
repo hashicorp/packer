@@ -9,6 +9,7 @@
 
 package openapi
 
+// NetgwUpdate struct for NetgwUpdate
 type NetgwUpdate struct {
 	Name string `json:"name,omitempty"`
 }

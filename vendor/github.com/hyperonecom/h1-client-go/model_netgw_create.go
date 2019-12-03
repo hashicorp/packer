@@ -9,8 +9,9 @@
 
 package openapi
 
+// NetgwCreate struct for NetgwCreate
 type NetgwCreate struct {
-	Name string `json:"name,omitempty"`
+	Name   string            `json:"name,omitempty"`
 	Public NetgwCreatePublic `json:"public,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Tag    map[string]string `json:"tag,omitempty"`
 }
