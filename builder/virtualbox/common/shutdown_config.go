@@ -27,6 +27,8 @@ type ShutdownConfig struct {
 	// Error removing floppy controller, you might need to set this to 5m
 	// or so. By default, the delay is 0s or disabled.
 	PostShutdownDelay time.Duration `mapstructure:"post_shutdown_delay" required:"false"`
+
+	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
 }
 
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
