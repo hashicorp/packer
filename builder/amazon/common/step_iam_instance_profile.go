@@ -3,11 +3,11 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
 	"log"
-	"time"
 
 	"encoding/json"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -138,8 +138,6 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 
 		s.roleIsAttached = true
 		state.Put("iamInstanceProfile", aws.StringValue(profileResp.InstanceProfile.InstanceProfileName))
-
-		time.Sleep(5 * time.Second)
 	}
 
 	return multistep.ActionContinue
