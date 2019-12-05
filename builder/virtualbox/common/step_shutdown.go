@@ -30,8 +30,6 @@ type StepShutdown struct {
 }
 
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	// return multistep.ActionContinue
-
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
