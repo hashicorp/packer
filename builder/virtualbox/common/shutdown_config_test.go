@@ -64,3 +64,27 @@ func TestShutdownConfigPrepare_PostShutdownDelay(t *testing.T) {
 		t.Fatalf("bad: %s", c.PostShutdownDelay)
 	}
 }
+
+func TestShutdownConfigPrepare_DisableShutdown(t *testing.T) {
+	var c *ShutdownConfig
+	var errs []error
+
+	// Test with default value
+	c = testShutdownConfig()
+	c.DisableShutdown = false
+	errs = c.Prepare(interpolate.NewContext())
+	if len(errs) > 0 {
+		t.Fatalf("err: %#v", errs)
+	}
+
+	// Test with a good one
+	c = testShutdownConfig()
+	c.DisableShutdown = true
+	errs = c.Prepare(interpolate.NewContext())
+	if len(errs) > 0 {
+		t.Fatalf("err: %#v", errs)
+	}
+	if !c.DisableShutdown {
+		t.Fatalf("bad: %t", c.DisableShutdown)
+	}
+}
