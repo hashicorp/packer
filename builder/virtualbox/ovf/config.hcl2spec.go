@@ -79,6 +79,7 @@ type FlatConfig struct {
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	PostShutdownDelay         *string           `mapstructure:"post_shutdown_delay" required:"false" cty:"post_shutdown_delay"`
+	DisableShutdown           *bool             `mapstructure:"disable_shutdown" required:"false" cty:"disable_shutdown"`
 	VBoxManage                [][]string        `mapstructure:"vboxmanage" required:"false" cty:"vboxmanage"`
 	VBoxManagePost            [][]string        `mapstructure:"vboxmanage_post" required:"false" cty:"vboxmanage_post"`
 	VBoxVersionFile           *string           `mapstructure:"virtualbox_version_file" required:"false" cty:"virtualbox_version_file"`
@@ -177,6 +178,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shutdown_command":             &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"post_shutdown_delay":          &hcldec.AttrSpec{Name: "post_shutdown_delay", Type: cty.String, Required: false},
+		"disable_shutdown":             &hcldec.AttrSpec{Name: "disable_shutdown", Type: cty.Bool, Required: false},
 		"vboxmanage":                   &hcldec.BlockListSpec{TypeName: "vboxmanage", Nested: &hcldec.AttrSpec{Name: "vboxmanage", Type: cty.List(cty.String), Required: false}},
 		"vboxmanage_post":              &hcldec.BlockListSpec{TypeName: "vboxmanage_post", Nested: &hcldec.AttrSpec{Name: "vboxmanage_post", Type: cty.List(cty.String), Required: false}},
 		"virtualbox_version_file":      &hcldec.AttrSpec{Name: "virtualbox_version_file", Type: cty.String, Required: false},

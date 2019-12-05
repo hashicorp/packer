@@ -239,6 +239,13 @@ builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     `5m` or five minutes.
 
+-   `disable_shutdown` (boolean) - Packer normally halts the virtual machine after all provisioners have
+    run when no `shutdown_command` is defined.  If this is set to `true`, Packer
+    *will not* halt the virtual machine but will assume that you will send the stop
+    signal yourself through the preseed.cfg or your final provisioner.
+    Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
+    The timeout can be changed using `shutdown_timeout` option.
+
 -   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
     not export the VM. Useful if the builder should be applied again on the created
     target snapshot.
