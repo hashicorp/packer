@@ -27,6 +27,13 @@ type ShutdownConfig struct {
 	// Error removing floppy controller, you might need to set this to 5m
 	// or so. By default, the delay is 0s or disabled.
 	PostShutdownDelay time.Duration `mapstructure:"post_shutdown_delay" required:"false"`
+	// Packer normally halts the virtual machine after all provisioners have
+	// run when no `shutdown_command` is defined.  If this is set to `true`, Packer
+	// *will not* halt the virtual machine but will assume that you will send the stop
+	// signal yourself through the preseed.cfg or your final provisioner.
+	// Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
+	// The timeout can be changed using `shutdown_timeout` option.
+	DisableShutdown bool `mapstructure:"disable_shutdown" required:"false"`
 }
 
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {

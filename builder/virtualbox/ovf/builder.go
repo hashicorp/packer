@@ -139,9 +139,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm: &b.config.SSHConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
-			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
-			Delay:   b.config.PostShutdownDelay,
+			Command:         b.config.ShutdownCommand,
+			Timeout:         b.config.ShutdownTimeout,
+			Delay:           b.config.PostShutdownDelay,
+			DisableShutdown: b.config.DisableShutdown,
 		},
 		&vboxcommon.StepRemoveDevices{
 			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
