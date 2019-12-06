@@ -10,19 +10,6 @@ import (
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{}
-}
-
-func testPP(t *testing.T) *PostProcessor {
-	var p PostProcessor
-	if err := p.Configure(testConfig()); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	return &p
-}
-
 func testUi() *packer.BasicUi {
 	return &packer.BasicUi{
 		Reader: new(bytes.Buffer),
