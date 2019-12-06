@@ -1,3 +1,0 @@
-error while printing array
-received a string
-  string
