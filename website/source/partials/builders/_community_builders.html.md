@@ -1,6 +1,6 @@
 ### Community Builders
 
-- [ARM builder](https://github.com/solo-io/packer-builder-arm-image) - A builder
+- [ARM builder](https://github.com/mkaczanowski/packer-builder-arm) - A builder
   for creating ARM images
 
 - [vSphere builder](https://github.com/jetbrains-infra/packer-builder-vsphere) -
