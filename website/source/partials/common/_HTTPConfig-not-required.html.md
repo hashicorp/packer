@@ -15,3 +15,5 @@
     are `8000` and `9000`, respectively.
     
 -   `http_port_max` (int) - HTTP Port Max
+
+-   `http_ip` (string) - HTTP IP
