@@ -110,8 +110,8 @@ func serverListener_tcp() (net.Listener, error) {
 		return nil, err
 	}
 
-	log.Printf("Plugin minimum port: %d/%d\n", minPort)
-	log.Printf("Plugin maximum port: %d/%d\n", maxPort)
+	log.Printf("Plugin minimum port: %d\n", minPort)
+	log.Printf("Plugin maximum port: %d\n", maxPort)
 
 	for port := minPort; port <= maxPort; port++ {
 		address := fmt.Sprintf("127.0.0.1:%d", port)
