@@ -208,29 +208,32 @@ func (c *config) discoverInternal() error {
 	for builder := range command.Builders {
 		_, found := (c.Builders)[builder]
 		if !found {
-			log.Printf("Using internal plugin for %s", builder)
 			(c.Builders)[builder] = fmt.Sprintf("%s%splugin%spacker-builder-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, builder)
+		} else {
+			log.Printf("Using external plugin for %s", builder)
 		}
 	}
 
 	for provisioner := range command.Provisioners {
 		_, found := (c.Provisioners)[provisioner]
 		if !found {
-			log.Printf("Using internal plugin for %s", provisioner)
 			(c.Provisioners)[provisioner] = fmt.Sprintf(
 				"%s%splugin%spacker-provisioner-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+		} else {
+			log.Printf("Using external plugin for %s", provisioner)
 		}
 	}
 
 	for postProcessor := range command.PostProcessors {
 		_, found := (c.PostProcessors)[postProcessor]
 		if !found {
-			log.Printf("Using internal plugin for %s", postProcessor)
 			(c.PostProcessors)[postProcessor] = fmt.Sprintf(
 				"%s%splugin%spacker-post-processor-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+		} else {
+			log.Printf("Using external plugin for %s", postProcessor)
 		}
 	}
 
