@@ -1,0 +1,9 @@
+.idea/
+packer-builder-vsphere*
+build/
+bin/
+.env
+test*.json
+crash.log
+packer_cache/
+vendor/
