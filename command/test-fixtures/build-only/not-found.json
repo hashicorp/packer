@@ -16,31 +16,6 @@
     "post-processors": [
         [
             {
-                "name": "apple",
-                "type": "shell-local",
-                "inline": [
-                    "echo apple > apple.txt"
-                ]
-            },
-            {
-                "name": "peach",
-                "type": "shell-local",
-                "inline": [
-                    "echo peach > peach.txt"
-                ]
-            }
-        ],
-        [
-            {
-                "name": "pear",
-                "type": "shell-local",
-                "inline": [
-                    "echo pear > pear.txt"
-                ]
-            }
-        ],
-        [
-            {
                 "only": [
                     "vanilla"
                 ],
