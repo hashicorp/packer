@@ -115,6 +115,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	}
 
 	// Get the builds we care about
+	var errors = struct {
+		sync.RWMutex
+		m map[string]error
+	}{m: make(map[string]error)}
 	buildNames := c.Meta.BuildNames(core)
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, n := range buildNames {
@@ -123,6 +127,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 			c.Ui.Error(fmt.Sprintf(
 				"Failed to initialize build '%s': %s",
 				n, err))
+			errors.m[n] = err
 			continue
 		}
 
@@ -200,11 +205,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		sync.RWMutex
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
-	var errors = struct {
-		sync.RWMutex
-		m map[string]error
-	}{m: make(map[string]error)}
-
 	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
