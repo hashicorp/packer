@@ -62,8 +62,6 @@ func realMain() int {
 
 		packer.LogSecretFilter.SetOutput(logWriter)
 
-		//packer.LogSecrets.
-
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
 
@@ -137,11 +135,15 @@ func wrappedMain() int {
 	packer.LogSecretFilter.SetOutput(os.Stderr)
 	log.SetOutput(&packer.LogSecretFilter)
 
+	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+	if inPlugin {
+		// This prevents double-logging timestamps
+		log.SetFlags(0)
+	}
+
 	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
-
-	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
 
 	config, err := loadConfig()
 	if err != nil {
@@ -195,7 +197,7 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot determind if process is in "+
+				fmt.Fprintf(os.Stderr, "cannot determine if process is in "+
 					"background: %s\n", err)
 			}
 			if backgrounded {
