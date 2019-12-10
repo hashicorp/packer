@@ -149,6 +149,9 @@ configuration is actually required.
     machine. If this is NOT set, then it is your responsibility via other means
     (shell provisioner, etc.) to get a validation key to where Chef expects it.
 
+-   `version` (string) - The version of Chef to be installed. By default this
+    is empty which will install the latest version of Chef.
+
 <%= partial "partials/provisioners/common-config" %>
 
 ## Chef Configuration
