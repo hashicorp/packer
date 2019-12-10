@@ -145,6 +145,8 @@ type RunConfig struct {
 	// profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
 	// to launch the EC2 instance with.
 	IamInstanceProfile string `mapstructure:"iam_instance_profile" required:"false"`
+	// Whether or not to check if the IAM instance profile exists. Defaults to false
+	SkipProfileValidation bool `mapstructure:"skip_profile_validation" required:"false"`
 	// Temporary IAM instance profile policy document
 	// If IamInstanceProfile is specified it will be used instead. Example:
 	//

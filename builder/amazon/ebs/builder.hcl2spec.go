@@ -55,6 +55,7 @@ type FlatConfig struct {
 	EbsOptimized                              *bool                                  `mapstructure:"ebs_optimized" required:"false" cty:"ebs_optimized"`
 	EnableT2Unlimited                         *bool                                  `mapstructure:"enable_t2_unlimited" required:"false" cty:"enable_t2_unlimited"`
 	IamInstanceProfile                        *string                                `mapstructure:"iam_instance_profile" required:"false" cty:"iam_instance_profile"`
+	SkipProfileValidation                     *bool                                  `mapstructure:"skip_profile_validation" required:"false" cty:"skip_profile_validation"`
 	TemporaryIamInstanceProfilePolicyDocument *common.FlatPolicyDocument             `mapstructure:"temporary_iam_instance_profile_policy_document" required:"false" cty:"temporary_iam_instance_profile_policy_document"`
 	InstanceInitiatedShutdownBehavior         *string                                `mapstructure:"shutdown_behavior" required:"false" cty:"shutdown_behavior"`
 	InstanceType                              *string                                `mapstructure:"instance_type" required:"true" cty:"instance_type"`
@@ -177,6 +178,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ebs_optimized":                 &hcldec.AttrSpec{Name: "ebs_optimized", Type: cty.Bool, Required: false},
 		"enable_t2_unlimited":           &hcldec.AttrSpec{Name: "enable_t2_unlimited", Type: cty.Bool, Required: false},
 		"iam_instance_profile":          &hcldec.AttrSpec{Name: "iam_instance_profile", Type: cty.String, Required: false},
+		"skip_profile_validation":       &hcldec.AttrSpec{Name: "skip_profile_validation", Type: cty.Bool, Required: false},
 		"temporary_iam_instance_profile_policy_document": &hcldec.BlockSpec{TypeName: "temporary_iam_instance_profile_policy_document", Nested: hcldec.ObjectSpec((*common.FlatPolicyDocument)(nil).HCL2Spec())},
 		"shutdown_behavior":                     &hcldec.AttrSpec{Name: "shutdown_behavior", Type: cty.String, Required: false},
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},

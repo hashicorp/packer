@@ -16,6 +16,7 @@ import (
 
 type StepIamInstanceProfile struct {
 	IamInstanceProfile                        string
+	SkipProfileValidation                     bool
 	TemporaryIamInstanceProfilePolicyDocument *PolicyDocument
 	createdInstanceProfileName                string
 	createdRoleName                           string
@@ -30,16 +31,18 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 	state.Put("iamInstanceProfile", "")
 
 	if len(s.IamInstanceProfile) > 0 {
-		_, err := iamsvc.GetInstanceProfile(
-			&iam.GetInstanceProfileInput{
-				InstanceProfileName: aws.String(s.IamInstanceProfile),
-			},
-		)
-		if err != nil {
-			err := fmt.Errorf("Couldn't find specified instance profile: %s", err)
-			log.Printf("[DEBUG] %s", err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
+		if !s.SkipProfileValidation {
+			_, err := iamsvc.GetInstanceProfile(
+				&iam.GetInstanceProfileInput{
+					InstanceProfileName: aws.String(s.IamInstanceProfile),
+				},
+			)
+			if err != nil {
+				err := fmt.Errorf("Couldn't find specified instance profile: %s", err)
+				log.Printf("[DEBUG] %s", err.Error())
+				state.Put("error", err)
+				return multistep.ActionHalt
+			}
 		}
 		log.Printf("Using specified instance profile: %v", s.IamInstanceProfile)
 		state.Put("iamInstanceProfile", s.IamInstanceProfile)
