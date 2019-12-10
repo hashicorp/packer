@@ -166,6 +166,30 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 }
 
+func TestBuildExceptNonExistingBuilder(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		"-parallel=false",
+		`-except=`,
+		filepath.Join(testFixture("build-only"), "not-found.json"),
+	}
+
+	defer cleanup()
+
+	if code := c.Run(args); code != 1 {
+		t.Errorf("Expected to find exit code 1, found %d", code)
+	}
+	if !fileExists("chocolate.txt") {
+		t.Errorf("Expected to find chocolate.txt")
+	}
+	if fileExists("vanilla.txt") {
+		t.Errorf("NOT expected to find vanilla.tx")
+	}
+}
+
 // fileExists returns true if the filename is found
 func fileExists(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
@@ -181,6 +205,9 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 		Builder: func(n string) (packer.Builder, error) {
 			if n == "file" {
 				return &file.Builder{}, nil
+			}
+			if n == "non-existing" {
+				return nil, fmt.Errorf("builder type not found")
 			}
 			return &null.Builder{}, nil
 		},
