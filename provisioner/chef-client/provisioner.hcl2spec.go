@@ -43,6 +43,7 @@ type FlatConfig struct {
 	StagingDir                 *string                `mapstructure:"staging_directory" cty:"staging_directory"`
 	ValidationClientName       *string                `mapstructure:"validation_client_name" cty:"validation_client_name"`
 	ValidationKeyPath          *string                `mapstructure:"validation_key_path" cty:"validation_key_path"`
+	Version                    *string                `mapstructure:"version" cty:"version"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -88,6 +89,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"staging_directory":              &hcldec.AttrSpec{Name: "staging_directory", Type: cty.String, Required: false},
 		"validation_client_name":         &hcldec.AttrSpec{Name: "validation_client_name", Type: cty.String, Required: false},
 		"validation_key_path":            &hcldec.AttrSpec{Name: "validation_key_path", Type: cty.String, Required: false},
+		"version":                        &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},
 	}
 	return s
 }
