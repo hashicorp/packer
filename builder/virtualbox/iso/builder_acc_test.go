@@ -8,10 +8,8 @@ import (
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 )
 
-const fixturesDir = "./test-fixtures"
-
 func TestBuilderAcc_basic(t *testing.T) {
-	templatePath := filepath.Join(fixturesDir, "minimal.json")
+	templatePath := filepath.Join("testdata", "minimal.json")
 	bytes, err := ioutil.ReadFile(templatePath)
 	if err != nil {
 		t.Fatalf("failed to load template file %s", templatePath)

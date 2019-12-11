@@ -12,7 +12,7 @@
           "ssh_username": "vagrant",
           "ssh_wait_timeout": "10000s",
 
-          "http_directory": "./test-fixtures/http",
+          "http_directory": "./testdata/http",
           "boot_wait": "10s",
           "boot_command": [
             "<esc><wait>",
