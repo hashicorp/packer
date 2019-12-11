@@ -48,6 +48,8 @@ func PlaceholderData() map[string]string {
 		placeholderData[name] = fmt.Sprintf("{{.%s}}", name)
 	}
 
+	placeholderData["ID"] = "{{.ID}}"
+
 	return placeholderData
 }
 
@@ -58,6 +60,7 @@ type StepProvision struct {
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := map[string]interface{}{}
 	// Read communicator data into hook data
+	// state.GetOK("id")
 	commConf, ok := state.GetOk("communicator_config")
 	if !ok {
 		log.Printf("Unable to load config from state to populate provisionHookData")
@@ -94,7 +97,6 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 	ui := state.Get("ui").(packer.Ui)
 
 	hookData := PopulateProvisionHookData(state)
-	log.Printf("Megan hookdata is %T", hookData)
 
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...

@@ -43,6 +43,7 @@ var FuncGens = map[string]interface{}{
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
+	"generated":      funcGenGenerated,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -159,6 +160,13 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 		}
 
 		return path, nil
+	}
+}
+
+func funcGenGenerated(ctx *Context) interface{} {
+	return func(k string) (string, error) {
+		// Return the key inside braces _without_ the generated func attached
+		return fmt.Sprintf("{{.%s}}", k), nil
 	}
 }
 
