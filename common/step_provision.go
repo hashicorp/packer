@@ -53,10 +53,6 @@ func PlaceholderData() map[string]string {
 	return placeholderData
 }
 
-type StepProvision struct {
-	Comm packer.Communicator
-}
-
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := map[string]interface{}{}
 	// Read communicator data into hook data
@@ -76,11 +72,22 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	}
 	// Loop over all field values and retrieve them from the ssh config
 	for fieldName, _ := range pd {
+		if fieldName == "ID" {
+			continue
+		}
 		fVal := v.FieldByName(fieldName)
-		hookData[fieldName] = fVal.Interface()
+		if fVal.IsZero() {
+			log.Printf("Megan NONINTERFACABLE fVal is %#v", fVal)
+		} else {
+			hookData[fieldName] = fVal.Interface()
+		}
 	}
 
 	return hookData
+}
+
+type StepProvision struct {
+	Comm packer.Communicator
 }
 
 func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBag, hooktype string) multistep.StepAction {

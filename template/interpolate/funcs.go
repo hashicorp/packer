@@ -3,6 +3,7 @@ package interpolate
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -164,9 +165,21 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 }
 
 func funcGenGenerated(ctx *Context) interface{} {
-	return func(k string) (string, error) {
-		// Return the key inside braces _without_ the generated func attached
-		return fmt.Sprintf("{{.%s}}", k), nil
+	return func(s string) (string, error) {
+		log.Printf("Megan context data is %#v", ctx.Data)
+		if data, ok := ctx.Data.(map[string]string); ok {
+			// PlaceholderData has been passed into generator, and we can check
+			// the value against the placeholder data to make sure that it is
+			// valid
+			if heldPlace, ok := data[s]; ok {
+				return heldPlace, nil
+			} else {
+				return "", fmt.Errorf("loaded data, but couldnt find winrm in it", s)
+			}
+		}
+
+		return "", fmt.Errorf("Error validating computed variable: the given "+
+			"variable %s will not be passed into your plugin.", s)
 	}
 }
 
