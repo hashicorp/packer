@@ -1,7 +1,6 @@
 ### Community Builders
 
-- [ARM builder]() - A builder
-  for creating ARM images
+- ARM builders
   * [packer-builder-arm-image](https://github.com/solo-io/packer-builder-arm-image) - simple builder lets you extend on existing system images.
   * [packer-builder-arm](https://github.com/mkaczanowski/packer-builder-arm) - flexible builder lets you extend or build images from scratch with variety of options (ie. custom partition table).
 
