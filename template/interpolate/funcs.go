@@ -3,7 +3,6 @@ package interpolate
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -166,7 +165,6 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 
 func funcGenGenerated(ctx *Context) interface{} {
 	return func(s string) (string, error) {
-		log.Printf("Megan context data is %#v", ctx.Data)
 		if data, ok := ctx.Data.(map[string]string); ok {
 			// PlaceholderData has been passed into generator, and we can check
 			// the value against the placeholder data to make sure that it is

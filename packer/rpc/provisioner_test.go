@@ -39,7 +39,7 @@ func TestProvisionerRPC(t *testing.T) {
 	// Test Provision
 	ui := &testUi{}
 	comm := &packer.MockCommunicator{}
-	if err := pClient.Provision(topCtx, ui, comm, make(map[interface{}]interface{})); err == nil {
+	if err := pClient.Provision(topCtx, ui, comm, make(map[string]interface{})); err == nil {
 		t.Fatalf("Provison should have err")
 	}
 	if !p.ProvCalled {

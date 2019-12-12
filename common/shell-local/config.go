@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/shell"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -44,13 +45,14 @@ type Config struct {
 	// used to track the data sent to shell-local from the builder
 	// GeneratedData
 
-	ctx interpolate.Context
+	ctx           interpolate.Context
+	generatedData map[string]interface{}
 }
 
 func Decode(config *Config, raws ...interface{}) error {
 	// Create passthrough for build-generated data so we can fill it in once we know
 	// it
-	// config.ctx.Data = common.PlaceholderData()
+	config.ctx.Data = common.PlaceholderData()
 
 	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
 		Interpolate:        true,

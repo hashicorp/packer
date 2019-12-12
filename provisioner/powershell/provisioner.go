@@ -220,26 +220,20 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
 	p.generatedData = make(map[string]interface{})
-	// test that generatedData is a map, not an empty interface.
-	dataMap, ok := generatedData.(map[interface{}]interface{})
-	if ok {
-		for key, val := range dataMap {
-			keyString, ok := key.(string)
-			if ok {
-				p.generatedData[keyString] = val
-			} else {
-				log.Printf("Error casting generated data key to a string.")
-			}
-		}
+
+	if generatedData != nil {
+		log.Printf("Gen data isn't nil.")
+		p.generatedData = generatedData
 		if winRMPass, ok := p.generatedData["WinRMPassword"]; ok {
+			log.Printf("Found winrm pass")
 			packer.LogSecretFilter.Set(winRMPass.(string))
 		}
 	} else {
-		log.Printf("error reading generated data from builder")
+		log.Printf("generatedData passed to Provision method is nil!")
 	}
 
 	scripts := make([]string, len(p.config.Scripts))
@@ -445,7 +439,6 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	if err != nil {
 		return "", err
 	}
-
 	ctxData := p.generatedData
 	ctxData["Path"] = p.config.RemotePath
 	ctxData["Vars"] = p.config.RemoteEnvVarPath
@@ -475,7 +468,6 @@ func (p *Provisioner) ElevatedUser() string {
 func (p *Provisioner) ElevatedPassword() string {
 	// Replace ElevatedPassword for winrm users who used this feature
 	p.config.ctx.Data = p.generatedData
-
 	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
 
 	return elevatedPassword
