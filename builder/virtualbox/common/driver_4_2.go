@@ -165,9 +165,6 @@ func (d *VBox42Driver) Stop(name string) error {
 		return err
 	}
 
-	// We sleep here for a little bit to let the session "unlock"
-	time.Sleep(2 * time.Second)
-
 	return nil
 }
 
@@ -207,7 +204,7 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 		ShouldRetry: func(err error) bool {
 			return isLockedBySession(stderr)
 		},
-		RetryDelay: (&retry.Backoff{InitialBackoff: 1 * time.Minute, MaxBackoff: 2 * time.Minute, Multiplier: 2}).Linear,
+		RetryDelay: func() time.Duration { return 2 * time.Minute },
 	}.Run(ctx, func(ctx context.Context) error {
 		return cmd.Run()
 	})
@@ -236,7 +233,7 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 
 func isLockedBySession(stderr bytes.Buffer) bool {
 	stderrString := strings.TrimSpace(stderr.String())
-	return strings.Contains(stderrString, "LockMachine") || strings.Contains(stderrString, "already locked by a session")
+	return strings.Contains(stderrString, "VBOX_E_INVALID_OBJECT_STATE")
 }
 
 func (d *VBox42Driver) Verify() error {
