@@ -186,7 +186,18 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
-	_, err := d.VBoxManageWithOutput(args...)
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 5,
+		ShouldRetry: func(err error) bool {
+			return isLockedBySession(err.Error())
+		},
+		RetryDelay: func() time.Duration { return 2 * time.Minute },
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := d.VBoxManageWithOutput(args...)
+		return err
+	})
+
 	return err
 }
 
@@ -197,17 +208,7 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	cmd := exec.Command(d.VBoxManagePath, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-
-	ctx := context.TODO()
-	err := retry.Config{
-		Tries: 5,
-		ShouldRetry: func(err error) bool {
-			return isLockedBySession(stderr)
-		},
-		RetryDelay: func() time.Duration { return 2 * time.Minute },
-	}.Run(ctx, func(ctx context.Context) error {
-		return cmd.Run()
-	})
+	err := cmd.Run()
 
 	stdoutString := strings.TrimSpace(stdout.String())
 	stderrString := strings.TrimSpace(stderr.String())
@@ -231,9 +232,8 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	return stdoutString, err
 }
 
-func isLockedBySession(stderr bytes.Buffer) bool {
-	stderrString := strings.TrimSpace(stderr.String())
-	return strings.Contains(stderrString, "VBOX_E_INVALID_OBJECT_STATE")
+func isLockedBySession(err string) bool {
+	return strings.Contains(err, "VBOX_E_INVALID_OBJECT_STATE")
 }
 
 func (d *VBox42Driver) Verify() error {
