@@ -200,7 +200,17 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	cmd := exec.Command(d.VBoxManagePath, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
+
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 11,
+		ShouldRetry: func(err error) bool {
+			return isSessionLocked(stderr)
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 30 * time.Second, MaxBackoff: 2 * time.Minute, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		return cmd.Run()
+	})
 
 	stdoutString := strings.TrimSpace(stdout.String())
 	stderrString := strings.TrimSpace(stderr.String())
@@ -222,6 +232,11 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	log.Printf("stderr: %s", stderrString)
 
 	return stdoutString, err
+}
+
+func isSessionLocked(stderr bytes.Buffer) bool {
+	stderrString := strings.TrimSpace(stderr.String())
+	return strings.Contains(stderrString, "VBOX_E_INVALID_OBJECT_STATE") && strings.Contains(stderrString, "LockMachine")
 }
 
 func (d *VBox42Driver) Verify() error {
