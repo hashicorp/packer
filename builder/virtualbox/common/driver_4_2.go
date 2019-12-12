@@ -203,11 +203,11 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 
 	ctx := context.TODO()
 	err := retry.Config{
-		Tries: 11,
+		Tries: 5,
 		ShouldRetry: func(err error) bool {
-			return isSessionLocked(stderr)
+			return isLockedBySession(stderr)
 		},
-		RetryDelay: (&retry.Backoff{InitialBackoff: 30 * time.Second, MaxBackoff: 2 * time.Minute, Multiplier: 2}).Linear,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 1 * time.Minute, MaxBackoff: 2 * time.Minute, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		return cmd.Run()
 	})
@@ -234,9 +234,9 @@ func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	return stdoutString, err
 }
 
-func isSessionLocked(stderr bytes.Buffer) bool {
+func isLockedBySession(stderr bytes.Buffer) bool {
 	stderrString := strings.TrimSpace(stderr.String())
-	return strings.Contains(stderrString, "VBOX_E_INVALID_OBJECT_STATE") && strings.Contains(stderrString, "LockMachine")
+	return strings.Contains(stderrString, "LockMachine") || strings.Contains(stderrString, "already locked by a session")
 }
 
 func (d *VBox42Driver) Verify() error {
