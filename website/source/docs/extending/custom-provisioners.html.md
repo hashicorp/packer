@@ -36,7 +36,7 @@ explaining what each method should do.
 ``` go
 type Provisioner interface {
   Prepare(...interface{}) error
-  Provision(Ui, Communicator) error
+  Provision(Ctx, Ui, Communicator, new(interface{})) error
 }
 ```
 

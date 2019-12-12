@@ -174,7 +174,7 @@ func funcGenGenerated(ctx *Context) interface{} {
 			if heldPlace, ok := data[s]; ok {
 				return heldPlace, nil
 			} else {
-				return "", fmt.Errorf("loaded data, but couldnt find winrm in it", s)
+				return "", fmt.Errorf("loaded data, but couldnt find %s in it", s)
 			}
 		}
 
