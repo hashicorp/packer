@@ -214,7 +214,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
 	// Interpolate env vars to check for .WinRMPassword
 	p.config.ctx.Data = &PassthroughTemplate{

@@ -20,7 +20,7 @@ type Provisioner interface {
 	// given for cancellation, a UI is given to communicate with the user, and
 	// a communicator is given that is guaranteed to be connected to some
 	// machine so that provisioning can be done.
-	Provision(context.Context, Ui, Communicator, interface{}) error
+	Provision(context.Context, Ui, Communicator, map[string]interface{}) error
 }
 
 // A HookedProvisioner represents a provisioner and information describing it
@@ -53,7 +53,26 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
-		err := p.Provisioner.Provision(ctx, ui, comm, data)
+		// Provisioners expect a map[string]interface{} in their data field, but
+		// it gets converted into a map[interface]interface on the way over the
+		// RPC. Check that data can be cast into such a form, and cast it.
+		cast := make(map[string]interface{})
+		interMap, ok := data.(map[interface{}]interface{})
+		if !ok {
+			log.Printf("Unable to read map[string]interface out of data." +
+				"Using empty interface.")
+		} else {
+			for key, val := range interMap {
+				keyString, ok := key.(string)
+				if ok {
+					cast[keyString] = val
+				} else {
+					log.Printf("Error casting generated data key to a string.")
+				}
+			}
+		}
+
+		err := p.Provisioner.Provision(ctx, ui, comm, cast)
 
 		ts.End(err)
 		if err != nil {
@@ -75,7 +94,7 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData interface{}) error {
+func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
@@ -102,7 +121,7 @@ func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData interface{}) error {
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
 	// Use a select to determine if we get cancelled during the wait
 	message := "Pausing before the next provisioner . Press enter to continue."
 

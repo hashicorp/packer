@@ -39,11 +39,11 @@ func (p *provisioner) Prepare(configs ...interface{}) (err error) {
 }
 
 type ProvisionerProvisionArgs struct {
-	GeneratedData interface{}
+	GeneratedData map[string]interface{}
 	StreamID      uint32
 }
 
-func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
+func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)
@@ -74,7 +74,6 @@ func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interfa
 
 func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *interface{}) error {
 	streamId := args.StreamID
-	generatedData := args.GeneratedData
 	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
@@ -84,8 +83,7 @@ func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *int
 	if p.context == nil {
 		p.context, p.contextCancel = context.WithCancel(context.Background())
 	}
-
-	if err := p.p.Provision(p.context, client.Ui(), client.Communicator(), generatedData); err != nil {
+	if err := p.p.Provision(p.context, client.Ui(), client.Communicator(), args.GeneratedData); err != nil {
 		return NewBasicError(err)
 	}
 

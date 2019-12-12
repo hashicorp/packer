@@ -75,10 +75,9 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		if fieldName == "ID" {
 			continue
 		}
+
 		fVal := v.FieldByName(fieldName)
-		if fVal.IsZero() {
-			log.Printf("Megan NONINTERFACABLE fVal is %#v", fVal)
-		} else {
+		if !fVal.IsZero() {
 			hookData[fieldName] = fVal.Interface()
 		}
 	}
