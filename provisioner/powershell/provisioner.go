@@ -223,18 +223,24 @@ func extractScript(p *Provisioner) (string, error) {
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
-	p.generatedData = map[string]interface{}{}
-	for key, val := range generatedData.(map[interface{}]interface{}) {
-		keyString, ok := key.(string)
-		if ok {
-			p.generatedData[keyString] = val
-		} else {
-			log.Printf("Error casting generated data key to a string.")
+	p.generatedData = make(map[string]interface{})
+	// test that generatedData is a map, not an empty interface.
+	dataMap, ok := generatedData.(map[interface{}]interface{})
+	if ok {
+		for key, val := range dataMap {
+			keyString, ok := key.(string)
+			if ok {
+				p.generatedData[keyString] = val
+			} else {
+				log.Printf("Error casting generated data key to a string.")
+			}
 		}
+		if winRMPass, ok := p.generatedData["WinRMPassword"]; ok {
+			packer.LogSecretFilter.Set(winRMPass.(string))
+		}
+	} else {
+		log.Printf("error reading generated data from builder")
 	}
-
-	winRMPass := p.generatedData["WinRMPassword"]
-	packer.LogSecretFilter.Set(winRMPass.(string))
 
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
