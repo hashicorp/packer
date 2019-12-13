@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"reflect"
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
@@ -28,27 +27,20 @@ import (
 func PlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
 
-	// use reflection to grab the communicator config field off the config
-	var sshExample communicator.SSH
-	var winrmExample communicator.WinRM
+	// The following correspond to communicator-agnostic functions that are
+	// part of the SSH and WinRM communicator implementations. These functions
+	// are not part of the communicator interface, but are stored on the
+	// Communicator Config and return the appropriate values rather than
+	// depending on the actual communicator config values. E.g "Password"
+	// reprosents either WinRMPassword or SSHPassword, which makes this more
+	// useful if a template contains multiple builds.
+	placeholderData["Host"] = "{{.Host}}"
+	placeholderData["Port"] = "{{.Port}}"
+	placeholderData["User"] = "{{.User}}"
+	placeholderData["Password"] = "{{.Password}}"
 
-	t := reflect.TypeOf(sshExample)
-	n := t.NumField()
-	for i := 0; i < n; i++ {
-		fVal := t.Field(i)
-		name := fVal.Name
-		placeholderData[name] = fmt.Sprintf("{{.%s}}", name)
-	}
-
-	t = reflect.TypeOf(winrmExample)
-	n = t.NumField()
-	for i := 0; i < n; i++ {
-		fVal := t.Field(i)
-		name := fVal.Name
-		placeholderData[name] = fmt.Sprintf("{{.%s}}", name)
-	}
-
-	placeholderData["ID"] = "{{.ID}}"
+	// Backwards-compatability:
+	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
 
 	return placeholderData
 }
@@ -56,31 +48,24 @@ func PlaceholderData() map[string]string {
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := map[string]interface{}{}
 	// Read communicator data into hook data
-	// state.GetOK("id")
-	commConf, ok := state.GetOk("communicator_config")
+	comm, ok := state.GetOk("communicator_config")
 	if !ok {
 		log.Printf("Unable to load config from state to populate provisionHookData")
 		return hookData
 	}
-	cast := commConf.(*communicator.Config)
+	commConf := comm.(*communicator.Config)
 
-	pd := PlaceholderData()
-
-	v := reflect.ValueOf(cast)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
 	// Loop over all field values and retrieve them from the ssh config
-	for fieldName, _ := range pd {
-		if fieldName == "ID" {
-			continue
-		}
+	hookData["Host"] = commConf.Host()
+	hookData["Port"] = commConf.Port()
+	hookData["User"] = commConf.User()
+	hookData["Password"] = commConf.Password()
+	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
+	// Password.
+	hookData["WinRMPassword"] = commConf.WinRMPassword
 
-		fVal := v.FieldByName(fieldName)
-		if !fVal.IsZero() {
-			hookData[fieldName] = fVal.Interface()
-		}
-	}
+	// TODO
+	// state.GetOK("id")
 
 	return hookData
 }
