@@ -26,7 +26,7 @@ import (
 // accidentally being interpolated into empty strings at prepare time.
 func PlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
-
+	placeholderData["ID"] = "{{.ID}}"
 	// The following correspond to communicator-agnostic functions that are
 	// part of the SSH and WinRM communicator implementations. These functions
 	// are not part of the communicator interface, but are stored on the
@@ -38,6 +38,7 @@ func PlaceholderData() map[string]string {
 	placeholderData["Port"] = "{{.Port}}"
 	placeholderData["User"] = "{{.User}}"
 	placeholderData["Password"] = "{{.Password}}"
+	placeholderData["ConnType"] = "{{.Type}}"
 
 	// Backwards-compatability:
 	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
@@ -60,12 +61,24 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	hookData["Port"] = commConf.Port()
 	hookData["User"] = commConf.User()
 	hookData["Password"] = commConf.Password()
+	hookData["ConnType"] = commConf.Type
+
 	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
 	// Password.
 	hookData["WinRMPassword"] = commConf.WinRMPassword
 
-	// TODO
-	// state.GetOK("id")
+	// instance_id is placed in state by the builders.
+	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
+	// Implemented in most others including digitalOcean (droplet id),
+	// docker (container_id), and clouds which use "server" internally instead
+	// of instance.
+	id, ok := state.GetOk("instance_id")
+	if ok {
+		hookData["ID"] = id
+	} else {
+		// Warn user that the id isn't implemented
+		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
+	}
 
 	return hookData
 }

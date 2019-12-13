@@ -77,6 +77,9 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	s.instanceId = instanceId
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance)
 
 	if instance.BootDiskState != ucloudcommon.BootDiskStateNormal {
 		ui.Say("Waiting for boot disk of instance initialized")

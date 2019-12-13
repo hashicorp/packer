@@ -35,7 +35,11 @@ func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.St
 
 	ui.Say("Calling Vagrant Up (this can take some time)...")
 
-	_, _, err := driver.Up(s.generateArgs())
+	args := s.generateArgs()
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", args[0])
+	_, _, err := driver.Up(args)
 
 	if err != nil {
 		state.Put("error", err)
