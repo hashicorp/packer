@@ -11,22 +11,10 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
-
-type ExecuteCommandTemplate struct {
-	Vars          string
-	Script        string
-	Command       string
-	WinRMPassword string
-}
-
-type EnvVarsTemplate struct {
-	WinRMPassword string
-}
 
 func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[string]interface{}) (bool, error) {
 	if generatedData != nil {
@@ -218,10 +206,4 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 		flattened += fmt.Sprintf(config.EnvVarFormat, key, envVars[key])
 	}
 	return flattened, nil
-}
-
-func getWinRMPassword(buildName string) string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
-	packer.LogSecretFilter.Set(winRMPass)
-	return winRMPass
 }
