@@ -96,6 +96,9 @@ func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.State
 		"Hi, we have created the instance, its name=%v , "+
 			"its id=%v, "+
 			"and its eip=%v  :) ", instance.InstanceName, s.InstanceSpecConfig.InstanceId, eip.Result.ElasticIp.ElasticIpAddress))
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.InstanceSpecConfig.InstanceId)
 	return multistep.ActionContinue
 }
 

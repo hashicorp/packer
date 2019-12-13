@@ -154,6 +154,9 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.VMName)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.VMName)
 
 	return multistep.ActionContinue
 }
