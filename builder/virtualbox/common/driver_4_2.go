@@ -165,9 +165,6 @@ func (d *VBox42Driver) Stop(name string) error {
 		return err
 	}
 
-	// We sleep here for a little bit to let the session "unlock"
-	time.Sleep(2 * time.Second)
-
 	return nil
 }
 
@@ -189,7 +186,18 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
-	_, err := d.VBoxManageWithOutput(args...)
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 5,
+		ShouldRetry: func(err error) bool {
+			return strings.Contains(err.Error(), "VBOX_E_INVALID_OBJECT_STATE")
+		},
+		RetryDelay: func() time.Duration { return 2 * time.Minute },
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := d.VBoxManageWithOutput(args...)
+		return err
+	})
+
 	return err
 }
 
