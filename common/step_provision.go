@@ -41,6 +41,8 @@ func PlaceholderData() map[string]string {
 	placeholderData["Password"] = "{{.Password}}"
 	placeholderData["ConnType"] = "{{.Type}}"
 	placeholderData["PACKER_RUN_UUID"] = "{{.PACKER_RUN_UUID}}"
+	placeholderData["SSHPublicKey"] = "{{.SSHPublicKey}}"
+	placeholderData["SSHPrivateKey"] = "{{.SSHPrivateKey}}"
 
 	// Backwards-compatability:
 	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
@@ -78,6 +80,8 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	hookData["User"] = commConf.User()
 	hookData["Password"] = commConf.Password()
 	hookData["ConnType"] = commConf.Type
+	hookData["SSHPublicKey"] = commConf.SSHPublicKey
+	hookData["SSHPrivateKey"] = commConf.SSHPrivateKey
 
 	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
 	// Password.
