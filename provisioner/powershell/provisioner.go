@@ -89,8 +89,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// Create passthrough for build-generated data so we can fill it in once we know
-	// it
+	// Create passthrough for build-generated data
 	p.config.ctx.Data = common.PlaceholderData()
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -223,18 +222,7 @@ func extractScript(p *Provisioner) (string, error) {
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
-	p.generatedData = make(map[string]interface{})
-
-	if generatedData != nil {
-		log.Printf("Gen data isn't nil.")
-		p.generatedData = generatedData
-		if winRMPass, ok := p.generatedData["WinRMPassword"]; ok {
-			log.Printf("Found winrm pass")
-			packer.LogSecretFilter.Set(winRMPass.(string))
-		}
-	} else {
-		log.Printf("generatedData passed to Provision method is nil!")
-	}
+	p.generatedData = generatedData
 
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)

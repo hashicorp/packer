@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner"
@@ -130,6 +129,7 @@ type Provisioner struct {
 	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
+	generatedData     map[string]interface{}
 }
 
 type ExecuteTemplate struct {
@@ -146,17 +146,9 @@ type ExecuteTemplate struct {
 	WorkingDir       string
 }
 
-type EnvVarsTemplate struct {
-	WinRMPassword string
-}
-
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// Create passthrough for winrm password so we can fill it in once we know
-	// it
-	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: `{{.WinRMPassword}}`,
-	}
-
+	// Create passthrough for build-generated data
+	p.config.ctx.Data = common.PlaceholderData()
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -259,9 +251,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Puppet...")
 	p.communicator = comm
+	p.generatedData = generatedData
 	ui.Message("Creating Puppet staging directory...")
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
@@ -484,12 +477,6 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func getWinRMPassword(buildName string) string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
-	packer.LogSecretFilter.Set(winRMPass)
-	return winRMPass
-}
-
 func (p *Provisioner) Communicator() packer.Communicator {
 	return p.communicator
 }
@@ -500,9 +487,7 @@ func (p *Provisioner) ElevatedUser() string {
 
 func (p *Provisioner) ElevatedPassword() string {
 	// Replace ElevatedPassword for winrm users who used this feature
-	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
-	}
+	p.config.ctx.Data = p.generatedData
 
 	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
 
