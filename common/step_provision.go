@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
@@ -39,6 +40,7 @@ func PlaceholderData() map[string]string {
 	placeholderData["User"] = "{{.User}}"
 	placeholderData["Password"] = "{{.Password}}"
 	placeholderData["ConnType"] = "{{.Type}}"
+	placeholderData["PACKER_RUN_UUID"] = "{{.PACKER_RUN_UUID}}"
 
 	// Backwards-compatability:
 	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
@@ -48,6 +50,20 @@ func PlaceholderData() map[string]string {
 
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := map[string]interface{}{}
+	// instance_id is placed in state by the builders.
+	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
+	// Implemented in most others including digitalOcean (droplet id),
+	// docker (container_id), and clouds which use "server" internally instead
+	// of instance.
+	id, ok := state.GetOk("instance_id")
+	if ok {
+		hookData["ID"] = id
+	} else {
+		// Warn user that the id isn't implemented
+		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
+	}
+	hookData["PACKER_RUN_UUID"] = os.Getenv("PACKER_RUN_UUID")
+
 	// Read communicator data into hook data
 	comm, ok := state.GetOk("communicator_config")
 	if !ok {
@@ -66,19 +82,6 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
 	// Password.
 	hookData["WinRMPassword"] = commConf.WinRMPassword
-
-	// instance_id is placed in state by the builders.
-	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
-	// Implemented in most others including digitalOcean (droplet id),
-	// docker (container_id), and clouds which use "server" internally instead
-	// of instance.
-	id, ok := state.GetOk("instance_id")
-	if ok {
-		hookData["ID"] = id
-	} else {
-		// Warn user that the id isn't implemented
-		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
-	}
 
 	return hookData
 }
