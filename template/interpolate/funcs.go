@@ -12,6 +12,7 @@ import (
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
@@ -166,11 +167,17 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 func funcGenGenerated(ctx *Context) interface{} {
 	return func(s string) (string, error) {
 		if data, ok := ctx.Data.(map[string]string); ok {
-			// PlaceholderData has been passed into generator, and we can check
-			// the value against the placeholder data to make sure that it is
-			// valid
+			// PlaceholderData has been passed into generator, so if the given
+			// key already exists in data, then we know it's an "allowed" key
 			if heldPlace, ok := data[s]; ok {
-				return heldPlace, nil
+				// If we're in the first interpolation pass, the goal is to
+				// make sure that we pass the value through.
+				// TODO match against an actual string constant
+				if strings.Contains(heldPlace, common.PlaceholderMsg) {
+					return fmt.Sprintf("{{.%s}}", s), nil
+				} else {
+					return heldPlace, nil
+				}
 			} else {
 				return "", fmt.Errorf("loaded data, but couldnt find %s in it", s)
 			}

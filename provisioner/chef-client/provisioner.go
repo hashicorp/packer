@@ -121,7 +121,7 @@ type KnifeTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Create passthrough for build-generated data
-	p.config.ctx.Data = common.PlaceholderData()
+	p.config.ctx.Data = packer.BasicPlaceholderData()
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,

@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/shell"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -52,7 +51,7 @@ type Config struct {
 func Decode(config *Config, raws ...interface{}) error {
 	// Create passthrough for build-generated data so we can fill it in once we know
 	// it
-	config.ctx.Data = common.PlaceholderData()
+	config.ctx.Data = packer.BasicPlaceholderData()
 
 	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
 		Interpolate:        true,
