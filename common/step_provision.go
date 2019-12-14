@@ -22,34 +22,6 @@ import (
 // Produces:
 //   <nothing>
 
-// Provisioners interpolate most of their fields in the prepare stage; this
-// placeholder map helps keep fields that are only generated at build time from
-// accidentally being interpolated into empty strings at prepare time.
-func PlaceholderData() map[string]string {
-	placeholderData := map[string]string{}
-	placeholderData["ID"] = "{{.ID}}"
-	// The following correspond to communicator-agnostic functions that are
-	// part of the SSH and WinRM communicator implementations. These functions
-	// are not part of the communicator interface, but are stored on the
-	// Communicator Config and return the appropriate values rather than
-	// depending on the actual communicator config values. E.g "Password"
-	// reprosents either WinRMPassword or SSHPassword, which makes this more
-	// useful if a template contains multiple builds.
-	placeholderData["Host"] = "{{.Host}}"
-	placeholderData["Port"] = "{{.Port}}"
-	placeholderData["User"] = "{{.User}}"
-	placeholderData["Password"] = "{{.Password}}"
-	placeholderData["ConnType"] = "{{.Type}}"
-	placeholderData["PACKER_RUN_UUID"] = "{{.PACKER_RUN_UUID}}"
-	placeholderData["SSHPublicKey"] = "{{.SSHPublicKey}}"
-	placeholderData["SSHPrivateKey"] = "{{.SSHPrivateKey}}"
-
-	// Backwards-compatability:
-	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
-
-	return placeholderData
-}
-
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := map[string]interface{}{}
 	// instance_id is placed in state by the builders.

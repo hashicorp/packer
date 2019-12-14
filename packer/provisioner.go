@@ -6,6 +6,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 // A provisioner is responsible for installing and configuring software
@@ -35,6 +37,42 @@ type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
+}
+
+// Provisioners interpolate most of their fields in the prepare stage; this
+// placeholder map helps keep fields that are only generated at build time from
+// accidentally being interpolated into empty strings at prepare time.
+// This helper function generates the most basic placeholder data which should
+// be accessible to the provisioners. It is used to initialize provisioners, to
+// force validation using the `generated` template function. In the future,
+// custom generated data could be passed into provisioners from builders to
+// enable specialized builder-specific (but still validated!!) access to builder
+// data.
+func BasicPlaceholderData() map[string]string {
+	placeholderData := map[string]string{}
+	msg := "Generated_%s. " + common.PlaceholderMsg
+	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
+	// The following correspond to communicator-agnostic functions that are
+	// part of the SSH and WinRM communicator implementations. These functions
+	// are not part of the communicator interface, but are stored on the
+	// Communicator Config and return the appropriate values rather than
+	// depending on the actual communicator config values. E.g "Password"
+	// reprosents either WinRMPassword or SSHPassword, which makes this more
+	// useful if a template contains multiple builds.
+	placeholderData["Host"] = fmt.Sprintf(msg, "Host")
+	placeholderData["Port"] = fmt.Sprintf(msg, "Port")
+	placeholderData["User"] = fmt.Sprintf(msg, "User")
+	placeholderData["Password"] = fmt.Sprintf(msg, "Password")
+	placeholderData["ConnType"] = fmt.Sprintf(msg, "Type")
+	placeholderData["PACKER_RUN_UUID"] = fmt.Sprintf(msg, "PACKER_RUN_UUID")
+	placeholderData["SSHPublicKey"] = fmt.Sprintf(msg, "SSHPublicKey")
+	placeholderData["SSHPrivateKey"] = fmt.Sprintf(msg, "SSHPrivateKey")
+
+	// Backwards-compatability: WinRM Password can get through without forcing
+	// the generated func validation.
+	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
+
+	return placeholderData
 }
 
 // Runs the provisioners in order.
