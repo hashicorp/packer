@@ -62,6 +62,29 @@ Here is a full list of the available functions for reference.
     each function will behave.
 -   `env` - Returns environment variables. See example in [using home
     variable](/docs/templates/user-variables.html#using-home-variable)
+-   `generated` - This engine will allow you to access special variables that
+    provide connection information and basic instance state information.
+    Usage example:
+    ```json
+        {
+          "type": "shell-local",
+          "environment_vars": ["TESTVAR={{ generated `PACKER_RUN_UUID`}}"],
+          "inline": ["echo $TESTVAR"]
+        },
+    ```
+    Valid variables to request are: "ID", "Host", "Port", "User", "Password",
+    "ConnType", "PACKER_RUN_UUID", "SSHPublicKey", "SSHPrivateKey", and
+    "WinRMPassword", though obviously depending on which communicator you are
+    using, some of these values may be empty. ID represents the vm being
+    provisioned. For example, in Amazon it is the instance id; in digitalocean,
+    it is the droplet id; in Vmware, it is the vm name.
+
+    This function is only for use within _provisioners_, and does not yet work
+    if the provisioners are being used in conjunction with our chroot builders
+    or with lxc/lxd builders.
+
+    This engine is in beta; please report any issues or requests on the Packer
+    issue tracker on GitHub.
 -   `isotime [FORMAT]` - UTC time, which can be
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below in [the `isotime` format
