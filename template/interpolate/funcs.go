@@ -179,7 +179,7 @@ func funcGenGenerated(ctx *Context) interface{} {
 					return heldPlace, nil
 				}
 			} else {
-				return "", fmt.Errorf("loaded data, but couldnt find %s in it", s)
+				return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 			}
 		}
 
