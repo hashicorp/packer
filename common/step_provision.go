@@ -23,8 +23,13 @@ import (
 //   <nothing>
 
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
+	hookData := make(map[string]interface{})
+
 	// Load Builder hook data from state, if it has been set.
-	// hookData := state.GetOk("generated_data").(map[string]interface{})
+	hd, ok := state.GetOk("generated_data")
+	if ok {
+		hookData = hd.(map[string]interface{})
+	}
 
 	// instance_id is placed in state by the builders.
 	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
@@ -41,7 +46,7 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		// Warn user that the id isn't implemented
 		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
 	}
-	hookData["PACKER_RUN_UUID"] = os.Getenv("PACKER_RUN_UUID")
+	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
 
 	// Read communicator data into hook data
 	comm, ok := state.GetOk("communicator_config")
