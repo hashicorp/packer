@@ -5,7 +5,6 @@ package ovf
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -83,8 +82,8 @@ type Config struct {
 	// VBoxManage import. This can be useful for passing keepallmacs or
 	// keepnatmacs options for existing ovf images.
 	ImportOpts string `mapstructure:"import_opts" required:"false"`
-	// The path to an OVF or OVA file that acts as the
-	// source of this build. This currently must be a local file.
+	// The filepath or URL to an OVF or OVA file that acts as the
+	// source of this build.
 	SourcePath string `mapstructure:"source_path" required:"true"`
 	// The path where the OVA should be saved
 	// after download. By default, it will go in the packer cache, with a hash of
@@ -161,11 +160,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
-	}
-
-	if _, err := os.Stat(c.SourcePath); err != nil {
-		packer.MultiErrorAppend(errs,
-			fmt.Errorf("Source file '%s' needs to exist at time of config validation! %v", c.SourcePath, err))
 	}
 
 	validMode := false
