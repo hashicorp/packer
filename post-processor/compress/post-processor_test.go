@@ -197,7 +197,7 @@ func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 
 	// Prepare the file builder
 	builder := file.Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["file"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["file"].Config)
 	if len(warnings) > 0 {
 		for _, warn := range warnings {
 			return nil, nil, fmt.Errorf("Configuration warning: %s", warn)

@@ -22,7 +22,7 @@ func (b *cmdBuilder) ConfigSpec() hcldec.ObjectSpec {
 	return b.builder.ConfigSpec()
 }
 
-func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, error) {
+func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, []string, error) {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)

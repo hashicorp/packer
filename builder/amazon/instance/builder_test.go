@@ -47,7 +47,7 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 	defer tempfile.Close()
 
 	config["account_id"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -56,7 +56,7 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 	}
 
 	config["account_id"] = "foo"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -65,7 +65,7 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 	}
 
 	config["account_id"] = "0123-0456-7890"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -87,7 +87,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test good
 	config["ami_name"] = "foo"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -98,7 +98,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -109,7 +109,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -126,7 +126,7 @@ func TestBuilderPrepare_BundleDestination(t *testing.T) {
 	defer tempfile.Close()
 
 	config["bundle_destination"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -146,7 +146,7 @@ func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -167,7 +167,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -184,7 +184,7 @@ func TestBuilderPrepare_S3Bucket(t *testing.T) {
 	defer tempfile.Close()
 
 	config["s3_bucket"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -193,7 +193,7 @@ func TestBuilderPrepare_S3Bucket(t *testing.T) {
 	}
 
 	config["s3_bucket"] = "foo"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -210,7 +210,7 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	defer tempfile.Close()
 
 	config["x509_cert_path"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -219,7 +219,7 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	}
 
 	config["x509_cert_path"] = "i/am/a/file/that/doesnt/exist"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -235,7 +235,7 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	defer tf.Close()
 
 	config["x509_cert_path"] = tf.Name()
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -252,7 +252,7 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	defer tempfile.Close()
 
 	config["x509_key_path"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -261,7 +261,7 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	}
 
 	config["x509_key_path"] = "i/am/a/file/that/doesnt/exist"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -277,7 +277,7 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	defer tf.Close()
 
 	config["x509_key_path"] = tf.Name()
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -294,7 +294,7 @@ func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 	defer tempfile.Close()
 
 	config["x509_upload_path"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

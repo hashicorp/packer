@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -78,12 +77,9 @@ func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) mul
 			"Password (since debug is enabled) \"%s\"", s.Comm.WinRMPassword))
 	}
 
-	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
 	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepGetPassword) Cleanup(multistep.StateBag) {
-	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
-}
+func (s *StepGetPassword) Cleanup(multistep.StateBag) {}

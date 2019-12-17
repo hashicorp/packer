@@ -23,10 +23,10 @@ type Builder struct {
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
 	cfg := openapi.NewConfiguration()
@@ -44,7 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	b.client = openapi.NewAPIClient(cfg)
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 type wrappedCommandTemplate struct {

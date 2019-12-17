@@ -20,7 +20,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"password": []string{},
 	}
 
-	warns, err := b.Prepare(c)
+	_, warns, err := b.Prepare(c)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}

@@ -127,7 +127,7 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 		Writer: b,
 	}
 	comm := &packer.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}

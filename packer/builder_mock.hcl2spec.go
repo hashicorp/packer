@@ -20,6 +20,7 @@ type FlatMockBuilder struct {
 	RunHook         Hook          `cty:"run_hook"`
 	RunUi           Ui            `cty:"run_ui"`
 	CancelCalled    *bool         `cty:"cancel_called"`
+	GeneratedVars   []string      `cty:"generated_vars"`
 }
 
 // FlatMapstructure returns a new FlatMockBuilder.
@@ -44,6 +45,7 @@ func (*FlatMockBuilder) HCL2Spec() map[string]hcldec.Spec {
 		"run_hook":         &hcldec.AttrSpec{Name: "Hook", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"run_ui":           &hcldec.AttrSpec{Name: "Ui", Type: cty.Bool, Required: false},   /* TODO(azr): could not find type */
 		"cancel_called":    &hcldec.AttrSpec{Name: "cancel_called", Type: cty.Bool, Required: false},
+		"generated_vars":   &hcldec.AttrSpec{Name: "generated_vars", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }

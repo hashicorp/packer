@@ -28,26 +28,27 @@ type BuilderPrepareArgs struct {
 }
 
 type BuilderPrepareResponse struct {
-	Warnings []string
-	Error    *BasicError
+	GeneratedVars []string
+	Warnings      []string
+	Error         *BasicError
 }
 
-func (b *builder) Prepare(config ...interface{}) ([]string, error) {
+func (b *builder) Prepare(config ...interface{}) ([]string, []string, error) {
 	config, err := encodeCTYValues(config)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var resp BuilderPrepareResponse
 	cerr := b.client.Call(b.endpoint+".Prepare", &BuilderPrepareArgs{config}, &resp)
 	if cerr != nil {
-		return nil, cerr
+		return nil, nil, cerr
 	}
 
 	if resp.Error != nil {
 		err = resp.Error
 	}
 
-	return resp.Warnings, err
+	return resp.GeneratedVars, resp.Warnings, err
 }
 
 func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -93,10 +94,11 @@ func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareR
 	if err != nil {
 		return err
 	}
-	warnings, err := b.builder.Prepare(config...)
+	generated, warnings, err := b.builder.Prepare(config...)
 	*reply = BuilderPrepareResponse{
-		Warnings: warnings,
-		Error:    NewBasicError(err),
+		GeneratedVars: generated,
+		Warnings:      warnings,
+		Error:         NewBasicError(err),
 	}
 	return nil
 }

@@ -29,8 +29,11 @@ type ParallelTestBuilder struct {
 	wg sync.WaitGroup
 }
 
-func (b *ParallelTestBuilder) ConfigSpec() hcldec.ObjectSpec                 { return nil }
-func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
+func (b *ParallelTestBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
+
+func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	return nil, nil, nil
+}
 
 func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("building")
@@ -41,8 +44,9 @@ func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer
 // LockedBuilder wont run until unlock is called
 type LockedBuilder struct{ unlock chan interface{} }
 
-func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec                 { return nil }
-func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
+func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
+
+func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error) { return nil, nil, nil }
 
 func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("locking build")
