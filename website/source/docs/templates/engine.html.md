@@ -62,22 +62,27 @@ Here is a full list of the available functions for reference.
     each function will behave.
 -   `env` - Returns environment variables. See example in [using home
     variable](/docs/templates/user-variables.html#using-home-variable)
--   `generated` - This engine will allow you to access special variables that
+-   `build` - This engine will allow you to access special variables that
     provide connection information and basic instance state information.
     Usage example:
     ```json
         {
           "type": "shell-local",
-          "environment_vars": ["TESTVAR={{ generated `PACKER_RUN_UUID`}}"],
+          "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
           "inline": ["echo $TESTVAR"]
         },
     ```
-    Valid variables to request are: "ID", "Host", "Port", "User", "Password",
-    "ConnType", "PACKER_RUN_UUID", "SSHPublicKey", "SSHPrivateKey", and
-    "WinRMPassword", though obviously depending on which communicator you are
-    using, some of these values may be empty. ID represents the vm being
-    provisioned. For example, in Amazon it is the instance id; in digitalocean,
-    it is the droplet id; in Vmware, it is the vm name.
+    Valid variables to request are: "InstanceID", "CommunicatorHost",
+    "CommunicatorPort", "CommunicatorUser", "CommunicatorPassword", "ConnType",
+    "PackerRunUUID", "CommunicatorPublicKey", and "CommunicatorPrivateKey".
+    Depending on which communicator you are using, some of these values may be
+    empty -- for example, the public and private keys are unique to the SSH
+    communicator. InstanceID represents the vm being provisioned. For example,
+    in Amazon it is the instance id; in digitalocean, it is the droplet id; in
+    Vmware, it is the vm name.
+
+    For backwards compatability, `WinRMPassword` is also available through this
+    engine, though it is no different than using the more general `Password`.
 
     This function is only for use within _provisioners_, and does not yet work
     if the provisioners are being used in conjunction with our chroot builders
