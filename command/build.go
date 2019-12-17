@@ -129,7 +129,7 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 
 	isHCLLoaded, err := isHCLLoaded(path)
 	if path != "-" && err != nil {
-		c.Ui.Error(fmt.Sprintf("Could not tell wether %s is hcl enabled: %s", path, err))
+		c.Ui.Error(fmt.Sprintf("could not tell whether %s is hcl enabled: %s", path, err))
 		return nil, 1
 	}
 	if isHCLLoaded {
@@ -137,9 +137,10 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 	}
 
 	c.Ui.Say(`Legacy JSON Configuration Will Be Used.
-The template will be parsed in the legacy configuration style. This style 
-Will continue to work but users are encouraged to move to the new style, 
-See: https://packer.io/guides/hcl2 .`)
+The template will be parsed in the legacy configuration style. This style
+will continue to work but users are encouraged to move to the new style.
+See: https://packer.io/guides/hcl
+`)
 
 	// Parse the template
 	var tpl *template.Template
