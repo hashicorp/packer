@@ -44,7 +44,7 @@ var FuncGens = map[string]interface{}{
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
-	"generated":      funcGenGenerated,
+	"build":          funcGenBuild,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -164,7 +164,7 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 	}
 }
 
-func funcGenGenerated(ctx *Context) interface{} {
+func funcGenBuild(ctx *Context) interface{} {
 	return func(s string) (string, error) {
 		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
 			// PlaceholderData has been passed into generator, so if the given
@@ -184,7 +184,7 @@ func funcGenGenerated(ctx *Context) interface{} {
 			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 		}
 
-		return "", fmt.Errorf("Error validating computed variable: the given "+
+		return "", fmt.Errorf("Error validating build variable: the given "+
 			"variable %s will not be passed into your plugin.", s)
 	}
 }
