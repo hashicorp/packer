@@ -34,10 +34,10 @@ const (
 	DefaultSecretName       = "packerKeyVaultSecret"
 )
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	c, warnings, errs := newConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
 	b.config = c
@@ -47,7 +47,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.setTemplateParameters(b.stateBag)
 	b.setImageParameters(b.stateBag)
 
-	return warnings, errs
+	return nil, warnings, errs
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

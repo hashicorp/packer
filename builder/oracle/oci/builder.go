@@ -26,14 +26,14 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, []string, error) {
 	config, err := NewConfig(rawConfig...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	b.config = config
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

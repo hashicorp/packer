@@ -20,10 +20,10 @@ type Builder struct {
 	client *openapi.APIClient
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	config, warnings, errs := NewConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
 	b.config = *config
@@ -43,7 +43,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	b.client = openapi.NewAPIClient(cfg)
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 type wrappedCommandTemplate struct {

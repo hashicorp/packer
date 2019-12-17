@@ -35,7 +35,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"public_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -50,7 +50,7 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 
 	// Test good
 	config["image_name"] = "foo"
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -61,7 +61,7 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 	// Test bad
 	config["image_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -72,7 +72,7 @@ func TestBuilderPrepare_ImageName(t *testing.T) {
 	// Test bad
 	delete(config, "image_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -87,7 +87,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -113,7 +113,7 @@ func TestBuilderPrepare_ImageDestinations(t *testing.T) {
 			"description": "bar",
 		},
 	}
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

@@ -69,7 +69,7 @@ func TestBuild_Prepare(t *testing.T) {
 	if !prov.PrepCalled {
 		t.Fatal("prep should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 
@@ -144,7 +144,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	if !prov.PrepCalled {
 		t.Fatal("prepare should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }

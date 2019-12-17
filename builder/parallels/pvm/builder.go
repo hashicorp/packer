@@ -20,14 +20,14 @@ type Builder struct {
 }
 
 // Prepare processes the build configuration parameters.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	c, warnings, errs := NewConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 	b.config = c
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 // Run executes a Packer build and returns a packer.Artifact representing

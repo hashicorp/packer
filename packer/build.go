@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 const (
@@ -148,10 +150,22 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 	}
 
 	// Prepare the builder
-	warn, err = b.builder.Prepare(b.builderConfig, packerConfig)
+	generatedVars, warn, err := b.builder.Prepare(b.builderConfig, packerConfig)
 	if err != nil {
 		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
 		return
+	}
+
+	// If the builder has provided a list of to-be-generated variables that
+	// should be made accessible to provisioners, pass that list into
+	// the provisioner prepare() so that the provisioner can appropriately
+	// validate user input against what will become available.
+	generatedPlaceholderMap := BasicPlaceholderData()
+	if generatedVars != nil {
+		for _, k := range generatedVars {
+			generatedPlaceholderMap[k] = fmt.Sprintf("Generated_%s. "+
+				common.PlaceholderMsg, k)
+		}
 	}
 
 	// Prepare the provisioners
@@ -159,6 +173,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
 		copy(configs, coreProv.config)
 		configs = append(configs, packerConfig)
+		configs = append(configs, generatedPlaceholderMap)
 
 		if err = coreProv.provisioner.Prepare(configs...); err != nil {
 			return
@@ -170,6 +185,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 		configs := make([]interface{}, len(b.cleanupProvisioner.config), len(b.cleanupProvisioner.config)+1)
 		copy(configs, b.cleanupProvisioner.config)
 		configs = append(configs, packerConfig)
+		configs = append(configs, generatedPlaceholderMap)
 		err = b.cleanupProvisioner.provisioner.Prepare(configs...)
 		if err != nil {
 			return

@@ -41,9 +41,11 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		config = &DecodeOpts{Interpolate: true}
 	}
 
+	// Detect user variables from the raws and merge them into our context
+	ctxData, raws := DetectContextData(raws...)
+
 	// Interpolate first
 	if config.Interpolate {
-		// Detect user variables from the raws and merge them into our context
 		ctx, err := DetectContext(raws...)
 		if err != nil {
 			return err
@@ -55,6 +57,9 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 			config.InterpolateContext.BuildType = ctx.BuildType
 			config.InterpolateContext.TemplatePath = ctx.TemplatePath
 			config.InterpolateContext.UserVariables = ctx.UserVariables
+			if config.InterpolateContext.Data == nil {
+				config.InterpolateContext.Data = ctxData
+			}
 		}
 		ctx = config.InterpolateContext
 
@@ -103,7 +108,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		for _, unused := range md.Unused {
 			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
 				err = multierror.Append(err, fmt.Errorf(
-					"unknown configuration key: %q", unused))
+					"unknown configuration key: %q; raws is %#v \n\n and ctx data is %#v", unused, raws, ctxData))
 			}
 		}
 		if err != nil {
@@ -112,6 +117,39 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 	}
 
 	return nil
+}
+
+func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []interface{}) {
+	// In provisioners, the last value pulled from raws is the placeholder data
+	// for build-specific variables. Pull these out to add to interpolation
+	// context.
+
+	// Internally, our tests may cause this to be read as a map[string]string
+	placeholderData := raws[len(raws)-1]
+	if pd, ok := placeholderData.(map[string]string); ok {
+		if uuid, ok := pd["PackerRunUUID"]; ok {
+			if strings.Contains(uuid, "Generated_PackerRunUUID.") {
+				cast := make(map[interface{}]interface{})
+				for k, v := range pd {
+					cast[k] = v
+				}
+				raws = raws[:len(raws)-1]
+				return cast, raws
+			}
+		}
+	}
+
+	// but with normal interface conversion across the rpc, it'll look like a
+	// map[interface]interface, not a map[string]string
+	if pd, ok := placeholderData.(map[interface{}]interface{}); ok {
+		if uuid, ok := pd["PackerRunUUID"]; ok {
+			if strings.Contains(uuid.(string), "Generated_PackerRunUUID.") {
+				raws = raws[:len(raws)-1]
+				return pd, raws
+			}
+		}
+	}
+	return nil, raws
 }
 
 // DetectContext builds a base interpolate.Context, automatically

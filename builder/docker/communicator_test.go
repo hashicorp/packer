@@ -35,7 +35,7 @@ func TestUploadDownload(t *testing.T) {
 
 	// Setup the builder
 	builder := &Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
 	if err != nil {
 		t.Fatalf("Error preparing configuration %s", err)
 	}
@@ -118,7 +118,7 @@ func TestLargeDownload(t *testing.T) {
 
 	// Setup the builder
 	builder := &Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
 	if err != nil {
 		t.Fatalf("Error preparing configuration %s", err)
 	}
@@ -222,7 +222,7 @@ func TestFixUploadOwner(t *testing.T) {
 
 	// Setup the builder
 	builder := &Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
 	if err != nil {
 		t.Fatalf("Error preparing configuration %s", err)
 	}
