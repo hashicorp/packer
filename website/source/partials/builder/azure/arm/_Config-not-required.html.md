@@ -22,8 +22,6 @@
     
     Following is an example.
     
-    <!-- -->
-    
         "shared_image_gallery_destination": {
             "resource_group": "ResourceGroup",
             "gallery_name": "GalleryName",

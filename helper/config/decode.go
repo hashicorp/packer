@@ -1,14 +1,19 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"sort"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
+	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 // DecodeOpts are the options for decoding configuration.
@@ -37,6 +42,36 @@ var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 // Decode decodes the configuration into the target and optionally
 // automatically interpolates all the configuration as it goes.
 func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
+	for i, raw := range raws {
+		// check for cty values and transform them to json then to a
+		// map[string]interface{} so that mapstructure can do its thing.
+		cval, ok := raw.(cty.Value)
+		if !ok {
+			continue
+		}
+		type flatConfigurer interface {
+			FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
+		}
+		ctarget := target.(flatConfigurer)
+		flatCfg := ctarget.FlatMapstructure()
+		err := gocty.FromCtyValue(cval, flatCfg)
+		if err != nil {
+			switch err := err.(type) {
+			case cty.PathError:
+				return fmt.Errorf("%v: %v", err, err.Path)
+			}
+			return err
+		}
+		b, err := ctyjson.SimpleJSONValue{Value: cval}.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		var raw map[string]interface{}
+		if err := json.Unmarshal(b, &raw); err != nil {
+			return err
+		}
+		raws[i] = raw
+	}
 	if config == nil {
 		config = &DecodeOpts{Interpolate: true}
 	}

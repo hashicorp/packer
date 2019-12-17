@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -145,6 +146,12 @@ type ExecuteTemplate struct {
 	Sudo             bool
 	WorkingDir       string
 }
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
+}
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Create passthrough for build-generated data

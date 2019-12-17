@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -11,8 +10,7 @@ import (
 // An implementation of packer.Build where the build is actually executed
 // over an RPC connection.
 type build struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // BuildServer wraps a packer.Build implementation and makes it exportable

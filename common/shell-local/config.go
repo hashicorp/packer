@@ -50,7 +50,7 @@ type Config struct {
 }
 
 func Decode(config *Config, raws ...interface{}) error {
-	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
+	err := configHelper.Decode(config, &configHelper.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

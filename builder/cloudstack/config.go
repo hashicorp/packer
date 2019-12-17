@@ -167,8 +167,7 @@ type Config struct {
 }
 
 // NewConfig parses and validates the given config.
-func NewConfig(raws ...interface{}) (*Config, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) error {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -179,7 +178,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var errs *packer.MultiError
@@ -309,8 +308,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	// Check for errors and return if we have any.
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return errs
 	}
 
-	return c, nil
+	return nil
 }

@@ -5,7 +5,6 @@ package ovf
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -83,8 +82,8 @@ type Config struct {
 	// VBoxManage import. This can be useful for passing keepallmacs or
 	// keepnatmacs options for existing ovf images.
 	ImportOpts string `mapstructure:"import_opts" required:"false"`
-	// The path to an OVF or OVA file that acts as the
-	// source of this build. This currently must be a local file.
+	// The filepath or URL to an OVF or OVA file that acts as the
+	// source of this build.
 	SourcePath string `mapstructure:"source_path" required:"true"`
 	// The path where the OVA should be saved
 	// after download. By default, it will go in the packer cache, with a hash of
@@ -105,8 +104,7 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -121,7 +119,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Defaults
@@ -163,11 +161,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	}
 
-	if _, err := os.Stat(c.SourcePath); err != nil {
-		packer.MultiErrorAppend(errs,
-			fmt.Errorf("Source file '%s' needs to exist at time of config validation! %v", c.SourcePath, err))
-	}
-
 	validMode := false
 	validModes := []string{
 		vboxcommon.GuestAdditionsModeDisable,
@@ -201,7 +194,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return warnings, errs
 	}
 
 	// TODO: Write a packer fix and just remove import_opts
@@ -209,5 +202,5 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.ImportFlags = append(c.ImportFlags, "--options", c.ImportOpts)
 	}
 
-	return c, warnings, nil
+	return warnings, nil
 }

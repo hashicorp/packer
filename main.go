@@ -62,8 +62,6 @@ func realMain() int {
 
 		packer.LogSecretFilter.SetOutput(logWriter)
 
-		//packer.LogSecrets.
-
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
 
@@ -137,18 +135,22 @@ func wrappedMain() int {
 	packer.LogSecretFilter.SetOutput(os.Stderr)
 	log.SetOutput(&packer.LogSecretFilter)
 
-	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
-	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
-	log.Printf("Built with Go Version: %s", runtime.Version())
-
 	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+	if inPlugin {
+		// This prevents double-logging timestamps
+		log.SetFlags(0)
+	}
+
+	log.Printf("[INFO] Packer version: %s [%s %s %s]",
+		version.FormattedVersion(),
+		runtime.Version(),
+		runtime.GOOS, runtime.GOARCH)
 
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
 		return 1
 	}
-	log.Printf("Packer config: %+v", config)
 
 	// Fire off the checkpoint.
 	go runCheckpoint(config)
@@ -195,7 +197,7 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot determind if process is in "+
+				fmt.Fprintf(os.Stderr, "cannot determine if process is in "+
 					"background: %s\n", err)
 			}
 			if backgrounded {
@@ -212,10 +214,11 @@ func wrappedMain() int {
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				Builder:       config.LoadBuilder,
-				Hook:          config.LoadHook,
-				PostProcessor: config.LoadPostProcessor,
-				Provisioner:   config.LoadProvisioner,
+				Hook: config.StarHook,
+
+				BuilderStore:       config.Builders,
+				ProvisionerStore:   config.Provisioners,
+				PostProcessorStore: config.PostProcessors,
 			},
 			Version: version.Version,
 		},
@@ -289,6 +292,9 @@ func loadConfig() (*config, error) {
 	var config config
 	config.PluginMinPort = 10000
 	config.PluginMaxPort = 25000
+	config.Builders = packer.MapOfBuilder{}
+	config.PostProcessors = packer.MapOfPostProcessor{}
+	config.Provisioners = packer.MapOfProvisioner{}
 	if err := config.Discover(); err != nil {
 		return nil, err
 	}

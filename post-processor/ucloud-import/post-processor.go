@@ -1,8 +1,16 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package ucloudimport
 
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
@@ -13,10 +21,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	ufsdk "github.com/ufilesdk-dev/ufile-gosdk"
-	"log"
-	"net/url"
-	"strings"
-	"time"
 )
 
 const (
@@ -57,7 +61,8 @@ type PostProcessor struct {
 	config Config
 }
 
-// Entry point for configuration parsing when we've defined
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,

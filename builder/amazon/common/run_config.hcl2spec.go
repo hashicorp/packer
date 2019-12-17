@@ -17,10 +17,13 @@ type FlatAmiFilterOptions struct {
 // FlatMapstructure returns a new FlatAmiFilterOptions.
 // FlatAmiFilterOptions is an auto-generated flat version of AmiFilterOptions.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*AmiFilterOptions) FlatMapstructure() interface{} { return new(FlatAmiFilterOptions) }
+func (*AmiFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatAmiFilterOptions)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatAmiFilterOptions.
-// This spec is used by HCL to read the fields of FlatAmiFilterOptions.
+// HCL2Spec returns the hcl spec of a AmiFilterOptions.
+// This spec is used by HCL to read the fields of AmiFilterOptions.
+// The decoded values from this spec will then be applied to a FlatAmiFilterOptions.
 func (*FlatAmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters":     &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
@@ -40,14 +43,17 @@ type FlatPolicyDocument struct {
 // FlatMapstructure returns a new FlatPolicyDocument.
 // FlatPolicyDocument is an auto-generated flat version of PolicyDocument.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*PolicyDocument) FlatMapstructure() interface{} { return new(FlatPolicyDocument) }
+func (*PolicyDocument) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatPolicyDocument)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatPolicyDocument.
-// This spec is used by HCL to read the fields of FlatPolicyDocument.
+// HCL2Spec returns the hcl spec of a PolicyDocument.
+// This spec is used by HCL to read the fields of PolicyDocument.
+// The decoded values from this spec will then be applied to a FlatPolicyDocument.
 func (*FlatPolicyDocument) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"version":   &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},
-		"statement": &hcldec.BlockListSpec{TypeName: "statement", Nested: &hcldec.BlockSpec{TypeName: "statement", Nested: hcldec.ObjectSpec((*FlatStatement)(nil).HCL2Spec())}},
+		"statement": &hcldec.BlockListSpec{TypeName: "statement", Nested: hcldec.ObjectSpec((*FlatStatement)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -61,12 +67,13 @@ type FlatSecurityGroupFilterOptions struct {
 // FlatMapstructure returns a new FlatSecurityGroupFilterOptions.
 // FlatSecurityGroupFilterOptions is an auto-generated flat version of SecurityGroupFilterOptions.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*SecurityGroupFilterOptions) FlatMapstructure() interface{} {
+func (*SecurityGroupFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
 	return new(FlatSecurityGroupFilterOptions)
 }
 
-// HCL2Spec returns the hcldec.Spec of a FlatSecurityGroupFilterOptions.
-// This spec is used by HCL to read the fields of FlatSecurityGroupFilterOptions.
+// HCL2Spec returns the hcl spec of a SecurityGroupFilterOptions.
+// This spec is used by HCL to read the fields of SecurityGroupFilterOptions.
+// The decoded values from this spec will then be applied to a FlatSecurityGroupFilterOptions.
 func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
@@ -85,10 +92,13 @@ type FlatStatement struct {
 // FlatMapstructure returns a new FlatStatement.
 // FlatStatement is an auto-generated flat version of Statement.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Statement) FlatMapstructure() interface{} { return new(FlatStatement) }
+func (*Statement) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatStatement)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatStatement.
-// This spec is used by HCL to read the fields of FlatStatement.
+// HCL2Spec returns the hcl spec of a Statement.
+// This spec is used by HCL to read the fields of Statement.
+// The decoded values from this spec will then be applied to a FlatStatement.
 func (*FlatStatement) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"effect":   &hcldec.AttrSpec{Name: "effect", Type: cty.String, Required: false},
@@ -109,10 +119,13 @@ type FlatSubnetFilterOptions struct {
 // FlatMapstructure returns a new FlatSubnetFilterOptions.
 // FlatSubnetFilterOptions is an auto-generated flat version of SubnetFilterOptions.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*SubnetFilterOptions) FlatMapstructure() interface{} { return new(FlatSubnetFilterOptions) }
+func (*SubnetFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatSubnetFilterOptions)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatSubnetFilterOptions.
-// This spec is used by HCL to read the fields of FlatSubnetFilterOptions.
+// HCL2Spec returns the hcl spec of a SubnetFilterOptions.
+// This spec is used by HCL to read the fields of SubnetFilterOptions.
+// The decoded values from this spec will then be applied to a FlatSubnetFilterOptions.
 func (*FlatSubnetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters":   &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
@@ -131,10 +144,13 @@ type FlatVpcFilterOptions struct {
 // FlatMapstructure returns a new FlatVpcFilterOptions.
 // FlatVpcFilterOptions is an auto-generated flat version of VpcFilterOptions.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*VpcFilterOptions) FlatMapstructure() interface{} { return new(FlatVpcFilterOptions) }
+func (*VpcFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatVpcFilterOptions)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatVpcFilterOptions.
-// This spec is used by HCL to read the fields of FlatVpcFilterOptions.
+// HCL2Spec returns the hcl spec of a VpcFilterOptions.
+// This spec is used by HCL to read the fields of VpcFilterOptions.
+// The decoded values from this spec will then be applied to a FlatVpcFilterOptions.
 func (*FlatVpcFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},

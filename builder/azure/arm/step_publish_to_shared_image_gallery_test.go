@@ -2,9 +2,10 @@ package arm
 
 import (
 	"context"
+	"testing"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
-	"testing"
 )
 
 func TestStepPublishToSharedImageGalleryShouldNotPublishForVhd(t *testing.T) {
