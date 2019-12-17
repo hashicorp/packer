@@ -54,14 +54,36 @@ type PostProcessorFunc func(name string) (PostProcessor, error)
 // The function type used to lookup Provisioner implementations.
 type ProvisionerFunc func(name string) (Provisioner, error)
 
+type BasicStore interface {
+	Has(name string) bool
+	List() (names []string)
+}
+
+type BuilderStore interface {
+	BasicStore
+	Start(name string) (Builder, error)
+}
+
+type ProvisionerStore interface {
+	BasicStore
+	Start(name string) (Provisioner, error)
+}
+
+type PostProcessorStore interface {
+	BasicStore
+	Start(name string) (PostProcessor, error)
+}
+
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
 type ComponentFinder struct {
-	Builder       BuilderFunc
-	Hook          HookFunc
-	PostProcessor PostProcessorFunc
-	Provisioner   ProvisionerFunc
+	Hook HookFunc
+
+	// For HCL2
+	BuilderStore       BuilderStore
+	ProvisionerStore   ProvisionerStore
+	PostProcessorStore PostProcessorStore
 }
 
 // NewCore creates a new Core.
@@ -112,10 +134,10 @@ func (c *Core) BuildNames() []string {
 	return r
 }
 
-func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (coreBuildProvisioner, error) {
+func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (CoreBuildProvisioner, error) {
 	// Get the provisioner
-	cbp := coreBuildProvisioner{}
-	provisioner, err := c.components.Provisioner(rawP.Type)
+	cbp := CoreBuildProvisioner{}
+	provisioner, err := c.components.ProvisionerStore.Start(rawP.Type)
 	if err != nil {
 		return cbp, fmt.Errorf(
 			"error initializing provisioner '%s': %s",
@@ -146,9 +168,9 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			Provisioner: provisioner,
 		}
 	}
-	cbp = coreBuildProvisioner{
-		pType:       rawP.Type,
-		provisioner: provisioner,
+	cbp = CoreBuildProvisioner{
+		PType:       rawP.Type,
+		Provisioner: provisioner,
 		config:      config,
 	}
 
@@ -162,7 +184,7 @@ func (c *Core) Build(n string) (Build, error) {
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
-	builder, err := c.components.Builder(configBuilder.Type)
+	builder, err := c.components.BuilderStore.Start(configBuilder.Type)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error initializing builder '%s': %s",
@@ -177,7 +199,7 @@ func (c *Core) Build(n string) (Build, error) {
 	rawName := configBuilder.Name
 
 	// Setup the provisioners for this build
-	provisioners := make([]coreBuildProvisioner, 0, len(c.Template.Provisioners))
+	provisioners := make([]CoreBuildProvisioner, 0, len(c.Template.Provisioners))
 	for _, rawP := range c.Template.Provisioners {
 		// If we're skipping this, then ignore it
 		if rawP.OnlyExcept.Skip(rawName) {
@@ -191,7 +213,7 @@ func (c *Core) Build(n string) (Build, error) {
 		provisioners = append(provisioners, cbp)
 	}
 
-	var cleanupProvisioner coreBuildProvisioner
+	var cleanupProvisioner CoreBuildProvisioner
 	if c.Template.CleanupProvisioner != nil {
 		// This is a special instantiation of the shell-local provisioner that
 		// is only run on error at end of provisioning step before other step
@@ -203,9 +225,9 @@ func (c *Core) Build(n string) (Build, error) {
 	}
 
 	// Setup the post-processors
-	postProcessors := make([][]coreBuildPostProcessor, 0, len(c.Template.PostProcessors))
+	postProcessors := make([][]CoreBuildPostProcessor, 0, len(c.Template.PostProcessors))
 	for _, rawPs := range c.Template.PostProcessors {
-		current := make([]coreBuildPostProcessor, 0, len(rawPs))
+		current := make([]CoreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
 			if rawP.Skip(rawName) {
 				continue
@@ -222,7 +244,7 @@ func (c *Core) Build(n string) (Build, error) {
 			}
 
 			// Get the post-processor
-			postProcessor, err := c.components.PostProcessor(rawP.Type)
+			postProcessor, err := c.components.PostProcessorStore.Start(rawP.Type)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"error initializing post-processor '%s': %s",
@@ -233,9 +255,9 @@ func (c *Core) Build(n string) (Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
-			current = append(current, coreBuildPostProcessor{
-				processor:         postProcessor,
-				processorType:     rawP.Type,
+			current = append(current, CoreBuildPostProcessor{
+				PostProcessor:     postProcessor,
+				PType:             rawP.Type,
 				config:            rawP.Config,
 				keepInputArtifact: rawP.KeepInputArtifact,
 			})
@@ -251,16 +273,16 @@ func (c *Core) Build(n string) (Build, error) {
 
 	// TODO hooks one day
 
-	return &coreBuild{
-		name:               n,
-		builder:            builder,
-		builderConfig:      configBuilder.Config,
-		builderType:        configBuilder.Type,
-		postProcessors:     postProcessors,
-		provisioners:       provisioners,
-		cleanupProvisioner: cleanupProvisioner,
-		templatePath:       c.Template.Path,
-		variables:          c.variables,
+	return &CoreBuild{
+		Type:               n,
+		Builder:            builder,
+		BuilderConfig:      configBuilder.Config,
+		BuilderType:        configBuilder.Type,
+		PostProcessors:     postProcessors,
+		Provisioners:       provisioners,
+		CleanupProvisioner: cleanupProvisioner,
+		TemplatePath:       c.Template.Path,
+		Variables:          c.variables,
 	}, nil
 }
 

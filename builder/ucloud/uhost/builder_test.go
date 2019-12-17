@@ -1,10 +1,11 @@
 package uhost
 
 import (
-	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
+
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testBuilderConfig() map[string]interface{} {

@@ -37,7 +37,7 @@ type RemoteCmd struct {
 	exitStatus int
 
 	// This thing is a mutex, lock when making modifications concurrently
-	sync.Mutex
+	m sync.Mutex
 
 	exitChInit sync.Once
 	exitCh     chan interface{}
@@ -80,6 +80,11 @@ type Communicator interface {
 	DownloadDir(src string, dst string, exclude []string) error
 }
 
+type ConfigurableCommunicator interface {
+	HCL2Speccer
+	Configure(...interface{}) ([]string, error)
+}
+
 // RunWithUi runs the remote command and streams the output to any configured
 // Writers for stdout/stderr, while also writing each line as it comes to a Ui.
 // RunWithUi will not return until the command finishes or is cancelled.
@@ -95,8 +100,8 @@ func (r *RemoteCmd) RunWithUi(ctx context.Context, c Communicator, ui Ui) error 
 	originalStdout := r.Stdout
 	originalStderr := r.Stderr
 	defer func() {
-		r.Lock()
-		defer r.Unlock()
+		r.m.Lock()
+		defer r.m.Unlock()
 
 		r.Stdout = originalStdout
 		r.Stderr = originalStderr
@@ -169,9 +174,9 @@ OutputLoop:
 func (r *RemoteCmd) SetExited(status int) {
 	r.initchan()
 
-	r.Lock()
+	r.m.Lock()
 	r.exitStatus = status
-	r.Unlock()
+	r.m.Unlock()
 
 	close(r.exitCh)
 }
@@ -180,8 +185,8 @@ func (r *RemoteCmd) SetExited(status int) {
 func (r *RemoteCmd) Wait() int {
 	r.initchan()
 	<-r.exitCh
-	r.Lock()
-	defer r.Unlock()
+	r.m.Lock()
+	defer r.m.Unlock()
 	return r.exitStatus
 }
 

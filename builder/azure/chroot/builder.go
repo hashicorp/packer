@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
 
 // Package chroot is able to create an Azure managed image without requiring the
 // launch of a new virtual machine for every build. It does this by attaching and
@@ -14,6 +15,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/common"
@@ -115,6 +117,8 @@ type Builder struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = azcommon.TemplateFuncs

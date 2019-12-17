@@ -88,3 +88,6 @@
     
 -   `ssh_remote_tunnels` ([]string) - 
 -   `ssh_local_tunnels` ([]string) - 
+-   `ssh_public_key` ([]byte) - SSH Internals
+    
+-   `ssh_private_key` ([]byte) - SSH Private Key

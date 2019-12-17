@@ -3,6 +3,7 @@ package shell_local
 import (
 	"context"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 )
@@ -15,6 +16,8 @@ type ExecuteCommandTemplate struct {
 	Vars   string
 	Script string
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := sl.Decode(&p.config, raws...)

@@ -132,7 +132,8 @@ func TestNewConfig(t *testing.T) {
 			raw[tc.Nullify] = nil
 		}
 
-		_, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 
 		if tc.Err {
 			if errs == nil {

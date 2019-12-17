@@ -2,10 +2,9 @@ package common
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
-
-	"encoding/json"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"

@@ -13,6 +13,9 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
@@ -52,6 +55,7 @@ func (c *BuildCommand) Run(args []string) int {
 	return c.RunContext(buildCtx, args)
 }
 
+// Config is the command-configuration parsed from the command line.
 type Config struct {
 	Color, Debug, Force, Timestamp bool
 	ParallelBuilds                 int64
@@ -92,33 +96,67 @@ func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
 	return cfg, 0
 }
 
-func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
-	cfg, ret := c.ParseArgs(args)
-	if ret != 0 {
-		return ret
+func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
+	parser := &hcl2template.Parser{
+		Parser:                hclparse.NewParser(),
+		BuilderSchemas:        c.CoreConfig.Components.BuilderStore,
+		ProvisionersSchemas:   c.CoreConfig.Components.ProvisionerStore,
+		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
 	}
+
+	builds, diags := parser.Parse(path)
+	{
+		// write HCL errors/diagnostics if any.
+		b := bytes.NewBuffer(nil)
+		err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
+		if err != nil {
+			c.Ui.Error("could not write diagnostic: " + err.Error())
+			return nil, 1
+		}
+		if b.Len() != 0 {
+			c.Ui.Message(b.String())
+		}
+	}
+	ret := 0
+	if diags.HasErrors() {
+		ret = 1
+	}
+
+	return builds, ret
+}
+
+func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
+
+	isHCLLoaded, err := isHCLLoaded(path)
+	if path != "-" && err != nil {
+		c.Ui.Error(fmt.Sprintf("Could not tell wether %s is hcl enabled: %s", path, err))
+		return nil, 1
+	}
+	if isHCLLoaded {
+		return c.GetBuildsFromHCL(path)
+	}
+
+	c.Ui.Say(`Legacy JSON Configuration Will Be Used.
+The template will be parsed in the legacy configuration style. This style 
+Will continue to work but users are encouraged to move to the new style, 
+See: https://packer.io/guides/hcl2 .`)
 
 	// Parse the template
 	var tpl *template.Template
-	var err error
-	tpl, err = template.ParseFile(cfg.Path)
+	tpl, err = template.ParseFile(path)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
-		return 1
+		return nil, 1
 	}
 
 	// Get the core
 	core, err := c.Meta.Core(tpl)
 	if err != nil {
 		c.Ui.Error(err.Error())
-		return 1
+		return nil, 1
 	}
 
-	// Get the builds we care about
-	var errors = struct {
-		sync.RWMutex
-		m map[string]error
-	}{m: make(map[string]error)}
+	ret := 0
 	buildNames := c.Meta.BuildNames(core)
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, n := range buildNames {
@@ -127,12 +165,22 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 			c.Ui.Error(fmt.Sprintf(
 				"Failed to initialize build '%s': %s",
 				n, err))
-			errors.m[n] = err
+			ret = 1
 			continue
 		}
 
 		builds = append(builds, b)
 	}
+	return builds, ret
+}
+
+func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
+	}
+
+	builds, ret := c.GetBuilds(cfg.Path)
 
 	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
@@ -146,18 +194,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		packer.UiColorYellow,
 		packer.UiColorBlue,
 	}
-	buildUis := make(map[string]packer.Ui)
-	for i, b := range buildNames {
-		var ui packer.Ui
-		ui = c.Ui
+	buildUis := make(map[packer.Build]packer.Ui)
+	for i := range builds {
+		ui := c.Ui
 		if cfg.Color {
 			ui = &packer.ColoredUi{
 				Color: colors[i%len(colors)],
 				Ui:    ui,
 			}
 			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
-				ui.Say(fmt.Sprintf("%s output will be in this color.", b))
-				if i+1 == len(buildNames) {
+				ui.Say(fmt.Sprintf("%s: output will be in this color.", builds[i].Name()))
+				if i+1 == len(builds) {
 					// Add a newline between the color output and the actual output
 					c.Ui.Say("")
 				}
@@ -170,7 +217,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 			}
 		}
 
-		buildUis[b] = ui
+		buildUis[builds[i]] = ui
 	}
 
 	log.Printf("Build debug mode: %v", cfg.Debug)
@@ -178,7 +225,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	log.Printf("On error: %v", cfg.OnError)
 
 	// Set the debug and force mode and prepare all the builds
-	for _, b := range builds {
+	for i := range builds {
+		b := builds[i]
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfg.Debug)
 		b.SetForce(cfg.Force)
@@ -190,7 +238,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 			return 1
 		}
 		if len(warnings) > 0 {
-			ui := buildUis[b.Name()]
+			ui := buildUis[b]
 			ui.Say(fmt.Sprintf("Warnings for build '%s':\n", b.Name()))
 			for _, warning := range warnings {
 				ui.Say(fmt.Sprintf("* %s", warning))
@@ -205,6 +253,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		sync.RWMutex
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
+	// Get the builds we care about
+	var errors = struct {
+		sync.RWMutex
+		m map[string]error
+	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
@@ -214,7 +267,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 
 		b := builds[i]
 		name := b.Name()
-		ui := buildUis[name]
+		ui := buildUis[b]
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errors.Lock()
@@ -338,10 +391,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 
 	if len(errors.m) > 0 {
 		// If any errors occurred, exit with a non-zero exit status
-		return 1
+		ret = 1
 	}
 
-	return 0
+	return ret
 }
 
 func (*BuildCommand) Help() string {

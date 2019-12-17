@@ -69,7 +69,8 @@ func TestConfig(t *testing.T) {
 	// Config tests
 	t.Run("BaseConfig", func(t *testing.T) {
 		raw := testConfig(cfgFile)
-		_, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
@@ -80,7 +81,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		delete(raw, "access_cfg_file")
 
-		_, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 
 		expectedErrors := []string{
 			"'user_ocid'", "'tenancy_ocid'", "'fingerprint'", "'key_file'",
@@ -102,7 +104,8 @@ func TestConfig(t *testing.T) {
 		raw["fingerprint"] = "00:00..."
 		raw["key_file"] = keyFile.Name()
 
-		_, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 
 		if errs != nil {
 			t.Fatalf("err: %+v", errs)
@@ -112,7 +115,8 @@ func TestConfig(t *testing.T) {
 
 	t.Run("TenancyReadFromAccessCfgFile", func(t *testing.T) {
 		raw := testConfig(cfgFile)
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -131,7 +135,8 @@ func TestConfig(t *testing.T) {
 
 	t.Run("RegionNotDefaultedToPHXWhenSetInOCISettings", func(t *testing.T) {
 		raw := testConfig(cfgFile)
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -156,7 +161,8 @@ func TestConfig(t *testing.T) {
 			raw := testConfig(cfgFile)
 			delete(raw, k)
 
-			_, errs := NewConfig(raw)
+			var c Config
+			errs := c.Prepare(raw)
 
 			if !strings.Contains(errs.Error(), k) {
 				t.Errorf("Expected '%s' to contain '%s'", errs.Error(), k)
@@ -168,7 +174,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		delete(raw, "image_name")
 
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -183,7 +190,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		raw["user_ocid"] = expected
 
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -199,7 +207,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		raw["tenancy_ocid"] = expected
 
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -215,7 +224,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		raw["region"] = expected
 
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration %+v", errs)
 		}
@@ -231,7 +241,8 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		raw["fingerprint"] = expected
 
-		c, errs := NewConfig(raw)
+		var c Config
+		errs := c.Prepare(raw)
 		if errs != nil {
 			t.Fatalf("Unexpected error in configuration: %+v", errs)
 		}

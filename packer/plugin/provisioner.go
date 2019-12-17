@@ -4,12 +4,22 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 )
 
 type cmdProvisioner struct {
 	p      packer.Provisioner
 	client *Client
+}
+
+func (p *cmdProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	defer func() {
+		r := recover()
+		p.checkExit(r, nil)
+	}()
+
+	return p.p.ConfigSpec()
 }
 
 func (c *cmdProvisioner) Prepare(configs ...interface{}) error {

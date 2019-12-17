@@ -72,10 +72,13 @@ type FlatConfig struct {
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":             &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -116,7 +119,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
-		"ami_block_device_mappings":     &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: &hcldec.BlockSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())}},
+		"ami_block_device_mappings":     &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"chroot_mounts":                 &hcldec.BlockListSpec{TypeName: "chroot_mounts", Nested: &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.String), Required: false}},
 		"command_wrapper":               &hcldec.AttrSpec{Name: "command_wrapper", Type: cty.String, Required: false},
 		"copy_files":                    &hcldec.AttrSpec{Name: "copy_files", Type: cty.List(cty.String), Required: false},

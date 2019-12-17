@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -15,18 +16,18 @@ const BuilderId = "packer.cloudstack"
 
 // Builder represents the CloudStack builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 	ui     packer.Ui
 }
 
-// Prepare implements the packer.Builder interface.
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	config, errs := NewConfig(raws...)
+	errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return nil, errs
 	}
-	b.config = config
 
 	return nil, nil
 }
@@ -109,7 +110,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the artifact and return it
 	artifact := &Artifact{
 		client:   client,
-		config:   b.config,
+		config:   &b.config,
 		template: state.Get("template").(*cloudstack.CreateTemplateResponse),
 	}
 

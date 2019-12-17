@@ -493,58 +493,57 @@ func (c *Config) createCertificate() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func newConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	c.ctx.Funcs = azcommon.TemplateFuncs
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 	}, raws...)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	provideDefaultValues(&c)
-	setRuntimeValues(&c)
-	setUserNamePassword(&c)
+	provideDefaultValues(c)
+	setRuntimeValues(c)
+	setUserNamePassword(c)
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	err = setCustomData(&c)
+	err = setCustomData(c)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// NOTE: if the user did not specify a communicator, then default to both
 	// SSH and WinRM.  This is for backwards compatibility because the code did
 	// not specifically force the user to set a communicator.
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "ssh") {
-		err = setSshValues(&c)
+		err = setSshValues(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "winrm") {
-		err = setWinRMCertificate(&c)
+		err = setWinRMCertificate(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
-	assertRequiredParametersSet(&c, errs)
-	assertTagProperties(&c, errs)
+	assertRequiredParametersSet(c, errs)
+	assertTagProperties(c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
-	return &c, nil, nil
+	return nil, nil
 }
 
 func setSshValues(c *Config) error {

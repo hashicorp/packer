@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -22,22 +23,23 @@ const ociAPIVersion = "20160918"
 
 // Builder is a builder implementation that creates Oracle OCI custom images.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
-	config, err := NewConfig(rawConfig...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	err := b.config.Prepare(raws...)
 	if err != nil {
 		return nil, err
 	}
-	b.config = config
 
 	return nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	driver, err := NewDriverOCI(b.config)
+	driver, err := NewDriverOCI(&b.config)
 	if err != nil {
 		return nil, err
 	}
