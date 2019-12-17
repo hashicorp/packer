@@ -42,10 +42,6 @@ func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
 func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	// calling BuilderSchemas will start a new builder plugin to ask about
-	// the schema of the builder; but we do not know yet if the builder is
-	// actually going to be used. This also allows to call the same builder
-	// more than once.
 	builder, err := p.BuilderSchemas.Start(source.Type)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
