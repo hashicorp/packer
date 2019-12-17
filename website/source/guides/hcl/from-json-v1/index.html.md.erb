@@ -21,8 +21,8 @@ The following file :
   "builders": [
     {
       "ami_name": "packer-test",
-      "region": "us-east-1"
-      "instance_type": "t2.micro"
+      "region": "us-east-1",
+      "instance_type": "t2.micro",
 
       "source_ami_filter": {
         "filters": {
@@ -73,7 +73,7 @@ source "amazon-ebs" "example" {
     }
 
     communicator = "ssh"
-    ssh_username = "ec2-user"
+    ssh_username = "ubuntu"
 }
 
 # A build starts sources and runs provisioning steps on those sources.
