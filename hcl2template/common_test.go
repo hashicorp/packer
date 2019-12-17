@@ -134,6 +134,7 @@ type parseTest struct {
 }
 
 func testParse(t *testing.T, tests []parseTest) {
+	t.Helper()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
