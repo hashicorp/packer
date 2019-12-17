@@ -61,7 +61,8 @@ func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics) 
 	if moreDiags.HasErrors() {
 		return nil, diags
 	}
-	warning, err := builder.Prepare(decoded)
+
+	_, warning, err := builder.Prepare(decoded)
 	moreDiags = warningErrorsToDiags(source.block, warning, err)
 	diags = append(diags, moreDiags...)
 	return builder, diags
