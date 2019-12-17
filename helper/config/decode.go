@@ -163,7 +163,7 @@ func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []inte
 	placeholderData := raws[len(raws)-1]
 	if pd, ok := placeholderData.(map[string]string); ok {
 		if uuid, ok := pd["PackerRunUUID"]; ok {
-			if strings.Contains(uuid, "Generated_PackerRunUUID.") {
+			if strings.Contains(uuid, "Build_PackerRunUUID.") {
 				cast := make(map[interface{}]interface{})
 				for k, v := range pd {
 					cast[k] = v
@@ -178,12 +178,13 @@ func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []inte
 	// map[interface]interface, not a map[string]string
 	if pd, ok := placeholderData.(map[interface{}]interface{}); ok {
 		if uuid, ok := pd["PackerRunUUID"]; ok {
-			if strings.Contains(uuid.(string), "Generated_PackerRunUUID.") {
+			if strings.Contains(uuid.(string), "Build_PackerRunUUID.") {
 				raws = raws[:len(raws)-1]
 				return pd, raws
 			}
 		}
 	}
+
 	return nil, raws
 }
 

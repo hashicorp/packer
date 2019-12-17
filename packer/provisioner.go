@@ -53,7 +53,7 @@ type ProvisionHook struct {
 // data.
 func BasicPlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
-	msg := "Generated_%s. " + common.PlaceholderMsg
+	msg := "Build_%s. " + common.PlaceholderMsg
 	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
 	// The following correspond to communicator-agnostic functions that are
 	// part of the SSH and WinRM communicator implementations. These functions
