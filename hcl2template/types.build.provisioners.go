@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"fmt"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -31,7 +32,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 	return provisioner, diags
 }
 
-func (p *Parser) StartProvisioner(pb *ProvisionerBlock) (packer.Provisioner, hcl.Diagnostics) {
+func (p *Parser) StartProvisioner(pb *ProvisionerBlock, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)
@@ -43,12 +44,30 @@ func (p *Parser) StartProvisioner(pb *ProvisionerBlock) (packer.Provisioner, hcl
 		})
 		return nil, diags
 	}
-	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pb.block, nil, provisioner)
+	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.block, nil, provisioner)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return nil, diags
 	}
-	err = provisioner.Prepare(flatProvisinerCfg)
+	// manipulate generatedVars from builder to add to the interfaces being
+	// passed to the provisioner Prepare()
+
+	// If the builder has provided a list of to-be-generated variables that
+	// should be made accessible to provisioners, pass that list into
+	// the provisioner prepare() so that the provisioner can appropriately
+	// validate user input against what will become available. Otherwise,
+	// only pass the default variables, using the basic placeholder data.
+	generatedPlaceholderMap := packer.BasicPlaceholderData()
+	if generatedVars != nil {
+		for _, k := range generatedVars {
+			generatedPlaceholderMap[k] = fmt.Sprintf("Generated_%s. "+
+				common.PlaceholderMsg, k)
+		}
+	}
+	// configs := make([]interface{}, 2)
+	// configs = append(, flatProvisionerCfg)
+	// configs = append(configs, generatedPlaceholderMap)
+	err = provisioner.Prepare(flatProvisionerCfg, generatedPlaceholderMap)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,

@@ -14,11 +14,11 @@ type PackerConfig struct {
 	Builds Builds
 }
 
-func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		provisioner, moreDiags := p.StartProvisioner(pb)
+		provisioner, moreDiags := p.StartProvisioner(pb, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -63,12 +63,12 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				})
 				continue
 			}
-			builder, moreDiags := p.StartBuilder(src)
+			builder, moreDiags, generatedVars := p.StartBuilder(src)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks)
+			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks, generatedVars)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
