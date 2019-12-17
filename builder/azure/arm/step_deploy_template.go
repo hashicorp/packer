@@ -58,6 +58,18 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	return err
 }
 
+func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
+	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)
+	if err == nil {
+		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
+	}
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+
+	return err
+}
+
 func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deploying deployment template ...")
 
@@ -178,7 +190,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		ui.Error("Could not retrieve OS Image details")
 	}
 
-	ui.Say(" -> Deployment: " + deploymentName)
+	ui.Say(" -> Deployment Resources within: " + deploymentName)
 	if deploymentName != "" {
 		maxResources := int32(50)
 		deploymentOperations, err := s.client.DeploymentOperationsClient.ListComplete(context.TODO(), resourceGroupName, deploymentName, &maxResources)
@@ -223,5 +235,8 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 				"Name: %s\n"+
 				"Error: %s", imageName, err))
 		}
+
+		ui.Say(fmt.Sprintf(" -> Deployment: '%s'", deploymentName))
+		s.deleteTemplate(context.Background(), resourceGroupName, deploymentName)
 	}
 }
