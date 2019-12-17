@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 func boolPointer(tf bool) *bool {
@@ -173,6 +175,34 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 
 	if !reflect.DeepEqual(builder.PrepareConfig[1], packerConfig) {
 		t.Fatalf("prepare bad: %#v", builder.PrepareConfig[1])
+	}
+}
+
+func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
+	packerConfig := testDefaultPackerConfig()
+
+	build := testBuild()
+	builder := build.Builder.(*MockBuilder)
+	builder.GeneratedVars = []string{"PartyVar"}
+
+	build.Prepare()
+	if !builder.PrepareCalled {
+		t.Fatalf("should be called")
+	}
+	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.PrepareConfig)
+	}
+
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
+	if !prov.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+
+	generated := BasicPlaceholderData()
+	generated["PartyVar"] = "Build_PartyVar. " + common.PlaceholderMsg
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
 

@@ -163,7 +163,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	generatedPlaceholderMap := BasicPlaceholderData()
 	if generatedVars != nil {
 		for _, k := range generatedVars {
-			generatedPlaceholderMap[k] = fmt.Sprintf("Generated_%s. "+
+			generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
 				common.PlaceholderMsg, k)
 		}
 	}
