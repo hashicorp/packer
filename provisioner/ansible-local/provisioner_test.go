@@ -343,7 +343,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 
 	// Setup the builder
 	builder := &docker.Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
 	if err != nil {
 		t.Fatalf("Error preparing configuration %s", err)
 	}

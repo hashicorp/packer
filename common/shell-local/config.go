@@ -5,6 +5,7 @@ package shell_local
 import (
 	"errors"
 	"fmt"
+	// "log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -49,10 +50,6 @@ type Config struct {
 }
 
 func Decode(config *Config, raws ...interface{}) error {
-	// Create passthrough for build-generated data so we can fill it in once we know
-	// it
-	config.ctx.Data = packer.BasicPlaceholderData()
-
 	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &config.ctx,
@@ -63,7 +60,8 @@ func Decode(config *Config, raws ...interface{}) error {
 		},
 	}, raws...)
 	if err != nil {
-		return fmt.Errorf("Error decoding config: %s, config is %#v, and raws is %#v", err, config, raws)
+		return fmt.Errorf("Error decoding config: %s", err)
+		// return fmt.Errorf("Error decoding config: %s, config is %#v, and raws is %#v", err, config, raws)
 	}
 
 	return nil

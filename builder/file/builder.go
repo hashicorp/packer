@@ -23,14 +23,14 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	c, warnings, errs := NewConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 	b.config = c
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 // Run is where the actual build should take place. It takes a Build and a Ui.

@@ -12,7 +12,7 @@ type cmdBuilder struct {
 	client  *Client
 }
 
-func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, error) {
+func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, []string, error) {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)

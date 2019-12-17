@@ -20,7 +20,7 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs := &multierror.Error{}
 
 	err := config.Decode(&b.config, &config.DecodeOpts{
@@ -42,7 +42,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Comm.SSHAgentAuth = true
 	}
 
-	return nil, errs.ErrorOrNil()
+	return nil, nil, errs.ErrorOrNil()
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

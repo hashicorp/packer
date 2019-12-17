@@ -21,14 +21,14 @@ type Builder struct {
 }
 
 // Prepare implements the packer.Builder interface.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	config, errs := NewConfig(raws...)
 	if errs != nil {
-		return nil, errs
+		return nil, nil, errs
 	}
 	b.config = config
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 // Run implements the packer.Builder interface.

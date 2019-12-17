@@ -64,7 +64,7 @@ func BasicPlaceholderData() map[string]string {
 	placeholderData["User"] = fmt.Sprintf(msg, "User")
 	placeholderData["Password"] = fmt.Sprintf(msg, "Password")
 	placeholderData["ConnType"] = fmt.Sprintf(msg, "Type")
-	placeholderData["PACKER_RUN_UUID"] = fmt.Sprintf(msg, "PACKER_RUN_UUID")
+	placeholderData["PackerRunUUID"] = fmt.Sprintf(msg, "PackerRunUUID")
 	placeholderData["SSHPublicKey"] = fmt.Sprintf(msg, "SSHPublicKey")
 	placeholderData["SSHPrivateKey"] = fmt.Sprintf(msg, "SSHPrivateKey")
 
@@ -73,6 +73,28 @@ func BasicPlaceholderData() map[string]string {
 	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
 
 	return placeholderData
+}
+
+func CastDataToMap(data interface{}) map[string]interface{} {
+	// Provisioners expect a map[string]interface{} in their data field, but
+	// it gets converted into a map[interface]interface on the way over the
+	// RPC. Check that data can be cast into such a form, and cast it.
+	cast := make(map[string]interface{})
+	interMap, ok := data.(map[interface{}]interface{})
+	if !ok {
+		log.Printf("Unable to read map[string]interface out of data."+
+			"Using empty interface: %#v", data)
+	} else {
+		for key, val := range interMap {
+			keyString, ok := key.(string)
+			if ok {
+				cast[keyString] = val
+			} else {
+				log.Printf("Error casting generated data key to a string.")
+			}
+		}
+	}
+	return cast
 }
 
 // Runs the provisioners in order.
@@ -91,25 +113,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
-		// Provisioners expect a map[string]interface{} in their data field, but
-		// it gets converted into a map[interface]interface on the way over the
-		// RPC. Check that data can be cast into such a form, and cast it.
-		cast := make(map[string]interface{})
-		interMap, ok := data.(map[interface{}]interface{})
-		if !ok {
-			log.Printf("Unable to read map[string]interface out of data." +
-				"Using empty interface.")
-		} else {
-			for key, val := range interMap {
-				keyString, ok := key.(string)
-				if ok {
-					cast[keyString] = val
-				} else {
-					log.Printf("Error casting generated data key to a string.")
-				}
-			}
-		}
-
+		cast := CastDataToMap(data)
 		err := p.Provisioner.Provision(ctx, ui, comm, cast)
 
 		ts.End(err)

@@ -23,10 +23,10 @@ type MockBuilder struct {
 	RunFn         func(ctx context.Context)
 }
 
-func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
+func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error) {
 	tb.PrepareCalled = true
 	tb.PrepareConfig = config
-	return tb.PrepareWarnings, nil
+	return nil, tb.PrepareWarnings, nil
 }
 
 func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {

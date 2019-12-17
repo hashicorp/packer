@@ -81,7 +81,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 
 	b := &Builder{}
-	warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
 	if err != nil {
 		t.Fatal(err, warn)
 	}
@@ -149,7 +149,7 @@ func TestAgentSetToFalse(t *testing.T) {
 	}
 
 	b := &Builder{}
-	warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
 	if err != nil {
 		t.Fatal(err, warn)
 	}

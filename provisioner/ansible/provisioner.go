@@ -80,9 +80,6 @@ type Provisioner struct {
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
 
-	// Create passthrough for build-generated data
-	p.config.ctx.Data = packer.BasicPlaceholderData()
-
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,

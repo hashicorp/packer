@@ -44,7 +44,7 @@ type EngineVarsTemplate struct {
 	SourceOMI   string
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = osccommon.TemplateFuncs
 	// Create passthrough for {{ .BuildRegion }} and {{ .SourceOMI }} variables
 	// so we can fill them in later
@@ -57,7 +57,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateContext: &b.config.ctx,
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors
@@ -78,11 +78,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

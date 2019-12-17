@@ -166,21 +166,22 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 
 func funcGenGenerated(ctx *Context) interface{} {
 	return func(s string) (string, error) {
-		if data, ok := ctx.Data.(map[string]string); ok {
+		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
 			// PlaceholderData has been passed into generator, so if the given
 			// key already exists in data, then we know it's an "allowed" key
 			if heldPlace, ok := data[s]; ok {
-				// If we're in the first interpolation pass, the goal is to
-				// make sure that we pass the value through.
-				// TODO match against an actual string constant
-				if strings.Contains(heldPlace, common.PlaceholderMsg) {
-					return fmt.Sprintf("{{.%s}}", s), nil
-				} else {
-					return heldPlace, nil
+				if hp, ok := heldPlace.(string); ok {
+					// If we're in the first interpolation pass, the goal is to
+					// make sure that we pass the value through.
+					// TODO match against an actual string constant
+					if strings.Contains(hp, common.PlaceholderMsg) {
+						return fmt.Sprintf("{{.%s}}", s), nil
+					} else {
+						return hp, nil
+					}
 				}
-			} else {
-				return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 			}
+			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 		}
 
 		return "", fmt.Errorf("Error validating computed variable: the given "+

@@ -22,13 +22,13 @@ type Builder struct {
 
 var pluginVersion = "1.0.0"
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	config, warnings, errs := NewConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 	b.config = *config
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
