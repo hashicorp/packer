@@ -12,7 +12,13 @@ import (
 type StepConnectDocker struct{}
 
 func (s *StepConnectDocker) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
+	config, ok := state.Get("config").(*Config)
+	if !ok {
+		err := fmt.Errorf("error encountered obtaining docker config")
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
 	containerId := state.Get("container_id").(string)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)
