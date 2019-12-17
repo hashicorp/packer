@@ -37,10 +37,10 @@ const (
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
 	b.stateBag = new(multistep.BasicStateBag)
@@ -48,7 +48,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.setTemplateParameters(b.stateBag)
 	b.setImageParameters(b.stateBag)
 
-	return warnings, errs
+	return nil, warnings, errs
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -232,10 +232,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
 			NewStepDeployTemplate(azureClient, ui, &b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
-			&StepSaveWinRMPassword{
-				Password:  b.config.tmpAdminPassword,
-				BuildName: b.config.PackerBuildName,
-			},
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {

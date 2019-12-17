@@ -31,7 +31,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"api_key": []string{},
 	}
 
-	warns, err := b.Prepare(c)
+	_, warns, err := b.Prepare(c)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -47,7 +47,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	config := testConfig()
 
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

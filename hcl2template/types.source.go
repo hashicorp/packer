@@ -39,7 +39,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics) {
+func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := p.BuilderSchemas.Start(source.Type)
@@ -49,18 +49,19 @@ func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics) 
 			Detail:  err.Error(),
 			Subject: &source.block.LabelRanges[0],
 		})
-		return builder, diags
+		return builder, diags, nil
 	}
 
 	decoded, moreDiags := decodeHCL2Spec(source.block, nil, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		return nil, diags
+		return nil, diags, nil
 	}
-	warning, err := builder.Prepare(decoded)
+
+	generatedVars, warning, err := builder.Prepare(decoded)
 	moreDiags = warningErrorsToDiags(source.block, warning, err)
 	diags = append(diags, moreDiags...)
-	return builder, diags
+	return builder, diags, generatedVars
 }
 
 func (source *Source) Ref() SourceRef {

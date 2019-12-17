@@ -40,8 +40,8 @@ var _ packer.Builder = new(MockBuilder)
 
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
-func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, error) {
-	return nil, config.Decode(&b.Config, &config.DecodeOpts{
+func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	return nil, nil, config.Decode(&b.Config, &config.DecodeOpts{
 		Interpolate: true,
 	}, raws...)
 }
@@ -70,7 +70,7 @@ func (b *MockProvisioner) Prepare(raws ...interface{}) error {
 	}, raws...)
 }
 
-func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	return nil
 }
 

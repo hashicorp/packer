@@ -25,16 +25,18 @@ type MockBuilder struct {
 	RunUi         Ui
 	CancelCalled  bool
 	RunFn         func(ctx context.Context)
+
+	GeneratedVars []string
 }
 
 func (tb *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return tb.FlatMapstructure().HCL2Spec() }
 
 func (tb *MockBuilder) FlatConfig() interface{} { return tb.FlatMapstructure() }
 
-func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
+func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error) {
 	tb.PrepareCalled = true
 	tb.PrepareConfig = config
-	return tb.PrepareWarnings, nil
+	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
 func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
