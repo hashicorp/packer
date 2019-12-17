@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,RootBlockDevice
+
 // Package bsusurrogate contains a packer.Builder implementation that
 // builds a new EBS-backed OMI using an ephemeral instance.
 package bsusurrogate
@@ -9,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -38,6 +41,8 @@ type Builder struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 

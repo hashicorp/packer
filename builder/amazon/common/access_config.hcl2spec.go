@@ -18,10 +18,13 @@ type FlatVaultAWSEngineOptions struct {
 // FlatMapstructure returns a new FlatVaultAWSEngineOptions.
 // FlatVaultAWSEngineOptions is an auto-generated flat version of VaultAWSEngineOptions.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*VaultAWSEngineOptions) FlatMapstructure() interface{} { return new(FlatVaultAWSEngineOptions) }
+func (*VaultAWSEngineOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatVaultAWSEngineOptions)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatVaultAWSEngineOptions.
-// This spec is used by HCL to read the fields of FlatVaultAWSEngineOptions.
+// HCL2Spec returns the hcl spec of a VaultAWSEngineOptions.
+// This spec is used by HCL to read the fields of VaultAWSEngineOptions.
+// The decoded values from this spec will then be applied to a FlatVaultAWSEngineOptions.
 func (*FlatVaultAWSEngineOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"name":        &hcldec.AttrSpec{Name: "name", Type: cty.String, Required: false},

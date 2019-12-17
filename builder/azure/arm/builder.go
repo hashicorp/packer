@@ -14,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
@@ -24,7 +25,7 @@ import (
 )
 
 type Builder struct {
-	config   *Config
+	config   Config
 	stateBag multistep.StateBag
 	runner   multistep.Runner
 }
@@ -34,13 +35,13 @@ const (
 	DefaultSecretName       = "packerKeyVaultSecret"
 )
 
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := newConfig(raws...)
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
-
-	b.config = c
 
 	b.stateBag = new(multistep.BasicStateBag)
 	b.configureStateBag(b.stateBag)
@@ -64,7 +65,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	log.Print(":: Configuration")
-	packerAzureCommon.DumpConfig(b.config, func(s string) { log.Print(s) })
+	packerAzureCommon.DumpConfig(&b.config, func(s string) { log.Print(s) })
 
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put(constants.Ui, ui)
@@ -90,7 +91,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	resolver := newResourceResolver(azureClient)
-	if err := resolver.Resolve(b.config); err != nil {
+	if err := resolver.Resolve(&b.config); err != nil {
 		return nil, err
 	}
 	if b.config.ClientConfig.ObjectID == "" {
@@ -197,8 +198,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
@@ -212,10 +213,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
-			NewStepSnapshotOSDisk(azureClient, ui, b.config),
-			NewStepSnapshotDataDisks(azureClient, ui, b.config),
+			NewStepSnapshotOSDisk(azureClient, ui, &b.config),
+			NewStepSnapshotDataDisks(azureClient, ui, &b.config),
 			NewStepCaptureImage(azureClient, ui),
-			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
+			NewStepPublishToSharedImageGallery(azureClient, ui, &b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
@@ -224,12 +225,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
 			NewStepGetCertificate(azureClient, ui),
-			NewStepSetCertificate(b.config, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
+			NewStepSetCertificate(&b.config, ui),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&StepSaveWinRMPassword{
 				Password:  b.config.tmpAdminPassword,
@@ -251,10 +252,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
-			NewStepSnapshotOSDisk(azureClient, ui, b.config),
-			NewStepSnapshotDataDisks(azureClient, ui, b.config),
+			NewStepSnapshotOSDisk(azureClient, ui, &b.config),
+			NewStepSnapshotDataDisks(azureClient, ui, &b.config),
 			NewStepCaptureImage(azureClient, ui),
-			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
+			NewStepPublishToSharedImageGallery(azureClient, ui, &b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),

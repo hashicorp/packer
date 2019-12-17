@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/packer/command"
@@ -27,9 +28,9 @@ type config struct {
 	PluginMinPort              int
 	PluginMaxPort              int
 
-	Builders       map[string]string
-	PostProcessors map[string]string `json:"post-processors"`
-	Provisioners   map[string]string
+	Builders       packer.MapOfBuilder
+	Provisioners   packer.MapOfProvisioner
+	PostProcessors packer.MapOfPostProcessor `json:"post-processors"`
 }
 
 // Decodes configuration in JSON format from the given io.Reader into
@@ -58,7 +59,7 @@ func (c *config) Discover() error {
 	if err != nil {
 		log.Printf("[ERR] Error loading exe directory: %s", err)
 	} else {
-		if err := c.discover(filepath.Dir(exePath)); err != nil {
+		if err := c.discoverExternalComponents(filepath.Dir(exePath)); err != nil {
 			return err
 		}
 	}
@@ -68,19 +69,19 @@ func (c *config) Discover() error {
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
 	} else {
-		if err := c.discover(filepath.Join(dir, "plugins")); err != nil {
+		if err := c.discoverExternalComponents(filepath.Join(dir, "plugins")); err != nil {
 			return err
 		}
 	}
 
 	// Next, look in the CWD.
-	if err := c.discover("."); err != nil {
+	if err := c.discoverExternalComponents("."); err != nil {
 		return err
 	}
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.
-	if err := c.discoverInternal(); err != nil {
+	if err := c.discoverInternalComponents(); err != nil {
 		return err
 	}
 
@@ -89,51 +90,33 @@ func (c *config) Discover() error {
 
 // This is a proper packer.BuilderFunc that can be used to load packer.Builder
 // implementations from the defined plugins.
-func (c *config) LoadBuilder(name string) (packer.Builder, error) {
+func (c *config) StartBuilder(name string) (packer.Builder, error) {
 	log.Printf("Loading builder: %s\n", name)
-	bin, ok := c.Builders[name]
-	if !ok {
-		log.Printf("Builder not found: %s\n", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).Builder()
+	return c.Builders.Start(name)
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
 // to load packer.Hook implementations from the defined plugins.
-func (c *config) LoadHook(name string) (packer.Hook, error) {
+func (c *config) StarHook(name string) (packer.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return c.pluginClient(name).Hook()
 }
 
 // This is a proper packer.PostProcessorFunc that can be used to load
 // packer.PostProcessor implementations from defined plugins.
-func (c *config) LoadPostProcessor(name string) (packer.PostProcessor, error) {
+func (c *config) StartPostProcessor(name string) (packer.PostProcessor, error) {
 	log.Printf("Loading post-processor: %s", name)
-	bin, ok := c.PostProcessors[name]
-	if !ok {
-		log.Printf("Post-processor not found: %s", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).PostProcessor()
+	return c.PostProcessors.Start(name)
 }
 
 // This is a proper packer.ProvisionerFunc that can be used to load
 // packer.Provisioner implementations from defined plugins.
-func (c *config) LoadProvisioner(name string) (packer.Provisioner, error) {
+func (c *config) StartProvisioner(name string) (packer.Provisioner, error) {
 	log.Printf("Loading provisioner: %s\n", name)
-	bin, ok := c.Provisioners[name]
-	if !ok {
-		log.Printf("Provisioner not found: %s\n", name)
-		return nil, nil
-	}
-
-	return c.pluginClient(bin).Provisioner()
+	return c.Provisioners.Start(name)
 }
 
-func (c *config) discover(path string) error {
+func (c *config) discoverExternalComponents(path string) error {
 	var err error
 
 	if !filepath.IsAbs(path) {
@@ -142,32 +125,69 @@ func (c *config) discover(path string) error {
 			return err
 		}
 	}
+	externallyUsed := []string{}
 
-	err = c.discoverSingle(
-		filepath.Join(path, "packer-builder-*"), &c.Builders)
+	pluginPaths, err := c.discoverSingle(filepath.Join(path, "packer-builder-*"))
 	if err != nil {
 		return err
 	}
+	for plugin := range pluginPaths {
+		plugin := plugin
+		c.Builders[plugin] = func() (packer.Builder, error) {
+			return c.pluginClient(pluginPaths[plugin]).Builder()
+		}
+		externallyUsed = append(externallyUsed, plugin)
+	}
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external builders %v", externallyUsed)
+		externallyUsed = nil
+	}
 
-	err = c.discoverSingle(
-		filepath.Join(path, "packer-post-processor-*"), &c.PostProcessors)
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-post-processor-*"))
 	if err != nil {
 		return err
 	}
+	for plugin := range pluginPaths {
+		plugin := plugin
+		c.PostProcessors[plugin] = func() (packer.PostProcessor, error) {
+			return c.pluginClient(pluginPaths[plugin]).PostProcessor()
+		}
+		externallyUsed = append(externallyUsed, plugin)
+	}
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external post-processors %v", externallyUsed)
+		externallyUsed = nil
+	}
 
-	return c.discoverSingle(
-		filepath.Join(path, "packer-provisioner-*"), &c.Provisioners)
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-provisioner-*"))
+	if err != nil {
+		return err
+	}
+	for plugin := range pluginPaths {
+		plugin := plugin
+		c.Provisioners[plugin] = func() (packer.Provisioner, error) {
+			return c.pluginClient(pluginPaths[plugin]).Provisioner()
+		}
+		externallyUsed = append(externallyUsed, plugin)
+	}
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external provisioners %v", externallyUsed)
+		externallyUsed = nil
+	}
+
+	return nil
 }
 
-func (c *config) discoverSingle(glob string, m *map[string]string) error {
+func (c *config) discoverSingle(glob string) (map[string]string, error) {
 	matches, err := filepath.Glob(glob)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if *m == nil {
-		*m = make(map[string]string)
-	}
+	res := make(map[string]string)
 
 	prefix := filepath.Base(glob)
 	prefix = prefix[:strings.Index(prefix, "*")]
@@ -191,13 +211,13 @@ func (c *config) discoverSingle(glob string, m *map[string]string) error {
 		// Look for foo-bar-baz. The plugin name is "baz"
 		plugin := file[len(prefix):]
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", plugin, match)
-		(*m)[plugin] = match
+		res[plugin] = match
 	}
 
-	return nil
+	return res, nil
 }
 
-func (c *config) discoverInternal() error {
+func (c *config) discoverInternalComponents() error {
 	// Get the packer binary path
 	packerPath, err := osext.Executable()
 	if err != nil {
@@ -206,34 +226,38 @@ func (c *config) discoverInternal() error {
 	}
 
 	for builder := range command.Builders {
+		builder := builder
 		_, found := (c.Builders)[builder]
 		if !found {
-			(c.Builders)[builder] = fmt.Sprintf("%s%splugin%spacker-builder-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, builder)
-		} else {
-			log.Printf("Using external plugin for %s", builder)
+			c.Builders[builder] = func() (packer.Builder, error) {
+				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
+					packerPath, PACKERSPACE, PACKERSPACE, builder)
+				return c.pluginClient(bin).Builder()
+			}
 		}
 	}
 
 	for provisioner := range command.Provisioners {
+		provisioner := provisioner
 		_, found := (c.Provisioners)[provisioner]
 		if !found {
-			(c.Provisioners)[provisioner] = fmt.Sprintf(
-				"%s%splugin%spacker-provisioner-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
-		} else {
-			log.Printf("Using external plugin for %s", provisioner)
+			c.Provisioners[provisioner] = func() (packer.Provisioner, error) {
+				bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
+					packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+				return c.pluginClient(bin).Provisioner()
+			}
 		}
 	}
 
 	for postProcessor := range command.PostProcessors {
+		postProcessor := postProcessor
 		_, found := (c.PostProcessors)[postProcessor]
 		if !found {
-			(c.PostProcessors)[postProcessor] = fmt.Sprintf(
-				"%s%splugin%spacker-post-processor-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
-		} else {
-			log.Printf("Using external plugin for %s", postProcessor)
+			c.PostProcessors[postProcessor] = func() (packer.PostProcessor, error) {
+				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
+					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+				return c.pluginClient(bin).PostProcessor()
+			}
 		}
 	}
 
@@ -248,7 +272,7 @@ func (c *config) pluginClient(path string) *plugin.Client {
 	if err != nil {
 		// If that doesn't work, look for it in the same directory
 		// as the `packer` executable (us).
-		log.Printf("Plugin could not be found. Checking same directory as executable.")
+		log.Printf("Plugin could not be found at %s (%v). Checking same directory as executable.", originalPath, err)
 		exePath, err := osext.Executable()
 		if err != nil {
 			log.Printf("Couldn't get current exe path: %s", err)

@@ -24,10 +24,13 @@ type FlatBlockDevice struct {
 // FlatMapstructure returns a new FlatBlockDevice.
 // FlatBlockDevice is an auto-generated flat version of BlockDevice.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*BlockDevice) FlatMapstructure() interface{} { return new(FlatBlockDevice) }
+func (*BlockDevice) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatBlockDevice)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatBlockDevice.
-// This spec is used by HCL to read the fields of FlatBlockDevice.
+// HCL2Spec returns the hcl spec of a BlockDevice.
+// This spec is used by HCL to read the fields of BlockDevice.
+// The decoded values from this spec will then be applied to a FlatBlockDevice.
 func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"delete_on_vm_deletion": &hcldec.AttrSpec{Name: "delete_on_vm_deletion", Type: cty.Bool, Required: false},
@@ -119,8 +122,8 @@ type FlatConfig struct {
 	SSHReadWriteTimeout         *string                                `mapstructure:"ssh_read_write_timeout" cty:"ssh_read_write_timeout"`
 	SSHRemoteTunnels            []string                               `mapstructure:"ssh_remote_tunnels" cty:"ssh_remote_tunnels"`
 	SSHLocalTunnels             []string                               `mapstructure:"ssh_local_tunnels" cty:"ssh_local_tunnels"`
-	SSHPublicKey                []byte                                 `cty:"ssh_public_key"`
-	SSHPrivateKey               []byte                                 `cty:"ssh_private_key"`
+	SSHPublicKey                []byte                                 `mapstructure:"ssh_public_key" cty:"ssh_public_key"`
+	SSHPrivateKey               []byte                                 `mapstructure:"ssh_private_key" cty:"ssh_private_key"`
 	WinRMUser                   *string                                `mapstructure:"winrm_username" cty:"winrm_username"`
 	WinRMPassword               *string                                `mapstructure:"winrm_password" cty:"winrm_password"`
 	WinRMHost                   *string                                `mapstructure:"winrm_host" cty:"winrm_host"`
@@ -136,10 +139,13 @@ type FlatConfig struct {
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":                    &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -226,7 +232,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                       &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                       &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_interface":                        &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
-		"bsu_volumes":                          &hcldec.BlockListSpec{TypeName: "bsu_volumes", Nested: &hcldec.BlockSpec{TypeName: "bsu_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())}},
+		"bsu_volumes":                          &hcldec.BlockListSpec{TypeName: "bsu_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
 	}
 	return s
 }

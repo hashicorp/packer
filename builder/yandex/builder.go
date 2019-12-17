@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,24 +20,24 @@ const BuilderID = "packer.yandex"
 
 // Builder represents a Packer Builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-// Prepare processes the build configuration parameters.
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
-	b.config = c
 	return warnings, nil
 }
 
 // Run executes a yandex Packer build and returns a packer.Artifact
 // representing a Yandex.Cloud compute image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	driver, err := NewDriverYC(ui, b.config)
+	driver, err := NewDriverYC(ui, &b.config)
 	ctx = requestid.ContextWithClientTraceID(ctx, uuid.New().String())
 
 	if err != nil {
@@ -45,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Set up the state
 	state := &multistep.BasicStateBag{}
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("sdk", driver.SDK())
 	state.Put("hook", hook)
@@ -91,7 +92,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	artifact := &Artifact{
 		image:  image.(*compute.Image),
-		config: b.config,
+		config: &b.config,
 	}
 	return artifact, nil
 }

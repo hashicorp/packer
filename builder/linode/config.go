@@ -48,8 +48,7 @@ func createRandomRootPassword() (string, error) {
 	return rootPass, nil
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
@@ -60,7 +59,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			},
 		},
 	}, raws...); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
@@ -136,9 +135,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.PersonalAccessToken)
-	return c, nil, nil
+	return nil, nil
 }

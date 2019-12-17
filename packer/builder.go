@@ -1,6 +1,8 @@
 package packer
 
-import "context"
+import (
+	"context"
+)
 
 // Implementers of Builder are responsible for actually building images
 // on some platform given some configuration.
@@ -13,6 +15,8 @@ import "context"
 // parallelism is strictly disabled, so it is safe to request input from
 // stdin and so on.
 type Builder interface {
+	HCL2Speccer
+
 	// Prepare is responsible for configuring the builder and validating
 	// that configuration. Any setup should be done in this method. Note that
 	// NO side effects should take place in prepare, it is meant as a state

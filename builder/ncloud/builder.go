@@ -4,6 +4,7 @@ import (
 	"context"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -12,17 +13,18 @@ import (
 
 // Builder assume this implements packer.Builder
 type Builder struct {
-	config   *Config
+	config   Config
 	stateBag multistep.StateBag
 	runner   multistep.Runner
 }
 
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
-	b.config = c
 
 	b.stateBag = new(multistep.BasicStateBag)
 
@@ -42,12 +44,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Comm.Type == "ssh" {
 		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, b.config),
+			NewStepValidateTemplate(conn, ui, &b.config),
 			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui, b.config),
-			NewStepCreatePublicIPInstance(conn, ui, b.config),
+			NewStepCreateServerInstance(conn, ui, &b.config),
+			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
+			NewStepGetRootPassword(conn, ui, &b.config),
+			NewStepCreatePublicIPInstance(conn, ui, &b.config),
 			&communicator.StepConnectSSH{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -60,18 +62,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Comm: &b.config.Comm,
 			},
 			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
+			NewStepCreateServerImage(conn, ui, &b.config),
+			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
 			NewStepTerminateServerInstance(conn, ui),
 		}
 	} else if b.config.Comm.Type == "winrm" {
 		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, b.config),
+			NewStepValidateTemplate(conn, ui, &b.config),
 			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui, b.config),
-			NewStepCreatePublicIPInstance(conn, ui, b.config),
+			NewStepCreateServerInstance(conn, ui, &b.config),
+			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
+			NewStepGetRootPassword(conn, ui, &b.config),
+			NewStepCreatePublicIPInstance(conn, ui, &b.config),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -86,8 +88,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 			&common.StepProvision{},
 			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
+			NewStepCreateServerImage(conn, ui, &b.config),
+			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
 			NewStepTerminateServerInstance(conn, ui),
 		}
 	}

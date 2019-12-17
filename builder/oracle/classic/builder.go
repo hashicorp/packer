@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package classic
 
 import (
@@ -8,6 +10,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/go-oracle-terraform/opc"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -20,16 +23,17 @@ const BuilderId = "packer.oracle.classic"
 
 // Builder is a builder implementation that creates Oracle OCI custom images.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
-	config, err := NewConfig(rawConfig...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	err := b.config.Prepare(raws...)
 	if err != nil {
 		return nil, err
 	}
-	b.config = config
 
 	var errs *packer.MultiError
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -14,16 +15,17 @@ import (
 const BuilderId = "packer.oneandone"
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
-	b.config = c
 
 	return warnings, nil
 }

@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,BlockDevice
 
 // The ebsvolume package contains a packer.Builder implementation that builds
 // EBS volumes for Amazon EC2 using an ephemeral instance,
@@ -10,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -78,6 +80,8 @@ type EngineVarsTemplate struct {
 	BuildRegion string
 	SourceAMI   string
 }
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs

@@ -40,10 +40,8 @@ func TestBuilder_Prepare(t *testing.T) {
 		},
 	}
 
-	b := &Builder{}
-
 	for desc, tc := range cases {
-		_, errs := b.Prepare(tc.Config)
+		_, errs := (&Builder{}).Prepare(tc.Config)
 
 		if tc.Err {
 			if errs == nil {

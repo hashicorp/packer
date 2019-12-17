@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 )
@@ -15,6 +16,10 @@ type Provisioner struct {
 }
 
 var _ packer.Provisioner = new(Provisioner)
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.FlatMapstructure().HCL2Spec() }
+
+func (p *Provisioner) FlatConfig() interface{} { return p.FlatMapstructure() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return config.Decode(&p, &config.DecodeOpts{}, raws...)

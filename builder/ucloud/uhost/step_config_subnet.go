@@ -3,6 +3,7 @@ package uhost
 import (
 	"context"
 	"fmt"
+
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"

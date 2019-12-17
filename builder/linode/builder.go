@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/linode/linodego"
 
@@ -21,16 +22,17 @@ const BuilderID = "packer.linode"
 
 // Builder represents a Packer Builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
-	b.config = c
 	return nil, nil
 }
 

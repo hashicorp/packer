@@ -1,6 +1,14 @@
 <% wrap_layout :inner do %>
   <% content_for :sidebar do %>
     <ul class="nav docs-sidenav">
+      <li<%= sidebar_current("hcl") %>>
+        <a href="/guides/hcl">HCL guides</a>
+        <ul class="nav">
+          <li<%= sidebar_current("hcl-from-json-v1") %>>
+            <a href="/guides/hcl/from-json-v1">from JSON v1</a>
+          </li>
+        </ul>
+      </li>
       <li<%= sidebar_current("automatic-operating-system-installs") %>>
         <a href="/guides/automatic-operating-system-installs/index.html">Automatic OS Installs</a>
         <ul class="nav">

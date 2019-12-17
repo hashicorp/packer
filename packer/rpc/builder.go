@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -11,8 +10,7 @@ import (
 // An implementation of packer.Builder where the builder is actually executed
 // over an RPC connection.
 type builder struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // BuilderServer wraps a packer.Builder implementation and makes it exportable
@@ -21,8 +19,8 @@ type BuilderServer struct {
 	context       context.Context
 	contextCancel func()
 
+	commonServer
 	builder packer.Builder
-	mux     *muxBroker
 }
 
 type BuilderPrepareArgs struct {
@@ -35,12 +33,16 @@ type BuilderPrepareResponse struct {
 }
 
 func (b *builder) Prepare(config ...interface{}) ([]string, error) {
+	config, err := encodeCTYValues(config)
+	if err != nil {
+		return nil, err
+	}
 	var resp BuilderPrepareResponse
-	cerr := b.client.Call("Builder.Prepare", &BuilderPrepareArgs{config}, &resp)
+	cerr := b.client.Call(b.endpoint+".Prepare", &BuilderPrepareArgs{config}, &resp)
 	if cerr != nil {
 		return nil, cerr
 	}
-	var err error = nil
+
 	if resp.Error != nil {
 		err = resp.Error
 	}
@@ -61,7 +63,7 @@ func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		select {
 		case <-ctx.Done():
 			log.Printf("Cancelling builder after context cancellation %v", ctx.Err())
-			if err := b.client.Call("Builder.Cancel", new(interface{}), new(interface{})); err != nil {
+			if err := b.client.Call(b.endpoint+".Cancel", new(interface{}), new(interface{})); err != nil {
 				log.Printf("Error cancelling builder: %s", err)
 			}
 		case <-done:
@@ -70,7 +72,7 @@ func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	var responseId uint32
 
-	if err := b.client.Call("Builder.Run", nextId, &responseId); err != nil {
+	if err := b.client.Call(b.endpoint+".Run", nextId, &responseId); err != nil {
 		return nil, err
 	}
 
@@ -87,7 +89,11 @@ func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 }
 
 func (b *BuilderServer) Prepare(args *BuilderPrepareArgs, reply *BuilderPrepareResponse) error {
-	warnings, err := b.builder.Prepare(args.Configs...)
+	config, err := decodeCTYValues(args.Configs)
+	if err != nil {
+		return err
+	}
+	warnings, err := b.builder.Prepare(config...)
 	*reply = BuilderPrepareResponse{
 		Warnings: warnings,
 		Error:    NewBasicError(err),

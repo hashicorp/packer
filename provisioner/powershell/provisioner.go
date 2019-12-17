@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
@@ -97,6 +98,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
 	}
 }
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Create passthrough for winrm password so we can fill it in once we know

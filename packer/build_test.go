@@ -10,24 +10,24 @@ func boolPointer(tf bool) *bool {
 	return &tf
 }
 
-func testBuild() *coreBuild {
-	return &coreBuild{
-		name:          "test",
-		builder:       &MockBuilder{ArtifactId: "b"},
-		builderConfig: 42,
-		builderType:   "foo",
+func testBuild() *CoreBuild {
+	return &CoreBuild{
+		Type:          "test",
+		Builder:       &MockBuilder{ArtifactId: "b"},
+		BuilderConfig: 42,
+		BuilderType:   "foo",
 		hooks: map[string][]Hook{
 			"foo": {&MockHook{}},
 		},
-		provisioners: []coreBuildProvisioner{
+		Provisioners: []CoreBuildProvisioner{
 			{"mock-provisioner", &MockProvisioner{}, []interface{}{42}},
 		},
-		postProcessors: [][]coreBuildPostProcessor{
+		PostProcessors: [][]CoreBuildPostProcessor{
 			{
 				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), boolPointer(true)},
 			},
 		},
-		variables: make(map[string]string),
+		Variables: make(map[string]string),
 		onError:   "cleanup",
 	}
 }
@@ -54,7 +54,7 @@ func TestBuild_Prepare(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 
 	build.Prepare()
 	if !builder.PrepareCalled {
@@ -64,8 +64,8 @@ func TestBuild_Prepare(t *testing.T) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
-	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*MockProvisioner)
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
 	if !prov.PrepCalled {
 		t.Fatal("prep should be called")
 	}
@@ -73,8 +73,8 @@ func TestBuild_Prepare(t *testing.T) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 
-	corePP := build.postProcessors[0][0]
-	pp := corePP.processor.(*MockPostProcessor)
+	corePP := build.PostProcessors[0][0]
+	pp := corePP.PostProcessor.(*MockPostProcessor)
 	if !pp.ConfigureCalled {
 		t.Fatal("should be called")
 	}
@@ -111,7 +111,7 @@ func TestBuildPrepare_BuilderWarnings(t *testing.T) {
 	expected := []string{"foo"}
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 	builder.PrepareWarnings = expected
 
 	warn, err := build.Prepare()
@@ -128,7 +128,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	packerConfig[DebugConfigKey] = true
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 
 	build.SetDebug(true)
 	build.Prepare()
@@ -139,8 +139,8 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
-	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*MockProvisioner)
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
 	if !prov.PrepCalled {
 		t.Fatal("prepare should be called")
 	}
@@ -156,8 +156,8 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 	}
 
 	build := testBuild()
-	build.variables["foo"] = "bar"
-	builder := build.builder.(*MockBuilder)
+	build.Variables["foo"] = "bar"
+	builder := build.Builder.(*MockBuilder)
 
 	warn, err := build.Prepare()
 	if len(warn) > 0 {
@@ -191,7 +191,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify builder was run
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 	if !builder.RunCalled {
 		t.Fatal("should be called")
 	}
@@ -210,13 +210,13 @@ func TestBuild_Run(t *testing.T) {
 
 	// Verify provisioners run
 	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
-	prov := build.provisioners[0].provisioner.(*MockProvisioner)
+	prov := build.Provisioners[0].Provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")
 	}
 
 	// Verify post-processor was run
-	pp := build.postProcessors[0][0].processor.(*MockPostProcessor)
+	pp := build.PostProcessors[0][0].PostProcessor.(*MockPostProcessor)
 	if !pp.PostProcessCalled {
 		t.Fatal("should be called")
 	}
@@ -228,7 +228,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with no post-processors, we only get the
 	// main build.
 	build := testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{}
+	build.PostProcessors = [][]CoreBuildPostProcessor{}
 
 	build.Prepare()
 	artifacts, err := build.Run(context.Background(), ui)
@@ -249,7 +249,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that doesn't keep
 	// inputs, only that post-processors results are returned.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
@@ -274,7 +274,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with multiple post-processors, as long as one
 	// keeps the original, the original is kept.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), boolPointer(false)},
 		},
@@ -302,7 +302,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with sequences, intermediaries are kept if they
 	// want to be.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), boolPointer(false)},
 			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), boolPointer(true)},
@@ -332,7 +332,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that forcibly
 	// keeps inputs, that the artifacts are kept.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
 				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", make(map[string]interface{}), boolPointer(false),
@@ -360,7 +360,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that non-forcibly
 	// keeps inputs, that the artifacts are discarded if user overrides.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
 				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), boolPointer(false),
@@ -387,7 +387,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that non-forcibly
 	// keeps inputs, that the artifacts are kept if user does not have preference.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
 				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), nil,
@@ -434,7 +434,7 @@ func TestBuild_Cancel(t *testing.T) {
 
 	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 
 	builder.RunFn = func(ctx context.Context) {
 		topCtxCancel()

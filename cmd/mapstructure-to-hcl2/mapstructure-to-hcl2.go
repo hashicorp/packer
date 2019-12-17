@@ -125,7 +125,7 @@ func main() {
 		newStructName := "Flat" + id.Name
 		structs = append(structs, StructDef{
 			OriginalStructName: id.Name,
-			StructName:         newStructName,
+			FlatStructName:     newStructName,
 			Struct:             flatenedStruct,
 		})
 
@@ -150,22 +150,23 @@ func main() {
 		return structs[i].OriginalStructName < structs[j].OriginalStructName
 	})
 	for _, flatenedStruct := range structs {
-		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.StructName, flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.FlatStructName, flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.")
-		fmt.Fprintf(out, "\ntype %s struct {\n", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\ntype %s struct {\n", flatenedStruct.FlatStructName)
 		outputStructFields(out, flatenedStruct.Struct)
 		fmt.Fprint(out, "}\n")
 
-		fmt.Fprintf(out, "\n// FlatMapstructure returns a new %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.StructName, flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// FlatMapstructure returns a new %s.", flatenedStruct.FlatStructName)
+		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.FlatStructName, flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.")
-		fmt.Fprintf(out, "\nfunc (*%s) FlatMapstructure() interface{} {", flatenedStruct.OriginalStructName)
-		fmt.Fprintf(out, "return new(%s)", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\nfunc (*%s) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "return new(%s)", flatenedStruct.FlatStructName)
 		fmt.Fprint(out, "}\n")
 
-		fmt.Fprintf(out, "\n// HCL2Spec returns the hcldec.Spec of a %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\n// This spec is used by HCL to read the fields of %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\nfunc (*%s) HCL2Spec() map[string]hcldec.Spec {\n", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\n// HCL2Spec returns the hcl spec of a %s.", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// This spec is used by HCL to read the fields of %s.", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// The decoded values from this spec will then be applied to a %s.", flatenedStruct.FlatStructName)
+		fmt.Fprintf(out, "\nfunc (*%s) HCL2Spec() map[string]hcldec.Spec {\n", flatenedStruct.FlatStructName)
 		outputStructHCL2SpecBody(out, flatenedStruct.Struct)
 		fmt.Fprint(out, "}\n")
 	}
@@ -196,7 +197,7 @@ func main() {
 
 type StructDef struct {
 	OriginalStructName string
-	StructName         string
+	FlatStructName     string
 	Struct             *types.Struct
 }
 
@@ -250,7 +251,13 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 			})
 		case *types.Named:
 			b := bytes.NewBuffer(nil)
-			outputHCL2SpecField(b, accessor, elem, tag)
+			underlyingType := elem.Underlying()
+			switch underlyingType.(type) {
+			case *types.Struct:
+				fmt.Fprintf(b, `hcldec.ObjectSpec((*%s)(nil).HCL2Spec())`, elem.String())
+			default:
+				outputHCL2SpecField(b, accessor, elem, tag)
+			}
 			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
 		case *types.Slice:
 			b := bytes.NewBuffer(nil)
@@ -268,9 +275,6 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 		default:
 			outputHCL2SpecField(w, f.String(), underlyingType, tag)
 		}
-	case *types.Struct:
-		fmt.Fprintf(w, `&hcldec.BlockObjectSpec{TypeName: "%s",`+
-			` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, fieldType.String())
 	default:
 		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
 			Name:     accessor,
@@ -303,7 +307,9 @@ func basicKindToCtyType(kind types.BasicKind) cty.Type {
 func outputStructFields(w io.Writer, s *types.Struct) {
 	for i := 0; i < s.NumFields(); i++ {
 		field, tag := s.Field(i), s.Tag(i)
-		fmt.Fprintf(w, "	%s `%s`\n", strings.Replace(field.String(), "field ", "", 1), tag)
+		fieldNameStr := field.String()
+		fieldNameStr = strings.Replace(fieldNameStr, "field ", "", 1)
+		fmt.Fprintf(w, "	%s `%s`\n", fieldNameStr, tag)
 	}
 }
 
@@ -350,6 +356,9 @@ func getUsedImports(s *types.Struct) map[NamePath]*types.Package {
 			continue
 		}
 		pkg := namedType.Obj().Pkg()
+		if pkg == nil {
+			continue
+		}
 		res[NamePath{pkg.Name(), pkg.Path()}] = pkg
 	}
 	return res

@@ -28,6 +28,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/adapter"
 	commonhelper "github.com/hashicorp/packer/helper/common"
@@ -80,6 +81,8 @@ type Provisioner struct {
 type PassthroughTemplate struct {
 	WinRMPassword string
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})

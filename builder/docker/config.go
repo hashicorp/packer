@@ -107,8 +107,7 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	c.FixUploadOwner = true
 
@@ -124,7 +123,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Defaults
@@ -191,8 +190,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
-	return c, nil, nil
+	return nil, nil
 }
