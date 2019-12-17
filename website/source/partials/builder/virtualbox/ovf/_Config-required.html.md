@@ -7,6 +7,6 @@
     file or an URL, in which case checksum_type must be set to file; the
     go-getter will download it and use the first hash found.
     
--   `source_path` (string) - The path to an OVF or OVA file that acts as the
-    source of this build. This currently must be a local file.
+-   `source_path` (string) - The filepath or URL to an OVF or OVA file that acts as the
+    source of this build.
     

@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute/computeapi"
 	"github.com/Azure/go-autorest/autorest/to"
-	"regexp"
-	"strings"
 )
 
 var platformImageRegex = regexp.MustCompile(`^[-_.a-zA-Z0-9]+:[-_.a-zA-Z0-9]+:[-_.a-zA-Z0-9]+:[-_.a-zA-Z0-9]+$`)

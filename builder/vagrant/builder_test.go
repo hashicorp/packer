@@ -15,7 +15,6 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 }
 
 func TestBuilder_Prepare_ValidateSource(t *testing.T) {
-	b := &Builder{}
 	type testCase struct {
 		config      map[string]interface{}
 		errExpected bool
@@ -83,7 +82,7 @@ func TestBuilder_Prepare_ValidateSource(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		_, _, err := b.Prepare(tc.config)
+		_, _, err := (&Builder{}).Prepare(tc.config)
 		if (err != nil) != tc.errExpected {
 			t.Fatalf("Unexpected behavior from test case %#v; %s.", tc.config, tc.reason)
 		}

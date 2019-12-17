@@ -9,7 +9,8 @@ import (
 )
 
 func TestRequiredParameters(t *testing.T) {
-	_, _, err := NewConfig(make(map[string]interface{}))
+	var c Config
+	_, err := c.Prepare(make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("Expected empty configuration to fail")
 	}

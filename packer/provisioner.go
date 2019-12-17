@@ -7,12 +7,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/common"
 )
 
 // A provisioner is responsible for installing and configuring software
 // on a machine prior to building the actual image.
 type Provisioner interface {
+	HCL2Speccer
+
 	// Prepare is called with a set of configurations to setup the
 	// internal state of the provisioner. The multiple configurations
 	// should be merged in some sane way.
@@ -132,6 +135,8 @@ type PausedProvisioner struct {
 	Provisioner Provisioner
 }
 
+func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
+func (p *PausedProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
 func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
@@ -159,6 +164,8 @@ type DebuggedProvisioner struct {
 	lock     sync.Mutex
 }
 
+func (p *DebuggedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
+func (p *DebuggedProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
 func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }

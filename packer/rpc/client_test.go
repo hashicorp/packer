@@ -40,7 +40,10 @@ func testConn(t *testing.T) (net.Conn, net.Conn) {
 func testClientServer(t *testing.T) (*Client, *Server) {
 	clientConn, serverConn := testConn(t)
 
-	server, _ := NewServer(serverConn)
+	server, err := NewServer(serverConn)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
 	go server.Serve()
 
 	client, err := NewClient(clientConn)

@@ -51,20 +51,7 @@ func Server() (*packrpc.Server, error) {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("Plugin minimum port: %d\n", minPort)
-	log.Printf("Plugin maximum port: %d\n", maxPort)
-
-	listener, err := serverListener(minPort, maxPort)
+	listener, err := serverListener()
 	if err != nil {
 		return nil, err
 	}
@@ -104,15 +91,27 @@ func Server() (*packrpc.Server, error) {
 	return packrpc.NewServer(conn)
 }
 
-func serverListener(minPort, maxPort int64) (net.Listener, error) {
+func serverListener() (net.Listener, error) {
 	if runtime.GOOS == "windows" {
-		return serverListener_tcp(minPort, maxPort)
+		return serverListener_tcp()
 	}
 
 	return serverListener_unix()
 }
 
-func serverListener_tcp(minPort, maxPort int64) (net.Listener, error) {
+func serverListener_tcp() (net.Listener, error) {
+	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Plugin port range: [%d,%d]", minPort, maxPort)
+
 	for port := minPort; port <= maxPort; port++ {
 		address := fmt.Sprintf("127.0.0.1:%d", port)
 		listener, err := net.Listen("tcp", address)

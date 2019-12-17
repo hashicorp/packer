@@ -15,10 +15,13 @@ type FlatOutputConfig struct {
 // FlatMapstructure returns a new FlatOutputConfig.
 // FlatOutputConfig is an auto-generated flat version of OutputConfig.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*OutputConfig) FlatMapstructure() interface{} { return new(FlatOutputConfig) }
+func (*OutputConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatOutputConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatOutputConfig.
-// This spec is used by HCL to read the fields of FlatOutputConfig.
+// HCL2Spec returns the hcl spec of a OutputConfig.
+// This spec is used by HCL to read the fields of OutputConfig.
+// The decoded values from this spec will then be applied to a FlatOutputConfig.
 func (*FlatOutputConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"output_directory": &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},

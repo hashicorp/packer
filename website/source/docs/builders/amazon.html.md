@@ -202,7 +202,10 @@ work, but specifics will depend on your use-case.
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
-    "Action": "iam:PassRole",
+    "Action": [
+        "iam:PassRole",
+        "iam:GetInstanceProfile"
+    ],
     "Resource": [
         "*"
     ]

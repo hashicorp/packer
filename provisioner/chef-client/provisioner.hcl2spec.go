@@ -43,15 +43,19 @@ type FlatConfig struct {
 	StagingDir                 *string                `mapstructure:"staging_directory" cty:"staging_directory"`
 	ValidationClientName       *string                `mapstructure:"validation_client_name" cty:"validation_client_name"`
 	ValidationKeyPath          *string                `mapstructure:"validation_key_path" cty:"validation_key_path"`
+	Version                    *string                `mapstructure:"version" cty:"version"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":              &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -88,6 +92,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"staging_directory":              &hcldec.AttrSpec{Name: "staging_directory", Type: cty.String, Required: false},
 		"validation_client_name":         &hcldec.AttrSpec{Name: "validation_client_name", Type: cty.String, Required: false},
 		"validation_key_path":            &hcldec.AttrSpec{Name: "validation_key_path", Type: cty.String, Required: false},
+		"version":                        &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},
 	}
 	return s
 }

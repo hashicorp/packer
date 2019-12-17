@@ -71,8 +71,7 @@ type diskConfig struct {
 	DiskFormat      string `mapstructure:"format"`
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	// Agent defaults to true
 	c.Agent = true
 
@@ -88,7 +87,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
@@ -207,11 +206,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.Password)
-	return c, nil, nil
+	return nil, nil
 }
 
 func contains(haystack []string, needle string) bool {
