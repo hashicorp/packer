@@ -11,6 +11,8 @@
     [GH-8342]
 * builder/hyperone: Update builder schema and tags [GH-8444]
 * builder/qemu: Add display template option for qemu. [GH-7676]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
 * builder/qemu: Add fixer to convert disk size from int to string [GH-8390]
 * builder/qemu: When a user adds a new drive in qemuargs, process it to make
     sure that necessary settings are applied to that drive. [GH-8380]
@@ -53,8 +55,6 @@
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: Complete deprecation of clean_ami_name template func
     [GH-8320] [GH-8193]
-* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
-    [GH-7546]
 * core: Changes have been made to both the Prepare() method signature on the
     builder interface and on the Provision() method signature on the
     provisioner interface. [GH-7866]
