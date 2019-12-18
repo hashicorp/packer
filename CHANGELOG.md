@@ -16,6 +16,7 @@
     sure that necessary settings are applied to that drive. [GH-8380]
 * builder/vmware: Fix error message when ovftool is missing [GH-8371]
 * core: Cleanup logging for external plugins [GH-8471]
+* core: HCL2 template support is now in beta. [GH-8423]
 * core: Interpolation within provisioners can now access build-specific values
     like Host IP, communicator password, and more. [GH-7866]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
