@@ -36,7 +36,8 @@ addition to the options listed here, a
 builder.
 
 ### Required options for authentication:
-If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure.html#azure-managed-identity)
+If you're running packer on an Azure VM with a [system-assigned managed identity](/docs/builders/azure.html#azure-managed-identity)
+that has been granted appropriate permissions, 
 you don't need to specify any additional configuration options.
 If you would like to use interactive user authentication, you should specify
 `subscription_id` only. Packer will use cached credentials or redirect you
