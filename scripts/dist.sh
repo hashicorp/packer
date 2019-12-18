@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e pipefail
+set -e
 
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
