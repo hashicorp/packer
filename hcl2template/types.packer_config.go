@@ -45,6 +45,7 @@ func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock) ([]packer
 			PType:         pp.PType,
 		})
 	}
+
 	return res, diags
 }
 
@@ -74,6 +75,10 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				continue
 			}
 			postProcessors, moreDiags := p.CoreBuildPostProcessors(build.PostProcessors)
+			pps := [][]packer.CoreBuildPostProcessor{}
+			if len(postProcessors) > 0 {
+				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
+			}
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -83,7 +88,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				Type:           src.Type,
 				Builder:        builder,
 				Provisioners:   provisioners,
-				PostProcessors: [][]packer.CoreBuildPostProcessor{postProcessors},
+				PostProcessors: pps,
 				Variables:      cfg.Variables,
 			}
 			res = append(res, pcb)
