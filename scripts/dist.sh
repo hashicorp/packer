@@ -49,7 +49,7 @@ if [ -z $NOSIGN ]; then
 fi
 
 ./scripts/sign.sh
-# hc-releases upload $DIR/pkg/dist/
-# hc-releases publish
+hc-releases upload $DIR/pkg/dist/
+hc-releases publish
 
 exit 0
