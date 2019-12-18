@@ -1,6 +1,17 @@
 <% wrap_layout :inner do %>
   <% content_for :sidebar do %>
     <ul class="nav docs-sidenav">
+
+      <li<%= sidebar_current("configuration") %>>
+        <a href="/docs/configuration/from-1.5/index.html">HCL</a>
+        <ul class="nav">
+          <li<%= sidebar_current("configuration-syntax") %>>
+            <a href="/docs/configuration/from-1.5/syntax.html">Syntax</a>
+          </li>
+        </ul>
+      </li>
+
+      <hr>
       
       <li><a href="/docs/basics/terminology.html">Terminology</a></li>
 
