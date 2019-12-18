@@ -1,4 +1,4 @@
-## 1.5.0 (Upcoming)
+## 1.5.0 (December 18, 2019)
 
 ### IMPROVEMENTS:
 * builder/amazon: Add no_ephemeral template option to remove ephemeral drives
