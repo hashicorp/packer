@@ -16,16 +16,21 @@
     sure that necessary settings are applied to that drive. [GH-8380]
 * builder/vmware: Fix error message when ovftool is missing [GH-8371]
 * core: Cleanup logging for external plugins [GH-8471]
+* core: Interpolation within provisioners can now access build-specific values
+    like Host IP, communicator password, and more. [GH-7866]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
     [GH-8354] [GH-8361] [GH-8363] [GH-8370]
 * post-processor/shell-local: Add "valid_exit_codes" option to shell-local.
     [GH-8401]
+* provisioner/chef-client: Add version selection option. [GH-8468]
 * provisioner/shell-local: Add "valid_exit_codes" option to shell-local.
     [GH-8401]
 * provisioner/shell: Add support for the "env_var_format" parameter [GH-8319]
 
 ### BUG FIXES:
 * builder/amazon: Fix request retry mechanism to launch aws instance [GH-8430]
+* builder/azure: Fix PollDuration option which was overriden in some clients.
+    [GH-8490]
 * builder/hyperv: Fix bug in checking VM name that could cause flakiness if
     many VMs are defined. [GH-8357]
 * builder/vagrant: Use absolute path for Vagrantfile [GH-8321]
@@ -40,6 +45,7 @@
 * core: Fix iso_target_path option; don't cache when target path is non-nil
     [GH-8394]
 * core: Return exit code 1 when builder type is not found [GH-8474]
+* core: Return exit code 1 when builder type is not found [GH-8475]
 * core: Update to newest version of go-tty to re-enable CTRL-S and CTRL-Q usage
     [GH-8364]
 
@@ -48,6 +54,9 @@
     [GH-8320] [GH-8193]
 * builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
     [GH-7546]
+* core: Changes have been made to both the Prepare() method signature on the
+    builder interface and on the Provision() method signature on the
+    provisioner interface. [GH-7866]
 * provisioner/ansible-local: The "galaxycommand" option has been renamed to
     "galaxy_command". A fixer has been written for this, which can be invoked
     with `packer fix`. [GH-8411]
