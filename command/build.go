@@ -136,11 +136,12 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 		return c.GetBuildsFromHCL(path)
 	}
 
-	c.Ui.Say(`Legacy JSON Configuration Will Be Used.
-The template will be parsed in the legacy configuration style. This style
-will continue to work but users are encouraged to move to the new style.
-See: https://packer.io/guides/hcl
-`)
+	// TODO: uncomment in v1.5.1 once we've polished HCL a bit more.
+	// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
+	// The template will be parsed in the legacy configuration style. This style
+	// will continue to work but users are encouraged to move to the new style.
+	// See: https://packer.io/guides/hcl
+	// `)
 
 	// Parse the template
 	var tpl *template.Template
