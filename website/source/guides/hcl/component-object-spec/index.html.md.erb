@@ -37,5 +37,5 @@ following snippet:
     func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
     ```
 
-    From now one every time you add or change a field of Config you will need to
+    From now on every time you add or change a field of Config you will need to
     run he `go generate` command again.
