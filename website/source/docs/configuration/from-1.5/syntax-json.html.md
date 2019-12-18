@@ -1,7 +1,7 @@
 ---
 layout: "docs"
 page_title: "JSON Configuration Syntax - Configuration Language"
-sidebar_current: configuration-syntax-json
+sidebar_current: configuration-json-syntax
 description: |-
   In addition to the native syntax that is most commonly used with Packer,
   the HCL language can also be expressed in a JSON-compatible syntax.
