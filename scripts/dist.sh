@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -e pipefail
 
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
@@ -48,6 +48,7 @@ if [ -z $NOSIGN ]; then
   popd
 fi
 
+./scripts/sign.sh
 # hc-releases upload $DIR/pkg/dist/
 # hc-releases publish
 
