@@ -185,7 +185,7 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 		ShouldRetry: func(err error) bool {
 			return strings.Contains(err.Error(), "VBOX_E_INVALID_OBJECT_STATE")
 		},
-		RetryDelay: func() time.Duration { return 2 * time.Minute },
+		RetryDelay: func() time.Duration { return 1 * time.Minute },
 	}.Run(ctx, func(ctx context.Context) error {
 		_, err := d.VBoxManageWithOutput(args...)
 		return err
