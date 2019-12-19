@@ -10,3 +10,5 @@
 
 - [Vultr builder](https://github.com/vultr/packer-builder-vultr) - A builder
   for creating [Vultr](https://www.vultr.com/) snapshots.
+
+- [Huawei Cloud ECS builder](https://github.com/huaweicloud/packer-builder-huaweicloud-ecs) - Plugin for creating [Huawei Cloud ECS](https://www.huaweicloud.com/intl/en-us/) image.
