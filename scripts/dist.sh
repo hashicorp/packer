@@ -39,6 +39,8 @@ for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
   popd >/dev/null 2>&1
 done
 
+./scripts/sign.sh
+
 if [ -z $NOSIGN ]; then
   echo "==> Signing..."
   pushd ./pkg/dist
@@ -48,7 +50,6 @@ if [ -z $NOSIGN ]; then
   popd
 fi
 
-./scripts/sign.sh
 hc-releases upload $DIR/pkg/dist/
 hc-releases publish
 
