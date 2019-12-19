@@ -63,9 +63,22 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 		s.l.Listener.Close() // free port, but don't unlock lock file
 		sshHostPort = s.l.Port
 
+		// Make sure to configure the network interface to NAT
+		command := []string{
+			"modifyvm", vmName,
+			"--nic1",
+			"nat",
+		}
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Failed to configure NAT interface: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
 		// Create a forwarded port mapping to the VM
 		ui.Say(fmt.Sprintf("Creating forwarded port mapping for communicator (SSH, WinRM, etc) (host port %d)", sshHostPort))
-		command := []string{
+		command = []string{
 			"modifyvm", vmName,
 			"--natpf1",
 			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
