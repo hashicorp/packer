@@ -46,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state := new(multistep.BasicStateBag)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 
 	steps := []multistep.Step{
 
