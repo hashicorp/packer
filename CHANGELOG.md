@@ -25,6 +25,7 @@
     like Host IP, communicator password, and more. [GH-7866]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
     [GH-8354] [GH-8361] [GH-8363] [GH-8370]
+* post-processor/docker-tag: Add support for multiple tags. [GH-8392]
 * post-processor/shell-local: Add "valid_exit_codes" option to shell-local.
     [GH-8401]
 * provisioner/chef-client: Add version selection option. [GH-8468]
