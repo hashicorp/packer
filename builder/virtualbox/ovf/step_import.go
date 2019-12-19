@@ -42,7 +42,7 @@ func (s *StepImport) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
+	config := state.Get("config").(Config)
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
