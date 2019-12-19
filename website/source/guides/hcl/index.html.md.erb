@@ -50,3 +50,37 @@ It could be super handy for a boot_command.
 EOF
 }
 ```
+
+## Building blocks can be split in files
+
+Currently Packer offers the `source` and the `build` root blocks. These two
+building blocks can be defined in any order an a `build` can import one or more
+`source`. Usually a `source` defines what we currently call a builder and a
+`build` can apply multiple provisioning steps to a source. For example:
+
+```hcl
+# folder/sources.pkr.hcl
+sources "amazon-ebs" "example-1" {
+  ami_name = "example-1-ami"
+}
+
+sources "amazon-ebs" "example-2" {
+  ami_name = "example-2-ami"
+}
+```
+
+```hcl
+# folder/build.pkr.hcl
+build {
+  sources = [
+    "sources.amazon-ebs.example-1",
+    "sources.amazon-ebs.example-2"
+  ]
+
+  provisioner "shell" {
+    inline = [
+      "echo it's alive !"
+    ]
+  }
+}
+```
