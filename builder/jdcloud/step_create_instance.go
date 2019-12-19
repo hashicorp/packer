@@ -142,7 +142,7 @@ func (s *stepCreateJDCloudInstance) Cleanup(state multistep.StateBag) {
 
 func createElasticIp(state multistep.StateBag) (string, error) {
 
-	generalConfig := state.Get("config").(Config)
+	generalConfig := state.Get("config").(*Config)
 	regionId := generalConfig.RegionId
 	credential := core.NewCredentials(generalConfig.AccessKey, generalConfig.SecretKey)
 	vpcclient := vpcClient.NewVpcClient(credential)
