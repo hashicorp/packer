@@ -64,8 +64,12 @@ source "amazon-ebs" "example-1" {
   ami_name = "example-1-ami"
 }
 
-source "amazon-ebs" "example-2" {
-  ami_name = "example-2-ami"
+source "virtualbox-iso" "example-2" {
+  boot_command = <<EOF
+<esc><esc><enter><wait>
+/install/vmlinuz noapic 
+...
+EOF
 }
 ```
 
@@ -74,7 +78,7 @@ source "amazon-ebs" "example-2" {
 build {
   sources = [
     "source.amazon-ebs.example-1",
-    "source.amazon-ebs.example-2"
+    "source.virtualbox-iso.example-2"
   ]
 
   provisioner "shell" {
