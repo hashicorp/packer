@@ -32,7 +32,7 @@ of a specification called _HCL_. It is not necessary to know all of the details
 of HCL syntax or its JSON mapping in order to use Packer, and so this page
 summarizes the most important differences between native and JSON syntax. If
 you are interested, you can find a full definition of HCL's JSON syntax in [its
-specification](https://github.com/hashicorp/hcl2/blob/master/hcl/spec.md).
+specification](https://github.com/hashicorp/hcl/blob/hcl2/hclsyntax/spec.md).
 
 ## JSON File Structure
 

@@ -135,19 +135,7 @@ The following named values are available:
 
 * `source.<SOURCE TYPE>.<NAME>` is an object representing a
   [source](./sources.html) of the given type
-  and name. The attributes of the source can be accessed using
-  [dot or square bracket notation][inpage-index].
-
-    Any named value that does not match another pattern listed below
-    will be interpreted by Packer as a reference to a managed source.
-
-### Named Values and Dependencies
-
-Constructs like resources and module calls often use references to named values
-in their block bodies, and Packer analyzes these expressions to automatically
-infer dependencies between objects. For example, an expression in a source
-argument that refers to another managed source creates an implicit dependency
-between the two resources.
+  and name.
 
 ## String Literals
 
@@ -166,24 +154,24 @@ sequence, with the following characters selecting the escape behavior:
 | `\uNNNN`     | Unicode character from the basic multilingual plane (NNNN is four hex digits) |
 | `\UNNNNNNNN` | Unicode character from supplementary planes (NNNNNNNN is eight hex digits)    |
 
-The alternative syntax for string literals is the so-called "heredoc" style,
-inspired by Unix shell languages. This style allows multi-line strings to
-be expressed more clearly by using a custom delimiter word on a line of its
-own to close the string:
+The alternative syntax for string literals is the so-called Here Documents or
+"heredoc" style, inspired by Unix shell languages. This style allows multi-line
+strings to be expressed more clearly by using a custom delimiter word on a line
+of its own to close the string:
 
 ```hcl
-<<EOT
+<<EOF
 hello
 world
-EOT
+EOF
 ```
 
 The `<<` marker followed by any identifier at the end of a line introduces the
 sequence. Packer then processes the following lines until it finds one that
 consists entirely of the identifier given in the introducer. In the above
-example, `EOT` is the identifier selected. Any identifier is allowed, but
+example, `EOF` is the identifier selected. Any identifier is allowed, but
 conventionally this identifier is in all-uppercase and begins with `EO`, meaning
-"end of". `EOT` in this case stands for "end of text".
+"end of". `EOF` in this case stands for "end of text".
 
 The "heredoc" form shown above requires that the lines following be flush with
 the left margin, which can be awkward when an expression is inside an indented
@@ -191,10 +179,10 @@ block:
 
 ```hcl
 block {
-  value = <<EOT
+  value = <<EOF
 hello
 world
-EOT
+EOF
 }
 ```
 
@@ -203,10 +191,10 @@ that is introduced by the `<<-` sequence:
 
 ```hcl
 block {
-  value = <<-EOT
+  value = <<-EOF
   hello
     world
-  EOT
+  EOF
 }
 ```
 
