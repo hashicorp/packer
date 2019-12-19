@@ -31,7 +31,8 @@ method should do.
 
 ``` go
 type Builder interface {
-  Prepare(...interface{}) error
+  ConfigSpec() hcldec.ObjectSpec
+  Prepare(...interface{}) ([]string, []string, error)
   Run(context.Context, ui Ui, hook Hook) (Artifact, error)
 }
 ```
