@@ -19,7 +19,7 @@ type stepCreateVersion struct {
 func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	box := state.Get("box").(*Box)
 
 	ui.Say(fmt.Sprintf("Creating version: %s", config.Version))
