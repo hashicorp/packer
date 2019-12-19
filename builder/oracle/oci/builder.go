@@ -46,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
