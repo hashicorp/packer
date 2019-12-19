@@ -47,46 +47,46 @@ func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) 
 	vm, err := findRuntimeVM(cli, dcPath, s.VMName, s.RemoteFolder)
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("findRuntimeVM: " + err.Error())
 		return multistep.ActionHalt
 	}
 
 	dsPath, err := datastorePath(vm)
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("datastorePath: " + err.Error())
 		return multistep.ActionHalt
 	}
 
 	host, err := vm.HostSystem(context.Background())
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("vm.HostSystem: " + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err := vm.Unregister(context.Background()); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("vm.Unregister:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("unregisterPreviousVM: " + err.Error())
 		return multistep.ActionHalt
 	}
 
 	task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("folder.RegisterVM: " + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err = task.Wait(context.Background()); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("task.Wait: " + err.Error())
 		return multistep.ActionHalt
 	}
 
