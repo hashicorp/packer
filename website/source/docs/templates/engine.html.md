@@ -72,9 +72,9 @@ Here is a full list of the available functions for reference.
           "inline": ["echo $TESTVAR"]
         },
     ```
-    Valid variables to request are: "InstanceID", "CommunicatorHost",
-    "CommunicatorPort", "CommunicatorUser", "CommunicatorPassword", "ConnType",
-    "PackerRunUUID", "CommunicatorPublicKey", and "CommunicatorPrivateKey".
+    Valid variables to request are: "ID", "Host",
+    "Port", "User", "Password", "ConnType",
+    "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
     Depending on which communicator you are using, some of these values may be
     empty -- for example, the public and private keys are unique to the SSH
     communicator. InstanceID represents the vm being provisioned. For example,
@@ -84,7 +84,9 @@ Here is a full list of the available functions for reference.
     For backwards compatability, `WinRMPassword` is also available through this
     engine, though it is no different than using the more general `Password`.
 
-    This function is only for use within _provisioners_, and does not yet work
+    This function is only for use within specific options inside of
+    _provisioners_ -- these options will be listed as being template engines
+    in the provisioner documentation. This feature does not yet work
     if the provisioners are being used in conjunction with our chroot builders
     or with lxc/lxd builders.
 
