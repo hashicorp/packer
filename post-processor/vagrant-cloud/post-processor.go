@@ -166,7 +166,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
-	state.Put("config", p.config)
+	state.Put("config", &p.config)
 	state.Put("client", p.client)
 	state.Put("artifact", artifact)
 	state.Put("artifactFilePath", artifact.Files()[0])
