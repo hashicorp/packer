@@ -45,21 +45,21 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	if c.VMID == 0 {
 		ui.Say("No VM ID given, getting next free from Proxmox")
-		for n := 0; n < 5; n++ {
-			id, err := proxmox.MaxVmId(client)
-			if err != nil {
-				log.Printf("Error getting max used VM ID: %v (attempt %d/5)", err, n+1)
-				continue
-			}
-			c.VMID = id + 1
-			break
+		maxid, err := proxmox.MaxVmId(client)
+		var nextid int
+		if err != nil {
+			log.Printf("Error getting max used VM ID: %v", err)
+			nextid, err = client.GetNextID(0)
+		} else {
+			nextid, err = client.GetNextID(maxid)
 		}
-		if c.VMID == 0 {
-			err := fmt.Errorf("Failed to get free VM ID")
+		if err != nil {
+			err := fmt.Errorf("Failed to get next free VM ID")
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+		c.VMID = nextid
 	}
 	vmRef := proxmox.NewVmRef(c.VMID)
 	vmRef.SetNode(c.Node)
