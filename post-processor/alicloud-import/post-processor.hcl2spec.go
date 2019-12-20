@@ -21,6 +21,7 @@ type FlatConfig struct {
 	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"true" cty:"secret_key"`
 	AlicloudRegion                    *string                      `mapstructure:"region" required:"true" cty:"region"`
 	AlicloudSkipValidation            *bool                        `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
+	AlicloudSkipImageValidation       *bool                        `mapstructure:"skip_image_validation" required:"false" cty:"skip_image_validation"`
 	SecurityToken                     *string                      `mapstructure:"security_token" required:"false" cty:"security_token"`
 	AlicloudImageName                 *string                      `mapstructure:"image_name" required:"true" cty:"image_name"`
 	AlicloudImageVersion              *string                      `mapstructure:"image_version" required:"false" cty:"image_version"`
@@ -132,6 +133,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"secret_key":                   &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"skip_region_validation":       &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
+		"skip_image_validation":        &hcldec.AttrSpec{Name: "skip_image_validation", Type: cty.Bool, Required: false},
 		"security_token":               &hcldec.AttrSpec{Name: "security_token", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_version":                &hcldec.AttrSpec{Name: "image_version", Type: cty.String, Required: false},
