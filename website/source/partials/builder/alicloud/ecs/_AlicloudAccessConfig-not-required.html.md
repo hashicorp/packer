@@ -3,6 +3,9 @@
 -   `skip_region_validation` (bool) - The region validation can be skipped if this value is true, the default
     value is false.
     
+-   `skip_image_validation` (bool) - The image validation can be skipped if this value is true, the default
+    value is false.
+    
 -   `security_token` (string) - STS access token, can be set through template or by exporting as
     environment variable such as `export SECURITY_TOKEN=value`.
     
