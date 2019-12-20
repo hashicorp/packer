@@ -1,3 +1,30 @@
+## 1.5.1 (December 20, 2019)
+This was a fast-follow release to fix a number of panics that we introduced when
+making changes for HCL2.
+
+### IMPROVEMENTS:
+* builder/alicloud: Add show_expired option for describing images [GH-8425]
+
+### Bug Fixes:
+* builder/cloudstack: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/iso: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/vmcx: Fix panics associated with loading config [GH-8513]
+* builder/linode: Fix panics associated with loading config [GH-8513]
+* builder/lxc: Fix panics associated with loading config [GH-8513]
+* builder/lxd: Fix panics associated with loading config [GH-8513]
+* builder/oneandone: Fix panics associated with loading config [GH-8513]
+* builder/oracle/classic: Fix panics associated with loading config [GH-8513]
+* builder/oracle/oci: Fix panics associated with loading config [GH-8513]
+* builder/osc/bsuvolume: Fix panics associated with loading config [GH-8513]
+* builder/parallels/pvm: Fix panics associated with loading config [GH-8513]
+* builder/profitbricks: Fix panics associated with loading config [GH-8513]
+* builder/scaleway: Fix panics associated with loading config [GH-8513]
+* builder/vagrant: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox/ovf: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox: Configure NAT interface before forwarded port mapping #8514
+* post-processor/vagrant-cloud: Configure NAT interface before forwarded port mapping [GH-8514]
+* builder/jdcloud: Update jdcloud statebag to use pointers for config [GH-8518]
+
 ## 1.5.0 (December 18, 2019)
 
 ### IMPROVEMENTS:
