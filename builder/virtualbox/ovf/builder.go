@@ -86,8 +86,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Url:          []string{b.config.SourcePath},
 		},
 		&StepImport{
-			Name:        b.config.VMName,
-			ImportFlags: b.config.ImportFlags,
+			Name:           b.config.VMName,
+			ImportFlags:    b.config.ImportFlags,
+			KeepRegistered: b.config.KeepRegistered,
 		},
 		&vboxcommon.StepAttachGuestAdditions{
 			GuestAdditionsMode:      b.config.GuestAdditionsMode,
