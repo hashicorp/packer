@@ -14,11 +14,8 @@ func TestStepImport_impl(t *testing.T) {
 
 func TestStepImport(t *testing.T) {
 	state := testState(t)
-	cfg := testConfig(t)
-	var c Config
-	c.Prepare(cfg)
 	state.Put("vm_path", "foo")
-	state.Put("config", &c)
+
 	step := new(StepImport)
 	step.Name = "bar"
 
@@ -46,16 +43,24 @@ func TestStepImport(t *testing.T) {
 	} else if name != "bar" {
 		t.Fatalf("bad: %#v", name)
 	}
+}
 
-	// Test cleanup
-	c.KeepRegistered = true
+func TestStepImport_Cleanup(t *testing.T) {
+	state := testState(t)
+	state.Put("vm_path", "foo")
+
+	step := new(StepImport)
+	step.vmName = "bar"
+
+	driver := state.Get("driver").(*vboxcommon.DriverMock)
+
+	step.KeepRegistered = true
 	step.Cleanup(state)
-
 	if driver.DeleteCalled {
 		t.Fatal("delete should not be called")
 	}
 
-	c.KeepRegistered = false
+	state.Put(multistep.StateHalted, true)
 	step.Cleanup(state)
 	if !driver.DeleteCalled {
 		t.Fatal("delete should be called")
