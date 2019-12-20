@@ -11,7 +11,10 @@ description: |-
 # HCL Configuration Language
 
 Packer uses the Hashicorp Configuration Language - HCL - designed to allow
-concise descriptions of the required steps to get to a build file.
+concise descriptions of the required steps to get to a build file. This page
+describes the features of HCL2 exhaustively, if you would like to give a quick
+try to HCL2, you can also read the quicker [HCL2 getting started
+guide](/guides/hcl).
 
 ## Builds
 
