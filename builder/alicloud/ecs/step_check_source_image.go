@@ -21,6 +21,9 @@ func (s *stepCheckAlicloudSourceImage) Run(ctx context.Context, state multistep.
 	describeImagesRequest := ecs.CreateDescribeImagesRequest()
 	describeImagesRequest.RegionId = config.AlicloudRegion
 	describeImagesRequest.ImageId = config.AlicloudSourceImage
+	if config.AlicloudSkipImageValidation {
+		describeImagesRequest.ShowExpired = "true"
+	}
 	imagesResponse, err := client.DescribeImages(describeImagesRequest)
 	if err != nil {
 		return halt(state, err, "Error querying alicloud image")

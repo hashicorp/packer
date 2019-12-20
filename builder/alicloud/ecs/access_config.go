@@ -26,6 +26,9 @@ type AlicloudAccessConfig struct {
 	// The region validation can be skipped if this value is true, the default
 	// value is false.
 	AlicloudSkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
+	// The image validation can be skipped if this value is true, the default
+	// value is false.
+	AlicloudSkipImageValidation bool `mapstructure:"skip_image_validation" required:"false"`
 	// STS access token, can be set through template or by exporting as
 	// environment variable such as `export SECURITY_TOKEN=value`.
 	SecurityToken string `mapstructure:"security_token" required:"false"`
