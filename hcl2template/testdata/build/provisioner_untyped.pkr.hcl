@@ -1,0 +1,6 @@
+
+build {
+    provision {
+        foo = "bar"
+    }
+}

@@ -18,6 +18,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -62,6 +63,8 @@ type PostProcessor struct {
 	warnAtlasToken        bool
 	insecureSkipTLSVerify bool
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -163,7 +166,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
-	state.Put("config", p.config)
+	state.Put("config", &p.config)
 	state.Put("client", p.client)
 	state.Put("artifact", artifact)
 	state.Put("artifactFilePath", artifact.Files()[0])

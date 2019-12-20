@@ -9,7 +9,8 @@
 
 package openapi
 
+// OrganisationLimit struct for OrganisationLimit
 type OrganisationLimit struct {
 	Organisation OrganisationLimitOrganisation `json:"organisation,omitempty"`
-	Project ProjectLimit `json:"project,omitempty"`
+	Project      ProjectLimit                  `json:"project,omitempty"`
 }

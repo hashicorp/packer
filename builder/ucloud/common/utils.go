@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
-	"strings"
 )
 
 func CheckStringIn(val string, available []string) error {

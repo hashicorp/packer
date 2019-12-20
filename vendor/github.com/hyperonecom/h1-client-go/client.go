@@ -17,8 +17,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -33,8 +35,8 @@ import (
 )
 
 var (
-	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
-	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
+	jsonCheck = regexp.MustCompile(`(?i:(?:application|text)/(?:vnd\.[^;]+\+)?json)`)
+	xmlCheck  = regexp.MustCompile(`(?i:(?:application|text)/xml)`)
 )
 
 // APIClient manages communication with the HyperOne API API v0.0.2
@@ -45,7 +47,11 @@ type APIClient struct {
 
 	// API Services
 
+	AgentApi *AgentApiService
+
 	ContainerApi *ContainerApiService
+
+	DatabaseApi *DatabaseApiService
 
 	DiskApi *DiskApiService
 
@@ -57,7 +63,7 @@ type APIClient struct {
 
 	IsoApi *IsoApiService
 
-	LogArchiveApi *LogArchiveApiService
+	JournalApi *JournalApiService
 
 	NetadpApi *NetadpApiService
 
@@ -69,17 +75,29 @@ type APIClient struct {
 
 	ProjectApi *ProjectApiService
 
+	RegistryApi *RegistryApiService
+
 	ReplicaApi *ReplicaApiService
 
 	ReservationApi *ReservationApiService
 
+	ServiceApi *ServiceApiService
+
 	SnapshotApi *SnapshotApiService
+
+	UserApi *UserApiService
 
 	VaultApi *VaultApiService
 
 	VmApi *VmApiService
 
 	VmhostApi *VmhostApiService
+
+	VolumeApi *VolumeApiService
+
+	WebsiteApi *WebsiteApiService
+
+	ZoneApi *ZoneApiService
 }
 
 type service struct {
@@ -98,24 +116,32 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.AgentApi = (*AgentApiService)(&c.common)
 	c.ContainerApi = (*ContainerApiService)(&c.common)
+	c.DatabaseApi = (*DatabaseApiService)(&c.common)
 	c.DiskApi = (*DiskApiService)(&c.common)
 	c.FirewallApi = (*FirewallApiService)(&c.common)
 	c.ImageApi = (*ImageApiService)(&c.common)
 	c.IpApi = (*IpApiService)(&c.common)
 	c.IsoApi = (*IsoApiService)(&c.common)
-	c.LogArchiveApi = (*LogArchiveApiService)(&c.common)
+	c.JournalApi = (*JournalApiService)(&c.common)
 	c.NetadpApi = (*NetadpApiService)(&c.common)
 	c.NetgwApi = (*NetgwApiService)(&c.common)
 	c.NetworkApi = (*NetworkApiService)(&c.common)
 	c.OrganisationApi = (*OrganisationApiService)(&c.common)
 	c.ProjectApi = (*ProjectApiService)(&c.common)
+	c.RegistryApi = (*RegistryApiService)(&c.common)
 	c.ReplicaApi = (*ReplicaApiService)(&c.common)
 	c.ReservationApi = (*ReservationApiService)(&c.common)
+	c.ServiceApi = (*ServiceApiService)(&c.common)
 	c.SnapshotApi = (*SnapshotApiService)(&c.common)
+	c.UserApi = (*UserApiService)(&c.common)
 	c.VaultApi = (*VaultApiService)(&c.common)
 	c.VmApi = (*VmApiService)(&c.common)
 	c.VmhostApi = (*VmhostApiService)(&c.common)
+	c.VolumeApi = (*VolumeApiService)(&c.common)
+	c.WebsiteApi = (*WebsiteApiService)(&c.common)
+	c.ZoneApi = (*ZoneApiService)(&c.common)
 
 	return c
 }
@@ -196,14 +222,50 @@ func parameterToString(obj interface{}, collectionFormat string) string {
 	return fmt.Sprintf("%v", obj)
 }
 
-// callAPI do the request.
-func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
-	return c.cfg.HTTPClient.Do(request)
+// helper for converting interface{} parameters to json strings
+func parameterToJson(obj interface{}) (string, error) {
+	jsonBuf, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBuf), err
 }
 
-// Change base path to allow switching to mocks
+// callAPI do the request.
+func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
+	if c.cfg.Debug {
+		dump, err := httputil.DumpRequestOut(request, true)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("\n%s\n", string(dump))
+	}
+
+	resp, err := c.cfg.HTTPClient.Do(request)
+	if err != nil {
+		return resp, err
+	}
+
+	if c.cfg.Debug {
+		dump, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			return resp, err
+		}
+		log.Printf("\n%s\n", string(dump))
+	}
+
+	return resp, err
+}
+
+// ChangeBasePath changes base path to allow switching to mocks
 func (c *APIClient) ChangeBasePath(path string) {
 	c.cfg.BasePath = path
+}
+
+// Allow modification of underlying config for alternate implementations and testing
+// Caution: modifying the configuration while live can cause data races and potentially unwanted behavior
+func (c *APIClient) GetConfig() *Configuration {
+	return c.cfg
 }
 
 // prepareRequest build the request
@@ -265,9 +327,10 @@ func (c *APIClient) prepareRequest(
 			if err != nil {
 				return nil, err
 			}
-			// Set the Boundary in the Content-Type
-			headerParams["Content-Type"] = w.FormDataContentType()
 		}
+
+		// Set the Boundary in the Content-Type
+		headerParams["Content-Type"] = w.FormDataContentType()
 
 		// Set Content-Length
 		headerParams["Content-Length"] = fmt.Sprintf("%d", body.Len())
@@ -288,6 +351,16 @@ func (c *APIClient) prepareRequest(
 	url, err := url.Parse(path)
 	if err != nil {
 		return nil, err
+	}
+
+	// Override request host, if applicable
+	if c.cfg.Host != "" {
+		url.Host = c.cfg.Host
+	}
+
+	// Override request scheme, if applicable
+	if c.cfg.Scheme != "" {
+		url.Scheme = c.cfg.Scheme
 	}
 
 	// Adding Query Param
@@ -318,11 +391,6 @@ func (c *APIClient) prepareRequest(
 			headers.Set(h, v)
 		}
 		localVarRequest.Header = headers
-	}
-
-	// Override request host, if applicable
-	if c.cfg.Host != "" {
-		localVarRequest.Host = c.cfg.Host
 	}
 
 	// Add the user agent to the request.
@@ -364,17 +432,25 @@ func (c *APIClient) prepareRequest(
 }
 
 func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err error) {
-		if strings.Contains(contentType, "application/xml") {
-			if err = xml.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
-		} else if strings.Contains(contentType, "application/json") {
-			if err = json.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
+	if len(b) == 0 {
+		return nil
+	}
+	if s, ok := v.(*string); ok {
+		*s = string(b)
+		return nil
+	}
+	if xmlCheck.MatchString(contentType) {
+		if err = xml.Unmarshal(b, v); err != nil {
+			return err
 		}
+		return nil
+	}
+	if jsonCheck.MatchString(contentType) {
+		if err = json.Unmarshal(b, v); err != nil {
+			return err
+		}
+		return nil
+	}
 	return errors.New("undefined response type")
 }
 
@@ -417,7 +493,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer, err e
 	} else if jsonCheck.MatchString(contentType) {
 		err = json.NewEncoder(bodyBuf).Encode(body)
 	} else if xmlCheck.MatchString(contentType) {
-		xml.NewEncoder(bodyBuf).Encode(body)
+		err = xml.NewEncoder(bodyBuf).Encode(body)
 	}
 
 	if err != nil {

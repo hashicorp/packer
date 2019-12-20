@@ -10,6 +10,9 @@
         "source_image": "ubuntu",
         "disk_size": 10,
         "vm_type": "a1.nano",
-        "image_name": "packerbats-minimal-{{timestamp}}"
+        "image_name": "packerbats-minimal-{{timestamp}}",
+        "image_tags": {
+			"key":"value"
+		}
     }]
 }

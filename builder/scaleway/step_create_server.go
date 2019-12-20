@@ -60,6 +60,9 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	s.serverID = server
 
 	state.Put("server_id", server)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.serverID)
 
 	return multistep.ActionContinue
 }

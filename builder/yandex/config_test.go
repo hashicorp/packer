@@ -135,7 +135,8 @@ func TestConfigPrepare(t *testing.T) {
 			delete(raw, "token")
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, tc.Key)
@@ -156,7 +157,8 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 		"key": "file_not_exist",
 	}
 
-	_, _, errs := NewConfig(config)
+	var c Config
+	_, errs := c.Prepare(config)
 
 	if errs == nil || !strings.Contains(errs.Error(), "cannot access file 'file_not_exist' with content "+
 		"for value of metadata key 'key':") {
@@ -183,10 +185,11 @@ func TestConfigDefaults(t *testing.T) {
 	for _, tc := range cases {
 		raw := testConfig(t)
 
-		c, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 		testConfigOk(t, warns, errs)
 
-		actual := tc.Read(c)
+		actual := tc.Read(&c)
 		if actual != tc.Value {
 			t.Fatalf("bad: %#v", actual)
 		}
@@ -196,7 +199,8 @@ func TestConfigDefaults(t *testing.T) {
 func TestImageName(t *testing.T) {
 	raw := testConfig(t)
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -208,7 +212,8 @@ func TestImageName(t *testing.T) {
 func TestZone(t *testing.T) {
 	raw := testConfig(t)
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 	if c.Zone != "ru-central1-a" {
 		t.Fatalf("Zone should be 'ru-central1-a' given, but is '%s'", c.Zone)
 	}
@@ -218,7 +223,8 @@ func TestGpuDefaultPlatformID(t *testing.T) {
 	raw := testConfig(t)
 	raw["instance_gpus"] = 1
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 	if c.PlatformID != "gpu-standard-v1" {
 		t.Fatalf("expected 'gpu-standard-v1', but got '%s'", c.PlatformID)
 	}
@@ -229,7 +235,8 @@ func TestGpuWrongPlatformID(t *testing.T) {
 	raw["instance_gpus"] = 1
 	raw["platform_id"] = "standard-v1"
 
-	_, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	testConfigErr(t, warns, errs, "incompatible GPU platform_id")
 }
 
@@ -254,12 +261,13 @@ func testConfig(t *testing.T) (config map[string]interface{}) {
 func testConfigStruct(t *testing.T) *Config {
 	raw := testConfig(t)
 
-	c, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 
 	require.True(t, len(warns) == 0, "bad: %#v", warns)
 	require.NoError(t, errs, "should not have error: %s", errs)
 
-	return c
+	return &c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error, extra string) {

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -30,6 +31,7 @@ type Config struct {
 	Subnetwork          string   `mapstructure:"subnetwork"`
 	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
 	Zone                string   `mapstructure:"zone"`
+	ServiceAccountEmail string   `mapstructure:"service_account_email"`
 
 	account *jwt.Config
 	ctx     interpolate.Context
@@ -39,6 +41,8 @@ type PostProcessor struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -149,6 +153,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			"https://www.googleapis.com/auth/devstorage.full_control",
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
+	}
+	if p.config.ServiceAccountEmail != "" {
+		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
 	}
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,

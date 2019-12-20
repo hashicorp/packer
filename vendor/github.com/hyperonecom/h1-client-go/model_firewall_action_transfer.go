@@ -9,6 +9,7 @@
 
 package openapi
 
+// FirewallActionTransfer struct for FirewallActionTransfer
 type FirewallActionTransfer struct {
 	Project string `json:"project"`
 }

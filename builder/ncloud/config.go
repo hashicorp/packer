@@ -60,8 +60,7 @@ type Config struct {
 }
 
 // NewConfig checks parameters
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := []string{}
 
 	err := config.Decode(c, &config.DecodeOpts{
@@ -71,7 +70,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, warnings, err
+		return warnings, err
 	}
 
 	var errs *packer.MultiError
@@ -115,7 +114,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if c.BlockStorageSize < 10 || c.BlockStorageSize > 2000 {
 			errs = packer.MultiErrorAppend(errs, errors.New("The size of BlockStorageSize is at least 10 GB and up to 2000GB"))
 		} else if int(c.BlockStorageSize/10)*10 != c.BlockStorageSize {
-			return nil, nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
+			return nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
 		}
 	}
 
@@ -136,8 +135,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return warnings, errs
 	}
 
-	return c, warnings, nil
+	return warnings, nil
 }

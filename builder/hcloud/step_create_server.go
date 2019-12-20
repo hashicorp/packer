@@ -85,6 +85,9 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 	// Store the server id for later
 	state.Put("server_id", serverCreateResult.Server.ID)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", serverCreateResult.Server.ID)
 
 	if err := waitForAction(ctx, client, serverCreateResult.Action); err != nil {
 		err := fmt.Errorf("Error creating server: %s", err)

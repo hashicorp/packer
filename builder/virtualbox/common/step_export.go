@@ -3,10 +3,8 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -46,9 +44,6 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
-	// Wait a second to ensure VM is really shutdown.
-	log.Println("1 second timeout to ensure VM is really shutdown")
-	time.Sleep(1 * time.Second)
 	ui.Say("Preparing to export machine...")
 
 	// Clear out the Packer-created forwarding rule

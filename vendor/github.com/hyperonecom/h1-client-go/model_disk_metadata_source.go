@@ -9,7 +9,8 @@
 
 package openapi
 
+// DiskMetadataSource struct for DiskMetadataSource
 type DiskMetadataSource struct {
-	Filename string `json:"filename,omitempty"`
-	Size float32 `json:"size,omitempty"`
+	Filename string  `json:"filename,omitempty"`
+	Size     float32 `json:"size,omitempty"`
 }

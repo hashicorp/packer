@@ -9,6 +9,7 @@
 
 package openapi
 
+// IpActionTransfer struct for IpActionTransfer
 type IpActionTransfer struct {
 	Project string `json:"project"`
 }

@@ -35,7 +35,13 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"vm_type": "a1.nano",
 		"source_image": "ubuntu",
-		"disk_size": 10
+		"disk_size": 10,
+		"image_tags": {
+			"key":"value"
+		},
+		"vm_tags": {
+			"key_vm":"value_vm"
+		}
 	}]
 }
 `

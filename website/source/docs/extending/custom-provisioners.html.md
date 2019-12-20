@@ -35,8 +35,9 @@ explaining what each method should do.
 
 ``` go
 type Provisioner interface {
+  ConfigSpec() hcldec.ObjectSpec
   Prepare(...interface{}) error
-  Provision(Ui, Communicator) error
+  Provision(context.Context, Ui, Communicator, map[string]interface{}) error
 }
 ```
 

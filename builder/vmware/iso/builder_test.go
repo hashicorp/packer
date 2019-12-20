@@ -33,7 +33,7 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -63,7 +63,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "disk_size")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -77,7 +77,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	config["disk_size"] = 60000
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -95,7 +95,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "floppy_files")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -110,7 +110,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	floppies_path := "../../../common/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -129,7 +129,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig()
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
-	_, errs := b.Prepare(config)
+	_, _, errs := b.Prepare(config)
 	if errs == nil {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
@@ -149,7 +149,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_type"] = "foobar"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -161,7 +161,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	// Bad
 	config["remote_host"] = ""
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -176,7 +176,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	config["remote_password"] = ""
 	config["remote_private_key_file"] = ""
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -189,7 +189,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	config["remote_host"] = "foobar.example.com"
 	config["remote_password"] = "supersecret"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -207,7 +207,7 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_password"] = ""
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) != 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -218,7 +218,7 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 	// Good
 	config["remote_password"] = "supersecret"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) != 0 {
 		t.Fatalf("err: %s", err)
 	}
@@ -233,7 +233,7 @@ func TestBuilderPrepare_Format(t *testing.T) {
 
 	// Bad
 	config["format"] = "foobar"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -252,7 +252,7 @@ func TestBuilderPrepare_Format(t *testing.T) {
 		config["skip_validate_credentials"] = true
 
 		b = Builder{}
-		warns, err = b.Prepare(config)
+		_, warns, err = b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -268,7 +268,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -290,7 +290,7 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 
 	config["output_directory"] = dir
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -301,7 +301,7 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	// Test with a good one
 	config["output_directory"] = "i-hope-i-dont-exist"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -316,7 +316,7 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 
 	// Test a default
 	delete(config, "tools_upload_path")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -331,7 +331,7 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 	// Test with a bad value
 	config["tools_upload_path"] = "{{{nope}"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -342,7 +342,7 @@ func TestBuilderPrepare_ToolsUploadPath(t *testing.T) {
 	// Test with a good one
 	config["tools_upload_path"] = "hey"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -357,7 +357,7 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	// Test bad
 	config["vmx_template_path"] = "/i/dont/exist/forreal"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -379,7 +379,7 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	config["vmx_template_path"] = tf.Name()
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -401,7 +401,7 @@ func TestBuilderPrepare_VMXTemplatePath(t *testing.T) {
 
 	config["vmx_template_path"] = tf2.Name()
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -417,7 +417,7 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	// Bad
 	config["vnc_port_min"] = 1000
 	config["vnc_port_max"] = 500
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -428,7 +428,7 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	// Bad
 	config["vnc_port_min"] = -500
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -440,7 +440,7 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	config["vnc_port_min"] = 500
 	config["vnc_port_max"] = 1000
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -458,7 +458,7 @@ func TestBuilderCheckCollisions(t *testing.T) {
 	}
 	{
 		var b Builder
-		warns, _ := b.Prepare(config)
+		_, warns, _ := b.Prepare(config)
 		if len(warns) != 1 {
 			t.Fatalf("Should have warning about two collisions.")
 		}
@@ -466,7 +466,7 @@ func TestBuilderCheckCollisions(t *testing.T) {
 	{
 		config["vmx_template_path"] = "some/path.vmx"
 		var b Builder
-		warns, _ := b.Prepare(config)
+		_, warns, _ := b.Prepare(config)
 		if len(warns) != 0 {
 			t.Fatalf("Should not check for collisions with custom template.")
 		}
@@ -484,7 +484,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["winrm_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -512,7 +512,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["ssh_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}

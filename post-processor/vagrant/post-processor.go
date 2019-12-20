@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -56,6 +57,11 @@ type Config struct {
 
 type PostProcessor struct {
 	configs map[string]*Config
+}
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec {
+	panic("not implemented yet")
+	// return p.config.FlatMapstructure().HCL2Spec()
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {

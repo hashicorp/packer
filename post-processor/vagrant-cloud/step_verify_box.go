@@ -28,7 +28,7 @@ type stepVerifyBox struct {
 func (s *stepVerifyBox) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	ui.Say(fmt.Sprintf("Verifying box is accessible: %s", config.Tag))
 

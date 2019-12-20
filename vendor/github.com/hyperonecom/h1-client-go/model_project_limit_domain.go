@@ -10,6 +10,6 @@
 package openapi
 
 type ProjectLimitDomain struct {
-	Count float32 `json:"count"`
+	Count  float32 `json:"count"`
 	Record float32 `json:"record"`
 }

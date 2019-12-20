@@ -194,9 +194,20 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 	}
 
-	runReq, runResp := ec2conn.RunInstancesRequest(runOpts)
-	runReq.RetryCount = 11
-	err = runReq.Send()
+	var runResp *ec2.Reservation
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(err error) bool {
+			if isAWSErr(err, "InvalidParameterValue", "iamInstanceProfile") {
+				return true
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		runResp, err = ec2conn.RunInstances(runOpts)
+		return err
+	})
 
 	if isAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
 		err := fmt.Errorf("Error launching source instance: a valid Subnet Id was not specified")
@@ -269,6 +280,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.InstanceId)
 
 	// If we're in a region that doesn't support tagging on instance creation,
 	// do that now.

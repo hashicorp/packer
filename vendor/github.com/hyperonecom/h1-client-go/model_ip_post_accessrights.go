@@ -9,6 +9,7 @@
 
 package openapi
 
+// IpPostAccessrights struct for IpPostAccessrights
 type IpPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

@@ -9,7 +9,8 @@
 
 package openapi
 
+// NetworkUpdate struct for NetworkUpdate
 type NetworkUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name    string `json:"name,omitempty"`
 	Gateway string `json:"gateway,omitempty"`
 }

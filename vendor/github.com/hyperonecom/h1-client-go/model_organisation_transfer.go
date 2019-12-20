@@ -9,7 +9,8 @@
 
 package openapi
 
+// OrganisationTransfer struct for OrganisationTransfer
 type OrganisationTransfer struct {
 	Name string `json:"name,omitempty"`
-	Id string `json:"_id,omitempty"`
+	Id   string `json:"id,omitempty"`
 }

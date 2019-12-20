@@ -150,11 +150,12 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		if s.Extension != "" {
 			targetPath += "." + s.Extension
 		}
+		targetPath, err = packer.CachePath(targetPath)
+		if err != nil {
+			return "", fmt.Errorf("CachePath: %s", err)
+		}
 	}
-	targetPath, err = packer.CachePath(targetPath)
-	if err != nil {
-		return "", fmt.Errorf("CachePath: %s", err)
-	}
+
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)

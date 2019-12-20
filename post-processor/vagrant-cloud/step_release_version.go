@@ -17,7 +17,7 @@ func (s *stepReleaseVersion) Run(ctx context.Context, state multistep.StateBag) 
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	ui.Say(fmt.Sprintf("Releasing version: %s", version.Version))
 
