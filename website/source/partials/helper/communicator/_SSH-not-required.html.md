@@ -46,7 +46,8 @@
     use this option with a key pair already configured in the source AMI,
     leave the `ssh_keypair_name` blank. To associate an existing key pair in
     AWS with the source instance, set the `ssh_keypair_name` field to the
-    name of the key pair.
+    name of the key pair. The environment variable `SSH_AUTH_SOCK` must be
+    set for this option to work properly.
     
 -   `ssh_disable_agent_forwarding` (bool) - If true, SSH agent forwarding will be disabled. Defaults to `false`.
     
