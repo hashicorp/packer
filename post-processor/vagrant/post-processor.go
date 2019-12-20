@@ -93,23 +93,8 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 		config = specificConfig
 	}
 
-	ui.Say("Creating a dummy Vagrant box to ensure the host system can create one correctly")
-
-	tempDir, err := tmp.Dir("packer")
+	err := CreateDummyBox(ui, config.CompressionLevel)
 	if err != nil {
-		return nil, false, err
-	}
-	defer os.RemoveAll(tempDir)
-	if err := WriteMetadata(tempDir, make(map[string]string)); err != nil {
-		return nil, false, err
-	}
-	tempBox, err := tmp.File("box-*.box")
-	if err != nil {
-		return nil, false, err
-	}
-	defer tempBox.Close()
-	defer os.Remove(tempBox.Name())
-	if err := DirToBox(tempBox.Name(), tempDir, nil, config.CompressionLevel); err != nil {
 		return nil, false, err
 	}
 
