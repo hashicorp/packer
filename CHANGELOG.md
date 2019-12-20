@@ -9,6 +9,7 @@ making changes for HCL2.
 * builder/cloudstack: Fix panics associated with loading config [GH-8513]
 * builder/hyperv/iso: Fix panics associated with loading config [GH-8513]
 * builder/hyperv/vmcx: Fix panics associated with loading config [GH-8513]
+* builder/jdcloud: Update jdcloud statebag to use pointers for config [GH-8518]
 * builder/linode: Fix panics associated with loading config [GH-8513]
 * builder/lxc: Fix panics associated with loading config [GH-8513]
 * builder/lxd: Fix panics associated with loading config [GH-8513]
@@ -21,9 +22,10 @@ making changes for HCL2.
 * builder/scaleway: Fix panics associated with loading config [GH-8513]
 * builder/vagrant: Fix panics associated with loading config [GH-8513]
 * builder/virtualbox/ovf: Fix panics associated with loading config [GH-8513]
-* builder/virtualbox: Configure NAT interface before forwarded port mapping #8514
-* post-processor/vagrant-cloud: Configure NAT interface before forwarded port mapping [GH-8514]
-* builder/jdcloud: Update jdcloud statebag to use pointers for config [GH-8518]
+* builder/virtualbox: Configure NAT interface before forwarded port mapping
+    #8514
+* post-processor/vagrant-cloud: Configure NAT interface before forwarded port
+    mapping [GH-8514]
 
 ## 1.5.0 (December 18, 2019)
 
