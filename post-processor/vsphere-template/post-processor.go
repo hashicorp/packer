@@ -37,6 +37,7 @@ type Config struct {
 	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
 	SnapshotName        string `mapstructure:"snapshot_name"`
 	SnapshotDescription string `mapstructure:"snapshot_description"`
+	ReregisterVM        bool   `mapstructure:"reregister_vm" default:true`
 
 	ctx interpolate.Context
 }
@@ -135,7 +136,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			Folder: p.config.Folder,
 		},
 		NewStepCreateSnapshot(artifact, p),
-		NewStepMarkAsTemplate(artifact),
+		NewStepMarkAsTemplate(artifact, p),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(ctx, state)

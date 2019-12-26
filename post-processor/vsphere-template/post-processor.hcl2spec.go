@@ -25,6 +25,7 @@ type FlatConfig struct {
 	SnapshotEnable      *bool             `mapstructure:"snapshot_enable" cty:"snapshot_enable"`
 	SnapshotName        *string           `mapstructure:"snapshot_name" cty:"snapshot_name"`
 	SnapshotDescription *string           `mapstructure:"snapshot_description" cty:"snapshot_description"`
+	ReregisterVM        *bool             `mapstructure:"reregister_vm" cty:"reregister_vm"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -55,6 +56,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"snapshot_enable":            &hcldec.AttrSpec{Name: "snapshot_enable", Type: cty.Bool, Required: false},
 		"snapshot_name":              &hcldec.AttrSpec{Name: "snapshot_name", Type: cty.String, Required: false},
 		"snapshot_description":       &hcldec.AttrSpec{Name: "snapshot_description", Type: cty.String, Required: false},
+		"reregister_vm":              &hcldec.AttrSpec{Name: "reregister_vm", Type: cty.Bool, Required: false},
 	}
 	return s
 }

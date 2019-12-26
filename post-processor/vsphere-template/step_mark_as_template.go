@@ -18,9 +18,10 @@ import (
 type stepMarkAsTemplate struct {
 	VMName       string
 	RemoteFolder string
+	ReregisterVM bool
 }
 
-func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
+func NewStepMarkAsTemplate(artifact packer.Artifact, p *PostProcessor) *stepMarkAsTemplate {
 	remoteFolder := "Discovered virtual machine"
 	vmname := artifact.Id()
 
@@ -33,6 +34,7 @@ func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
 	return &stepMarkAsTemplate{
 		VMName:       vmname,
 		RemoteFolder: remoteFolder,
+		ReregisterVM: p.config.ReregisterVM,
 	}
 }
 
@@ -42,7 +44,6 @@ func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) 
 	folder := state.Get("folder").(*object.Folder)
 	dcPath := state.Get("dcPath").(string)
 
-	ui.Message("Marking as a template...")
 
 	vm, err := findRuntimeVM(cli, dcPath, s.VMName, s.RemoteFolder)
 	if err != nil {
@@ -51,42 +52,56 @@ func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
+	// Use a simple "MarkAsTemplate" method unless `reregister_vm` is true
+	if !s.ReregisterVM {
+		ui.Message("Marking as a template...")
+
+		if err := vm.MarkAsTemplate(context.Background()); err != nil {
+			state.Put("error", err)
+			ui.Error("vm.MarkAsTemplate:" + err.Error())
+			return multistep.ActionHalt
+		}
+		return multistep.ActionContinue
+	}
+
+	ui.Message("Re-register VM as a template...")
+
 	dsPath, err := datastorePath(vm)
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("datastorePath:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	host, err := vm.HostSystem(context.Background())
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("vm.HostSystem:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err := vm.Unregister(context.Background()); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("vm.Unregister:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("unregisterPreviousVM:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
 	if err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("RegisterVM:" + err.Error())
 		return multistep.ActionHalt
 	}
 
 	if err = task.Wait(context.Background()); err != nil {
 		state.Put("error", err)
-		ui.Error(err.Error())
+		ui.Error("task.Wait:" + err.Error())
 		return multistep.ActionHalt
 	}
 
