@@ -131,10 +131,11 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin := range pluginPaths {
+	for plugin, path := range pluginPaths {
 		plugin := plugin
+		path := path
 		c.Builders[plugin] = func() (packer.Builder, error) {
-			return c.pluginClient(pluginPaths[plugin]).Builder()
+			return c.pluginClient(path).Builder()
 		}
 		externallyUsed = append(externallyUsed, plugin)
 	}
@@ -148,10 +149,11 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin := range pluginPaths {
+	for plugin, path := range pluginPaths {
 		plugin := plugin
+		path := path
 		c.PostProcessors[plugin] = func() (packer.PostProcessor, error) {
-			return c.pluginClient(pluginPaths[plugin]).PostProcessor()
+			return c.pluginClient(path).PostProcessor()
 		}
 		externallyUsed = append(externallyUsed, plugin)
 	}
@@ -165,10 +167,11 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin := range pluginPaths {
+	for plugin, path := range pluginPaths {
 		plugin := plugin
+		path := path
 		c.Provisioners[plugin] = func() (packer.Provisioner, error) {
-			return c.pluginClient(pluginPaths[plugin]).Provisioner()
+			return c.pluginClient(path).Provisioner()
 		}
 		externallyUsed = append(externallyUsed, plugin)
 	}
