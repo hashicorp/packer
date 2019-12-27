@@ -267,6 +267,14 @@ func (c *config) discoverInternalComponents() error {
 func (c *config) pluginClient(path string) *plugin.Client {
 	originalPath := path
 
+	// Check for special case using `packer plugin PLUGIN`
+	args := []string{}
+	if strings.Contains(path, PACKERSPACE) {
+		parts := strings.Split(path, PACKERSPACE)
+		path = parts[0]
+		args = parts[1:]
+	}
+
 	// First attempt to find the executable by consulting the PATH.
 	path, err := exec.LookPath(path)
 	if err != nil {
@@ -280,14 +288,6 @@ func (c *config) pluginClient(path string) *plugin.Client {
 			log.Printf("Current exe path: %s", exePath)
 			path = filepath.Join(filepath.Dir(exePath), filepath.Base(originalPath))
 		}
-	}
-
-	// Check for special case using `packer plugin PLUGIN`
-	args := []string{}
-	if strings.Contains(path, PACKERSPACE) {
-		parts := strings.Split(path, PACKERSPACE)
-		path = parts[0]
-		args = parts[1:]
 	}
 
 	// If everything failed, just use the original path and let the error
