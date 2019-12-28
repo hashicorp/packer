@@ -3,6 +3,8 @@ package vagrant
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
@@ -28,12 +30,42 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	}
 
 	format := artifact.State("diskType").(string)
-	origSize := artifact.State("diskSize").(uint64)
-	size := origSize / 1024 // In MB, want GB
-	if origSize%1024 > 0 {
-		// Make sure we don't make the size smaller
-		size++
+	sizeString := artifact.State("diskSize").(string)
+	// sizes defined at https://github.com/qemu/qemu/blob/dd5b0f95490883cd8bc7d070db8de70d5c979cbc/qemu-img.c#L141
+	// All are multiples of 1024, not 1000
+	sizeString = strings.ToLower(sizeString)
+	re := regexp.MustCompile(`^[\d]+(b|k|m|g|t){0,1}$`)
+	matched := re.MatchString(sizeString)
+	if !matched {
+		return "", nil, fmt.Errorf("Malformed diskSize %v", sizeString)
 	}
+	value := sizeString[:len(sizeString)-1]
+	suffix := sizeString[len(sizeString)-1:]
+	origSize, err := strconv.ParseUint(value, 10, 64)
+	var sizeGb uint64
+	if err != nil {
+		return "", nil, err
+	}
+	switch suffix {
+	case "e":
+		sizeGb = origSize * 1024 * 1024 * 1024
+	case "p":
+		sizeGb = origSize * 1024 * 1024
+	case "t":
+		sizeGb = origSize * 1024
+	case "g":
+		sizeGb = origSize
+	case "m":
+		sizeGb = origSize / 1024 // In MB, want GB
+		if origSize%1024 > 0 {
+			// Make sure we don't make the size smaller
+			sizeGb++
+		}
+	case "k":
+	case "b":
+		return "", nil, fmt.Errorf("Disk size too small. Must be > 1MB")
+	}
+
 	domainType := artifact.State("domainType").(string)
 
 	// Convert domain type to libvirt driver
@@ -51,7 +83,7 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	metadata = map[string]interface{}{
 		"provider":     "libvirt",
 		"format":       format,
-		"virtual_size": size,
+		"virtual_size": sizeGb,
 	}
 
 	vagrantfile = fmt.Sprintf(libvirtVagrantfile, driver)
