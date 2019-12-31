@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -727,8 +728,35 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact.state["diskPaths"] = diskpaths
 	}
 	artifact.state["diskType"] = b.config.Format
-	artifact.state["diskSize"] = b.config.DiskSize
 	artifact.state["domainType"] = b.config.Accelerator
+
+	// parsing number part of disk size, disk size was already validated by prepare and 'M' unit added if needed
+	sizeInUnits, err := strconv.ParseUint(b.config.DiskSize[:len(b.config.DiskSize)-1], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	switch strings.ToLower(b.config.DiskSize[len(b.config.DiskSize)-1:]) {
+	case "e":
+		artifact.state["diskSize"] = sizeInUnits * 1024 * 1024 * 1024 * 1024
+	case "p":
+		artifact.state["diskSize"] = sizeInUnits * 1024 * 1024 * 1024
+	case "t":
+		artifact.state["diskSize"] = sizeInUnits * 1024 * 1024
+	case "g":
+		artifact.state["diskSize"] = sizeInUnits * 1024
+	case "m":
+		artifact.state["diskSize"] = sizeInUnits
+	case "k":
+		artifact.state["diskSize"] = sizeInUnits / 1024
+	case "b":
+		artifact.state["diskSize"] = sizeInUnits / 1024 / 1024
+	default:
+		return nil, errors.New("no disk_size unit added by prepare method")
+	}
+	if artifact.state["diskSize"] == 0 {
+		artifact.state["diskSize"] = 1
+	}
 
 	return artifact, nil
 }
