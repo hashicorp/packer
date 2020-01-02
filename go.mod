@@ -81,7 +81,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.0.0
-	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80
+	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80 // indirect
 	github.com/hashicorp/serf v0.8.2 // indirect
 	github.com/hashicorp/vault v1.1.0
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
