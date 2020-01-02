@@ -9,6 +9,13 @@ const (
 	Thumbprint    string = "thumbprint"
 	Ui            string = "ui"
 )
+
+// Default replica count for image versions in shared image gallery
+const (
+	SharedImageGalleryImageVersionDefaultMinReplicaCount int32 = 1
+	SharedImageGalleryImageVersionDefaultMaxReplicaCount int32 = 10
+)
+
 const (
 	ArmCaptureTemplate                 string = "arm.CaptureTemplate"
 	ArmComputeName                     string = "arm.ComputeName"
@@ -30,18 +37,21 @@ const (
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
 	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
 
-	ArmIsManagedImage                              string = "arm.IsManagedImage"
-	ArmManagedImageResourceGroupName               string = "arm.ManagedImageResourceGroupName"
-	ArmManagedImageLocation                        string = "arm.ManagedImageLocation"
-	ArmManagedImageName                            string = "arm.ManagedImageName"
-	ArmManagedImageSigPublishResourceGroup         string = "arm.ManagedImageSigPublishResourceGroup"
-	ArmManagedImageSharedGalleryName               string = "arm.ManagedImageSharedGalleryName"
-	ArmManagedImageSharedGalleryImageName          string = "arm.ManagedImageSharedGalleryImageName"
-	ArmManagedImageSharedGalleryImageVersion       string = "arm.ManagedImageSharedGalleryImageVersion"
-	ArmManagedImageSharedGalleryReplicationRegions string = "arm.ManagedImageSharedGalleryReplicationRegions"
-	ArmManagedImageSharedGalleryId                 string = "arm.ArmManagedImageSharedGalleryId"
-	ArmManagedImageSubscription                    string = "arm.ArmManagedImageSubscription"
-	ArmAsyncResourceGroupDelete                    string = "arm.AsyncResourceGroupDelete"
-	ArmManagedImageOSDiskSnapshotName              string = "arm.ManagedImageOSDiskSnapshotName"
-	ArmManagedImageDataDiskSnapshotPrefix          string = "arm.ManagedImageDataDiskSnapshotPrefix"
+	ArmIsManagedImage                                         string = "arm.IsManagedImage"
+	ArmManagedImageResourceGroupName                          string = "arm.ManagedImageResourceGroupName"
+	ArmManagedImageLocation                                   string = "arm.ManagedImageLocation"
+	ArmManagedImageName                                       string = "arm.ManagedImageName"
+	ArmManagedImageSigPublishResourceGroup                    string = "arm.ManagedImageSigPublishResourceGroup"
+	ArmManagedImageSharedGalleryName                          string = "arm.ManagedImageSharedGalleryName"
+	ArmManagedImageSharedGalleryImageName                     string = "arm.ManagedImageSharedGalleryImageName"
+	ArmManagedImageSharedGalleryImageVersion                  string = "arm.ManagedImageSharedGalleryImageVersion"
+	ArmManagedImageSharedGalleryReplicationRegions            string = "arm.ManagedImageSharedGalleryReplicationRegions"
+	ArmManagedImageSharedGalleryId                            string = "arm.ArmManagedImageSharedGalleryId"
+	ArmManagedImageSharedGalleryImageVersionEndOfLifeDate     string = "arm.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate"
+	ArmManagedImageSharedGalleryImageVersionReplicaCount      string = "arm.ArmManagedImageSharedGalleryImageVersionReplicaCount"
+	ArmManagedImageSharedGalleryImageVersionExcludeFromLatest string = "arm.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest"
+	ArmManagedImageSubscription                               string = "arm.ArmManagedImageSubscription"
+	ArmAsyncResourceGroupDelete                               string = "arm.AsyncResourceGroupDelete"
+	ArmManagedImageOSDiskSnapshotName                         string = "arm.ManagedImageOSDiskSnapshotName"
+	ArmManagedImageDataDiskSnapshotPrefix                     string = "arm.ManagedImageDataDiskSnapshotPrefix"
 )

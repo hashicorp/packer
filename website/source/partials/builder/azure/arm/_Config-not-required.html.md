@@ -40,6 +40,16 @@
     its default of "60m" (valid time units include `s` for seconds, `m` for
     minutes, and `h` for hours.)
     
+-   `shared_gallery_image_version_end_of_life_date` (string) - The end of life date (2006-01-02T15:04:05.99Z) of the gallery Image Version. This property
+    can be used for decommissioning purposes.
+    
+-   `shared_image_gallery_replica_count` (int32) - The number of replicas of the Image Version to be created per region. This
+    property would take effect for a region when regionalReplicaCount is not specified.
+    Replica count must be between 1 and 10.
+    
+-   `shared_gallery_image_version_exclude_from_latest` (bool) - If set to true, Virtual Machines deployed from the latest version of the
+    Image Definition won't use this Image Version.
+    
 -   `image_version` (string) - Specify a specific version of an OS to boot from.
     Defaults to `latest`. There may be a difference in versions available
     across regions due to image synchronization latency. To ensure a consistent
