@@ -17,9 +17,11 @@ type FlatConfig struct {
 	PackerOnError                     *string                      `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars                    map[string]string            `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars               []string                     `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"true" cty:"access_key"`
-	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"true" cty:"secret_key"`
-	AlicloudRegion                    *string                      `mapstructure:"region" required:"true" cty:"region"`
+	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"false" cty:"access_key"`
+	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"false" cty:"secret_key"`
+	AlicloudRegion                    *string                      `mapstructure:"region" required:"false" cty:"region"`
+	AlicloudProfile                   *string                      `mapstructure:"profile" required:"false" cty:"profile"`
+	AlicloudSharedCredentialsFile     *string                      `mapstructure:"shared_credentials_file" required:"false" cty:"shared_credentials_file"`
 	AlicloudSkipValidation            *bool                        `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
 	AlicloudSkipImageValidation       *bool                        `mapstructure:"skip_image_validation" required:"false" cty:"skip_image_validation"`
 	SecurityToken                     *string                      `mapstructure:"security_token" required:"false" cty:"security_token"`

@@ -3,26 +3,34 @@
 package ecs
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/hashicorp/packer/version"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Config of alicloud
 type AlicloudAccessConfig struct {
 	// This is the Alicloud access key. It must be provided, but it can also be
 	// sourced from the ALICLOUD_ACCESS_KEY environment variable.
-	AlicloudAccessKey string `mapstructure:"access_key" required:"true"`
+	AlicloudAccessKey string `mapstructure:"access_key" required:"false"`
 	// This is the Alicloud secret key. It must be provided, but it can also be
 	// sourced from the ALICLOUD_SECRET_KEY environment variable.
-	AlicloudSecretKey string `mapstructure:"secret_key" required:"true"`
+	AlicloudSecretKey string `mapstructure:"secret_key" required:"false"`
 	// This is the Alicloud region. It must be provided, but it can also be
 	// sourced from the ALICLOUD_REGION environment variables.
-	AlicloudRegion string `mapstructure:"region" required:"true"`
+	AlicloudRegion string `mapstructure:"region" required:"false"`
+	// Alicloud profile name, like default etc.
+	AlicloudProfile string `mapstructure:"profile" required:"false"`
+	// Alicoud profile config file path, like ~/.aliyun/config.json
+	AlicloudSharedCredentialsFile string `mapstructure:"shared_credentials_file" required:"false"`
 	// The region validation can be skipped if this value is true, the default
 	// value is false.
 	AlicloudSkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
@@ -48,8 +56,23 @@ func (c *AlicloudAccessConfig) Client() (*ClientWrapper, error) {
 		c.SecurityToken = os.Getenv("SECURITY_TOKEN")
 	}
 
-	client, err := ecs.NewClientWithStsToken(c.AlicloudRegion, c.AlicloudAccessKey,
-		c.AlicloudSecretKey, c.SecurityToken)
+	var getProviderConfig = func(str string, key string) string {
+		value, err := getConfigFromProfile(c, key)
+		if err == nil && value != nil {
+			str = value.(string)
+		}
+		return str
+	}
+
+	//use aliyun profile instead of aliyun ak and sk
+	if c.AlicloudAccessKey == "" || c.AlicloudSecretKey == "" {
+		c.AlicloudAccessKey = getProviderConfig(c.AlicloudAccessKey, "access_key_id")
+		c.AlicloudSecretKey = getProviderConfig(c.AlicloudSecretKey, "access_key_secret")
+		c.AlicloudRegion = getProviderConfig(c.AlicloudRegion, "region_id")
+		c.SecurityToken = getProviderConfig(c.SecurityToken, "sts_token")
+	}
+
+	client, err := ecs.NewClientWithStsToken(c.AlicloudRegion, c.AlicloudAccessKey, c.AlicloudSecretKey, c.SecurityToken)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +112,13 @@ func (c *AlicloudAccessConfig) Config() error {
 	if c.AlicloudSecretKey == "" {
 		c.AlicloudSecretKey = os.Getenv("ALICLOUD_SECRET_KEY")
 	}
-	if c.AlicloudAccessKey == "" || c.AlicloudSecretKey == "" {
+	if c.AlicloudProfile == "" {
+		c.AlicloudProfile = os.Getenv("ALICLOUD_PROFILE")
+	}
+	if c.AlicloudSharedCredentialsFile == "" {
+		c.AlicloudSharedCredentialsFile = os.Getenv("ALICLOUD_SHARED_CREDENTIALS_FILE")
+	}
+	if (c.AlicloudAccessKey == "" || c.AlicloudSecretKey == "") && c.AlicloudProfile == "" {
 		return fmt.Errorf("ALICLOUD_ACCESS_KEY and ALICLOUD_SECRET_KEY must be set in template file or environment variables.")
 	}
 	return nil
@@ -130,4 +159,68 @@ func (c *AlicloudAccessConfig) getSupportedRegions() ([]string, error) {
 	}
 
 	return validRegions, nil
+}
+
+func getConfigFromProfile(c *AlicloudAccessConfig, ProfileKey string) (interface{}, error) {
+	providerConfig := make(map[string]interface{})
+	current := c.AlicloudProfile
+	// use aliyun profile if exist
+	if current != "" {
+		profilePath, err := homedir.Expand(c.AlicloudSharedCredentialsFile)
+		if err != nil {
+			return nil, err
+		}
+		if profilePath == "" {
+			profilePath = fmt.Sprintf("%s/.aliyun/config.json", os.Getenv("HOME"))
+			if runtime.GOOS == "windows" {
+				profilePath = fmt.Sprintf("%s/.aliyun/config.json", os.Getenv("USERPROFILE"))
+			}
+		}
+		_, err = os.Stat(profilePath)
+		if !os.IsNotExist(err) {
+			data, err := ioutil.ReadFile(profilePath)
+			if err != nil {
+				return nil, err
+			}
+			config := map[string]interface{}{}
+			err = json.Unmarshal(data, &config)
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range config["profiles"].([]interface{}) {
+				if current == v.(map[string]interface{})["name"] {
+					providerConfig = v.(map[string]interface{})
+				}
+			}
+		}
+	}
+	mode := ""
+	if v, ok := providerConfig["mode"]; ok {
+		mode = v.(string)
+	} else {
+		return v, nil
+	}
+	switch ProfileKey {
+	case "access_key_id", "access_key_secret":
+		if mode == "EcsRamRole" {
+			return "", nil
+		}
+	case "ram_role_name":
+		if mode != "EcsRamRole" {
+			return "", nil
+		}
+	case "sts_token":
+		if mode != "StsToken" {
+			return "", nil
+		}
+	case "ram_role_arn", "ram_session_name":
+		if mode != "RamRoleArn" {
+			return "", nil
+		}
+	case "expired_seconds":
+		if mode != "RamRoleArn" {
+			return float64(0), nil
+		}
+	}
+	return providerConfig[ProfileKey], nil
 }
