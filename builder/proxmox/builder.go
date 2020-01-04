@@ -38,6 +38,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
+const downloadPathKey = "downloaded_iso_path"
+
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	var err error
 	tlsConfig := &tls.Config{
@@ -62,6 +64,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the steps
 	steps := []multistep.Step{
+		&common.StepDownload{
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
+			Description:  "ISO",
+			Extension:    b.config.TargetExtension,
+			ResultKey:    downloadPathKey,
+			TargetPath:   b.config.TargetPath,
+			Url:          b.config.ISOUrls,
+		},
+		&stepUploadISO{},
 		&stepStartVM{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
