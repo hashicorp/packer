@@ -312,10 +312,10 @@ PostProcessorRunSeqLoop:
 			}
 
 			keep := defaultKeep
-			// When user has not set keep_input_artifuact
+			// When user has not set keep_input_artifact
 			// corePP.keepInputArtifact is nil.
 			// In this case, use the keepDefault provided by the postprocessor.
-			// When user _has_ set keep_input_atifact, go with that instead.
+			// When user _has_ set keep_input_artifact, go with that instead.
 			// Exception: for postprocessors that will fail/become
 			// useless if keep isn't true, heed forceOverride and keep the
 			// input artifact regardless of user preference.
