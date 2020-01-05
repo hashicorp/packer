@@ -285,4 +285,9 @@
     password for Windows instances. Defaults to 20 minutes. Example value:
     10m
     
--   `ssh_interface` (string) - SSH Interface
+-   `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
+    set, either the public IP address, private IP address, public DNS name
+    or private DNS name will used as the host for SSH. The default behaviour
+    if inside a VPC is to use the public IP address if available, otherwise
+    the private IP address will be used. If not in a VPC the public DNS name
+    will be used.
