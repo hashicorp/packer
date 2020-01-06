@@ -1,0 +1,1 @@
+ERROR: -> ResourceNotFound : The Resource 'Microsoft.Compute/images/PackerUbuntuImage' under resource group 'packer-test00' was not found.

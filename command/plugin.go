@@ -21,6 +21,7 @@ import (
 	amazoninstancebuilder "github.com/hashicorp/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
 	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
+	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
 	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	dockerbuilder "github.com/hashicorp/packer/builder/docker"
@@ -82,6 +83,7 @@ import (
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
+	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
@@ -112,6 +114,7 @@ var Builders = map[string]packer.Builder{
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"azure-arm":           new(azurearmbuilder.Builder),
 	"azure-chroot":        new(azurechrootbuilder.Builder),
+	"azure-dtl":           new(azuredtlbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
 	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
@@ -156,6 +159,7 @@ var Builders = map[string]packer.Builder{
 var Provisioners = map[string]packer.Provisioner{
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
+	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"breakpoint":        new(breakpointprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
