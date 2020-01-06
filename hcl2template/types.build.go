@@ -51,11 +51,11 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 		if ref == NoSource {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  "Invalid " + sourceLabel + " reference",
+				Summary:  "Invalid " + sourceLabel + " reference: " + buildFrom,
 				Detail: "A " + sourceLabel + " type must start with a letter and " +
 					"may contain only letters, digits, underscores, and dashes." +
 					"A valid source reference looks like: `source.type.name`",
-				Subject: &block.LabelRanges[0],
+				Subject: block.DefRange.Ptr(),
 			})
 			continue
 		}
@@ -67,7 +67,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 				Detail: "A " + sourceLabel + " type must start with a letter and " +
 					"may contain only letters, digits, underscores, and dashes." +
 					"A valid source reference looks like: `source.type.name`",
-				Subject: &block.LabelRanges[0],
+				Subject: block.DefRange.Ptr(),
 			})
 			continue
 		}
@@ -75,7 +75,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 		build.Froms = append(build.Froms, ref)
 	}
 
-	content, diags := b.Config.Content(buildSchema)
+	content, moreDiags := b.Config.Content(buildSchema)
+	diags = append(diags, moreDiags...)
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case buildProvisionerLabel:
