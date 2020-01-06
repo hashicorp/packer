@@ -377,8 +377,20 @@ type RunConfig struct {
 	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 
 	// Communicator settings
-	Comm         communicator.Config `mapstructure:",squash"`
-	SSHInterface string              `mapstructure:"ssh_interface"`
+	Comm communicator.Config `mapstructure:",squash"`
+
+	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
+	//    set, either the public IP address, private IP address, public DNS name
+	//    or private DNS name will used as the host for SSH. The default behaviour
+	//    if inside a VPC is to use the public IP address if available, otherwise
+	//    the private IP address will be used. If not in a VPC the public DNS name
+	//    will be used. Also works for WinRM.
+	//
+	//    Where Packer is configured for an outbound proxy but WinRM traffic
+	//    should be direct, `ssh_interface` must be set to `private_dns` and
+	//    `<region>.compute.internal` included in the `NO_PROXY` environment
+	//    variable.
+	SSHInterface string `mapstructure:"ssh_interface"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
