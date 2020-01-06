@@ -90,6 +90,13 @@ func TestParser_complete(t *testing.T) {
 			getBuildsWantBuilds:    []packer.Build{},
 			getBuildsWantDiags:     true,
 		},
+		{name: "unknown block type",
+			parser:                 defaultParser,
+			args:                   parseTestArgs{"testdata/unknown"},
+			parseWantCfg:           &PackerConfig{},
+			parseWantDiags:         true,
+			parseWantDiagHasErrors: true,
+		},
 	}
 	testParse(t, tests)
 }
