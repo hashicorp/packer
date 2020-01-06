@@ -127,8 +127,6 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 			cfg.Builds = append(cfg.Builds, build)
 
-		default:
-			panic(fmt.Sprintf("unexpected block type %q", block.Type)) // TODO(azr): err
 		}
 	}
 
