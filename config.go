@@ -131,12 +131,12 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin, path := range pluginPaths {
-		newPath := path // this needs to be stored in a new variable for the func below
-		c.Builders[plugin] = func() (packer.Builder, error) {
+	for pluginName, pluginPath := range pluginPaths {
+		newPath := pluginPath // this needs to be stored in a new variable for the func below
+		c.Builders[pluginName] = func() (packer.Builder, error) {
 			return c.pluginClient(newPath).Builder()
 		}
-		externallyUsed = append(externallyUsed, plugin)
+		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
@@ -148,12 +148,12 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin, path := range pluginPaths {
-		newPath := path // this needs to be stored in a new variable for the func below
-		c.PostProcessors[plugin] = func() (packer.PostProcessor, error) {
+	for pluginName, pluginPath := range pluginPaths {
+		newPath := pluginPath // this needs to be stored in a new variable for the func below
+		c.PostProcessors[pluginName] = func() (packer.PostProcessor, error) {
 			return c.pluginClient(newPath).PostProcessor()
 		}
-		externallyUsed = append(externallyUsed, plugin)
+		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
@@ -165,12 +165,12 @@ func (c *config) discoverExternalComponents(path string) error {
 	if err != nil {
 		return err
 	}
-	for plugin, path := range pluginPaths {
-		newPath := path // this needs to be stored in a new variable for the func below
-		c.Provisioners[plugin] = func() (packer.Provisioner, error) {
+	for pluginName, pluginPath := range pluginPaths {
+		newPath := pluginPath // this needs to be stored in a new variable for the func below
+		c.Provisioners[pluginName] = func() (packer.Provisioner, error) {
 			return c.pluginClient(newPath).Provisioner()
 		}
-		externallyUsed = append(externallyUsed, plugin)
+		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
@@ -209,9 +209,9 @@ func (c *config) discoverSingle(glob string) (map[string]string, error) {
 		}
 
 		// Look for foo-bar-baz. The plugin name is "baz"
-		plugin := file[len(prefix):]
-		log.Printf("[DEBUG] Discovered plugin: %s = %s", plugin, match)
-		res[plugin] = match
+		pluginName := file[len(prefix):]
+		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)
+		res[pluginName] = match
 	}
 
 	return res, nil
