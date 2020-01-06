@@ -21,7 +21,7 @@ func TestParse_build(t *testing.T) {
 								Type: "amazon-ebs",
 								Name: "ubuntu-1604",
 							},
-							ref,
+							refVBIsoUbuntu1204,
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
