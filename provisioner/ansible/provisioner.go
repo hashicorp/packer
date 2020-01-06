@@ -495,7 +495,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	flattenedCmd := strings.Join(cmd.Args, " ")
 	sanitized := flattenedCmd
 	winRMPass, ok := p.generatedData["WinRMPassword"]
-	if ok {
+	if ok && winRMPass != "" {
 		sanitized = strings.Replace(sanitized,
 			winRMPass.(string), "*****", -1)
 	}
