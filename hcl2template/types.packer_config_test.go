@@ -55,7 +55,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{"dir with no config files",
 			defaultParser,
-			parseTestArgs{"testdata/"},
+			parseTestArgs{"testdata/empty"},
 			nil,
 			true, true,
 			nil,
