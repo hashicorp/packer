@@ -83,6 +83,16 @@ func TestParse_build(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+		{"invalid source",
+			defaultParser,
+			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl"},
+			&PackerConfig{
+				Builds: nil,
+			},
+			true, true,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }
