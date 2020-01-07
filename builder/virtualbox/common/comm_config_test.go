@@ -27,15 +27,15 @@ func TestCommConfigPrepare(t *testing.T) {
 	}
 
 	if c.HostPortMin != 2222 {
-		t.Errorf("bad min ssh host port: %d", c.HostPortMin)
+		t.Errorf("bad min communicator host port: %d", c.HostPortMin)
 	}
 
 	if c.HostPortMax != 4444 {
-		t.Errorf("bad max ssh host port: %d", c.HostPortMax)
+		t.Errorf("bad max communicator host port: %d", c.HostPortMax)
 	}
 
 	if c.Comm.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", c.Comm.SSHPort)
+		t.Errorf("bad communicator port: %d", c.Comm.SSHPort)
 	}
 }
 

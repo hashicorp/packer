@@ -125,8 +125,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Config:    &b.config.CommConfig.Comm,
 			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
 			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
-			SSHPort:   vboxcommon.SSHPort,
-			WinRMPort: vboxcommon.SSHPort,
+			SSHPort:   vboxcommon.CommPort,
+			WinRMPort: vboxcommon.CommPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: *b.config.VBoxVersionFile,
