@@ -41,7 +41,7 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"virtual_name":          &hcldec.AttrSpec{Name: "virtual_name", Type: cty.String, Required: false},
 		"volume_type":           &hcldec.AttrSpec{Name: "volume_type", Type: cty.String, Required: false},
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
-		"tags":                  &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"tags":                  &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
 	}
 	return s
 }

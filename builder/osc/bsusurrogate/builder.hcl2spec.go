@@ -218,14 +218,14 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"omi_groups":                           &hcldec.AttrSpec{Name: "omi_groups", Type: cty.List(cty.String), Required: false},
 		"omi_product_codes":                    &hcldec.AttrSpec{Name: "omi_product_codes", Type: cty.List(cty.String), Required: false},
 		"omi_regions":                          &hcldec.AttrSpec{Name: "omi_regions", Type: cty.List(cty.String), Required: false},
-		"tags":                                 &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"tags":                                 &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
 		"force_deregister":                     &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
 		"force_delete_snapshot":                &hcldec.AttrSpec{Name: "force_delete_snapshot", Type: cty.Bool, Required: false},
-		"snapshot_tags":                        &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"snapshot_tags":                        &hcldec.BlockAttrsSpec{TypeName: "snapshot_tags", ElementType: cty.String, Required: false},
 		"snapshot_account_ids":                 &hcldec.AttrSpec{Name: "snapshot_account_ids", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":                      &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"omi_root_device":                      &hcldec.BlockSpec{TypeName: "omi_root_device", Nested: hcldec.ObjectSpec((*FlatRootBlockDevice)(nil).HCL2Spec())},
-		"run_volume_tags":                      &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"run_volume_tags":                      &hcldec.BlockAttrsSpec{TypeName: "run_volume_tags", ElementType: cty.String, Required: false},
 	}
 	return s
 }

@@ -88,10 +88,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"omi_product_codes":          &hcldec.AttrSpec{Name: "omi_product_codes", Type: cty.List(cty.String), Required: false},
 		"omi_regions":                &hcldec.AttrSpec{Name: "omi_regions", Type: cty.List(cty.String), Required: false},
 		"skip_region_validation":     &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
-		"tags":                       &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"tags":                       &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
 		"force_deregister":           &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
 		"force_delete_snapshot":      &hcldec.AttrSpec{Name: "force_delete_snapshot", Type: cty.Bool, Required: false},
-		"snapshot_tags":              &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"snapshot_tags":              &hcldec.BlockAttrsSpec{TypeName: "snapshot_tags", ElementType: cty.String, Required: false},
 		"snapshot_account_ids":       &hcldec.AttrSpec{Name: "snapshot_account_ids", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":            &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"access_key":                 &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
@@ -119,7 +119,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"root_volume_type":           &hcldec.AttrSpec{Name: "root_volume_type", Type: cty.String, Required: false},
 		"source_omi":                 &hcldec.AttrSpec{Name: "source_omi", Type: cty.String, Required: false},
 		"source_omi_filter":          &hcldec.BlockSpec{TypeName: "source_omi_filter", Nested: hcldec.ObjectSpec((*common.FlatOmiFilterOptions)(nil).HCL2Spec())},
-		"root_volume_tags":           &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"root_volume_tags":           &hcldec.BlockAttrsSpec{TypeName: "root_volume_tags", ElementType: cty.String, Required: false},
 	}
 	return s
 }
