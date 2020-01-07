@@ -639,7 +639,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
-		new(stepConfigureQMP),
+		&stepConfigureQMP{
+			VNCUsePassword: b.config.VNCUsePassword,
+			QMPSocketPath:  b.config.QMPSocketPath,
+		},
 		&stepTypeBootCommand{},
 	)
 
