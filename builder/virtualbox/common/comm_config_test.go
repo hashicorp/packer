@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-func testSSHConfig() *SSHConfig {
-	return &SSHConfig{
+func testCommConfig() *CommConfig {
+	return &CommConfig{
 		Comm: communicator.Config{
 			SSH: communicator.SSH{
 				SSHUsername: "foo",
@@ -19,19 +19,19 @@ func testSSHConfig() *SSHConfig {
 	}
 }
 
-func TestSSHConfigPrepare(t *testing.T) {
-	c := testSSHConfig()
+func TestCommConfigPrepare(t *testing.T) {
+	c := testCommConfig()
 	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if c.SSHHostPortMin != 2222 {
-		t.Errorf("bad min ssh host port: %d", c.SSHHostPortMin)
+	if c.HostPortMin != 2222 {
+		t.Errorf("bad min ssh host port: %d", c.HostPortMin)
 	}
 
-	if c.SSHHostPortMax != 4444 {
-		t.Errorf("bad max ssh host port: %d", c.SSHHostPortMax)
+	if c.HostPortMax != 4444 {
+		t.Errorf("bad max ssh host port: %d", c.HostPortMax)
 	}
 
 	if c.Comm.SSHPort != 22 {
@@ -39,41 +39,41 @@ func TestSSHConfigPrepare(t *testing.T) {
 	}
 }
 
-func TestSSHConfigPrepare_SSHHostPort(t *testing.T) {
-	var c *SSHConfig
+func TestCommConfigPrepare_SSHHostPort(t *testing.T) {
+	var c *CommConfig
 	var errs []error
 
 	// Bad
-	c = testSSHConfig()
-	c.SSHHostPortMin = 1000
-	c.SSHHostPortMax = 500
+	c = testCommConfig()
+	c.HostPortMin = 1000
+	c.HostPortMax = 500
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
 
 	// Good
-	c = testSSHConfig()
-	c.SSHHostPortMin = 50
-	c.SSHHostPortMax = 500
+	c = testCommConfig()
+	c.HostPortMin = 50
+	c.HostPortMax = 500
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
 }
 
-func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
-	var c *SSHConfig
+func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
+	var c *CommConfig
 	var errs []error
 
-	c = testSSHConfig()
+	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = ""
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
 
-	c = testSSHConfig()
+	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = "/i/dont/exist"
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
@@ -92,7 +92,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	c = testSSHConfig()
+	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
@@ -103,7 +103,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Seek(0, 0)
 	tf.Truncate(0)
 	tf.Write([]byte(testPem))
-	c = testSSHConfig()
+	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {

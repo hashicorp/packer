@@ -37,7 +37,7 @@ type Config struct {
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
 	vboxcommon.RunConfig            `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
-	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.CommConfig           `mapstructure:",squash"`
 	vboxcommon.HWConfig             `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
@@ -167,7 +167,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.CommConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HWConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxBundleConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
@@ -333,10 +333,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		new(vboxcommon.StepAttachFloppy),
 		&vboxcommon.StepForwardSSH{
-			CommConfig:     &b.config.SSHConfig.Comm,
-			HostPortMin:    b.config.SSHHostPortMin,
-			HostPortMax:    b.config.SSHHostPortMax,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+			CommConfig:     &b.config.CommConfig.Comm,
+			HostPortMin:    b.config.HostPortMin,
+			HostPortMax:    b.config.HostPortMax,
+			SkipNatMapping: b.config.SkipNatMapping,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
@@ -354,9 +354,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.SSHConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
-			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
+			Config:    &b.config.CommConfig.Comm,
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.SSHPort,
 			WinRMPort: vboxcommon.SSHPort,
 		},
@@ -370,7 +370,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		new(common.StepProvision),
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.SSHConfig.Comm,
+			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
 			Command:         b.config.ShutdownCommand,
@@ -391,7 +391,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			OutputDir:      b.config.OutputDir,
 			ExportOpts:     b.config.ExportConfig.ExportOpts,
 			Bundling:       b.config.VBoxBundleConfig,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+			SkipNatMapping: b.config.SkipNatMapping,
 			SkipExport:     b.config.SkipExport,
 		},
 	}
