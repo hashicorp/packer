@@ -63,6 +63,11 @@ func TestStepDownload_Run(t *testing.T) {
 		want      multistep.StepAction
 		wantFiles []string
 	}{
+		{"empty url list passes",
+			fields{Url: []string{}},
+			multistep.ActionContinue,
+			nil,
+		},
 		{"not passing a checksum passes",
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}},
 			multistep.ActionContinue,

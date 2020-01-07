@@ -53,6 +53,11 @@ type StepDownload struct {
 }
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if len(s.Url) == 0 {
+		log.Println("No urls specified. ISO will not be downloaded.")
+		return multistep.ActionContinue
+	}
+
 	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
 	ui := state.Get("ui").(packer.Ui)
