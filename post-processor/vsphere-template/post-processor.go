@@ -37,7 +37,7 @@ type Config struct {
 	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
 	SnapshotName        string `mapstructure:"snapshot_name"`
 	SnapshotDescription string `mapstructure:"snapshot_description"`
-	ReregisterVM        bool   `mapstructure:"reregister_vm" default:true`
+	ReregisterVM        bool   `mapstructure:"reregister_vm" default:"true"`
 
 	ctx interpolate.Context
 }
