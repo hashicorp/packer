@@ -42,8 +42,8 @@ func (*FlatMockBuilder) HCL2Spec() map[string]hcldec.Spec {
 		"prepare_called":   &hcldec.AttrSpec{Name: "prepare_called", Type: cty.Bool, Required: false},
 		"prepare_config":   &hcldec.AttrSpec{Name: "prepare_config", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"run_called":       &hcldec.AttrSpec{Name: "run_called", Type: cty.Bool, Required: false},
-		"run_hook":         &hcldec.AttrSpec{Name: "Hook", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"run_ui":           &hcldec.AttrSpec{Name: "Ui", Type: cty.Bool, Required: false},   /* TODO(azr): could not find type */
+		"run_hook":         &hcldec.AttrSpec{Name: "run_hook", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"run_ui":           &hcldec.AttrSpec{Name: "run_ui", Type: cty.Bool, Required: false},   /* TODO(azr): could not find type */
 		"cancel_called":    &hcldec.AttrSpec{Name: "cancel_called", Type: cty.Bool, Required: false},
 		"generated_vars":   &hcldec.AttrSpec{Name: "generated_vars", Type: cty.List(cty.String), Required: false},
 	}
@@ -140,10 +140,10 @@ func (*FlatMockPostProcessor) HCL2Spec() map[string]hcldec.Spec {
 		"error":                 &hcldec.AttrSpec{Name: "error", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"configure_called":      &hcldec.AttrSpec{Name: "configure_called", Type: cty.Bool, Required: false},
 		"configure_configs":     &hcldec.AttrSpec{Name: "configure_configs", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"configure_error":       &hcldec.AttrSpec{Name: "error", Type: cty.Bool, Required: false},             /* TODO(azr): could not find type */
+		"configure_error":       &hcldec.AttrSpec{Name: "configure_error", Type: cty.Bool, Required: false},   /* TODO(azr): could not find type */
 		"post_process_called":   &hcldec.AttrSpec{Name: "post_process_called", Type: cty.Bool, Required: false},
-		"post_process_artifact": &hcldec.AttrSpec{Name: "Artifact", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"post_process_ui":       &hcldec.AttrSpec{Name: "Ui", Type: cty.Bool, Required: false},       /* TODO(azr): could not find type */
+		"post_process_artifact": &hcldec.AttrSpec{Name: "post_process_artifact", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"post_process_ui":       &hcldec.AttrSpec{Name: "post_process_ui", Type: cty.Bool, Required: false},       /* TODO(azr): could not find type */
 	}
 	return s
 }
@@ -173,8 +173,8 @@ func (*FlatMockProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"prep_called":       &hcldec.AttrSpec{Name: "prep_called", Type: cty.Bool, Required: false},
 		"prep_configs":      &hcldec.AttrSpec{Name: "prep_configs", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"prov_called":       &hcldec.AttrSpec{Name: "prov_called", Type: cty.Bool, Required: false},
-		"prov_communicator": &hcldec.AttrSpec{Name: "Communicator", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"prov_ui":           &hcldec.AttrSpec{Name: "Ui", Type: cty.Bool, Required: false},           /* TODO(azr): could not find type */
+		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false},           /* TODO(azr): could not find type */
 	}
 	return s
 }
@@ -201,9 +201,9 @@ func (*RemoteCmd) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spe
 func (*FlatRemoteCmd) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"command": &hcldec.AttrSpec{Name: "command", Type: cty.String, Required: false},
-		"stdin":   &hcldec.AttrSpec{Name: "io.Reader", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"stdout":  &hcldec.AttrSpec{Name: "io.Writer", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"stderr":  &hcldec.AttrSpec{Name: "io.Writer", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"stdin":   &hcldec.AttrSpec{Name: "stdin", Type: cty.Bool, Required: false},  /* TODO(azr): could not find type */
+		"stdout":  &hcldec.AttrSpec{Name: "stdout", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"stderr":  &hcldec.AttrSpec{Name: "stderr", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 	}
 	return s
 }
