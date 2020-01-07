@@ -273,7 +273,7 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 			fmt.Fprintf(w, `&hcldec.BlockSpec{TypeName: "%s",`+
 				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String())
 		default:
-			outputHCL2SpecField(w, f.String(), underlyingType, tag)
+			outputHCL2SpecField(w, accessor, underlyingType, tag)
 		}
 	default:
 		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
@@ -415,7 +415,11 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 		if _, ok := field.Type().(*types.Signature); ok {
 			continue // ignore funcs
 		}
-		structtag, _ := structtag.Parse(tag)
+		structtag, err := structtag.Parse(tag)
+		if err != nil {
+			log.Printf("could not parse field tag %s of : %v", tag, err)
+			continue
+		}
 		if ms, err := structtag.Get("mapstructure"); err != nil {
 			//no mapstructure tag
 		} else if ms.HasOption("squash") {
@@ -446,21 +450,25 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.Bool]), field.Embedded())
 			case "github.com/hashicorp/packer/provisioner/powershell.ExecutionPolicy": // TODO(azr): unhack this situation
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.String]), field.Embedded())
-			}
-			if str, isStruct := f.Underlying().(*types.Struct); isStruct {
-				obj := flattenNamed(f, str)
-				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), obj, field.Embedded())
-				field = makePointer(field)
-			}
-			if slice, isSlice := f.Underlying().(*types.Slice); isSlice {
-				if f, fNamed := slice.Elem().(*types.Named); fNamed {
-					if str, isStruct := f.Underlying().(*types.Struct); isStruct {
-						// this is a slice of named structs; we want to change
-						// the struct ref to a 'FlatStruct'.
-						obj := flattenNamed(f, str)
-						slice := types.NewSlice(obj)
-						field = types.NewField(field.Pos(), field.Pkg(), field.Name(), slice, field.Embedded())
+			default:
+				if str, isStruct := f.Underlying().(*types.Struct); isStruct {
+					obj := flattenNamed(f, str)
+					field = types.NewField(field.Pos(), field.Pkg(), field.Name(), obj, field.Embedded())
+					field = makePointer(field)
+				}
+				if slice, isSlice := f.Underlying().(*types.Slice); isSlice {
+					if f, fNamed := slice.Elem().(*types.Named); fNamed {
+						if str, isStruct := f.Underlying().(*types.Struct); isStruct {
+							// this is a slice of named structs; we want to change
+							// the struct ref to a 'FlatStruct'.
+							obj := flattenNamed(f, str)
+							slice := types.NewSlice(obj)
+							field = types.NewField(field.Pos(), field.Pkg(), field.Name(), slice, field.Embedded())
+						}
 					}
+				}
+				if _, isBasic := f.Underlying().(*types.Basic); isBasic {
+					field = makePointer(field)
 				}
 			}
 		case *types.Slice:
