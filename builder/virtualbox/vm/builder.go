@@ -16,7 +16,7 @@ import (
 // Builder implements packer.Builder and builds the actual VirtualBox
 // images.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
