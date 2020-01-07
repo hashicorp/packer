@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -24,7 +25,7 @@ import (
 // Builder implements packer.Builder and builds the actual VirtualBox
 // images.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
@@ -131,9 +132,9 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-// Prepare processes the build configuration parameters.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	b.config = new(Config)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -144,7 +145,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors and warnings
@@ -215,10 +216,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 // Run executes a Packer build and returns a packer.Artifact representing
@@ -236,7 +237,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
 	state.Put("hook", hook)

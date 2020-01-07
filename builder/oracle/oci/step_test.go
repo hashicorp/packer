@@ -16,7 +16,8 @@ func baseTestConfig() *Config {
 		panic(err)
 	}
 
-	cfg, err := NewConfig(map[string]interface{}{
+	var c Config
+	err = c.Prepare(map[string]interface{}{
 		"availability_domain": "aaaa:US-ASHBURN-AD-1",
 
 		// Image
@@ -46,7 +47,7 @@ func baseTestConfig() *Config {
 	if err != nil {
 		panic(err)
 	}
-	return cfg
+	return &c
 }
 
 func testState() multistep.StateBag {

@@ -2,12 +2,10 @@ package hcl2template
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/packer/packer"
 )
 
 const (
@@ -29,48 +27,21 @@ var configSchema = &hcl.BodySchema{
 type Parser struct {
 	*hclparse.Parser
 
-	ProvisionersSchemas map[string]Decodable
+	BuilderSchemas packer.BuilderStore
 
-	PostProvisionersSchemas map[string]Decodable
+	ProvisionersSchemas packer.ProvisionerStore
 
-	CommunicatorSchemas map[string]Decodable
-
-	SourceSchemas map[string]Decodable
+	PostProcessorsSchemas packer.PostProcessorStore
 }
 
-const hcl2FileExt = ".pkr.hcl"
+const (
+	hcl2FileExt     = ".pkr.hcl"
+	hcl2JsonFileExt = ".pkr.json"
+)
 
-func (p *Parser) Parse(filename string) (*PackerConfig, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
+func (p *Parser) parse(filename string) (*PackerConfig, hcl.Diagnostics) {
 
-	hclFiles := []string{}
-	jsonFiles := []string{}
-	if strings.HasSuffix(filename, hcl2FileExt) {
-		hclFiles = append(hclFiles, hcl2FileExt)
-	} else if strings.HasSuffix(filename, ".json") {
-		jsonFiles = append(jsonFiles, hcl2FileExt)
-	} else {
-		fileInfos, err := ioutil.ReadDir(filename)
-		if err != nil {
-			diag := &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Cannot read hcl directory",
-				Detail:   err.Error(),
-			}
-			diags = append(diags, diag)
-		}
-		for _, fileInfo := range fileInfos {
-			if fileInfo.IsDir() {
-				continue
-			}
-			filename := filepath.Join(filename, fileInfo.Name())
-			if strings.HasSuffix(filename, hcl2FileExt) {
-				hclFiles = append(hclFiles, filename)
-			} else if strings.HasSuffix(filename, ".json") {
-				jsonFiles = append(jsonFiles, filename)
-			}
-		}
-	}
+	hclFiles, jsonFiles, diags := GetHCL2Files(filename)
 
 	var files []*hcl.File
 	for _, filename := range hclFiles {
@@ -89,24 +60,21 @@ func (p *Parser) Parse(filename string) (*PackerConfig, hcl.Diagnostics) {
 
 	cfg := &PackerConfig{}
 	for _, file := range files {
-		moreDiags := p.ParseFile(file, cfg)
+		moreDiags := p.parseFile(file, cfg)
 		diags = append(diags, moreDiags...)
 	}
-	if diags.HasErrors() {
-		return cfg, diags
-	}
 
-	return cfg, nil
+	return cfg, diags
 }
 
-// ParseFile filename content into cfg.
+// parseFile filename content into cfg.
 //
-// ParseFile may be called multiple times with the same cfg on a different file.
+// parseFile may be called multiple times with the same cfg on a different file.
 //
-// ParseFile returns as complete a config as we can manage, even if there are
+// parseFile returns as complete a config as we can manage, even if there are
 // errors, since a partial result can be useful for careful analysis by
 // development tools such as text editor extensions.
-func (p *Parser) ParseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -115,12 +83,11 @@ func (p *Parser) ParseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case sourceLabel:
-			if cfg.Sources == nil {
-				cfg.Sources = map[SourceRef]*Source{}
-			}
-
-			source, moreDiags := p.decodeSource(block, p.SourceSchemas)
+			source, moreDiags := p.decodeSource(block)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
 
 			ref := source.Ref()
 			if existing := cfg.Sources[ref]; existing != nil {
@@ -130,10 +97,14 @@ func (p *Parser) ParseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 					Detail: fmt.Sprintf("This "+sourceLabel+" block has the "+
 						"same builder type and name as a previous block declared "+
 						"at %s. Each "+sourceLabel+" must have a unique name per builder type.",
-						existing.HCL2Ref.DeclRange),
-					Subject: &source.HCL2Ref.DeclRange,
+						existing.block.DefRange.Ptr()),
+					Subject: source.block.DefRange.Ptr(),
 				})
 				continue
+			}
+
+			if cfg.Sources == nil {
+				cfg.Sources = map[SourceRef]*Source{}
 			}
 			cfg.Sources[ref] = source
 
@@ -143,38 +114,19 @@ func (p *Parser) ParseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 
 			moreDiags := cfg.Variables.decodeConfig(block)
+			if moreDiags.HasErrors() {
+				continue
+			}
 			diags = append(diags, moreDiags...)
 
 		case buildLabel:
 			build, moreDiags := p.decodeBuildConfig(block)
 			diags = append(diags, moreDiags...)
-			cfg.Builds = append(cfg.Builds, build)
-
-		case communicatorLabel:
-			if cfg.Communicators == nil {
-				cfg.Communicators = map[CommunicatorRef]*Communicator{}
-			}
-			communicator, moreDiags := p.decodeCommunicatorConfig(block)
-			diags = append(diags, moreDiags...)
-
-			ref := communicator.Ref()
-
-			if existing := cfg.Communicators[ref]; existing != nil {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate " + communicatorLabel + " block",
-					Detail: fmt.Sprintf("This "+communicatorLabel+" block has the "+
-						"same type and name as a previous block declared "+
-						"at %s. Each "+communicatorLabel+" must have a unique name per type.",
-						existing.HCL2Ref.DeclRange),
-					Subject: &communicator.HCL2Ref.DeclRange,
-				})
+			if moreDiags.HasErrors() {
 				continue
 			}
-			cfg.Communicators[ref] = communicator
+			cfg.Builds = append(cfg.Builds, build)
 
-		default:
-			panic(fmt.Sprintf("unexpected block type %q", block.Type)) // TODO(azr): err
 		}
 	}
 

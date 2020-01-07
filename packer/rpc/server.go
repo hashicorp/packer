@@ -76,15 +76,20 @@ func (s *Server) RegisterBuild(b packer.Build) error {
 
 func (s *Server) RegisterBuilder(b packer.Builder) error {
 	return s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
+		commonServer: commonServer{
+			selfConfigurable: b,
+			mux:              s.mux,
+		},
 		builder: b,
-		mux:     s.mux,
 	})
 }
 
 func (s *Server) RegisterCommunicator(c packer.Communicator) error {
 	return s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
-		c:   c,
-		mux: s.mux,
+		c: c,
+		commonServer: commonServer{
+			mux: s.mux,
+		},
 	})
 }
 
@@ -97,15 +102,21 @@ func (s *Server) RegisterHook(h packer.Hook) error {
 
 func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
 	return s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
-		mux: s.mux,
-		p:   p,
+		commonServer: commonServer{
+			selfConfigurable: p,
+			mux:              s.mux,
+		},
+		p: p,
 	})
 }
 
 func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
 	return s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
-		mux: s.mux,
-		p:   p,
+		commonServer: commonServer{
+			selfConfigurable: p,
+			mux:              s.mux,
+		},
+		p: p,
 	})
 }
 

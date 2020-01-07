@@ -3,10 +3,60 @@ package vagrant
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
 )
+
+// Lowercase a ascii letter.
+func lower(c byte) byte {
+	return c | ('a' - 'A')
+}
+
+// Convert a string that represents a qemu disk image size to megabytes.
+//
+// Valid units (case-insensitive):
+//
+//		B (byte)        1B
+//		K (kilobyte) 1024B
+//		M (megabyte) 1024K
+//		G (gigabyte) 1024M
+//		T (terabyte) 1024G
+//		P (petabyte) 1024T
+//		E (exabyte)  1024P
+//
+// The default is M.
+func sizeInMegabytes(size string) uint64 {
+	unit := size[len(size)-1]
+
+	if unit >= '0' && unit <= '9' {
+		unit = 'm'
+	} else {
+		size = size[:len(size)-1]
+	}
+
+	value, _ := strconv.ParseUint(size, 10, 64)
+
+	switch lower(unit) {
+	case 'b':
+		return value / 1024 / 1024
+	case 'k':
+		return value / 1024
+	case 'm':
+		return value
+	case 'g':
+		return value * 1024
+	case 't':
+		return value * 1024 * 1024
+	case 'p':
+		return value * 1024 * 1024 * 1024
+	case 'e':
+		return value * 1024 * 1024 * 1024 * 1024
+	default:
+		panic(fmt.Sprintf("Unknown size unit %c", unit))
+	}
+}
 
 type LibVirtProvider struct{}
 
@@ -28,7 +78,7 @@ func (p *LibVirtProvider) Process(ui packer.Ui, artifact packer.Artifact, dir st
 	}
 
 	format := artifact.State("diskType").(string)
-	origSize := artifact.State("diskSize").(uint64)
+	origSize := sizeInMegabytes(artifact.State("diskSize").(string))
 	size := origSize / 1024 // In MB, want GB
 	if origSize%1024 > 0 {
 		// Make sure we don't make the size smaller

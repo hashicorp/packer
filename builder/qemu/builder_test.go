@@ -62,7 +62,7 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -101,7 +101,7 @@ func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
 
 	// Test a default boot_wait
 	delete(config, "vnc_bind_address")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -122,7 +122,7 @@ func TestBuilderPrepare_DiskCompaction(t *testing.T) {
 	config["skip_compaction"] = false
 	config["disk_compression"] = true
 	config["format"] = "img"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -141,7 +141,7 @@ func TestBuilderPrepare_DiskCompaction(t *testing.T) {
 	config["disk_compression"] = true
 	config["format"] = "qcow2"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -178,7 +178,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		delete(config, "disk_size")
 		config["disk_size"] = tc.InputSize
 
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -198,7 +198,7 @@ func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
 
 	config["disk_additional_size"] = []string{"1M"}
 	config["disk_image"] = true
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -209,7 +209,7 @@ func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
 	delete(config, "disk_image")
 	config["disk_additional_size"] = []string{"1M"}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -228,7 +228,7 @@ func TestBuilderPrepare_Format(t *testing.T) {
 
 	// Bad
 	config["format"] = "illegal value"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -239,7 +239,7 @@ func TestBuilderPrepare_Format(t *testing.T) {
 	// Good
 	config["format"] = "qcow2"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -250,7 +250,7 @@ func TestBuilderPrepare_Format(t *testing.T) {
 	// Good
 	config["format"] = "raw"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -269,7 +269,7 @@ func TestBuilderPrepare_UseBackingFile(t *testing.T) {
 	config["disk_image"] = false
 	config["format"] = "qcow2"
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -281,7 +281,7 @@ func TestBuilderPrepare_UseBackingFile(t *testing.T) {
 	config["disk_image"] = true
 	config["format"] = "raw"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -293,7 +293,7 @@ func TestBuilderPrepare_UseBackingFile(t *testing.T) {
 	config["disk_image"] = true
 	config["format"] = "qcow2"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -307,7 +307,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "floppy_files")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -322,7 +322,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	floppies_path := "../../common/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -341,7 +341,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig()
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
-	_, errs := b.Prepare(config)
+	_, _, errs := b.Prepare(config)
 	if errs == nil {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
@@ -357,7 +357,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -379,7 +379,7 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 
 	config["output_directory"] = dir
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -390,7 +390,7 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	// Test with a good one
 	config["output_directory"] = "i-hope-i-dont-exist"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -405,7 +405,7 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 
 	// Test with a bad value
 	config["shutdown_timeout"] = "this is not good"
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -416,7 +416,7 @@ func TestBuilderPrepare_ShutdownTimeout(t *testing.T) {
 	// Test with a good one
 	config["shutdown_timeout"] = "5s"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -433,7 +433,7 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	config["ssh_host_port_min"] = 1000
 	config["ssh_host_port_max"] = 500
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -444,7 +444,7 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	// Bad
 	config["ssh_host_port_min"] = -500
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -456,7 +456,7 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	config["ssh_host_port_min"] = 500
 	config["ssh_host_port_max"] = 1000
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -471,7 +471,7 @@ func TestBuilderPrepare_SSHPrivateKey(t *testing.T) {
 
 	config["ssh_private_key_file"] = ""
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -481,7 +481,7 @@ func TestBuilderPrepare_SSHPrivateKey(t *testing.T) {
 
 	config["ssh_private_key_file"] = "/i/dont/exist"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -503,7 +503,7 @@ func TestBuilderPrepare_SSHPrivateKey(t *testing.T) {
 
 	config["ssh_private_key_file"] = tf.Name()
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -517,7 +517,7 @@ func TestBuilderPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Write([]byte(testPem))
 	config["ssh_private_key_file"] = tf.Name()
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -532,7 +532,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 
 	// Test a default boot_wait
 	delete(config, "ssh_wait_timeout")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -543,7 +543,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	// Test with a bad value
 	config["ssh_wait_timeout"] = "this is not good"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -554,7 +554,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	// Test with a good one
 	config["ssh_wait_timeout"] = "5s"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -569,7 +569,7 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 
 	// Test with empty
 	delete(config, "qemuargs")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -587,7 +587,7 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 	}
 
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -611,7 +611,7 @@ func TestBuilderPrepare_VNCPassword(t *testing.T) {
 	config["vnc_use_password"] = true
 	config["output_directory"] = "not-a-real-directory"
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}

@@ -31,7 +31,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test good
 	config["ami_name"] = "foo"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -42,7 +42,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -53,7 +53,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -67,7 +67,7 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	config := testConfig()
 
 	config["chroot_mounts"] = nil
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -83,7 +83,7 @@ func TestBuilderPrepare_ChrootMountsBadDefaults(t *testing.T) {
 	config["chroot_mounts"] = [][]string{
 		{"bad"},
 	}
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -96,7 +96,7 @@ func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	config := testConfig()
 
 	config["source_ami"] = ""
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -105,7 +105,7 @@ func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	}
 
 	config["source_ami"] = "foo"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -119,7 +119,7 @@ func TestBuilderPrepare_CommandWrapper(t *testing.T) {
 	config := testConfig()
 
 	config["command_wrapper"] = "echo hi; {{.Command}}"
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -132,7 +132,7 @@ func TestBuilderPrepare_CopyFiles(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()
 
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -150,7 +150,7 @@ func TestBuilderPrepare_CopyFilesNoDefault(t *testing.T) {
 	config := testConfig()
 
 	config["copy_files"] = []string{}
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -171,7 +171,7 @@ func TestBuilderPrepare_RootDeviceNameAndAMIMappings(t *testing.T) {
 	config["root_device_name"] = "/dev/sda"
 	config["ami_block_device_mappings"] = []interface{}{map[string]string{}}
 	config["root_volume_size"] = 15
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) == 0 {
 		t.Fatal("Missing warning, stating block device mappings will be overwritten")
 	} else if len(warnings) > 1 {
@@ -187,7 +187,7 @@ func TestBuilderPrepare_AMIMappingsNoRootDeviceName(t *testing.T) {
 	config := testConfig()
 
 	config["ami_block_device_mappings"] = []interface{}{map[string]string{}}
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -201,7 +201,7 @@ func TestBuilderPrepare_RootDeviceNameNoAMIMappings(t *testing.T) {
 	config := testConfig()
 
 	config["root_device_name"] = "/dev/sda"
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

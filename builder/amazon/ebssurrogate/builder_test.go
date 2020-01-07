@@ -31,7 +31,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"access_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -46,7 +46,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

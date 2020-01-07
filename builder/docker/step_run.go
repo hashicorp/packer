@@ -13,10 +13,14 @@ type StepRun struct {
 }
 
 func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(Driver)
-	tempDir := state.Get("temp_dir").(string)
 	ui := state.Get("ui").(packer.Ui)
+	config, ok := state.Get("config").(*Config)
+	if !ok {
+		err := fmt.Errorf("error encountered obtaining docker config")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	runConfig := ContainerConfig{
 		Image:      config.Image,
@@ -28,8 +32,11 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	for host, container := range config.Volumes {
 		runConfig.Volumes[host] = container
 	}
+
+	tempDir := state.Get("temp_dir").(string)
 	runConfig.Volumes[tempDir] = config.ContainerDir
 
+	driver := state.Get("driver").(Driver)
 	ui.Say("Starting docker container...")
 	containerId, err := driver.StartContainer(&runConfig)
 	if err != nil {
@@ -42,6 +49,9 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	// Save the container ID
 	s.containerId = containerId
 	state.Put("container_id", s.containerId)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.containerId)
 	ui.Message(fmt.Sprintf("Container ID: %s", s.containerId))
 	return multistep.ActionContinue
 }

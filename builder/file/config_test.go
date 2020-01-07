@@ -16,7 +16,8 @@ func testConfig() map[string]interface{} {
 func TestContentSourceConflict(t *testing.T) {
 	raw := testConfig()
 
-	_, _, errs := NewConfig(raw)
+	var c Config
+	_, errs := c.Prepare(raw)
 	if !strings.Contains(errs.Error(), ErrContentSourceConflict.Error()) {
 		t.Errorf("Expected config error: %s", ErrContentSourceConflict.Error())
 	}
@@ -26,7 +27,8 @@ func TestNoFilename(t *testing.T) {
 	raw := testConfig()
 
 	delete(raw, "filename")
-	_, _, errs := NewConfig(raw)
+	var c Config
+	_, errs := c.Prepare(raw)
 	if errs == nil {
 		t.Errorf("Expected config error: %s", ErrTargetRequired.Error())
 	}
@@ -37,7 +39,8 @@ func TestNoContent(t *testing.T) {
 
 	delete(raw, "content")
 	delete(raw, "source")
-	_, warns, _ := NewConfig(raw)
+	var c Config
+	warns, _ := c.Prepare(raw)
 
 	if len(warns) == 0 {
 		t.Error("Expected config warning without any content")

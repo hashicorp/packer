@@ -1,49 +1,115 @@
-## 1.5.0 (Upcoming)
+## 1.5.2 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
+* builder/azure: Set expiry for image versions in SIG [GH-8561]
+* core: clean up messy log line in plugin execution. [GH-8542]
+
+### Bug Fixes:
+* builder/virtualbox-ovf: Remove config dependency from StepImport [GH-8509]
+* builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
+* core: Fix crash when build.sources is set to an invalid name [GH-8569]
+* core: Fix loading of external plugins. GH-8543]
+* post-processor/vagrant: correctly handle the diskSize property as a qemu size
+    string [GH-8567]
+* provisioner/ansible: Fix password sanitization to account for empty string
+    values. [GH-8570]
+
+## 1.5.1 (December 20, 2019)
+This was a fast-follow release to fix a number of panics that we introduced when
+making changes for HCL2.
+
+### IMPROVEMENTS:
+* builder/alicloud: Add show_expired option for describing images [GH-8425]
+
+### Bug Fixes:
+* builder/cloudstack: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/iso: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/vmcx: Fix panics associated with loading config [GH-8513]
+* builder/jdcloud: Update jdcloud statebag to use pointers for config [GH-8518]
+* builder/linode: Fix panics associated with loading config [GH-8513]
+* builder/lxc: Fix panics associated with loading config [GH-8513]
+* builder/lxd: Fix panics associated with loading config [GH-8513]
+* builder/oneandone: Fix panics associated with loading config [GH-8513]
+* builder/oracle/classic: Fix panics associated with loading config [GH-8513]
+* builder/oracle/oci: Fix panics associated with loading config [GH-8513]
+* builder/osc/bsuvolume: Fix panics associated with loading config [GH-8513]
+* builder/parallels/pvm: Fix panics associated with loading config [GH-8513]
+* builder/profitbricks: Fix panics associated with loading config [GH-8513]
+* builder/scaleway: Fix panics associated with loading config [GH-8513]
+* builder/vagrant: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox/ovf: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox: Configure NAT interface before forwarded port mapping
+    #8514
+* post-processor/vagrant-cloud: Configure NAT interface before forwarded port
+    mapping [GH-8514]
+
+## 1.5.0 (December 18, 2019)
 
 ### IMPROVEMENTS:
 * builder/amazon: Add no_ephemeral template option to remove ephemeral drives
     from launch mappings. [GH-8393]
-* builder/amazon: Add validation for `subnet_id` when specifying `vpc_id`
+* builder/amazon: Add validation for "subnet_id" when specifying "vpc_id"
     [GH-8360] [GH-8387] [GH-8391]
 * builder/amazon: allow enabling ena/sr-iov on ebssurrogate spot instances
     [GH-8397]
 * builder/amazon: Retry runinstances aws api call to mitigate throttling
     [GH-8342]
+* builder/hyperone: Update builder schema and tags [GH-8444]
 * builder/qemu: Add display template option for qemu. [GH-7676]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
+* builder/qemu: Add fixer to convert disk size from int to string [GH-8390]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
 * builder/qemu: When a user adds a new drive in qemuargs, process it to make
     sure that necessary settings are applied to that drive. [GH-8380]
 * builder/vmware: Fix error message when ovftool is missing [GH-8371]
+* core: Cleanup logging for external plugins [GH-8471]
+* core: HCL2 template support is now in beta. [GH-8423]
+* core: Interpolation within provisioners can now access build-specific values
+    like Host IP, communicator password, and more. [GH-7866]
 * core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
     [GH-8354] [GH-8361] [GH-8363] [GH-8370]
+* post-processor/docker-tag: Add support for multiple tags. [GH-8392]
 * post-processor/shell-local: Add "valid_exit_codes" option to shell-local.
     [GH-8401]
+* provisioner/chef-client: Add version selection option. [GH-8468]
 * provisioner/shell-local: Add "valid_exit_codes" option to shell-local.
     [GH-8401]
-* provisioner/shell: Add support for the `env_var_format` parameter [GH-8319]
+* provisioner/shell: Add support for the "env_var_format" parameter [GH-8319]
 
 ### BUG FIXES:
+* builder/amazon: Fix request retry mechanism to launch aws instance [GH-8430]
+* builder/azure: Fix PollDuration option which was overriden in some clients.
+    [GH-8490]
 * builder/hyperv: Fix bug in checking VM name that could cause flakiness if
     many VMs are defined. [GH-8357]
 * builder/vagrant: Use absolute path for Vagrantfile [GH-8321]
 * builder/virtualbox: Fix panic in snapshot builder. [GH-8336] [GH-8329]
 * communicator/winrm: Resolve ntlm nil pointer bug by bumping go-ntlmssp
     dependency [GH-8369]
-* communicator: Fix proxy connection settings to use `SSHProxyUsername` and
-    `SSHProxyPassword` where relevant instead of bastion username and password.
+* communicator: Fix proxy connection settings to use "SSHProxyUsername" and
+    "SSHProxyPassword" where relevant instead of bastion username and password.
     [GH-8375]
 * core: Fix bug where Packer froze if asked to log an extremely long line
     [GH-8356]
 * core: Fix iso_target_path option; don't cache when target path is non-nil
     [GH-8394]
+* core: Return exit code 1 when builder type is not found [GH-8474]
+* core: Return exit code 1 when builder type is not found [GH-8475]
 * core: Update to newest version of go-tty to re-enable CTRL-S and CTRL-Q usage
     [GH-8364]
-
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: Complete deprecation of clean_ami_name template func
     [GH-8320] [GH-8193]
-* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
-    [GH-7546]
+* core: Changes have been made to both the Prepare() method signature on the
+    builder interface and on the Provision() method signature on the
+    provisioner interface. [GH-7866]
+* provisioner/ansible-local: The "galaxycommand" option has been renamed to
+    "galaxy_command". A fixer has been written for this, which can be invoked
+    with `packer fix`. [GH-8411]
 
 ## 1.4.5 (November 4, 2019)
 

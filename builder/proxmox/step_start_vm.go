@@ -76,6 +76,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	// Store the vm id for later
 	state.Put("vmRef", vmRef)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", vmRef)
 
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)

@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/exoscale/egoscale"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/qemu"
 	"github.com/hashicorp/packer/common"
@@ -56,6 +57,8 @@ func init() {
 type PostProcessor struct {
 	config Config
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.TemplateZone = defaultTemplateZone

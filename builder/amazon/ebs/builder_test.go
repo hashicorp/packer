@@ -32,7 +32,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"access_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -48,7 +48,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test good
 	config["ami_name"] = "foo"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -59,7 +59,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -70,7 +70,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -85,7 +85,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -101,7 +101,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 	// Test good
 	config["shutdown_behavior"] = "terminate"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -111,7 +111,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test good
 	config["shutdown_behavior"] = "stop"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -121,7 +121,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test bad
 	config["shutdown_behavior"] = "foobar"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

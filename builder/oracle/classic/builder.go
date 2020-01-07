@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package classic
 
 import (
@@ -8,6 +10,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/go-oracle-terraform/opc"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -20,25 +23,26 @@ const BuilderId = "packer.oracle.classic"
 
 // Builder is a builder implementation that creates Oracle OCI custom images.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
-	config, err := NewConfig(rawConfig...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	err := b.config.Prepare(raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	b.config = config
 
 	var errs *packer.MultiError
 
 	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx))
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -63,7 +67,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	runID := fmt.Sprintf("%s_%s", b.config.ImageName, os.Getenv("PACKER_RUN_UUID"))
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("client", client)

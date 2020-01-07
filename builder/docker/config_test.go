@@ -14,7 +14,8 @@ func testConfig() map[string]interface{} {
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig())
+	var c Config
+	warns, errs := c.Prepare(testConfig())
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
@@ -22,7 +23,7 @@ func testConfigStruct(t *testing.T) *Config {
 		t.Fatalf("bad: %#v", errs)
 	}
 
-	return c
+	return &c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error) {
@@ -55,17 +56,18 @@ func TestConfigPrepare_exportPath(t *testing.T) {
 	// No export path. This is invalid. Previously this would not error during
 	// validation and as a result the failure would happen at build time.
 	delete(raw, "export_path")
-	_, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// Good export path
 	raw["export_path"] = "good"
-	_, warns, errs = NewConfig(raw)
+	warns, errs = c.Prepare(raw)
 	testConfigOk(t, warns, errs)
 
 	// Bad export path (directory)
 	raw["export_path"] = td
-	_, warns, errs = NewConfig(raw)
+	warns, errs = c.Prepare(raw)
 	testConfigErr(t, warns, errs)
 }
 
@@ -74,17 +76,17 @@ func TestConfigPrepare_exportPathAndCommit(t *testing.T) {
 
 	// Export but no commit (explicit default)
 	raw["commit"] = false
-	_, warns, errs := NewConfig(raw)
+	warns, errs := (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 
 	// Commit AND export specified (invalid)
 	raw["commit"] = true
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// Commit but no export
 	delete(raw, "export_path")
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 }
 
@@ -93,18 +95,18 @@ func TestConfigPrepare_exportDiscard(t *testing.T) {
 
 	// Export but no discard (explicit default)
 	raw["discard"] = false
-	_, warns, errs := NewConfig(raw)
+	warns, errs := (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 
 	// Discard AND export (invalid)
 	raw["discard"] = true
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// Discard but no export
 	raw["discard"] = true
 	delete(raw, "export_path")
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 }
 
@@ -113,12 +115,13 @@ func TestConfigPrepare_image(t *testing.T) {
 
 	// No image
 	delete(raw, "image")
-	_, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// Good image
 	raw["image"] = "path"
-	_, warns, errs = NewConfig(raw)
+	warns, errs = c.Prepare(raw)
 	testConfigOk(t, warns, errs)
 }
 
@@ -127,7 +130,8 @@ func TestConfigPrepare_pull(t *testing.T) {
 
 	// No pull set
 	delete(raw, "pull")
-	c, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	testConfigOk(t, warns, errs)
 	if !c.Pull {
 		t.Fatal("should pull by default")
@@ -135,7 +139,7 @@ func TestConfigPrepare_pull(t *testing.T) {
 
 	// Pull set
 	raw["pull"] = false
-	c, warns, errs = NewConfig(raw)
+	warns, errs = c.Prepare(raw)
 	testConfigOk(t, warns, errs)
 	if c.Pull {
 		t.Fatal("should not pull")

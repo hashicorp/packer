@@ -81,6 +81,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.0.0
+	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80 // indirect
 	github.com/hashicorp/serf v0.8.2 // indirect
 	github.com/hashicorp/vault v1.1.0
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
@@ -124,8 +125,6 @@ require (
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/onsi/ginkgo v1.7.0 // indirect
-	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/oracle/oci-go-sdk v1.8.0
 	github.com/outscale/osc-go v0.0.1
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
@@ -157,7 +156,7 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
-	github.com/zclconf/go-cty v1.1.0
+	github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect

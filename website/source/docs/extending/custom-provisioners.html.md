@@ -35,8 +35,9 @@ explaining what each method should do.
 
 ``` go
 type Provisioner interface {
+  ConfigSpec() hcldec.ObjectSpec
   Prepare(...interface{}) error
-  Provision(Ui, Communicator) error
+  Provision(context.Context, Ui, Communicator, map[string]interface{}) error
 }
 ```
 
@@ -66,6 +67,13 @@ validate the configuration.
 The `Prepare` method is called very early in the build process so that errors
 may be displayed to the user before anything actually happens.
 
+### The "ConfigSpec" Method
+
+This method returns a hcldec.ObjectSpec, which is a spec necessary for using
+HCL2 templates with Packer. For information on how to use and implement this
+function, check our
+[object spec docs](https://www.packer.io/guides/hcl/component-object-spec)
+
 ### The "Provision" Method
 
 The `Provision` method is called when a machine is running and ready to be
@@ -77,6 +85,10 @@ is used to communicate with the running machine, and is guaranteed to be
 connected at this point.
 
 The provision method should not return until provisioning is complete.
+
+The map[string]interface{} provides users with build-specific information,
+like host and IP, provided by the `build` template engine. Provisioners may use
+this information however they please, or not use it.
 
 ## Using the Communicator
 

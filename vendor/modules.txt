@@ -618,7 +618,7 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
-# github.com/zclconf/go-cty v1.1.0
+# github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function

@@ -36,10 +36,18 @@ explaining what each method should do.
 
 ``` go
 type PostProcessor interface {
+  ConfigSpec() hcldec.ObjectSpec
   Configure(interface{}) error
   PostProcess(context.Context, Ui, Artifact) (a Artifact, keep, mustKeep bool, err error)
 }
 ```
+
+### The "ConfigSpec" Method
+
+This method returns a hcldec.ObjectSpec, which is a spec necessary for using
+HCL2 templates with Packer. For information on how to use and implement this
+function, check our
+[object spec docs](https://www.packer.io/guides/hcl/component-object-spec)
 
 ### The "Configure" Method
 
@@ -91,6 +99,6 @@ return value is explained below:
     keep the artifact around.
 -   `bool` - If forceOverride is true, then any user input for
     keep_input_artifact is ignored and the artifact is either kept or discarded
-    according to the value set in `keep`. 
+    according to the value set in `keep`.
 -   `error` - Non-nil if there was an error in any way. If this is the case,
     the other two return values are ignored.

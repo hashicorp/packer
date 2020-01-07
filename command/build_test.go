@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
-	shell_local "github.com/hashicorp/packer/post-processor/shell-local"
+	shell_local_pp "github.com/hashicorp/packer/post-processor/shell-local"
 	"github.com/hashicorp/packer/provisioner/shell"
-	sl "github.com/hashicorp/packer/provisioner/shell-local"
+	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 )
 
 func TestBuildOnlyFileCommaFlags(t *testing.T) {
@@ -166,6 +166,30 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 }
 
+func TestBuildWithNonExistingBuilder(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		"-parallel=false",
+		`-except=`,
+		filepath.Join(testFixture("build-only"), "not-found.json"),
+	}
+
+	defer cleanup()
+
+	if code := c.Run(args); code != 1 {
+		t.Errorf("Expected to find exit code 1, found %d", code)
+	}
+	if !fileExists("chocolate.txt") {
+		t.Errorf("Expected to find chocolate.txt")
+	}
+	if fileExists("vanilla.txt") {
+		t.Errorf("NOT expected to find vanilla.tx")
+	}
+}
+
 // fileExists returns true if the filename is found
 func fileExists(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
@@ -178,22 +202,16 @@ func fileExists(filename string) bool {
 // available. This allows us to test a builder that writes files to disk.
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
-		Builder: func(n string) (packer.Builder, error) {
-			if n == "file" {
-				return &file.Builder{}, nil
-			}
-			return &null.Builder{}, nil
+		BuilderStore: packer.MapOfBuilder{
+			"file": func() (packer.Builder, error) { return &file.Builder{}, nil },
+			"null": func() (packer.Builder, error) { return &null.Builder{}, nil },
 		},
-		Provisioner: func(n string) (packer.Provisioner, error) {
-			if n == "shell" {
-				return &shell.Provisioner{}, nil
-			} else if n == "shell-local" {
-				return &sl.Provisioner{}, nil
-			}
-			return nil, fmt.Errorf("requested provisioner not implemented in this test")
+		ProvisionerStore: packer.MapOfProvisioner{
+			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },
+			"shell":       func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
-		PostProcessor: func(n string) (packer.PostProcessor, error) {
-			return &shell_local.PostProcessor{}, nil
+		PostProcessorStore: packer.MapOfPostProcessor{
+			"shell-local": func() (packer.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
 		},
 	}
 	return &packer.CoreConfig{

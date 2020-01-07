@@ -66,5 +66,5 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 }
 
 func (FixerGalaxyCommand) Synopsis() string {
-	return `Replaces "galaxycommad" in ansible-local provisioner configs with "galaxy_command"`
+	return `Replaces "galaxycommand" in ansible-local provisioner configs with "galaxy_command"`
 }

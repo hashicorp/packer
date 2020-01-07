@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 const (
@@ -79,21 +81,21 @@ type Build interface {
 	SetOnError(string)
 }
 
-// A build struct represents a single build job, the result of which should
+// A CoreBuild struct represents a single build job, the result of which should
 // be a single machine image artifact. This artifact may be comprised of
-// multiple files, of course, but it should be for only a single provider
-// (such as VirtualBox, EC2, etc.).
-type coreBuild struct {
-	name               string
-	builder            Builder
-	builderConfig      interface{}
-	builderType        string
+// multiple files, of course, but it should be for only a single provider (such
+// as VirtualBox, EC2, etc.).
+type CoreBuild struct {
+	Type               string
+	Builder            Builder
+	BuilderConfig      interface{}
+	BuilderType        string
 	hooks              map[string][]Hook
-	postProcessors     [][]coreBuildPostProcessor
-	provisioners       []coreBuildProvisioner
-	cleanupProvisioner coreBuildProvisioner
-	templatePath       string
-	variables          map[string]string
+	Provisioners       []CoreBuildProvisioner
+	PostProcessors     [][]CoreBuildPostProcessor
+	CleanupProvisioner CoreBuildProvisioner
+	TemplatePath       string
+	Variables          map[string]string
 
 	debug         bool
 	force         bool
@@ -102,32 +104,32 @@ type coreBuild struct {
 	prepareCalled bool
 }
 
-// Keeps track of the post-processor and the configuration of the
-// post-processor used within a build.
-type coreBuildPostProcessor struct {
-	processor         PostProcessor
-	processorType     string
+// CoreBuildPostProcessor Keeps track of the post-processor and the
+// configuration of the post-processor used within a build.
+type CoreBuildPostProcessor struct {
+	PostProcessor     PostProcessor
+	PType             string
 	config            map[string]interface{}
 	keepInputArtifact *bool
 }
 
-// Keeps track of the provisioner and the configuration of the provisioner
-// within the build.
-type coreBuildProvisioner struct {
-	pType       string
-	provisioner Provisioner
+// CoreBuildProvisioner keeps track of the provisioner and the configuration of
+// the provisioner within the build.
+type CoreBuildProvisioner struct {
+	PType       string
+	Provisioner Provisioner
 	config      []interface{}
 }
 
 // Returns the name of the build.
-func (b *coreBuild) Name() string {
-	return b.name
+func (b *CoreBuild) Name() string {
+	return b.Type
 }
 
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
-func (b *coreBuild) Prepare() (warn []string, err error) {
+func (b *CoreBuild) Prepare() (warn []string, err error) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
@@ -138,48 +140,62 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 	b.prepareCalled = true
 
 	packerConfig := map[string]interface{}{
-		BuildNameConfigKey:     b.name,
-		BuilderTypeConfigKey:   b.builderType,
+		BuildNameConfigKey:     b.Type,
+		BuilderTypeConfigKey:   b.BuilderType,
 		DebugConfigKey:         b.debug,
 		ForceConfigKey:         b.force,
 		OnErrorConfigKey:       b.onError,
-		TemplatePathKey:        b.templatePath,
-		UserVariablesConfigKey: b.variables,
+		TemplatePathKey:        b.TemplatePath,
+		UserVariablesConfigKey: b.Variables,
 	}
 
 	// Prepare the builder
-	warn, err = b.builder.Prepare(b.builderConfig, packerConfig)
+	generatedVars, warn, err := b.Builder.Prepare(b.BuilderConfig, packerConfig)
 	if err != nil {
-		log.Printf("Build '%s' prepare failure: %s\n", b.name, err)
+		log.Printf("Build '%s' prepare failure: %s\n", b.Type, err)
 		return
 	}
 
+	// If the builder has provided a list of to-be-generated variables that
+	// should be made accessible to provisioners, pass that list into
+	// the provisioner prepare() so that the provisioner can appropriately
+	// validate user input against what will become available.
+	generatedPlaceholderMap := BasicPlaceholderData()
+	if generatedVars != nil {
+		for _, k := range generatedVars {
+			generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
+				common.PlaceholderMsg, k)
+		}
+	}
+
 	// Prepare the provisioners
-	for _, coreProv := range b.provisioners {
+	for _, coreProv := range b.Provisioners {
 		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
 		copy(configs, coreProv.config)
 		configs = append(configs, packerConfig)
+		configs = append(configs, generatedPlaceholderMap)
 
-		if err = coreProv.provisioner.Prepare(configs...); err != nil {
+		if err = coreProv.Provisioner.Prepare(configs...); err != nil {
 			return
 		}
 	}
 
 	// Prepare the on-error-cleanup provisioner
-	if b.cleanupProvisioner.pType != "" {
-		configs := make([]interface{}, len(b.cleanupProvisioner.config), len(b.cleanupProvisioner.config)+1)
-		copy(configs, b.cleanupProvisioner.config)
+	if b.CleanupProvisioner.PType != "" {
+		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+1)
+		copy(configs, b.CleanupProvisioner.config)
 		configs = append(configs, packerConfig)
-		err = b.cleanupProvisioner.provisioner.Prepare(configs...)
+		configs = append(configs, generatedPlaceholderMap)
+		err = b.CleanupProvisioner.Provisioner.Prepare(configs...)
 		if err != nil {
 			return
 		}
 	}
 
 	// Prepare the post-processors
-	for _, ppSeq := range b.postProcessors {
+	for _, ppSeq := range b.PostProcessors {
 		for _, corePP := range ppSeq {
-			err = corePP.processor.Configure(corePP.config, packerConfig)
+			err = corePP.PostProcessor.Configure(corePP.config, packerConfig)
 			if err != nil {
 				return
 			}
@@ -190,7 +206,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) {
+func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -203,24 +219,24 @@ func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 	}
 
 	// Add a hook for the provisioners if we have provisioners
-	if len(b.provisioners) > 0 {
-		hookedProvisioners := make([]*HookedProvisioner, len(b.provisioners))
-		for i, p := range b.provisioners {
+	if len(b.Provisioners) > 0 {
+		hookedProvisioners := make([]*HookedProvisioner, len(b.Provisioners))
+		for i, p := range b.Provisioners {
 			var pConfig interface{}
 			if len(p.config) > 0 {
 				pConfig = p.config[0]
 			}
 			if b.debug {
 				hookedProvisioners[i] = &HookedProvisioner{
-					&DebuggedProvisioner{Provisioner: p.provisioner},
+					&DebuggedProvisioner{Provisioner: p.Provisioner},
 					pConfig,
-					p.pType,
+					p.PType,
 				}
 			} else {
 				hookedProvisioners[i] = &HookedProvisioner{
-					p.provisioner,
+					p.Provisioner,
 					pConfig,
-					p.pType,
+					p.PType,
 				}
 			}
 		}
@@ -234,11 +250,11 @@ func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 		})
 	}
 
-	if b.cleanupProvisioner.pType != "" {
+	if b.CleanupProvisioner.PType != "" {
 		hookedCleanupProvisioner := &HookedProvisioner{
-			b.cleanupProvisioner.provisioner,
-			b.cleanupProvisioner.config,
-			b.cleanupProvisioner.pType,
+			b.CleanupProvisioner.Provisioner,
+			b.CleanupProvisioner.config,
+			b.CleanupProvisioner.PType,
 		}
 		hooks[HookCleanupProvision] = []Hook{&ProvisionHook{
 			Provisioners: []*HookedProvisioner{hookedCleanupProvisioner},
@@ -254,9 +270,9 @@ func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 		Ui:     originalUi,
 	}
 
-	log.Printf("Running builder: %s", b.builderType)
-	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
-	builderArtifact, err := b.builder.Run(ctx, builderUi, hook)
+	log.Printf("Running builder: %s", b.BuilderType)
+	ts := CheckpointReporter.AddSpan(b.BuilderType, "builder", b.BuilderConfig)
+	builderArtifact, err := b.Builder.Run(ctx, builderUi, hook)
 	ts.End(err)
 	if err != nil {
 		return nil, err
@@ -269,21 +285,21 @@ func (b *coreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 	}
 
 	errors := make([]error, 0)
-	keepOriginalArtifact := len(b.postProcessors) == 0
+	keepOriginalArtifact := len(b.PostProcessors) == 0
 
 	// Run the post-processors
 PostProcessorRunSeqLoop:
-	for _, ppSeq := range b.postProcessors {
+	for _, ppSeq := range b.PostProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
 			ppUi := &TargetedUI{
-				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
+				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.PType),
 				Ui:     originalUi,
 			}
 
-			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
-			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
-			artifact, defaultKeep, forceOverride, err := corePP.processor.PostProcess(ctx, ppUi, priorArtifact)
+			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.PType))
+			ts := CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
+			artifact, defaultKeep, forceOverride, err := corePP.PostProcessor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
@@ -296,10 +312,10 @@ PostProcessorRunSeqLoop:
 			}
 
 			keep := defaultKeep
-			// When user has not set keep_input_artifuact
+			// When user has not set keep_input_artifact
 			// corePP.keepInputArtifact is nil.
 			// In this case, use the keepDefault provided by the postprocessor.
-			// When user _has_ set keep_input_atifact, go with that instead.
+			// When user _has_ set keep_input_artifact, go with that instead.
 			// Exception: for postprocessors that will fail/become
 			// useless if keep isn't true, heed forceOverride and keep the
 			// input artifact regardless of user preference.
@@ -308,7 +324,7 @@ PostProcessorRunSeqLoop:
 					log.Printf("The %s post-processor forces "+
 						"keep_input_artifact=true to preserve integrity of the"+
 						"build chain. User-set keep_input_artifact=false will be"+
-						"ignored.", corePP.processorType)
+						"ignored.", corePP.PType)
 				} else {
 					// User overrides default.
 					keep = *corePP.keepInputArtifact
@@ -321,7 +337,7 @@ PostProcessorRunSeqLoop:
 				if !keepOriginalArtifact && keep {
 					log.Printf(
 						"Flagging to keep original artifact from post-processor '%s'",
-						corePP.processorType)
+						corePP.PType)
 					keepOriginalArtifact = true
 				}
 			} else {
@@ -330,10 +346,10 @@ PostProcessorRunSeqLoop:
 				if keep {
 					artifacts = append(artifacts, priorArtifact)
 				} else {
-					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.processorType)
+					log.Printf("Deleting prior artifact from post-processor '%s'", corePP.PType)
 					if err := priorArtifact.Destroy(); err != nil {
 						log.Printf("Error is %#v", err)
-						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s; pp is %s", err, corePP.processorType))
+						errors = append(errors, fmt.Errorf("Failed cleaning up prior artifact: %s; pp is %s", err, corePP.PType))
 					}
 				}
 			}
@@ -352,7 +368,7 @@ PostProcessorRunSeqLoop:
 		copy(artifacts[1:], artifacts)
 		artifacts[0] = builderArtifact
 	} else {
-		log.Printf("Deleting original artifact for build '%s'", b.name)
+		log.Printf("Deleting original artifact for build '%s'", b.Type)
 		if err := builderArtifact.Destroy(); err != nil {
 			errors = append(errors, fmt.Errorf("Error destroying builder artifact: %s; bad artifact: %#v", err, builderArtifact.Files()))
 		}
@@ -365,7 +381,7 @@ PostProcessorRunSeqLoop:
 	return artifacts, err
 }
 
-func (b *coreBuild) SetDebug(val bool) {
+func (b *CoreBuild) SetDebug(val bool) {
 	if b.prepareCalled {
 		panic("prepare has already been called")
 	}
@@ -373,7 +389,7 @@ func (b *coreBuild) SetDebug(val bool) {
 	b.debug = val
 }
 
-func (b *coreBuild) SetForce(val bool) {
+func (b *CoreBuild) SetForce(val bool) {
 	if b.prepareCalled {
 		panic("prepare has already been called")
 	}
@@ -381,7 +397,7 @@ func (b *coreBuild) SetForce(val bool) {
 	b.force = val
 }
 
-func (b *coreBuild) SetOnError(val string) {
+func (b *CoreBuild) SetOnError(val string) {
 	if b.prepareCalled {
 		panic("prepare has already been called")
 	}
