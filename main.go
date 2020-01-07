@@ -327,7 +327,7 @@ func loadConfig() (*config, error) {
 	}
 	defer f.Close()
 
-	if err := decodeConfig(f, &config); err != nil {
+	if err := DecodeConfig(f, &config); err != nil {
 		return nil, err
 	}
 

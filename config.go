@@ -33,9 +33,9 @@ type config struct {
 	PostProcessors packer.MapOfPostProcessor `json:"post-processors"`
 }
 
-// Decodes configuration in JSON format from the given io.Reader into
+// DecodeConfig decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
-func decodeConfig(r io.Reader, c *config) error {
+func DecodeConfig(r io.Reader, c *config) error {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(c)
 }
