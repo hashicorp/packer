@@ -32,5 +32,21 @@ func TestAlicloudAccessConfigPrepareRegion(t *testing.T) {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
+	c.AlicloudAccessKey = ""
+	if err := c.Prepare(nil); err == nil {
+		t.Fatalf("should have err")
+	}
+
+	c.AlicloudProfile = "default"
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+
+	c.AlicloudProfile = ""
+	os.Setenv("ALICLOUD_PROFILE", "default")
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
+
 	c.AlicloudSkipValidation = false
 }
