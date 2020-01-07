@@ -273,7 +273,7 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 			fmt.Fprintf(w, `&hcldec.BlockSpec{TypeName: "%s",`+
 				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String())
 		default:
-			outputHCL2SpecField(w, f.String(), underlyingType, tag)
+			outputHCL2SpecField(w, accessor, underlyingType, tag)
 		}
 	default:
 		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{

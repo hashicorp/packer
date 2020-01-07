@@ -155,7 +155,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cloud":                         &hcldec.AttrSpec{Name: "cloud", Type: cty.String, Required: false},
 		"image_name":                    &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"metadata":                      &hcldec.BlockAttrsSpec{TypeName: "metadata", ElementType: cty.String, Required: false},
-		"image_visibility":              &hcldec.AttrSpec{Name: "images.ImageVisibility", Type: cty.String, Required: false},
+		"image_visibility":              &hcldec.AttrSpec{Name: "image_visibility", Type: cty.String, Required: false},
 		"image_members":                 &hcldec.AttrSpec{Name: "image_members", Type: cty.List(cty.String), Required: false},
 		"image_disk_format":             &hcldec.AttrSpec{Name: "image_disk_format", Type: cty.String, Required: false},
 		"image_tags":                    &hcldec.AttrSpec{Name: "image_tags", Type: cty.List(cty.String), Required: false},
