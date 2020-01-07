@@ -21,7 +21,7 @@ func TestParse_build(t *testing.T) {
 								Type: "amazon-ebs",
 								Name: "ubuntu-1604",
 							},
-							ref,
+							refVBIsoUbuntu1204,
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
@@ -76,6 +76,16 @@ func TestParse_build(t *testing.T) {
 		{"inexistent post-processor",
 			defaultParser,
 			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl"},
+			&PackerConfig{
+				Builds: nil,
+			},
+			true, true,
+			[]packer.Build{},
+			false,
+		},
+		{"invalid source",
+			defaultParser,
+			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl"},
 			&PackerConfig{
 				Builds: nil,
 			},
