@@ -12,14 +12,16 @@ import (
 )
 
 type NestedMockConfig struct {
-	String          string            `mapstructure:"string"`
-	Int             int               `mapstructure:"int"`
-	Int64           int64             `mapstructure:"int64"`
-	Bool            bool              `mapstructure:"bool"`
-	Trilean         config.Trilean    `mapstructure:"trilean"`
-	Duration        time.Duration     `mapstructure:"duration"`
-	MapStringString map[string]string `mapstructure:"map_string_string"`
-	SliceString     []string          `mapstructure:"slice_string"`
+	String               string               `mapstructure:"string"`
+	Int                  int                  `mapstructure:"int"`
+	Int64                int64                `mapstructure:"int64"`
+	Bool                 bool                 `mapstructure:"bool"`
+	Trilean              config.Trilean       `mapstructure:"trilean"`
+	Duration             time.Duration        `mapstructure:"duration"`
+	MapStringString      map[string]string    `mapstructure:"map_string_string"`
+	SliceString          []string             `mapstructure:"slice_string"`
+	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
+	NamedString          NamedString          `mapstructure:"named_string"`
 }
 
 type MockConfig struct {
@@ -118,3 +120,10 @@ func (b *MockCommunicator) Configure(raws ...interface{}) ([]string, error) {
 		Interpolate: true,
 	}, raws...)
 }
+
+//////
+// Utils
+//////
+
+type NamedMapStringString map[string]string
+type NamedString string
