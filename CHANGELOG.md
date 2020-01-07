@@ -1,3 +1,20 @@
+## 1.5.2 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
+* builder/azure: Set expiry for image versions in SIG [GH-8561]
+* core: clean up messy log line in plugin execution. [GH-8542]
+
+### Bug Fixes:
+* builder/virtualbox-ovf: Remove config dependency from StepImport [GH-8509]
+* builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
+* core: Fix crash when build.sources is set to an invalid name [GH-8569]
+* core: Fix loading of external plugins. GH-8543]
+* post-processor/vagrant: correctly handle the diskSize property as a qemu size
+    string [GH-8567]
+* provisioner/ansible: Fix password sanitization to account for empty string
+    values. [GH-8570]
+
 ## 1.5.1 (December 20, 2019)
 This was a fast-follow release to fix a number of panics that we introduced when
 making changes for HCL2.
