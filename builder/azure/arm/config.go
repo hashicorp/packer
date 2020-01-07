@@ -137,6 +137,16 @@ type Config struct {
 	// its default of "60m" (valid time units include `s` for seconds, `m` for
 	// minutes, and `h` for hours.)
 	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
+	// The end of life date (2006-01-02T15:04:05.99Z) of the gallery Image Version. This property
+	// can be used for decommissioning purposes.
+	SharedGalleryImageVersionEndOfLifeDate string `mapstructure:"shared_gallery_image_version_end_of_life_date" required:"false"`
+	// The number of replicas of the Image Version to be created per region. This
+	// property would take effect for a region when regionalReplicaCount is not specified.
+	// Replica count must be between 1 and 10.
+	SharedGalleryImageVersionReplicaCount int32 `mapstructure:"shared_image_gallery_replica_count" required:"false"`
+	// If set to true, Virtual Machines deployed from the latest version of the
+	// Image Definition won't use this Image Version.
+	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
 	// PublisherName for your base image. See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
