@@ -2,9 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -37,39 +34,14 @@ type Parser struct {
 	PostProcessorsSchemas packer.PostProcessorStore
 }
 
-const hcl2FileExt = ".pkr.hcl"
+const (
+	hcl2FileExt     = ".pkr.hcl"
+	hcl2JsonFileExt = ".pkr.json"
+)
 
 func (p *Parser) parse(filename string) (*PackerConfig, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
 
-	hclFiles := []string{}
-	jsonFiles := []string{}
-	if strings.HasSuffix(filename, hcl2FileExt) {
-		hclFiles = append(hclFiles, filename)
-	} else if strings.HasSuffix(filename, ".json") {
-		jsonFiles = append(jsonFiles, filename)
-	} else {
-		fileInfos, err := ioutil.ReadDir(filename)
-		if err != nil {
-			diag := &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Cannot read hcl directory",
-				Detail:   err.Error(),
-			}
-			diags = append(diags, diag)
-		}
-		for _, fileInfo := range fileInfos {
-			if fileInfo.IsDir() {
-				continue
-			}
-			filename := filepath.Join(filename, fileInfo.Name())
-			if strings.HasSuffix(filename, hcl2FileExt) {
-				hclFiles = append(hclFiles, filename)
-			} else if strings.HasSuffix(filename, ".json") {
-				jsonFiles = append(jsonFiles, filename)
-			}
-		}
-	}
+	hclFiles, jsonFiles, diags := GetHCL2Files(filename)
 
 	var files []*hcl.File
 	for _, filename := range hclFiles {
@@ -155,8 +127,6 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 			cfg.Builds = append(cfg.Builds, build)
 
-		default:
-			panic(fmt.Sprintf("unexpected block type %q", block.Type)) // TODO(azr): err
 		}
 	}
 

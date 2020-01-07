@@ -103,5 +103,6 @@ func (p *Parser) Parse(path string) ([]packer.Build, hcl.Diagnostics) {
 		return nil, diags
 	}
 
-	return p.getBuilds(cfg)
+	builds, moreDiags := p.getBuilds(cfg)
+	return builds, append(diags, moreDiags...)
 }
