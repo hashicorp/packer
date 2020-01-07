@@ -41,5 +41,9 @@ func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
 		c.ShutdownTimeout = 5 * time.Minute
 	}
 
+	if c.PostShutdownDelay == 0 {
+		c.PostShutdownDelay = 2 * time.Second
+	}
+
 	return nil
 }

@@ -176,6 +176,9 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	// Things succeeded, store the name so we can remove it later
 	state.Put("instance_name", name)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", name)
 
 	return multistep.ActionContinue
 }

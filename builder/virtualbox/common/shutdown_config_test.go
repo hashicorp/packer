@@ -49,8 +49,8 @@ func TestShutdownConfigPrepare_PostShutdownDelay(t *testing.T) {
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
-	if c.PostShutdownDelay.Nanoseconds() != 0 {
-		t.Fatalf("bad: %s", c.PostShutdownDelay)
+	if c.PostShutdownDelay != 2*time.Second {
+		t.Fatalf("bad: PostShutdownDelay should be 2 seconds but was %s", c.PostShutdownDelay)
 	}
 
 	// Test with a good one

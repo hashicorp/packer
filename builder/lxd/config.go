@@ -43,16 +43,15 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) error {
 
 	var md mapstructure.Metadata
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Metadata:    &md,
 		Interpolate: true,
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Accumulate any errors
@@ -85,8 +84,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return errs
 	}
 
-	return &c, nil
+	return nil
 }

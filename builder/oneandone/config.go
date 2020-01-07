@@ -31,11 +31,10 @@ type Config struct {
 	ctx            interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	var md mapstructure.Metadata
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Metadata:           &md,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -46,7 +45,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
@@ -107,8 +106,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 	packer.LogSecretFilter.Set(c.Token)
-	return &c, nil, nil
+	return nil, nil
 }

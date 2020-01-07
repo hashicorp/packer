@@ -3,9 +3,10 @@ package uhost
 import (
 	"context"
 	"fmt"
+	"time"
+
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common/retry"
-	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"

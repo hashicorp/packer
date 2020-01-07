@@ -15,23 +15,12 @@ import (
 // available. This allows us to test a builder that writes files to disk.
 func testCoreConfigSleepBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
-		Builder: func(n string) (packer.Builder, error) {
-			switch n {
-			case "file":
-				return &file.Builder{}, nil
-			default:
-				panic(n)
-			}
+		BuilderStore: packer.MapOfBuilder{
+			"file": func() (packer.Builder, error) { return &file.Builder{}, nil },
 		},
-		Provisioner: func(n string) (packer.Provisioner, error) {
-			switch n {
-			case "shell-local":
-				return &shell_local.Provisioner{}, nil
-			case "sleep":
-				return &sleep.Provisioner{}, nil
-			default:
-				panic(n)
-			}
+		ProvisionerStore: packer.MapOfProvisioner{
+			"sleep":       func() (packer.Provisioner, error) { return &sleep.Provisioner{}, nil },
+			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },
 		},
 	}
 	return &packer.CoreConfig{

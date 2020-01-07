@@ -12,6 +12,7 @@ import (
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
@@ -43,6 +44,7 @@ var FuncGens = map[string]interface{}{
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
+	"build":          funcGenBuild,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -159,6 +161,44 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 		}
 
 		return path, nil
+	}
+}
+
+func funcGenBuild(ctx *Context) interface{} {
+	return func(s string) (string, error) {
+		if data, ok := ctx.Data.(map[string]string); ok {
+			if heldPlace, ok := data[s]; ok {
+				// If we're in the first interpolation pass, the goal is to
+				// make sure that we pass the value through.
+				// TODO match against an actual string constant
+				if strings.Contains(heldPlace, common.PlaceholderMsg) {
+					return fmt.Sprintf("{{.%s}}", s), nil
+				} else {
+					return heldPlace, nil
+				}
+			}
+			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
+		}
+		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
+			// PlaceholderData has been passed into generator, so if the given
+			// key already exists in data, then we know it's an "allowed" key
+			if heldPlace, ok := data[s]; ok {
+				if hp, ok := heldPlace.(string); ok {
+					// If we're in the first interpolation pass, the goal is to
+					// make sure that we pass the value through.
+					// TODO match against an actual string constant
+					if strings.Contains(hp, common.PlaceholderMsg) {
+						return fmt.Sprintf("{{.%s}}", s), nil
+					} else {
+						return hp, nil
+					}
+				}
+			}
+			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
+		}
+
+		return "", fmt.Errorf("Error validating build variable: the given "+
+			"variable %s will not be passed into your plugin.", s)
 	}
 }
 

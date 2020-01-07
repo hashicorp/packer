@@ -237,7 +237,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.GalleryImagesClient.RequestInspector = withInspection(maxlen)
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImagesClient.UserAgent)
-	azureClient.GalleryImageVersionsClient.Client.PollingDuration = PollingDuration
+	azureClient.GalleryImagesClient.Client.PollingDuration = PollingDuration
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

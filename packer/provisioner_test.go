@@ -114,7 +114,7 @@ func TestPausedProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(MockCommunicator)
-	prov.Provision(context.Background(), ui, comm)
+	prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -143,7 +143,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 		},
 	}
 
-	err := prov.Provision(context.Background(), testUi(), new(MockCommunicator))
+	err := prov.Provision(context.Background(), testUi(), new(MockCommunicator), make(map[string]interface{}))
 
 	if err != nil {
 		t.Fatalf("prov failed: %v", err)
@@ -164,7 +164,7 @@ func TestPausedProvisionerCancel(t *testing.T) {
 		return ctx.Err()
 	}
 
-	err := prov.Provision(topCtx, testUi(), new(MockCommunicator))
+	err := prov.Provision(topCtx, testUi(), new(MockCommunicator), make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have err")
 	}
@@ -198,7 +198,7 @@ func TestDebuggedProvisionerProvision(t *testing.T) {
 	ui := testUi()
 	comm := new(MockCommunicator)
 	writeReader(ui, "\n")
-	prov.Provision(context.Background(), ui, comm)
+	prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -224,7 +224,7 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 		return ctx.Err()
 	}
 
-	err := prov.Provision(topCtx, testUi(), new(MockCommunicator))
+	err := prov.Provision(topCtx, testUi(), new(MockCommunicator), make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
 	}

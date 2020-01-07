@@ -15,15 +15,14 @@ import (
 // An implementation of packer.Communicator where the communicator is actually
 // executed over an RPC connection.
 type communicator struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // CommunicatorServer wraps a packer.Communicator implementation and makes
 // it exportable as part of a Golang RPC server.
 type CommunicatorServer struct {
-	c   packer.Communicator
-	mux *muxBroker
+	commonServer
+	c packer.Communicator
 }
 
 type CommandFinished struct {
@@ -62,7 +61,12 @@ type CommunicatorDownloadDirArgs struct {
 }
 
 func Communicator(client *rpc.Client) *communicator {
-	return &communicator{client: client}
+	return &communicator{
+		commonClient: commonClient{
+			client:   client,
+			endpoint: DefaultCommunicatorEndpoint,
+		},
+	}
 }
 
 func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
@@ -123,7 +127,7 @@ func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err er
 		cmd.SetExited(finished.ExitStatus)
 	}()
 
-	err = c.client.Call("Communicator.Start", &args, new(interface{}))
+	err = c.client.Call(c.endpoint+".Start", &args, new(interface{}))
 	return
 }
 
@@ -141,7 +145,7 @@ func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err er
 		args.FileInfo = NewFileInfo(*fi)
 	}
 
-	err = c.client.Call("Communicator.Upload", &args, new(interface{}))
+	err = c.client.Call(c.endpoint+".Upload", &args, new(interface{}))
 	return
 }
 
@@ -153,7 +157,7 @@ func (c *communicator) UploadDir(dst string, src string, exclude []string) error
 	}
 
 	var reply error
-	err := c.client.Call("Communicator.UploadDir", args, &reply)
+	err := c.client.Call(c.endpoint+".UploadDir", args, &reply)
 	if err == nil {
 		err = reply
 	}
@@ -169,7 +173,7 @@ func (c *communicator) DownloadDir(src string, dst string, exclude []string) err
 	}
 
 	var reply error
-	err := c.client.Call("Communicator.DownloadDir", args, &reply)
+	err := c.client.Call(c.endpoint+".DownloadDir", args, &reply)
 	if err == nil {
 		err = reply
 	}
@@ -193,7 +197,7 @@ func (c *communicator) Download(path string, w io.Writer) (err error) {
 	}
 
 	// Start sending data to the RPC server
-	err = c.client.Call("Communicator.Download", &args, new(interface{}))
+	err = c.client.Call(c.endpoint+".Download", &args, new(interface{}))
 
 	// Wait for the RPC server to finish receiving the data before we return
 	<-waitServer

@@ -16,7 +16,8 @@ func testConfig() map[string]interface{} {
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig())
+	var c Config
+	warns, errs := c.Prepare(testConfig())
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
@@ -24,7 +25,7 @@ func testConfigStruct(t *testing.T) *Config {
 		t.Fatalf("bad: %#v", errs)
 	}
 
-	return c
+	return &c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error) {
@@ -50,7 +51,8 @@ func TestConfigPrepare_port(t *testing.T) {
 
 	// default port should be 22
 	delete(raw, "port")
-	c, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	if c.CommConfig.SSHPort != 22 {
 		t.Fatalf("bad: port should default to 22, not %d", c.CommConfig.SSHPort)
 	}
@@ -62,12 +64,13 @@ func TestConfigPrepare_host(t *testing.T) {
 
 	// No host
 	delete(raw, "ssh_host")
-	_, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// Good host
 	raw["ssh_host"] = "good"
-	_, warns, errs = NewConfig(raw)
+	warns, errs = c.Prepare(raw)
 	testConfigOk(t, warns, errs)
 }
 
@@ -77,12 +80,12 @@ func TestConfigPrepare_sshCredential(t *testing.T) {
 	// no ssh_password and no ssh_private_key_file
 	delete(raw, "ssh_password")
 	delete(raw, "ssh_private_key_file")
-	_, warns, errs := NewConfig(raw)
+	warns, errs := (&Config{}).Prepare(raw)
 	testConfigErr(t, warns, errs)
 
 	// only ssh_password
 	raw["ssh_password"] = "good"
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 
 	// only ssh_private_key_file
@@ -90,11 +93,11 @@ func TestConfigPrepare_sshCredential(t *testing.T) {
 	defer os.Remove(testFile)
 	raw["ssh_private_key_file"] = testFile
 	delete(raw, "ssh_password")
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigOk(t, warns, errs)
 
 	// both ssh_password and ssh_private_key_file set
 	raw["ssh_password"] = "bad"
-	_, warns, errs = NewConfig(raw)
+	warns, errs = (&Config{}).Prepare(raw)
 	testConfigErr(t, warns, errs)
 }

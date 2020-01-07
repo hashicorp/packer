@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,6 +21,57 @@ import (
 //
 // Produces:
 //   <nothing>
+
+func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
+	hookData := make(map[string]interface{})
+
+	// Load Builder hook data from state, if it has been set.
+	hd, ok := state.GetOk("generated_data")
+	if ok {
+		hookData = hd.(map[string]interface{})
+	}
+
+	// instance_id is placed in state by the builders.
+	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
+	// Implemented in most others including digitalOcean (droplet id),
+	// docker (container_id), and clouds which use "server" internally instead
+	// of instance.
+
+	// Also note that Chroot and lxc/lxd builders tend to have their own custom
+	// step_provision, so they won't use this code path.
+	id, ok := state.GetOk("instance_id")
+	if ok {
+		hookData["ID"] = id
+	} else {
+		// Warn user that the id isn't implemented
+		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
+	}
+	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
+
+	// Read communicator data into hook data
+	comm, ok := state.GetOk("communicator_config")
+	if !ok {
+		log.Printf("Unable to load config from state to populate provisionHookData")
+		return hookData
+	}
+	commConf := comm.(*communicator.Config)
+
+	// Loop over all field values and retrieve them from the ssh config
+	hookData["Host"] = commConf.Host()
+	hookData["Port"] = commConf.Port()
+	hookData["User"] = commConf.User()
+	hookData["Password"] = commConf.Password()
+	hookData["ConnType"] = commConf.Type
+	hookData["SSHPublicKey"] = commConf.SSHPublicKey
+	hookData["SSHPrivateKey"] = commConf.SSHPrivateKey
+
+	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
+	// Password.
+	hookData["WinRMPassword"] = commConf.WinRMPassword
+
+	return hookData
+}
+
 type StepProvision struct {
 	Comm packer.Communicator
 }
@@ -32,8 +85,11 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 			comm = raw.(packer.Communicator)
 		}
 	}
+
 	hook := state.Get("hook").(packer.Hook)
 	ui := state.Get("ui").(packer.Ui)
+
+	hookData := PopulateProvisionHookData(state)
 
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...
@@ -44,7 +100,7 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 	}
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- hook.Run(ctx, hooktype, ui, comm, nil)
+		errCh <- hook.Run(ctx, hooktype, ui, comm, hookData)
 	}()
 
 	for {

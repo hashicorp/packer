@@ -5,6 +5,7 @@ package shell_local
 import (
 	"errors"
 	"fmt"
+	// "log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -41,16 +42,15 @@ type Config struct {
 	// End dedupe with postprocessor
 	UseLinuxPathing bool `mapstructure:"use_linux_pathing"`
 
-	ctx interpolate.Context
+	// used to track the data sent to shell-local from the builder
+	// GeneratedData
+
+	ctx           interpolate.Context
+	generatedData map[string]interface{}
 }
 
 func Decode(config *Config, raws ...interface{}) error {
-	//Create passthrough for winrm password so we can fill it in once we know it
-	config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: `{{.WinRMPassword}}`,
-	}
-
-	err := configHelper.Decode(&config, &configHelper.DecodeOpts{
+	err := configHelper.Decode(config, &configHelper.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
@@ -60,7 +60,8 @@ func Decode(config *Config, raws ...interface{}) error {
 		},
 	}, raws...)
 	if err != nil {
-		return fmt.Errorf("Error decoding config: %s, config is %#v, and raws is %#v", err, config, raws)
+		return fmt.Errorf("Error decoding config: %s", err)
+		// return fmt.Errorf("Error decoding config: %s, config is %#v, and raws is %#v", err, config, raws)
 	}
 
 	return nil

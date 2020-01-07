@@ -3,6 +3,9 @@ package jdcloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"time"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
@@ -11,8 +14,6 @@ import (
 	vpcApis "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis"
 	vpcClient "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-	"regexp"
-	"time"
 )
 
 type stepCreateJDCloudInstance struct {
@@ -96,6 +97,9 @@ func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.State
 		"Hi, we have created the instance, its name=%v , "+
 			"its id=%v, "+
 			"and its eip=%v  :) ", instance.InstanceName, s.InstanceSpecConfig.InstanceId, eip.Result.ElasticIp.ElasticIpAddress))
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.InstanceSpecConfig.InstanceId)
 	return multistep.ActionContinue
 }
 
@@ -138,7 +142,7 @@ func (s *stepCreateJDCloudInstance) Cleanup(state multistep.StateBag) {
 
 func createElasticIp(state multistep.StateBag) (string, error) {
 
-	generalConfig := state.Get("config").(Config)
+	generalConfig := state.Get("config").(*Config)
 	regionId := generalConfig.RegionId
 	credential := core.NewCredentials(generalConfig.AccessKey, generalConfig.SecretKey)
 	vpcclient := vpcClient.NewVpcClient(credential)

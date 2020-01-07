@@ -13,7 +13,7 @@ type TimeoutProvisioner struct {
 	Timeout time.Duration
 }
 
-func (p *TimeoutProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator) error {
+func (p *TimeoutProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
 	ctx, cancel := context.WithTimeout(ctx, p.Timeout)
 	defer cancel()
 
@@ -37,7 +37,7 @@ func (p *TimeoutProvisioner) Provision(ctx context.Context, ui Ui, comm Communic
 		}
 	}()
 
-	err := p.Provisioner.Provision(ctx, ui, comm)
+	err := p.Provisioner.Provision(ctx, ui, comm, generatedData)
 	close(errC)
 	return err
 }

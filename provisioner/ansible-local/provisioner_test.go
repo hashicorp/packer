@@ -134,7 +134,7 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(context.Background(), new(packer.NoopUi), comm); err != nil {
+	if err := p.Provision(context.Background(), new(packer.NoopUi), comm, make(map[string]interface{})); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -168,7 +168,7 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(context.Background(), new(packer.NoopUi), comm); err != nil {
+	if err := p.Provision(context.Background(), new(packer.NoopUi), comm, make(map[string]interface{})); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -343,7 +343,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 
 	// Setup the builder
 	builder := &docker.Builder{}
-	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
 	if err != nil {
 		t.Fatalf("Error preparing configuration %s", err)
 	}

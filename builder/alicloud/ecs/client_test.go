@@ -33,14 +33,11 @@ func TestWaitForExpectedExceedRetryTimes(t *testing.T) {
 		waitDone <- true
 	}()
 
-	timeTolerance := 1 * time.Second
 	select {
 	case <-waitDone:
 		if iter != defaultRetryTimes {
 			t.Fatalf("WaitForExpected should terminate at the %d iterations", defaultRetryTimes)
 		}
-	case <-time.After(defaultRetryTimes*defaultRetryInterval + timeTolerance):
-		t.Fatalf("WaitForExpected should terminate within %f seconds", (defaultRetryTimes*defaultRetryInterval + timeTolerance).Seconds())
 	}
 }
 

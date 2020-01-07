@@ -12,9 +12,3 @@ type HCL2Ref struct {
 	// remainder of unparsed body
 	Remain hcl.Body
 }
-
-// func (hr *HCL2Ref) Blah() {
-// 	// hr.Remain.
-// 	ctyjson.Marshal(nil, nil)
-// 	hr.DeclRange.
-// }

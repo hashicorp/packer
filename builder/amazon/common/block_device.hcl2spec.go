@@ -24,10 +24,13 @@ type FlatBlockDevice struct {
 // FlatMapstructure returns a new FlatBlockDevice.
 // FlatBlockDevice is an auto-generated flat version of BlockDevice.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*BlockDevice) FlatMapstructure() interface{} { return new(FlatBlockDevice) }
+func (*BlockDevice) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatBlockDevice)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatBlockDevice.
-// This spec is used by HCL to read the fields of FlatBlockDevice.
+// HCL2Spec returns the hcl spec of a BlockDevice.
+// This spec is used by HCL to read the fields of BlockDevice.
+// The decoded values from this spec will then be applied to a FlatBlockDevice.
 func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"delete_on_termination": &hcldec.AttrSpec{Name: "delete_on_termination", Type: cty.Bool, Required: false},
