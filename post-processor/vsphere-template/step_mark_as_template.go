@@ -44,7 +44,6 @@ func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) 
 	folder := state.Get("folder").(*object.Folder)
 	dcPath := state.Get("dcPath").(string)
 
-
 	vm, err := findRuntimeVM(cli, dcPath, s.VMName, s.RemoteFolder)
 	if err != nil {
 		state.Put("error", err)
