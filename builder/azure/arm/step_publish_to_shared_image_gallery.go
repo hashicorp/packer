@@ -49,7 +49,8 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 	if miSGImageVersionEndOfLifeDate != "" {
 		parseDate, err := date.ParseTime("2006-01-02T15:04:05.99Z", miSGImageVersionEndOfLifeDate)
 		if err != nil {
-			panic(err)
+			s.say(fmt.Sprintf("Error parsing date from shared_gallery_image_version_end_of_life_date: %s", err))
+			return "", err
 		}
 		endOfLifeDate = &date.Time{Time: parseDate}
 	} else {
