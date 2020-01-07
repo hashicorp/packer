@@ -415,7 +415,11 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 		if _, ok := field.Type().(*types.Signature); ok {
 			continue // ignore funcs
 		}
-		structtag, _ := structtag.Parse(tag)
+		structtag, err := structtag.Parse(tag)
+		if err != nil {
+			log.Printf("could not parse field tag %s of : %v", tag, err)
+			continue
+		}
 		if ms, err := structtag.Get("mapstructure"); err != nil {
 			//no mapstructure tag
 		} else if ms.HasOption("squash") {
