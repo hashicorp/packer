@@ -71,7 +71,7 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set ssh_host_port_max (old key)
 		{
 			Input: map[string]interface{}{
-				"type":          "virtualbox-iso",
+				"type":              "virtualbox-iso",
 				"ssh_host_port_max": 4444,
 			},
 
