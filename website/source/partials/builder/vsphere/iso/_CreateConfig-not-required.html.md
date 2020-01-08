@@ -17,7 +17,8 @@
     
 -   `disk_thin_provisioned` (bool) - Enable VMDK thin provisioning for VM. Defaults to `false`.
     
--   `network` (string) - Network
+-   `network` (string) - Set network VM will be connected to.
+    
 -   `network_card` (string) - Set VM network card type. Example `vmxnet3`.
     
 -   `usb_controller` (bool) - Create USB controller for virtual machine. Defaults to `false`.
