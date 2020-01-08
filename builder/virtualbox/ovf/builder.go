@@ -100,7 +100,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			VRDPPortMax:     b.config.VRDPPortMax,
 		},
 		new(vboxcommon.StepAttachFloppy),
-		&vboxcommon.StepForwardSSH{
+		&vboxcommon.StepPortForwarding{
 			CommConfig:     &b.config.CommConfig.Comm,
 			HostPortMin:    b.config.HostPortMin,
 			HostPortMax:    b.config.HostPortMax,

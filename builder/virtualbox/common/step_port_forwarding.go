@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step adds a NAT port forwarding definition so that SSH is available
+// This step adds a NAT port forwarding definition so that SSH or WinRM is available
 // on the guest machine.
 //
 // Uses:
@@ -21,7 +21,7 @@ import (
 //   vmName string
 //
 // Produces:
-type StepForwardSSH struct {
+type StepPortForwarding struct {
 	CommConfig     *communicator.Config
 	HostPortMin    int
 	HostPortMax    int
@@ -30,7 +30,7 @@ type StepForwardSSH struct {
 	l *net.Listener
 }
 
-func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPortForwarding) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -115,7 +115,7 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	return multistep.ActionContinue
 }
 
-func (s *StepForwardSSH) Cleanup(state multistep.StateBag) {
+func (s *StepPortForwarding) Cleanup(state multistep.StateBag) {
 	if s.l != nil {
 		err := s.l.Close()
 		if err != nil {
