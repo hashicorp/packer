@@ -44,7 +44,7 @@ a [communicator](/docs/templates/communicator.html) can be configured for this b
     your customized image from.
 
 -   `image_name` (string) - The name you want to create your customize image,
-    it should be composed of no more than 20 characters, of letters, numbers
+    it should be composed of no more than 60 characters, of letters, numbers
     or minus sign.
 
 ### Optional:
