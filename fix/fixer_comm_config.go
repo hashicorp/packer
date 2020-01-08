@@ -1,6 +1,8 @@
 package fix
 
 import (
+	"strings"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -26,6 +28,12 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 			continue
 		}
 
+		// only virtualbox builders
+		builderType := builders["type"].(string)
+		if ok := strings.HasPrefix(builderType, "virtualbox"); !ok {
+			continue
+		}
+
 		// ssh_host_port_min to host_port_min
 		if _, ok := builders["host_port_min"]; ok {
 
@@ -36,13 +44,10 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 
 		} else if _, ok := builders["ssh_host_port_min"]; ok {
 
-			// replace ssh_host_port_min with host_port_min if it exists
+			// replace ssh_host_port_min with host_port_min
 			sshHostPortMinRaw, _ := builders["ssh_host_port_min"]
-			sshHostPortMinString, ok := sshHostPortMinRaw.(int)
-			if ok {
-				delete(builders, "ssh_host_port_min")
-				builders["host_port_min"] = sshHostPortMinString
-			}
+			delete(builders, "ssh_host_port_min")
+			builders["host_port_min"] = sshHostPortMinRaw
 		}
 
 		// ssh_host_port_max to host_port_max
@@ -55,13 +60,11 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 
 		} else if _, ok := builders["ssh_host_port_max"]; ok {
 
-			// replace ssh_host_port_max with host_port_max if it exists
+			// replace ssh_host_port_max with host_port_max
 			sshHostPortMaxRaw, _ := builders["ssh_host_port_max"]
-			sshHostPortMaxString, ok := sshHostPortMaxRaw.(int)
-			if ok {
-				delete(builders, "ssh_host_port_max")
-				builders["host_port_max"] = sshHostPortMaxString
-			}
+			delete(builders, "ssh_host_port_max")
+			builders["host_port_max"] = sshHostPortMaxRaw
+
 		}
 
 		// ssh_skip_nat_mapping to skip_nat_mapping
@@ -74,12 +77,12 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 
 		} else if _, ok := builders["ssh_skip_nat_mapping"]; ok {
 
-			// replace ssh_skip_nat_mapping with skip_nat_mapping if it exists
+			// replace ssh_skip_nat_mapping with skip_nat_mapping
 			sshSkipNatMappingRaw, _ := builders["ssh_skip_nat_mapping"]
-			sshSkipNatMappingString, ok := sshSkipNatMappingRaw.(bool)
+			sshSkipNatMappingBool, ok := sshSkipNatMappingRaw.(bool)
 			if ok {
 				delete(builders, "ssh_skip_nat_mapping")
-				builders["skip_nat_mapping"] = sshSkipNatMappingString
+				builders["skip_nat_mapping"] = sshSkipNatMappingBool
 			}
 		}
 

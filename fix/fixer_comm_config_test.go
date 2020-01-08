@@ -17,10 +17,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set host_port_min
 		{
 			Input: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"host_port_min": 2222,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"host_port_min": 2222,
 			},
 		},
@@ -28,10 +30,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set ssh_host_port_min (old key)
 		{
 			Input: map[string]interface{}{
+				"type":              "virtualbox-ovf",
 				"ssh_host_port_min": 2222,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-ovf",
 				"host_port_min": 2222,
 			},
 		},
@@ -40,11 +44,13 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// host_port_min takes precedence
 		{
 			Input: map[string]interface{}{
+				"type":              "virtualbox-vm",
 				"ssh_host_port_min": 1234,
 				"host_port_min":     4321,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-vm",
 				"host_port_min": 4321,
 			},
 		},
@@ -52,10 +58,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set host_port_max
 		{
 			Input: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"host_port_max": 4444,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"host_port_max": 4444,
 			},
 		},
@@ -63,10 +71,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set ssh_host_port_max (old key)
 		{
 			Input: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"ssh_host_port_max": 4444,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-iso",
 				"host_port_max": 4444,
 			},
 		},
@@ -75,11 +85,13 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// host_port_max takes precedence
 		{
 			Input: map[string]interface{}{
+				"type":              "virtualbox-vm",
 				"ssh_host_port_max": 1234,
 				"host_port_max":     4321,
 			},
 
 			Expected: map[string]interface{}{
+				"type":          "virtualbox-vm",
 				"host_port_max": 4321,
 			},
 		},
@@ -87,10 +99,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set skip_nat_mapping
 		{
 			Input: map[string]interface{}{
+				"type":             "virtualbox-vm",
 				"skip_nat_mapping": true,
 			},
 
 			Expected: map[string]interface{}{
+				"type":             "virtualbox-vm",
 				"skip_nat_mapping": true,
 			},
 		},
@@ -98,10 +112,12 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// set ssh_skip_nat_mapping (old key)
 		{
 			Input: map[string]interface{}{
+				"type":                 "virtualbox-vm",
 				"ssh_skip_nat_mapping": true,
 			},
 
 			Expected: map[string]interface{}{
+				"type":             "virtualbox-vm",
 				"skip_nat_mapping": true,
 			},
 		},
@@ -110,11 +126,13 @@ func TestFixerCommConfig_Fix(t *testing.T) {
 		// skip_nat_mapping takes precedence
 		{
 			Input: map[string]interface{}{
+				"type":                 "virtualbox-iso",
 				"ssh_skip_nat_mapping": false,
 				"skip_nat_mapping":     true,
 			},
 
 			Expected: map[string]interface{}{
+				"type":             "virtualbox-iso",
 				"skip_nat_mapping": true,
 			},
 		},
