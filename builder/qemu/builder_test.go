@@ -531,7 +531,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	config := testConfig()
 
 	// Test a default boot_wait
-	delete(config, "ssh_wait_timeout")
+	delete(config, "ssh_timeout")
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -541,7 +541,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	}
 
 	// Test with a bad value
-	config["ssh_wait_timeout"] = "this is not good"
+	config["ssh_timeout"] = "this is not good"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -552,7 +552,7 @@ func TestBuilderPrepare_SSHWaitTimeout(t *testing.T) {
 	}
 
 	// Test with a good one
-	config["ssh_wait_timeout"] = "5s"
+	config["ssh_timeout"] = "5s"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {

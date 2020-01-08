@@ -14,7 +14,6 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
@@ -327,9 +326,6 @@ type Config struct {
 	// "BUILDNAME" is the name of the build. Currently, no file extension will be
 	// used unless it is specified in this option.
 	VMName string `mapstructure:"vm_name" required:"false"`
-	// These are deprecated, but we keep them around for BC
-	// TODO(@mitchellh): remove
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
@@ -470,11 +466,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.DiskInterface == "" {
 		b.config.DiskInterface = "virtio"
-	}
-
-	// TODO: backwards compatibility, write fixer instead
-	if b.config.SSHWaitTimeout != 0 {
-		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
 
 	if b.config.ISOSkipCache {
