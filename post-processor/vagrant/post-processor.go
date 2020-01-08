@@ -93,6 +93,11 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 		config = specificConfig
 	}
 
+	err := CreateDummyBox(ui, config.CompressionLevel)
+	if err != nil {
+		return nil, false, err
+	}
+
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
 	config.ctx.Data = &outputPathTemplate{
