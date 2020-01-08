@@ -1,16 +1,22 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type CDRomConfig
+
 package iso
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type CDRomConfig struct {
-	CdromType string   `mapstructure:"cdrom_type"`
-	ISOPaths  []string `mapstructure:"iso_paths"`
+	// Which controller to use. Example: `sata`. Defaults to `ide`.
+	CdromType string `mapstructure:"cdrom_type"`
+	// List of datastore paths to ISO files that will be mounted to the VM.
+	// Example: `"[datastore1] ISO/ubuntu.iso"`.
+	ISOPaths []string `mapstructure:"iso_paths"`
 }
 
 type StepAddCDRom struct {

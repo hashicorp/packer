@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 )
 
 func main() {

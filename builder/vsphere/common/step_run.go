@@ -1,14 +1,18 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type RunConfig
+
 package common
 
 import (
 	"context"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"strings"
 )
 
 type RunConfig struct {
+	// Priority of boot devices. Defaults to `disk,cdrom`
 	BootOrder string `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
 }
 

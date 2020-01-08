@@ -1,12 +1,15 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type ShutdownConfig
+
 package clone
 
 import (
+	"github.com/hashicorp/packer/builder/vsphere/common"
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 type Config struct {
@@ -23,7 +26,10 @@ type Config struct {
 	Comm                  communicator.Config `mapstructure:",squash"`
 	common.ShutdownConfig `mapstructure:",squash"`
 
-	CreateSnapshot    bool `mapstructure:"create_snapshot"`
+	// Create a snapshot when set to `true`, so the VM can be used as a base
+	// for linked clones. Defaults to `false`.
+	CreateSnapshot bool `mapstructure:"create_snapshot"`
+	// Convert VM to a template. Defaults to `false`.
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context

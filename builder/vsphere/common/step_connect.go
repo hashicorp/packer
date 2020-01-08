@@ -1,18 +1,26 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type ConnectConfig
+
 package common
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type ConnectConfig struct {
-	VCenterServer      string `mapstructure:"vcenter_server"`
-	Username           string `mapstructure:"username"`
-	Password           string `mapstructure:"password"`
-	InsecureConnection bool   `mapstructure:"insecure_connection"`
-	Datacenter         string `mapstructure:"datacenter"`
+	// vCenter server hostname.
+	VCenterServer string `mapstructure:"vcenter_server"`
+	// vSphere username.
+	Username string `mapstructure:"username"`
+	// vSphere password.
+	Password string `mapstructure:"password"`
+	// Do not validate vCenter server's TLS certificate. Defaults to `false`.
+	InsecureConnection bool `mapstructure:"insecure_connection"`
+	// VMware datacenter name. Required if there is more than one datacenter in vCenter.
+	Datacenter string `mapstructure:"datacenter"`
 }
 
 func (c *ConnectConfig) Prepare() []error {

@@ -3,9 +3,9 @@ package testing
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/common"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"math/rand"
 	"os"
 	"testing"

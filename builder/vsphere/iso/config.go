@@ -1,12 +1,13 @@
 package iso
 
 import (
+	"github.com/hashicorp/packer/builder/vsphere/common"
 	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 type Config struct {
@@ -21,12 +22,12 @@ type Config struct {
 
 	packerCommon.ISOConfig `mapstructure:",squash"`
 
-	CDRomConfig         `mapstructure:",squash"`
-	FloppyConfig        `mapstructure:",squash"`
-	common.RunConfig    `mapstructure:",squash"`
-	BootConfig          `mapstructure:",squash"`
-	common.WaitIpConfig `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
+	CDRomConfig            `mapstructure:",squash"`
+	FloppyConfig           `mapstructure:",squash"`
+	common.RunConfig       `mapstructure:",squash"`
+	bootcommand.BootConfig `mapstructure:",squash"`
+	common.WaitIpConfig    `mapstructure:",squash"`
+	Comm                   communicator.Config `mapstructure:",squash"`
 
 	common.ShutdownConfig `mapstructure:",squash"`
 

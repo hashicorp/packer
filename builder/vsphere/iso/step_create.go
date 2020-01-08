@@ -1,27 +1,42 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type CreateConfig
+
 package iso
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/common"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type CreateConfig struct {
-	Version     uint   `mapstructure:"vm_version"`
+	// Set VM hardware version. Defaults to the most current VM hardware
+	// version supported by vCenter. See
+	// [VMWare article 1003746](https://kb.vmware.com/s/article/1003746) for
+	// the full list of supported VM hardware versions.
+	Version uint `mapstructure:"vm_version"`
+	// Set VM OS type. Defaults to `otherGuest`. See [
+	// here](https://pubs.vmware.com/vsphere-6-5/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
+	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
-	Firmware    string `mapstructure:"firmware"`
+	// Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
+	Firmware string `mapstructure:"firmware"`
+	// Set VM disk controller type. Example `pvscsi`.
+	DiskControllerType string `mapstructure:"disk_controller_type"`
+	// The size of the disk in MB.
+	DiskSize int64 `mapstructure:"disk_size"`
+	// Enable VMDK thin provisioning for VM. Defaults to `false`.
+	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
 
-	DiskControllerType  string `mapstructure:"disk_controller_type"`
-	DiskSize            int64  `mapstructure:"disk_size"`
-	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
-
-	Network       string `mapstructure:"network"`
-	NetworkCard   string `mapstructure:"network_card"`
-	USBController bool   `mapstructure:"usb_controller"`
-
+	Network string `mapstructure:"network"`
+	// Set VM network card type. Example `vmxnet3`.
+	NetworkCard string `mapstructure:"network_card"`
+	// Create USB controller for virtual machine. Defaults to `false`.
+	USBController bool `mapstructure:"usb_controller"`
+	// VM notes.
 	Notes string `mapstructure:"notes"`
 }
 

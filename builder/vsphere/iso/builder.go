@@ -2,12 +2,12 @@ package iso
 
 import (
 	"context"
+	"github.com/hashicorp/packer/builder/vsphere/common"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type Builder struct {
