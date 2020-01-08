@@ -6,6 +6,7 @@ package iso
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,7 +31,7 @@ type CreateConfig struct {
 	DiskSize int64 `mapstructure:"disk_size"`
 	// Enable VMDK thin provisioning for VM. Defaults to `false`.
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
-
+	// Set network VM will be connected to.
 	Network string `mapstructure:"network"`
 	// Set VM network card type. Example `vmxnet3`.
 	NetworkCard string `mapstructure:"network_card"`
