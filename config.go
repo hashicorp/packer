@@ -27,17 +27,56 @@ type config struct {
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
 	PluginMinPort              int
 	PluginMaxPort              int
-
-	Builders       packer.MapOfBuilder
-	Provisioners   packer.MapOfProvisioner
-	PostProcessors packer.MapOfPostProcessor `json:"post-processors"`
+	RawBuilders                map[string]string         `json:"builders"`
+	RawProvisioners            map[string]string         `json:"provisioners"`
+	RawPostProcessors          map[string]string         `json:"post-processors"`
+	Builders                   packer.MapOfBuilder       `json:"-"`
+	Provisioners               packer.MapOfProvisioner   `json:"-"`
+	PostProcessors             packer.MapOfPostProcessor `json:"-"`
 }
 
 // DecodeConfig decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
 func DecodeConfig(r io.Reader, c *config) error {
 	decoder := json.NewDecoder(r)
-	return decoder.Decode(c)
+	err := decoder.Decode(c)
+	if err != nil {
+		return err
+	}
+
+	// helper to build up list of plugin directories
+	extractPaths := func(m map[string]string) []string {
+		if len(m) == 0 {
+			return nil
+		}
+
+		paths := make([]string, 0, len(m))
+		for _, v := range m {
+			paths = append(paths, filepath.Dir(v))
+		}
+
+		return paths
+	}
+
+	var pluginPaths []string
+	pluginPaths = append(pluginPaths, extractPaths(c.RawProvisioners)...)
+	pluginPaths = append(pluginPaths, extractPaths(c.RawBuilders)...)
+	pluginPaths = append(pluginPaths, extractPaths(c.RawPostProcessors)...)
+
+	visited := make(map[string]bool)
+	for _, pluginPath := range pluginPaths {
+		if visited[pluginPath] {
+			continue
+		}
+
+		if err := c.discoverExternalComponents(pluginPath); err != nil {
+			return err
+		}
+
+		visited[pluginPath] = true
+	}
+
+	return nil
 }
 
 // Discover discovers plugins.
