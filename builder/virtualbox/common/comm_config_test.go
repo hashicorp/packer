@@ -111,6 +111,35 @@ func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 	}
 }
 
+func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
+	var c *CommConfig
+	hostPortMin := 1234
+	hostPortMax := 4321
+	skipNatMapping := true
+
+	c = testCommConfig()
+	c.SSHHostPortMin = hostPortMin
+	c.SSHHostPortMax = hostPortMax
+	c.SSHSkipNatMapping = skipNatMapping
+
+	err := c.Prepare(interpolate.NewContext())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.HostPortMin != hostPortMin {
+		t.Fatalf("HostPortMin should be %d for backwards compatibility, but it was %d", hostPortMin, c.HostPortMin)
+	}
+
+	if c.HostPortMax != hostPortMax {
+		t.Fatalf("HostPortMax should be %d for backwards compatibility, but it was %d", hostPortMax, c.HostPortMax)
+	}
+
+	if c.SkipNatMapping != skipNatMapping {
+		t.Fatalf("SkipNatMapping should be %t for backwards compatibility, but it was %t", skipNatMapping, c.SkipNatMapping)
+	}
+}
+
 const testPem = `
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEAxd4iamvrwRJvtNDGQSIbNvvIQN8imXTRWlRY62EvKov60vqu

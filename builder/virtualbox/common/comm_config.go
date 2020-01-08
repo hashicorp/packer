@@ -23,9 +23,32 @@ type CommConfig struct {
 	// does not setup forwarded port mapping for communicator (SSH or WinRM) requests and uses ssh_port or winrm_port
 	// on the host to communicate to the virtual machine.
 	SkipNatMapping bool `mapstructure:"skip_nat_mapping" required:"false"`
+
+	// These are deprecated, but we keep them around for backwards compatibility
+	// TODO: remove later
+	SSHHostPortMin int `mapstructure:"ssh_host_port_min" required:"false"`
+	// TODO: remove later
+	SSHHostPortMax int `mapstructure:"ssh_host_port_max"`
+	// TODO: remove later
+	SSHSkipNatMapping bool `mapstructure:"ssh_skip_nat_mapping" required:"false"`
 }
 
 func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
+	// Backwards compatibility
+	if c.SSHHostPortMin != 0 {
+		c.HostPortMin = c.SSHHostPortMin
+	}
+
+	// Backwards compatibility
+	if c.SSHHostPortMax != 0 {
+		c.HostPortMax = c.SSHHostPortMax
+	}
+
+	// Backwards compatibility
+	if c.SSHSkipNatMapping {
+		c.SkipNatMapping = c.SSHSkipNatMapping
+	}
+
 	if c.Comm.SSHHost == "" {
 		c.Comm.SSHHost = "127.0.0.1"
 	}
