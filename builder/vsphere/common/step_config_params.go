@@ -1,14 +1,18 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type ConfigParamsConfig
+
 package common
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type ConfigParamsConfig struct {
+	// Custom parameters.
 	ConfigParams map[string]string `mapstructure:"configuration_parameters"`
 }
 

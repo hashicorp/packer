@@ -1,14 +1,28 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type LocationConfig
+
 package common
 
 import "fmt"
 
 type LocationConfig struct {
-	VMName       string `mapstructure:"vm_name"`
-	Folder       string `mapstructure:"folder"`
-	Cluster      string `mapstructure:"cluster"`
-	Host         string `mapstructure:"host"`
+	// Name of the new VM to create.
+	VMName string `mapstructure:"vm_name"`
+	// VM folder to create the VM in.
+	Folder string `mapstructure:"folder"`
+	// ESXi cluster where target VM is created. See
+	// [Working with Clusters](#working-with-clusters).
+	Cluster string `mapstructure:"cluster"`
+	// ESXi host where target VM is created. A full path must be specified if
+	// the host is in a folder. For example `folder/host`. See the
+	// `Specifying Clusters and Hosts` section above for more details.
+	Host string `mapstructure:"host"`
+	// VMWare resource pool. Defaults to the root resource pool of the
+	// `host` or `cluster`.
 	ResourcePool string `mapstructure:"resource_pool"`
-	Datastore    string `mapstructure:"datastore"`
+	// VMWare datastore. Required if `host` is a cluster, or if `host` has
+	// multiple datastores.
+	Datastore string `mapstructure:"datastore"`
 }
 
 func (c *LocationConfig) Prepare() []error {

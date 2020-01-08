@@ -1,18 +1,25 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type ShutdownConfig
+
 package common
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"log"
 	"time"
 )
 
 type ShutdownConfig struct {
-	Command string        `mapstructure:"shutdown_command"`
+	// Specify a VM guest shutdown command. VMware guest tools are used by
+	// default.
+	Command string `mapstructure:"shutdown_command"`
+	// Amount of time to wait for graceful VM shutdown. Examples 45s and 10m.
+	// Defaults to 5m(5 minutes).
 	Timeout time.Duration `mapstructure:"shutdown_timeout"`
 }
 

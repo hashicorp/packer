@@ -1,16 +1,24 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type FloppyConfig
+
 package iso
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type FloppyConfig struct {
-	FloppyIMGPath     string   `mapstructure:"floppy_img_path"`
-	FloppyFiles       []string `mapstructure:"floppy_files"`
+	// Datastore path to a floppy image that will be mounted to the VM.
+	// Example: `[datastore1] ISO/pvscsi-Windows8.flp`.
+	FloppyIMGPath string `mapstructure:"floppy_img_path"`
+	// List of local files to be mounted to the VM floppy drive. Can be used to
+	// make Debian preseed or RHEL kickstart files available to the VM.
+	FloppyFiles []string `mapstructure:"floppy_files"`
+	// List of directories to copy files from.
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
 }
 

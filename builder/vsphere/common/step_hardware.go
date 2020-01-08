@@ -1,27 +1,40 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type HardwareConfig
+
 package common
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type HardwareConfig struct {
-	CPUs             int32 `mapstructure:"CPUs"`
-	CpuCores         int32 `mapstructure:"cpu_cores"`
-	CPUReservation   int64 `mapstructure:"CPU_reservation"`
-	CPULimit         int64 `mapstructure:"CPU_limit"`
-	CpuHotAddEnabled bool  `mapstructure:"CPU_hot_plug"`
-
-	RAM                 int64 `mapstructure:"RAM"`
-	RAMReservation      int64 `mapstructure:"RAM_reservation"`
-	RAMReserveAll       bool  `mapstructure:"RAM_reserve_all"`
-	MemoryHotAddEnabled bool  `mapstructure:"RAM_hot_plug"`
-
+	// Number of CPU sockets.
+	CPUs int32 `mapstructure:"CPUs"`
+	// Number of CPU cores per socket.
+	CpuCores int32 `mapstructure:"cpu_cores"`
+	// Amount of reserved CPU resources in MHz.
+	CPUReservation int64 `mapstructure:"CPU_reservation"`
+	// Upper limit of available CPU resources in MHz.
+	CPULimit int64 `mapstructure:"CPU_limit"`
+	// Enable CPU hot plug setting for virtual machine. Defaults to `false`.
+	CpuHotAddEnabled bool `mapstructure:"CPU_hot_plug"`
+	// Amount of RAM in MB.
+	RAM int64 `mapstructure:"RAM"`
+	// Amount of reserved RAM in MB.
+	RAMReservation int64 `mapstructure:"RAM_reservation"`
+	// Reserve all available RAM. Defaults to `false`. Cannot be used together
+	// with `RAM_reservation`.
+	RAMReserveAll bool `mapstructure:"RAM_reserve_all"`
+	// Enable RAM hot plug setting for virtual machine. Defaults to `false`.
+	MemoryHotAddEnabled bool `mapstructure:"RAM_hot_plug"`
+	// Amount of video memory in MB.
 	VideoRAM int64 `mapstructure:"video_ram"`
-	NestedHV bool  `mapstructure:"NestedHV"`
+	// Enable nested hardware virtualization for VM. Defaults to `false`.
+	NestedHV bool `mapstructure:"NestedHV"`
 }
 
 func (c *HardwareConfig) Prepare() []error {

@@ -1,20 +1,28 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type CloneConfig
+
 package clone
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/common"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type CloneConfig struct {
-	Template    string `mapstructure:"template"`
-	DiskSize    int64  `mapstructure:"disk_size"`
-	LinkedClone bool   `mapstructure:"linked_clone"`
-	Network     string `mapstructure:"network"`
-	Notes       string `mapstructure:"notes"`
+	// Name of source VM. Path is optional.
+	Template string `mapstructure:"template"`
+	// The size of the disk in MB.
+	DiskSize int64 `mapstructure:"disk_size"`
+	// Create VM as a linked clone from latest snapshot. Defaults to `false`.
+	LinkedClone bool `mapstructure:"linked_clone"`
+	// Set network VM will be connected to.
+	Network string `mapstructure:"network"`
+	// VM notes.
+	Notes string `mapstructure:"notes"`
 }
 
 func (c *CloneConfig) Prepare() []error {

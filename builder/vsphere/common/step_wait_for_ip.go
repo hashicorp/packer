@@ -1,17 +1,30 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type WaitIpConfig
+
 package common
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"log"
 	"time"
 )
 
 type WaitIpConfig struct {
-	WaitTimeout   time.Duration `mapstructure:"ip_wait_timeout"`
+	// Amount of time to wait for VM's IP, similar to 'ssh_timeout'.
+	// Defaults to 30m (30 minutes). See the Goang
+	// [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
+	// for full details.
+	WaitTimeout time.Duration `mapstructure:"ip_wait_timeout"`
+	// Amount of time to wait for VM's IP to settle down, sometimes VM may
+	// report incorrect IP initially, then its recommended to set that
+	// parameter to apx. 2 minutes. Examples 45s and 10m. Defaults to
+	// 5s(5 seconds). See the Golang
+	// [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
+	//  for full details.
 	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
 
 	// WaitTimeout is a total timeout, so even if VM changes IP frequently and it doesn't settle down we will end waiting.

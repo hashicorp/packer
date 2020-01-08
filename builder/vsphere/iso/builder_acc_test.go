@@ -2,9 +2,9 @@ package iso
 
 import (
 	"fmt"
+	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"github.com/hashicorp/packer/packer"
-	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
 	"github.com/vmware/govmomi/vim25/types"
 	"io/ioutil"
 	"os"
