@@ -46,6 +46,7 @@ func init() {
 		"spot-price-auto-product":    new(FixerAmazonSpotPriceProductDeprecation),
 		"qemu-disk-size":             new(FixerQEMUDiskSize),
 		"galaxy-command":             new(FixerGalaxyCommand),
+		"comm-config":                new(FixerCommConfig),
 	}
 
 	FixerOrder = []string{
@@ -75,5 +76,6 @@ func init() {
 		"spot-price-auto-product",
 		"qemu-disk-size",
 		"galaxy-command",
+		"comm-config",
 	}
 }
