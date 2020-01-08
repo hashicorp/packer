@@ -2,6 +2,7 @@ package iso
 
 import (
 	"context"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	packerCommon "github.com/hashicorp/packer/common"
@@ -15,14 +16,16 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	c, warnings, errs := NewConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return warnings, nil, errs
 	}
 	b.config = c
 
-	return warnings, nil
+	return warnings, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

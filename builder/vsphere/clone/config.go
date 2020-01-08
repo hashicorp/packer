@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type ShutdownConfig
+//go:generate mapstructure-to-hcl2 -type Config
 
 package clone
 

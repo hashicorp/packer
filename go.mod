@@ -145,13 +145,12 @@ require (
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
-	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
+	github.com/vmware/govmomi v0.21.0
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
 	github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
 	go.opencensus.io v0.22.2 // indirect
-	go.uber.org/goleak v1.0.0
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect

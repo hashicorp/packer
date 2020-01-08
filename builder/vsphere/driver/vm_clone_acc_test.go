@@ -9,6 +9,7 @@ import (
 )
 
 func TestVMAcc_clone(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	testCases := []struct {
 		name          string
 		config        *CloneConfig
