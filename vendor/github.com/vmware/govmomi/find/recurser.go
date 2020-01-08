@@ -190,7 +190,7 @@ func (r recurser) List(ctx context.Context, s *spec, root list.Element, parts []
 		}
 
 		if !matched {
-			matched = strings.HasSuffix(e.Path, path.Join(all...))
+			matched = strings.HasSuffix(e.Path, "/"+path.Join(all...))
 			if matched {
 				// name contains a '/'
 				out = append(out, e)

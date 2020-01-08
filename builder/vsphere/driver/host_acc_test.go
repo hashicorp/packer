@@ -5,6 +5,7 @@ import (
 )
 
 func TestHostAcc(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	d := newTestDriver(t)
 	host, err := d.FindHost(TestHostName)
 	if err != nil {

@@ -19,10 +19,28 @@ package vim25
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"net/http"
+	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+)
+
+const (
+	Namespace = "vim25"
+	Version   = "6.7"
+	Path      = "/sdk"
+)
+
+var (
+	ServiceInstance = types.ManagedObjectReference{
+		Type:  "ServiceInstance",
+		Value: "ServiceInstance",
+	}
 )
 
 // Client is a tiny wrapper around the vim25/soap Client that stores session
@@ -40,25 +58,61 @@ type Client struct {
 	RoundTripper soap.RoundTripper
 }
 
-// NewClient creates and returns a new client wirh the ServiceContent field
+// NewClient creates and returns a new client with the ServiceContent field
 // filled in.
 func NewClient(ctx context.Context, rt soap.RoundTripper) (*Client, error) {
-	serviceContent, err := methods.GetServiceContent(ctx, rt)
-	if err != nil {
-		return nil, err
-	}
-
 	c := Client{
-		ServiceContent: serviceContent,
-		RoundTripper:   rt,
+		RoundTripper: rt,
 	}
 
 	// Set client if it happens to be a soap.Client
 	if sc, ok := rt.(*soap.Client); ok {
 		c.Client = sc
+
+		if c.Namespace == "" {
+			c.Namespace = "urn:" + Namespace
+		} else if !strings.Contains(c.Namespace, ":") {
+			c.Namespace = "urn:" + c.Namespace // ensure valid URI format
+		}
+		if c.Version == "" {
+			c.Version = Version
+		}
+	}
+
+	var err error
+	c.ServiceContent, err = methods.GetServiceContent(ctx, rt)
+	if err != nil {
+		return nil, err
 	}
 
 	return &c, nil
+}
+
+// UseServiceVersion sets soap.Client.Version to the current version of the service endpoint via /sdk/vimServiceVersions.xml
+func (c *Client) UseServiceVersion() error {
+	u := c.URL()
+	u.Path = path.Join(Path, "vimServiceVersions.xml")
+
+	res, err := c.Get(u.String())
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("http.Get(%s): %s", u.Path, err)
+	}
+
+	v := struct {
+		Version *string `xml:"namespace>version"`
+	}{&c.Version}
+
+	err = xml.NewDecoder(res.Body).Decode(&v)
+	_ = res.Body.Close()
+	if err != nil {
+		return fmt.Errorf("xml.Decode(%s): %s", u.Path, err)
+	}
+
+	return nil
 }
 
 // RoundTrip dispatches to the RoundTripper field.

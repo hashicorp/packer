@@ -8,6 +8,7 @@ import (
 )
 
 func TestDatastoreAcc(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	d := newTestDriver(t)
 	ds, err := d.FindDatastore("datastore1", "")
 	if err != nil {
@@ -23,6 +24,7 @@ func TestDatastoreAcc(t *testing.T) {
 }
 
 func TestFileUpload(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	dsName := "datastore1"
 	hostName := "esxi-1.vsphere65.test"
 
@@ -58,6 +60,7 @@ func TestFileUpload(t *testing.T) {
 }
 
 func TestFileUploadDRS(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	dsName := "datastore3"
 	hostName := ""
 

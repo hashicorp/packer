@@ -3,6 +3,7 @@ package driver
 import "testing"
 
 func TestResourcePoolAcc(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	d := newTestDriver(t)
 	p, err := d.FindResourcePool("", "esxi-1.vsphere65.test", "pool1/pool2")
 	if err != nil {

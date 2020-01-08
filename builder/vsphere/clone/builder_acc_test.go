@@ -11,6 +11,7 @@ import (
 )
 
 func TestCloneBuilderAcc_default(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	config := defaultConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -101,6 +102,7 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 }
 
 func TestCloneBuilderAcc_artifact(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	config := defaultConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -126,6 +128,7 @@ func checkArtifact(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_folder(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: folderConfig(),
@@ -163,6 +166,7 @@ func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_resourcePool(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: resourcePoolConfig(),
@@ -200,6 +204,7 @@ func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_datastore(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: datastoreConfig(),
@@ -259,6 +264,7 @@ func multipleDatastoresConfig() string {
 }
 
 func TestCloneBuilderAcc_fullClone(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: fullCloneConfig(),
@@ -291,6 +297,7 @@ func checkFullClone(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_linkedClone(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: linkedCloneConfig(),
@@ -323,6 +330,7 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_network(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: networkConfig(),
@@ -368,6 +376,7 @@ func checkNetwork(t *testing.T, name string) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_hardware(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: hardwareConfig(),
@@ -457,6 +466,7 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_RAMReservation(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: RAMReservationConfig(),
@@ -490,6 +500,7 @@ func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_sshPassword(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: sshPasswordConfig(),
@@ -525,6 +536,7 @@ func checkDefaultBootOrder(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_sshKey(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: sshKeyConfig(),
@@ -540,6 +552,7 @@ func sshKeyConfig() string {
 }
 
 func TestCloneBuilderAcc_snapshot(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: snapshotConfig(),
@@ -574,6 +587,7 @@ func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_template(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: templateConfig(),
@@ -606,6 +620,7 @@ func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_bootOrder(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: bootOrderConfig(),
@@ -644,6 +659,7 @@ func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_notes(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: notesConfig(),
@@ -678,6 +694,7 @@ func checkNotes(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestCloneBuilderAcc_windows(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	t.Skip("test is too slow")
 	config := windowsConfig()
 	builderT.Test(t, builderT.TestCase{

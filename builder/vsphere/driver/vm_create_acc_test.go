@@ -6,6 +6,7 @@ import (
 )
 
 func TestVMAcc_create(t *testing.T) {
+	t.Skip("Acceptance tests not configured yet.")
 	testCases := []struct {
 		name          string
 		config        *CreateConfig
