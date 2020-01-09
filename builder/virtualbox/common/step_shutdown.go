@@ -27,6 +27,7 @@ type StepShutdown struct {
 	Timeout         time.Duration
 	Delay           time.Duration
 	DisableShutdown bool
+	ACPIShutdown    bool
 }
 
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -35,7 +36,15 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	if !s.DisableShutdown {
+	if s.ACPIShutdown {
+		ui.Say("Shuting down the virtual machine via ACPI power button...")
+		if err := driver.StopViaACPI(vmName); err != nil {
+			err := fmt.Errorf("Error stopping VM: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	} else if !s.DisableShutdown {
 		if s.Command != "" {
 			ui.Say("Gracefully halting virtual machine...")
 			log.Printf("Executing shutdown command: %s", s.Command)

@@ -17,6 +17,7 @@ func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	state := testState(t)
 	step := new(StepShutdown)
 	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -47,6 +48,7 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
 	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -85,6 +87,7 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
 	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -113,6 +116,7 @@ func TestStepShutdown_DisableShutdown(t *testing.T) {
 	state := testState(t)
 	step := new(StepShutdown)
 	step.DisableShutdown = true
+	step.ACPIShutdown = false
 	step.Timeout = 2 * time.Second
 
 	comm := new(packer.MockCommunicator)

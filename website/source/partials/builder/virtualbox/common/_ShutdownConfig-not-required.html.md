@@ -25,3 +25,6 @@
     Packer will wait for a default of 5 minutes until the virtual machine is shutdown.
     The timeout can be changed using `shutdown_timeout` option.
     
+-   `acpi_shutdown` (bool) - If it's set to true, it will shutdown the VM via power button. It could be a good option
+    when keeping the machine state is necessary after shutting it down.
+    

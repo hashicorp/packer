@@ -127,6 +127,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Timeout:         b.config.ShutdownTimeout,
 			Delay:           b.config.PostShutdownDelay,
 			DisableShutdown: b.config.DisableShutdown,
+			ACPIShutdown:    b.config.ACPIShutdown,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
