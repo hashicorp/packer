@@ -25,6 +25,7 @@ type NestedMockConfig struct {
 }
 
 type MockConfig struct {
+	NotSquashed      string `mapstructure:"not_squashed"`
 	NestedMockConfig `mapstructure:",squash"`
 	Nested           NestedMockConfig   `mapstructure:"nested"`
 	NestedSlice      []NestedMockConfig `mapstructure:"nested_slice"`

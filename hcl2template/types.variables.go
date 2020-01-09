@@ -2,26 +2,37 @@ package hcl2template
 
 import (
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/packer/template"
+	"github.com/zclconf/go-cty/cty"
 )
 
-type PackerV1Variables map[string]string
+type PackerV1Variables map[string]cty.Value
 
 // decodeConfig decodes a "variables" section the way packer 1 used to
 func (variables *PackerV1Variables) decodeConfig(block *hcl.Block) hcl.Diagnostics {
-	return gohcl.DecodeBody(block.Body, nil, variables)
-}
+	attrs, diags := block.Body.JustAttributes()
 
-func (variables PackerV1Variables) Variables() map[string]*template.Variable {
-	res := map[string]*template.Variable{}
-
-	for k, v := range variables {
-		res[k] = &template.Variable{
-			Key:     k,
-			Default: v,
-		}
+	if diags.HasErrors() {
+		return diags
 	}
 
-	return res
+	for key, attr := range attrs {
+		if _, found := (*variables)[key]; found {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate variable",
+				Detail:   "Duplicate " + key + " variable found.",
+				Subject:  attr.NameRange.Ptr(),
+				Context:  block.DefRange.Ptr(),
+			})
+			continue
+		}
+		value, moreDiags := attr.Expr.Value(nil)
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			continue
+		}
+		(*variables)[key] = value
+	}
+
+	return diags
 }

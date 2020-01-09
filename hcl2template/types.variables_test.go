@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func TestParse_variables(t *testing.T) {
@@ -15,9 +16,9 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/basic.pkr.hcl"},
 			&PackerConfig{
 				Variables: PackerV1Variables{
-					"image_name": "foo-image-{{user `my_secret`}}",
-					"key":        "value",
-					"my_secret":  "foo",
+					"image_name": cty.StringVal("foo-image-{{user `my_secret`}}"),
+					"key":        cty.StringVal("value"),
+					"my_secret":  cty.StringVal("foo"),
 				},
 			},
 			false, false,

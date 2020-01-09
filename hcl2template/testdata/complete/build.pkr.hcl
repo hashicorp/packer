@@ -6,6 +6,7 @@ build {
     ]
 
     provisioner "shell" {
+        not_squashed = "${var.foo}"
         string   = "string"
         int      = "${41 + 1}"
         int64    = "${42 + 1}"
@@ -45,6 +46,7 @@ build {
     }
 
     provisioner "file" {
+        not_squashed = "${var.foo}"
         string   = "string"
         int      = 42
         int64    = 43

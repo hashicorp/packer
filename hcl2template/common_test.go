@@ -125,6 +125,7 @@ var (
 
 	basicMockProvisioner = &MockProvisioner{
 		Config: MockConfig{
+			NotSquashed:      "value",
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{

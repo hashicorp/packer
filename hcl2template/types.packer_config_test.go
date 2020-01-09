@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 var (
@@ -19,6 +20,9 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete"},
 			&PackerConfig{
+				Variables: PackerV1Variables{
+					"foo": cty.StringVal("value"),
+				},
 				Sources: map[SourceRef]*Source{
 					refVBIsoUbuntu1204: &Source{Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},

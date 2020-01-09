@@ -33,7 +33,7 @@ func (p *Parser) decodePostProcessorGroup(block *hcl.Block) (*PostProcessorBlock
 	return postProcessor, diags
 }
 
-func (p *Parser) StartPostProcessor(pp *PostProcessorBlock) (packer.PostProcessor, hcl.Diagnostics) {
+func (p *Parser) StartPostProcessor(pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)
@@ -45,7 +45,7 @@ func (p *Parser) StartPostProcessor(pp *PostProcessorBlock) (packer.PostProcesso
 		})
 		return nil, diags
 	}
-	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.block, nil, postProcessor)
+	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.block, ectx, postProcessor)
 	diags = append(diags, moreDiags...)
 	err = postProcessor.Configure(flatProvisinerCfg)
 	if err != nil {

@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // PackerConfig represents a loaded packer config
@@ -14,11 +15,11 @@ type PackerConfig struct {
 	Builds Builds
 }
 
-func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		provisioner, moreDiags := p.StartProvisioner(pb, generatedVars)
+		provisioner, moreDiags := p.StartProvisioner(pb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -31,11 +32,11 @@ func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, generatedVars
 	return res, diags
 }
 
-func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, pp := range blocks {
-		postProcessor, moreDiags := p.StartPostProcessor(pp)
+		postProcessor, moreDiags := p.StartPostProcessor(pp, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -53,6 +54,12 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
 
+	ectx := &hcl.EvalContext{
+		Variables: map[string]cty.Value{
+			"var": cty.ObjectVal(cfg.Variables),
+		},
+	}
+
 	for _, build := range cfg.Builds {
 		for _, from := range build.Froms {
 			src, found := cfg.Sources[from]
@@ -64,17 +71,17 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				})
 				continue
 			}
-			builder, moreDiags, generatedVars := p.StartBuilder(src)
+			builder, moreDiags, generatedVars := p.StartBuilder(src, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks, generatedVars)
+			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks, ectx, generatedVars)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := p.CoreBuildPostProcessors(build.PostProcessors)
+			postProcessors, moreDiags := p.CoreBuildPostProcessors(build.PostProcessors, ectx)
 			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
 				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
@@ -89,7 +96,6 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
-				Variables:      cfg.Variables,
 			}
 			res = append(res, pcb)
 		}
