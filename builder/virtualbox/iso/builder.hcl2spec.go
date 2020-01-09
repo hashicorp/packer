@@ -84,10 +84,12 @@ type FlatConfig struct {
 	WinRMUseSSL               *bool             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl"`
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
+	HostPortMin               *int              `mapstructure:"host_port_min" required:"false" cty:"host_port_min"`
+	HostPortMax               *int              `mapstructure:"host_port_max" required:"false" cty:"host_port_max"`
+	SkipNatMapping            *bool             `mapstructure:"skip_nat_mapping" required:"false" cty:"skip_nat_mapping"`
 	SSHHostPortMin            *int              `mapstructure:"ssh_host_port_min" required:"false" cty:"ssh_host_port_min"`
 	SSHHostPortMax            *int              `mapstructure:"ssh_host_port_max" cty:"ssh_host_port_max"`
 	SSHSkipNatMapping         *bool             `mapstructure:"ssh_skip_nat_mapping" required:"false" cty:"ssh_skip_nat_mapping"`
-	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" cty:"ssh_wait_timeout"`
 	CpuCount                  *int              `mapstructure:"cpus" required:"false" cty:"cpus"`
 	MemorySize                *int              `mapstructure:"memory" required:"false" cty:"memory"`
 	Sound                     *string           `mapstructure:"sound" required:"false" cty:"sound"`
@@ -201,10 +203,12 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
+		"host_port_min":                &hcldec.AttrSpec{Name: "host_port_min", Type: cty.Number, Required: false},
+		"host_port_max":                &hcldec.AttrSpec{Name: "host_port_max", Type: cty.Number, Required: false},
+		"skip_nat_mapping":             &hcldec.AttrSpec{Name: "skip_nat_mapping", Type: cty.Bool, Required: false},
 		"ssh_host_port_min":            &hcldec.AttrSpec{Name: "ssh_host_port_min", Type: cty.Number, Required: false},
 		"ssh_host_port_max":            &hcldec.AttrSpec{Name: "ssh_host_port_max", Type: cty.Number, Required: false},
 		"ssh_skip_nat_mapping":         &hcldec.AttrSpec{Name: "ssh_skip_nat_mapping", Type: cty.Bool, Required: false},
-		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"cpus":                         &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"sound":                        &hcldec.AttrSpec{Name: "sound", Type: cty.String, Required: false},
