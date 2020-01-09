@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step adds a NAT port forwarding definition so that SSH is available
+// This step adds a NAT port forwarding definition so that SSH or WinRM is available
 // on the guest machine.
 //
 // Uses:
@@ -21,7 +21,7 @@ import (
 //   vmName string
 //
 // Produces:
-type StepForwardSSH struct {
+type StepPortForwarding struct {
 	CommConfig     *communicator.Config
 	HostPortMin    int
 	HostPortMax    int
@@ -30,19 +30,19 @@ type StepForwardSSH struct {
 	l *net.Listener
 }
 
-func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPortForwarding) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
 	if s.CommConfig.Type == "none" {
 		log.Printf("Not using a communicator, skipping setting up port forwarding...")
-		state.Put("sshHostPort", 0)
+		state.Put("commHostPort", 0)
 		return multistep.ActionContinue
 	}
 
 	guestPort := s.CommConfig.Port()
-	sshHostPort := guestPort
+	commHostPort := guestPort
 	if !s.SkipNatMapping {
 		log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d",
 			s.HostPortMin, s.HostPortMax)
@@ -61,7 +61,7 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 		s.l.Listener.Close() // free port, but don't unlock lock file
-		sshHostPort = s.l.Port
+		commHostPort = s.l.Port
 
 		// Make sure to configure the network interface to NAT
 		command := []string{
@@ -77,11 +77,11 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 		}
 
 		// Create a forwarded port mapping to the VM
-		ui.Say(fmt.Sprintf("Creating forwarded port mapping for communicator (SSH, WinRM, etc) (host port %d)", sshHostPort))
+		ui.Say(fmt.Sprintf("Creating forwarded port mapping for communicator (SSH, WinRM, etc) (host port %d)", commHostPort))
 		command = []string{
 			"modifyvm", vmName,
 			"--natpf1",
-			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", sshHostPort, guestPort),
+			fmt.Sprintf("packercomm,tcp,127.0.0.1,%d,,%d", commHostPort, guestPort),
 		}
 		retried := false
 	retry:
@@ -110,12 +110,12 @@ func (s *StepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	}
 
 	// Save the port we're using so that future steps can use it
-	state.Put("sshHostPort", sshHostPort)
+	state.Put("commHostPort", commHostPort)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepForwardSSH) Cleanup(state multistep.StateBag) {
+func (s *StepPortForwarding) Cleanup(state multistep.StateBag) {
 	if s.l != nil {
 		err := s.l.Close()
 		if err != nil {

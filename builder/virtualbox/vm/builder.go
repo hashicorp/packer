@@ -82,11 +82,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			VRDPPortMax:     b.config.VRDPPortMax,
 		},
 		new(vboxcommon.StepAttachFloppy),
-		&vboxcommon.StepForwardSSH{
-			CommConfig:     &b.config.SSHConfig.Comm,
-			HostPortMin:    b.config.SSHHostPortMin,
-			HostPortMax:    b.config.SSHHostPortMax,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+		&vboxcommon.StepPortForwarding{
+			CommConfig:     &b.config.CommConfig.Comm,
+			HostPortMin:    b.config.HostPortMin,
+			HostPortMax:    b.config.HostPortMax,
+			SkipNatMapping: b.config.SkipNatMapping,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
@@ -104,11 +104,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.SSHConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
-			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
-			SSHPort:   vboxcommon.SSHPort,
-			WinRMPort: vboxcommon.SSHPort,
+			Config:    &b.config.CommConfig.Comm,
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
+			SSHPort:   vboxcommon.CommPort,
+			WinRMPort: vboxcommon.CommPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: *b.config.VBoxVersionFile,
@@ -120,7 +120,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		new(common.StepProvision),
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.SSHConfig.Comm,
+			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
 			Command:         b.config.ShutdownCommand,
@@ -141,7 +141,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,
 			ExportOpts:     b.config.ExportOpts,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+			SkipNatMapping: b.config.SkipNatMapping,
 			SkipExport:     b.config.SkipExport,
 		},
 	}
