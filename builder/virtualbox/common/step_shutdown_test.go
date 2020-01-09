@@ -141,3 +141,32 @@ func TestStepShutdown_DisableShutdown(t *testing.T) {
 		t.Fatal("should NOT have error")
 	}
 }
+
+func TestStepShutdown_ACPIShutdown(t *testing.T) {
+	state := testState(t)
+	step := new(StepShutdown)
+	step.ACPIShutdown = true
+	step.Timeout = 2 * time.Second
+
+	comm := new(packer.MockCommunicator)
+	state.Put("communicator", comm)
+	state.Put("vmName", "foo")
+
+	driver := state.Get("driver").(*DriverMock)
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+	if _, ok := state.GetOk("error"); ok {
+		t.Fatal("should NOT have error")
+	}
+
+	// Test that Stop was just called
+	if driver.StopViaACPIName != "foo" {
+		t.Fatal("should call stop via ACPI")
+	}
+	if comm.StartCalled {
+		t.Fatal("comm start should not be called")
+	}
+}
