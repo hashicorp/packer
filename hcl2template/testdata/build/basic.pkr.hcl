@@ -8,11 +8,11 @@ build {
 
     provisioner "shell" {
         string   = "string"
-        int      = 42
-        int64    = 43
-        bool     = true
+        int      = "${41 + 1}"
+        int64    = "${42 + 1}"
+        bool     = "true"
         trilean  = true
-        duration = "10s"
+        duration = "${9 + 1}s"
         map_string_string {
             a = "b"
             c = "d"
