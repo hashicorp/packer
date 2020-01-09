@@ -97,6 +97,13 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 	return res, diags
 }
 
+// Parse will parse HCL file(s) in path. Path can be a folder or a file.
+//
+// Parse will first parse variables and then the rest; so that interpolation
+// can happen.
+//
+// Parse then return a slice of packer.Builds; which are what packer core uses
+// to run builds.
 func (p *Parser) Parse(path string) ([]packer.Build, hcl.Diagnostics) {
 	cfg, diags := p.parse(path)
 	if diags.HasErrors() {
