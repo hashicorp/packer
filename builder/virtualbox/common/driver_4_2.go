@@ -161,6 +161,14 @@ func (d *VBox42Driver) Stop(name string) error {
 	return nil
 }
 
+func (d *VBox42Driver) StopViaACPI(name string) error {
+	if err := d.VBoxManage("controlvm", name, "acpipowerbutton"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *VBox42Driver) SuppressMessages() error {
 	extraData := map[string]string{
 		"GUI/RegistrationData": "triesLeft=0",
