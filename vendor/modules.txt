@@ -341,6 +341,7 @@ github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
 # github.com/hashicorp/hcl/v2 v2.0.0
 github.com/hashicorp/hcl/v2
+github.com/hashicorp/hcl/v2/ext/typeexpr
 github.com/hashicorp/hcl/v2/gohcl
 github.com/hashicorp/hcl/v2/hcldec
 github.com/hashicorp/hcl/v2/hclparse
