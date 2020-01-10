@@ -6,7 +6,7 @@ build {
     ]
 
     provisioner "shell" {
-        not_squashed = "${var.foo}"
+        not_squashed = var.foo
         string   = "string"
         int      = "${41 + 1}"
         int64    = "${42 + 1}"
@@ -17,11 +17,7 @@ build {
             a = "b"
             c = "d"
         }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
+        slice_string = var.availability_zone_names
 
         nested {
             string   = "string"
@@ -34,11 +30,7 @@ build {
                 a = "b"
                 c = "d"
             }
-            slice_string = [
-                "a",
-                "b",
-                "c",
-            ]
+            slice_string = var.availability_zone_names
         }
 
         nested_slice {

@@ -62,7 +62,14 @@ func testParse(t *testing.T, tests []parseTest) {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
 			if diff := cmp.Diff(tt.parseWantCfg, gotCfg,
-				cmpopts.IgnoreUnexported(cty.Value{}, Source{}, ProvisionerBlock{}, PostProcessorBlock{}),
+				cmpopts.IgnoreUnexported(
+					cty.Value{},
+					cty.Type{},
+					InputVariable{},
+					Source{},
+					ProvisionerBlock{},
+					PostProcessorBlock{},
+				),
 				cmpopts.IgnoreTypes(HCL2Ref{}),
 				cmpopts.IgnoreTypes([]hcl.Range{}),
 				cmpopts.IgnoreTypes(hcl.Range{}),
@@ -80,7 +87,10 @@ func testParse(t *testing.T, tests []parseTest) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
 			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds,
-				cmpopts.IgnoreUnexported(packer.CoreBuild{},
+				cmpopts.IgnoreUnexported(
+					cty.Value{},
+					cty.Type{},
+					packer.CoreBuild{},
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
 				),

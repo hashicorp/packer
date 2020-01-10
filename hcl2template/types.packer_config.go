@@ -10,7 +10,7 @@ import (
 type PackerConfig struct {
 	Sources map[SourceRef]*Source
 
-	Variables PackerV1Variables
+	InputVariables InputVariables
 
 	Builds Builds
 }
@@ -56,7 +56,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 
 	ectx := &hcl.EvalContext{
 		Variables: map[string]cty.Value{
-			"var": cty.ObjectVal(cfg.Variables),
+			"var": cty.ObjectVal(cfg.InputVariables.Values()),
 		},
 	}
 

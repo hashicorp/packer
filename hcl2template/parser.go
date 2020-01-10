@@ -11,6 +11,7 @@ import (
 const (
 	sourceLabel       = "source"
 	variablesLabel    = "variables"
+	variableLabel     = "variable"
 	buildLabel        = "build"
 	communicatorLabel = "communicator"
 )
@@ -19,6 +20,7 @@ var configSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
 		{Type: sourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: variablesLabel},
+		{Type: variableLabel, LabelNames: []string{"name"}},
 		{Type: buildLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
@@ -82,6 +84,17 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case variableLabel:
+			moreDiags := cfg.InputVariables.decodeConfig(block)
+			diags = append(diags, moreDiags...)
+		case variablesLabel:
+			moreDiags := cfg.InputVariables.decodeConfigMap(block)
+			diags = append(diags, moreDiags...)
+		}
+	}
+
+	for _, block := range content.Blocks {
+		switch block.Type {
 		case sourceLabel:
 			source, moreDiags := p.decodeSource(block)
 			diags = append(diags, moreDiags...)
@@ -107,17 +120,6 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				cfg.Sources = map[SourceRef]*Source{}
 			}
 			cfg.Sources[ref] = source
-
-		case variablesLabel:
-			if cfg.Variables == nil {
-				cfg.Variables = PackerV1Variables{}
-			}
-
-			moreDiags := cfg.Variables.decodeConfig(block)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			diags = append(diags, moreDiags...)
 
 		case buildLabel:
 			build, moreDiags := p.decodeBuildConfig(block)
