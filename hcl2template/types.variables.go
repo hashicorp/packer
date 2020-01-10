@@ -3,12 +3,14 @@ package hcl2template
 import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/typeexpr"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/zclconf/go-cty/cty"
 )
 
 type Variable struct {
-	Default cty.Value
-	Type    cty.Type
+	Default     cty.Value
+	Type        cty.Type
+	Description string
 
 	block *hcl.Block
 }
@@ -69,15 +71,24 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 		(*variables) = Variables{}
 	}
 
-	attrs, diags := block.Body.JustAttributes()
+	var b struct {
+		Description string   `hcl:"description,optional"`
+		Rest        hcl.Body `hcl:",remain"`
+	}
+	diags := gohcl.DecodeBody(block.Body, nil, &b)
 
 	if diags.HasErrors() {
 		return diags
 	}
 
 	res := Variable{
-		block: block,
+		Description: b.Description,
+		block:       block,
 	}
+
+	attrs, moreDiags := b.Rest.JustAttributes()
+	diags = append(diags, moreDiags...)
+
 	if def, ok := attrs["default"]; ok {
 		defaultValue, moreDiags := def.Expr.Value(ectx)
 		diags = append(diags, moreDiags...)

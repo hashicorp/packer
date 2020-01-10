@@ -15,12 +15,14 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/basic.pkr.hcl"},
 			&PackerConfig{
 				InputVariables: Variables{
-					"image_name":              Variable{},
-					"key":                     Variable{},
-					"my_secret":               Variable{},
-					"image_id":                Variable{},
-					"port":                    Variable{},
-					"availability_zone_names": Variable{},
+					"image_name": Variable{},
+					"key":        Variable{},
+					"my_secret":  Variable{},
+					"image_id":   Variable{},
+					"port":       Variable{},
+					"availability_zone_names": Variable{
+						Description: "Describing is awesome ;D\n",
+					},
 				},
 				LocalVariables: Variables{
 					"owner":        Variable{},

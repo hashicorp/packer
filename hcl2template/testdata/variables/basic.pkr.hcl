@@ -18,6 +18,9 @@ variable "port" {
 variable "availability_zone_names" {
   type    = list(string)
   default = ["us-west-1a"]
+  description = <<POTATO
+Describing is awesome ;D
+POTATO
 }
 
 locals {
