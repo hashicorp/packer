@@ -19,11 +19,11 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete"},
 			&PackerConfig{
-				InputVariables: InputVariables{
-					"foo":                     InputVariable{},
-					"image_id":                InputVariable{},
-					"port":                    InputVariable{},
-					"availability_zone_names": InputVariable{},
+				InputVariables: Variables{
+					"foo":                     Variable{},
+					"image_id":                Variable{},
+					"port":                    Variable{},
+					"availability_zone_names": Variable{},
 				},
 				Sources: map[SourceRef]*Source{
 					refVBIsoUbuntu1204: &Source{Type: "virtualbox-iso", Name: "ubuntu-1204"},

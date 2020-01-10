@@ -6,20 +6,20 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-type InputVariable struct {
+type Variable struct {
 	Default cty.Value
 	Type    cty.Type
 
 	block *hcl.Block
 }
 
-func (v *InputVariable) Value() cty.Value {
+func (v *Variable) Value() cty.Value {
 	return v.Default
 }
 
-type InputVariables map[string]InputVariable
+type Variables map[string]Variable
 
-func (variables InputVariables) Values() map[string]cty.Value {
+func (variables Variables) Values() map[string]cty.Value {
 	res := map[string]cty.Value{}
 	for k, v := range variables {
 		res[k] = v.Value()
@@ -28,9 +28,9 @@ func (variables InputVariables) Values() map[string]cty.Value {
 }
 
 // decodeConfig decodes a "variables" section the way packer 1 used to
-func (variables *InputVariables) decodeConfigMap(block *hcl.Block) hcl.Diagnostics {
+func (variables *Variables) decodeConfigMap(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
 	if (*variables) == nil {
-		(*variables) = InputVariables{}
+		(*variables) = Variables{}
 	}
 	attrs, diags := block.Body.JustAttributes()
 
@@ -49,12 +49,12 @@ func (variables *InputVariables) decodeConfigMap(block *hcl.Block) hcl.Diagnosti
 			})
 			continue
 		}
-		value, moreDiags := attr.Expr.Value(nil)
+		value, moreDiags := attr.Expr.Value(ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
 		}
-		(*variables)[key] = InputVariable{
+		(*variables)[key] = Variable{
 			Default: value,
 			Type:    value.Type(),
 		}
@@ -64,9 +64,9 @@ func (variables *InputVariables) decodeConfigMap(block *hcl.Block) hcl.Diagnosti
 }
 
 // decodeConfig decodes a "variables" section the way packer 1 used to
-func (variables *InputVariables) decodeConfig(block *hcl.Block) hcl.Diagnostics {
+func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
 	if (*variables) == nil {
-		(*variables) = InputVariables{}
+		(*variables) = Variables{}
 	}
 
 	attrs, diags := block.Body.JustAttributes()
@@ -75,11 +75,11 @@ func (variables *InputVariables) decodeConfig(block *hcl.Block) hcl.Diagnostics 
 		return diags
 	}
 
-	res := InputVariable{
+	res := Variable{
 		block: block,
 	}
 	if def, ok := attrs["default"]; ok {
-		defaultValue, moreDiags := def.Expr.Value(nil)
+		defaultValue, moreDiags := def.Expr.Value(ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			return diags

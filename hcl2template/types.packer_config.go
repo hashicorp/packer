@@ -10,9 +10,20 @@ import (
 type PackerConfig struct {
 	Sources map[SourceRef]*Source
 
-	InputVariables InputVariables
+	InputVariables Variables
+	LocalVariables Variables
 
 	Builds Builds
+}
+
+func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
+	ectx := &hcl.EvalContext{
+		Variables: map[string]cty.Value{
+			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
+			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
+		},
+	}
+	return ectx
 }
 
 func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
@@ -54,12 +65,6 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
 
-	ectx := &hcl.EvalContext{
-		Variables: map[string]cty.Value{
-			"var": cty.ObjectVal(cfg.InputVariables.Values()),
-		},
-	}
-
 	for _, build := range cfg.Builds {
 		for _, from := range build.Froms {
 			src, found := cfg.Sources[from]
@@ -71,17 +76,17 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				})
 				continue
 			}
-			builder, moreDiags, generatedVars := p.StartBuilder(src, ectx)
+			builder, moreDiags, generatedVars := p.StartBuilder(src, cfg.EvalContext())
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks, ectx, generatedVars)
+			provisioners, moreDiags := p.CoreBuildProvisioners(build.ProvisionerBlocks, cfg.EvalContext(), generatedVars)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := p.CoreBuildPostProcessors(build.PostProcessors, ectx)
+			postProcessors, moreDiags := p.CoreBuildPostProcessors(build.PostProcessors, cfg.EvalContext())
 			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
 				pps = [][]packer.CoreBuildPostProcessor{postProcessors}

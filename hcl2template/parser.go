@@ -12,6 +12,7 @@ const (
 	sourceLabel       = "source"
 	variablesLabel    = "variables"
 	variableLabel     = "variable"
+	localsLabel       = "locals"
 	buildLabel        = "build"
 	communicatorLabel = "communicator"
 )
@@ -21,6 +22,7 @@ var configSchema = &hcl.BodySchema{
 		{Type: sourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: variablesLabel},
 		{Type: variableLabel, LabelNames: []string{"name"}},
+		{Type: localsLabel},
 		{Type: buildLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
@@ -62,21 +64,19 @@ func (p *Parser) parse(filename string) (*PackerConfig, hcl.Diagnostics) {
 
 	cfg := &PackerConfig{}
 	for _, file := range files {
-		moreDiags := p.parseFile(file, cfg)
-		diags = append(diags, moreDiags...)
+		diags = append(diags, p.parseInputVariables(file, cfg)...)
+	}
+	for _, file := range files {
+		diags = append(diags, p.parseLocalVariables(file, cfg)...)
+	}
+	for _, file := range files {
+		diags = append(diags, p.parseConfig(file, cfg)...)
 	}
 
 	return cfg, diags
 }
 
-// parseFile filename content into cfg.
-//
-// parseFile may be called multiple times with the same cfg on a different file.
-//
-// parseFile returns as complete a config as we can manage, even if there are
-// errors, since a partial result can be useful for careful analysis by
-// development tools such as text editor extensions.
-func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) parseInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -85,13 +85,39 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case variableLabel:
-			moreDiags := cfg.InputVariables.decodeConfig(block)
+			moreDiags := cfg.InputVariables.decodeConfig(block, nil)
 			diags = append(diags, moreDiags...)
 		case variablesLabel:
-			moreDiags := cfg.InputVariables.decodeConfigMap(block)
+			moreDiags := cfg.InputVariables.decodeConfigMap(block, nil)
 			diags = append(diags, moreDiags...)
 		}
 	}
+
+	return diags
+}
+
+func (p *Parser) parseLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case localsLabel:
+			moreDiags := cfg.LocalVariables.decodeConfigMap(block, cfg.EvalContext())
+			diags = append(diags, moreDiags...)
+		}
+	}
+
+	return diags
+}
+
+func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
 
 	for _, block := range content.Blocks {
 		switch block.Type {

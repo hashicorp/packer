@@ -65,7 +65,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				cmpopts.IgnoreUnexported(
 					cty.Value{},
 					cty.Type{},
-					InputVariable{},
+					Variable{},
 					Source{},
 					ProvisionerBlock{},
 					PostProcessorBlock{},
