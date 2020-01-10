@@ -73,7 +73,7 @@ func (p *Parser) ParseHCLFile(filename string) (*hcl.File, hcl.Diagnostics) {
 			{
 				Severity: hcl.DiagError,
 				Summary:  "Failed to read file",
-				Detail:   fmt.Sprintf("The configuration file %q could not be read. %v", filename, err),
+				Detail:   fmt.Sprintf("The configuration file %q could not be read.", filename),
 			},
 		}
 	}
