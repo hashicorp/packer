@@ -23,6 +23,14 @@ Describing is awesome ;D
 POTATO
 }
 
+variable "super_secret_password" {
+  type     = string
+  sensible = true
+description = <<IMSENSIBLE
+Handle with care plz
+IMSENSIBLE
+}
+
 locals {
   service_name = "forum"
   owner        = "Community Team"

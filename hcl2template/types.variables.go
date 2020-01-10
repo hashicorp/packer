@@ -11,6 +11,7 @@ type Variable struct {
 	Default     cty.Value
 	Type        cty.Type
 	Description string
+	Sensible    bool
 
 	block *hcl.Block
 }
@@ -73,6 +74,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 
 	var b struct {
 		Description string   `hcl:"description,optional"`
+		Sensible    bool     `hcl:"sensible,optional"`
 		Rest        hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
@@ -83,6 +85,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 
 	res := Variable{
 		Description: b.Description,
+		Sensible:    b.Sensible,
 		block:       block,
 	}
 

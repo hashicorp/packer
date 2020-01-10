@@ -23,6 +23,10 @@ func TestParse_variables(t *testing.T) {
 					"availability_zone_names": Variable{
 						Description: "Describing is awesome ;D\n",
 					},
+					"super_secret_password": Variable{
+						Sensible:    true,
+						Description: "Handle with care plz\n",
+					},
 				},
 				LocalVariables: Variables{
 					"owner":        Variable{},
