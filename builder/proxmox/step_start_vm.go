@@ -18,7 +18,7 @@ type stepStartVM struct{}
 
 func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(proxmox.PveClient)
 	c := state.Get("config").(*Config)
 
 	agent := 1
