@@ -12,25 +12,23 @@ import (
 )
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare()
 	if errs != nil {
 		return warnings, nil, errs
 	}
-	b.config = c
 
 	return warnings, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
-	state.Put("comm", &b.config.Comm)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 

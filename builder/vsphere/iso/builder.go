@@ -12,7 +12,7 @@ import (
 )
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
@@ -29,7 +29,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
-	state.Put("comm", &b.config.Comm)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
