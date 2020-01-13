@@ -6,7 +6,8 @@ import (
 )
 
 func TestCloneConfig_MinimalConfig(t *testing.T) {
-	_, warns, errs := NewConfig(minimalConfig())
+	c := new(Config)
+	warns, errs := c.Prepare(minimalConfig())
 	testConfigOk(t, warns, errs)
 }
 
@@ -15,7 +16,8 @@ func TestCloneConfig_MandatoryParameters(t *testing.T) {
 	for _, param := range params {
 		raw := minimalConfig()
 		raw[param] = ""
-		_, warns, err := NewConfig(raw)
+		c := new(Config)
+		warns, err := c.Prepare(raw)
 		testConfigErr(t, param, warns, err)
 	}
 }
@@ -23,7 +25,8 @@ func TestCloneConfig_MandatoryParameters(t *testing.T) {
 func TestCloneConfig_Timeout(t *testing.T) {
 	raw := minimalConfig()
 	raw["shutdown_timeout"] = "3m"
-	conf, warns, err := NewConfig(raw)
+	conf := new(Config)
+	warns, err := conf.Prepare(raw)
 	testConfigOk(t, warns, err)
 	if conf.ShutdownConfig.Timeout != 3*time.Minute {
 		t.Fatalf("shutdown_timeout sould be equal 3 minutes, got %v", conf.ShutdownConfig.Timeout)
@@ -34,7 +37,8 @@ func TestCloneConfig_RAMReservation(t *testing.T) {
 	raw := minimalConfig()
 	raw["RAM_reservation"] = 1000
 	raw["RAM_reserve_all"] = true
-	_, warns, err := NewConfig(raw)
+	c := new(Config)
+	warns, err := c.Prepare(raw)
 	testConfigErr(t, "RAM_reservation", warns, err)
 }
 
