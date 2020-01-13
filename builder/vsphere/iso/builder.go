@@ -19,11 +19,10 @@ type Builder struct {
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	c, warnings, errs := NewConfig(raws...)
+	warnings, errs := b.config.Prepare()
 	if errs != nil {
 		return warnings, nil, errs
 	}
-	b.config = c
 
 	return warnings, nil, nil
 }
