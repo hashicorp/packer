@@ -12,7 +12,7 @@ func TestParse_source(t *testing.T) {
 	tests := []parseTest{
 		{"two basic sources",
 			defaultParser,
-			parseTestArgs{"testdata/sources/basic.pkr.hcl"},
+			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
 			&PackerConfig{
 				Sources: map[SourceRef]*Source{
 					SourceRef{
@@ -30,7 +30,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"untyped source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/untyped.pkr.hcl"},
+			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil},
 			&PackerConfig{},
 			true, true,
 			nil,
@@ -38,7 +38,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"unnamed source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/unnamed.pkr.hcl"},
+			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil},
 			&PackerConfig{},
 			true, true,
 			nil,
@@ -46,7 +46,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"inexistent source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent.pkr.hcl"},
+			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil},
 			&PackerConfig{},
 			true, true,
 			nil,
@@ -54,7 +54,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"duplicate source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/duplicate.pkr.hcl"},
+			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
 			&PackerConfig{
 				Sources: map[SourceRef]*Source{
 					SourceRef{

@@ -33,6 +33,7 @@ func getBasicParser() *Parser {
 
 type parseTestArgs struct {
 	filename string
+	vars     map[string]string
 }
 
 type parseTest struct {
@@ -54,7 +55,7 @@ func testParse(t *testing.T, tests []parseTest) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCfg, gotDiags := tt.parser.parse(tt.args.filename)
+			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected diagnostics. %s", gotDiags)
 			}

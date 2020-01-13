@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -39,44 +40,82 @@ type Parser struct {
 }
 
 const (
-	hcl2FileExt     = ".pkr.hcl"
-	hcl2JsonFileExt = ".pkr.json"
+	hcl2FileExt        = ".pkr.hcl"
+	hcl2JsonFileExt    = ".pkr.json"
+	hcl2VarFileExt     = ".auto.pkrvars.hcl"
+	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-func (p *Parser) parse(filename string) (*PackerConfig, hcl.Diagnostics) {
-
-	hclFiles, jsonFiles, diags := GetHCL2Files(filename)
+func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
-	for _, filename := range hclFiles {
-		f, moreDiags := p.ParseHCLFile(filename)
-		diags = append(diags, moreDiags...)
-		files = append(files, f)
-	}
-	for _, filename := range jsonFiles {
-		f, moreDiags := p.ParseJSONFile(filename)
-		diags = append(diags, moreDiags...)
-		files = append(files, f)
-	}
-	if diags.HasErrors() {
-		return nil, diags
+	var diags hcl.Diagnostics
+
+	// parse config files
+	{
+		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
+		if len(hclFiles)+len(jsonFiles) == 0 {
+			diags = append(moreDiags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Could not find any config file in " + filename,
+				Detail: "A config file must be suffixed with `.pkr.hcl` or " +
+					"`.pkr.json`. A folder can be referenced.",
+			})
+		}
+		for _, filename := range hclFiles {
+			f, moreDiags := p.ParseHCLFile(filename)
+			diags = append(diags, moreDiags...)
+			files = append(files, f)
+		}
+		for _, filename := range jsonFiles {
+			f, moreDiags := p.ParseJSONFile(filename)
+			diags = append(diags, moreDiags...)
+			files = append(files, f)
+		}
+		if diags.HasErrors() {
+			return nil, diags
+		}
 	}
 
+	// decode variable blocks
 	cfg := &PackerConfig{}
-	for _, file := range files {
-		diags = append(diags, p.parseInputVariables(file, cfg)...)
+	{
+		for _, file := range files {
+			diags = append(diags, p.decodeInputVariables(file, cfg)...)
+		}
+		for _, file := range files {
+			diags = append(diags, p.decodeLocalVariables(file, cfg)...)
+		}
 	}
-	for _, file := range files {
-		diags = append(diags, p.parseLocalVariables(file, cfg)...)
+
+	// parse var files
+	{
+		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
+		diags = append(diags, moreDiags...)
+		var varFiles []*hcl.File
+		for _, filename := range hclVarFiles {
+			f, moreDiags := p.ParseHCLFile(filename)
+			diags = append(diags, moreDiags...)
+			varFiles = append(varFiles, f)
+		}
+		for _, filename := range jsonVarFiles {
+			f, moreDiags := p.ParseJSONFile(filename)
+			diags = append(diags, moreDiags...)
+			varFiles = append(varFiles, f)
+		}
+
+		diags = append(diags, cfg.InputVariables.collectVariableValues(os.Environ(), varFiles, vars)...)
 	}
+
+	// decode the actual content
 	for _, file := range files {
-		diags = append(diags, p.parseConfig(file, cfg)...)
+		diags = append(diags, p.decodeConfig(file, cfg)...)
 	}
 
 	return cfg, diags
 }
 
-func (p *Parser) parseInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -96,7 +135,7 @@ func (p *Parser) parseInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnos
 	return diags
 }
 
-func (p *Parser) parseLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -113,7 +152,7 @@ func (p *Parser) parseLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnos
 	return diags
 }
 
-func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)

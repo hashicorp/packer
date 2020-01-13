@@ -104,7 +104,7 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
 	}
 
-	builds, diags := parser.Parse(path)
+	builds, diags := parser.Parse(path, c.flagVars)
 	{
 		// write HCL errors/diagnostics if any.
 		b := bytes.NewBuffer(nil)

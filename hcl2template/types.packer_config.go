@@ -115,8 +115,8 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 //
 // Parse then return a slice of packer.Builds; which are what packer core uses
 // to run builds.
-func (p *Parser) Parse(path string) ([]packer.Build, hcl.Diagnostics) {
-	cfg, diags := p.parse(path)
+func (p *Parser) Parse(path string, vars map[string]string) ([]packer.Build, hcl.Diagnostics) {
+	cfg, diags := p.parse(path, vars)
 	if diags.HasErrors() {
 		return nil, diags
 	}

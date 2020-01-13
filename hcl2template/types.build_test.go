@@ -12,7 +12,7 @@ func TestParse_build(t *testing.T) {
 	tests := []parseTest{
 		{"basic build no src",
 			defaultParser,
-			parseTestArgs{"testdata/build/basic.pkr.hcl"},
+			parseTestArgs{"testdata/build/basic.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: Builds{
 					&BuildBlock{
@@ -45,7 +45,7 @@ func TestParse_build(t *testing.T) {
 		},
 		{"untyped provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_untyped.pkr.hcl"},
+			parseTestArgs{"testdata/build/provisioner_untyped.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: nil,
 			},
@@ -55,7 +55,7 @@ func TestParse_build(t *testing.T) {
 		},
 		{"inexistent provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl"},
+			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: nil,
 			},
@@ -65,7 +65,7 @@ func TestParse_build(t *testing.T) {
 		},
 		{"untyped post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl"},
+			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: nil,
 			},
@@ -75,7 +75,7 @@ func TestParse_build(t *testing.T) {
 		},
 		{"inexistent post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl"},
+			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: nil,
 			},
@@ -85,7 +85,7 @@ func TestParse_build(t *testing.T) {
 		},
 		{"invalid source",
 			defaultParser,
-			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl"},
+			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl", nil},
 			&PackerConfig{
 				Builds: nil,
 			},

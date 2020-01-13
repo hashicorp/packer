@@ -17,13 +17,13 @@ func TestParser_complete(t *testing.T) {
 	tests := []parseTest{
 		{"working build",
 			defaultParser,
-			parseTestArgs{"testdata/complete"},
+			parseTestArgs{"testdata/complete", nil},
 			&PackerConfig{
 				InputVariables: Variables{
-					"foo":                     Variable{},
-					"image_id":                Variable{},
-					"port":                    Variable{},
-					"availability_zone_names": Variable{},
+					"foo":                     &Variable{},
+					"image_id":                &Variable{},
+					"port":                    &Variable{},
+					"availability_zone_names": &Variable{},
 				},
 				Sources: map[SourceRef]*Source{
 					refVBIsoUbuntu1204: &Source{Type: "virtualbox-iso", Name: "ubuntu-1204"},
@@ -61,7 +61,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{"dir with no config files",
 			defaultParser,
-			parseTestArgs{"testdata/empty"},
+			parseTestArgs{"testdata/empty", nil},
 			nil,
 			true, true,
 			nil,
@@ -69,14 +69,14 @@ func TestParser_complete(t *testing.T) {
 		},
 		{name: "inexistent dir",
 			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/inexistent"},
+			args:                   parseTestArgs{"testdata/inexistent", nil},
 			parseWantCfg:           nil,
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
 		},
 		{name: "folder named build.pkr.hcl with an unknown src",
 			parser: defaultParser,
-			args:   parseTestArgs{"testdata/build.pkr.hcl"},
+			args:   parseTestArgs{"testdata/build.pkr.hcl", nil},
 			parseWantCfg: &PackerConfig{
 				Builds: Builds{
 					&BuildBlock{
@@ -98,7 +98,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{name: "unknown block type",
 			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/unknown"},
+			args:                   parseTestArgs{"testdata/unknown", nil},
 			parseWantCfg:           &PackerConfig{},
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
