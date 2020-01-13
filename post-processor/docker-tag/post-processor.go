@@ -68,17 +68,26 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	importRepo := p.config.Repository
 	var lastTaggedRepo = importRepo
-	for _, tag := range p.config.Tag {
-		local := importRepo + ":" + tag
-		ui.Message("Tagging image: " + artifact.Id())
-		ui.Message("Repository: " + local)
+	if len(p.config.Tag) > 0 {
+		for _, tag := range p.config.Tag {
+			local := importRepo + ":" + tag
+			ui.Message("Tagging image: " + artifact.Id())
+			ui.Message("Repository: " + local)
 
-		err := driver.TagImage(artifact.Id(), local, p.config.Force)
+			err := driver.TagImage(artifact.Id(), local, p.config.Force)
+			if err != nil {
+				return nil, false, true, err
+			}
+
+			lastTaggedRepo = local
+		}
+	} else {
+		ui.Message("Tagging image: " + artifact.Id())
+		ui.Message("Repository: " + importRepo)
+		err := driver.TagImage(artifact.Id(), importRepo, p.config.Force)
 		if err != nil {
 			return nil, false, true, err
 		}
-
-		lastTaggedRepo = local
 	}
 
 	// Build the artifact
