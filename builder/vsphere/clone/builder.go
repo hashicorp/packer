@@ -19,12 +19,12 @@ type Builder struct {
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	warnings, errs := b.config.Prepare()
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, nil, errs
+		return nil, warnings, errs
 	}
 
-	return warnings, nil, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

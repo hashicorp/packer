@@ -74,8 +74,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
 
 	if len(errs.Errors) > 0 {
-		return nil, errs
+		return warnings, errs
 	}
 
-	return nil, nil
+	return warnings, nil
 }
