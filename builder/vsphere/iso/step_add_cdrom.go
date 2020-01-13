@@ -47,7 +47,7 @@ func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 	}
 
-	ui.Say("Mount ISO images...")
+	ui.Say("Mounting ISO images...")
 	if len(s.Config.ISOPaths) > 0 {
 		for _, path := range s.Config.ISOPaths {
 			if err := vm.AddCdrom(s.Config.CdromType, path); err != nil {

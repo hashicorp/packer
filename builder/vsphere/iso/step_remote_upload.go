@@ -34,7 +34,7 @@ func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
 
 		if exists := ds.FileExists(remotePath); exists == true {
-			ui.Say("File already upload")
+			ui.Say("File already uploaded; continuing")
 			state.Put("iso_remote_path", fullRemotePath)
 			return multistep.ActionContinue
 		}
