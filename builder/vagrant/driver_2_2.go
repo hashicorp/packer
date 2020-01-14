@@ -224,6 +224,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 					log.Printf("[vagrant driver] stderr: %s", line)
 				}
 				stderrString += line
+				break
 			default:
 				line, _ := stdout.ReadString('\n')
 				if line != "" {
