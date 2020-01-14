@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -68,6 +67,30 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+		{"invalid default type",
+			defaultParser,
+			parseTestArgs{"testdata/variables/invalid_default.pkr.hcl", nil},
+			&PackerConfig{
+				InputVariables: Variables{
+					"broken_type": &Variable{},
+				},
+			},
+			true, true,
+			[]packer.Build{},
+			false,
+		},
+		{"invalid default type",
+			defaultParser,
+			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
+			&PackerConfig{
+				InputVariables: Variables{
+					"broken_type": &Variable{},
+				},
+			},
+			true, false,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }
@@ -82,7 +105,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		name          string
 		variables     Variables
 		args          args
-		want          hcl.Diagnostics
+		wantDiags     bool
 		wantVariables Variables
 		wantValues    map[string]cty.Value
 	}{
@@ -101,7 +124,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			want: nil,
+			wantDiags: false,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					CmdValue:     cty.StringVal("cmd_value"),
@@ -132,7 +155,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			want: nil,
+			wantDiags: false,
 			wantVariables: Variables{
 				"used_strings": &Variable{
 					Type:         cty.List(cty.String),
@@ -146,6 +169,134 @@ func TestVariables_collectVariableValues(t *testing.T) {
 				"used_strings": stringListVal("cmd_value_1"),
 			},
 		},
+
+		{name: "invalid env var",
+			variables: Variables{"used_string": &Variable{DefaultValue: cty.StringVal("default_value")}},
+			args: args{
+				env: []string{`PKR_VAR_used_string`},
+			},
+
+			// output
+			wantDiags: false,
+			wantVariables: Variables{
+				"used_string": &Variable{
+					DefaultValue: cty.StringVal("default_value"),
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"used_string": cty.StringVal("default_value"),
+			},
+		},
+
+		{name: "undefined but set value",
+			variables: Variables{},
+			args: args{
+				env:      []string{`PKR_VAR_unused_string=value`},
+				hclFiles: []string{`unused_string="value"`},
+			},
+
+			// output
+			wantDiags:     false,
+			wantVariables: Variables{},
+			wantValues:    map[string]cty.Value{},
+		},
+
+		{name: "undefined but set value - args",
+			variables: Variables{},
+			args: args{
+				argv: map[string]string{
+					"unused_string": "value",
+				},
+			},
+
+			// output
+			wantDiags:     true,
+			wantVariables: Variables{},
+			wantValues:    map[string]cty.Value{},
+		},
+
+		{name: "value not corresponding to type - env",
+			variables: Variables{
+				"used_string": &Variable{
+					Type: cty.String,
+				},
+			},
+			args: args{
+				env: []string{`PKR_VAR_used_string=["string"]`},
+			},
+
+			// output
+			wantDiags: true,
+			wantVariables: Variables{
+				"used_string": &Variable{
+					Type:     cty.String,
+					EnvValue: cty.DynamicVal,
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"used_string": cty.DynamicVal,
+			},
+		},
+
+		{name: "value not corresponding to type - cfg file",
+			variables: Variables{
+				"used_string": &Variable{
+					Type: cty.String,
+				},
+			},
+			args: args{
+				hclFiles: []string{`used_string=["string"]`},
+			},
+
+			// output
+			wantDiags: true,
+			wantVariables: Variables{
+				"used_string": &Variable{
+					Type:         cty.String,
+					VarfileValue: cty.DynamicVal,
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"used_string": cty.DynamicVal,
+			},
+		},
+
+		{name: "value not corresponding to type - argv",
+			variables: Variables{
+				"used_string": &Variable{
+					Type: cty.String,
+				},
+			},
+			args: args{
+				argv: map[string]string{
+					"used_string": `["string"]`,
+				},
+			},
+
+			// output
+			wantDiags: true,
+			wantVariables: Variables{
+				"used_string": &Variable{
+					Type:     cty.String,
+					CmdValue: cty.DynamicVal,
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"used_string": cty.DynamicVal,
+			},
+		},
+
+		{name: "defining a variable block in a variables file is invalid ",
+			variables: Variables{},
+			args: args{
+				hclFiles: []string{`variable "something" {}`},
+			},
+
+			// output
+			wantDiags:     true,
+			wantVariables: Variables{},
+			wantValues:    map[string]cty.Value{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -158,8 +309,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 				}
 				files = append(files, file)
 			}
-			if got := tt.variables.collectVariableValues(tt.args.env, files, tt.args.argv); !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("Variables.collectVariableValues() = %v, want %v", got, tt.want)
+			if gotDiags := tt.variables.collectVariableValues(tt.args.env, files, tt.args.argv); (gotDiags == nil) == tt.wantDiags {
+				t.Fatalf("Variables.collectVariableValues() = %v, want %v", gotDiags, tt.wantDiags)
 			}
 			if diff := cmp.Diff(fmt.Sprintf("%#v", tt.wantVariables), fmt.Sprintf("%#v", tt.variables)); diff != "" {
 				t.Fatalf("didn't get expected variables: %s", diff)
