@@ -22,7 +22,14 @@ type Variable struct {
 	EnvValue     cty.Value
 	DefaultValue cty.Value
 
-	// Cty Type of the variable
+	// Cty Type of the variable. If the default value or a collected value is
+	// not of this type nor can be converted to this type an error diagnostic
+	// will show up. This allows us to assume that values are valid later in
+	// code.
+	//
+	// When a default value - and no type - is passed in the variable
+	// declaration, the type of the default variable will be used. This will
+	// allow to ensure that users set this variable correctly.
 	Type cty.Type
 	// Description of the variable
 	Description string
@@ -148,12 +155,6 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 			return diags
 		}
 
-		// Convert the default to the expected type so we can catch invalid
-		// defaults early and allow later code to assume validity.
-		// Note that this depends on us having already processed any "type"
-		// attribute above.
-		// However, we can't do this if we're in an override file where
-		// the type might not be set; we'll catch that during merge.
 		if res.Type != cty.NilType {
 			var err error
 			defaultValue, err = convert.Convert(defaultValue, res.Type)
@@ -337,12 +338,6 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
 
-		// Convert the default to the expected type so we can catch invalid
-		// defaults early and allow later code to assume validity.
-		// Note that this depends on us having already processed any "type"
-		// attribute above.
-		// However, we can't do this if we're in an override file where
-		// the type might not be set; we'll catch that during merge.
 		if variable.Type != cty.NilType {
 			var err error
 			val, err = convert.Convert(val, variable.Type)
