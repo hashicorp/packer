@@ -72,7 +72,7 @@ Here is a full list of the available functions for reference.
           "inline": ["echo $TESTVAR"]
         },
     ```
-    Valid variables to request are: "ID", "Host",
+    Valid variables to request are: "ID", "SourceImageName", "Host",
     "Port", "User", "Password", "ConnType",
     "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
     Depending on which communicator you are using, some of these values may be
