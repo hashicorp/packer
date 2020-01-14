@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"github.com/zclconf/go-cty/cty/convert"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -30,6 +31,11 @@ type Variable struct {
 	Sensible bool
 
 	block *hcl.Block
+}
+
+func (v *Variable) GoString() string {
+	return fmt.Sprintf("{Type:%q,CmdValue:%q,VarfileValue:%q,EnvValue:%q,DefaultValue:%q}",
+		v.Type.GoString(), v.CmdValue.GoString(), v.VarfileValue.GoString(), v.EnvValue.GoString(), v.DefaultValue.GoString())
 }
 
 func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
@@ -124,16 +130,6 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 	attrs, moreDiags := b.Rest.JustAttributes()
 	diags = append(diags, moreDiags...)
 
-	if def, ok := attrs["default"]; ok {
-		defaultValue, moreDiags := def.Expr.Value(ectx)
-		diags = append(diags, moreDiags...)
-		if moreDiags.HasErrors() {
-			return diags
-		}
-		res.DefaultValue = defaultValue
-		res.Type = defaultValue.Type()
-		delete(attrs, "default")
-	}
 	if t, ok := attrs["type"]; ok {
 		tp, moreDiags := typeexpr.Type(t.Expr)
 		diags = append(diags, moreDiags...)
@@ -143,6 +139,36 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 
 		res.Type = tp
 		delete(attrs, "type")
+	}
+
+	if def, ok := attrs["default"]; ok {
+		defaultValue, moreDiags := def.Expr.Value(ectx)
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			return diags
+		}
+
+		// Convert the default to the expected type so we can catch invalid
+		// defaults early and allow later code to assume validity.
+		// Note that this depends on us having already processed any "type"
+		// attribute above.
+		// However, we can't do this if we're in an override file where
+		// the type might not be set; we'll catch that during merge.
+		if res.Type != cty.NilType {
+			var err error
+			defaultValue, err = convert.Convert(defaultValue, res.Type)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid default value for variable",
+					Detail:   fmt.Sprintf("This default value is not compatible with the variable's type constraint: %s.", err),
+					Subject:  def.Expr.Range().Ptr(),
+				})
+				defaultValue = cty.DynamicVal
+			}
+		}
+
+		res.DefaultValue = defaultValue
 	}
 	if len(attrs) > 0 {
 		keys := []string{}
@@ -180,7 +206,7 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		}
 
 		name := raw[:eq]
-		rawVal := raw[eq+1:]
+		value := raw[eq+1:]
 
 		// this variable was not defined in the hcl files, let's skip it !
 		v, found := variables[name]
@@ -188,9 +214,15 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 			continue
 		}
 
-		value := cty.StringVal(rawVal)
-
-		v.EnvValue = value
+		fakeFilename := fmt.Sprintf("<value for var.%s from env>", name)
+		expr, moreDiags := hclsyntax.ParseExpression([]byte(value), fakeFilename, hcl.Pos{Line: 1, Column: 1})
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			continue
+		}
+		val, valDiags := expr.Value(nil)
+		diags = append(diags, valDiags...)
+		v.EnvValue = val
 	}
 
 	// files will contain files found in the folder then files passed as
