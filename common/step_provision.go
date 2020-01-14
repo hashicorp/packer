@@ -46,6 +46,17 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		// Warn user that the id isn't implemented
 		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
 	}
+
+	// source_ami_name is placed in state by the amazon builder
+	// and it's not implemented by other builders
+	amiName, ok := state.GetOk("source_ami_name")
+	if ok {
+		hookData["SourceAMIName"] = amiName
+	} else {
+		// Warn user that the id isn't implemented
+		hookData["SourceAMIName"] = "ERR_SOURCE_AMI_NAME_NOT_IMPLEMENTED_BY_BUILDER"
+	}
+
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
 
 	// Read communicator data into hook data
