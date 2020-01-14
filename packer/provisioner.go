@@ -55,6 +55,7 @@ func BasicPlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
 	msg := "Build_%s. " + common.PlaceholderMsg
 	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
+	placeholderData["SourceImageName"] = fmt.Sprintf(msg, "SourceImageName")
 	// The following correspond to communicator-agnostic functions that are
 	// part of the SSH and WinRM communicator implementations. These functions
 	// are not part of the communicator interface, but are stored on the

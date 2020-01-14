@@ -53,7 +53,6 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	if ok {
 		hookData["SourceImageName"] = imageName
 	} else {
-		// Warn user that the id isn't implemented
 		hookData["SourceImageName"] = "ERR_SOURCE_IMAGE_NAME_NOT_IMPLEMENTED_BY_BUILDER"
 	}
 
