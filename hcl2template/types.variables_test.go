@@ -44,6 +44,30 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+		{"duplicate variable",
+			defaultParser,
+			parseTestArgs{"testdata/variables/duplicate_variable.pkr.hcl", nil},
+			&PackerConfig{
+				InputVariables: Variables{
+					"boolean_value": &Variable{},
+				},
+			},
+			true, true,
+			[]packer.Build{},
+			false,
+		},
+		{"duplicate variable in variables",
+			defaultParser,
+			parseTestArgs{"testdata/variables/duplicate_variables.pkr.hcl", nil},
+			&PackerConfig{
+				InputVariables: Variables{
+					"boolean_value": &Variable{},
+				},
+			},
+			true, true,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }

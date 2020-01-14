@@ -91,7 +91,7 @@ func (variables *Variables) decodeConfigMap(block *hcl.Block, ectx *hcl.EvalCont
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate variable",
-				Detail:   "Duplicate " + key + " variable found.",
+				Detail:   "Duplicate " + key + " variable definition found.",
 				Subject:  attr.NameRange.Ptr(),
 				Context:  block.DefRange.Ptr(),
 			})
@@ -117,6 +117,16 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 		(*variables) = Variables{}
 	}
 
+	if _, found := (*variables)[block.Labels[0]]; found {
+
+		return []*hcl.Diagnostic{{
+			Severity: hcl.DiagError,
+			Summary:  "Duplicate variable",
+			Detail:   "Duplicate " + block.Labels[0] + " variable definition found.",
+			Context:  block.DefRange.Ptr(),
+		}}
+	}
+
 	var b struct {
 		Description string   `hcl:"description,optional"`
 		Sensible    bool     `hcl:"sensible,optional"`
@@ -138,6 +148,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 	diags = append(diags, moreDiags...)
 
 	if t, ok := attrs["type"]; ok {
+		delete(attrs, "type")
 		tp, moreDiags := typeexpr.Type(t.Expr)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
@@ -149,6 +160,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 	}
 
 	if def, ok := attrs["default"]; ok {
+		delete(attrs, "default")
 		defaultValue, moreDiags := def.Expr.Value(ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
@@ -179,7 +191,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
 			Summary:  "Unknown keys",
-			Detail:   fmt.Sprintf("unknown variable keys: %s", keys),
+			Detail:   fmt.Sprintf("unknown variable setting(s): %s", keys),
 			Context:  block.DefRange.Ptr(),
 		})
 	}
