@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"github.com/zclconf/go-cty/cty/convert"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -10,6 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/convert"
 )
 
 type Variable struct {
@@ -208,9 +208,9 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		name := raw[:eq]
 		value := raw[eq+1:]
 
-		// this variable was not defined in the hcl files, let's skip it !
-		v, found := variables[name]
+		variable, found := variables[name]
 		if !found {
+			// this variable was not defined in the hcl files, let's skip it !
 			continue
 		}
 
@@ -222,7 +222,22 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		}
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
-		v.EnvValue = val
+
+		if variable.Type != cty.NilType {
+			var err error
+			val, err = convert.Convert(val, variable.Type)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid value for variable",
+					Detail:   fmt.Sprintf("The value for %s is not compatible with the variable's type constraint: %s.", name, err),
+					Subject:  expr.Range().Ptr(),
+				})
+				val = cty.DynamicVal
+			}
+		}
+
+		variable.EnvValue = val
 	}
 
 	// files will contain files found in the folder then files passed as
@@ -278,9 +293,21 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 
 			val, moreDiags := attr.Expr.Value(nil)
 			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
+
+			if variable.Type != cty.NilType {
+				var err error
+				val, err = convert.Convert(val, variable.Type)
+				if err != nil {
+					diags = append(diags, &hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Invalid value for variable",
+						Detail:   fmt.Sprintf("The value for %s is not compatible with the variable's type constraint: %s.", name, err),
+						Subject:  attr.Expr.Range().Ptr(),
+					})
+					val = cty.DynamicVal
+				}
 			}
+
 			variable.VarfileValue = val
 		}
 	}
@@ -309,6 +336,27 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		}
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
+
+		// Convert the default to the expected type so we can catch invalid
+		// defaults early and allow later code to assume validity.
+		// Note that this depends on us having already processed any "type"
+		// attribute above.
+		// However, we can't do this if we're in an override file where
+		// the type might not be set; we'll catch that during merge.
+		if variable.Type != cty.NilType {
+			var err error
+			val, err = convert.Convert(val, variable.Type)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid argument value for -var variable",
+					Detail:   fmt.Sprintf("The received arg value for %s is not compatible with the variable's type constraint: %s.", name, err),
+					Subject:  expr.Range().Ptr(),
+				})
+				val = cty.DynamicVal
+			}
+		}
+
 		variable.CmdValue = val
 	}
 

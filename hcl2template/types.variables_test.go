@@ -2,13 +2,12 @@ package hcl2template
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/convert"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/packer"
@@ -63,8 +62,10 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		wantVariables Variables
 		wantValues    map[string]cty.Value
 	}{
-		{"string", Variables{"used_string": &Variable{DefaultValue: cty.StringVal("default_value")}},
-			args{
+
+		{name: "string",
+			variables: Variables{"used_string": &Variable{DefaultValue: cty.StringVal("default_value")}},
+			args: args{
 				env: []string{`PKR_VAR_used_string="env_value"`},
 				hclFiles: []string{
 					`used_string="xy"`,
@@ -74,9 +75,10 @@ func TestVariables_collectVariableValues(t *testing.T) {
 					"used_string": `"cmd_value"`,
 				},
 			},
+
 			// output
-			nil,
-			Variables{
+			want: nil,
+			wantVariables: Variables{
 				"used_string": &Variable{
 					CmdValue:     cty.StringVal("cmd_value"),
 					VarfileValue: cty.StringVal("varfile_value"),
@@ -84,12 +86,17 @@ func TestVariables_collectVariableValues(t *testing.T) {
 					DefaultValue: cty.StringVal("default_value"),
 				},
 			},
-			map[string]cty.Value{
+			wantValues: map[string]cty.Value{
 				"used_string": cty.StringVal("cmd_value"),
 			},
 		},
-		{"array of strings", Variables{"used_strings": &Variable{DefaultValue: cty.TupleVal([]cty.Value{cty.StringVal("default_value_1")})}},
-			args{
+
+		{name: "array of strings",
+			variables: Variables{"used_strings": &Variable{
+				DefaultValue: stringListVal("default_value_1"),
+				Type:         cty.List(cty.String),
+			}},
+			args: args{
 				env: []string{`PKR_VAR_used_strings=["env_value_1", "env_value_2"]`},
 				hclFiles: []string{
 					`used_strings=["xy"]`,
@@ -99,18 +106,20 @@ func TestVariables_collectVariableValues(t *testing.T) {
 					"used_strings": `["cmd_value_1"]`,
 				},
 			},
+
 			// output
-			nil,
-			Variables{
+			want: nil,
+			wantVariables: Variables{
 				"used_strings": &Variable{
-					CmdValue:     cty.TupleVal([]cty.Value{cty.StringVal("cmd_value_1")}),
-					VarfileValue: cty.TupleVal([]cty.Value{cty.StringVal("varfile_value_1")}),
-					EnvValue:     cty.TupleVal([]cty.Value{cty.StringVal("env_value_1"), cty.StringVal("env_value_2")}),
-					DefaultValue: cty.TupleVal([]cty.Value{cty.StringVal("default_value_1")}),
+					Type:         cty.List(cty.String),
+					CmdValue:     stringListVal("cmd_value_1"),
+					VarfileValue: stringListVal("varfile_value_1"),
+					EnvValue:     stringListVal("env_value_1", "env_value_2"),
+					DefaultValue: stringListVal("default_value_1"),
 				},
 			},
-			map[string]cty.Value{
-				"used_strings": cty.TupleVal([]cty.Value{cty.StringVal("cmd_value_1")}),
+			wantValues: map[string]cty.Value{
+				"used_strings": stringListVal("cmd_value_1"),
 			},
 		},
 	}
@@ -119,22 +128,11 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			var files []*hcl.File
 			parser := getBasicParser()
 			for i, hclContent := range tt.args.hclFiles {
-				tmpFile, err := ioutil.TempFile("", fmt.Sprintf("test_file_%d_*"+hcl2VarFileExt, i))
-				if err != nil {
-					t.Fatal("ioutil.TempFile", err)
-				}
-				_, err = tmpFile.Write([]byte(hclContent))
-				if err != nil {
-					t.Fatal("tmpFile.Write", err)
-				}
-				tmpFileName := tmpFile.Name()
-				tmpFile.Close()
-				file, diags := parser.ParseHCLFile(tmpFileName)
+				file, diags := parser.ParseHCL([]byte(hclContent), fmt.Sprintf("test_file_%d_*"+hcl2VarFileExt, i))
 				if diags != nil {
 					t.Fatalf("ParseHCLFile %d: %v", i, diags)
 				}
 				files = append(files, file)
-				defer os.Remove(tmpFileName)
 			}
 			if got := tt.variables.collectVariableValues(tt.args.env, files, tt.args.argv); !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("Variables.collectVariableValues() = %v, want %v", got, tt.want)
@@ -155,4 +153,16 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			}
 		})
 	}
+}
+
+func stringListVal(strings ...string) cty.Value {
+	values := []cty.Value{}
+	for _, str := range strings {
+		values = append(values, cty.StringVal(str))
+	}
+	list, err := convert.Convert(cty.ListVal(values), cty.List(cty.String))
+	if err != nil {
+		panic(err)
+	}
+	return list
 }
