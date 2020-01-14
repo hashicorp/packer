@@ -199,7 +199,11 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	cmd.Start()
+	err := cmd.Start()
+	if err != nil {
+		return "", "", fmt.Errorf("Error starting vagrant command with args: %s",
+			strings.Join(args, " "))
+	}
 
 	stdoutString := ""
 	stderrString := ""
@@ -238,7 +242,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 		}
 	}()
 
-	err := cmd.Wait()
+	err = cmd.Wait()
 
 	donech <- true
 
