@@ -1,13 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common/retry"
 )
 
 // DestroyAMIs deregisters the AWS machine images in imageids from an active AWS account
@@ -23,8 +26,19 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 
 	// Deregister image by name.
 	for _, i := range resp.Images {
-		_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
-			ImageId: i.ImageId,
+
+		ctx := context.TODO()
+		err = retry.Config{
+			Tries: 11,
+			ShouldRetry: func(err error) bool {
+				return isAWSErr(err, "UnauthorizedOperation", "")
+			},
+			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+				ImageId: i.ImageId,
+			})
+			return err
 		})
 
 		if err != nil {
