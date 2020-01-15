@@ -20,7 +20,7 @@ type Config struct {
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:       true,
 		InterpolateFilter: &interpolate.RenderFilter{},
 	}, raws...)
