@@ -227,7 +227,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Printf("error getting out pioe")
+		log.Printf("error getting out pipe")
 	}
 
 	err = cmd.Start()
