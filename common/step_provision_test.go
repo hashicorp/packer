@@ -36,7 +36,7 @@ func TestStepProvision_Impl(t *testing.T) {
 func TestPopulateProvisionHookData(t *testing.T) {
 	state := testState(t)
 	commConfig := testCommConfig()
-	generatedData :=  map[string]interface{}{"Data": "generated" }
+	generatedData := map[string]interface{}{"Data": "generated"}
 	instanceId := 11111
 	packerRunUUID := "1fa225b8-27d1-42d1-9117-221772213962"
 
