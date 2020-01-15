@@ -30,7 +30,7 @@ func TestParse_variables(t *testing.T) {
 						Description: fmt.Sprintln("Describing is awesome ;D"),
 					},
 					"super_secret_password": &Variable{
-						Sensible:    true,
+						Sensitive:   true,
 						Description: fmt.Sprintln("Handle with care plz"),
 					},
 				},

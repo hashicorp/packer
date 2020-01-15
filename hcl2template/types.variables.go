@@ -33,9 +33,9 @@ type Variable struct {
 	Type cty.Type
 	// Description of the variable
 	Description string
-	// When Sensible is set to true Packer will try it best to hide/obfuscate
+	// When Sensitive is set to true Packer will try it best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
-	Sensible bool
+	Sensitive bool
 
 	block *hcl.Block
 }
@@ -129,7 +129,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 
 	var b struct {
 		Description string   `hcl:"description,optional"`
-		Sensible    bool     `hcl:"sensible,optional"`
+		Sensitive   bool     `hcl:"sensitive,optional"`
 		Rest        hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
@@ -140,7 +140,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 
 	res := &Variable{
 		Description: b.Description,
-		Sensible:    b.Sensible,
+		Sensitive:   b.Sensitive,
 		block:       block,
 	}
 

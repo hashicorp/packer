@@ -25,7 +25,7 @@ POTATO
 
 variable "super_secret_password" {
   type     = string
-  sensible = true
+  sensitive = true
 description = <<IMSENSIBLE
 Handle with care plz
 IMSENSIBLE
