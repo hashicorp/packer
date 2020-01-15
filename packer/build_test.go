@@ -26,7 +26,7 @@ func testBuild() *CoreBuild {
 		},
 		PostProcessors: [][]CoreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), boolPointer(true)},
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", make(map[string]interface{}), boolPointer(true)},
 			},
 		},
 		Variables: make(map[string]string),
@@ -281,7 +281,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -306,10 +306,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
 		},
 	}
 
@@ -334,12 +334,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -365,7 +365,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
@@ -393,7 +393,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
@@ -420,7 +420,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", make(map[string]interface{}), nil,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), nil,
 			},
 		},
 	}
