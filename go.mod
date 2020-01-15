@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/pubsub v1.1.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
 	contrib.go.opencensus.io/exporter/ocagent v0.5.0 // indirect
-	dmitri.shuralyov.com/gpu/mtl v0.0.0-20191203043605-d42048ed14fd // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 	github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
 	github.com/Azure/go-autorest v12.0.0+incompatible
@@ -34,7 +33,6 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/creack/goselect v0.1.0 // indirect
-	github.com/creack/pty v1.1.9 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
@@ -45,7 +43,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
-	github.com/envoyproxy/go-control-plane v0.9.1 // indirect
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
@@ -59,7 +56,6 @@ require (
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/pprof v0.0.0-20191105193234-27840fff0d09 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.0.0
 	github.com/gophercloud/gophercloud v0.2.0
@@ -81,7 +77,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.0.0
-	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80 // indirect
 	github.com/hashicorp/serf v0.8.2 // indirect
 	github.com/hashicorp/vault v1.1.0
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
@@ -100,7 +95,6 @@ require (
 	github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/kr/fs v0.0.0-20131111012553-2788f0dbd169 // indirect
-	github.com/kr/pty v1.1.8 // indirect
 	github.com/linode/linodego v0.7.1
 	github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
@@ -112,7 +106,6 @@ require (
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -125,6 +118,8 @@ require (
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
+	github.com/onsi/ginkgo v1.7.0 // indirect
+	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/oracle/oci-go-sdk v1.8.0
 	github.com/outscale/osc-go v0.0.1
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
@@ -133,9 +128,7 @@ require (
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.1.1
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
-	github.com/prometheus/client_model v0.0.0-20191202183732-d1d2010b5bee // indirect
 	github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17 // indirect
-	github.com/rogpeppe/go-internal v1.5.0 // indirect
 	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
@@ -152,7 +145,7 @@ require (
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
-	github.com/vmware/govmomi v0.0.0-20170707011325-c2105a174311
+	github.com/vmware/govmomi v0.21.0
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
@@ -160,16 +153,14 @@ require (
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8 // indirect
+	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
 	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191203051722-db047d72ee39
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
 	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect

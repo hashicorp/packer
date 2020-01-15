@@ -1,0 +1,18 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-clone",
+
+      "vcenter_server":      "vcenter.vsphere65.test",
+      "username":            "root",
+      "password":            "jetbrains",
+      "insecure_connection": "true",
+
+      "template": "alpine",
+      "vm_name":  "alpine-clone-{{timestamp}}",
+      "host":     "esxi-1.vsphere65.test",
+
+      "communicator": "none"
+    }
+  ]
+}
