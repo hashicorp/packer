@@ -198,6 +198,15 @@ variables are available:
 -   `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
 -   `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
 
+## Build function template engine variables
+
+For the build function of [template engine](/docs/templates/engine.html), the following
+variables are available:
+
+-   `SourceAMIName` - The source AMI Name (for example
+    `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+    build the AMI.
+
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
@@ -249,3 +258,4 @@ be easily added to the provisioner section.
 ```
 
 <%= partial "partials/builders/aws-ssh-differentiation-table" %>
+

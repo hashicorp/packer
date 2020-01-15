@@ -70,9 +70,9 @@ Here is a full list of the available functions for reference.
           "type": "shell-local",
           "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
           "inline": ["echo $TESTVAR"]
-        },
+        }
     ```
-    Valid variables to request are: "ID", "SourceImageName", "Host",
+    Valid variables to request are: "ID", "Host",
     "Port", "User", "Password", "ConnType",
     "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
     Depending on which communicator you are using, some of these values may be
@@ -89,6 +89,8 @@ Here is a full list of the available functions for reference.
     in the provisioner documentation. This feature does not yet work
     if the provisioners are being used in conjunction with our chroot builders
     or with lxc/lxd builders.
+    
+    For builder-specific engine variables, please also refer to the builder docs.
 
     This engine is in beta; please report any issues or requests on the Packer
     issue tracker on GitHub.
