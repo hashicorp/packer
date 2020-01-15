@@ -47,15 +47,6 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
 	}
 
-	// source_image_name is placed in state by builders
-	// and it's currently implemented only in Amazon
-	imageName, ok := state.GetOk("source_image_name")
-	if ok {
-		hookData["SourceImageName"] = imageName
-	} else {
-		hookData["SourceImageName"] = "ERR_SOURCE_IMAGE_NAME_NOT_IMPLEMENTED_BY_BUILDER"
-	}
-
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
 
 	// Read communicator data into hook data

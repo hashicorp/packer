@@ -36,14 +36,12 @@ func TestStepProvision_Impl(t *testing.T) {
 func TestPopulateProvisionHookData(t *testing.T) {
 	state := testState(t)
 	commConfig := testCommConfig()
-	generatedData := make(map[string]interface{})
+	generatedData :=  map[string]interface{}{"Data": "generated" }
 	instanceId := 11111
-	sourceImageName := "image name"
 	packerRunUUID := "1fa225b8-27d1-42d1-9117-221772213962"
 
 	state.Put("generated_data", generatedData)
 	state.Put("instance_id", instanceId)
-	state.Put("source_image_name", sourceImageName)
 	state.Put("communicator_config", commConfig)
 
 	os.Setenv("PACKER_RUN_UUID", packerRunUUID)
@@ -51,13 +49,13 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	hookData := PopulateProvisionHookData(state)
 
 	if len(hookData) == 0 {
-		t.Fatalf("Bad: hoodData is empty!")
+		t.Fatalf("Bad: hookData is empty!")
+	}
+	if hookData["Data"] != generatedData["Data"] {
+		t.Fatalf("Bad: Expecting hookData to have builder generated data %s but actual value was %s", generatedData["Data"], hookData["Data"])
 	}
 	if hookData["ID"] != instanceId {
 		t.Fatalf("Bad: Expecting hookData[\"ID\"]  was %d but actual value was %d", instanceId, hookData["ID"])
-	}
-	if hookData["SourceImageName"] != sourceImageName {
-		t.Fatalf("Bad: Expecting hookData[\"SourceImageName\"]  was %s but actual value was %s", sourceImageName, hookData["SourceImageName"])
 	}
 	if hookData["PackerRunUUID"] != packerRunUUID {
 		t.Fatalf("Bad: Expecting hookData[\"PackerRunUUID\"]  was %s but actual value was %s", packerRunUUID, hookData["PackerRunUUID"])

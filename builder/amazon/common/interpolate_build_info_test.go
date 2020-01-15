@@ -66,12 +66,14 @@ func TestInterpolateBuildInfo_extractBuildInfo_withSourceImage(t *testing.T) {
 	}
 }
 
-func TestInterpolateBuildInfo_extractBuildInfo_stateBagWithSourceImageName(t *testing.T) {
+func TestInterpolateBuildInfo_extractBuildInfo_GeneratedDataWithSourceImageName(t *testing.T) {
 	state := testState()
 	state.Put("source_image", testImage())
 	extractBuildInfo("foo", state)
 
-	if state.Get("source_image_name") != "ami_test_name" {
-		t.Fatalf("Unexpected state source_image_name: expected %#v got %#v\n", "ami_test_name", state.Get("source_image_name"))
+	generatedData := state.Get("generated_data").(map[string]interface{})
+
+	if generatedData["SourceAMIName"] != "ami_test_name" {
+		t.Fatalf("Unexpected state SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedData["SourceAMIName"])
 	}
 }

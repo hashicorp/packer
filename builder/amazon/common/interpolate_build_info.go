@@ -37,7 +37,7 @@ func extractBuildInfo(region string, state multistep.StateBag) *BuildInfoTemplat
 		SourceAMIOwnerName: aws.StringValue(sourceAMI.ImageOwnerAlias),
 		SourceAMITags:      sourceAMITags,
 	}
-	state.Put("source_image_name", buildInfoTemplate.SourceAMIName)
+	state.Put("generated_data", map[string]interface{}{"SourceAMIName": buildInfoTemplate.SourceAMIName })
 
 	return buildInfoTemplate
 }
