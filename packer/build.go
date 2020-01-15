@@ -109,6 +109,7 @@ type CoreBuild struct {
 type CoreBuildPostProcessor struct {
 	PostProcessor     PostProcessor
 	PType             string
+	PName             string
 	config            map[string]interface{}
 	keepInputArtifact *bool
 }
@@ -297,7 +298,11 @@ PostProcessorRunSeqLoop:
 				Ui:     originalUi,
 			}
 
-			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.PType))
+			if corePP.PName == corePP.PType {
+				builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.PType))
+			} else {
+				builderUi.Say(fmt.Sprintf("Running post-processor: %s (type %s)", corePP.PName, corePP.PType))
+			}
 			ts := CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
 			artifact, defaultKeep, forceOverride, err := corePP.PostProcessor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
