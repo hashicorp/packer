@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -158,6 +159,9 @@ func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []inte
 	// In provisioners, the last value pulled from raws is the placeholder data
 	// for build-specific variables. Pull these out to add to interpolation
 	// context.
+	if len(raws) == 0 {
+		return nil, raws
+	}
 
 	// Internally, our tests may cause this to be read as a map[string]string
 	placeholderData := raws[len(raws)-1]
@@ -201,6 +205,7 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 
 	for _, r := range raws {
 		if err := mapstructure.Decode(r, &s); err != nil {
+			log.Printf("Error detecting context: %s", err)
 			return nil, err
 		}
 	}
