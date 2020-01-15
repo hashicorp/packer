@@ -88,7 +88,7 @@ func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) e
 
 func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 	return func() (string, error) {
-		log.Printf("[Debug] Check if SG with id %s exists", id)
+		log.Printf("[Debug] Retrieving state for VM with id %s", id)
 		resp, err := conn.POST_ReadVms(oapi.ReadVmsRequest{
 			Filters: oapi.FiltersVm{
 				VmIds: []string{id},
@@ -102,7 +102,7 @@ func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		if resp.OK == nil {
-			return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+			return "", fmt.Errorf("Vm with ID %s not Found", id)
 		}
 
 		if len(resp.OK.Vms) == 0 {

@@ -154,6 +154,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm:         &b.config.RunConfig.Comm,
 			DebugKeyPath: fmt.Sprintf("oapi_%s", b.config.PackerBuildName),
 		},
+		&osccommon.StepPublicIp{
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			Debug:                    b.config.PackerDebug,
+		},
 		&osccommon.StepSecurityGroup{
 			SecurityGroupFilter:   b.config.SecurityGroupFilter,
 			SecurityGroupIds:      b.config.SecurityGroupIds,
@@ -164,7 +168,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			BlockDevices: b.config.BlockDevices,
 		},
 		&osccommon.StepRunSourceVm{
-			AssociatePublicIpAddress:    b.config.AssociatePublicIpAddress,
 			BlockDevices:                b.config.BlockDevices,
 			Comm:                        &b.config.RunConfig.Comm,
 			Ctx:                         b.config.ctx,
