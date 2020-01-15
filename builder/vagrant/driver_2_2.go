@@ -201,7 +201,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 
 	err := cmd.Start()
 	if err != nil {
-		return "", "", fmt.Errorf("Error starting vagrant command with args: %s",
+		return "", "", fmt.Errorf("Error starting vagrant command with args: %q",
 			strings.Join(args, " "))
 	}
 
