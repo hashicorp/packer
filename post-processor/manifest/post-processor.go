@@ -162,9 +162,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 	return source, true, true, nil
 }
 
-// Generates the final command to send to the communicator, using either the
-// user-provided ExecuteCommand or defaulting to something that makes sense for
-// the host OS TODO change it
 func createInterpolatedCustomData(config *Config, customData string) (string, error) {
 	interpolatedCmd, err := interpolate.Render(customData, &config.ctx)
 	if err != nil {
