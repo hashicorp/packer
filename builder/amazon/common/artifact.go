@@ -20,6 +20,8 @@ type Artifact struct {
 	// BuilderId is the unique ID for the builder that created this AMI
 	BuilderIdValue string
 
+	StateData map[string]interface{}
+
 	// EC2 connection for performing API stuff.
 	Session *session.Session
 }
@@ -55,6 +57,10 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
+
 	switch name {
 	case "atlas.artifact.metadata":
 		return a.stateAtlasMetadata()
