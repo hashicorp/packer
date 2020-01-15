@@ -27,17 +27,86 @@ type config struct {
 	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
 	PluginMinPort              int
 	PluginMaxPort              int
-
-	Builders       packer.MapOfBuilder
-	Provisioners   packer.MapOfProvisioner
-	PostProcessors packer.MapOfPostProcessor `json:"post-processors"`
+	RawBuilders                map[string]string         `json:"builders"`
+	RawProvisioners            map[string]string         `json:"provisioners"`
+	RawPostProcessors          map[string]string         `json:"post-processors"`
+	Builders                   packer.MapOfBuilder       `json:"-"`
+	Provisioners               packer.MapOfProvisioner   `json:"-"`
+	PostProcessors             packer.MapOfPostProcessor `json:"-"`
 }
 
-// Decodes configuration in JSON format from the given io.Reader into
+// decodeConfig decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
 func decodeConfig(r io.Reader, c *config) error {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(c)
+}
+
+// LoadExternalComponentsFromConfig loads plugins defined in RawBuilders, RawProvisioners, and RawPostProcessors.
+func (c *config) LoadExternalComponentsFromConfig() {
+	// helper to build up list of plugin paths
+	extractPaths := func(m map[string]string) []string {
+		paths := make([]string, 0, len(m))
+		for _, v := range m {
+			paths = append(paths, v)
+		}
+
+		return paths
+	}
+
+	var pluginPaths []string
+	pluginPaths = append(pluginPaths, extractPaths(c.RawProvisioners)...)
+	pluginPaths = append(pluginPaths, extractPaths(c.RawBuilders)...)
+	pluginPaths = append(pluginPaths, extractPaths(c.RawPostProcessors)...)
+
+	var externallyUsed = make([]string, 0, len(pluginPaths))
+	for _, pluginPath := range pluginPaths {
+		if name, ok := c.loadExternalComponent(pluginPath); ok {
+			log.Printf("[DEBUG] Loaded plugin: %s = %s", name, pluginPath)
+			externallyUsed = append(externallyUsed, name)
+		}
+	}
+
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external plugins %v", externallyUsed)
+	}
+}
+
+func (c *config) loadExternalComponent(path string) (string, bool) {
+	pluginName := filepath.Base(path)
+
+	// On Windows, ignore any plugins that don't end in .exe.
+	// We could do a full PATHEXT parse, but this is probably good enough.
+	if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(pluginName)) != ".exe" {
+		log.Printf("[DEBUG] Ignoring plugin %s, no exe extension", path)
+		return "", false
+	}
+
+	// If the filename has a ".", trim up to there
+	if idx := strings.Index(pluginName, "."); idx >= 0 {
+		pluginName = pluginName[:idx]
+	}
+
+	switch {
+	case strings.HasPrefix(pluginName, "packer-builder-"):
+		pluginName = pluginName[len("packer-builder-"):]
+		c.Builders[pluginName] = func() (packer.Builder, error) {
+			return c.pluginClient(path).Builder()
+		}
+	case strings.HasPrefix(pluginName, "packer-post-processor-"):
+		pluginName = pluginName[len("packer-post-processor-"):]
+		c.PostProcessors[pluginName] = func() (packer.PostProcessor, error) {
+			return c.pluginClient(path).PostProcessor()
+		}
+	case strings.HasPrefix(pluginName, "packer-provisioner-"):
+		pluginName = pluginName[len("packer-provisioner-"):]
+		c.Provisioners[pluginName] = func() (packer.Provisioner, error) {
+			return c.pluginClient(path).Provisioner()
+		}
+	}
+
+	return pluginName, true
 }
 
 // Discover discovers plugins.
@@ -194,7 +263,7 @@ func (c *config) discoverSingle(glob string) (map[string]string, error) {
 	for _, match := range matches {
 		file := filepath.Base(match)
 
-		// One Windows, ignore any plugins that don't end in .exe.
+		// On Windows, ignore any plugins that don't end in .exe.
 		// We could do a full PATHEXT parse, but this is probably good enough.
 		if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(file)) != ".exe" {
 			log.Printf(
