@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 )
@@ -57,12 +56,9 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 	log.Printf("identity file is %s", sshConfig.IdentityFile)
 	log.Printf("Removing quotes from identity file")
-	if strings.HasPrefix(sshConfig.IdentityFile, "\"") {
-		sshConfig.IdentityFile = sshConfig.IdentityFile[1:]
-		if strings.HasSuffix(sshConfig.IdentityFile, "\"") {
-			sshConfig.IdentityFile = sshConfig.IdentityFile[:len(sshConfig.IdentityFile)-1]
-		}
-		log.Printf("identity file is now %s", sshConfig.IdentityFile)
+	sshConfig.IdentityFile, err = strconv.Unquote(sshConfig.IdentityFile)
+	if err != nil {
+		log.Printf("Error unquoting identity file: %s", err)
 	}
 	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
 	config.Comm.SSHUsername = sshConfig.User
