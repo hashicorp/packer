@@ -130,7 +130,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return nil, warns, nil
+
+	generatedData := []string{"SourceAMIName"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -325,6 +327,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Session:        session,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

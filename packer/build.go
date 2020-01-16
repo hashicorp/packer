@@ -195,7 +195,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	// Prepare the post-processors
 	for _, ppSeq := range b.PostProcessors {
 		for _, corePP := range ppSeq {
-			err = corePP.PostProcessor.Configure(corePP.config, packerConfig)
+			err = corePP.PostProcessor.Configure(corePP.config, packerConfig, generatedPlaceholderMap)
 			if err != nil {
 				return
 			}

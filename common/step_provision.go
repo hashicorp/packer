@@ -46,6 +46,7 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		// Warn user that the id isn't implemented
 		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
 	}
+
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
 
 	// Read communicator data into hook data

@@ -80,7 +80,7 @@ func TestBuild_Prepare(t *testing.T) {
 	if !pp.ConfigureCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig}) {
+	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", pp.ConfigureConfigs)
 	}
 }
