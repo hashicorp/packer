@@ -50,8 +50,18 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 		// Delete snapshot(s) by image
 		for _, b := range i.BlockDeviceMappings {
 			if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
-				_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
-					SnapshotId: b.Ebs.SnapshotId,
+
+				err = retry.Config{
+					Tries: 11,
+					ShouldRetry: func(err error) bool {
+						return isAWSErr(err, "UnauthorizedOperation", "")
+					},
+					RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+				}.Run(ctx, func(ctx context.Context) error {
+					_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+						SnapshotId: b.Ebs.SnapshotId,
+					})
+					return err
 				})
 
 				if err != nil {
