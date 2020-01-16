@@ -6,6 +6,7 @@ build {
     ]
 
     provisioner "shell" {
+        name     = "provisioner that does something"
         string   = "string"
         int      = 42
         int64    = 43
@@ -45,6 +46,46 @@ build {
     }
 
     provisioner "file" {
+        string   = "string"
+        int      = 42
+        int64    = 43
+        bool     = true
+        trilean  = true
+        duration = "10s"
+        map_string_string {
+            a = "b"
+            c = "d"
+        }
+        slice_string = [
+            "a",
+            "b",
+            "c",
+        ]
+
+        nested {
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+        }
+
+        nested_slice {
+        }
+    }
+
+    post-processor "amazon-import" { 
+        name     = "something"
         string   = "string"
         int      = 42
         int64    = 43

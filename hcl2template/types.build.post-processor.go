@@ -4,27 +4,43 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
 )
 
 // PostProcessorBlock represents a parsed PostProcessorBlock
 type PostProcessorBlock struct {
 	PType string
-	block *hcl.Block
+	PName string
+
+	HCL2Ref
 }
 
-func (p *Parser) decodePostProcessorGroup(block *hcl.Block) (*PostProcessorBlock, hcl.Diagnostics) {
-	postProcessor := &PostProcessorBlock{
-		PType: block.Labels[0],
-		block: block,
+func (p *PostProcessorBlock) String() string {
+	return fmt.Sprintf(buildPostProcessorLabel+"-block %q %q", p.PType, p.PName)
+}
+
+func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl.Diagnostics) {
+	var b struct {
+		Name string   `hcl:"name,optional"`
+		Rest hcl.Body `hcl:",remain"`
 	}
-	var diags hcl.Diagnostics
+	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	if diags.HasErrors() {
+		return nil, diags
+	}
+
+	postProcessor := &PostProcessorBlock{
+		PType:   block.Labels[0],
+		PName:   b.Name,
+		HCL2Ref: newHCL2Ref(block, b.Rest),
+	}
 
 	if !p.PostProcessorsSchemas.Has(postProcessor.PType) {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + buildPostProcessorLabel + " type " + postProcessor.PType,
+			Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", postProcessor.PType),
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known provisioners: %v", p.ProvisionersSchemas.List()),
+			Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", p.PostProcessorsSchemas.List()),
 			Severity: hcl.DiagError,
 		})
 		return nil, diags
@@ -39,21 +55,21 @@ func (p *Parser) StartPostProcessor(pp *PostProcessorBlock) (packer.PostProcesso
 	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Failed loading " + pp.block.Type,
-			Subject: pp.block.LabelRanges[0].Ptr(),
+			Summary: fmt.Sprintf("Failed loading %s", pp.PType),
+			Subject: pp.DefRange.Ptr(),
 			Detail:  err.Error(),
 		})
 		return nil, diags
 	}
-	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.block, nil, postProcessor)
+	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.Rest, nil, postProcessor)
 	diags = append(diags, moreDiags...)
 	err = postProcessor.Configure(flatProvisinerCfg)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Failed preparing " + pp.block.Type,
+			Summary:  fmt.Sprintf("Failed preparing %s", pp),
 			Detail:   err.Error(),
-			Subject:  pp.block.DefRange.Ptr(),
+			Subject:  pp.DefRange.Ptr(),
 		})
 		return nil, diags
 	}
