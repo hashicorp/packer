@@ -22,7 +22,10 @@ func testBuild() *CoreBuild {
 			"foo": {&MockHook{}},
 		},
 		Provisioners: []CoreBuildProvisioner{
-			{"mock-provisioner", &MockProvisioner{}, []interface{}{42}},
+			{
+				PType:       "mock-provisioner",
+				Provisioner: &MockProvisioner{},
+				config:      []interface{}{42}},
 		},
 		PostProcessors: [][]CoreBuildPostProcessor{
 			{
