@@ -61,7 +61,7 @@ func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
 	// Basic configuration
 	b.config.RootDevice = RootBlockDevice{
 		SourceDeviceName: "device name",
-		DeviceName: "device name",
+		DeviceName:       "device name",
 	}
 	b.config.LaunchMappings = BlockDevices{
 		BlockDevice{

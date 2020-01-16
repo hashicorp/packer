@@ -109,4 +109,3 @@ func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
 		t.Fatalf("Generated data should contain SourceAMIName")
 	}
 }
-

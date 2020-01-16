@@ -5,7 +5,7 @@ import "testing"
 func TestArtifactState(t *testing.T) {
 	expectedData := "this is the data"
 	artifact := &Artifact{
-		StateData:      map[string]interface{}{"state_data": expectedData},
+		StateData: map[string]interface{}{"state_data": expectedData},
 	}
 
 	// Valid state
