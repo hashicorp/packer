@@ -52,7 +52,7 @@ func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics, 
 		return builder, diags, nil
 	}
 
-	decoded, moreDiags := decodeHCL2Spec(source.block, nil, builder)
+	decoded, moreDiags := decodeHCL2Spec(source.block.Body, nil, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags, nil

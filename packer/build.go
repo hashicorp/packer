@@ -118,6 +118,7 @@ type CoreBuildPostProcessor struct {
 // the provisioner within the build.
 type CoreBuildProvisioner struct {
 	PType       string
+	PName       string
 	Provisioner Provisioner
 	config      []interface{}
 }

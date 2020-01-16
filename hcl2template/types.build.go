@@ -78,7 +78,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 			}
 			build.ProvisionerBlocks = append(build.ProvisionerBlocks, p)
 		case buildPostProcessorLabel:
-			pp, moreDiags := p.decodePostProcessorGroup(block)
+			pp, moreDiags := p.decodePostProcessor(block)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
