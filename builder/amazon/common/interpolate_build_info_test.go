@@ -65,3 +65,15 @@ func TestInterpolateBuildInfo_extractBuildInfo_withSourceImage(t *testing.T) {
 		t.Fatalf("Unexpected BuildInfoTemplate: expected %#v got %#v\n", expected, *buildInfo)
 	}
 }
+
+func TestInterpolateBuildInfo_extractBuildInfo_GeneratedDataWithSourceImageName(t *testing.T) {
+	state := testState()
+	state.Put("source_image", testImage())
+	extractBuildInfo("foo", state)
+
+	generatedData := state.Get("generated_data").(map[string]interface{})
+
+	if generatedData["SourceAMIName"] != "ami_test_name" {
+		t.Fatalf("Unexpected state SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedData["SourceAMIName"])
+	}
+}

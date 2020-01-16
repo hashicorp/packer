@@ -63,6 +63,21 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, bool, error) {
+	generatedData := source.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
+
+	for key, data := range p.config.CustomData {
+		interpolatedData, err := createInterpolatedCustomData(&p.config, data)
+		if err != nil {
+			return nil, false, false, err
+		}
+		p.config.CustomData[key] = interpolatedData
+	}
+
 	artifact := &Artifact{}
 
 	var err error
@@ -145,4 +160,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 	// The manifest should never delete the artifacts it is set to record, so it
 	// forcibly sets "keep" to true.
 	return source, true, true, nil
+}
+
+func createInterpolatedCustomData(config *Config, customData string) (string, error) {
+	interpolatedCmd, err := interpolate.Render(customData, &config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error interpolating custom data: %s", err)
+	}
+	return interpolatedCmd, nil
 }

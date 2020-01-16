@@ -160,6 +160,15 @@ variables are available:
 -   `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
 -   `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
 
+## Build function template engine variables
+
+For the build function of [template engine](/docs/templates/engine.html), the following
+variables are available:
+
+-   `SourceAMIName` - The source AMI Name (for example
+    `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+    build the AMI.
+
 -&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on
 termination of the instance building the new image. In addition to those

@@ -1,6 +1,7 @@
 package ebssurrogate
 
 import (
+	"github.com/hashicorp/packer/builder/amazon/common"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -52,5 +53,39 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
+	var b Builder
+	// Basic configuration
+	b.config.RootDevice = RootBlockDevice{
+		SourceDeviceName: "device name",
+		DeviceName:       "device name",
+	}
+	b.config.LaunchMappings = BlockDevices{
+		BlockDevice{
+			BlockDevice: common.BlockDevice{
+				DeviceName: "device name",
+			},
+			OmitFromArtifact: false,
+		},
+	}
+	b.config.AMIVirtType = "type"
+	config := testConfig()
+	config["ami_name"] = "name"
+
+	generatedData, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
+	if generatedData[0] != "SourceAMIName" {
+		t.Fatalf("Generated data should contain SourceAMIName")
 	}
 }

@@ -167,6 +167,37 @@ type SSH struct {
 	SSHPrivateKey []byte `mapstructure:"ssh_private_key"`
 }
 
+type WinRM struct {
+	// The username to use to connect to WinRM.
+	WinRMUser string `mapstructure:"winrm_username"`
+	// The password to use to connect to WinRM.
+	WinRMPassword string `mapstructure:"winrm_password"`
+	// The address for WinRM to connect to.
+	//
+	// NOTE: If using an Amazon EBS builder, you can specify the interface
+	// WinRM connects to via
+	// [`ssh_interface`](https://www.packer.io/docs/builders/amazon-ebs.html#ssh_interface)
+	WinRMHost string `mapstructure:"winrm_host"`
+	// The WinRM port to connect to. This defaults to `5985` for plain
+	// unencrypted connection and `5986` for SSL when `winrm_use_ssl` is set to
+	// true.
+	WinRMPort int `mapstructure:"winrm_port"`
+	// The amount of time to wait for WinRM to become available. This defaults
+	// to `30m` since setting up a Windows machine generally takes a long time.
+	WinRMTimeout time.Duration `mapstructure:"winrm_timeout"`
+	// If `true`, use HTTPS for WinRM.
+	WinRMUseSSL bool `mapstructure:"winrm_use_ssl"`
+	// If `true`, do not check server certificate chain and host name.
+	WinRMInsecure bool `mapstructure:"winrm_insecure"`
+	// If `true`, NTLMv2 authentication (with session security) will be used
+	// for WinRM, rather than default (basic authentication), removing the
+	// requirement for basic authentication to be enabled within the target
+	// guest. Further reading for remote connection authentication can be found
+	// [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
+	WinRMUseNTLM            bool `mapstructure:"winrm_use_ntlm"`
+	WinRMTransportDecorator func() winrm.Transporter
+}
+
 func (c *SSH) ConfigSpec() hcldec.ObjectSpec   { return c.FlatMapstructure().HCL2Spec() }
 func (c *WinRM) ConfigSpec() hcldec.ObjectSpec { return c.FlatMapstructure().HCL2Spec() }
 
@@ -203,37 +234,6 @@ type SSHInterface struct {
 	// connect via whichever IP address is returned first from the OpenStack
 	// API.
 	SSHIPVersion string `mapstructure:"ssh_ip_version"`
-}
-
-type WinRM struct {
-	// The username to use to connect to WinRM.
-	WinRMUser string `mapstructure:"winrm_username"`
-	// The password to use to connect to WinRM.
-	WinRMPassword string `mapstructure:"winrm_password"`
-	// The address for WinRM to connect to.
-	//
-	// NOTE: If using an Amazon EBS builder, you can specify the interface
-	// WinRM connects to via
-	// [`ssh_interface`](https://www.packer.io/docs/builders/amazon-ebs.html#ssh_interface)
-	WinRMHost string `mapstructure:"winrm_host"`
-	// The WinRM port to connect to. This defaults to `5985` for plain
-	// unencrypted connection and `5986` for SSL when `winrm_use_ssl` is set to
-	// true.
-	WinRMPort int `mapstructure:"winrm_port"`
-	// The amount of time to wait for WinRM to become available. This defaults
-	// to `30m` since setting up a Windows machine generally takes a long time.
-	WinRMTimeout time.Duration `mapstructure:"winrm_timeout"`
-	// If `true`, use HTTPS for WinRM.
-	WinRMUseSSL bool `mapstructure:"winrm_use_ssl"`
-	// If `true`, do not check server certificate chain and host name.
-	WinRMInsecure bool `mapstructure:"winrm_insecure"`
-	// If `true`, NTLMv2 authentication (with session security) will be used
-	// for WinRM, rather than default (basic authentication), removing the
-	// requirement for basic authentication to be enabled within the target
-	// guest. Further reading for remote connection authentication can be found
-	// [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
-	WinRMUseNTLM            bool `mapstructure:"winrm_use_ntlm"`
-	WinRMTransportDecorator func() winrm.Transporter
 }
 
 // ReadSSHPrivateKeyFile returns the SSH private key bytes
