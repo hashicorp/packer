@@ -39,6 +39,14 @@ each can be found below:
     connections on your local host. The default is 10,000. See the [core
     configuration page](/docs/other/core-configuration.html).
 
+-   `PACKER_PLUGIN_PATH` - a PATH variable for finding third-party packer
+plugins. For example: `~/custom-dir-1:~/custom-dir-2`.
+Separate directories in the PATH string using a colon (`:`) on posix systems and
+a semicolon (`;`) on windows systems. The above example path would be able to
+find a provisioner named `packer-provisioner-foo` in either
+`~/custom-dir-1/packer-provisioner-foo` or
+`~/custom-dir-2/packer-provisioner-foo`.
+
 -   `CHECKPOINT_DISABLE` - When Packer is invoked it sometimes calls out to
     [checkpoint.hashicorp.com](https://checkpoint.hashicorp.com/) to look for
     new versions of Packer. If you want to disable this for security or privacy
