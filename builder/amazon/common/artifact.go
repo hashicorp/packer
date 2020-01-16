@@ -20,6 +20,8 @@ type Artifact struct {
 	// BuilderId is the unique ID for the builder that created this AMI
 	BuilderIdValue string
 
+	// SateData should store data such as GeneratedData
+	// to be shared with post-processors
 	StateData map[string]interface{}
 
 	// EC2 connection for performing API stuff.

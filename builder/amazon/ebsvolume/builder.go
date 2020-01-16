@@ -284,6 +284,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Volumes:        state.Get("ebsvolumes").(EbsVolumes),
 		BuilderIdValue: BuilderId,
 		Conn:           ec2conn,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	ui.Say(fmt.Sprintf("Created Volumes: %s", artifact))
 	return artifact, nil
