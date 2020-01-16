@@ -25,6 +25,7 @@ func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, generatedVars
 		}
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
+			PName:       pb.PName,
 			Provisioner: provisioner,
 		})
 	}
@@ -34,15 +35,16 @@ func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, generatedVars
 func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
-	for _, pp := range blocks {
-		postProcessor, moreDiags := p.StartPostProcessor(pp)
+	for _, ppb := range blocks {
+		postProcessor, moreDiags := p.StartPostProcessor(ppb)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
 		}
 		res = append(res, packer.CoreBuildPostProcessor{
 			PostProcessor: postProcessor,
-			PType:         pp.PType,
+			PName:         ppb.PName,
+			PType:         ppb.PType,
 		})
 	}
 
@@ -59,7 +61,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + sourceLabel + " " + from.String(),
-					Subject:  build.HCL2Ref.DeclRange.Ptr(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
 				})
 				continue
