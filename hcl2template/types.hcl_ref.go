@@ -7,8 +7,19 @@ import (
 // reference to the source definition in configuration text file
 type HCL2Ref struct {
 	// reference to the source definition in configuration text file
-	DeclRange hcl.Range
+	DefRange     hcl.Range
+	TypeRange    hcl.Range
+	LabelsRanges []hcl.Range
 
 	// remainder of unparsed body
-	Remain hcl.Body
+	Rest hcl.Body
+}
+
+func newHCL2Ref(block *hcl.Block, rest hcl.Body) HCL2Ref {
+	return HCL2Ref{
+		Rest:         rest,
+		DefRange:     block.DefRange,
+		TypeRange:    block.TypeRange,
+		LabelsRanges: block.LabelRanges,
+	}
 }
