@@ -19,6 +19,13 @@ type FlatConfig struct {
 	HTTPDir                   *string           `mapstructure:"http_directory" cty:"http_directory"`
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max"`
+	ISOChecksum               *string           `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum"`
+	ISOChecksumURL            *string           `mapstructure:"iso_checksum_url" cty:"iso_checksum_url"`
+	ISOChecksumType           *string           `mapstructure:"iso_checksum_type" cty:"iso_checksum_type"`
+	RawSingleISOUrl           *string           `mapstructure:"iso_url" required:"true" cty:"iso_url"`
+	ISOUrls                   []string          `mapstructure:"iso_urls" cty:"iso_urls"`
+	TargetPath                *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
+	TargetExtension           *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
 	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
 	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
@@ -79,6 +86,7 @@ type FlatConfig struct {
 	NICs                      []FlatnicConfig   `mapstructure:"network_adapters" cty:"network_adapters"`
 	Disks                     []FlatdiskConfig  `mapstructure:"disks" cty:"disks"`
 	ISOFile                   *string           `mapstructure:"iso_file" cty:"iso_file"`
+	ISOStoragePool            *string           `mapstructure:"iso_storage_pool" cty:"iso_storage_pool"`
 	Agent                     *bool             `mapstructure:"qemu_agent" cty:"qemu_agent"`
 	SCSIController            *string           `mapstructure:"scsi_controller" cty:"scsi_controller"`
 	TemplateName              *string           `mapstructure:"template_name" cty:"template_name"`
@@ -108,6 +116,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
+		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
+		"iso_checksum_url":             &hcldec.AttrSpec{Name: "iso_checksum_url", Type: cty.String, Required: false},
+		"iso_checksum_type":            &hcldec.AttrSpec{Name: "iso_checksum_type", Type: cty.String, Required: false},
+		"iso_url":                      &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
+		"iso_urls":                     &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
+		"iso_target_path":              &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
+		"iso_target_extension":         &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -168,6 +183,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatnicConfig)(nil).HCL2Spec())},
 		"disks":                        &hcldec.BlockListSpec{TypeName: "disks", Nested: hcldec.ObjectSpec((*FlatdiskConfig)(nil).HCL2Spec())},
 		"iso_file":                     &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
+		"iso_storage_pool":             &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
 		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
 		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
