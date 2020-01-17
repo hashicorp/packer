@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	builderscommon "github.com/hashicorp/packer/builder/common"
 	"os"
 	"strings"
 
@@ -248,6 +249,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builderscommon.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -383,6 +385,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData: generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,

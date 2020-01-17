@@ -19,6 +19,9 @@ func (s *StepChrootProvision) Run(ctx context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
+	// At this point variables are valid but not assigned a value
+	// Retrieve generated data from builders and assign default variables. Like in step_provision
+
 	// Create our communicator
 	comm := &Communicator{
 		Chroot:     mountPath,

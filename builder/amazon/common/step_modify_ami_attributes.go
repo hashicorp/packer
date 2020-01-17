@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	builderscommon "github.com/hashicorp/packer/builder/common"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -20,6 +21,8 @@ type StepModifyAMIAttributes struct {
 	ProductCodes   []string
 	Description    string
 	Ctx            interpolate.Context
+
+	GeneratedData *builderscommon.GeneratedData
 }
 
 func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -43,7 +46,7 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 	}
 
 	var err error
-	s.Ctx.Data = extractBuildInfo(*ec2conn.Config.Region, state)
+	s.Ctx.Data = extractBuildInfo(*ec2conn.Config.Region, state, s.GeneratedData)
 	s.Description, err = interpolate.Render(s.Description, &s.Ctx)
 	if err != nil {
 		err = fmt.Errorf("Error interpolating AMI description: %s", err)
