@@ -163,7 +163,7 @@ they aren't documented here other than to tell you how to hook in provisioners.
 
 ### Build variables
 
-Packer makes it possible to provide custom template engine variables to be shared along 
+Packer makes it possible to provide custom template engine variables to be shared with 
 provisioners using the `build` function. 
  
 Part of the builder interface changes made in 1.5.0 was to make builder Prepare() methods 
@@ -183,7 +183,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 Returning the custom variable name(s) within the `generated_data` placeholder is necessary 
 for the template containing the build variable(s) to validate.  
     
-Once the placeholder is set, it's necessary to pass the variables real values when calling 
+Once the placeholder is set, it's necessary to pass the variables' real values when calling 
 the provisioner. This can be done as the example below:   
 
 ```
