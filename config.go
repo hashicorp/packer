@@ -61,10 +61,14 @@ func (c *config) LoadExternalComponentsFromConfig() {
 
 	var externallyUsed = make([]string, 0, len(pluginPaths))
 	for _, pluginPath := range pluginPaths {
-		if name, ok := c.loadExternalComponent(pluginPath); ok {
-			log.Printf("[DEBUG] Loaded plugin: %s = %s", name, pluginPath)
-			externallyUsed = append(externallyUsed, name)
+		name, err := c.loadSingleComponent(pluginPath)
+		if err != nil {
+			log.Print(err)
+			continue
 		}
+
+		log.Printf("loaded plugin: %s = %s", name, pluginPath)
+		externallyUsed = append(externallyUsed, name)
 	}
 
 	if len(externallyUsed) > 0 {
@@ -73,14 +77,17 @@ func (c *config) LoadExternalComponentsFromConfig() {
 	}
 }
 
-func (c *config) loadExternalComponent(path string) (string, bool) {
+func (c *config) loadSingleComponent(path string) (string, error) {
 	pluginName := filepath.Base(path)
 
 	// On Windows, ignore any plugins that don't end in .exe.
 	// We could do a full PATHEXT parse, but this is probably good enough.
 	if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(pluginName)) != ".exe" {
-		log.Printf("[DEBUG] Ignoring plugin %s, no exe extension", path)
-		return "", false
+		return "", fmt.Errorf("error loading plugin %q, no exe extension", path)
+	}
+
+	if _, err := os.Stat(path); err != nil {
+		return "", fmt.Errorf("error loading plugin %q: %s", path, err)
 	}
 
 	// If the filename has a ".", trim up to there
@@ -106,7 +113,7 @@ func (c *config) loadExternalComponent(path string) (string, bool) {
 		}
 	}
 
-	return pluginName, true
+	return pluginName, nil
 }
 
 // Discover discovers plugins.
