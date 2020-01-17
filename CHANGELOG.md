@@ -10,6 +10,7 @@
 * builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
 * core: Fix crash when build.sources is set to an invalid name [GH-8569]
 * core: Fix loading of external plugins. GH-8543]
+* post-processor/docker-tag: Fix regression if no tags were specified. [GH-8593]
 * post-processor/vagrant: correctly handle the diskSize property as a qemu size
     string [GH-8567]
 * provisioner/ansible: Fix password sanitization to account for empty string

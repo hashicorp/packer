@@ -1,0 +1,51 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server":      "vcenter.vsphere65.test",
+      "username":            "root",
+      "password":            "jetbrains",
+      "insecure_connection": "true",
+
+      "vm_name": "macos-packer",
+      "host":     "esxi-mac.vsphere65.test",
+
+      "guest_os_type": "darwin16_64Guest",
+
+      "CPUs":             1,
+      "RAM":              4096,
+
+      "disk_size":        32768,
+      "disk_thin_provisioned": true,
+
+      "network_card": "e1000e",
+      "usb_controller": true,
+
+      "configuration_parameters": {
+        "ich7m.present": "TRUE",
+        "smc.present": "TRUE"
+      },
+      "cdrom_type": "sata",
+
+      "iso_paths": [
+        "[datastore-mac] ISO/macOS 10.13.3.iso",
+        "[datastore-mac] ISO/VMware Tools/10.2.0/darwin.iso"
+      ],
+
+      "iso_urls": ["{{template_dir}}/setup/out/setup.iso"],
+      "iso_checksum_type": "sha256",
+      "iso_checksum_url": "file:///{{template_dir}}/setup/out/sha256sums",
+
+      "boot_wait": "4m",
+      "boot_command": [
+        "<enter><wait5>",
+        "<leftCtrlOn><f2><leftCtrlOff>u<enter>t<enter><wait5>",
+        "/Volumes/setup/setup.sh<enter>"
+      ],
+
+      "ssh_username": "jetbrains",
+      "ssh_password": "jetbrains"
+    }
+  ]
+}

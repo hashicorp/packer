@@ -10,6 +10,6 @@ type Decodable interface {
 	ConfigSpec() hcldec.ObjectSpec
 }
 
-func decodeHCL2Spec(block *hcl.Block, ectx *hcl.EvalContext, dec Decodable) (cty.Value, hcl.Diagnostics) {
-	return hcldec.Decode(block.Body, dec.ConfigSpec(), ectx)
+func decodeHCL2Spec(body hcl.Body, ectx *hcl.EvalContext, dec Decodable) (cty.Value, hcl.Diagnostics) {
+	return hcldec.Decode(body, dec.ConfigSpec(), ectx)
 }

@@ -64,14 +64,16 @@ Here is a full list of the available functions for reference.
     variable](/docs/templates/user-variables.html#using-home-variable)
 -   `build` - This engine will allow you to access special variables that
     provide connection information and basic instance state information.
-    Usage example:
+    Usage example:   
+    
     ```json
-        {
-          "type": "shell-local",
-          "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
-          "inline": ["echo $TESTVAR"]
-        },
+    {
+      "type": "shell-local",
+      "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
+      "inline": ["echo $TESTVAR"]
+    }
     ```
+    
     Valid variables to request are: "ID", "Host",
     "Port", "User", "Password", "ConnType",
     "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
@@ -89,6 +91,8 @@ Here is a full list of the available functions for reference.
     in the provisioner documentation. This feature does not yet work
     if the provisioners are being used in conjunction with our chroot builders
     or with lxc/lxd builders.
+    
+    For builder-specific engine variables, please also refer to the builder docs.
 
     This engine is in beta; please report any issues or requests on the Packer
     issue tracker on GitHub.

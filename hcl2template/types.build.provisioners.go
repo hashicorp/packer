@@ -2,7 +2,9 @@ package hcl2template
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
@@ -10,21 +12,34 @@ import (
 // ProvisionerBlock represents a parsed provisioner
 type ProvisionerBlock struct {
 	PType string
-	block *hcl.Block
+	PName string
+	HCL2Ref
+}
+
+func (p *ProvisionerBlock) String() string {
+	return fmt.Sprintf(buildProvisionerLabel+"-block %q %q", p.PType, p.PName)
 }
 
 func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Diagnostics) {
-	provisioner := &ProvisionerBlock{
-		PType: block.Labels[0],
-		block: block,
+	var b struct {
+		Name string   `hcl:"name,optional"`
+		Rest hcl.Body `hcl:",remain"`
 	}
-	var diags hcl.Diagnostics
+	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	if diags.HasErrors() {
+		return nil, diags
+	}
+	provisioner := &ProvisionerBlock{
+		PType:   block.Labels[0],
+		PName:   b.Name,
+		HCL2Ref: newHCL2Ref(block, b.Rest),
+	}
 
 	if !p.ProvisionersSchemas.Has(provisioner.PType) {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + buildProvisionerLabel + " type " + provisioner.PType,
+			Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provisioner.PType),
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known provisioners: %v", p.ProvisionersSchemas.List()),
+			Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", p.ProvisionersSchemas.List()),
 			Severity: hcl.DiagError,
 		})
 		return nil, diags
@@ -38,13 +53,13 @@ func (p *Parser) StartProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, g
 	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Failed loading " + pb.block.Type,
-			Subject: pb.block.LabelRanges[0].Ptr(),
+			Summary: fmt.Sprintf("failed loading %s", pb.PType),
+			Subject: pb.HCL2Ref.LabelsRanges[0].Ptr(),
 			Detail:  err.Error(),
 		})
 		return nil, diags
 	}
-	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.block, ectx, provisioner)
+	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.HCL2Ref.Rest, ectx, provisioner)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return nil, diags
@@ -71,9 +86,9 @@ func (p *Parser) StartProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, g
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Failed preparing " + pb.block.Type,
+			Summary:  fmt.Sprintf("Failed preparing %s", pb),
 			Detail:   err.Error(),
-			Subject:  pb.block.DefRange.Ptr(),
+			Subject:  pb.HCL2Ref.DefRange.Ptr(),
 		})
 		return nil, diags
 	}

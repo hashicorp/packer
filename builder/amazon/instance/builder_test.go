@@ -302,3 +302,24 @@ func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
+
+func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
+	var b Builder
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
+
+	generatedData, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
+	if generatedData[0] != "SourceAMIName" {
+		t.Fatalf("Generated data should contain SourceAMIName")
+	}
+}

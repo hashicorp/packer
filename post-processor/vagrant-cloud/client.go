@@ -26,14 +26,22 @@ type VagrantCloudClient struct {
 }
 
 type VagrantCloudErrors struct {
-	Errors map[string][]string `json:"errors"`
+	Errors []interface{} `json:"errors"`
 }
 
 func (v VagrantCloudErrors) FormatErrors() string {
 	errs := make([]string, 0)
-	for e := range v.Errors {
-		msg := fmt.Sprintf("%s %s", e, strings.Join(v.Errors[e], ","))
-		errs = append(errs, msg)
+	for _, err := range v.Errors {
+		switch e := err.(type) {
+		case string:
+			errs = append(errs, e)
+		case map[string]interface{}:
+			for k, v := range e {
+				errs = append(errs, fmt.Sprintf("%s %s", k, v))
+			}
+		default:
+			errs = append(errs, fmt.Sprintf("%s", err))
+		}
 	}
 	return strings.Join(errs, ". ")
 }

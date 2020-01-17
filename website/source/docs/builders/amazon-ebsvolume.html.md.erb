@@ -185,5 +185,14 @@ termination of the instance building the new image. In addition to those
 volumes created by this builder, any volumes inn the source AMI which are not
 marked for deletion on termination will remain in your account.
 
+## Build function template engine variables
+
+For the build function of [template engine](/docs/templates/engine.html), the following
+variables are available:
+
+-   `SourceAMIName` - The source AMI Name (for example
+    `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+    build the AMI.
+
 
 <%= partial "partials/builders/aws-ssh-differentiation-table" %>

@@ -32,11 +32,20 @@ func TestParser_complete(t *testing.T) {
 					&BuildBlock{
 						Froms: []SourceRef{refVBIsoUbuntu1204},
 						ProvisionerBlocks: []*ProvisionerBlock{
-							{PType: "shell"},
+							{
+								PType: "shell",
+								PName: "provisioner that does something",
+							},
 							{PType: "file"},
 						},
 						PostProcessors: []*PostProcessorBlock{
-							{PType: "amazon-import"},
+							{
+								PType: "amazon-import",
+								PName: "something",
+							},
+							{
+								PType: "amazon-import",
+							},
 						},
 					},
 				},
@@ -47,12 +56,24 @@ func TestParser_complete(t *testing.T) {
 					Type:    "virtualbox-iso",
 					Builder: basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
-						{PType: "shell", Provisioner: basicMockProvisioner},
+						{
+							PType:       "shell",
+							PName:       "provisioner that does something",
+							Provisioner: basicMockProvisioner,
+						},
 						{PType: "file", Provisioner: basicMockProvisioner},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
-							{PType: "amazon-import", PostProcessor: basicMockPostProcessor},
+							{
+								PType:         "amazon-import",
+								PName:         "something",
+								PostProcessor: basicMockPostProcessor,
+							},
+							{
+								PType:         "amazon-import",
+								PostProcessor: basicMockPostProcessor,
+							},
 						},
 					},
 				},

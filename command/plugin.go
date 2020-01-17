@@ -59,6 +59,8 @@ import (
 	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
+	vsphereclonebuilder "github.com/hashicorp/packer/builder/vsphere/clone"
+	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
@@ -150,6 +152,8 @@ var Builders = map[string]packer.Builder{
 	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
+	"vsphere-clone":       new(vsphereclonebuilder.Builder),
+	"vsphere-iso":         new(vsphereisobuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
 }
 

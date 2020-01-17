@@ -76,6 +76,12 @@ Optional:
 -   `snapshot_description` (string) - Description for the snapshot. Required
     when `snapshot_enable` is `true`
 
+-    `reregister_vm` (boolean) - Use the method of unregister VM and reregister
+    as a template, rather than using the markAsTemplate method in vmWare.
+    NOTE: If you are getting permission denied errors when trying to mark as a
+    template, but it works fine in the vSphere UI, try setting this to false.
+    Default is true.
+
 ## Using the vSphere Template with local builders
 
 Once the [vSphere](/docs/post-processors/vsphere.html) takes an artifact from

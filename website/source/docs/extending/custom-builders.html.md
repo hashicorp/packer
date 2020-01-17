@@ -159,3 +159,44 @@ necessary.
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 
+## Template Engine
+
+### Build variables
+
+Packer makes it possible to provide custom template engine variables to be shared with 
+provisioners using the `build` function. 
+ 
+Part of the builder interface changes made in 1.5.0 was to make builder Prepare() methods 
+return a list of custom variables which we call `generated data`. 
+We use that list of variables to generate a custom placeholder map per builder that 
+combines custom variables with the placeholder map of default build variables created by Packer.   
+Here's an example snippet telling packer what will be made available by the builder:
+
+```
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+    // ...
+    
+    generatedData := []string{"SourceImageName"}
+    return generatedData, warns, nil
+}
+```
+Returning the custom variable name(s) within the `generated_data` placeholder is necessary 
+for the template containing the build variable(s) to validate.  
+    
+Once the placeholder is set, it's necessary to pass the variables' real values when calling 
+the provisioner. This can be done as the example below:   
+
+```
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+    // ...
+    
+    // Create map of custom variable
+    generatedData := map[string]interface{}{"SourceImageName": "the source image name value"}
+    // Pass map to provisioner
+    hook.Run(context.Context, packer.HookProvision, ui, comm, generatedData)
+    
+    // ...
+}
+```
+
+To know more about the template engine build function, please refer to the [template engine docs](/docs/templates/engine.html).

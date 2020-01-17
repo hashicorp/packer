@@ -299,13 +299,14 @@ func loadConfig() (*config, error) {
 		return nil, err
 	}
 
+	// start by loading from PACKER_CONFIG if available
+	log.Print("Checking 'PACKER_CONFIG' for a config file path")
 	configFilePath := os.Getenv("PACKER_CONFIG")
-	if configFilePath != "" {
-		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
-	} else {
-		var err error
-		configFilePath, err = packer.ConfigFile()
 
+	if configFilePath == "" {
+		var err error
+		log.Print("'PACKER_CONFIG' not set; checking the default config file path")
+		configFilePath, err = packer.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
 		}
@@ -330,6 +331,8 @@ func loadConfig() (*config, error) {
 	if err := decodeConfig(f, &config); err != nil {
 		return nil, err
 	}
+
+	config.LoadExternalComponentsFromConfig()
 
 	return &config, nil
 }

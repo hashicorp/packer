@@ -103,7 +103,6 @@ type FlatConfig struct {
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	SSHSkipRequestPty         *bool             `mapstructure:"ssh_skip_request_pty" cty:"ssh_skip_request_pty"`
-	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" cty:"ssh_wait_timeout"`
 	ToolsUploadFlavor         *string           `mapstructure:"tools_upload_flavor" required:"false" cty:"tools_upload_flavor"`
 	ToolsUploadPath           *string           `mapstructure:"tools_upload_path" required:"false" cty:"tools_upload_path"`
 	VMXData                   map[string]string `mapstructure:"vmx_data" required:"false" cty:"vmx_data"`
@@ -234,7 +233,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                 &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                 &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_skip_request_pty":           &hcldec.AttrSpec{Name: "ssh_skip_request_pty", Type: cty.Bool, Required: false},
-		"ssh_wait_timeout":               &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"tools_upload_flavor":            &hcldec.AttrSpec{Name: "tools_upload_flavor", Type: cty.String, Required: false},
 		"tools_upload_path":              &hcldec.AttrSpec{Name: "tools_upload_path", Type: cty.String, Required: false},
 		"vmx_data":                       &hcldec.BlockAttrsSpec{TypeName: "vmx_data", ElementType: cty.String, Required: false},

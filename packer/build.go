@@ -109,6 +109,7 @@ type CoreBuild struct {
 type CoreBuildPostProcessor struct {
 	PostProcessor     PostProcessor
 	PType             string
+	PName             string
 	config            map[string]interface{}
 	keepInputArtifact *bool
 }
@@ -117,6 +118,7 @@ type CoreBuildPostProcessor struct {
 // the provisioner within the build.
 type CoreBuildProvisioner struct {
 	PType       string
+	PName       string
 	Provisioner Provisioner
 	config      []interface{}
 }
@@ -195,7 +197,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	// Prepare the post-processors
 	for _, ppSeq := range b.PostProcessors {
 		for _, corePP := range ppSeq {
-			err = corePP.PostProcessor.Configure(corePP.config, packerConfig)
+			err = corePP.PostProcessor.Configure(corePP.config, packerConfig, generatedPlaceholderMap)
 			if err != nil {
 				return
 			}
@@ -297,7 +299,11 @@ PostProcessorRunSeqLoop:
 				Ui:     originalUi,
 			}
 
-			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.PType))
+			if corePP.PName == corePP.PType {
+				builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.PType))
+			} else {
+				builderUi.Say(fmt.Sprintf("Running post-processor: %s (type %s)", corePP.PName, corePP.PType))
+			}
 			ts := CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
 			artifact, defaultKeep, forceOverride, err := corePP.PostProcessor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
