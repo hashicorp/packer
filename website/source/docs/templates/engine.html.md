@@ -64,14 +64,16 @@ Here is a full list of the available functions for reference.
     variable](/docs/templates/user-variables.html#using-home-variable)
 -   `build` - This engine will allow you to access special variables that
     provide connection information and basic instance state information.
-    Usage example:
+    Usage example:   
+    
     ```json
-        {
-          "type": "shell-local",
-          "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
-          "inline": ["echo $TESTVAR"]
-        }
+    {
+      "type": "shell-local",
+      "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
+      "inline": ["echo $TESTVAR"]
+    }
     ```
+    
     Valid variables to request are: "ID", "Host",
     "Port", "User", "Password", "ConnType",
     "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
