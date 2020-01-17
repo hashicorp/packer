@@ -63,13 +63,14 @@ func TestLoadExternalComponentsFromConfig(t *testing.T) {
 		t.Errorf("failed to load external builders; got %v as the resulting config", cfg.Builders)
 	}
 
+	if len(cfg.PostProcessors) != 1 || !cfg.PostProcessors.Has("noop") {
+		t.Errorf("failed to load external post-processors; got %v as the resulting config", cfg.PostProcessors)
+	}
+
 	if len(cfg.Provisioners) != 1 || !cfg.Provisioners.Has("super-shell") {
 		t.Errorf("failed to load external provisioners; got %v as the resulting config", cfg.Provisioners)
 	}
 
-	if len(cfg.PostProcessors) != 1 || !cfg.PostProcessors.Has("noop") {
-		t.Errorf("failed to load external post-processors; got %v as the resulting config", cfg.PostProcessors)
-	}
 }
 
 func TestLoadExternalComponentsFromConfig_onlyProvisioner(t *testing.T) {
@@ -94,17 +95,53 @@ func TestLoadExternalComponentsFromConfig_onlyProvisioner(t *testing.T) {
 
 	cfg.LoadExternalComponentsFromConfig()
 
-	if len(cfg.Builders) != 0 || cfg.Builders.Has("cloud-xyz") {
+	if len(cfg.Builders) != 0 {
 		t.Errorf("loaded external builders when it wasn't supposed to; got %v as the resulting config", cfg.Builders)
+	}
+
+	if len(cfg.PostProcessors) != 0 {
+		t.Errorf("loaded external post-processors when it wasn't supposed to; got %v as the resulting config", cfg.PostProcessors)
 	}
 
 	if len(cfg.Provisioners) != 1 || !cfg.Provisioners.Has("super-shell") {
 		t.Errorf("failed to load external provisioners; got %v as the resulting config", cfg.Provisioners)
 	}
+}
 
-	if len(cfg.PostProcessors) != 0 || cfg.PostProcessors.Has("noop") {
-		t.Errorf("loaded external post-processors when it wasn't supposed to; got %v as the resulting config", cfg.PostProcessors)
+func TestLoadSingleComponent(t *testing.T) {
+
+	tmpFile, err := ioutil.TempFile(".", "packer-builder-")
+	if err != nil {
+		t.Fatalf("failed to create test file with error: %s", err)
 	}
+	defer os.Remove(tmpFile.Name())
+
+	tt := []struct {
+		pluginPath    string
+		errorExpected bool
+	}{
+		{pluginPath: tmpFile.Name(), errorExpected: false},
+		{pluginPath: "./non-existing-file", errorExpected: true},
+	}
+
+	var cfg config
+	cfg.Builders = packer.MapOfBuilder{}
+	cfg.PostProcessors = packer.MapOfPostProcessor{}
+	cfg.Provisioners = packer.MapOfProvisioner{}
+
+	for _, tc := range tt {
+		tc := tc
+		_, err := cfg.loadSingleComponent(tc.pluginPath)
+		if tc.errorExpected && err == nil {
+			t.Errorf("expected loadSingleComponent(%s) to error but it didn't", tc.pluginPath)
+			continue
+		}
+
+		if err != nil && !tc.errorExpected {
+			t.Errorf("expected loadSingleComponent(%s) to load properly but got an error: %v", tc.pluginPath, err)
+		}
+	}
+
 }
 
 /* generateFakePackerConfigData creates a collection of mock plugins along with a basic packerconfig.
