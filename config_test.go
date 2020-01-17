@@ -110,7 +110,8 @@ func TestLoadExternalComponentsFromConfig_onlyProvisioner(t *testing.T) {
 
 func TestLoadSingleComponent(t *testing.T) {
 
-	tmpFile, err := ioutil.TempFile(".", "packer-builder-")
+	// .exe will work everyone for testing purpose, but mostly here to help Window's test runs.
+	tmpFile, err := ioutil.TempFile(".", "packer-builder-*.exe")
 	if err != nil {
 		t.Fatalf("failed to create test file with error: %s", err)
 	}
