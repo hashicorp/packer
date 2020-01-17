@@ -30,7 +30,7 @@ type StepMountDevice struct {
 	MountOptions   []string
 	MountPartition string
 
-	mountPath string
+	mountPath     string
 	GeneratedData *builderscommon.GeneratedData
 }
 

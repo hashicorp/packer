@@ -35,7 +35,7 @@ func testState() multistep.StateBag {
 }
 
 func testGeneratedData(state multistep.StateBag) builderscommon.GeneratedData {
-	generatedData := builderscommon.GeneratedData{State:state}
+	generatedData := builderscommon.GeneratedData{State: state}
 	return generatedData
 }
 
