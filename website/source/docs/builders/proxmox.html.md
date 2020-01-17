@@ -50,7 +50,21 @@ builder.
 
 -   `iso_file` (string) - Path to the ISO file to boot from, expressed as a
     proxmox datastore path, for example
-    `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`
+    `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`.
+    Either `iso_file` OR `iso_url` must be specifed.
+
+-   `iso_url` (string) - URL to an ISO file to upload to Proxmox, and then
+    boot from. Either `iso_file` OR `iso_url` must be specifed.
+
+-   `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
+    the ISO file.
+
+-   `iso_checksum` (string) - Checksum of the ISO file.
+
+-   `iso_checksum_type` (string) - Type of the checksum. Can be md5, sha1,
+    sha256, sha512 or none. Corruption of large files, such as ISOs, can occur
+    during transfer from time to time. As such, setting this to none is not
+    recommended.
 
 ### Optional:
 -   `insecure_skip_tls_verify` (bool) - Skip validating the certificate.

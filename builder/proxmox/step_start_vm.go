@@ -26,6 +26,8 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		agent = 0
 	}
 
+	isoFile := state.Get("iso_file").(string)
+
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
@@ -37,7 +39,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		QemuCores:    c.Cores,
 		QemuSockets:  c.Sockets,
 		QemuOs:       c.OS,
-		QemuIso:      c.ISOFile,
+		QemuIso:      isoFile,
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
 		Scsihw:       c.SCSIController,
