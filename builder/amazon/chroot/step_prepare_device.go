@@ -42,7 +42,7 @@ func (s *StepPrepareDevice) Run(ctx context.Context, state multistep.StateBag) m
 
 	log.Printf("Device: %s", device)
 	state.Put("device", device)
-	s.GeneratedData.Put("device", device)
+	s.GeneratedData.Put("Device", device)
 	return multistep.ActionContinue
 }
 
