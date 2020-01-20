@@ -2,11 +2,11 @@ package builder
 
 import "github.com/hashicorp/packer/helper/multistep"
 
-// GeneratedData manages the generated_data inside
-// the StateBag to make sure the data won't be overwritten
-// It should be used when a builder adds multiple custom template engine variables
+// GeneratedData manages variables exported by a builder after
+// it started. It uses the builder's multistep.StateBag internally, make sure it
+// is not nil before calling any functions.
 type GeneratedData struct {
-	// Just the builder StateBag
+	// The builder's StateBag
 	State multistep.StateBag
 }
 
