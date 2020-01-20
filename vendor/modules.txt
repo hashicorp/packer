@@ -339,8 +339,10 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/hashicorp/hcl/v2 v2.0.0
+# github.com/hashicorp/hcl/v2 v2.3.0
 github.com/hashicorp/hcl/v2
+github.com/hashicorp/hcl/v2/ext/customdecode
+github.com/hashicorp/hcl/v2/ext/tryfunc
 github.com/hashicorp/hcl/v2/ext/typeexpr
 github.com/hashicorp/hcl/v2/gohcl
 github.com/hashicorp/hcl/v2/hcldec
@@ -620,7 +622,7 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
-# github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
+# github.com/zclconf/go-cty v1.2.0
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
@@ -628,6 +630,8 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
+# github.com/zclconf/go-cty-yaml v1.0.1
+github.com/zclconf/go-cty-yaml
 # go.opencensus.io v0.22.2
 go.opencensus.io
 go.opencensus.io/internal

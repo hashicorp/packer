@@ -7,7 +7,7 @@ build {
     ]
 
     provisioner "shell" {
-        string   = "string"
+        string   = lower("STRING")
         int      = 42
         int64    = 43
         bool     = true

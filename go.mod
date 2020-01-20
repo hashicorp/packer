@@ -76,7 +76,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.0.0
+	github.com/hashicorp/hcl/v2 v2.3.0
 	github.com/hashicorp/serf v0.8.2 // indirect
 	github.com/hashicorp/vault v1.1.0
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
@@ -149,7 +149,8 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
-	github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
+	github.com/zclconf/go-cty v1.2.0
+	github.com/zclconf/go-cty-yaml v1.0.1
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect

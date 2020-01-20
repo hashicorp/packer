@@ -18,6 +18,7 @@ type PackerConfig struct {
 
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	ectx := &hcl.EvalContext{
+		Functions: Functions(),
 		Variables: map[string]cty.Value{
 			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
 			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
