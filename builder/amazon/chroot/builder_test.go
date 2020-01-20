@@ -209,3 +209,28 @@ func TestBuilderPrepare_RootDeviceNameNoAMIMappings(t *testing.T) {
 		t.Fatalf("should have error")
 	}
 }
+
+func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	generatedData, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
+	if generatedData[0] != "SourceAMIName" {
+		t.Fatalf("Generated data should contain SourceAMIName")
+	}
+	if generatedData[1] != "Device" {
+		t.Fatalf("Generated data should contain Device")
+	}
+	if generatedData[2] != "MountPath" {
+		t.Fatalf("Generated data should contain MountPath")
+	}
+}

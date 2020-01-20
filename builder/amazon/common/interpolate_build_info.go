@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -15,7 +16,7 @@ type BuildInfoTemplate struct {
 	SourceAMITags      map[string]string
 }
 
-func extractBuildInfo(region string, state multistep.StateBag) *BuildInfoTemplate {
+func extractBuildInfo(region string, state multistep.StateBag, generatedData *builder.GeneratedData) *BuildInfoTemplate {
 	rawSourceAMI, hasSourceAMI := state.GetOk("source_image")
 	if !hasSourceAMI {
 		return &BuildInfoTemplate{
@@ -37,7 +38,6 @@ func extractBuildInfo(region string, state multistep.StateBag) *BuildInfoTemplat
 		SourceAMIOwnerName: aws.StringValue(sourceAMI.ImageOwnerAlias),
 		SourceAMITags:      sourceAMITags,
 	}
-	state.Put("generated_data", map[string]interface{}{"SourceAMIName": buildInfoTemplate.SourceAMIName})
-
+	generatedData.Put("SourceAMIName", buildInfoTemplate.SourceAMIName)
 	return buildInfoTemplate
 }

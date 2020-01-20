@@ -25,9 +25,12 @@ func (s *StepChrootProvision) Run(ctx context.Context, state multistep.StateBag)
 		CmdWrapper: wrappedCommand,
 	}
 
+	// Loads hook data from builder's state, if it has been set.
+	hookData := common.PopulateProvisionHookData(state)
+
 	// Provision
 	log.Println("Running the provision hook")
-	if err := hook.Run(ctx, packer.HookProvision, ui, comm, nil); err != nil {
+	if err := hook.Run(ctx, packer.HookProvision, ui, comm, hookData); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
