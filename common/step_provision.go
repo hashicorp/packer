@@ -32,12 +32,12 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	}
 
 	// instance_id is placed in state by the builders.
-	// Not yet implemented in lxc/lxd, Azure, Qemu.
+	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
 	// Implemented in most others including digitalOcean (droplet id),
 	// docker (container_id), and clouds which use "server" internally instead
 	// of instance.
 
-	// Also note that lxc/lxd builders tend to have their own custom
+	// Also note that Chroot and lxc/lxd builders tend to have their own custom
 	// step_provision, so they won't use this code path.
 	id, ok := state.GetOk("instance_id")
 	if ok {
