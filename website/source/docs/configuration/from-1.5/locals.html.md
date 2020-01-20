@@ -1,6 +1,6 @@
 ---
 layout: "docs"
-page_title: "Local Values - 0.11 Configuration Language"
+page_title: "Local Values - HCL Configuration Language"
 sidebar_current: "configuration-locals"
 description: |-
   Local values assign a name to an expression that can then be used multiple times within a folder.

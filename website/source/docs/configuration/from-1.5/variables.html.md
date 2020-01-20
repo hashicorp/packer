@@ -1,6 +1,6 @@
 ---
 layout: "docs"
-page_title: "Input Variables - Configuration Language"
+page_title: "Input Variables - HCL Configuration Language"
 sidebar_current: "configuration-variables"
 description: |-
   Input variables are parameters for Packer modules.
