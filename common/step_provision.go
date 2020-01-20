@@ -52,7 +52,7 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	// Read communicator data into hook data
 	comm, ok := state.GetOk("communicator_config")
 	if !ok {
-		log.Printf("Unable to load config from state to populate provisionHookData")
+		log.Printf("Unable to load communicator config from state to populate provisionHookData")
 		return hookData
 	}
 	commConf := comm.(*communicator.Config)
