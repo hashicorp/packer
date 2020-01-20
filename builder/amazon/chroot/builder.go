@@ -10,12 +10,12 @@ package chroot
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/packer/builder"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	builderscommon "github.com/hashicorp/packer/builder/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
 	"github.com/hashicorp/packer/helper/config"
@@ -358,7 +358,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
-	generatedData := &builderscommon.GeneratedData{State: state}
+	generatedData := &builder.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{

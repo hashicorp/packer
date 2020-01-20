@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	builderscommon "github.com/hashicorp/packer/builder/common"
+	"github.com/hashicorp/packer/builder"
 	"log"
 	"os"
 	"path/filepath"
@@ -31,7 +31,7 @@ type StepMountDevice struct {
 	MountPartition string
 
 	mountPath     string
-	GeneratedData *builderscommon.GeneratedData
+	GeneratedData *builder.GeneratedData
 }
 
 func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

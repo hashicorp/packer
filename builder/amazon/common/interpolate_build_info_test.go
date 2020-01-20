@@ -1,7 +1,7 @@
 package common
 
 import (
-	builderscommon "github.com/hashicorp/packer/builder/common"
+	"github.com/hashicorp/packer/builder"
 	"reflect"
 	"testing"
 
@@ -34,8 +34,8 @@ func testState() multistep.StateBag {
 	return state
 }
 
-func testGeneratedData(state multistep.StateBag) builderscommon.GeneratedData {
-	generatedData := builderscommon.GeneratedData{State: state}
+func testGeneratedData(state multistep.StateBag) builder.GeneratedData {
+	generatedData := builder.GeneratedData{State: state}
 	return generatedData
 }
 
@@ -84,9 +84,5 @@ func TestInterpolateBuildInfo_extractBuildInfo_GeneratedDataWithSourceImageName(
 
 	if generatedDataState["SourceAMIName"] != "ami_test_name" {
 		t.Fatalf("Unexpected state SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedDataState["SourceAMIName"])
-	}
-
-	if generatedData.Data["SourceAMIName"] != "ami_test_name" {
-		t.Fatalf("Unexpected GeneratedData SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedData.Data["SourceAMIName"])
 	}
 }

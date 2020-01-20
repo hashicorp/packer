@@ -1,4 +1,4 @@
-package common
+package builder
 
 import (
 	"github.com/hashicorp/packer/helper/multistep"
@@ -11,8 +11,10 @@ func TestGeneratedData_Put(t *testing.T) {
 		State: state,
 	}
 	expectedValue := "data value"
+	secondExpectedValue := "another data value"
 
 	generatedData.Put("data_key", expectedValue)
+	generatedData.Put("another_data_key", secondExpectedValue)
 
 	if _, ok := generatedData.State.GetOk("generated_data"); !ok {
 		t.Fatalf("BAD: StateBag should contain generated_data")
@@ -22,8 +24,7 @@ func TestGeneratedData_Put(t *testing.T) {
 	if generatedDataState["data_key"] != expectedValue {
 		t.Fatalf("Unexpected state for data_key: expected %#v got %#v\n", expectedValue, generatedDataState["data_key"])
 	}
-
-	if generatedData.Data["data_key"] != expectedValue {
-		t.Fatalf("Unexpected GeneratedData for data_key: expected %#v got %#v\n", expectedValue, generatedData.Data["data_key"])
+	if generatedDataState["another_data_key"] != secondExpectedValue {
+		t.Fatalf("Unexpected state for another_data_key: expected %#v got %#v\n", secondExpectedValue, generatedDataState["another_data_key"])
 	}
 }

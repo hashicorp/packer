@@ -2,10 +2,10 @@ package common
 
 import (
 	"fmt"
-	builderscommon "github.com/hashicorp/packer/builder/common"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -27,10 +27,7 @@ func (t TagMap) IsSet() bool {
 
 func (t TagMap) EC2Tags(ictx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
 	var ec2Tags []*ec2.Tag
-	generatedData := builderscommon.GeneratedData{State: state}
-	if _, ok := state.GetOk("generated_data"); ok {
-		generatedData.Data = state.Get("generated_data").(map[string]interface{})
-	}
+	generatedData := builder.GeneratedData{State: state}
 	ictx.Data = extractBuildInfo(region, state, &generatedData)
 
 	for key, value := range t {
