@@ -3,16 +3,18 @@ layout: "guides"
 page_title: "Input Variables"
 sidebar_current: hcl-configuration-variables
 description: |-
-  This page introduces input variables as a way to do parameterize a
-  configuration.
+  This page introduces input variables and local variables as a way to
+  parameterize a configuration.
 ---
 
-# Input Variables
+# Input Variables and local variables
 
-This page introduces input variables as a way to do parameterize a
-configuration.
+This page introduces input variables and local variables as a way to
+parameterize a configuration. Once defined, input variables are settable from a
+default value, environment, special var files, and command line arguments.
+Local variables can be a compound of input variables and local variables.
 
-## Defining Variables
+## Defining Variables and locals
 
 Let's create a file `variables.pkr.hcl` with the following contents.
 
@@ -27,13 +29,22 @@ variable "secret_key" {}
 variable "region" {
   default = "us-east-1"
 }
+
+locals {
+  debian_ami_name = "${var.image_id}-debian"
+  foo             = "bar"
+}
 ```
 
 This defines three variables within your Packer configuration.  The first
 two have empty blocks `{}`. The third sets a default. If a default value is
 set, the variable is optional. Otherwise, the variable is required.
+This also defines two locals: `debian_ami_name` and `foo`.
 
-## Using Variables in Configuration
+-> **Note**: that it is *not* possible to use variables in a variable defintion
+but it *is* possible to use locals and variables in a local definintion.
+
+## Using Variables and locals in Configuration
 
 Next, you can define a source using the variables :
 
@@ -41,21 +52,22 @@ Next, you can define a source using the variables :
 # source.pkr.hcl
 
 source "amazon-ebs" "debian" {
+  ami_name   = local.debian_ami_name
   access_key = var.aws_access_key
   secret_key = "${var.aws_secret_key}"
   region     = "${var.aws_region}"
 }
 ```
 
-This uses more interpolations, this time prefixed with `var.`. This
-tells Packer that you're accessing variables. This configures
-the builder with the given variables.
+This uses more interpolations, this time prefixed with `var.` and `.local`.
+This tells Packer that you're accessing variables. This configures the builder
+with the given variables.
 
 ## Assigning Variables
 
 There are multiple ways to assign variables. Below is also the order
 in which variable values are chosen. The following is the descending order
-of precedence in which variables are considered.
+of precedence in which variables are considered. So first defined; first used.
 
 #### Command-line flags
 

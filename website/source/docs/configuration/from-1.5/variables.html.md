@@ -15,8 +15,8 @@ build to be customized without altering the build's own source code.
 When you declare variables in the build of your configuration, you can set
 their values using CLI options and environment variables.
 
-Input variable usage is introduced in the Getting Started guide section [_Input
-Variables_](/intro/getting-started/variables.html).
+Input variable and local variable usage are introduced in the [_Variables
+Guide_](/guides/hcl/variables).
 
 -> **Note:** For brevity, input variables are often referred to as just
 "variables" or "Packer variables" when it is clear from context what sort of
