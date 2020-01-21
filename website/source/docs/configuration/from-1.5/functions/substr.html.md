@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "substr - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-substr"
+sidebar_current: "configuration-functions-string-substr"
 description: |-
   The substr function extracts a substring from a given string by offset and
   length.

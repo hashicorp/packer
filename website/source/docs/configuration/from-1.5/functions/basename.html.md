@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "basename - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-basename"
+sidebar_current: "configuration-functions-file-basename"
 description: |-
   The basename function removes all except the last portion from a filesystem
   path.

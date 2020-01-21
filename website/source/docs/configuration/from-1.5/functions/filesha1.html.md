@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "filesha1 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-filesha1"
+sidebar_current: "configuration-functions-crypto-filesha1"
 description: |-
   The filesha1 function computes the SHA1 hash of the contents of
   a given file and encodes it as hex.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "uuidv5 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-uuidv5"
+sidebar_current: "configuration-functions-crypto-uuidv5"
 description: |-
   The uuidv5 function generates a uuid v5 string representation of the value in the specified namespace.
 ---

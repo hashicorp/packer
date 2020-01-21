@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "chomp - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-chomp"
+sidebar_current: "configuration-functions-string-chomp"
 description: |-
   The chomp function removes newline characters at the end of a string.
 ---

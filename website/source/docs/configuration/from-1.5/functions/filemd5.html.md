@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "filemd5 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-filemd5"
+sidebar_current: "configuration-functions-crypto-filemd5"
 description: |-
   The filemd5 function computes the MD5 hash of the contents of
   a given file and encodes it as hex.

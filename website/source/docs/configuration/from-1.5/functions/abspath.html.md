@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "abspath - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-abspath"
+sidebar_current: "configuration-functions-file-abspath"
 description: |-
   The abspath function converts the argument to an absolute filesystem path.
 ---

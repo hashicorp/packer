@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "element - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-element"
+sidebar_current: "configuration-functions-collection-element"
 description: |-
   The element function retrieves a single element from a list.
 ---

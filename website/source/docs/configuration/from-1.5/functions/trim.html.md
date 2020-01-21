@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "trim - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-trim"
+sidebar_current: "configuration-functions-string-trim"
 description: |-
   The trim function removes the specified characters from the start and end of
   a given string.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "base64sha256 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-base64sha256"
+sidebar_current: "configuration-functions-crypto-base64sha256"
 description: |-
   The base64sha256 function computes the SHA256 hash of a given string and
   encodes it with Base64.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "base64decode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-base64decode"
+sidebar_current: "configuration-functions-encoding-base64decode"
 description: |-
   The base64decode function decodes a string containing a base64 sequence.
 ---

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "pow - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-pow"
+sidebar_current: "configuration-functions-numeric-pow"
 description: |-
   The pow function raises a number to a power.
 ---

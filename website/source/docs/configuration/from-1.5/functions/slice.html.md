@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "slice - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-slice"
+sidebar_current: "configuration-functions-collection-slice"
 description: |-
   The slice function extracts some consecutive elements from within a list.
 ---

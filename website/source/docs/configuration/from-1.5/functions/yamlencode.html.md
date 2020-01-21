@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "yamlencode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-yamlencode"
+sidebar_current: "configuration-functions-encoding-yamlencode"
 description: |-
   The yamlencode function encodes a given value as a YAML string.
 ---

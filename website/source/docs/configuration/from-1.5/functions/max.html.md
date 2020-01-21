@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "max - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-max"
+sidebar_current: "configuration-functions-numeric-max"
 description: |-
   The max function takes one or more numbers and returns the greatest number.
 ---

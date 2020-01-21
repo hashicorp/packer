@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "trimsuffix - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-trimsuffix"
+sidebar_current: "configuration-functions-string-trimsuffix"
 description: |-
   The trimsuffix function removes the specified suffix from the end of a
   given string.

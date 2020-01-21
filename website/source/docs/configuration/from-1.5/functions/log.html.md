@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "log - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-log"
+sidebar_current: "configuration-functions-numeric-log"
 description: |-
   The log function returns the logarithm of a given number in a given base.
 ---

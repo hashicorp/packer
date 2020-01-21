@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "yamldecode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-yamldecode"
+sidebar_current: "configuration-functions-encoding-yamldecode"
 description: |-
   The yamldecode function decodes a YAML string into a representation of its
   value.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "merge - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-merge"
+sidebar_current: "configuration-functions-collection-merge"
 description: |-
   The merge function takes an arbitrary number of maps and returns a single
   map after merging the keys from each argument.

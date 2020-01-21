@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "formatlist - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-formatlist"
+sidebar_current: "configuration-functions-string-formatlist"
 description: |-
   The formatlist function produces a list of strings by formatting a number of
   other values according to a specification string.

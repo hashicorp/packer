@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "toset - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-toset"
+sidebar_current: "configuration-functions-conversion-toset"
 description: |-
   The toset function converts a value to a set.
 ---

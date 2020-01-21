@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "index - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-index"
+sidebar_current: "configuration-functions-collection-index"
 description: |-
   The index function finds the element index for a given value in a list.
 ---

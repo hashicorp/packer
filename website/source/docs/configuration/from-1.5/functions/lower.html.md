@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "lower - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-lower"
+sidebar_current: "configuration-functions-string-lower"
 description: |-
   The lower function converts all cased letters in the given string to lowercase.
 ---

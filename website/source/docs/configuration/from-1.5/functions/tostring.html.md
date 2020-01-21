@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "tostring - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-tostring"
+sidebar_current: "configuration-functions-conversion-tostring"
 description: |-
   The tostring function converts a value to a string.
 ---

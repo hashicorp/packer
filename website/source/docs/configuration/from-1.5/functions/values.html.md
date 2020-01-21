@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "values - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-values"
+sidebar_current: "configuration-functions-collection-values"
 description: |-
   The values function returns a list of the element values in a given map.
 ---

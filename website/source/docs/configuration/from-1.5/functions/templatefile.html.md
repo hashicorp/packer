@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "templatefile - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-templatefile"
+sidebar_current: "configuration-functions-file-templatefile"
 description: |-
   The templatefile function reads the file at the given path and renders its
   content as a template.

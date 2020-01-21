@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "tolist - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-tolist"
+sidebar_current: "configuration-functions-conversion-tolist"
 description: |-
   The tolist function converts a value to a list.
 ---

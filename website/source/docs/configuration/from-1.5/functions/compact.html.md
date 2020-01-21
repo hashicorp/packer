@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "compact - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-compact"
+sidebar_current: "configuration-functions-collection-compact"
 description: |-
   The compact function removes empty string elements from a list.
 ---

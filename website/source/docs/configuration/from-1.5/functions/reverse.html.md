@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "reverse - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-reverse"
+sidebar_current: "configuration-functions-collection-reverse"
 description: |-
   The reverse function reverses a sequence.
 ---

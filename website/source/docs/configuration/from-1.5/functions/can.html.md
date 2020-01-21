@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "can - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-can"
+sidebar_current: "configuration-functions-conversion-can"
 description: |-
   The can function tries to evaluate an expression given as an argument and
   indicates whether the evaluation succeeded.

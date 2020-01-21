@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "ceil - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-ceil"
+sidebar_current: "configuration-functions-numeric-ceil"
 description: |-
   The ceil function returns the closest whole number greater than or equal to
   the given value.

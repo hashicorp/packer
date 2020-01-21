@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "lookup - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-lookup"
+sidebar_current: "configuration-functions-collection-lookup"
 description: |-
   The lookup function retrieves an element value from a map given its key.
 ---

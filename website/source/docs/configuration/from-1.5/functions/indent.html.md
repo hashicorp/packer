@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "indent - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-indent"
+sidebar_current: "configuration-functions-string-indent"
 description: |-
   The indent function adds a number of spaces to the beginnings of all but the
   first line of a given multi-line string.

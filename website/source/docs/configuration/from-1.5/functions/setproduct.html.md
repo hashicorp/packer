@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "setproduct - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-setproduct"
+sidebar_current: "configuration-functions-collection-setproduct"
 description: |-
   The setproduct function finds all of the possible combinations of elements
   from all of the given sets by computing the cartesian product.

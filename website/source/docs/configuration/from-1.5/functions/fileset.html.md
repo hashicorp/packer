@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "fileset - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-file-set"
+sidebar_current: "configuration-functions-file-file-set"
 description: |-
   The fileset function enumerates a set of regular file names given a pattern.
 ---

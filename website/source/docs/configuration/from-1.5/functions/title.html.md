@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "title - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-title"
+sidebar_current: "configuration-functions-string-title"
 description: |-
   The title function converts the first letter of each word in a given string
   to uppercase.

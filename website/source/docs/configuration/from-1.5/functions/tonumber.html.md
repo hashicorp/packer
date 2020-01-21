@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "tonumber - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-tonumber"
+sidebar_current: "configuration-functions-conversion-tonumber"
 description: |-
   The tonumber function converts a value to a number.
 ---

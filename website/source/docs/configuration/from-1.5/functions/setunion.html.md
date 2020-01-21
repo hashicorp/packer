@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "setunion - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-setunion"
+sidebar_current: "configuration-functions-collection-setunion"
 description: |-
   The setunion function takes multiple sets and produces a single set
   containing the elements from all of the given sets.

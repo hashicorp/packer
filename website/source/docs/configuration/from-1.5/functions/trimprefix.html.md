@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "trimprefix - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-trimprefix"
+sidebar_current: "configuration-functions-string-trimprefix"
 description: |-
   The trimprefix function removes the specified prefix from the start of a
   given string.

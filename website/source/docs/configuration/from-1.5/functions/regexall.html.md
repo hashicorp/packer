@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "regexall - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-regexall"
+sidebar_current: "configuration-functions-string-regexall"
 description: |-
   The regex function applies a regular expression to a string and returns a list of all matches.
 ---

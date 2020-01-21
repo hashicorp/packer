@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "pathexpand - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-pathexpand"
+sidebar_current: "configuration-functions-file-pathexpand"
 description: |-
   The pathexpand function expands a leading ~ character to the current user's
   home directory.

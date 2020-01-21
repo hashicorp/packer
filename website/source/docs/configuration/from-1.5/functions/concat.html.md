@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "concat - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-concat"
+sidebar_current: "configuration-functions-collection-concat"
 description: |-
   The concat function combines two or more lists into a single list.
 ---

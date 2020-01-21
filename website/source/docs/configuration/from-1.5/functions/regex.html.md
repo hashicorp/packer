@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "regex - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-regex"
+sidebar_current: "configuration-functions-string-regex"
 description: |-
   The regex function applies a regular expression to a string and returns the
   matching substrings.

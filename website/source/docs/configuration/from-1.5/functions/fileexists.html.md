@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "fileexists - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-file-exists"
+sidebar_current: "configuration-functions-file-file-exists"
 description: |-
   The fileexists function determines whether a file exists at a given path.
 ---

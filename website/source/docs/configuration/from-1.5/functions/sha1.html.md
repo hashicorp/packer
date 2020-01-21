@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "sha1 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-sha1"
+sidebar_current: "configuration-functions-crypto-sha1"
 description: |-
   The sha1 function computes the SHA1 hash of a given string and encodes it
   with hexadecimal digits.

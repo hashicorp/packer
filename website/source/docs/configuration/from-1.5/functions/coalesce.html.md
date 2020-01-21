@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "coalesce - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-coalesce-x"
+sidebar_current: "configuration-functions-collection-coalesce-x"
 description: |-
   The coalesce function takes any number of arguments and returns the
   first one that isn't null nor empty.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "strrev - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-strrev"
+sidebar_current: "configuration-functions-string-strrev"
 description: |-
   The strrev function reverses a string.
 ---

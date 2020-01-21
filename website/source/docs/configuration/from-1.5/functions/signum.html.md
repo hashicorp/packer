@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "signum - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-signum"
+sidebar_current: "configuration-functions-numeric-signum"
 description: |-
   The signum function determines the sign of a number.
 ---

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "format - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-format-x"
+sidebar_current: "configuration-functions-string-format-x"
 description: |-
   The format function produces a string by formatting a number of other values
   according to a specification string.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "range - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-range"
+sidebar_current: "configuration-functions-collection-range"
 description: |-
   The range function generates sequences of numbers.
 ---

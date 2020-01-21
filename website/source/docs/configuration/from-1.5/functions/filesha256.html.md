@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "filesha256 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-crypto-filesha256"
+sidebar_current: "configuration-functions-crypto-filesha256"
 description: |-
   The filesha256 function computes the SHA256 hash of the contents of
   a given file and encodes it as hex.

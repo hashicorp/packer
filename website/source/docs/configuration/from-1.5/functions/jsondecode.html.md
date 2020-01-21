@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "jsondecode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-jsondecode"
+sidebar_current: "configuration-functions-encoding-jsondecode"
 description: |-
   The jsondecode function decodes a JSON string into a representation of its
   value.

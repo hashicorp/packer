@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "length - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-length"
+sidebar_current: "configuration-functions-collection-length"
 description: |-
   The length function determines the length of a collection or string.
 ---

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "distinct - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-distinct"
+sidebar_current: "configuration-functions-collection-distinct"
 description: |-
   The distinct function removes duplicate elements from a list.
 ---

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "try - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-try"
+sidebar_current: "configuration-functions-conversion-try"
 description: |-
   The try function tries to evaluate a sequence of expressions given as
   arguments and returns the result of the first one that does not produce

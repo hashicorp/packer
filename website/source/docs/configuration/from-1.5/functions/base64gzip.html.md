@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "base64gzip - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-base64gzip"
+sidebar_current: "configuration-functions-encoding-base64gzip"
 description: |-
   The base64encode function compresses the given string with gzip and then
   encodes the result in Base64.

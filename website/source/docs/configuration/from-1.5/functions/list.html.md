@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "list - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-list"
+sidebar_current: "configuration-functions-collection-list"
 description: |-
   The list function constructs a list from some given elements.
 ---

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "tobool - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-tobool"
+sidebar_current: "configuration-functions-conversion-tobool"
 description: |-
   The tobool function converts a value to boolean.
 ---

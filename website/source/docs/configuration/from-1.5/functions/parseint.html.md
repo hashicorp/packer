@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "parseint - Functions - Configuration Language"
-sidebar_current: "docs-funcs-numeric-parseint"
+sidebar_current: "configuration-functions-numeric-parseint"
 description: |-
   The parseint function parses the given string as a representation of an integer.
 ---

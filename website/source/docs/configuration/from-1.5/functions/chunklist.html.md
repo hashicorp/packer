@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "chunklist - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-chunklist"
+sidebar_current: "configuration-functions-collection-chunklist"
 description: |-
   The chunklist function splits a single list into fixed-size chunks, returning
   a list of lists.

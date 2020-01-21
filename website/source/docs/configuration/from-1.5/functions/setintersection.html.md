@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "setintersection - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-setintersection"
+sidebar_current: "configuration-functions-collection-setintersection"
 description: |-
   The setintersection function takes multiple sets and produces a single set
   containing only the elements that all of the given sets have in common.

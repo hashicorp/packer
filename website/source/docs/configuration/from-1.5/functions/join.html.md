@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "join - Functions - Configuration Language"
-sidebar_current: "docs-funcs-string-join"
+sidebar_current: "configuration-functions-string-join"
 description: |-
   The join function produces a string by concatenating the elements of a list
   with a given delimiter.

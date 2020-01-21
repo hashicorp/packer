@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "jsonencode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-jsonencode"
+sidebar_current: "configuration-functions-encoding-jsonencode"
 description: |-
   The jsonencode function encodes a given value as a JSON string.
 ---

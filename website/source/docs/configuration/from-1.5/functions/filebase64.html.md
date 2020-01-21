@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "filebase64 - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-filebase64"
+sidebar_current: "configuration-functions-file-filebase64"
 description: |-
   The filebase64 function reads the contents of the file at the given path and
   returns them as a base64-encoded string.

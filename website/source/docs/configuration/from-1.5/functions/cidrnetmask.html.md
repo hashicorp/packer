@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "cidrnetmask - Functions - Configuration Language"
-sidebar_current: "docs-funcs-ipnet-cidrnetmask"
+sidebar_current: "configuration-functions-ipnet-cidrnetmask"
 description: |-
   The cidrnetmask function converts an IPv4 address prefix given in CIDR
   notation into a subnet mask address.

@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "urlencode - Functions - Configuration Language"
-sidebar_current: "docs-funcs-encoding-urlencode"
+sidebar_current: "configuration-functions-encoding-urlencode"
 description: |-
   The urlencode function applies URL encoding to a given string.
 ---

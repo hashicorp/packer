@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "file - Functions - Configuration Language"
-sidebar_current: "docs-funcs-file-file-x"
+sidebar_current: "configuration-functions-file-file-x"
 description: |-
   The file function reads the contents of the file at the given path and
   returns them as a string.

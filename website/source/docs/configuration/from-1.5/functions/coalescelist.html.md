@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "coalescelist - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-coalescelist"
+sidebar_current: "configuration-functions-collection-coalescelist"
 description: |-
   The coalescelist function takes any number of list arguments and returns the
   first one that isn't empty.

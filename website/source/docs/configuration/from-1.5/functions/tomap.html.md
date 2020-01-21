@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "tomap - Functions - Configuration Language"
-sidebar_current: "docs-funcs-conversion-tomap"
+sidebar_current: "configuration-functions-conversion-tomap"
 description: |-
   The tomap function converts a value to a map.
 ---

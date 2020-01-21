@@ -1,7 +1,7 @@
 ---
-layout: "functions"
+layout: "docs"
 page_title: "matchkeys - Functions - Configuration Language"
-sidebar_current: "docs-funcs-collection-matchkeys"
+sidebar_current: "configuration-functions-collection-matchkeys"
 description: |-
   The matchkeys function takes a subset of elements from one list by matching
   corresponding indexes in another list.
