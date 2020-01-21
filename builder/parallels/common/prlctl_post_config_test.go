@@ -3,12 +3,14 @@ package common
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestPrlctlPostConfigPrepare_PrlctlPost(t *testing.T) {
 	// Test with empty
 	c := new(PrlctlPostConfig)
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -22,7 +24,7 @@ func TestPrlctlPostConfigPrepare_PrlctlPost(t *testing.T) {
 	c.PrlctlPost = [][]string{
 		{"foo", "bar", "baz"},
 	}
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}

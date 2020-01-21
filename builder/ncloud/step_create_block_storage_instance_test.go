@@ -12,9 +12,9 @@ func TestStepCreateBlockStorageInstanceShouldFailIfOperationCreateBlockStorageIn
 
 	var testSubject = &StepCreateBlockStorageInstance{
 		CreateBlockStorageInstance: func(serverInstanceNo string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
-		Say:    func(message string) {},
-		Error:  func(e error) {},
-		Config: new(Config),
+		Say:                        func(message string) {},
+		Error:                      func(e error) {},
+		Config:                     new(Config),
 	}
 
 	testSubject.Config.BlockStorageSize = 10
@@ -35,9 +35,9 @@ func TestStepCreateBlockStorageInstanceShouldFailIfOperationCreateBlockStorageIn
 func TestStepCreateBlockStorageInstanceShouldPassIfOperationCreateBlockStorageInstancePasses(t *testing.T) {
 	var testSubject = &StepCreateBlockStorageInstance{
 		CreateBlockStorageInstance: func(serverInstanceNo string) (string, error) { return "a", nil },
-		Say:    func(message string) {},
-		Error:  func(e error) {},
-		Config: new(Config),
+		Say:                        func(message string) {},
+		Error:                      func(e error) {},
+		Config:                     new(Config),
 	}
 
 	testSubject.Config.BlockStorageSize = 10

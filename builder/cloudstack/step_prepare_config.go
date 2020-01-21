@@ -13,7 +13,7 @@ import (
 
 type stepPrepareConfig struct{}
 
-func (s *stepPrepareConfig) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

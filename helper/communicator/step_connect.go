@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/packer/communicator/none"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -44,7 +45,21 @@ type StepConnect struct {
 	substep multistep.Step
 }
 
+func (s *StepConnect) pause(pauseLen time.Duration, ctx context.Context) bool {
+	// Use a select to determine if we get cancelled during the wait
+	log.Printf("Pausing before connecting...")
+	select {
+	case <-ctx.Done():
+		return true
+	case <-time.After(pauseLen):
+	}
+	log.Printf("Pause over; connecting...")
+	return false
+}
+
 func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
+
 	typeMap := map[string]multistep.Step{
 		"none": nil,
 		"ssh": &StepConnectSSH{
@@ -71,21 +86,43 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	if step == nil {
-		comm, err := none.New("none")
-		if err != nil {
+		if comm, err := none.New("none"); err != nil {
 			err := fmt.Errorf("Failed to set communicator 'none': %s", err)
 			state.Put("error", err)
-			ui := state.Get("ui").(packer.Ui)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+
+		} else {
+			state.Put("communicator", comm)
+			log.Printf("[INFO] communicator disabled, will not connect")
 		}
-		state.Put("communicator", comm)
-		log.Printf("[INFO] communicator disabled, will not connect")
 		return multistep.ActionContinue
 	}
 
+	if host, err := s.Host(state); err == nil {
+		ui.Say(fmt.Sprintf("Using %s communicator to connect: %s", s.Config.Type, host))
+	} else {
+		log.Printf("[DEBUG] Unable to get address during connection step: %s", err)
+	}
+
 	s.substep = step
-	return s.substep.Run(ctx, state)
+	action := s.substep.Run(ctx, state)
+	if action == multistep.ActionHalt {
+		return action
+	}
+
+	if s.Config.PauseBeforeConnect > 0 {
+		cancelled := s.pause(s.Config.PauseBeforeConnect, ctx)
+		if cancelled {
+			return multistep.ActionHalt
+		}
+	}
+
+	// Put communicator config into state so we can pass it to provisioners
+	// for specialized interpolation later
+	state.Put("communicator_config", s.Config)
+
+	return multistep.ActionContinue
 }
 
 func (s *StepConnect) Cleanup(state multistep.StateBag) {

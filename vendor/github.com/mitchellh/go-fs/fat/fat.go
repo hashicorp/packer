@@ -3,8 +3,9 @@ package fat
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/go-fs"
 	"math"
+
+	"github.com/mitchellh/go-fs"
 )
 
 // The first cluster that can really hold user data is always 2

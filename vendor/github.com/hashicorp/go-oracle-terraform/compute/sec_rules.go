@@ -7,10 +7,10 @@ type SecRulesClient struct {
 
 // SecRules obtains a SecRulesClient which can be used to access to the
 // Sec Rules functions of the Compute API
-func (c *ComputeClient) SecRules() *SecRulesClient {
+func (c *Client) SecRules() *SecRulesClient {
 	return &SecRulesClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "security ip list",
 			ContainerPath:       "/secrule/",
 			ResourceRootPath:    "/secrule",
@@ -29,8 +29,10 @@ type SecRuleInfo struct {
 	Disabled bool `json:"disabled"`
 	// The name of the destination security list or security IP list.
 	DestinationList string `json:"dst_list"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The name of the sec rule
-	Name string `json:"name"`
+	Name string
 	// The name of the source security list or security IP list.
 	SourceList string `json:"src_list"`
 	// Uniform Resource Identifier for the sec rule
@@ -185,7 +187,7 @@ func (c *SecRulesClient) DeleteSecRule(deleteInput *DeleteSecRuleInput) error {
 }
 
 func (c *SecRulesClient) success(ruleInfo *SecRuleInfo) (*SecRuleInfo, error) {
-	ruleInfo.Name = c.getUnqualifiedName(ruleInfo.Name)
+	ruleInfo.Name = c.getUnqualifiedName(ruleInfo.FQDN)
 	ruleInfo.SourceList = c.unqualifyListName(ruleInfo.SourceList)
 	ruleInfo.DestinationList = c.unqualifyListName(ruleInfo.DestinationList)
 	ruleInfo.Application = c.getUnqualifiedName(ruleInfo.Application)

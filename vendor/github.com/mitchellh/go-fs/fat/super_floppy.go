@@ -3,8 +3,9 @@ package fat
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/go-fs"
 	"time"
+
+	"github.com/mitchellh/go-fs"
 )
 
 // SuperFloppyConfig is the configuration for various properties of

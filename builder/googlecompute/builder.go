@@ -3,9 +3,11 @@
 package googlecompute
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -17,32 +19,32 @@ const BuilderId = "packer.googlecompute"
 
 // Builder represents a Packer Builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-// Prepare processes the build configuration parameters.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
-	b.config = c
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 // Run executes a googlecompute Packer build and returns a packer.Artifact
 // representing a GCE machine image.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, &b.config.Account)
+		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, err
 	}
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -51,9 +53,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		new(StepCheckExistingImage),
 		&StepCreateSSHKey{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
-			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
 		},
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
@@ -67,11 +68,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
-			Host:        commHost,
-			SSHConfig:   sshConfig,
+			Host:        communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+			SSHConfig:   b.config.Comm.SSHConfigFunc(),
 			WinRMConfig: winrmConfig,
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	}
 	if _, exists := b.config.Metadata[StartupScriptKey]; exists || b.config.StartupScriptFile != "" {
 		steps = append(steps, new(StepWaitStartupScript))
@@ -80,7 +84,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// Report any errors.
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -94,15 +98,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		image:  state.Get("image").(*Image),
 		driver: driver,
-		config: b.config,
+		config: &b.config,
 	}
 	return artifact, nil
 }
 
 // Cancel.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
-}

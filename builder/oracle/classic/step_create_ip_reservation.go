@@ -12,11 +12,11 @@ import (
 
 type stepCreateIPReservation struct{}
 
-func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateIPReservation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	iprClient := client.IPReservations()
 	// TODO: add optional Name and Tags
 
@@ -42,12 +42,16 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 }
 
 func (s *stepCreateIPReservation) Cleanup(state multistep.StateBag) {
+	ipResName, ok := state.GetOk("ipres_name")
+	if !ok {
+		return
+	}
+
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cleaning up IP reservations...")
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
-	ipResName := state.Get("ipres_name").(string)
-	input := compute.DeleteIPReservationInput{Name: ipResName}
+	input := compute.DeleteIPReservationInput{Name: ipResName.(string)}
 	ipClient := client.IPReservations()
 	err := ipClient.DeleteIPReservation(&input)
 	if err != nil {

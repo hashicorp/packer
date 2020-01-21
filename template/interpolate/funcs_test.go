@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -140,6 +142,25 @@ func TestFuncIsotime(t *testing.T) {
 	}
 }
 
+func TestFuncStrftime(t *testing.T) {
+	ctx := &Context{}
+	i := &I{Value: "{{strftime \"%Y-%m-%dT%H:%M:%S%z\"}}"}
+	result, err := i.Render(ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	val, err := time.Parse("2006-01-02T15:04:05-0700", result)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	currentTime := time.Now().UTC()
+	if currentTime.Sub(val) > 2*time.Second {
+		t.Fatalf("val: %v (current: %v)", val, currentTime)
+	}
+}
+
 func TestFuncPwd(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -191,6 +212,43 @@ func TestFuncTemplatePath(t *testing.T) {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
 		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
+func TestFuncSplit(t *testing.T) {
+	cases := []struct {
+		Input         string
+		Output        string
+		ErrorExpected bool
+	}{
+		{
+			`{{split build_name "-" 0}}`,
+			"foo",
+			false,
+		},
+		{
+			`{{split build_name "-" 1}}`,
+			"bar",
+			false,
+		},
+		{
+			`{{split build_name "-" 2}}`,
+			"",
+			true,
+		},
+	}
+
+	ctx := &Context{BuildName: "foo-bar"}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if (err == nil) == tc.ErrorExpected {
 			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
 		}
 
@@ -261,6 +319,90 @@ func TestFuncUser(t *testing.T) {
 	}
 }
 
+func TestFuncPackerBuild(t *testing.T) {
+	type cases struct {
+		DataMap     interface{}
+		ErrExpected bool
+		Template    string
+		OutVal      string
+	}
+
+	testCases := []cases{
+		// Data map is empty; there should be an error.
+		{
+			DataMap:     nil,
+			ErrExpected: true,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "",
+		},
+		// Data map is a map[string]string and contains value
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[string]string and contains value
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[string]string and contains value with placeholder.
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "{{.PartyVar}}",
+		},
+		// Data map is a map[interface{}]interface{} and contains value
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[interface{}]interface{} and contains value
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[interface{}]interface{} and contains value with placeholder.
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "{{.PartyVar}}",
+		},
+		// Data map is a map[interface{}]interface{} and doesn't have value.
+		{
+			DataMap:     map[interface{}]interface{}{"BadVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: true,
+			Template:    "{{ build `MissingVar` }}",
+			OutVal:      "",
+		},
+	}
+
+	for _, tc := range testCases {
+		ctx := &Context{}
+		ctx.Data = tc.DataMap
+		i := &I{Value: tc.Template}
+
+		result, err := i.Render(ctx)
+		if (err != nil) != tc.ErrExpected {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Template, err)
+		}
+
+		if ok := strings.Compare(result, tc.OutVal); ok != 0 {
+			t.Fatalf("Expected input to include: %s\n\nGot: %s",
+				tc.OutVal, result)
+		}
+	}
+}
+
 func TestFuncPackerVersion(t *testing.T) {
 	template := `{{packer_version}}`
 
@@ -276,5 +418,50 @@ func TestFuncPackerVersion(t *testing.T) {
 	if !strings.HasPrefix(result, version.Version) {
 		t.Fatalf("Expected input to include: %s\n\nGot: %s",
 			version.Version, result)
+	}
+}
+
+func TestReplaceFuncs(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+
+		{
+			`{{ "foo-bar-baz" | replace "-" "/" 1}}`,
+			`foo/bar-baz`,
+		},
+
+		{
+			`{{ replace "-" "/" 1 "foo-bar-baz" }}`,
+			`foo/bar-baz`,
+		},
+
+		{
+			`{{ "I Am Henry VIII" | replace_all " " "-" }}`,
+			`I-Am-Henry-VIII`,
+		},
+
+		{
+			`{{ replace_all " " "-" "I Am Henry VIII" }}`,
+			`I-Am-Henry-VIII`,
+		},
+	}
+
+	ctx := &Context{
+		UserVariables: map[string]string{
+			"fee": "-foo-",
+		},
+	}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if diff := cmp.Diff(tc.Output, result); diff != "" {
+			t.Fatalf("Unexpected output: %s", diff)
+		}
 	}
 }

@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"net"
@@ -1065,7 +1064,7 @@ func (e *DhcpConfiguration) HostByName(host string) (configDeclaration, error) {
 type NetworkMap []map[string]string
 
 type NetworkNameMapper interface {
-	NameIntoDevice(string) (string, error)
+	NameIntoDevices(string) ([]string, error)
 	DeviceIntoName(string) (string, error)
 }
 
@@ -1082,13 +1081,17 @@ func ReadNetworkMap(fd *os.File) (NetworkMap, error) {
 	return result, nil
 }
 
-func (e NetworkMap) NameIntoDevice(name string) (string, error) {
+func (e NetworkMap) NameIntoDevices(name string) ([]string, error) {
+	var devices []string
 	for _, val := range e {
 		if strings.ToLower(val["name"]) == strings.ToLower(name) {
-			return val["device"], nil
+			devices = append(devices, val["device"])
 		}
 	}
-	return "", fmt.Errorf("Network name not found : %v", name)
+	if len(devices) > 0 {
+		return devices, nil
+	}
+	return make([]string, 0), fmt.Errorf("Network name not found : %v", name)
 }
 func (e NetworkMap) DeviceIntoName(device string) (string, error) {
 	for _, val := range e {
@@ -1905,21 +1908,26 @@ func networkingConfig_NamesToVmnet(config NetworkingConfig) map[NetworkingType][
 
 const NetworkingInterfacePrefix = "vmnet"
 
-func (e NetworkingConfig) NameIntoDevice(name string) (string, error) {
+func (e NetworkingConfig) NameIntoDevices(name string) ([]string, error) {
 	netmapper := networkingConfig_NamesToVmnet(e)
 	name = strings.ToLower(name)
 
-	var vmnet int
+	var vmnets []string
+	var networkingType NetworkingType
 	if name == "hostonly" && len(netmapper[NetworkingType_HOSTONLY]) > 0 {
-		vmnet = netmapper[NetworkingType_HOSTONLY][0]
+		networkingType = NetworkingType_HOSTONLY
 	} else if name == "nat" && len(netmapper[NetworkingType_NAT]) > 0 {
-		vmnet = netmapper[NetworkingType_NAT][0]
+		networkingType = NetworkingType_NAT
 	} else if name == "bridged" && len(netmapper[NetworkingType_BRIDGED]) > 0 {
-		vmnet = netmapper[NetworkingType_BRIDGED][0]
+		networkingType = NetworkingType_BRIDGED
 	} else {
-		return "", fmt.Errorf("Network name not found : %v", name)
+		return make([]string, 0), fmt.Errorf("Network name not found: %v", name)
 	}
-	return fmt.Sprintf("%s%d", NetworkingInterfacePrefix, vmnet), nil
+
+	for i := 0; i < len(netmapper[networkingType]); i++ {
+		vmnets = append(vmnets, fmt.Sprintf("%s%d", NetworkingInterfacePrefix, netmapper[networkingType][i]))
+	}
+	return vmnets, nil
 }
 
 func (e NetworkingConfig) DeviceIntoName(device string) (string, error) {
@@ -1953,7 +1961,9 @@ func consumeFile(fd *os.File) (chan byte, sentinelSignaller) {
 		b := make([]byte, 1)
 		for {
 			_, err := fd.Read(b)
-			if err == io.EOF {
+			if err != nil {
+				// In case of any error we must stop
+				// ErrClosed may appear since file is closed and this goroutine still left running
 				break
 			}
 			fromfile <- b[0]

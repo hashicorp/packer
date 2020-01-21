@@ -2,6 +2,7 @@ package iso
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -12,10 +13,11 @@ import (
 	"strconv"
 	"strings"
 
+	"testing"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/shell"
 	"github.com/hashicorp/packer/template"
-	"testing"
 )
 
 var vmxTestBuilderConfig = map[string]string{
@@ -46,6 +48,7 @@ func tmpnam(prefix string) string {
 	dir := os.TempDir()
 	max := int(math.Pow(2, float64(length)))
 
+	// FIXME use ioutil.TempFile() or at least mimic implementation, this could loop forever
 	n, err := rand.Intn(max), nil
 	for path = filepath.Join(dir, prefix+strconv.Itoa(n)); err == nil; _, err = os.Stat(path) {
 		n = rand.Intn(max)
@@ -134,17 +137,17 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 
 	// create our config to test the vmware-iso builder
 	components := packer.ComponentFinder{
-		Builder: func(n string) (packer.Builder, error) {
-			return &Builder{}, nil
+		BuilderStore: packer.MapOfBuilder{
+			"vmware-iso": func() (packer.Builder, error) { return &Builder{}, nil },
 		},
 		Hook: func(n string) (packer.Hook, error) {
 			return &packer.DispatchHook{}, nil
 		},
-		PostProcessor: func(n string) (packer.PostProcessor, error) {
-			return &packer.MockPostProcessor{}, nil
+		ProvisionerStore: packer.MapOfProvisioner{
+			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
-		Provisioner: func(n string) (packer.Provisioner, error) {
-			return &shell.Provisioner{}, nil
+		PostProcessorStore: packer.MapOfPostProcessor{
+			"something": func() (packer.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
 		},
 	}
 	config := packer.CoreConfig{
@@ -165,6 +168,9 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	warn, err := b.Prepare()
+	if err != nil {
+		t.Fatalf("error preparing build: %v", err)
+	}
 	if len(warn) > 0 {
 		for _, w := range warn {
 			t.Logf("Configuration warning: %s", w)
@@ -172,8 +178,7 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	// and then finally build it
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
-	artifacts, err := b.Run(ui, cache)
+	artifacts, err := b.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("Failed to build artifact: %s", err)
 	}

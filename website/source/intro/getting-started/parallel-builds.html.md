@@ -172,3 +172,5 @@ executed when you execute the command.
 At the end of the build, Packer outputs both of the artifacts created (an AMI
 and a DigitalOcean snapshot). Both images created are bare bones Ubuntu
 installations with Redis pre-installed.
+
+[Continue to Vagrant boxes](./vagrant.html)

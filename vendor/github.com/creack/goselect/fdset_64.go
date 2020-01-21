@@ -1,5 +1,5 @@
 // +build !darwin,!netbsd,!openbsd
-// +build amd64 arm64
+// +build amd64 arm64 ppc64le mips64 mips64le s390x
 
 package goselect
 

@@ -1,8 +1,9 @@
 package lxd
 
 import (
-	"log"
+	"context"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -17,21 +18,22 @@ type wrappedCommandTemplate struct {
 }
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, errs := NewConfig(raws...)
-	if errs != nil {
-		return nil, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return nil, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, nil, errs
+	}
+
+	return nil, nil, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		b.config.ctx.Data = &wrappedCommandTemplate{Command: command}
 		return interpolate.Render(b.config.CommandWrapper, &b.config.ctx)
@@ -45,15 +47,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
-	state.Put("cache", cache)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
 
 	// Run
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -65,11 +66,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

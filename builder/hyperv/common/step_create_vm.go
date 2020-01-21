@@ -21,25 +21,40 @@ type StepCreateVM struct {
 	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint
+	DiskBlockSize                  uint
+	UseLegacyNetworkAdapter        bool
 	Generation                     uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
+	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
 	MacAddress                     string
-	SkipExport                     bool
-	OutputDir                      string
+	FixedVHD                       bool
+	Version                        string
+	KeepRegistered                 bool
 }
 
-func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")
 
-	path := state.Get("packerTempDir").(string)
+	var path string
+	if v, ok := state.GetOk("build_dir"); ok {
+		path = v.(string)
+	}
+
+	err := driver.CheckVMName(s.VMName)
+	if err != nil {
+		s.KeepRegistered = true
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
@@ -54,23 +69,28 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		log.Println("No existing virtual harddrive, not attaching.")
 	}
 
-	vhdPath := state.Get("packerVhdTempDir").(string)
-
-	// inline vhd path if export is skipped
-	if s.SkipExport {
-		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
-	}
-
 	// convert the MB to bytes
-	ramSize := int64(s.RamSize * 1024 * 1024)
-	diskSize := int64(s.DiskSize * 1024 * 1024)
+	ramSize := int64(s.RamSize) * 1024 * 1024
+	diskSize := int64(s.DiskSize) * 1024 * 1024
+	diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation, s.DifferencingDisk)
+	err = driver.CreateVirtualMachine(s.VMName, path, harddrivePath, ramSize, diskSize, diskBlockSize,
+		s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD, s.Version)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	if s.UseLegacyNetworkAdapter {
+		err := driver.ReplaceVirtualMachineNetworkAdapter(s.VMName, true)
+		if err != nil {
+			err := fmt.Errorf("Error creating legacy network adapter: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
@@ -100,7 +120,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	if s.Generation == 2 {
-		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
+		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot, s.SecureBootTemplate)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
 			state.Put("error", err)
@@ -124,7 +144,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		for index, size := range s.AdditionalDiskSize {
 			diskSize := int64(size * 1024 * 1024)
 			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
-			err = driver.AddVirtualMachineHardDrive(s.VMName, vhdPath, diskFile, diskSize, "SCSI")
+			err = driver.AddVirtualMachineHardDrive(s.VMName, path, diskFile, diskSize, diskBlockSize, "SCSI")
 			if err != nil {
 				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
 				state.Put("error", err)
@@ -146,6 +166,9 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.VMName)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.VMName)
 
 	return multistep.ActionContinue
 }
@@ -157,10 +180,18 @@ func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.KeepRegistered {
+		ui.Say("keep_registered set. Skipping unregister/deletion of VM.")
+		return
+	}
+
 	ui.Say("Unregistering and deleting virtual machine...")
 
 	err := driver.DeleteVirtualMachine(s.VMName)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting virtual machine: %s", err))
 	}
+
+	// TODO: Clean up created VHDX
 }

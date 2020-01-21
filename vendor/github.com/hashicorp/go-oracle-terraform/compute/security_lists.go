@@ -7,21 +7,25 @@ type SecurityListsClient struct {
 
 // SecurityLists obtains a SecurityListsClient which can be used to access to the
 // Security List functions of the Compute API
-func (c *ComputeClient) SecurityLists() *SecurityListsClient {
+func (c *Client) SecurityLists() *SecurityListsClient {
 	return &SecurityListsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "security list",
 			ContainerPath:       "/seclist/",
 			ResourceRootPath:    "/seclist",
 		}}
 }
 
+// SecurityListPolicy defines the constants a security list policy can be
 type SecurityListPolicy string
 
 const (
-	SecurityListPolicyDeny   SecurityListPolicy = "deny"
+	// SecurityListPolicyDeny - deny
+	SecurityListPolicyDeny SecurityListPolicy = "deny"
+	// SecurityListPolicyReject - reject
 	SecurityListPolicyReject SecurityListPolicy = "reject"
+	// SecurityListPolicyPermit - permit
 	SecurityListPolicyPermit SecurityListPolicy = "permit"
 )
 
@@ -30,9 +34,11 @@ type SecurityListInfo struct {
 	// Shows the default account for your identity domain.
 	Account string `json:"account"`
 	// A description of the security list.
-	Description string `json:description`
-	// The three-part name of the security list (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Description string `json:"description"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+	// The name of the security list
+	Name string
 	// The policy for outbound traffic from the security list.
 	OutboundCIDRPolicy SecurityListPolicy `json:"outbound_cidr_policy"`
 	// The policy for inbound traffic to the security list
@@ -73,7 +79,7 @@ func (c *SecurityListsClient) CreateSecurityList(createInput *CreateSecurityList
 type GetSecurityListInput struct {
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetSecurityList retrieves the security list with the given name.
@@ -90,7 +96,7 @@ func (c *SecurityListsClient) GetSecurityList(getInput *GetSecurityListInput) (*
 type UpdateSecurityListInput struct {
 	// A description of the security list.
 	// Optional
-	Description string `json:description`
+	Description string `json:"description"`
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
 	Name string `json:"name"`
@@ -117,7 +123,7 @@ func (c *SecurityListsClient) UpdateSecurityList(updateInput *UpdateSecurityList
 type DeleteSecurityListInput struct {
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // DeleteSecurityList deletes the security list with the given name.
@@ -126,6 +132,6 @@ func (c *SecurityListsClient) DeleteSecurityList(deleteInput *DeleteSecurityList
 }
 
 func (c *SecurityListsClient) success(listInfo *SecurityListInfo) (*SecurityListInfo, error) {
-	c.unqualify(&listInfo.Name)
+	listInfo.Name = c.getUnqualifiedName(listInfo.FQDN)
 	return listInfo, nil
 }

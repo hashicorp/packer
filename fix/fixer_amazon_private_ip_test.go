@@ -39,6 +39,19 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 				"ssh_interface": "private_ip",
 			},
 		},
+
+		// ssh_private_ip specified as string
+		{
+			Input: map[string]interface{}{
+				"type":           "amazon-ebs",
+				"ssh_private_ip": "true",
+			},
+
+			Expected: map[string]interface{}{
+				"type":          "amazon-ebs",
+				"ssh_interface": "private_ip",
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -60,5 +73,21 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 		if !reflect.DeepEqual(output, expected) {
 			t.Fatalf("unexpected: %#v\nexpected: %#v\n", output, expected)
 		}
+	}
+}
+
+func TestFixerAmazonPrivateIPNonBoolean(t *testing.T) {
+	var f FixerAmazonPrivateIP
+
+	input := map[string]interface{}{
+		"builders": []map[string]interface{}{{
+			"type":           "amazon-ebs",
+			"ssh_private_ip": "not-a-boolean-value",
+		}},
+	}
+
+	_, err := f.Fix(input)
+	if err == nil {
+		t.Fatal("should have errored")
 	}
 }

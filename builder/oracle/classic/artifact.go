@@ -2,8 +2,6 @@ package classic
 
 import (
 	"fmt"
-
-	"github.com/hashicorp/go-oracle-terraform/compute"
 )
 
 // Artifact is an artifact implementation that contains Image List
@@ -12,7 +10,6 @@ type Artifact struct {
 	MachineImageName string
 	MachineImageFile string
 	ImageListVersion int
-	driver           *compute.ComputeClient
 }
 
 // BuilderId uniquely identifies the builder.

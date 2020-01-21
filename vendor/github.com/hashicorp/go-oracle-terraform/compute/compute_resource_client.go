@@ -11,7 +11,7 @@ import (
 
 // ResourceClient is an AuthenticatedClient with some additional information about the resources to be addressed.
 type ResourceClient struct {
-	*ComputeClient
+	*Client
 	ResourceDescription string
 	ContainerPath       string
 	ResourceRootPath    string
@@ -58,12 +58,7 @@ func (c *ResourceClient) deleteResource(name string) error {
 		objectPath = c.ResourceRootPath
 	}
 	_, err := c.executeRequest("DELETE", objectPath, nil)
-	if err != nil {
-		return err
-	}
-
-	// No errors and no response body to write
-	return nil
+	return err
 }
 
 func (c *ResourceClient) deleteOrchestration(name string) error {
@@ -77,22 +72,20 @@ func (c *ResourceClient) deleteOrchestration(name string) error {
 	objectPath = fmt.Sprintf("%s?terminate=True", objectPath)
 
 	_, err := c.executeRequest("DELETE", objectPath, nil)
-	if err != nil {
-		return err
-	}
-
-	// No errors and no response body to write
-	return nil
+	return err
 }
 
 func (c *ResourceClient) unmarshalResponseBody(resp *http.Response, iface interface{}) error {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
+	_, err := buf.ReadFrom(resp.Body)
+	if err != nil {
+		return err
+	}
 	c.client.DebugLogString(fmt.Sprintf("HTTP Resp (%d): %s", resp.StatusCode, buf.String()))
 	// JSON decode response into interface
 	var tmp interface{}
 	dcd := json.NewDecoder(buf)
-	if err := dcd.Decode(&tmp); err != nil {
+	if err = dcd.Decode(&tmp); err != nil {
 		return err
 	}
 

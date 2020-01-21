@@ -10,7 +10,6 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -23,6 +22,7 @@ import (
 	"time"
 
 	packrpc "github.com/hashicorp/packer/packer/rpc"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // This is a count of the number of interrupts the process has received.
@@ -36,7 +36,7 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // The APIVersion is outputted along with the RPC address. The plugin
 // client validates this API version and will show an error if it doesn't
 // know how to speak it.
-const APIVersion = "4"
+const APIVersion = "5"
 
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
@@ -51,20 +51,7 @@ func Server() (*packrpc.Server, error) {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("Plugin minimum port: %d\n", minPort)
-	log.Printf("Plugin maximum port: %d\n", maxPort)
-
-	listener, err := serverListener(minPort, maxPort)
+	listener, err := serverListener()
 	if err != nil {
 		return nil, err
 	}
@@ -101,18 +88,30 @@ func Server() (*packrpc.Server, error) {
 
 	// Serve a single connection
 	log.Println("Serving a plugin connection...")
-	return packrpc.NewServer(conn), nil
+	return packrpc.NewServer(conn)
 }
 
-func serverListener(minPort, maxPort int64) (net.Listener, error) {
+func serverListener() (net.Listener, error) {
 	if runtime.GOOS == "windows" {
-		return serverListener_tcp(minPort, maxPort)
+		return serverListener_tcp()
 	}
 
 	return serverListener_unix()
 }
 
-func serverListener_tcp(minPort, maxPort int64) (net.Listener, error) {
+func serverListener_tcp() (net.Listener, error) {
+	minPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MIN_PORT"), 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	maxPort, err := strconv.ParseInt(os.Getenv("PACKER_PLUGIN_MAX_PORT"), 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Plugin port range: [%d,%d]", minPort, maxPort)
+
 	for port := minPort; port <= maxPort; port++ {
 		address := fmt.Sprintf("127.0.0.1:%d", port)
 		listener, err := net.Listen("tcp", address)
@@ -125,7 +124,7 @@ func serverListener_tcp(minPort, maxPort int64) (net.Listener, error) {
 }
 
 func serverListener_unix() (net.Listener, error) {
-	tf, err := ioutil.TempFile("", "packer-plugin")
+	tf, err := tmp.File("packer-plugin")
 	if err != nil {
 		return nil, err
 	}

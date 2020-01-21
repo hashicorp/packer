@@ -7,15 +7,15 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"access_key":                "access_key",
-		"secret_key":                "secret_key",
-		"server_image_product_code": "SPSW0WINNT000016",
-		"server_product_code":       "SPSVRSSD00000011",
-		"server_image_name":         "packer-test {{timestamp}}",
-		"server_image_description":  "server description",
-		"block_storage_size":        100,
-		"user_data":                 "#!/bin/sh\nyum install -y httpd\ntouch /var/www/html/index.html\nchkconfig --level 2345 httpd on",
-		"region":                    "Korea",
+		"access_key":                            "access_key",
+		"secret_key":                            "secret_key",
+		"server_image_product_code":             "SPSW0WINNT000016",
+		"server_product_code":                   "SPSVRSSD00000011",
+		"server_image_name":                     "packer-test {{timestamp}}",
+		"server_image_description":              "server description",
+		"block_storage_size":                    100,
+		"user_data":                             "#!/bin/sh\nyum install -y httpd\ntouch /var/www/html/index.html\nchkconfig --level 2345 httpd on",
+		"region":                                "Korea",
 		"access_control_group_configuration_no": "33",
 		"communicator":                          "ssh",
 		"ssh_username":                          "root",
@@ -24,15 +24,15 @@ func testConfig() map[string]interface{} {
 
 func testConfigForMemberServerImage() map[string]interface{} {
 	return map[string]interface{}{
-		"access_key":               "access_key",
-		"secret_key":               "secret_key",
-		"server_product_code":      "SPSVRSSD00000011",
-		"member_server_image_no":   "2440",
-		"server_image_name":        "packer-test {{timestamp}}",
-		"server_image_description": "server description",
-		"block_storage_size":       100,
-		"user_data":                "#!/bin/sh\nyum install -y httpd\ntouch /var/www/html/index.html\nchkconfig --level 2345 httpd on",
-		"region":                   "Korea",
+		"access_key":                            "access_key",
+		"secret_key":                            "secret_key",
+		"server_product_code":                   "SPSVRSSD00000011",
+		"member_server_image_no":                "2440",
+		"server_image_name":                     "packer-test {{timestamp}}",
+		"server_image_description":              "server description",
+		"block_storage_size":                    100,
+		"user_data":                             "#!/bin/sh\nyum install -y httpd\ntouch /var/www/html/index.html\nchkconfig --level 2345 httpd on",
+		"region":                                "Korea",
 		"access_control_group_configuration_no": "33",
 		"communicator":                          "ssh",
 		"ssh_username":                          "root",
@@ -42,7 +42,8 @@ func testConfigForMemberServerImage() map[string]interface{} {
 func TestConfigWithServerImageProductCode(t *testing.T) {
 	raw := testConfig()
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 
 	if c.AccessKey != "access_key" {
 		t.Errorf("Expected 'access_key' to be set to '%s', but got '%s'.", raw["access_key"], c.AccessKey)
@@ -76,7 +77,8 @@ func TestConfigWithServerImageProductCode(t *testing.T) {
 func TestConfigWithMemberServerImageCode(t *testing.T) {
 	raw := testConfigForMemberServerImage()
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 
 	if c.AccessKey != "access_key" {
 		t.Errorf("Expected 'access_key' to be set to '%s', but got '%s'.", raw["access_key"], c.AccessKey)
@@ -110,10 +112,11 @@ func TestConfigWithMemberServerImageCode(t *testing.T) {
 func TestEmptyConfig(t *testing.T) {
 	raw := new(map[string]interface{})
 
-	_, _, err := NewConfig(raw)
+	var c Config
+	_, err := c.Prepare(raw)
 
 	if err == nil {
-		t.Error("Expected Config to require 'access_key', 'secret_key' and some mendatory fields, but it did not")
+		t.Error("Expected Config to require 'access_key', 'secret_key' and some mandatory fields, but it did not")
 	}
 
 	if !strings.Contains(err.Error(), "access_key is required") {
@@ -138,7 +141,8 @@ func TestExistsBothServerImageProductCodeAndMemberServerImageNoConfig(t *testing
 		"member_server_image_no":    "2440",
 	}
 
-	_, _, err := NewConfig(raw)
+	var c Config
+	_, err := c.Prepare(raw)
 
 	if !strings.Contains(err.Error(), "Only one of server_image_product_code and member_server_image_no can be set") {
 		t.Error("Expected Config to require Only one of 'server_image_product_code' and 'member_server_image_no' can be set, but it did not")

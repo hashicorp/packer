@@ -7,10 +7,10 @@ type SecurityAssociationsClient struct {
 
 // SecurityAssociations obtains a SecurityAssociationsClient which can be used to access to the
 // Security Association functions of the Compute API
-func (c *ComputeClient) SecurityAssociations() *SecurityAssociationsClient {
+func (c *Client) SecurityAssociations() *SecurityAssociationsClient {
 	return &SecurityAssociationsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "security association",
 			ContainerPath:       "/secassociation/",
 			ResourceRootPath:    "/secassociation",
@@ -19,8 +19,10 @@ func (c *ComputeClient) SecurityAssociations() *SecurityAssociationsClient {
 
 // SecurityAssociationInfo describes an existing security association.
 type SecurityAssociationInfo struct {
-	// The three-part name of the Security Association (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+	// The three-part name of the Security Association
+	Name string
 	// The name of the Security List that you want to associate with the instance.
 	SecList string `json:"seclist"`
 	// vCable of the instance that you want to associate with the security list.
@@ -90,6 +92,7 @@ func (c *SecurityAssociationsClient) DeleteSecurityAssociation(deleteInput *Dele
 }
 
 func (c *SecurityAssociationsClient) success(assocInfo *SecurityAssociationInfo) (*SecurityAssociationInfo, error) {
-	c.unqualify(&assocInfo.Name, &assocInfo.SecList, &assocInfo.VCable)
+	assocInfo.Name = c.getUnqualifiedName(assocInfo.FQDN)
+	c.unqualify(&assocInfo.SecList, &assocInfo.VCable)
 	return assocInfo, nil
 }

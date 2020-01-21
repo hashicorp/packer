@@ -17,12 +17,13 @@ import (
 // StepGetPassword reads the password from a booted OpenStack server and sets
 // it on the WinRM config.
 type StepGetPassword struct {
-	Debug bool
-	Comm  *communicator.Config
+	Debug     bool
+	Comm      *communicator.Config
+	BuildName string
 }
 
-func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm
@@ -49,7 +50,7 @@ func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multi
 	server := state.Get("server").(*servers.Server)
 	var password string
 
-	privateKey, err := ssh.ParseRawPrivateKey([]byte(state.Get("privateKey").(string)))
+	privateKey, err := ssh.ParseRawPrivateKey(s.Comm.SSHPrivateKey)
 	if err != nil {
 		err = fmt.Errorf("Error parsing private key: %s", err)
 		state.Put("error", err)
@@ -75,6 +76,8 @@ func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multi
 		ui.Message(fmt.Sprintf(
 			"Password (since debug is enabled) \"%s\"", s.Comm.WinRMPassword))
 	}
+
+	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }

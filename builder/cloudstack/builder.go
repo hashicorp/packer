@@ -1,8 +1,10 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -14,24 +16,24 @@ const BuilderId = "packer.cloudstack"
 
 // Builder represents the CloudStack builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 	ui     packer.Ui
 }
 
-// Prepare implements the packer.Builder interface.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	config, errs := NewConfig(raws...)
-	if errs != nil {
-		return nil, errs
-	}
-	b.config = config
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return nil, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, nil, errs
+	}
+
+	return nil, nil, nil
 }
 
 // Run implements the packer.Builder interface.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	b.ui = ui
 
 	// Create a CloudStack API client.
@@ -51,7 +53,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("client", client)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -64,12 +66,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&stepKeypair{
-			Debug:                b.config.PackerDebug,
-			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
-			KeyPair:              b.config.Keypair,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			TemporaryKeyPairName: b.config.TemporaryKeypairName,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
 		},
 		&stepCreateSecurityGroup{},
 		&stepCreateInstance{
@@ -77,24 +76,25 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug: b.config.PackerDebug,
 		},
 		&stepSetupNetworking{},
+		&stepDetachIso{},
 		&communicator.StepConnect{
-			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: sshConfig(
-				b.config.Comm.SSHAgentAuth,
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPassword),
+			Config:    &b.config.Comm,
+			Host:      communicator.CommHost(b.config.Comm.SSHHost, "ipaddress"),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			SSHPort:   commPort,
 			WinRMPort: commPort,
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		&stepShutdownInstance{},
 		&stepCreateTemplate{},
 	}
 
 	// Configure the runner and run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -110,17 +110,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the artifact and return it
 	artifact := &Artifact{
 		client:   client,
-		config:   b.config,
+		config:   &b.config,
 		template: state.Get("template").(*cloudstack.CreateTemplateResponse),
 	}
 
 	return artifact, nil
-}
-
-// Cancel the step runner.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		b.ui.Say("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

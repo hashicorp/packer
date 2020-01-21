@@ -17,7 +17,7 @@ type StepInstanceInfo struct {
 
 // Run executes the Packer build step that gathers GCE instance info.
 // This adds "instance_ip" to the multistep state.
-func (s *StepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -29,7 +29,7 @@ func (s *StepInstanceInfo) Run(_ context.Context, state multistep.StateBag) mult
 	var err error
 	select {
 	case err = <-errCh:
-	case <-time.After(config.stateTimeout):
+	case <-time.After(config.StateTimeout):
 		err = errors.New("time out while waiting for instance to become running")
 	}
 

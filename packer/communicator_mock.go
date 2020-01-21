@@ -2,8 +2,11 @@ package packer
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"io"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -34,7 +37,7 @@ type MockCommunicator struct {
 	DownloadData   string
 }
 
-func (c *MockCommunicator) Start(rc *RemoteCmd) error {
+func (c *MockCommunicator) Start(ctx context.Context, rc *RemoteCmd) error {
 	c.StartCalled = true
 	c.StartCmd = rc
 
@@ -43,7 +46,7 @@ func (c *MockCommunicator) Start(rc *RemoteCmd) error {
 		if rc.Stdout != nil && c.StartStdout != "" {
 			wg.Add(1)
 			go func() {
-				rc.Stdout.Write([]byte(c.StartStdout))
+				io.Copy(rc.Stdout, strings.NewReader(c.StartStdout))
 				wg.Done()
 			}()
 		}
@@ -51,7 +54,7 @@ func (c *MockCommunicator) Start(rc *RemoteCmd) error {
 		if rc.Stderr != nil && c.StartStderr != "" {
 			wg.Add(1)
 			go func() {
-				rc.Stderr.Write([]byte(c.StartStderr))
+				io.Copy(rc.Stderr, strings.NewReader(c.StartStderr))
 				wg.Done()
 			}()
 		}
@@ -109,4 +112,20 @@ func (c *MockCommunicator) DownloadDir(src string, dst string, excl []string) er
 	c.DownloadDirExclude = excl
 
 	return nil
+}
+
+// ScriptUploadErrorMockCommunicator returns an error from it's Upload() method
+// when a script is uploaded to test the case where this upload fails.
+type ScriptUploadErrorMockCommunicator struct {
+	MockCommunicator
+}
+
+var ScriptUploadErrorMockCommunicatorError = errors.New("ScriptUploadErrorMockCommunicator Upload error")
+
+func (c *ScriptUploadErrorMockCommunicator) Upload(path string, r io.Reader, fi *os.FileInfo) error {
+	// only fail on script uploads, not on environment variable uploads
+	if !strings.Contains(path, "packer-ps-env-vars") {
+		return ScriptUploadErrorMockCommunicatorError
+	}
+	return c.MockCommunicator.Upload(path, r, fi)
 }

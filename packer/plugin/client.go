@@ -56,7 +56,7 @@ type ClientConfig struct {
 	// The minimum and maximum port to use for communicating with
 	// the subprocess. If not set, this defaults to 10,000 and 25,000
 	// respectively.
-	MinPort, MaxPort uint
+	MinPort, MaxPort int
 
 	// StartTimeout is the timeout to wait for the plugin to say it
 	// has started successfully.
@@ -327,8 +327,10 @@ func (c *Client) Start() (addr net.Addr, err error) {
 		switch parts[1] {
 		case "tcp":
 			addr, err = net.ResolveTCPAddr("tcp", parts[2])
+			log.Printf("Received tcp RPC address for %s: addr is %s", cmd.Path, addr)
 		case "unix":
 			addr, err = net.ResolveUnixAddr("unix", parts[2])
+			log.Printf("Received unix RPC address for %s: addr is %s", cmd.Path, addr)
 		default:
 			err = fmt.Errorf("Unknown address type: %s", parts[1])
 		}
@@ -339,6 +341,13 @@ func (c *Client) Start() (addr net.Addr, err error) {
 }
 
 func (c *Client) logStderr(r io.Reader) {
+	logPrefix := filepath.Base(c.config.Cmd.Path)
+	if logPrefix == "packer" {
+		// we just called the normal packer binary with the plugin arg.
+		// grab the last arg from the list which will match the plugin name.
+		logPrefix = c.config.Cmd.Args[len(c.config.Cmd.Args)-1]
+	}
+
 	bufR := bufio.NewReader(r)
 	for {
 		line, err := bufR.ReadString('\n')
@@ -346,7 +355,8 @@ func (c *Client) logStderr(r io.Reader) {
 			c.config.Stderr.Write([]byte(line))
 
 			line = strings.TrimRightFunc(line, unicode.IsSpace)
-			log.Printf("%s: %s", filepath.Base(c.config.Cmd.Path), line)
+
+			log.Printf("%s plugin: %s", logPrefix, line)
 		}
 
 		if err == io.EOF {

@@ -14,17 +14,21 @@ type stepCreateServer struct {
 	serverID string
 }
 
-func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
-	sshPubKey := state.Get("ssh_pubkey").(string)
+	c := state.Get("config").(*Config)
 	tags := []string{}
+	var bootscript *string
 
 	ui.Say("Creating server...")
 
-	if sshPubKey != "" {
-		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.TrimSpace(sshPubKey))}
+	if c.Bootscript != "" {
+		bootscript = &c.Bootscript
+	}
+
+	if c.Comm.SSHPublicKey != nil {
+		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.Replace(strings.TrimSpace(string(c.Comm.SSHPublicKey)), " ", "_", -1))}
 	}
 
 	server, err := client.PostServer(api.ScalewayServerDefinition{
@@ -33,6 +37,8 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		Organization:   c.Organization,
 		CommercialType: c.CommercialType,
 		Tags:           tags,
+		Bootscript:     bootscript,
+		BootType:       c.BootType,
 	})
 
 	if err != nil {
@@ -54,6 +60,9 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	s.serverID = server
 
 	state.Put("server_id", server)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.serverID)
 
 	return multistep.ActionContinue
 }

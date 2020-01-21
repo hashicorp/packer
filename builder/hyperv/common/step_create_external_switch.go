@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step creates switch for VM.
+// This step creates an external switch for the VM.
 //
 // Produces:
 //   SwitchName string - The name of the Switch
@@ -18,22 +18,27 @@ type StepCreateExternalSwitch struct {
 	oldSwitchName string
 }
 
-func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+// Run runs the step required to create an external switch. Depending on
+// the connectivity of the host machine, the external switch will allow the
+// build VM to connect to the outside world.
+func (s *StepCreateExternalSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	vmName := state.Get("vmName").(string)
-	errorMsg := "Error createing external switch: %s"
+	errorMsg := "Error creating external switch: %s"
 	var err error
 
 	ui.Say("Creating external switch...")
 
 	packerExternalSwitchName := "paes_" + uuid.TimeOrderedUUID()
 
+	// CreateExternalVirtualSwitch checks for an existing external switch,
+	// creating one if required, and connects the VM to it
 	err = driver.CreateExternalVirtualSwitch(vmName, packerExternalSwitchName)
 	if err != nil {
-		err := fmt.Errorf("Error creating switch: %s", err)
-		state.Put(errorMsg, err)
+		err := fmt.Errorf(errorMsg, err)
+		state.Put("error", err)
 		ui.Error(err.Error())
 		s.SwitchName = ""
 		return multistep.ActionHalt
@@ -79,8 +84,6 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Unregistering and deleting external switch...")
 
-	var err error = nil
-
 	errMsg := "Error deleting external switch: %s"
 
 	// connect the vm to the old switch
@@ -89,7 +92,7 @@ func (s *StepCreateExternalSwitch) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	err = driver.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
+	err := driver.ConnectVirtualMachineNetworkAdapterToSwitch(vmName, s.oldSwitchName)
 	if err != nil {
 		ui.Error(fmt.Sprintf(errMsg, err))
 		return

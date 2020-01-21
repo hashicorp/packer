@@ -1,14 +1,18 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // Package puppetmasterless implements a provisioner for Packer that executes
 // Puppet on the remote machine, configured to apply a local manifest
 // versus connecting to a Puppet master.
 package puppetmasterless
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -19,6 +23,12 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
+
+	// If true, staging directory is removed after executing puppet.
+	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
+
+	// The Guest OS Type (unix or windows)
+	GuestOSType string `mapstructure:"guest_os_type"`
 
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
@@ -31,6 +41,9 @@ type Config struct {
 
 	// Path to a hiera configuration file to upload and use.
 	HieraConfigPath string `mapstructure:"hiera_config_path"`
+
+	// If true, packer will ignore all exit-codes from a puppet run
+	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 
 	// An array of local paths of modules to upload.
 	ModulePaths []string `mapstructure:"module_paths"`
@@ -45,47 +58,48 @@ type Config struct {
 	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
 
+	// The directory that contains the puppet binary.
+	// E.g. if it can't be found on the standard path.
+	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
+
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
-
-	// If true, staging directory is removed after executing puppet.
-	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
 
 	// The directory from which the command will be executed.
 	// Packer requires the directory to exist when running puppet.
 	WorkingDir string `mapstructure:"working_directory"`
 
-	// The directory that contains the puppet binary.
-	// E.g. if it can't be found on the standard path.
-	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
-
-	// If true, packer will ignore all exit-codes from a puppet run
-	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
-
-	// The Guest OS Type (unix or windows)
-	GuestOSType string `mapstructure:"guest_os_type"`
+	// Instructs the communicator to run the remote script as a Windows
+	// scheduled task, effectively elevating the remote user by impersonating
+	// a logged-in user
+	ElevatedUser     string `mapstructure:"elevated_user"`
+	ElevatedPassword string `mapstructure:"elevated_password"`
 }
 
 type guestOSTypeConfig struct {
-	stagingDir       string
 	executeCommand   string
 	facterVarsFmt    string
 	facterVarsJoiner string
 	modulePathJoiner string
+	stagingDir       string
+	tempDir          string
 }
 
+// FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
+		tempDir:    "/tmp",
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
 			"{{if .Sudo}}sudo -E {{end}}" +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			"puppet apply --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"--detailed-exitcodes " +
 			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
@@ -93,14 +107,16 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
-		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
+		tempDir:    filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} && " +
+			`{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}` +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			"puppet apply --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"--detailed-exitcodes " +
 			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
@@ -111,21 +127,31 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 
 type Provisioner struct {
 	config            Config
+	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
+	generatedData     map[string]interface{}
 }
 
 type ExecuteTemplate struct {
-	WorkingDir      string
-	FacterVars      string
-	HieraConfigPath string
-	ModulePath      string
-	ManifestFile    string
-	ManifestDir     string
-	PuppetBinDir    string
-	Sudo            bool
-	ExtraArguments  string
+	Debug            bool
+	ExtraArguments   string
+	FacterVars       string
+	HieraConfigPath  string
+	ModulePath       string
+	ModulePathJoiner string
+	ManifestFile     string
+	ManifestDir      string
+	PuppetBinDir     string
+	Sudo             bool
+	WorkingDir       string
 }
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
+}
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -134,6 +160,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -156,10 +183,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if p.config.ExecuteCommand == "" {
@@ -233,8 +256,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Puppet...")
+	p.communicator = comm
+	p.generatedData = generatedData
 	ui.Message("Creating Puppet staging directory...")
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
@@ -286,21 +311,36 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
-		HieraConfigPath: remoteHieraConfigPath,
-		ManifestDir:     remoteManifestDir,
-		ManifestFile:    remoteManifestFile,
-		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
-		PuppetBinDir:    p.config.PuppetBinDir,
-		Sudo:            !p.config.PreventSudo,
-		WorkingDir:      p.config.WorkingDir,
-		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
+	data := ExecuteTemplate{
+		ExtraArguments:   "",
+		FacterVars:       strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
+		HieraConfigPath:  remoteHieraConfigPath,
+		ManifestDir:      remoteManifestDir,
+		ManifestFile:     remoteManifestFile,
+		ModulePath:       strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		ModulePathJoiner: p.guestOSTypeConfig.modulePathJoiner,
+		PuppetBinDir:     p.config.PuppetBinDir,
+		Sudo:             !p.config.PreventSudo,
+		WorkingDir:       p.config.WorkingDir,
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
+	}
+
+	if p.config.ElevatedUser != "" {
+		command, err = provisioner.GenerateElevatedRunner(command, p)
+		if err != nil {
+			return err
+		}
 	}
 
 	cmd := &packer.RemoteCmd{
@@ -308,12 +348,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Running Puppet: %s", command))
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return fmt.Errorf("Got an error starting command: %s", err)
 	}
 
-	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 && !p.config.IgnoreExitCodes {
-		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus)
+	if cmd.ExitStatus() != 0 && cmd.ExitStatus() != 2 && !p.config.IgnoreExitCodes {
+		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus())
 	}
 
 	if p.config.CleanStagingDir {
@@ -323,12 +363,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
 }
 
 func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) (string, error) {
@@ -397,21 +431,22 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
 	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
+	ctx := context.TODO()
 
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status.")
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
 	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
@@ -419,15 +454,14 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 }
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("rm -fr '%s'", dir),
-	}
+	ctx := context.TODO()
 
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	cmd := &packer.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status.")
 	}
 
@@ -446,4 +480,21 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	}
 
 	return comm.UploadDir(dst, src, nil)
+}
+
+func (p *Provisioner) Communicator() packer.Communicator {
+	return p.communicator
+}
+
+func (p *Provisioner) ElevatedUser() string {
+	return p.config.ElevatedUser
+}
+
+func (p *Provisioner) ElevatedPassword() string {
+	// Replace ElevatedPassword for winrm users who used this feature
+	p.config.ctx.Data = p.generatedData
+
+	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
+
+	return elevatedPassword
 }

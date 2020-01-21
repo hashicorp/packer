@@ -1,6 +1,9 @@
 package rpc
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
@@ -17,6 +20,10 @@ type testUi struct {
 	messageMessage string
 	sayCalled      bool
 	sayMessage     string
+
+	trackProgressCalled    bool
+	progressBarAddCalled   bool
+	progressBarCloseCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -45,6 +52,29 @@ func (u *testUi) Say(message string) {
 	u.sayCalled = true
 	u.sayMessage = message
 }
+
+func (u *testUi) TrackProgress(_ string, _, _ int64, stream io.ReadCloser) (body io.ReadCloser) {
+	u.trackProgressCalled = true
+
+	return &readCloser{
+		read: func(p []byte) (int, error) {
+			u.progressBarAddCalled = true
+			return stream.Read(p)
+		},
+		close: func() error {
+			u.progressBarCloseCalled = true
+			return stream.Close()
+		},
+	}
+}
+
+type readCloser struct {
+	read  func([]byte) (int, error)
+	close func() error
+}
+
+func (c *readCloser) Close() error               { return c.close() }
+func (c *readCloser) Read(p []byte) (int, error) { return c.read(p) }
 
 func TestUiRPC(t *testing.T) {
 	// Create the UI to test
@@ -86,6 +116,25 @@ func TestUiRPC(t *testing.T) {
 	uiClient.Say("message")
 	if ui.sayMessage != "message" {
 		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
+
+	ctt := []byte("foo bar baz !!!")
+	rc := ioutil.NopCloser(bytes.NewReader(ctt))
+
+	stream := uiClient.TrackProgress("stuff.txt", 0, int64(len(ctt)), rc)
+	if ui.trackProgressCalled != true {
+		t.Errorf("ProgressBastream not called.")
+	}
+
+	b := []byte{0}
+	stream.Read(b) // output ignored
+	if ui.progressBarAddCalled != true {
+		t.Errorf("Add not called.")
+	}
+
+	stream.Close()
+	if ui.progressBarCloseCalled != true {
+		t.Errorf("close not called.")
 	}
 
 	uiClient.Machine("foo", "bar", "baz")

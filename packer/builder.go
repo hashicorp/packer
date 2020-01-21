@@ -1,5 +1,9 @@
 package packer
 
+import (
+	"context"
+)
+
 // Implementers of Builder are responsible for actually building images
 // on some platform given some configuration.
 //
@@ -11,6 +15,8 @@ package packer
 // parallelism is strictly disabled, so it is safe to request input from
 // stdin and so on.
 type Builder interface {
+	HCL2Speccer
+
 	// Prepare is responsible for configuring the builder and validating
 	// that configuration. Any setup should be done in this method. Note that
 	// NO side effects should take place in prepare, it is meant as a state
@@ -23,14 +29,11 @@ type Builder interface {
 	// Each of the configuration values should merge into the final
 	// configuration.
 	//
-	// Prepare should return a list of warnings along with any errors
-	// that occurred while preparing.
-	Prepare(...interface{}) ([]string, error)
+	// Prepare should return a list of variables that will be made accessible to
+	// users during the provison methods, a list of warnings along with any
+	// errors that occurred while preparing.
+	Prepare(...interface{}) ([]string, []string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
-	Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
-
-	// Cancel cancels a possibly running Builder. This should block until
-	// the builder actually cancels and cleans up after itself.
-	Cancel()
+	Run(context.Context, Ui, Hook) (Artifact, error)
 }

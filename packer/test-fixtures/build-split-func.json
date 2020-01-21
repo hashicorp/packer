@@ -1,0 +1,6 @@
+{
+    "builders": [{
+        "type": "test",
+        "value": "{{split \"foo-bar\" \"-\" 0}}"
+    }]
+}

@@ -1,6 +1,7 @@
 package winrm
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -74,7 +75,7 @@ func New(config *Config) (*Communicator, error) {
 }
 
 // Start implementation of communicator.Communicator interface
-func (c *Communicator) Start(rc *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, rc *packer.RemoteCmd) error {
 	shell, err := c.client.CreateShell()
 	if err != nil {
 		return err
@@ -125,23 +126,16 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	wcp, err := c.newCopyClient()
 	if err != nil {
-		return err
-	}
-
-	if err != nil {
 		return fmt.Errorf("Was unable to create winrm client: %s", err)
 	}
-	client, err := c.newWinRMClient()
-	stdout, _, _, err := client.RunWithString(fmt.Sprintf("powershell -Command \"(Get-Item %s) -is [System.IO.DirectoryInfo]\"", path), "")
-	if err != nil {
-		return fmt.Errorf("Couldn't determine whether destination was a folder or file: %s", err)
+	if strings.HasSuffix(path, `\`) {
+		// path is a directory
+		if fi != nil {
+			path += filepath.Base((*fi).Name())
+		} else {
+			return fmt.Errorf("Was unable to infer file basename for upload.")
+		}
 	}
-	if strings.Contains(stdout, "True") {
-		// The path exists and is a directory.
-		// Upload file into the directory instead of overwriting.
-		path = filepath.Join(path, filepath.Base((*fi).Name()))
-	}
-
 	log.Printf("Uploading file to '%s'", path)
 	return wcp.Write(path, input)
 }

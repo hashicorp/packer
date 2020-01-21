@@ -56,9 +56,9 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "region": "us-east-1",
     "source_ami_filter": {
       "filters": {
-      "virtualization-type": "hvm",
-      "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-      "root-device-type": "ebs"
+        "virtualization-type": "hvm",
+        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+        "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
       "most_recent": true
@@ -106,15 +106,9 @@ Template validated successfully.
 
 Next, let's build the image from this template.
 
-An astute reader may notice that we said earlier we'd be building an image with
-Redis pre-installed, and yet the template we made doesn't reference Redis
-anywhere. In fact, this part of the documentation will only cover making a first
-basic, non-provisioned image. The next section on provisioning will cover
-installing Redis.
-
 ## Your First Image
 
-With a properly validated template. It is time to build your first image. This
+With a properly validated template, it is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
@@ -181,10 +175,7 @@ you will also need to set `associate_public_ip_address` to `true`, or set up a
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
-they're built, it is up to you to launch or destroy them as you see fit. If you
-want to store and namespace images for quick reference, you can use [Atlas by
-HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
-storing images at the end of this getting started guide.
+they're built, it is up to you to launch or destroy them as you see fit.
 
 After running the above example, your AWS account now has an AMI associated
 with it. AMIs are stored in S3 by Amazon, so unless you want to be charged
@@ -238,7 +229,7 @@ Now save the following text in a file named `firstrun.json`:
             "access_key": "{{user `aws_access_key`}}",
             "ami_name": "packer-linux-aws-demo-{{timestamp}}",
             "instance_type": "t2.micro",
-            "region": "us-east-1",
+            "region": "{{user `region`}}",
             "secret_key": "{{user `aws_secret_key`}}",
             "source_ami_filter": {
               "filters": {
@@ -277,7 +268,7 @@ Now save the following text in a file named `firstrun.json`:
 and to build, run `packer build firstrun.json`
 
 Note that if you wanted to use a `source_ami` instead of a `source_ami_filter`
-it might look something like this: `"source_ami": "ami-fce3c696",`
+it might look something like this: `"source_ami": "ami-fce3c696"`.
 
 Your output will look like this:
 
@@ -338,7 +329,7 @@ customize the image. Finally, when all is done, Packer will wrap the whole
 customized package up into a brand new AMI that will be available from the
 [AWS AMI management page](
 https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
-instances we subsequently create from this AMI will have our all of our
+instances we subsequently create from this AMI will have all of our
 customizations baked in. This is the core benefit we are looking to
 achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
 in this example.
@@ -375,7 +366,7 @@ for more info about what's going on behind the scenes here.
 ```powershell
 <powershell>
 # Set administrator password
-net user Administrator SuperS3cr3t!
+net user Administrator SuperS3cr3t!!!!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
 # First, make sure WinRM can't be connected to
@@ -384,6 +375,14 @@ netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" n
 # Delete any existing WinRM listeners
 winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
 winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Disable group policies which block basic authentication and unencrypted login
+
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowUnencryptedTraffic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowUnencryptedTraffic -Value 1
+
 
 # Create a new WinRM listener and configure
 winrm create winrm/config/listener?Address=*+Transport=HTTP
@@ -406,6 +405,9 @@ netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" n
 Start-Service -Name WinRM
 </powershell>
 ```
+
+-> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
+https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-out-eh/
 
 Save the above code in a file named `bootstrap_win.txt`.
 
@@ -512,7 +514,7 @@ customize and control the build process:
       "user_data_file": "./bootstrap_win.txt",
       "communicator": "winrm",
       "winrm_username": "Administrator",
-      "winrm_password": "SuperS3cr3t!"
+      "winrm_password": "SuperS3cr3t!!!!"
     }
   ],
   "provisioners": [
@@ -640,5 +642,7 @@ For Windows 2016:
 
 The bootstrapping and sample provisioning should work the same across all
 Windows server versions.
+
+[Continue to provisioning an image](./provision.html)
 
 [platforms]: /docs/builders/index.html

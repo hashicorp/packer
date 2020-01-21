@@ -1,6 +1,7 @@
 package lxc
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 type LxcAttachCommunicator struct {
@@ -21,7 +23,7 @@ type LxcAttachCommunicator struct {
 	CmdWrapper    CommandWrapper
 }
 
-func (c *LxcAttachCommunicator) Start(cmd *packer.RemoteCmd) error {
+func (c *LxcAttachCommunicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
 	localCmd, err := c.Execute(cmd.Command)
 
 	if err != nil {
@@ -59,16 +61,19 @@ func (c *LxcAttachCommunicator) Start(cmd *packer.RemoteCmd) error {
 }
 
 func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
-	dst = filepath.Join(c.RootFs, dst)
 	log.Printf("Uploading to rootfs: %s", dst)
-	tf, err := ioutil.TempFile("", "packer-lxc-attach")
+	tf, err := tmp.File("packer-lxc-attach")
 	if err != nil {
 		return fmt.Errorf("Error uploading file to rootfs: %s", err)
 	}
 	defer os.Remove(tf.Name())
 	io.Copy(tf, r)
 
-	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", tf.Name(), dst))
+	attachCommand := []string{"cat", "%s", " | ", "lxc-attach"}
+	attachCommand = append(attachCommand, c.AttachOptions...)
+	attachCommand = append(attachCommand, []string{"--name", "%s", "--", "/bin/sh -c \"/bin/cat > %s\""}...)
+
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf(strings.Join(attachCommand, " "), tf.Name(), c.ContainerName, dst))
 	if err != nil {
 		return err
 	}
@@ -78,14 +83,14 @@ func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo)
 		// rename tempfile to match original file name. This makes sure that if file is being
 		// moved into a directory, the filename is preserved instead of a temp name.
 		adjustedTempName := filepath.Join(tfDir, (*fi).Name())
-		mvCmd, err := c.CmdWrapper(fmt.Sprintf("sudo mv %s %s", tf.Name(), adjustedTempName))
+		mvCmd, err := c.CmdWrapper(fmt.Sprintf("mv %s %s", tf.Name(), adjustedTempName))
 		if err != nil {
 			return err
 		}
 		defer os.Remove(adjustedTempName)
 		ShellCommand(mvCmd).Run()
 		// change cpCmd to use new file name as source
-		cpCmd, err = c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", adjustedTempName, dst))
+		cpCmd, err = c.CmdWrapper(fmt.Sprintf(strings.Join(attachCommand, " "), adjustedTempName, c.ContainerName, dst))
 		if err != nil {
 			return err
 		}
@@ -100,7 +105,7 @@ func (c *LxcAttachCommunicator) UploadDir(dst string, src string, exclude []stri
 	// TODO: remove any file copied if it appears in `exclude`
 	dest := filepath.Join(c.RootFs, dst)
 	log.Printf("Uploading directory '%s' to rootfs '%s'", src, dest)
-	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp -R %s/. %s", src, dest))
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp -R %s/. %s", src, dest))
 	if err != nil {
 		return err
 	}
@@ -131,7 +136,7 @@ func (c *LxcAttachCommunicator) DownloadDir(src string, dst string, exclude []st
 func (c *LxcAttachCommunicator) Execute(commandString string) (*exec.Cmd, error) {
 	log.Printf("Executing with lxc-attach in container: %s %s %s", c.ContainerName, c.RootFs, commandString)
 
-	attachCommand := []string{"sudo", "lxc-attach"}
+	attachCommand := []string{"lxc-attach"}
 	attachCommand = append(attachCommand, c.AttachOptions...)
 	attachCommand = append(attachCommand, []string{"--name", "%s", "--", "/bin/sh -c \"%s\""}...)
 

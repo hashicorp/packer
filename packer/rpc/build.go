@@ -1,7 +1,8 @@
 package rpc
 
 import (
-	"net/rpc"
+	"context"
+	"log"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -9,13 +10,15 @@ import (
 // An implementation of packer.Build where the build is actually executed
 // over an RPC connection.
 type build struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // BuildServer wraps a packer.Build implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuildServer struct {
+	context       context.Context
+	contextCancel func()
+
 	build packer.Build
 	mux   *muxBroker
 }
@@ -43,12 +46,24 @@ func (b *build) Prepare() ([]string, error) {
 	return resp.Warnings, err
 }
 
-func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error) {
+func (b *build) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
-	server.RegisterCache(cache)
 	server.RegisterUi(ui)
 	go server.Serve()
+
+	done := make(chan interface{})
+	defer close(done)
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Printf("Cancelling build after context cancellation %v", ctx.Err())
+			if err := b.client.Call("Build.Cancel", new(interface{}), new(interface{})); err != nil {
+				log.Printf("Error cancelling builder: %s", err)
+			}
+		case <-done:
+		}
+	}()
 
 	var result []uint32
 	if err := b.client.Call("Build.Run", nextId, &result); err != nil {
@@ -107,13 +122,17 @@ func (b *BuildServer) Prepare(args *interface{}, resp *BuildPrepareResponse) err
 }
 
 func (b *BuildServer) Run(streamId uint32, reply *[]uint32) error {
+	if b.context == nil {
+		b.context, b.contextCancel = context.WithCancel(context.Background())
+	}
+
 	client, err := newClientWithMux(b.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
 	}
 	defer client.Close()
 
-	artifacts, err := b.build.Run(client.Ui(), client.Cache())
+	artifacts, err := b.build.Run(b.context, client.Ui())
 	if err != nil {
 		return NewBasicError(err)
 	}
@@ -147,6 +166,8 @@ func (b *BuildServer) SetOnError(val *string, reply *interface{}) error {
 }
 
 func (b *BuildServer) Cancel(args *interface{}, reply *interface{}) error {
-	b.build.Cancel()
+	if b.contextCancel != nil {
+		b.contextCancel()
+	}
 	return nil
 }

@@ -19,7 +19,7 @@ type stepCreateProvider struct {
 	name string // the name of the provider
 }
 
-func (s *stepCreateProvider) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
@@ -46,6 +46,9 @@ func (s *stepCreateProvider) Run(_ context.Context, state multistep.StateBag) mu
 	if err != nil || (resp.StatusCode != 200) {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+		}
 		state.Put("error", fmt.Errorf("Error creating provider: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}

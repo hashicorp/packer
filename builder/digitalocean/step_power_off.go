@@ -12,9 +12,9 @@ import (
 
 type stepPowerOff struct{}
 
-func (s *stepPowerOff) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPowerOff) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(int)
 

@@ -2,19 +2,63 @@
 
 # builders
 
-/builder/alicloud/                      dongxiao.zzh@alibaba-inc.com
-/builder/amazon/ebssurrogate/           @jen20
-/builder/amazon/ebsvolume/              @jen20
-/builder/azure/                         @boumenot
-/builder/hyperv/                        @taliesins
-/builder/lxc/                           @ChrisLundquist
-/builder/lxd/                           @ChrisLundquist
-/builder/oneandone/                     @jasmingacic
-/builder/oracle/                        @prydie @owainlewis
-/builder/profitbricks/                  @jasmingacic
-/builder/triton/                        @jen20 @sean-
-/builder/ncloud/                        @YuSungDuk
-/builder/scaleway/                      @dimtion @edouardb
+/builder/alicloud/                      @chhaj5236 @alexyueer
+/website/source/docs/builders/alicloud* @chhaj5236 @alexyueer
+
+/builder/azure/                      @paulmey
+/website/source/docs/builders/azure* @paulmey
+
+/builder/hyperv/                      @taliesins
+/website/source/docs/builders/hyperv* @taliesins
+
+/builder/jdcloud/                      @XiaohanLiang @remrain
+/website/source/docs/builders/jdcloud* @XiaohanLiang @remrain
+
+/builder/linode/                      @displague @ctreatma @stvnjacobs
+/website/source/docs/builders/linode* @displague @ctreatma @stvnjacobs
+
+/builder/lxc/                      @ChrisLundquist
+/website/source/docs/builders/lxc* @ChrisLundquist
+
+/builder/lxd/                      @ChrisLundquist
+/website/source/docs/builders/lxd* @ChrisLundquist
+
+/builder/oneandone/                      @jasmingacic
+/website/source/docs/builders/oneandone* @jasmingacic
+
+/builder/oracle/                      @prydie @owainlewis
+/website/source/docs/builders/oracle* @prydie @owainlewis
+
+/builder/profitbricks/                      @jasmingacic
+/website/source/docs/builders/profitbricks* @jasmingacic
+
+/builder/triton/                      @sean-
+/website/source/docs/builders/triton* @sean-
+
+/builder/ncloud/                      @YuSungDuk
+/website/source/docs/builders/ncloud* @YuSungDuk
+
+/builder/proxmox/                      @carlpett
+/website/source/docs/builders/proxmox* @carlpett
+
+/builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
+/website/source/docs/builders/scaleway* @sieben @mvaude @jqueuniet @fflorens @brmzkw
+
+/builder/hcloud/                      @LKaemmerling
+/website/source/docs/builders/hcloud* @LKaemmerling
+
+/builder/hyperone/                      @m110 @gregorybrzeski @ad-m
+/website/source/docs/builders/hyperone* @m110 @gregorybrzeski @ad-m
+
+/builder/ucloud/                      @shawnmssu
+/website/source/docs/builders/ucloud* @shawnmssu
+
+/builder/yandex/                      @GennadySpb @alexanderKhaustov @seukyaso
+/website/source/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
+
+/builder/osc/                      @marinsalinas
+/website/source/docs/builders/osc* @marinsalinas
+
 
 # provisioners
 
@@ -22,7 +66,10 @@
 /provisioner/converge/                  @stevendborrelli
 
 # post-processors
+
 /post-processor/alicloud-import/        dongxiao.zzh@alibaba-inc.com
 /post-processor/checksum/               v.tolstov@selfip.ru
+/post-processor/exoscale-import/        @falzm @mcorbin
 /post-processor/googlecompute-export/   crunkleton@google.com
 /post-processor/vsphere-template/       nelson@bennu.cl
+/post-processor/ucloud-import/          @shawnmssu

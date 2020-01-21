@@ -4,6 +4,6 @@ import (
 	"testing"
 )
 
-func TestLocalOuputDir_impl(t *testing.T) {
+func TestLocalOutputDir_impl(t *testing.T) {
 	var _ OutputDir = new(LocalOutputDir)
 }

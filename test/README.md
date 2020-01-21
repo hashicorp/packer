@@ -7,8 +7,8 @@ results are expected.
 Tests are run using [Bats](https://github.com/sstephenson/bats), and therefore
 Bash is required to run any tests.
 
-**Warning:** Many of these tests run using AWS, and therefore have a
-real-world cost associated with running the tests. Be aware of that prior
+**Warning:** Many of these tests run using cloud infrastructure, and therefore have
+a real-world cost associated with running the tests. Be aware of that prior
 to running the tests. Additionally, many tests will leave left-over artifacts
 (AMIs) that you'll have to manually clean up.
 
@@ -17,7 +17,7 @@ to running the tests. Additionally, many tests will leave left-over artifacts
 ### Required Software
 
 Before running the tests, you'll need the following installed. If you're
-running on Mac OS X, most of these are available with `brew`:
+running on macOS, most of these are available with `brew`:
 
 * [Bats](https://github.com/sstephenson/bats)
 
@@ -26,6 +26,8 @@ running on Mac OS X, most of these are available with `brew`:
 
 * [gcutil](https://developers.google.com/compute/docs/gcutil/#install) for
   Google Compute Engine tests.
+
+* [h1-cli](https://github.com/hyperonecom/h1-client-go) for HyperOne tests.
 
 ### Configuring Tests
 
@@ -43,6 +45,15 @@ Set the following environmental variables:
 * `GC_BUCKET_NAME`
 * `GC_ACCOUNT_FILE`
 * `GC_PROJECT_ID`
+
+**For tests that test HyperOne:**
+
+Set the following environmental variables:
+
+* `HYPERONE_TOKEN`
+* `HYPERONE_PROJECT`
+
+You have to be authenticated within the `h1` tool (use `h1 login`).
 
 ### Running
 

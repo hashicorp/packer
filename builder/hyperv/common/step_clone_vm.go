@@ -16,27 +16,32 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepCloneVM struct {
-	CloneFromVMXCPath              string
+	CloneFromVMCXPath              string
 	CloneFromVMName                string
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
 	VMName                         string
 	SwitchName                     string
+	CompareCopy                    bool
 	RamSize                        uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
+	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	MacAddress                     string
+	KeepRegistered                 bool
+	AdditionalDiskSize             []uint
+	DiskBlockSize                  uint
 }
 
-func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cloning virtual machine...")
 
-	path := state.Get("packerTempDir").(string)
+	path := state.Get("build_dir").(string)
 
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
@@ -54,7 +59,9 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 
-	err := driver.CloneVirtualMachine(s.CloneFromVMXCPath, s.CloneFromVMName, s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path, harddrivePath, ramSize, s.SwitchName)
+	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName,
+		s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path,
+		harddrivePath, ramSize, s.SwitchName, s.CompareCopy)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)
@@ -99,7 +106,8 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 
 	if generation == 2 {
-		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
+
+		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot, s.SecureBootTemplate)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
 			state.Put("error", err)
@@ -119,6 +127,21 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 		}
 	}
 
+	if len(s.AdditionalDiskSize) > 0 {
+		for index, size := range s.AdditionalDiskSize {
+			diskSize := int64(size * 1024 * 1024)
+			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
+			diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
+			err = driver.AddVirtualMachineHardDrive(s.VMName, path, diskFile, diskSize, diskBlockSize, "SCSI")
+			if err != nil {
+				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	}
+
 	if s.MacAddress != "" {
 		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
 		if err != nil {
@@ -131,6 +154,9 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.VMName)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.VMName)
 
 	return multistep.ActionContinue
 }
@@ -142,6 +168,12 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.KeepRegistered {
+		ui.Say("keep_registered set. Skipping unregister/deletion of VM.")
+		return
+	}
+
 	ui.Say("Unregistering and deleting virtual machine...")
 
 	err := driver.DeleteVirtualMachine(s.VMName)

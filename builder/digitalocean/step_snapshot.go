@@ -12,12 +12,14 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepSnapshot struct{}
+type stepSnapshot struct {
+	snapshotTimeout time.Duration
+}
 
-func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	dropletId := state.Get("droplet_id").(int)
 	var snapshotRegions []string
 
@@ -31,9 +33,11 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	// With the pending state over, verify that we're in the active state
+	// because action can take a long time and may depend on the size of the final snapshot,
+	// the timeout is parameterized
 	ui.Say("Waiting for snapshot to complete...")
 	if err := waitForActionState(godo.ActionCompleted, dropletId, action.ID,
-		client, 20*time.Minute); err != nil {
+		client, s.snapshotTimeout); err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)
@@ -91,7 +95,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 				return multistep.ActionHalt
 			}
 			ui.Say(fmt.Sprintf("transferring Snapshot ID: %d", imageTransfer.ID))
-			if err := waitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
+			if err := WaitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
 				client, 20*time.Minute); err != nil {
 				// If we get an error the first time, actually report it
 				err := fmt.Errorf("Error waiting for snapshot transfer: %s", err)
@@ -111,6 +115,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	snapshotRegions = append(snapshotRegions, c.Region)
 
 	log.Printf("Snapshot image ID: %d", imageId)
 	state.Put("snapshot_image_id", imageId)

@@ -7,8 +7,10 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/client"
 )
 
-const WaitForOrchestrationActiveTimeout = time.Duration(3600 * time.Second)
-const WaitForOrchestrationDeleteTimeout = time.Duration(3600 * time.Second)
+const waitForOrchestrationActivePollInterval = 10 * time.Second
+const waitForOrchestrationActiveTimeout = 3600 * time.Second
+const waitForOrchestrationDeletePollInterval = 10 * time.Second
+const waitForOrchestrationDeleteTimeout = 3600 * time.Second
 
 // OrchestrationsClient is a client for the Orchestration functions of the Compute API.
 type OrchestrationsClient struct {
@@ -17,50 +19,73 @@ type OrchestrationsClient struct {
 
 // Orchestrations obtains an OrchestrationsClient which can be used to access to the
 // Orchestration functions of the Compute API
-func (c *ComputeClient) Orchestrations() *OrchestrationsClient {
+func (c *Client) Orchestrations() *OrchestrationsClient {
 	return &OrchestrationsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "Orchestration",
 			ContainerPath:       "/platform/v1/orchestration/",
 			ResourceRootPath:    "/platform/v1/orchestration",
 		}}
 }
 
+// OrchestrationDesiredState defines the different desired states a orchestration can be in
 type OrchestrationDesiredState string
 
 const (
-	// * active: Creates all the orchestration objects defined in the orchestration.
+	// OrchestrationDesiredStateActive - Creates all the orchestration objects defined in the orchestration.
 	OrchestrationDesiredStateActive OrchestrationDesiredState = "active"
-	// * inactive: Adds the orchestration to Oracle Compute Cloud Service, but does not create any of the orchestration
+	// OrchestrationDesiredStateInactive - Adds the orchestration to Oracle Compute Cloud Service, but does not create any of the orchestration
 	OrchestrationDesiredStateInactive OrchestrationDesiredState = "inactive"
-	// * suspended: Suspends all orchestration objects defined in the orchestration
+	// OrchestrationDesiredStateSuspend - Suspends all orchestration objects defined in the orchestration
 	OrchestrationDesiredStateSuspend OrchestrationDesiredState = "suspend"
 )
 
+// OrchestrationStatus defines the different status a orchestration can be in
 type OrchestrationStatus string
 
 const (
-	OrchestrationStatusActive       OrchestrationStatus = "active"
-	OrchestrationStatusInactive     OrchestrationStatus = "inactive"
-	OrchestrationStatusSuspend      OrchestrationStatus = "suspend"
-	OrchestrationStatusActivating   OrchestrationStatus = "activating"
-	OrchestrationStatusDeleting     OrchestrationStatus = "deleting"
-	OrchestrationStatusError        OrchestrationStatus = "terminal_error"
-	OrchestrationStatusStopping     OrchestrationStatus = "stopping"
-	OrchestrationStatusSuspending   OrchestrationStatus = "suspending"
-	OrchestrationStatusStarting     OrchestrationStatus = "starting"
+	// OrchestrationStatusActive - active
+	OrchestrationStatusActive OrchestrationStatus = "active"
+	// OrchestrationStatusInactive - inactive
+	OrchestrationStatusInactive OrchestrationStatus = "inactive"
+	// OrchestrationStatusSuspend - suspend
+	OrchestrationStatusSuspend OrchestrationStatus = "suspend"
+	// OrchestrationStatusActivating - activating
+	OrchestrationStatusActivating OrchestrationStatus = "activating"
+	// OrchestrationStatusDeleting - deleting
+	OrchestrationStatusDeleting OrchestrationStatus = "deleting"
+	// OrchestrationStatusError - terminal_error
+	OrchestrationStatusError OrchestrationStatus = "terminal_error"
+	// OrchestrationStatusStopping - stopping
+	OrchestrationStatusStopping OrchestrationStatus = "stopping"
+	// OrchestrationStatusSuspending - suspending
+	OrchestrationStatusSuspending OrchestrationStatus = "suspending"
+	// OrchestrationStatusStarting - starting
+	OrchestrationStatusStarting OrchestrationStatus = "starting"
+	// OrchestrationStatusDeactivating - deactivating
 	OrchestrationStatusDeactivating OrchestrationStatus = "deactivating"
-	OrchestrationStatusSuspended    OrchestrationStatus = "suspended"
+	// OrchestrationStatusSuspended - suspended
+	OrchestrationStatusSuspended OrchestrationStatus = "suspended"
 )
 
+// OrchestrationType defines the type of orchestrations that can be managed
 type OrchestrationType string
 
 const (
+	// OrchestrationTypeInstance - Instance
 	OrchestrationTypeInstance OrchestrationType = "Instance"
 )
 
-// OrchestrationInfo describes an existing Orchestration.
+// OrchestrationRelationshipType defines the orchestration relationship type for an orchestration
+type OrchestrationRelationshipType string
+
+const (
+	// OrchestrationRelationshipTypeDepends - the orchestration relationship depends on a resource
+	OrchestrationRelationshipTypeDepends OrchestrationRelationshipType = "depends"
+)
+
+// Orchestration describes an existing Orchestration.
 type Orchestration struct {
 	// The default Oracle Compute Cloud Service account, such as /Compute-acme/default.
 	Account string `json:"account"`
@@ -70,8 +95,10 @@ type Orchestration struct {
 	DesiredState OrchestrationDesiredState `json:"desired_state"`
 	// Unique identifier of this orchestration
 	ID string `json:"id"`
-	// The three-part name of the Orchestration (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+	// The three-part name of the Orchestration
+	Name string
 	// List of orchestration objects
 	Objects []Object `json:"objects"`
 	// Current status of this orchestration
@@ -119,10 +146,13 @@ type CreateOrchestrationInput struct {
 	Tags []string `json:"tags,omitempty"`
 	// Version of this orchestration. It is automatically generated by the server.
 	Version int `json:"version,omitempty"`
+	// Time to wait between polls to check status
+	PollInterval time.Duration `json:"-"`
 	// Time to wait for an orchestration to be ready
 	Timeout time.Duration `json:"-"`
 }
 
+// Object defines an object inside an orchestration
 type Object struct {
 	// The default Oracle Compute Cloud Service account, such as /Compute-acme/default.
 	// Optional
@@ -162,7 +192,7 @@ type Object struct {
 	// Note that when recovering from a failure, the orchestration doesn't consider object relationships.
 	// Orchestrations v2 use object references to recover interdependent objects to a healthy state. SeeObject
 	// References and Relationships in Using Oracle Compute Cloud Service (IaaS).
-	Relationship []Object `json:"relationships,omitempty"`
+	Relationships []Relationship `json:"relationships,omitempty"`
 	// The template attribute defines the properties or characteristics of the Oracle Compute Cloud Service object
 	// that you want to create, as specified by the type attribute.
 	// The fields in the template section vary depending on the specified type. See Orchestration v2 Attributes
@@ -182,6 +212,7 @@ type Object struct {
 	Version int `json:"version,omitempty"`
 }
 
+// Health defines the health of an object
 type Health struct {
 	// The status of the object
 	Status OrchestrationStatus `json:"status,omitempty"`
@@ -193,6 +224,17 @@ type Health struct {
 	Error string `json:"error,omitempty"`
 }
 
+// Relationship defines the relationship between objects
+type Relationship struct {
+	// The type of Relationship
+	// The only type is depends
+	// Required
+	Type OrchestrationRelationshipType `json:"type"`
+	// What objects the relationship depends on
+	// Required
+	Targets []string `json:"targets"`
+}
+
 // CreateOrchestration creates a new Orchestration with the given name, key and enabled flag.
 func (c *OrchestrationsClient) CreateOrchestration(input *CreateOrchestrationInput) (*Orchestration, error) {
 	var createdOrchestration Orchestration
@@ -201,7 +243,7 @@ func (c *OrchestrationsClient) CreateOrchestration(input *CreateOrchestrationInp
 	for _, i := range input.Objects {
 		i.Orchestration = c.getQualifiedName(i.Orchestration)
 		if i.Type == OrchestrationTypeInstance {
-			instanceClient := c.ComputeClient.Instances()
+			instanceClient := c.Client.Instances()
 			instanceInput := i.Template.(*CreateInstanceInput)
 			instanceInput.Name = c.getQualifiedName(instanceInput.Name)
 
@@ -222,6 +264,7 @@ func (c *OrchestrationsClient) CreateOrchestration(input *CreateOrchestrationInp
 			instanceInput.Storage = qualifiedStorageAttachments
 
 			instanceInput.Networking = instanceClient.qualifyNetworking(instanceInput.Networking)
+
 		}
 	}
 
@@ -234,13 +277,16 @@ func (c *OrchestrationsClient) CreateOrchestration(input *CreateOrchestrationInp
 		Name: createdOrchestration.Name,
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForOrchestrationActivePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForOrchestrationActiveTimeout
+		input.Timeout = waitForOrchestrationActiveTimeout
 	}
 
 	// Wait for orchestration to be ready and return the result
 	// Don't have to unqualify any objects, as the GetOrchestration method will handle that
-	orchestrationInfo, orchestrationError := c.WaitForOrchestrationState(getInput, input.Timeout)
+	orchestrationInfo, orchestrationError := c.WaitForOrchestrationState(getInput, input.PollInterval, input.Timeout)
 	if orchestrationError != nil {
 		deleteInput := &DeleteOrchestrationInput{
 			Name: createdOrchestration.Name,
@@ -252,13 +298,13 @@ func (c *OrchestrationsClient) CreateOrchestration(input *CreateOrchestrationInp
 		return nil, fmt.Errorf("Error creating orchestration %s: %s", getInput.Name, orchestrationError)
 	}
 
-	return &orchestrationInfo, nil
+	return orchestrationInfo, nil
 }
 
 // GetOrchestrationInput describes the Orchestration to get
 type GetOrchestrationInput struct {
 	// The three-part name of the Orchestration (/Compute-identity_domain/user/object).
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetOrchestration retrieves the Orchestration with the given name.
@@ -298,6 +344,8 @@ type UpdateOrchestrationInput struct {
 	Tags []string `json:"tags,omitempty"`
 	// Version of this orchestration. It is automatically generated by the server.
 	Version int `json:"version,omitempty"`
+	// Time to wait between polls to check status
+	PollInterval time.Duration `json:"-"`
 	// Time to wait for an orchestration to be ready
 	Timeout time.Duration `json:"-"`
 }
@@ -323,25 +371,30 @@ func (c *OrchestrationsClient) UpdateOrchestration(input *UpdateOrchestrationInp
 		Name: updatedOrchestration.Name,
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForOrchestrationActivePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForOrchestrationActiveTimeout
+		input.Timeout = waitForOrchestrationActiveTimeout
 	}
 
 	// Wait for orchestration to be ready and return the result
 	// Don't have to unqualify any objects, as the GetOrchestration method will handle that
-	orchestrationInfo, orchestrationError := c.WaitForOrchestrationState(getInput, input.Timeout)
+	orchestrationInfo, orchestrationError := c.WaitForOrchestrationState(getInput, input.PollInterval, input.Timeout)
 	if orchestrationError != nil {
 		return nil, orchestrationError
 	}
 
-	return &orchestrationInfo, nil
+	return orchestrationInfo, nil
 }
 
 // DeleteOrchestrationInput describes the Orchestration to delete
 type DeleteOrchestrationInput struct {
 	// The three-part name of the Orchestration (/Compute-identity_domain/user/object).
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
+	// Poll Interval for delete request
+	PollInterval time.Duration `json:"-"`
 	// Timeout for delete request
 	Timeout time.Duration `json:"-"`
 }
@@ -352,18 +405,21 @@ func (c *OrchestrationsClient) DeleteOrchestration(input *DeleteOrchestrationInp
 		return err
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForOrchestrationDeletePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForOrchestrationDeleteTimeout
+		input.Timeout = waitForOrchestrationDeleteTimeout
 	}
 
-	return c.WaitForOrchestrationDeleted(input, input.Timeout)
+	return c.WaitForOrchestrationDeleted(input, input.PollInterval, input.Timeout)
 }
 
 func (c *OrchestrationsClient) success(info *Orchestration) (*Orchestration, error) {
-	c.unqualify(&info.Name)
+	info.Name = c.getUnqualifiedName(info.FQDN)
 	for _, i := range info.Objects {
 		c.unqualify(&i.Orchestration)
-		if OrchestrationType(i.Type) == OrchestrationTypeInstance {
+		if i.Type == OrchestrationTypeInstance {
 			instanceInput := i.Template.(map[string]interface{})
 			instanceInput["name"] = c.getUnqualifiedName(instanceInput["name"].(string))
 		}
@@ -372,11 +428,11 @@ func (c *OrchestrationsClient) success(info *Orchestration) (*Orchestration, err
 	return info, nil
 }
 
-// WaitForOrchestrationActive waits for an orchestration to be completely initialized and available.
-func (c *OrchestrationsClient) WaitForOrchestrationState(input *GetOrchestrationInput, timeout time.Duration) (Orchestration, error) {
+// WaitForOrchestrationState waits for an orchestration to be in the specified state
+func (c *OrchestrationsClient) WaitForOrchestrationState(input *GetOrchestrationInput, pollInterval, timeout time.Duration) (*Orchestration, error) {
 	var info *Orchestration
 	var getErr error
-	err := c.client.WaitFor("orchestration to be ready", timeout, func() (bool, error) {
+	err := c.client.WaitFor("orchestration to be ready", pollInterval, timeout, func() (bool, error) {
 		info, getErr = c.GetOrchestration(input)
 		if getErr != nil {
 			return false, getErr
@@ -410,19 +466,18 @@ func (c *OrchestrationsClient) WaitForOrchestrationState(input *GetOrchestration
 			c.client.DebugLogString("Orchestration suspended")
 			if info.DesiredState == OrchestrationDesiredStateSuspend {
 				return true, nil
-			} else {
-				return false, nil
 			}
+			return false, nil
 		default:
 			return false, fmt.Errorf("Unknown orchestration state: %s, erroring", s)
 		}
 	})
-	return *info, err
+	return info, err
 }
 
 // WaitForOrchestrationDeleted waits for an orchestration to be fully deleted.
-func (c *OrchestrationsClient) WaitForOrchestrationDeleted(input *DeleteOrchestrationInput, timeout time.Duration) error {
-	return c.client.WaitFor("orchestration to be deleted", timeout, func() (bool, error) {
+func (c *OrchestrationsClient) WaitForOrchestrationDeleted(input *DeleteOrchestrationInput, pollInterval, timeout time.Duration) error {
+	return c.client.WaitFor("orchestration to be deleted", pollInterval, timeout, func() (bool, error) {
 		var info Orchestration
 		if err := c.getResource(input.Name, &info); err != nil {
 			if client.WasNotFoundError(err) {

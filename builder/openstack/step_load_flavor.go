@@ -17,8 +17,8 @@ type StepLoadFlavor struct {
 	Flavor string
 }
 
-func (s *StepLoadFlavor) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepLoadFlavor) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client

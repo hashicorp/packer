@@ -34,12 +34,22 @@ func testUi() *BasicUi {
 		Reader:      new(bytes.Buffer),
 		Writer:      new(bytes.Buffer),
 		ErrorWriter: new(bytes.Buffer),
+		TTY:         new(testTTY),
 	}
+}
+
+type testTTY struct {
+	say string
+}
+
+func (tty *testTTY) Close() error { return nil }
+func (tty *testTTY) ReadString() (string, error) {
+	return tty.say, nil
 }
 
 func TestColoredUi(t *testing.T) {
 	bufferUi := testUi()
-	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi}
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, defaultUiProgressBar}
 
 	if !ui.supportsColors() {
 		t.Skip("skipping for ui without color support")
@@ -71,7 +81,7 @@ func TestColoredUi(t *testing.T) {
 
 func TestColoredUi_noColorEnv(t *testing.T) {
 	bufferUi := testUi()
-	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi}
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, defaultUiProgressBar}
 
 	// Set the env var to get rid of the color
 	oldenv := os.Getenv("PACKER_NO_COLOR")
@@ -99,34 +109,34 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 
 func TestTargetedUI(t *testing.T) {
 	bufferUi := testUi()
-	targettedUi := &TargetedUI{
+	targetedUi := &TargetedUI{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
 
 	var actual, expected string
-	targettedUi.Say("foo")
+	targetedUi.Say("foo")
 	actual = readWriter(bufferUi)
 	expected = "==> foo: foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Message("foo")
+	targetedUi.Message("foo")
 	actual = readWriter(bufferUi)
 	expected = "    foo: foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Error("bar")
+	targetedUi.Error("bar")
 	actual = readErrorWriter(bufferUi)
 	expected = "==> foo: bar\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Say("foo\nbar")
+	targetedUi.Say("foo\nbar")
 	actual = readWriter(bufferUi)
 	expected = "==> foo: foo\n==> foo: bar\n"
 	if actual != expected {
@@ -215,9 +225,9 @@ func TestBasicUi_Ask(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		// Because of the internal bufio we can't eaily reset the input, so create a new one each time
+		// Because of the internal bufio we can't easily reset the input, so create a new one each time
 		bufferUi := testUi()
-		writeReader(bufferUi, testCase.Input)
+		bufferUi.TTY = &testTTY{testCase.Input}
 
 		actual, err = bufferUi.Ask(testCase.Prompt)
 		if err != nil {

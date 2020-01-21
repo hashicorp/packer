@@ -1,8 +1,9 @@
 package null
 
 import (
-	"log"
+	"context"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -12,36 +13,31 @@ import (
 const BuilderId = "fnoeding.null"
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return warnings, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
 }
 
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	steps := []multistep.Step{}
 
-	if b.config.CommConfig.Type != "none" {
-		steps = append(steps,
-			&communicator.StepConnect{
-				Config: &b.config.CommConfig,
-				Host:   CommHost(b.config.CommConfig.Host()),
-				SSHConfig: SSHConfig(
-					b.config.CommConfig.SSHAgentAuth,
-					b.config.CommConfig.SSHUsername,
-					b.config.CommConfig.SSHPassword,
-					b.config.CommConfig.SSHPrivateKey),
-			},
-		)
-	}
+	steps = append(steps,
+		&communicator.StepConnect{
+			Config:    &b.config.CommConfig,
+			Host:      CommHost(b.config.CommConfig.Host()),
+			SSHConfig: b.config.CommConfig.SSHConfigFunc(),
+		},
+	)
 
 	steps = append(steps,
 		new(common.StepProvision),
@@ -49,13 +45,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
@@ -65,11 +60,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// No errors, must've worked
 	artifact := &NullArtifact{}
 	return artifact, nil
-}
-
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

@@ -82,7 +82,7 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 	return s.serverInstanceNo, nil
 }
 
-func (s *StepCreateServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateServerInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Instance")
 
 	var loginKey = state.Get("LoginKey").(*LoginKey)
@@ -96,6 +96,9 @@ func (s *StepCreateServerInstance) Run(_ context.Context, state multistep.StateB
 	serverInstanceNo, err := s.CreateServerInstance(loginKey.KeyName, zoneNo, feeSystemTypeCode)
 	if err == nil {
 		state.Put("InstanceNo", serverInstanceNo)
+		// instance_id is the generic term used so that users can have access to the
+		// instance id inside of the provisioners, used in step_provision.
+		state.Put("instance_id", serverInstanceNo)
 	}
 
 	return processStepResult(err, s.Error, state)

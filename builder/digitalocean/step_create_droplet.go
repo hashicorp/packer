@@ -15,10 +15,10 @@ type stepCreateDroplet struct {
 	dropletId int
 }
 
-func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	sshKeyId := state.Get("ssh_key_id").(int)
 
 	// Create the droplet based on configuration
@@ -49,6 +49,7 @@ func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) mul
 		Monitoring:        c.Monitoring,
 		IPv6:              c.IPv6,
 		UserData:          userData,
+		Tags:              c.Tags,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
@@ -62,6 +63,9 @@ func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Store the droplet id for later
 	state.Put("droplet_id", droplet.ID)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", droplet.ID)
 
 	return multistep.ActionContinue
 }

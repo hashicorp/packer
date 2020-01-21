@@ -1,0 +1,42 @@
+{
+  "variables": {
+    "secret_id": "{{env `TENCENTCLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `TENCENTCLOUD_SECRET_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "tencentcloud-cvm",
+      "secret_id": "{{user `secret_id`}}",
+      "secret_key": "{{user `secret_key`}}",
+      "region": "ap-guangzhou",
+      "zone": "ap-guangzhou-3",
+      "instance_type": "S3.SMALL1",
+      "source_image_id": "img-oikl1tzv",
+      "disk_type": "CLOUD_PREMIUM",
+      "vpc_id": "vpc-h70b6b49",
+      "subnet_id": "subnet-1uwh63so",
+      "internet_max_bandwidth_out": 2,
+      "security_group_id": "sg-nltpbqg1",
+      "ssh_username": "root",
+      "image_name": "packerTest",
+      "host_name": "packerTest",
+      "associate_public_ip_address": true,
+      "image_description": "centosPacker",
+      "image_copy_regions": [
+        "ap-beijing"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -S -E sh '{{ .Path }}'",
+      "inline": [
+        "yum update -y",
+        "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+      ],
+      "inline_shebang": "/bin/sh -x",
+      "type": "shell",
+      "skip_clean": true
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 package rpc
 
 import (
+	"context"
 	"log"
-	"net/rpc"
+	"sync"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -10,14 +11,17 @@ import (
 // An implementation of packer.Hook where the hook is actually executed
 // over an RPC connection.
 type hook struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // HookServer wraps a packer.Hook implementation and makes it exportable
 // as part of a Golang RPC server.
 type HookServer struct {
+	context       context.Context
+	contextCancel func()
+
 	hook packer.Hook
+	lock sync.Mutex
 	mux  *muxBroker
 }
 
@@ -27,12 +31,25 @@ type HookRunArgs struct {
 	StreamId uint32
 }
 
-func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
+func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
 	server := newServerWithMux(h.mux, nextId)
 	server.RegisterCommunicator(comm)
 	server.RegisterUi(ui)
 	go server.Serve()
+
+	done := make(chan interface{})
+	defer close(done)
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Printf("Cancelling hook after context cancellation %v", ctx.Err())
+			if err := h.client.Call(h.endpoint+".Cancel", new(interface{}), new(interface{})); err != nil {
+				log.Printf("Error cancelling builder: %s", err)
+			}
+		case <-done:
+		}
+	}()
 
 	args := HookRunArgs{
 		Name:     name,
@@ -40,14 +57,7 @@ func (h *hook) Run(name string, ui packer.Ui, comm packer.Communicator, data int
 		StreamId: nextId,
 	}
 
-	return h.client.Call("Hook.Run", &args, new(interface{}))
-}
-
-func (h *hook) Cancel() {
-	err := h.client.Call("Hook.Cancel", new(interface{}), new(interface{}))
-	if err != nil {
-		log.Printf("Hook.Cancel error: %s", err)
-	}
+	return h.client.Call(h.endpoint+".Run", &args, new(interface{}))
 }
 
 func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
@@ -57,7 +67,12 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 	}
 	defer client.Close()
 
-	if err := h.hook.Run(args.Name, client.Ui(), client.Communicator(), args.Data); err != nil {
+	h.lock.Lock()
+	if h.context == nil {
+		h.context, h.contextCancel = context.WithCancel(context.Background())
+	}
+	h.lock.Unlock()
+	if err := h.hook.Run(h.context, args.Name, client.Ui(), client.Communicator(), args.Data); err != nil {
 		return NewBasicError(err)
 	}
 
@@ -66,6 +81,10 @@ func (h *HookServer) Run(args *HookRunArgs, reply *interface{}) error {
 }
 
 func (h *HookServer) Cancel(args *interface{}, reply *interface{}) error {
-	h.hook.Cancel()
+	h.lock.Lock()
+	if h.contextCancel != nil {
+		h.contextCancel()
+	}
+	h.lock.Unlock()
 	return nil
 }

@@ -2,14 +2,12 @@ package shell
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -25,6 +23,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	file, err := extractScript(p)
+	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
 	}
@@ -104,6 +103,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["script"] = tf.Name()
 	p = new(Provisioner)
@@ -130,6 +130,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["script"] = tf.Name()
@@ -149,6 +150,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["scripts"] = []string{tf.Name()}
@@ -175,6 +177,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["scripts"] = []string{tf.Name()}
 	p = new(Provisioner)
@@ -289,7 +292,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -308,7 +311,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.bat"
 
 	p.Prepare(config)
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -322,11 +325,16 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 }
 
 func TestProvisionerProvision_Scripts(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
-	defer os.Remove(tempFile.Name())
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
 	config := testConfig()
 	delete(config, "inline")
-	config["scripts"] = []string{tempFile.Name()}
+	config["scripts"] = []string{tf.Name()}
 	config["packer_build_name"] = "foobuild"
 	config["packer_builder_type"] = "footype"
 	ui := testUi()
@@ -334,7 +342,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -349,13 +357,18 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
 	config := testConfig()
 	ui := testUi()
-	defer os.Remove(tempFile.Name())
 	delete(config, "inline")
 
-	config["scripts"] = []string{tempFile.Name()}
+	config["scripts"] = []string{tf.Name()}
 	config["packer_build_name"] = "foobuild"
 	config["packer_builder_type"] = "footype"
 
@@ -368,7 +381,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -415,37 +428,6 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		}
 	}
 }
-
-func TestRetryable(t *testing.T) {
-	config := testConfig()
-
-	count := 0
-	retryMe := func() error {
-		log.Printf("RetryMe, attempt number %d", count)
-		if count == 2 {
-			return nil
-		}
-		count++
-		return errors.New(fmt.Sprintf("Still waiting %d more times...", 2-count))
-	}
-	retryableSleep = 50 * time.Millisecond
-	p := new(Provisioner)
-	p.config.StartRetryTimeout = 155 * time.Millisecond
-	err := p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err != nil {
-		t.Fatalf("should not have error retrying funuction")
-	}
-
-	count = 0
-	p.config.StartRetryTimeout = 10 * time.Millisecond
-	err = p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err == nil {
-		t.Fatalf("should have error retrying funuction")
-	}
-}
-
 func TestCancel(t *testing.T) {
 	// Don't actually call Cancel() as it performs an os.Exit(0)
 	// which kills the 'go test' tool

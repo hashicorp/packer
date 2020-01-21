@@ -92,7 +92,7 @@ const (
 )
 
 // unmarshal calls asn1.Unmarshal, but also returns an error if there is any
-// trailing data after unmarshaling.
+// trailing data after unmarshalling.
 func unmarshal(in []byte, out interface{}) error {
 	trailing, err := asn1.Unmarshal(in, out)
 	if err != nil {
@@ -398,7 +398,7 @@ func Encode(derBytes []byte, privateKey interface{}, password string) (pfxBytes 
 		return nil, err
 	}
 
-	// Marhsal []contentInfo so we can re-constitute the byte stream that will
+	// Marshal []contentInfo so we can re-constitute the byte stream that will
 	// be suitable for computing the MAC
 	bytes, err := asn1.Marshal(contentInfos)
 	if err != nil {

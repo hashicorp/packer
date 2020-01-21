@@ -15,10 +15,10 @@ import (
 
 const port string = "13000"
 
-type StepPollingInstalation struct {
+type StepPollingInstallation struct {
 }
 
-func (s *StepPollingInstalation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPollingInstallation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	errorMsg := "Error polling VM: %s"
@@ -75,6 +75,6 @@ func (s *StepPollingInstalation) Run(_ context.Context, state multistep.StateBag
 	return multistep.ActionContinue
 }
 
-func (s *StepPollingInstalation) Cleanup(state multistep.StateBag) {
+func (s *StepPollingInstallation) Cleanup(state multistep.StateBag) {
 
 }

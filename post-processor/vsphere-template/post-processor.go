@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package vsphere_template
 
 import (
@@ -8,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/builder/vmware/iso"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,8 +22,8 @@ import (
 )
 
 var builtins = map[string]string{
-	vsphere.BuilderId: "vmware",
-	iso.BuilderIdESX:  "vmware",
+	vsphere.BuilderId:      "vmware",
+	vmwcommon.BuilderIdESX: "vmware",
 }
 
 type Config struct {
@@ -31,6 +34,10 @@ type Config struct {
 	Password            string `mapstructure:"password"`
 	Datacenter          string `mapstructure:"datacenter"`
 	Folder              string `mapstructure:"folder"`
+	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
+	SnapshotName        string `mapstructure:"snapshot_name"`
+	SnapshotDescription string `mapstructure:"snapshot_description"`
+	ReregisterVM        bool   `mapstructure:"reregister_vm" default:"true"`
 
 	ctx interpolate.Context
 }
@@ -39,6 +46,8 @@ type PostProcessor struct {
 	config Config
 	url    *url.URL
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -76,6 +85,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error invalid vSphere sdk endpoint: %s", err))
+		return errs
 	}
 
 	sdk.User = url.UserPassword(p.config.Username, p.config.Password)
@@ -87,17 +97,20 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, false, fmt.Errorf("The Packer vSphere Template post-processor "+
+			"can only take an artifact from the VMware-iso builder, built on "+
+			"ESXi (i.e. remote) or an artifact from the vSphere post-processor. "+
+			"Artifact type %s does not fit this requirement", artifact.BuilderId())
 	}
 
-	f := artifact.State(iso.ArtifactConfFormat)
-	k := artifact.State(iso.ArtifactConfKeepRegistered)
-	s := artifact.State(iso.ArtifactConfSkipExport)
+	f := artifact.State(vmwcommon.ArtifactConfFormat)
+	k := artifact.State(vmwcommon.ArtifactConfKeepRegistered)
+	s := artifact.State(vmwcommon.ArtifactConfSkipExport)
 
 	if f != "" && k != "true" && s == "false" {
-		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
+		return nil, false, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
 	}
 
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
@@ -106,7 +119,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	time.Sleep(10 * time.Second)
 	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error connecting to vSphere: %s", err)
+		return nil, false, false, fmt.Errorf("Error connecting to vSphere: %s", err)
 	}
 
 	defer c.Logout(context.Background())
@@ -122,12 +135,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		NewStepMarkAsTemplate(artifact),
+		NewStepCreateSnapshot(artifact, p),
+		NewStepMarkAsTemplate(artifact, p),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
-	runner.Run(state)
+	runner.Run(ctx, state)
 	if rawErr, ok := state.GetOk("error"); ok {
-		return nil, false, rawErr.(error)
+		return nil, false, false, rawErr.(error)
 	}
-	return artifact, true, nil
+	return artifact, true, true, nil
 }

@@ -12,7 +12,15 @@ const (
 	BuilderId = "Azure.ResourceManagement.VMImage"
 )
 
+type AdditionalDiskArtifact struct {
+	AdditionalDiskUri            string
+	AdditionalDiskUriReadOnlySas string
+}
+
 type Artifact struct {
+	// OS type: Linux, Windows
+	OSType string
+
 	// VHD
 	StorageAccountLocation string
 	OSDiskUri              string
@@ -21,20 +29,45 @@ type Artifact struct {
 	TemplateUriReadOnlySas string
 
 	// Managed Image
-	ManagedImageResourceGroupName string
-	ManagedImageName              string
-	ManagedImageLocation          string
+	ManagedImageResourceGroupName      string
+	ManagedImageName                   string
+	ManagedImageLocation               string
+	ManagedImageId                     string
+	ManagedImageOSDiskSnapshotName     string
+	ManagedImageDataDiskSnapshotPrefix string
+	// ARM resource id for Shared Image Gallery
+	ManagedImageSharedImageGalleryId string
+
+	// Additional Disks
+	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
-func NewManagedImageArtifact(resourceGroup, name, location string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string) (*Artifact, error) {
 	return &Artifact{
-		ManagedImageResourceGroupName: resourceGroup,
-		ManagedImageName:              name,
-		ManagedImageLocation:          location,
+		ManagedImageResourceGroupName:      resourceGroup,
+		ManagedImageName:                   name,
+		ManagedImageLocation:               location,
+		ManagedImageId:                     id,
+		OSType:                             osType,
+		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
+		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
 	}, nil
 }
 
-func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) (*Artifact, error) {
+func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix, destinationSharedImageGalleryId string) (*Artifact, error) {
+	return &Artifact{
+		ManagedImageResourceGroupName:      resourceGroup,
+		ManagedImageName:                   name,
+		ManagedImageLocation:               location,
+		ManagedImageId:                     id,
+		OSType:                             osType,
+		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
+		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
+		ManagedImageSharedImageGalleryId:   destinationSharedImageGalleryId,
+	}, nil
+}
+
+func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string, osType string) (*Artifact, error) {
 	if template == nil {
 		return nil, fmt.Errorf("nil capture template")
 	}
@@ -53,11 +86,28 @@ func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) 
 		return nil, err
 	}
 
+	var additional_disks *[]AdditionalDiskArtifact
+	if template.Resources[0].Properties.StorageProfile.DataDisks != nil {
+		data_disks := make([]AdditionalDiskArtifact, len(template.Resources[0].Properties.StorageProfile.DataDisks))
+		for i, additionaldisk := range template.Resources[0].Properties.StorageProfile.DataDisks {
+			additionalVhdUri, err := url.Parse(additionaldisk.Image.Uri)
+			if err != nil {
+				return nil, err
+			}
+			data_disks[i].AdditionalDiskUri = additionalVhdUri.String()
+			data_disks[i].AdditionalDiskUriReadOnlySas = getSasUrl(getStorageUrlPath(additionalVhdUri))
+		}
+		additional_disks = &data_disks
+	}
+
 	return &Artifact{
+		OSType:                 osType,
 		OSDiskUri:              vhdUri.String(),
 		OSDiskUriReadOnlySas:   getSasUrl(getStorageUrlPath(vhdUri)),
 		TemplateUri:            templateUri.String(),
 		TemplateUriReadOnlySas: getSasUrl(getStorageUrlPath(templateUri)),
+
+		AdditionalDisks: additional_disks,
 
 		StorageAccountLocation: template.Resources[0].Location,
 	}, nil
@@ -89,7 +139,7 @@ func storageUriToTemplateUri(su *url.URL) (*url.URL, error) {
 	return url.Parse(strings.Replace(su.String(), filename, templateFilename, 1))
 }
 
-func (a *Artifact) isMangedImage() bool {
+func (a *Artifact) isManagedImage() bool {
 	return a.ManagedImageResourceGroupName != ""
 }
 
@@ -102,7 +152,10 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.OSDiskUri
+	if a.OSDiskUri != "" {
+		return a.OSDiskUri
+	}
+	return a.ManagedImageId
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -118,16 +171,33 @@ func (a *Artifact) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s:\n\n", a.BuilderId()))
-	if a.isMangedImage() {
+	buf.WriteString(fmt.Sprintf("OSType: %s\n", a.OSType))
+	if a.isManagedImage() {
 		buf.WriteString(fmt.Sprintf("ManagedImageResourceGroupName: %s\n", a.ManagedImageResourceGroupName))
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
+		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
+		if a.ManagedImageOSDiskSnapshotName != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
+		}
+		if a.ManagedImageDataDiskSnapshotPrefix != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
+		}
+		if a.ManagedImageSharedImageGalleryId != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageSharedImageGalleryId: %s\n", a.ManagedImageSharedImageGalleryId))
+		}
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
 		buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))
 		buf.WriteString(fmt.Sprintf("OSDiskUriReadOnlySas: %s\n", a.OSDiskUriReadOnlySas))
 		buf.WriteString(fmt.Sprintf("TemplateUri: %s\n", a.TemplateUri))
 		buf.WriteString(fmt.Sprintf("TemplateUriReadOnlySas: %s\n", a.TemplateUriReadOnlySas))
+		if a.AdditionalDisks != nil {
+			for i, additionaldisk := range *a.AdditionalDisks {
+				buf.WriteString(fmt.Sprintf("AdditionalDiskUri (datadisk-%d): %s\n", i+1, additionaldisk.AdditionalDiskUri))
+				buf.WriteString(fmt.Sprintf("AdditionalDiskUriReadOnlySas (datadisk-%d): %s\n", i+1, additionaldisk.AdditionalDiskUriReadOnlySas))
+			}
+		}
 	}
 
 	return buf.String()

@@ -1,28 +1,27 @@
 ---
+description: |
+    The Scaleway Packer builder is able to create new images for use with Scaleway
+    BareMetal and Virtual cloud server. The builder takes a source image, runs any
+    provisioning necessary on the image after launching it, then snapshots it into
+    a reusable image. This reusable image can then be used as the foundation of new
+    servers that are launched within Scaleway.
 layout: docs
-sidebar_current: docs-builders-scaleway
-page_title: Scaleway - Builders
-description: |-
-  The Scaleway Packer builder is able to create new images for use with
-  Scaleway BareMetal and Virtual cloud server. The builder takes a source
-  image, runs any provisioning necessary on the image after launching it, then
-  snapshots it into a reusable image. This reusable image can then be used as
-  the foundation of new servers that are launched within Scaleway.
+page_title: 'Scaleway - Builders'
+sidebar_current: 'docs-builders-scaleway'
 ---
-
 
 # Scaleway Builder
 
 Type: `scaleway`
 
 The `scaleway` Packer builder is able to create new images for use with
-[Scaleway](https://www.scaleway.com). The builder takes a source image,
-runs any provisioning necessary on the image after launching it, then snapshots
-it into a reusable image. This reusable image can then be used as the foundation
+[Scaleway](https://www.scaleway.com). The builder takes a source image, runs
+any provisioning necessary on the image after launching it, then snapshots it
+into a reusable image. This reusable image can then be used as the foundation
 of new servers that are launched within Scaleway.
 
-The builder does *not* manage snapshots. Once it creates an image, it is up to you
-to use it or delete it.
+The builder does *not* manage snapshots. Once it creates an image, it is up to
+you to use it or delete it.
 
 ## Configuration Reference
 
@@ -36,30 +35,32 @@ builder.
 
 ### Required:
 
--   `api_access_key` (string) - The api\_access\_key to use to access your
-    account. It can also be specified via environment variable
-    `SCALEWAY_API_ACCESS_KEY`. Your access key is available in the
-    ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the
+-   `organization_id` (string) - The organization id to use to identify your
+    organization. It can also be specified via environment variable
+    `SCALEWAY_ORGANIZATION`. Your organization id is available in the
+    ["Account" section](https://cloud.scaleway.com/#/account) of the
     control panel.
+    Previously named: `api_access_key` with environment variable: `SCALEWAY_API_ACCESS_KEY`
 
--   `api_token` (string) - The organization TOKEN to use to access your
-    account. It can also be specified via environment variable
-    `SCALEWAY_API_TOKEN`. Your tokens are available in the ["Credentials"
+-   `api_token` (string) - The token to use to authenticate with your account.
+    It can also be specified via environment variable `SCALEWAY_API_TOKEN`. You
+    can see and generate tokens in the ["Credentials"
     section](https://cloud.scaleway.com/#/credentials) of the control panel.
 
 -   `image` (string) - The UUID of the base image to use. This is the image
     that will be used to launch a new server and provision it. See
-    <https://api-marketplace.scaleway.com/images> get the complete list of the
-    accepted image UUID.
+    [the images list](https://api-marketplace.scaleway.com/images)
+    get the complete list of the accepted image UUID.
 
 -   `region` (string) - The name of the region to launch the server in (`par1`
     or `ams1`). Consequently, this is the region where the snapshot will be
     available.
 
--   `commercial_type` (string) - The name of the server commercial type: `C1`,
-    `C2S`, `C2M`, `C2L`, `X64-2GB`, `X64-4GB`, `X64-8GB`, `X64-15GB`,
-    `X64-30GB`, `X64-60GB`, `X64-120GB`, `ARM64-2GB`, `ARM64-4GB`, `ARM64-8GB`,
-    `ARM64-16GB`, `ARM64-32GB`, `ARM64-64GB`, `ARM64-128GB`
+-   `commercial_type` (string) - The name of the server commercial type:
+    `ARM64-128GB`, `ARM64-16GB`, `ARM64-2GB`, `ARM64-32GB`, `ARM64-4GB`,
+    `ARM64-64GB`, `ARM64-8GB`, `C1`, `C2L`, `C2M`, `C2S`, `START1-L`,
+    `START1-M`, `START1-S`, `START1-XS`, `X64-120GB`, `X64-15GB`, `X64-30GB`,
+    `X64-60GB`
 
 ### Optional:
 
@@ -72,19 +73,28 @@ builder.
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. Default `packer-TIMESTAMP`
 
+-   `boottype` (string) - The type of boot, can be either `local` or
+    `bootscript`. Default `bootscript`
+
+-   `bootscript` (string) - The id of an existing bootscript to use when
+    booting the server.
+
+-   `remove_volume` (boolean) - Force Packer to delete volume associated with 
+    the resulting snapshot after the build. Default `false`.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
 access tokens:
 
-```json
+``` json
 {
   "type": "scaleway",
-  "api_access_key": "YOUR API ACCESS KEY",
+  "organization_id": "YOUR ORGANIZATION ID",
   "api_token": "YOUR TOKEN",
   "image": "UUID OF THE BASE IMAGE",
   "region": "par1",
-  "commercial_type": "X64-2GB",
+  "commercial_type": "START1-S",
   "ssh_username": "root",
   "ssh_private_key_file": "~/.ssh/id_rsa"
 }

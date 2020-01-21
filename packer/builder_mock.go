@@ -1,7 +1,12 @@
+//go:generate mapstructure-to-hcl2 -type MockBuilder,MockCommunicator,RemoteCmd,MockProvisioner,MockPostProcessor
+
 package packer
 
 import (
+	"context"
 	"errors"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 )
 
 // MockBuilder is an implementation of Builder that can be used for tests.
@@ -16,23 +21,28 @@ type MockBuilder struct {
 	PrepareCalled bool
 	PrepareConfig []interface{}
 	RunCalled     bool
-	RunCache      Cache
 	RunHook       Hook
 	RunUi         Ui
 	CancelCalled  bool
+	RunFn         func(ctx context.Context)
+
+	GeneratedVars []string
 }
 
-func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, error) {
+func (tb *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return tb.FlatMapstructure().HCL2Spec() }
+
+func (tb *MockBuilder) FlatConfig() interface{} { return tb.FlatMapstructure() }
+
+func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error) {
 	tb.PrepareCalled = true
 	tb.PrepareConfig = config
-	return tb.PrepareWarnings, nil
+	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
-	tb.RunCache = c
 
 	if tb.RunErrResult {
 		return nil, errors.New("foo")
@@ -41,9 +51,12 @@ func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	if tb.RunNilResult {
 		return nil, nil
 	}
+	if tb.RunFn != nil {
+		tb.RunFn(ctx)
+	}
 
 	if h != nil {
-		if err := h.Run(HookProvision, ui, new(MockCommunicator), nil); err != nil {
+		if err := h.Run(ctx, HookProvision, ui, new(MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}
@@ -51,8 +64,4 @@ func (tb *MockBuilder) Run(ui Ui, h Hook, c Cache) (Artifact, error) {
 	return &MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil
-}
-
-func (tb *MockBuilder) Cancel() {
-	tb.CancelCalled = true
 }

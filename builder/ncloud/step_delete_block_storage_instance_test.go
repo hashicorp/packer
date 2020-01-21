@@ -11,9 +11,9 @@ import (
 func TestStepDeleteBlockStorageInstanceShouldFailIfOperationDeleteBlockStorageInstanceFails(t *testing.T) {
 	var testSubject = &StepDeleteBlockStorageInstance{
 		DeleteBlockStorageInstance: func(blockStorageInstanceNo string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
-		Say:    func(message string) {},
-		Error:  func(e error) {},
-		Config: &Config{BlockStorageSize: 10},
+		Say:                        func(message string) {},
+		Error:                      func(e error) {},
+		Config:                     &Config{BlockStorageSize: 10},
 	}
 
 	stateBag := createTestStateBagStepDeleteBlockStorageInstance()
@@ -32,9 +32,9 @@ func TestStepDeleteBlockStorageInstanceShouldFailIfOperationDeleteBlockStorageIn
 func TestStepDeleteBlockStorageInstanceShouldPassIfOperationDeleteBlockStorageInstancePasses(t *testing.T) {
 	var testSubject = &StepDeleteBlockStorageInstance{
 		DeleteBlockStorageInstance: func(blockStorageInstanceNo string) error { return nil },
-		Say:    func(message string) {},
-		Error:  func(e error) {},
-		Config: &Config{BlockStorageSize: 10},
+		Say:                        func(message string) {},
+		Error:                      func(e error) {},
+		Config:                     &Config{BlockStorageSize: 10},
 	}
 
 	stateBag := createTestStateBagStepDeleteBlockStorageInstance()

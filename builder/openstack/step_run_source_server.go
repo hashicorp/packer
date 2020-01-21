@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -13,22 +14,23 @@ import (
 )
 
 type StepRunSourceServer struct {
-	Name             string
-	SourceImage      string
-	SourceImageName  string
-	SecurityGroups   []string
-	Networks         []string
-	AvailabilityZone string
-	UserData         string
-	UserDataFile     string
-	ConfigDrive      bool
-	InstanceMetadata map[string]string
-	server           *servers.Server
+	Name                  string
+	SecurityGroups        []string
+	AvailabilityZone      string
+	UserData              string
+	UserDataFile          string
+	ConfigDrive           bool
+	InstanceMetadata      map[string]string
+	UseBlockStorageVolume bool
+	ForceDelete           bool
+	server                *servers.Server
 }
 
-func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
+	sourceImage := state.Get("source_image").(string)
+	networks := state.Get("networks").([]servers.Network)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -37,11 +39,6 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		err = fmt.Errorf("Error initializing compute client: %s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
-	}
-
-	networks := make([]servers.Network, len(s.Networks))
-	for i, networkUuid := range s.Networks {
-		networks[i].UUID = networkUuid
 	}
 
 	userData := []byte(s.UserData)
@@ -58,8 +55,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 
 	serverOpts := servers.CreateOpts{
 		Name:             s.Name,
-		ImageRef:         s.SourceImage,
-		ImageName:        s.SourceImageName,
+		ImageRef:         sourceImage,
 		FlavorRef:        flavor,
 		SecurityGroups:   s.SecurityGroups,
 		Networks:         networks,
@@ -71,16 +67,39 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder
-	keyName, hasKey := state.GetOk("keyPair")
-	if hasKey {
-		serverOptsExt = keypairs.CreateOptsExt{
+
+	// Create root volume in the Block Storage service if required.
+	// Add block device mapping v2 to the server create options if required.
+	if s.UseBlockStorageVolume {
+		volume := state.Get("volume_id").(string)
+		blockDeviceMappingV2 := []bootfromvolume.BlockDevice{
+			{
+				BootIndex:       0,
+				DestinationType: bootfromvolume.DestinationVolume,
+				SourceType:      bootfromvolume.SourceVolume,
+				UUID:            volume,
+			},
+		}
+		// ImageRef and block device mapping is an invalid options combination.
+		serverOpts.ImageRef = ""
+		serverOptsExt = bootfromvolume.CreateOptsExt{
 			CreateOptsBuilder: serverOpts,
-			KeyName:           keyName.(string),
+			BlockDevice:       blockDeviceMappingV2,
 		}
 	} else {
 		serverOptsExt = serverOpts
 	}
 
+	// Add keypair to the server create options.
+	keyName := config.Comm.SSHKeyPairName
+	if keyName != "" {
+		serverOptsExt = keypairs.CreateOptsExt{
+			CreateOptsBuilder: serverOptsExt,
+			KeyName:           keyName,
+		}
+	}
+
+	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, serverOptsExt).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
@@ -109,6 +128,9 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 
 	s.server = latestServer.(*servers.Server)
 	state.Put("server", s.server)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.server.ID)
 
 	return multistep.ActionContinue
 }
@@ -118,7 +140,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -129,9 +151,16 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say(fmt.Sprintf("Terminating the source server: %s ...", s.server.ID))
-	if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
-		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
-		return
+	if config.ForceDelete {
+		if err := servers.ForceDelete(computeClient, s.server.ID).ExtractErr(); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+			return
+		}
+	} else {
+		if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
+			ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+			return
+		}
 	}
 
 	stateChange := StateChangeConf{

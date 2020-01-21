@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/client"
 )
 
-const WaitForVolumeReadyTimeout = time.Duration(600 * time.Second)
-const WaitForVolumeDeleteTimeout = time.Duration(600 * time.Second)
+const waitForVolumeReadyPollInterval = 10 * time.Second
+const waitForVolumeReadyTimeout = 600 * time.Second
+const waitForVolumeDeletePollInterval = 10 * time.Second
+const waitForVolumeDeleteTimeout = 600 * time.Second
 
 // StorageVolumeClient is a client for the Storage Volume functions of the Compute API.
 type StorageVolumeClient struct {
@@ -19,10 +21,10 @@ type StorageVolumeClient struct {
 
 // StorageVolumes obtains a StorageVolumeClient which can be used to access to the
 // Storage Volume functions of the Compute API
-func (c *ComputeClient) StorageVolumes() *StorageVolumeClient {
+func (c *Client) StorageVolumes() *StorageVolumeClient {
 	return &StorageVolumeClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "storage volume",
 			ContainerPath:       "/storage/volume/",
 			ResourceRootPath:    "/storage/volume",
@@ -30,12 +32,16 @@ func (c *ComputeClient) StorageVolumes() *StorageVolumeClient {
 
 }
 
+// StorageVolumeKind defines the kinds of storage volumes that can be managed
 type StorageVolumeKind string
 
 const (
+	// StorageVolumeKindDefault - "/oracle/public/storage/default"
 	StorageVolumeKindDefault StorageVolumeKind = "/oracle/public/storage/default"
+	// StorageVolumeKindLatency - "/oracle/public/storage/latency"
 	StorageVolumeKindLatency StorageVolumeKind = "/oracle/public/storage/latency"
-	StorageVolumeKindSSD     StorageVolumeKind = "/oracle/public/storage/ssd/gpl"
+	// StorageVolumeKindSSD - "/oracle/public/storage/ssd/gpl"
+	StorageVolumeKindSSD StorageVolumeKind = "/oracle/public/storage/ssd/gpl"
 )
 
 // StorageVolumeInfo represents information retrieved from the service about a Storage Volume.
@@ -43,12 +49,11 @@ type StorageVolumeInfo struct {
 	// Shows the default account for your identity domain.
 	Account string `json:"account,omitempty"`
 
-	// true indicates that the storage volume can also be used as a boot disk for an instance.
-	// If you set the value to true, then you must specify values for the `ImageList` and `ImageListEntry` fields.
-	Bootable bool `json:"bootable,omitempty"`
-
 	// The description of the storage volume.
 	Description string `json:"description,omitempty"`
+
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 
 	// The hypervisor that this volume is compatible with.
 	Hypervisor string `json:"hypervisor,omitempty"`
@@ -56,26 +61,17 @@ type StorageVolumeInfo struct {
 	// Name of machine image to extract onto this volume when created. This information is provided only for bootable storage volumes.
 	ImageList string `json:"imagelist,omitempty"`
 
-	// Specific imagelist entry version to extract.
-	ImageListEntry int `json:"imagelist_entry,omitempty"`
-
 	// Three-part name of the machine image. This information is available if the volume is a bootable storage volume.
 	MachineImage string `json:"machineimage_name,omitempty"`
 
-	// All volumes are managed volumes. Default value is true.
-	Managed bool `json:"managed,omitempty"`
-
 	// The three-part name of the object (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Name string
 
 	// The OS platform this volume is compatible with.
 	Platform string `json:"platform,omitempty"`
 
 	// The storage-pool property: /oracle/public/storage/latency or /oracle/public/storage/default.
 	Properties []string `json:"properties,omitempty"`
-
-	// Boolean field indicating whether this volume can be attached as readonly. If set to False the volume will be attached as read-write.
-	ReadOnly bool `json:"readonly,omitempty"`
 
 	// The size of this storage volume in GB.
 	Size string `json:"size"`
@@ -107,6 +103,19 @@ type StorageVolumeInfo struct {
 
 	// Uniform Resource Identifier
 	URI string `json:"uri,omitempty"`
+
+	// true indicates that the storage volume can also be used as a boot disk for an instance.
+	// If you set the value to true, then you must specify values for the `ImageList` and `ImageListEntry` fields.
+	Bootable bool `json:"bootable,omitempty"`
+
+	// All volumes are managed volumes. Default value is true.
+	Managed bool `json:"managed,omitempty"`
+
+	// Boolean field indicating whether this volume can be attached as readonly. If set to False the volume will be attached as read-write.
+	ReadOnly bool `json:"readonly,omitempty"`
+
+	// Specific imagelist entry version to extract.
+	ImageListEntry int `json:"imagelist_entry,omitempty"`
 }
 
 func (c *StorageVolumeClient) getStorageVolumePath(name string) string {
@@ -149,6 +158,9 @@ type CreateStorageVolumeInput struct {
 	// Comma-separated strings that tag the storage volume.
 	Tags []string `json:"tags,omitempty"`
 
+	// Timeout to wait polling storage volume status.
+	PollInterval time.Duration `json:"-"`
+
 	// Timeout to wait for storage volume creation.
 	Timeout time.Duration `json:"-"`
 }
@@ -165,23 +177,26 @@ func (c *StorageVolumeClient) CreateStorageVolume(input *CreateStorageVolumeInpu
 	input.Size = sizeInBytes
 
 	var storageInfo StorageVolumeInfo
-	if err := c.createResource(&input, &storageInfo); err != nil {
+	if err = c.createResource(&input, &storageInfo); err != nil {
 		return nil, err
 	}
 
 	// Should never be nil, as we set this in the provider; but protect against it anyways.
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForVolumeReadyPollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForVolumeReadyTimeout
+		input.Timeout = waitForVolumeReadyTimeout
 	}
 
-	volume, err := c.waitForStorageVolumeToBecomeAvailable(input.Name, input.Timeout)
+	volume, err := c.waitForStorageVolumeToBecomeAvailable(input.Name, input.PollInterval, input.Timeout)
 	if err != nil {
 		if volume != nil {
 			deleteInput := &DeleteStorageVolumeInput{
 				Name: volume.Name,
 			}
 
-			if err := c.DeleteStorageVolume(deleteInput); err != nil {
+			if err = c.DeleteStorageVolume(deleteInput); err != nil {
 				return nil, err
 			}
 		}
@@ -194,6 +209,9 @@ type DeleteStorageVolumeInput struct {
 	// The three-part name of the object (/Compute-identity_domain/user/object).
 	Name string `json:"name"`
 
+	// Timeout to wait betweeon polling storage volume status
+	PollInterval time.Duration `json:"-"`
+
 	// Timeout to wait for storage volume deletion
 	Timeout time.Duration `json:"-"`
 }
@@ -205,11 +223,14 @@ func (c *StorageVolumeClient) DeleteStorageVolume(input *DeleteStorageVolumeInpu
 	}
 
 	// Should never be nil, but protect against it anyways
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForVolumeDeletePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForVolumeDeleteTimeout
+		input.Timeout = waitForVolumeDeleteTimeout
 	}
 
-	return c.waitForStorageVolumeToBeDeleted(input.Name, input.Timeout)
+	return c.waitForStorageVolumeToBeDeleted(input.Name, input.PollInterval, input.Timeout)
 }
 
 // GetStorageVolumeInput represents the body of an API request to obtain a Storage Volume.
@@ -220,7 +241,7 @@ type GetStorageVolumeInput struct {
 
 func (c *StorageVolumeClient) success(result *StorageVolumeInfo) (*StorageVolumeInfo, error) {
 	c.unqualify(&result.ImageList)
-	c.unqualify(&result.Name)
+	result.Name = c.getUnqualifiedName(result.FQDN)
 	c.unqualify(&result.Snapshot)
 
 	sizeInMegaBytes, err := sizeInGigaBytes(result.Size)
@@ -278,6 +299,9 @@ type UpdateStorageVolumeInput struct {
 	// Comma-separated strings that tag the storage volume.
 	Tags []string `json:"tags,omitempty"`
 
+	// Time to wait between polling storage volume status
+	PollInterval time.Duration `json:"-"`
+
 	// Time to wait for storage volume ready
 	Timeout time.Duration `json:"-"`
 }
@@ -299,11 +323,14 @@ func (c *StorageVolumeClient) UpdateStorageVolume(input *UpdateStorageVolumeInpu
 		return nil, err
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForVolumeReadyPollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForVolumeReadyTimeout
+		input.Timeout = waitForVolumeReadyTimeout
 	}
 
-	volumeInfo, err := c.waitForStorageVolumeToBecomeAvailable(input.Name, input.Timeout)
+	volumeInfo, err := c.waitForStorageVolumeToBecomeAvailable(input.Name, input.PollInterval, input.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -312,11 +339,12 @@ func (c *StorageVolumeClient) UpdateStorageVolume(input *UpdateStorageVolumeInpu
 }
 
 // waitForStorageVolumeToBecomeAvailable waits until a new Storage Volume is available (i.e. has finished initialising or updating).
-func (c *StorageVolumeClient) waitForStorageVolumeToBecomeAvailable(name string, timeout time.Duration) (*StorageVolumeInfo, error) {
+func (c *StorageVolumeClient) waitForStorageVolumeToBecomeAvailable(name string, pollInterval, timeout time.Duration) (*StorageVolumeInfo, error) {
 	var waitResult *StorageVolumeInfo
 
 	err := c.client.WaitFor(
 		fmt.Sprintf("storage volume %s to become available", c.getQualifiedName(name)),
+		pollInterval,
 		timeout,
 		func() (bool, error) {
 			getRequest := &GetStorageVolumeInput{
@@ -345,9 +373,10 @@ func (c *StorageVolumeClient) waitForStorageVolumeToBecomeAvailable(name string,
 }
 
 // waitForStorageVolumeToBeDeleted waits until the specified storage volume has been deleted.
-func (c *StorageVolumeClient) waitForStorageVolumeToBeDeleted(name string, timeout time.Duration) error {
+func (c *StorageVolumeClient) waitForStorageVolumeToBeDeleted(name string, pollInterval, timeout time.Duration) error {
 	return c.client.WaitFor(
 		fmt.Sprintf("storage volume %s to be deleted", c.getQualifiedName(name)),
+		pollInterval,
 		timeout,
 		func() (bool, error) {
 			getRequest := &GetStorageVolumeInput{

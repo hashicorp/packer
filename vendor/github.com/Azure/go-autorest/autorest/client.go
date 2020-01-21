@@ -1,15 +1,33 @@
 package autorest
 
+// Copyright 2017 Microsoft Corporation
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
-	"runtime"
+	"strings"
 	"time"
+
+	"github.com/Azure/go-autorest/logger"
+	"github.com/Azure/go-autorest/tracing"
 )
 
 const (
@@ -21,20 +39,16 @@ const (
 
 	// DefaultRetryAttempts is number of attempts for retry status codes (5xx).
 	DefaultRetryAttempts = 3
+
+	// DefaultRetryDuration is the duration to wait between retries.
+	DefaultRetryDuration = 30 * time.Second
 )
 
 var (
-	// defaultUserAgent builds a string containing the Go version, system archityecture and OS,
-	// and the go-autorest version.
-	defaultUserAgent = fmt.Sprintf("Go/%s (%s-%s) go-autorest/%s",
-		runtime.Version(),
-		runtime.GOARCH,
-		runtime.GOOS,
-		Version(),
-	)
-
-	statusCodesForRetry = []int{
+	// StatusCodesForRetry are a defined group of status code for which the client will retry
+	StatusCodesForRetry = []int{
 		http.StatusRequestTimeout,      // 408
+		http.StatusTooManyRequests,     // 429
 		http.StatusInternalServerError, // 500
 		http.StatusBadGateway,          // 502
 		http.StatusServiceUnavailable,  // 503
@@ -134,6 +148,7 @@ type Client struct {
 	PollingDelay time.Duration
 
 	// PollingDuration sets the maximum polling time after which an error is returned.
+	// Setting this to zero will use the provided context to control the duration.
 	PollingDuration time.Duration
 
 	// RetryAttempts sets the default number of retry attempts for client.
@@ -147,18 +162,40 @@ type Client struct {
 	UserAgent string
 
 	Jar http.CookieJar
+
+	// Set to true to skip attempted registration of resource providers (false by default).
+	SkipResourceProviderRegistration bool
 }
 
 // NewClientWithUserAgent returns an instance of a Client with the UserAgent set to the passed
 // string.
 func NewClientWithUserAgent(ua string) Client {
+	return newClient(ua, tls.RenegotiateNever)
+}
+
+// ClientOptions contains various Client configuration options.
+type ClientOptions struct {
+	// UserAgent is an optional user-agent string to append to the default user agent.
+	UserAgent string
+
+	// Renegotiation is an optional setting to control client-side TLS renegotiation.
+	Renegotiation tls.RenegotiationSupport
+}
+
+// NewClientWithOptions returns an instance of a Client with the specified values.
+func NewClientWithOptions(options ClientOptions) Client {
+	return newClient(options.UserAgent, options.Renegotiation)
+}
+
+func newClient(ua string, renegotiation tls.RenegotiationSupport) Client {
 	c := Client{
 		PollingDelay:    DefaultPollingDelay,
 		PollingDuration: DefaultPollingDuration,
 		RetryAttempts:   DefaultRetryAttempts,
-		RetryDuration:   30 * time.Second,
-		UserAgent:       defaultUserAgent,
+		RetryDuration:   DefaultRetryDuration,
+		UserAgent:       UserAgent(),
 	}
+	c.Sender = c.sender(renegotiation)
 	c.AddToUserAgent(ua)
 	return c
 }
@@ -180,25 +217,61 @@ func (c Client) Do(r *http.Request) (*http.Response, error) {
 		r, _ = Prepare(r,
 			WithUserAgent(c.UserAgent))
 	}
+	// NOTE: c.WithInspection() must be last in the list so that it can inspect all preceding operations
 	r, err := Prepare(r,
-		c.WithInspection(),
-		c.WithAuthorization())
+		c.WithAuthorization(),
+		c.WithInspection())
 	if err != nil {
-		return nil, NewErrorWithError(err, "autorest/Client", "Do", nil, "Preparing request failed")
+		var resp *http.Response
+		if detErr, ok := err.(DetailedError); ok {
+			// if the authorization failed (e.g. invalid credentials) there will
+			// be a response associated with the error, be sure to return it.
+			resp = detErr.Response
+		}
+		return resp, NewErrorWithError(err, "autorest/Client", "Do", nil, "Preparing request failed")
 	}
-	resp, err := SendWithSender(c.sender(), r,
-		DoRetryForStatusCodes(c.RetryAttempts, c.RetryDuration, statusCodesForRetry...))
-	Respond(resp,
-		c.ByInspecting())
+	logger.Instance.WriteRequest(r, logger.Filter{
+		Header: func(k string, v []string) (bool, []string) {
+			// remove the auth token from the log
+			if strings.EqualFold(k, "Authorization") || strings.EqualFold(k, "Ocp-Apim-Subscription-Key") {
+				v = []string{"**REDACTED**"}
+			}
+			return true, v
+		},
+	})
+	resp, err := SendWithSender(c.sender(tls.RenegotiateNever), r)
+	logger.Instance.WriteResponse(resp, logger.Filter{})
+	Respond(resp, c.ByInspecting())
 	return resp, err
 }
 
 // sender returns the Sender to which to send requests.
-func (c Client) sender() Sender {
+func (c Client) sender(renengotiation tls.RenegotiationSupport) Sender {
 	if c.Sender == nil {
+		// Use behaviour compatible with DefaultTransport, but require TLS minimum version.
+		var defaultTransport = http.DefaultTransport.(*http.Transport)
+		transport := tracing.Transport
+		// for non-default values of TLS renegotiation create a new tracing transport.
+		// updating tracing.Transport affects all clients which is not what we want.
+		if renengotiation != tls.RenegotiateNever {
+			transport = tracing.NewTransport()
+		}
+		transport.Base = &http.Transport{
+			Proxy:                 defaultTransport.Proxy,
+			DialContext:           defaultTransport.DialContext,
+			MaxIdleConns:          defaultTransport.MaxIdleConns,
+			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+			TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+			TLSClientConfig: &tls.Config{
+				MinVersion:    tls.VersionTLS12,
+				Renegotiation: renengotiation,
+			},
+		}
 		j, _ := cookiejar.New(nil)
-		return &http.Client{Jar: j}
+		return &http.Client{Jar: j, Transport: transport}
 	}
+
 	return c.Sender
 }
 

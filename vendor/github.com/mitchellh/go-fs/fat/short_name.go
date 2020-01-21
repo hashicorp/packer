@@ -30,11 +30,11 @@ func generateShortName(longName string, used []string) (string, error) {
 	if dotIdx == -1 {
 		dotIdx = len(longName)
 	} else {
-		ext = longName[dotIdx+1 : len(longName)]
+		ext = longName[dotIdx+1:]
 	}
 
 	ext = cleanShortString(ext)
-	ext = ext[0:len(ext)]
+	ext = ext[0:]
 	rawName := longName[0:dotIdx]
 	name := cleanShortString(rawName)
 	simpleName := fmt.Sprintf("%s.%s", name, ext)
@@ -42,7 +42,7 @@ func generateShortName(longName string, used []string) (string, error) {
 		simpleName = simpleName[0 : len(simpleName)-1]
 	}
 
-	doSuffix := name != rawName || len(name) > 8
+	doSuffix := name != rawName || len(name) > 8 || len(ext) > 3
 	if !doSuffix {
 		for _, usedSingle := range used {
 			if strings.ToUpper(usedSingle) == simpleName {
@@ -53,6 +53,9 @@ func generateShortName(longName string, used []string) (string, error) {
 	}
 
 	if doSuffix {
+		if len(ext) > 3 {
+			ext = ext[:3]
+		}
 		found := false
 		for i := 1; i < 99999; i++ {
 			serial := fmt.Sprintf("~%d", i)

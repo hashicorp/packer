@@ -1,5 +1,9 @@
 package common
 
+import (
+	"context"
+)
+
 // A driver is able to talk to HyperV and perform certain
 // operations with it. Some of the operations on here may seem overly
 // specific, but they were built specifically in mind to handle features
@@ -54,6 +58,9 @@ type Driver interface {
 
 	SetVmNetworkAdapterMacAddress(string, string) error
 
+	//Replace the network adapter with a (non-)legacy adapter
+	ReplaceVirtualMachineNetworkAdapter(string, bool) error
+
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
 
 	CreateExternalVirtualSwitch(string, string) error
@@ -66,11 +73,13 @@ type Driver interface {
 
 	DeleteVirtualSwitch(string) error
 
-	CreateVirtualMachine(string, string, string, string, int64, int64, string, uint, bool) error
+	CheckVMName(string) error
 
-	AddVirtualMachineHardDrive(string, string, string, int64, string) error
+	CreateVirtualMachine(string, string, string, int64, int64, int64, string, uint, bool, bool, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
+	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
+
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
 
 	DeleteVirtualMachine(string) error
 
@@ -82,7 +91,7 @@ type Driver interface {
 
 	SetVirtualMachineDynamicMemory(string, bool) error
 
-	SetVirtualMachineSecureBoot(string, bool) error
+	SetVirtualMachineSecureBoot(string, bool, string) error
 
 	SetVirtualMachineVirtualizationExtensions(string, bool) error
 
@@ -90,9 +99,11 @@ type Driver interface {
 
 	ExportVirtualMachine(string, string) error
 
-	CompactDisks(string, string) error
+	PreserveLegacyExportBehaviour(string, string) error
 
-	CopyExportedVirtualMachine(string, string, string, string) error
+	MoveCreatedVHDsToOutputDir(string, string) error
+
+	CompactDisks(string) (string, error)
 
 	RestartVirtualMachine(string) error
 
@@ -109,4 +120,10 @@ type Driver interface {
 	MountFloppyDrive(string, string) error
 
 	UnmountFloppyDrive(string) error
+
+	// Connect connects to a VM specified by the name given.
+	Connect(string) (context.CancelFunc, error)
+
+	// Disconnect disconnects to a VM specified by the context cancel function.
+	Disconnect(context.CancelFunc)
 }

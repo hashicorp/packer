@@ -1,8 +1,9 @@
 package fix
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"strings"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 // FixerPowerShellEscapes removes the PowerShell escape character from user

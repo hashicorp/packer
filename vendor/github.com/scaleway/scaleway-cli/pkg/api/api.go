@@ -52,6 +52,12 @@ func init() {
 	if url := os.Getenv("SCW_MARKETPLACE_API"); url != "" {
 		MarketplaceAPI = url
 	}
+	if url := os.Getenv("SCW_COMPUTE_PAR1_API"); url != "" {
+		ComputeAPIPar1 = url
+	}
+	if url := os.Getenv("SCW_COMPUTE_AMS1_API"); url != "" {
+		ComputeAPIAms1 = url
+	}
 }
 
 const (
@@ -267,6 +273,42 @@ type ScalewayImages struct {
 	Images []ScalewayImage `json:"images,omitempty"`
 }
 
+// ProductNetworkInterface gives interval and external allowed bandwidth
+type ProductNetworkInterface struct {
+	InternalBandwidth uint64 `json:"internal_bandwidth,omitempty"`
+	InternetBandwidth uint64 `json:"internet_bandwidth,omitempty"`
+}
+
+// ProductNetwork lists all the network interfaces
+type ProductNetwork struct {
+	Interfaces             []ProductNetworkInterface `json:"interfaces,omitempty"`
+	TotalInternalBandwidth uint64                    `json:"sum_internal_bandwidth,omitempty"`
+	TotalInternetBandwidth uint64                    `json:"sum_internet_bandwidth,omitempty"`
+	IPv6_Support           bool                      `json:"ipv6_support,omitempty"`
+}
+
+// ProductVolumeConstraint contains any volume constraint that the offer has
+type ProductVolumeConstraint struct {
+	MinSize uint64 `json:"min_size,omitempty"`
+	MaxSize uint64 `json:"max_size,omitempty"`
+}
+
+// ProductServerOffer represents a specific offer
+type ProductServer struct {
+	Arch              string                  `json:"arch,omitempty"`
+	Ncpus             uint64                  `json:"ncpus,omitempty"`
+	Ram               uint64                  `json:"ram,omitempty"`
+	Baremetal         bool                    `json:"baremetal,omitempty"`
+	VolumesConstraint ProductVolumeConstraint `json:"volumes_constraint,omitempty"`
+	AltNames          []string                `json:"alt_names,omitempty"`
+	Network           ProductNetwork          `json:"network,omitempty"`
+}
+
+// Products holds a map of all Scaleway servers
+type ScalewayProductsServers struct {
+	Servers map[string]ProductServer `json:"servers"`
+}
+
 // ScalewaySnapshot represents a Scaleway Snapshot
 type ScalewaySnapshot struct {
 	// Identifier is a unique identifier for the snapshot
@@ -416,6 +458,9 @@ type ScalewaySecurityGroups struct {
 	Servers               []ScalewaySecurityGroup `json:"servers"`
 	EnableDefaultSecurity bool                    `json:"enable_default_security"`
 	OrganizationDefault   bool                    `json:"organization_default"`
+	Stateful              bool                    `json:"stateful"`
+	InboundDefaultPolicy  string                  `json:"inbound_default_policy"`
+	OutboundDefaultPolicy string                  `json:"outbound_default_policy"`
 }
 
 // ScalewayGetSecurityGroups represents the response of a GET /security_groups/
@@ -461,17 +506,23 @@ type ScalewaySecurityGroup struct {
 
 // ScalewayNewSecurityGroup definition POST request /security_groups
 type ScalewayNewSecurityGroup struct {
-	Organization string `json:"organization"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
+	Organization          string `json:"organization"`
+	Name                  string `json:"name"`
+	Description           string `json:"description"`
+	Stateful              bool   `json:"stateful"`
+	InboundDefaultPolicy  string `json:"inbound_default_policy"`
+	OutboundDefaultPolicy string `json:"outbound_default_policy"`
 }
 
 // ScalewayUpdateSecurityGroup definition PUT request /security_groups
 type ScalewayUpdateSecurityGroup struct {
-	Organization        string `json:"organization"`
-	Name                string `json:"name"`
-	Description         string `json:"description"`
-	OrganizationDefault bool   `json:"organization_default"`
+	Organization          string `json:"organization"`
+	Name                  string `json:"name"`
+	Description           string `json:"description"`
+	OrganizationDefault   bool   `json:"organization_default"`
+	Stateful              bool   `json:"stateful"`
+	InboundDefaultPolicy  string `json:"inbound_default_policy"`
+	OutboundDefaultPolicy string `json:"outbound_default_policy"`
 }
 
 // ScalewayServer represents a Scaleway server
@@ -503,6 +554,9 @@ type ScalewayServer struct {
 	// State is the current status of the server
 	State string `json:"state,omitempty"`
 
+	// BootType is the boot method used, can be local or bootscript
+	BootType string `json:"boot_type,omitempty"`
+
 	// StateDetail is the detailed status of the server
 	StateDetail string `json:"state_detail,omitempty"`
 
@@ -527,7 +581,7 @@ type ScalewayServer struct {
 	// Organization is the owner of the server
 	Organization string `json:"organization,omitempty"`
 
-	// CommercialType is the commercial type of the server (i.e: C1, C2[SML], VC1S)
+	// CommercialType is the commercial type of the server (i.e: C1, C2[SML], START1-S)
 	CommercialType string `json:"commercial_type,omitempty"`
 
 	// Location of the server
@@ -577,6 +631,7 @@ type ScalewayServerPatchDefinition struct {
 	Tags              *[]string                  `json:"tags,omitempty"`
 	IPV6              *ScalewayIPV6Definition    `json:"ipv6,omitempty"`
 	EnableIPV6        *bool                      `json:"enable_ipv6,omitempty"`
+	BootType          *string                    `json:"boot_type,omitempty"`
 }
 
 // ScalewayServerDefinition represents a Scaleway server with image definition
@@ -602,7 +657,7 @@ type ScalewayServerDefinition struct {
 	// Organization is the owner of the server
 	Organization string `json:"organization"`
 
-	// CommercialType is the commercial type of the server (i.e: C1, C2[SML], VC1S)
+	// CommercialType is the commercial type of the server (i.e: C1, C2[SML], START1-S)
 	CommercialType string `json:"commercial_type"`
 
 	PublicIP string `json:"public_ip,omitempty"`
@@ -610,6 +665,8 @@ type ScalewayServerDefinition struct {
 	EnableIPV6 bool `json:"enable_ipv6,omitempty"`
 
 	SecurityGroup string `json:"security_group,omitempty"`
+
+	BootType string `json:"boot_type,omitempty"`
 }
 
 // ScalewayOneServer represents the response of a GET /servers/UUID API call
@@ -706,6 +763,26 @@ type ScalewayConnect struct {
 	Password    string `json:"password"`
 	Description string `json:"description"`
 	Expires     bool   `json:"expires"`
+}
+
+// ScalewayConnectInterface is the interface implemented by ScalewayConnect,
+// ScalewayConnectByOTP and ScalewayConnectByBackupCode
+type ScalewayConnectInterface interface {
+	GetPassword() string
+}
+
+func (s *ScalewayConnect) GetPassword() string {
+	return s.Password
+}
+
+type ScalewayConnectByOTP struct {
+	ScalewayConnect
+	TwoFAToken string `json:"2FA_token"`
+}
+
+type ScalewayConnectByBackupCode struct {
+	ScalewayConnect
+	TwoFABackupCode string `json:"2FA_backup_code"`
 }
 
 // ScalewayOrganizationDefinition represents a Scaleway Organization
@@ -1146,7 +1223,7 @@ func (s *ScalewayAPI) GetServers(all bool, limit int) (*[]ScalewayServer, error)
 		}
 	)
 
-	serverChan := make(chan ScalewayServers, 2)
+	serverChan := make(chan ScalewayServers, len(apis))
 	for _, api := range apis {
 		g.Go(s.fetchServers(api, query, serverChan))
 	}
@@ -1188,6 +1265,9 @@ func (s ScalewaySortServers) Less(i, j int) bool {
 
 // GetServer gets a server from the ScalewayAPI
 func (s *ScalewayAPI) GetServer(serverID string) (*ScalewayServer, error) {
+	if serverID == "" {
+		return nil, fmt.Errorf("cannot get server without serverID")
+	}
 	resp, err := s.GetResponsePaginate(s.computeAPI, "servers/"+serverID, url.Values{})
 	if err != nil {
 		return nil, err
@@ -1317,7 +1397,7 @@ func (s *ScalewayAPI) PostSnapshot(volumeID string, name string) (string, error)
 		return "", err
 	}
 	// FIXME arch, owner, title
-	s.Cache.InsertSnapshot(snapshot.Snapshot.Identifier, "", "", snapshot.Snapshot.Organization, snapshot.Snapshot.Name)
+	s.Cache.InsertSnapshot(snapshot.Snapshot.Identifier, s.Region, "", snapshot.Snapshot.Organization, snapshot.Snapshot.Name)
 	return snapshot.Snapshot.Identifier, nil
 }
 
@@ -1349,7 +1429,7 @@ func (s *ScalewayAPI) PostImage(volumeID string, name string, bootscript string,
 		return "", err
 	}
 	// FIXME region, arch, owner, title
-	s.Cache.InsertImage(image.Image.Identifier, "", image.Image.Arch, image.Image.Organization, image.Image.Name, "")
+	s.Cache.InsertImage(image.Image.Identifier, s.Region, image.Image.Arch, image.Image.Organization, image.Image.Name, "")
 	return image.Image.Identifier, nil
 }
 
@@ -1625,7 +1705,7 @@ func (s *ScalewayAPI) GetSnapshots() (*[]ScalewaySnapshot, error) {
 	}
 	for _, snapshot := range snapshots.Snapshots {
 		// FIXME region, arch, owner, title
-		s.Cache.InsertSnapshot(snapshot.Identifier, "", "", snapshot.Organization, snapshot.Name)
+		s.Cache.InsertSnapshot(snapshot.Identifier, s.Region, "", snapshot.Organization, snapshot.Name)
 	}
 	return &snapshots.Snapshots, nil
 }
@@ -1648,7 +1728,7 @@ func (s *ScalewayAPI) GetSnapshot(snapshotID string) (*ScalewaySnapshot, error) 
 		return nil, err
 	}
 	// FIXME region, arch, owner, title
-	s.Cache.InsertSnapshot(oneSnapshot.Snapshot.Identifier, "", "", oneSnapshot.Snapshot.Organization, oneSnapshot.Snapshot.Name)
+	s.Cache.InsertSnapshot(oneSnapshot.Snapshot.Identifier, s.Region, "", oneSnapshot.Snapshot.Organization, oneSnapshot.Snapshot.Name)
 	return &oneSnapshot.Snapshot, nil
 }
 
@@ -1675,7 +1755,7 @@ func (s *ScalewayAPI) GetVolumes() (*[]ScalewayVolume, error) {
 	}
 	for _, volume := range volumes.Volumes {
 		// FIXME region, arch, owner, title
-		s.Cache.InsertVolume(volume.Identifier, "", "", volume.Organization, volume.Name)
+		s.Cache.InsertVolume(volume.Identifier, s.Region, "", volume.Organization, volume.Name)
 	}
 	return &volumes.Volumes, nil
 }
@@ -1698,7 +1778,7 @@ func (s *ScalewayAPI) GetVolume(volumeID string) (*ScalewayVolume, error) {
 		return nil, err
 	}
 	// FIXME region, arch, owner, title
-	s.Cache.InsertVolume(oneVolume.Volume.Identifier, "", "", oneVolume.Volume.Organization, oneVolume.Volume.Name)
+	s.Cache.InsertVolume(oneVolume.Volume.Identifier, s.Region, "", oneVolume.Volume.Organization, oneVolume.Volume.Name)
 	return &oneVolume.Volume, nil
 }
 
@@ -1724,7 +1804,7 @@ func (s *ScalewayAPI) GetBootscripts() (*[]ScalewayBootscript, error) {
 	}
 	for _, bootscript := range bootscripts.Bootscripts {
 		// FIXME region, arch, owner, title
-		s.Cache.InsertBootscript(bootscript.Identifier, "", bootscript.Arch, bootscript.Organization, bootscript.Title)
+		s.Cache.InsertBootscript(bootscript.Identifier, s.Region, bootscript.Arch, bootscript.Organization, bootscript.Title)
 	}
 	return &bootscripts.Bootscripts, nil
 }
@@ -1747,7 +1827,7 @@ func (s *ScalewayAPI) GetBootscript(bootscriptID string) (*ScalewayBootscript, e
 		return nil, err
 	}
 	// FIXME region, arch, owner, title
-	s.Cache.InsertBootscript(oneBootscript.Bootscript.Identifier, "", oneBootscript.Bootscript.Arch, oneBootscript.Bootscript.Organization, oneBootscript.Bootscript.Title)
+	s.Cache.InsertBootscript(oneBootscript.Bootscript.Identifier, s.Region, oneBootscript.Bootscript.Arch, oneBootscript.Bootscript.Organization, oneBootscript.Bootscript.Title)
 	return &oneBootscript.Bootscript, nil
 }
 
@@ -1908,20 +1988,9 @@ func (s *ScalewayAPI) CheckCredentials() error {
 	if err != nil {
 		return err
 	}
-	found := false
 	var tokens ScalewayGetTokens
-
 	if err = json.Unmarshal(body, &tokens); err != nil {
 		return err
-	}
-	for _, token := range tokens.Tokens {
-		if token.ID == s.Token {
-			found = true
-			break
-		}
-	}
-	if !found {
-		return fmt.Errorf("Invalid token %v", s.Token)
 	}
 	return nil
 }
@@ -2751,4 +2820,25 @@ func (s *ScalewayAPI) ResolveTTYUrl() string {
 		return "https://tty-ams1.scaleway.com"
 	}
 	return ""
+}
+
+// GetProductServers Fetches all the server type and their constraints from the Products API
+func (s *ScalewayAPI) GetProductsServers() (*ScalewayProductsServers, error) {
+	resp, err := s.GetResponsePaginate(s.computeAPI, "products/servers", url.Values{})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := s.handleHTTPError([]int{http.StatusOK}, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	var productServers ScalewayProductsServers
+	if err = json.Unmarshal(body, &productServers); err != nil {
+		return nil, err
+	}
+
+	return &productServers, nil
 }

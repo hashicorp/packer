@@ -28,6 +28,10 @@ type MockDriver struct {
 	IPAddressResult string
 	IPAddressErr    error
 
+	KillCalled bool
+	KillID     string
+	KillError  error
+
 	LoginCalled   bool
 	LoginUsername string
 	LoginPassword string
@@ -47,9 +51,9 @@ type MockDriver struct {
 	SaveImageReader io.Reader
 	SaveImageError  error
 
-	TagImageCalled  bool
+	TagImageCalled  int
 	TagImageImageId string
-	TagImageRepo    string
+	TagImageRepo    []string
 	TagImageForce   bool
 	TagImageErr     error
 
@@ -101,7 +105,7 @@ func (d *MockDriver) Export(id string, dst io.Writer) error {
 	return d.ExportError
 }
 
-func (d *MockDriver) Import(path, repo string) (string, error) {
+func (d *MockDriver) Import(path string, changes []string, repo string) (string, error) {
 	d.ImportCalled = true
 	d.ImportPath = path
 	d.ImportRepo = repo
@@ -160,6 +164,12 @@ func (d *MockDriver) StartContainer(config *ContainerConfig) (string, error) {
 	return d.StartID, d.StartError
 }
 
+func (d *MockDriver) KillContainer(id string) error {
+	d.KillCalled = true
+	d.KillID = id
+	return d.KillError
+}
+
 func (d *MockDriver) StopContainer(id string) error {
 	d.StopCalled = true
 	d.StopID = id
@@ -167,9 +177,9 @@ func (d *MockDriver) StopContainer(id string) error {
 }
 
 func (d *MockDriver) TagImage(id string, repo string, force bool) error {
-	d.TagImageCalled = true
+	d.TagImageCalled += 1
 	d.TagImageImageId = id
-	d.TagImageRepo = repo
+	d.TagImageRepo = append(d.TagImageRepo, repo)
 	d.TagImageForce = force
 	return d.TagImageErr
 }

@@ -81,11 +81,14 @@ func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo str
 	s.Say(fmt.Sprintf("Public IP Instance [%s:%s] is created", publicIPInstance.PublicIPInstanceNo, publicIP))
 
 	err = s.waiterAssociatePublicIPToServerInstance(serverInstanceNo, publicIP)
+	if err != nil {
+		return nil, err
+	}
 
 	return &publicIPInstance, nil
 }
 
-func (s *StepCreatePublicIPInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreatePublicIPInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Public IP Instance")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)
@@ -94,6 +97,9 @@ func (s *StepCreatePublicIPInstance) Run(_ context.Context, state multistep.Stat
 	if err == nil {
 		state.Put("PublicIP", publicIPInstance.PublicIP)
 		state.Put("PublicIPInstance", publicIPInstance)
+		// instance_id is the generic term used so that users can have access to the
+		// instance id inside of the provisioners, used in step_provision.
+		state.Put("instance_id", publicIPInstance)
 	}
 
 	return processStepResult(err, s.Error, state)

@@ -2,10 +2,8 @@ package powershell
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
+	"context"
 	"io/ioutil"
-	//"log"
 	"os"
 	"regexp"
 	"strings"
@@ -30,6 +28,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	file, err := extractScript(p)
+	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
 	}
@@ -79,24 +78,12 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
-	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"` {
-		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
+	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
+		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
 	}
 
-	if p.config.ElevatedExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
-		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ElevatedExecuteCommand)
-	}
-
-	if p.config.ValidExitCodes == nil {
-		t.Fatalf("ValidExitCodes should not be nil")
-	}
-	if p.config.ValidExitCodes != nil {
-		expCodes := []int{0}
-		for i, v := range p.config.ValidExitCodes {
-			if v != expCodes[i] {
-				t.Fatalf("Expected ValidExitCodes don't match actual")
-			}
-		}
+	if p.config.ElevatedExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
+		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ElevatedExecuteCommand)
 	}
 
 	if p.config.ElevatedEnvVarFormat != `$env:%s="%s"; ` {
@@ -148,8 +135,8 @@ func TestProvisionerPrepare_Elevated(t *testing.T) {
 	config["elevated_user"] = "vagrant"
 	err := p.Prepare(config)
 
-	if err == nil {
-		t.Fatal("should have error (only provided elevated_user)")
+	if err != nil {
+		t.Fatal("should not have error")
 	}
 
 	config["elevated_password"] = "vagrant"
@@ -177,6 +164,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["script"] = tf.Name()
 	p = new(Provisioner)
@@ -203,6 +191,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["script"] = tf.Name()
@@ -222,6 +211,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["scripts"] = []string{tf.Name()}
@@ -248,6 +238,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["scripts"] = []string{tf.Name()}
 	p = new(Provisioner)
@@ -364,7 +355,7 @@ func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 200
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -387,7 +378,7 @@ func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 201 // Invalid!
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -408,13 +399,13 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1'; exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -428,13 +419,13 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.ps1"
 
 	p.Prepare(config)
-	err = p.Provision(ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
 
 	cmd = comm.StartCmd.Command
-	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1'; exit \$LastExitCode }"`)
 	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -444,6 +435,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 func TestProvisionerProvision_Scripts(t *testing.T) {
 	tempFile, _ := ioutil.TempFile("", "packer")
 	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
 	config := testConfig()
 	delete(config, "inline")
 	config["scripts"] = []string{tempFile.Name()}
@@ -455,13 +448,13 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -473,6 +466,8 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	config := testConfig()
 	ui := testUi()
 	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
 	delete(config, "inline")
 
 	config["scripts"] = []string{tempFile.Name()}
@@ -489,13 +484,13 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -506,6 +501,22 @@ func TestProvisionerProvision_UISlurp(t *testing.T) {
 	// UI should be called n times
 
 	// UI should receive following messages / output
+}
+
+func TestProvisionerProvision_UploadFails(t *testing.T) {
+	config := testConfig()
+	ui := testUi()
+
+	p := new(Provisioner)
+	comm := new(packer.ScriptUploadErrorMockCommunicator)
+	p.Prepare(config)
+	p.config.StartRetryTimeout = 1 * time.Second
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
+		t.Fatalf("expected Provision() error %q to contain %q",
+			err.Error(),
+			packer.ScriptUploadErrorMockCommunicatorError.Error())
+	}
 }
 
 func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
@@ -610,9 +621,10 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 
 	// Non-elevated
+	p.generatedData = make(map[string]interface{})
 	cmd, _ := p.createCommandText()
 
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -622,7 +634,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.ElevatedUser = "vagrant"
 	p.config.ElevatedPassword = "vagrant"
 	cmd, _ = p.createCommandText()
-	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "%TEMP%\\packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "C:/Windows/Temp/packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
 	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected elevated command: %s", cmd)
@@ -636,73 +648,13 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 
 	flattenedEnvVars := `$env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild";`
 
-	envVarPath, err := p.uploadEnvVars(flattenedEnvVars)
+	err := p.uploadEnvVars(flattenedEnvVars)
 	if err != nil {
 		t.Fatalf("Did not expect error: %s", err.Error())
 	}
 
 	if comm.UploadCalled != true {
 		t.Fatalf("Failed to upload env var file")
-	}
-
-	re := regexp.MustCompile(`\${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1`)
-	matched := re.MatchString(envVarPath)
-	if !matched {
-		t.Fatalf("Got unexpected path for env var file: %s", envVarPath)
-	}
-}
-
-func TestProvision_generateElevatedShellRunner(t *testing.T) {
-
-	// Non-elevated
-	config := testConfig()
-	p := new(Provisioner)
-	p.Prepare(config)
-	comm := new(packer.MockCommunicator)
-	p.communicator = comm
-	path, err := p.generateElevatedRunner("whoami")
-
-	if err != nil {
-		t.Fatalf("Did not expect error: %s", err.Error())
-	}
-
-	if comm.UploadCalled != true {
-		t.Fatalf("Should have uploaded file")
-	}
-
-	matched, _ := regexp.MatchString("%TEMP%(.{1})packer-elevated-shell.*", path)
-	if !matched {
-		t.Fatalf("Got unexpected file: %s", path)
-	}
-}
-
-func TestRetryable(t *testing.T) {
-	config := testConfig()
-
-	count := 0
-	retryMe := func() error {
-		t.Logf("RetryMe, attempt number %d", count)
-		if count == 2 {
-			return nil
-		}
-		count++
-		return errors.New(fmt.Sprintf("Still waiting %d more times...", 2-count))
-	}
-	retryableSleep = 50 * time.Millisecond
-	p := new(Provisioner)
-	p.config.StartRetryTimeout = 155 * time.Millisecond
-	err := p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err != nil {
-		t.Fatalf("should not have error retrying funuction")
-	}
-
-	count = 0
-	p.config.StartRetryTimeout = 10 * time.Millisecond
-	err = p.Prepare(config)
-	err = p.retryable(retryMe)
-	if err == nil {
-		t.Fatalf("should have error retrying funuction")
 	}
 }
 

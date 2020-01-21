@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
@@ -10,7 +11,8 @@ import (
 	"strings"
 	"time"
 
-	packer "github.com/hashicorp/packer/common"
+	versionUtil "github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer/common/retry"
 )
 
 type VBox42Driver struct {
@@ -24,9 +26,19 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 		return err
 	}
 
-	portCountArg := "--sataportcount"
-	if strings.HasPrefix(version, "4.3") || strings.HasPrefix(version, "5.") {
-		portCountArg = "--portcount"
+	portCountArg := "--portcount"
+
+	currentVersion, err := versionUtil.NewVersion(version)
+	if err != nil {
+		return err
+	}
+	firstVersionUsingPortCount, err := versionUtil.NewVersion("4.3")
+	if err != nil {
+		return err
+	}
+
+	if currentVersion.LessThan(firstVersionUsingPortCount) {
+		portCountArg = "--sataportcount"
 	}
 
 	command := []string{
@@ -34,6 +46,18 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 		"--name", name,
 		"--add", "sata",
 		portCountArg, strconv.Itoa(portcount),
+	}
+
+	return d.VBoxManage(command...)
+}
+
+func (d *VBox42Driver) CreateNVMeController(vmName string, name string, portcount int) error {
+	command := []string{
+		"storagectl", vmName,
+		"--name", name,
+		"--add", "pcie",
+		"--controller", "NVMe",
+		"--portcount", strconv.Itoa(portcount),
 	}
 
 	return d.VBoxManage(command...)
@@ -52,15 +76,7 @@ func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 }
 
 func (d *VBox42Driver) Delete(name string) error {
-	return packer.Retry(1, 1, 5, func(i uint) (bool, error) {
-		if err := d.VBoxManage("unregistervm", name, "--delete"); err != nil {
-			if i+1 == 5 {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
+	return d.VBoxManage("unregistervm", name, "--delete")
 }
 
 func (d *VBox42Driver) Iso() (string, error) {
@@ -142,8 +158,13 @@ func (d *VBox42Driver) Stop(name string) error {
 		return err
 	}
 
-	// We sleep here for a little bit to let the session "unlock"
-	time.Sleep(2 * time.Second)
+	return nil
+}
+
+func (d *VBox42Driver) StopViaACPI(name string) error {
+	if err := d.VBoxManage("controlvm", name, "acpipowerbutton"); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -166,6 +187,22 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 5,
+		ShouldRetry: func(err error) bool {
+			return strings.Contains(err.Error(), "VBOX_E_INVALID_OBJECT_STATE")
+		},
+		RetryDelay: func() time.Duration { return 1 * time.Minute },
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := d.VBoxManageWithOutput(args...)
+		return err
+	})
+
+	return err
+}
+
+func (d *VBox42Driver) VBoxManageWithOutput(args ...string) (string, error) {
 	var stdout, stderr bytes.Buffer
 
 	log.Printf("Executing VBoxManage: %#v", args)
@@ -193,7 +230,7 @@ func (d *VBox42Driver) VBoxManage(args ...string) error {
 	log.Printf("stdout: %s", stdoutString)
 	log.Printf("stderr: %s", stderrString)
 
-	return err
+	return stdoutString, err
 }
 
 func (d *VBox42Driver) Verify() error {
@@ -227,4 +264,86 @@ func (d *VBox42Driver) Version() (string, error) {
 
 	log.Printf("VirtualBox version: %s", matches[0][1])
 	return matches[0][1], nil
+}
+
+// LoadSnapshots load the snapshots for a VM instance
+func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
+	if vmName == "" {
+		panic("Argument empty exception: vmName")
+	}
+	log.Printf("Executing LoadSnapshots: VM: %s", vmName)
+
+	var rootNode *VBoxSnapshot
+	stdoutString, err := d.VBoxManageWithOutput("snapshot", vmName, "list", "--machinereadable")
+	if stdoutString == "This machine does not have any snapshots" {
+		return rootNode, nil
+	}
+	if nil != err {
+		return nil, err
+	}
+
+	rootNode, err = ParseSnapshotData(stdoutString)
+	if nil != err {
+		return nil, err
+	}
+
+	return rootNode, nil
+}
+
+func (d *VBox42Driver) CreateSnapshot(vmname string, snapshotName string) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	log.Printf("Executing CreateSnapshot: VM: %s, SnapshotName %s", vmname, snapshotName)
+
+	return d.VBoxManage("snapshot", vmname, "take", snapshotName)
+}
+
+func (d *VBox42Driver) HasSnapshots(vmname string) (bool, error) {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	log.Printf("Executing HasSnapshots: VM: %s", vmname)
+
+	sn, err := d.LoadSnapshots(vmname)
+	if nil != err {
+		return false, err
+	}
+	return nil != sn, nil
+}
+
+func (d *VBox42Driver) GetCurrentSnapshot(vmname string) (*VBoxSnapshot, error) {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	log.Printf("Executing GetCurrentSnapshot: VM: %s", vmname)
+
+	sn, err := d.LoadSnapshots(vmname)
+	if nil != err {
+		return nil, err
+	}
+	return sn.GetCurrentSnapshot(), nil
+}
+
+func (d *VBox42Driver) SetSnapshot(vmname string, sn *VBoxSnapshot) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	if nil == sn {
+		panic("Argument null exception: sn")
+	}
+	log.Printf("Executing SetSnapshot: VM: %s, SnapshotName %s", vmname, sn.UUID)
+
+	return d.VBoxManage("snapshot", vmname, "restore", sn.UUID)
+}
+
+func (d *VBox42Driver) DeleteSnapshot(vmname string, sn *VBoxSnapshot) error {
+	if vmname == "" {
+		panic("Argument empty exception: vmname")
+	}
+	if nil == sn {
+		panic("Argument null exception: sn")
+	}
+	log.Printf("Executing DeleteSnapshot: VM: %s, SnapshotName %s", vmname, sn.UUID)
+	return d.VBoxManage("snapshot", vmname, "delete", sn.UUID)
 }

@@ -17,7 +17,7 @@ import (
 // hard drive for the virtual machine.
 type stepCreateDisk struct{}
 
-func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -73,6 +73,13 @@ func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multis
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+	} else if config.HardDriveInterface == "pcie" {
+		if err := driver.CreateNVMeController(vmName, "NVMe Controller", config.NVMePortCount); err != nil {
+			err := fmt.Errorf("Error creating NVMe controller: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Attach the disk to the controller
@@ -83,6 +90,10 @@ func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multis
 
 	if config.HardDriveInterface == "scsi" {
 		controllerName = "SCSI Controller"
+	}
+
+	if config.HardDriveInterface == "pcie" {
+		controllerName = "NVMe Controller"
 	}
 
 	nonrotational := "off"

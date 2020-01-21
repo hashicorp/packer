@@ -10,16 +10,16 @@ import (
 
 type stepCreateInstance struct{}
 
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
-		driver    = state.Get("driver").(Driver)
-		ui        = state.Get("ui").(packer.Ui)
-		publicKey = state.Get("publicKey").(string)
+		driver = state.Get("driver").(Driver)
+		ui     = state.Get("ui").(packer.Ui)
+		config = state.Get("config").(*Config)
 	)
 
 	ui.Say("Creating instance...")
 
-	instanceID, err := driver.CreateInstance(publicKey)
+	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey))
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
 		ui.Error(err.Error())
@@ -33,7 +33,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 
 	ui.Say("Waiting for instance to enter 'RUNNING' state...")
 
-	if err = driver.WaitForInstanceState(instanceID, []string{"STARTING", "PROVISIONING"}, "RUNNING"); err != nil {
+	if err = driver.WaitForInstanceState(ctx, instanceID, []string{"STARTING", "PROVISIONING"}, "RUNNING"); err != nil {
 		err = fmt.Errorf("Error waiting for instance to start: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
@@ -57,14 +57,14 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	ui.Say(fmt.Sprintf("Terminating instance (%s)...", id))
 
-	if err := driver.TerminateInstance(id); err != nil {
+	if err := driver.TerminateInstance(context.TODO(), id); err != nil {
 		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return
 	}
 
-	err := driver.WaitForInstanceState(id, []string{"TERMINATING"}, "TERMINATED")
+	err := driver.WaitForInstanceState(context.TODO(), id, []string{"TERMINATING"}, "TERMINATED")
 	if err != nil {
 		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
 		ui.Error(err.Error())

@@ -14,9 +14,9 @@ multiple builders depending on the strategy you want to use to build the AMI.
 Packer supports the following builders at the moment:
 
 -   [amazon-ebs](/docs/builders/amazon-ebs.html) - Create EBS-backed AMIs by
-    launching a source AMI and re-packaging it into a new AMI
-    after provisioning. If in doubt, use this builder, which is the easiest to
-    get started with.
+    launching a source AMI and re-packaging it into a new AMI after
+    provisioning. If in doubt, use this builder, which is the easiest to get
+    started with.
 
 -   [amazon-instance](/docs/builders/amazon-instance.html) - Create
     instance-store AMIs by launching and provisioning a source instance, then
@@ -43,9 +43,9 @@ generally recommends EBS-backed images nowadays.
 Packer is able to create Amazon EBS Volumes which are preinitialized with a
 filesystem and data.
 
--   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS volumes
-    by launching a source AMI with block devices mapped. Provision the instance,
-    then destroy it, retaining the EBS volumes.
+-   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS
+    volumes by launching a source AMI with block devices mapped. Provision the
+    instance, then destroy it, retaining the EBS volumes.
 
 <span id="specifying-amazon-credentials"></span>
 
@@ -65,7 +65,7 @@ explained below:
 Static credentials can be provided in the form of an access key id and secret.
 These look like:
 
-```json
+``` json
 {
     "access_key": "AKIAIOSFODNN7EXAMPLE",
     "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
@@ -83,36 +83,38 @@ using either these environment variables will override the use of
 `AWS_SHARED_CREDENTIALS_FILE` and `AWS_PROFILE`. The `AWS_DEFAULT_REGION` and
 `AWS_SESSION_TOKEN` environment variables are also used, if applicable:
 
-
 Usage:
 
-```
-$ export AWS_ACCESS_KEY_ID="anaccesskey"
-$ export AWS_SECRET_ACCESS_KEY="asecretkey"
-$ export AWS_DEFAULT_REGION="us-west-2"
-$ packer build packer.json
-```
+    $ export AWS_ACCESS_KEY_ID="anaccesskey"
+    $ export AWS_SECRET_ACCESS_KEY="asecretkey"
+    $ export AWS_DEFAULT_REGION="us-west-2"
+    $ packer build packer.json
 
 ### Shared Credentials file
 
 You can use an AWS credentials file to specify your credentials. The default
-location is &#36;HOME/.aws/credentials on Linux and OS X, or
-"%USERPROFILE%.aws\credentials" for Windows users. If we fail to detect
+location is $HOME/.aws/credentials on Linux and OS X, or
+"%USERPROFILE%.aws\\credentials" for Windows users. If we fail to detect
 credentials inline, or in the environment, Packer will check this location. You
 can optionally specify a different location in the configuration by setting the
 environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
 
+The format for the credentials file is like so
+
+    [default]
+    aws_access_key_id=<your access key id>
+    aws_secret_access_key=<your secret access key>
+
 You may also configure the profile to use by setting the `profile`
 configuration option, or setting the `AWS_PROFILE` environment variable:
 
-```json
+``` json
 {
     "profile": "customprofile",
     "region": "us-east-1",
     "type": "amazon-ebs"
 }
 ```
-
 
 ### IAM Task or Instance Role
 
@@ -122,14 +124,6 @@ role, if it has one.
 This is a preferred approach over any other when running in EC2 as you can
 avoid hard coding credentials. Instead these are leased on-the-fly by Packer,
 which reduces the chance of leakage.
-
-The default deadline for the EC2 metadata API endpoint is 100 milliseconds,
-which can be overidden by setting the `AWS_METADATA_TIMEOUT` environment
-variable. The variable expects a positive golang Time.Duration string, which is
-a sequence of decimal numbers and a unit suffix; valid suffixes are `ns`
-(nanoseconds), `us` (microseconds), `ms` (milliseconds), `s` (seconds), `m`
-(minutes), and `h` (hours). Examples of valid inputs: `100ms`, `250ms`, `1s`,
-`2.5s`, `2.5m`, `1m30s`.
 
 The following policy document provides the minimal set permissions necessary
 for Packer to work:
@@ -149,7 +143,7 @@ for Packer to work:
         "ec2:CreateSnapshot",
         "ec2:CreateTags",
         "ec2:CreateVolume",
-        "ec2:DeleteKeypair",
+        "ec2:DeleteKeyPair",
         "ec2:DeleteSecurityGroup",
         "ec2:DeleteSnapshot",
         "ec2:DeleteVolume",
@@ -157,6 +151,7 @@ for Packer to work:
         "ec2:DescribeImageAttribute",
         "ec2:DescribeImages",
         "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
         "ec2:DescribeRegions",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSnapshots",
@@ -178,6 +173,16 @@ for Packer to work:
 }
 ```
 
+Note that if you'd like to create a spot instance, you must also add:
+
+    ec2:CreateLaunchTemplate,
+    ec2:DeleteLaunchTemplate,
+    ec2:CreateFleet
+
+If you have the `spot_price` parameter set to `auto`, you must also add:
+
+    ec2:DescribeSpotPriceHistory
+
 ## Troubleshooting
 
 ### Attaching IAM Policies to Roles
@@ -197,12 +202,63 @@ work, but specifics will depend on your use-case.
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
-    "Action": "iam:PassRole",
+    "Action": [
+        "iam:PassRole",
+        "iam:GetInstanceProfile"
+    ],
     "Resource": [
         "*"
     ]
 }
 ```
+
+In case when you're creating a temporary instance profile you will require to have following
+IAM policies.
+
+``` json
+{
+    "Sid": "PackerIAMCreateRole",
+    "Effect": "Allow",
+    "Action": [
+        "iam:PassRole",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:GetRole",
+        "iam:GetInstanceProfile",
+        "iam:DeleteRolePolicy",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:PutRolePolicy",
+        "iam:AddRoleToInstanceProfile"
+    ],
+    "Resource": "*"
+}
+```
+
+In cases where you are using a KMS key for encryption, your key will need the
+following policies at a minimum:
+
+```json
+{
+    "Sid": "Allow use of the key",
+    "Effect": "Allow",
+    "Action": [
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*"
+    ],
+    "Resource": "*"
+}
+```
+
+If you are using a key provided by a different account than the one you are
+using to run the Packer build, your key will also need
+
+``` json
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+```
+
 
 ### Checking that system time is current
 
@@ -214,6 +270,51 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
-current time. If you're on Linux, you can try setting the time with ntp by
-running `sudo ntpd -q`.
+<http://www.time.gov/>. On
+Linux/OS X, you can run the `date` command to get the current time. If you're
+on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
+
+### ResourceNotReady Error
+This error generally appears as either `ResourceNotReady: exceeded wait
+attempts` or `ResourceNotReady: failed waiting for successful resource state`.
+
+This opaque error gets returned from AWS's API for a number of reasons,
+generally during image copy/encryption. Possible reasons for the error include:
+
+- You aren't waiting long enough. This is where you'll see the `exceeded wait
+  attempts` variety of this error message:
+  We use the AWS SDK's built-in waiters to wait for longer-running tasks to
+    complete. These waiters have default delays between queries and maximum
+    number of queries that don't always work for our users.
+
+    If you find that you are being rate-limited or have exceeded your max wait
+    attempts, you can override the defaults by setting the following packer
+    environment variables (note that these will apply to all AWS tasks that we
+    have to wait for):
+
+    - `AWS_MAX_ATTEMPTS` - This is how many times to re-send a status update
+    request. Excepting tasks that we know can take an extremely long time, this
+    defaults to 40 tries.
+
+    - `AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
+    requests. Generally defaults to 2 or 5 seconds, depending on the task.
+
+- You are using short-lived credentials that expired during the build. If this
+    is the problem, you may also see `RequestExpired: Request has expired.`
+    errors displayed in the Packer output:
+
+    - If you are using STS credentials, make sure that they expire only after the
+    build has completed
+
+    - If you are chaining roles, make sure your build doesn't last more than an
+    hour, since when you chain roles the maximum length of time your credentials
+    will last is an hour:
+    https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html
+
+- Something is wrong with your KMS key. This is where you'll see the
+  `ResourceNotReady: failed waiting for successful resource state` variety of
+  this error message. Issues we've seen include:
+    - Your KMS key is invalid, possibly because of a typo
+    - Your KMS key is valid but does not have the necessary permissions (see
+      above for the necessary key permissions)
+    - Your KMS key is valid, but not in the region you've told us to use it in.

@@ -20,7 +20,7 @@ type DvdControllerProperties struct {
 	Existing           bool
 }
 
-func (s *StepMountSecondaryDvdImages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepMountSecondaryDvdImages) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Mounting secondary DVD images...")
@@ -58,7 +58,8 @@ func (s *StepMountSecondaryDvdImages) Run(_ context.Context, state multistep.Sta
 			return multistep.ActionHalt
 		}
 
-		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
+		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber,
+			controllerLocation))
 	}
 
 	return multistep.ActionContinue

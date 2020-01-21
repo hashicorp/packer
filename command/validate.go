@@ -1,12 +1,17 @@
 package command
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/posener/complete"
 )
 
 type ValidateCommand struct {
@@ -78,6 +83,58 @@ func (c *ValidateCommand) Run(args []string) int {
 		}
 	}
 
+	// Check if any of the configuration is fixable
+	var rawTemplateData map[string]interface{}
+	input := make(map[string]interface{})
+	templateData := make(map[string]interface{})
+	json.Unmarshal(tpl.RawContents, &rawTemplateData)
+	for k, v := range rawTemplateData {
+		if vals, ok := v.([]interface{}); ok {
+			if len(vals) == 0 {
+				continue
+			}
+		}
+		templateData[strings.ToLower(k)] = v
+		input[strings.ToLower(k)] = v
+	}
+
+	// fix rawTemplateData into input
+	for _, name := range fix.FixerOrder {
+		var err error
+		fixer, ok := fix.Fixers[name]
+		if !ok {
+			panic("fixer not found: " + name)
+		}
+		input, err = fixer.Fix(input)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf("Error checking against fixers: %s", err))
+			return 1
+		}
+	}
+	// delete empty top-level keys since the fixers seem to add them
+	// willy-nilly
+	for k := range input {
+		ml, ok := input[k].([]map[string]interface{})
+		if !ok {
+			continue
+		}
+		if len(ml) == 0 {
+			delete(input, k)
+		}
+	}
+	// marshal/unmarshal to make comparable to templateData
+	var fixedData map[string]interface{}
+	// Guaranteed to be valid json, so we can ignore errors
+	j, _ := json.Marshal(input)
+	json.Unmarshal(j, &fixedData)
+
+	if diff := cmp.Diff(templateData, fixedData); diff != "" {
+		c.Ui.Say("[warning] Fixable configuration found.")
+		c.Ui.Say("You may need to run `packer fix` to get your build to run")
+		c.Ui.Say("correctly. See debug log for more information.\n")
+		log.Printf("Fixable config differences:\n%s", diff)
+	}
+
 	if len(errs) > 0 {
 		c.Ui.Error("Template validation failed. Errors are shown below.\n")
 		for i, err := range errs {
@@ -87,7 +144,6 @@ func (c *ValidateCommand) Run(args []string) int {
 				c.Ui.Error("")
 			}
 		}
-
 		return 1
 	}
 
@@ -124,8 +180,8 @@ Usage: packer validate [options] TEMPLATE
 Options:
 
   -syntax-only           Only check syntax. Do not verify config of the template.
-  -except=foo,bar,baz    Validate all builds other than these
-  -only=foo,bar,baz      Validate only these builds
+  -except=foo,bar,baz    Validate all builds other than these.
+  -only=foo,bar,baz      Validate only these builds.
   -var 'key=value'       Variable for templates, can be used multiple times.
   -var-file=path         JSON file containing user variables.
 `
@@ -135,4 +191,18 @@ Options:
 
 func (*ValidateCommand) Synopsis() string {
 	return "check that a template is valid"
+}
+
+func (*ValidateCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (*ValidateCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-syntax-only": complete.PredictNothing,
+		"-except":      complete.PredictNothing,
+		"-only":        complete.PredictNothing,
+		"-var":         complete.PredictNothing,
+		"-var-file":    complete.PredictNothing,
+	}
 }

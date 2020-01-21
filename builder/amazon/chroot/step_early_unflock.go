@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/common/chroot"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -12,8 +13,8 @@ import (
 // StepEarlyUnflock unlocks the flock.
 type StepEarlyUnflock struct{}
 
-func (s *StepEarlyUnflock) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	cleanup := state.Get("flock_cleanup").(Cleanup)
+func (s *StepEarlyUnflock) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	cleanup := state.Get("flock_cleanup").(chroot.Cleanup)
 	ui := state.Get("ui").(packer.Ui)
 
 	log.Println("Unlocking file lock...")

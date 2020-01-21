@@ -7,18 +7,19 @@ package api
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/Sirupsen/logrus"
-	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/pkg/namesgenerator"
 	"github.com/dustin/go-humanize"
 	"github.com/moul/anonuuid"
 	"github.com/scaleway/scaleway-cli/pkg/utils"
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // ScalewayResolvedIdentifier represents a list of matching identifier for a specifier pattern
@@ -92,6 +93,36 @@ func CreateVolumeFromHumanSize(api *ScalewayAPI, size string) (*string, error) {
 	}
 
 	return &volumeID, nil
+}
+
+// VolumesFromSize returns a string of standard sized volumes from a given size
+func VolumesFromSize(size uint64) string {
+	const DefaultVolumeSize float64 = 50000000000
+	StdVolumeSizes := []struct {
+		kind     string
+		capacity float64
+	}{
+		{"150G", 150000000000},
+		{"100G", 100000000000},
+		{"50G", 50000000000},
+	}
+
+	RequiredSize := float64(size) - DefaultVolumeSize
+	Volumes := ""
+	for _, v := range StdVolumeSizes {
+		q := RequiredSize / v.capacity
+		r := math.Mod(RequiredSize, v.capacity)
+		RequiredSize = r
+
+		if q > 0 {
+			Volumes += strings.Repeat(v.kind+" ", int(q))
+		}
+		if r == 0 {
+			break
+		}
+	}
+
+	return strings.TrimSpace(Volumes)
 }
 
 // fillIdentifierCache fills the cache by fetching from the API
@@ -288,6 +319,26 @@ type ConfigCreateServer struct {
 	CommercialType    string
 	DynamicIPRequired bool
 	EnableIPV6        bool
+	BootType          string
+}
+
+// Return offer from any of the product name or alternate names
+func OfferNameFromName(name string, products *ScalewayProductsServers) (*ProductServer, error) {
+	offer, ok := products.Servers[name]
+	if ok {
+		return &offer, nil
+	}
+
+	for _, v := range products.Servers {
+		for _, alt := range v.AltNames {
+			alt := strings.ToUpper(alt)
+			if alt == name {
+				return &v, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("Unknow commercial type: %v", name)
 }
 
 // CreateServer creates a server using API based on typical server fields
@@ -300,16 +351,21 @@ func CreateServer(api *ScalewayAPI, c *ConfigCreateServer) (string, error) {
 		return "", errors.New("Invalid commercial type")
 	}
 
+	if c.BootType != "local" && c.BootType != "bootscript" {
+		return "", errors.New("Invalid boot type")
+	}
+
 	if c.Name == "" {
 		c.Name = strings.Replace(namesgenerator.GetRandomName(0), "_", "-", -1)
 	}
 
 	var server ScalewayServerDefinition
 
-	server.CommercialType = commercialType
+	server.CommercialType = strings.ToUpper(commercialType)
 	server.Volumes = make(map[string]string)
 	server.DynamicIPRequired = &c.DynamicIPRequired
 	server.EnableIPV6 = c.EnableIPV6
+	server.BootType = c.BootType
 	if commercialType == "" {
 		return "", errors.New("You need to specify a commercial-type")
 	}
@@ -336,32 +392,19 @@ func CreateServer(api *ScalewayAPI, c *ConfigCreateServer) (string, error) {
 	if c.Env != "" {
 		server.Tags = strings.Split(c.Env, " ")
 	}
-	switch c.CommercialType {
-	case "VC1M", "X64-4GB":
-		if c.AdditionalVolumes == "" {
-			c.AdditionalVolumes = "50G"
-			log.Debugf("This server needs a least 50G")
-		}
-	case "VC1L", "X64-8GB", "X64-15GB":
-		if c.AdditionalVolumes == "" {
-			c.AdditionalVolumes = "150G"
-			log.Debugf("This server needs a least 150G")
-		}
-	case "X64-30GB":
-		if c.AdditionalVolumes == "" {
-			c.AdditionalVolumes = "100G 150G"
-			log.Debugf("This server needs a least 300G")
-		}
-	case "X64-60GB":
-		if c.AdditionalVolumes == "" {
-			c.AdditionalVolumes = "50G 150G 150G"
-			log.Debugf("This server needs a least 400G")
-		}
-	case "X64-120GB":
-		if c.AdditionalVolumes == "" {
-			c.AdditionalVolumes = "150G 150G 150G"
-			log.Debugf("This server needs a least 500G")
-		}
+
+	products, err := api.GetProductsServers()
+	if err != nil {
+		return "", fmt.Errorf("Unable to fetch products list from the Scaleway API: %v", err)
+	}
+	offer, err := OfferNameFromName(server.CommercialType, products)
+	if err != nil {
+		return "", fmt.Errorf("Unknow commercial type %v: %v", server.CommercialType, err)
+	}
+	if offer.VolumesConstraint.MinSize > 0 && c.AdditionalVolumes == "" {
+		c.AdditionalVolumes = VolumesFromSize(offer.VolumesConstraint.MinSize)
+		log.Debugf("%s needs at least %s. Automatically creates the following volumes: %s",
+			server.CommercialType, humanize.Bytes(offer.VolumesConstraint.MinSize), c.AdditionalVolumes)
 	}
 	if c.AdditionalVolumes != "" {
 		volumes := strings.Split(c.AdditionalVolumes, " ")
@@ -375,24 +418,17 @@ func CreateServer(api *ScalewayAPI, c *ConfigCreateServer) (string, error) {
 			server.Volumes[volumeIDx] = *volumeID
 		}
 	}
+
 	arch := os.Getenv("SCW_TARGET_ARCH")
 	if arch == "" {
-		server.CommercialType = strings.ToUpper(server.CommercialType)
-		switch server.CommercialType[:2] {
-		case "C1":
-			arch = "arm"
-		case "C2", "VC", "X6":
-			arch = "x86_64"
-		default:
-			return "", fmt.Errorf("%s wrong commercial type", server.CommercialType)
-		}
+		arch = offer.Arch
 	}
 	imageIdentifier := &ScalewayImageIdentifier{
 		Arch: arch,
 	}
 	server.Name = c.Name
 	inheritingVolume := false
-	_, err := humanize.ParseBytes(c.ImageName)
+	_, err = humanize.ParseBytes(c.ImageName)
 	if err == nil {
 		// Create a new root volume
 		volumeID, errCreateVol := CreateVolumeFromHumanSize(api, c.ImageName)
@@ -536,7 +572,11 @@ func WaitForServerReady(api *ScalewayAPI, serverID, gateway string) (*ScalewaySe
 		}
 
 		if gateway == "" {
-			dest := fmt.Sprintf("%s:22", server.PublicAddress.IP)
+			ip := server.PublicAddress.IP
+			if ip == "" && server.EnableIPV6 {
+				ip = fmt.Sprintf("[%s]", server.IPV6.Address)
+			}
+			dest := fmt.Sprintf("%s:22", ip)
 			log.Debugf("Waiting for server SSH port %s", dest)
 			err = utils.WaitForTCPPortOpen(dest)
 			if err != nil {

@@ -137,7 +137,7 @@ func (client *VaultClient) DeletePreparer(resourceGroupName string, vaultName st
 func (client *VaultClient) DeleteSender(req *http.Request) (*http.Response, error) {
 	return autorest.SendWithSender(client,
 		req,
-		azure.DoPollForAsynchronous(client.PollingDelay))
+		azure.DoRetryWithRegistration(client.Client))
 }
 
 // DeleteResponder handles the response to the Delete request. The method always

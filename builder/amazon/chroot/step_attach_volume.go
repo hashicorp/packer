@@ -2,11 +2,10 @@ package chroot
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
-	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -24,7 +23,7 @@ type StepAttachVolume struct {
 	volumeId string
 }
 
-func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	device := state.Get("device").(string)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -52,35 +51,7 @@ func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) mult
 	s.volumeId = volumeId
 
 	// Wait for the volume to become attached
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"attaching"},
-		StepState: state,
-		Target:    "attached",
-		Refresh: func() (interface{}, string, error) {
-			attempts := 0
-			for attempts < 30 {
-				resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&volumeId}})
-				if err != nil {
-					return nil, "", err
-				}
-				if len(resp.Volumes[0].Attachments) > 0 {
-					a := resp.Volumes[0].Attachments[0]
-					return a, *a.State, nil
-				}
-				// When Attachment on volume is not present sleep for 2s and retry
-				attempts += 1
-				ui.Say(fmt.Sprintf(
-					"Volume %s show no attachments. Attempt %d/30. Sleeping for 2s and will retry.",
-					volumeId, attempts))
-				time.Sleep(2 * time.Second)
-			}
-
-			// Attachment on volume is not present after all attempts
-			return nil, "", errors.New("No attachments on volume.")
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	err = awscommon.WaitUntilVolumeAttached(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
@@ -116,26 +87,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	s.attached = false
 
 	// Wait for the volume to detach
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"attaching", "attached", "detaching"},
-		StepState: state,
-		Target:    "detached",
-		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
-			if err != nil {
-				return nil, "", err
-			}
-
-			v := resp.Volumes[0]
-			if len(v.Attachments) > 0 {
-				return v, *v.Attachments[0].State, nil
-			} else {
-				return v, "detached", nil
-			}
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	err = awscommon.WaitUntilVolumeDetached(aws.BackgroundContext(), ec2conn, s.volumeId)
 	if err != nil {
 		return fmt.Errorf("Error waiting for volume: %s", err)
 	}

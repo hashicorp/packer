@@ -11,19 +11,20 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 )
 
-const CMP_ACME = "/Compute-%s"
-const CMP_USERNAME = "/Compute-%s/%s"
-const CMP_QUALIFIED_NAME = "%s/%s"
+const cmpACME = "/Compute-%s"
+const cmpUsername = "/Compute-%s/%s"
+const cmpQualifiedName = "%s/%s"
 
 // Client represents an authenticated compute client, with compute credentials and an api client.
-type ComputeClient struct {
+type Client struct {
 	client       *client.Client
 	authCookie   *http.Cookie
 	cookieIssued time.Time
 }
 
-func NewComputeClient(c *opc.Config) (*ComputeClient, error) {
-	computeClient := &ComputeClient{}
+// NewComputeClient returns a compute client to interact with the Oracle Compute Infrastructure - Classic APIs
+func NewComputeClient(c *opc.Config) (*Client, error) {
+	computeClient := &Client{}
 	client, err := client.NewClient(c)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func NewComputeClient(c *opc.Config) (*ComputeClient, error) {
 	return computeClient, nil
 }
 
-func (c *ComputeClient) executeRequest(method, path string, body interface{}) (*http.Response, error) {
+func (c *Client) executeRequest(method, path string, body interface{}) (*http.Response, error) {
 	reqBody, err := c.client.MarshallRequestBody(body)
 	if err != nil {
 		return nil, err
@@ -62,7 +63,7 @@ func (c *ComputeClient) executeRequest(method, path string, body interface{}) (*
 	if c.authCookie != nil {
 		if time.Since(c.cookieIssued).Minutes() > 25 {
 			c.authCookie = nil
-			if err := c.getAuthenticationCookie(); err != nil {
+			if err = c.getAuthenticationCookie(); err != nil {
 				return nil, err
 			}
 		}
@@ -76,42 +77,42 @@ func (c *ComputeClient) executeRequest(method, path string, body interface{}) (*
 	return resp, nil
 }
 
-func (c *ComputeClient) getACME() string {
-	return fmt.Sprintf(CMP_ACME, *c.client.IdentityDomain)
+func (c *Client) getACME() string {
+	return fmt.Sprintf(cmpACME, *c.client.IdentityDomain)
 }
 
-func (c *ComputeClient) getUserName() string {
-	return fmt.Sprintf(CMP_USERNAME, *c.client.IdentityDomain, *c.client.UserName)
+func (c *Client) getUserName() string {
+	return fmt.Sprintf(cmpUsername, *c.client.IdentityDomain, *c.client.UserName)
 }
 
-func (c *ComputeClient) getQualifiedACMEName(name string) string {
+func (c *Client) getQualifiedACMEName(name string) string {
 	if name == "" {
 		return ""
 	}
 	if strings.HasPrefix(name, "/Compute-") && len(strings.Split(name, "/")) == 1 {
 		return name
 	}
-	return fmt.Sprintf(CMP_QUALIFIED_NAME, c.getACME(), name)
+	return fmt.Sprintf(cmpQualifiedName, c.getACME(), name)
 }
 
 // From compute_client
 // GetObjectName returns the fully-qualified name of an OPC object, e.g. /identity-domain/user@email/{name}
-func (c *ComputeClient) getQualifiedName(name string) string {
+func (c *Client) getQualifiedName(name string) string {
 	if name == "" {
 		return ""
 	}
 	if strings.HasPrefix(name, "/oracle") || strings.HasPrefix(name, "/Compute-") {
 		return name
 	}
-	return fmt.Sprintf(CMP_QUALIFIED_NAME, c.getUserName(), name)
+	return fmt.Sprintf(cmpQualifiedName, c.getUserName(), name)
 }
 
-func (c *ComputeClient) getObjectPath(root, name string) string {
+func (c *Client) getObjectPath(root, name string) string {
 	return fmt.Sprintf("%s%s", root, c.getQualifiedName(name))
 }
 
 // GetUnqualifiedName returns the unqualified name of an OPC object, e.g. the {name} part of /identity-domain/user@email/{name}
-func (c *ComputeClient) getUnqualifiedName(name string) string {
+func (c *Client) getUnqualifiedName(name string) string {
 	if name == "" {
 		return name
 	}
@@ -126,40 +127,40 @@ func (c *ComputeClient) getUnqualifiedName(name string) string {
 	return strings.Join(nameParts[3:], "/")
 }
 
-func (c *ComputeClient) unqualify(names ...*string) {
+func (c *Client) unqualify(names ...*string) {
 	for _, name := range names {
 		*name = c.getUnqualifiedName(*name)
 	}
 }
 
-func (c *ComputeClient) unqualifyUrl(url *string) {
+func (c *Client) unqualifyURL(url *string) {
 	var validID = regexp.MustCompile(`(\/(Compute[^\/\s]+))(\/[^\/\s]+)(\/[^\/\s]+)`)
 	name := validID.FindString(*url)
 	*url = c.getUnqualifiedName(name)
 }
 
-func (c *ComputeClient) getQualifiedList(list []string) []string {
+func (c *Client) getQualifiedList(list []string) []string {
 	for i, name := range list {
 		list[i] = c.getQualifiedName(name)
 	}
 	return list
 }
 
-func (c *ComputeClient) getUnqualifiedList(list []string) []string {
+func (c *Client) getUnqualifiedList(list []string) []string {
 	for i, name := range list {
 		list[i] = c.getUnqualifiedName(name)
 	}
 	return list
 }
 
-func (c *ComputeClient) getQualifiedListName(name string) string {
+func (c *Client) getQualifiedListName(name string) string {
 	nameParts := strings.Split(name, ":")
 	listType := nameParts[0]
 	listName := nameParts[1]
 	return fmt.Sprintf("%s:%s", listType, c.getQualifiedName(listName))
 }
 
-func (c *ComputeClient) unqualifyListName(qualifiedName string) string {
+func (c *Client) unqualifyListName(qualifiedName string) string {
 	nameParts := strings.Split(qualifiedName, ":")
 	listType := nameParts[0]
 	listName := nameParts[1]

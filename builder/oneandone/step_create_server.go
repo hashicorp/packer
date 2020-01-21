@@ -13,13 +13,9 @@ import (
 
 type stepCreateServer struct{}
 
-func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
-
-	if sshkey, ok := state.GetOk("publicKey"); ok {
-		c.SSHKey = sshkey.(string)
-	}
 
 	token := oneandone.SetToken(c.Token)
 
@@ -72,16 +68,20 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	if c.Comm.SSHPassword != "" {
 		req.Password = c.Comm.SSHPassword
 	}
-	if c.SSHKey != "" {
-		req.SSHKey = c.SSHKey
+	if len(c.Comm.SSHPublicKey) != 0 {
+		req.SSHKey = string(c.Comm.SSHPublicKey)
 	}
 
 	server_id, server, err := api.CreateServer(&req)
+	if err != nil {
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-	if err == nil {
-		// Wait until server is created and powered on for at most 60 x 10 seconds
-		err = api.WaitForState(server, "POWERED_ON", 10, c.Retries)
-	} else {
+	// Wait until server is created and powered on for at most 60 x 10 seconds
+	err = api.WaitForState(server, "POWERED_ON", 10, c.Retries)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Timeout waiting for server: %s", server_id))
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -94,6 +94,9 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	state.Put("server_id", server_id)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", server_id)
 
 	state.Put("server_ip", server.Ips[0].Ip)
 
@@ -122,8 +125,14 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 			ui.Error(err.Error())
 		}
 		err = api.WaitForState(server, "POWERED_OFF", 10, c.Retries)
+		if err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error waiting for 1and1 POWERED_OFF state. Please destroy it manually: %s",
+				serverId))
+			ui.Error(err.Error())
+		}
 
-		server, err = api.DeleteServer(server.Id, false)
+		_, err = api.DeleteServer(server.Id, false)
 
 		if err != nil {
 			ui.Error(fmt.Sprintf("Error deleting 1and1 server. Please destroy it manually: %s", serverId))

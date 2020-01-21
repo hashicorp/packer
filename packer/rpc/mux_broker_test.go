@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"net"
 	"testing"
 
@@ -17,14 +18,17 @@ func TestMuxBroker(t *testing.T) {
 	go bc.Run()
 	go bs.Run()
 
+	errChan := make(chan error, 1)
 	go func() {
+		defer close(errChan)
 		c, err := bc.Dial(5)
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- fmt.Errorf("err dialing: %s", err.Error())
+			return
 		}
 
 		if _, err := c.Write([]byte{42}); err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- fmt.Errorf("err writing: %s", err.Error())
 		}
 	}()
 
@@ -41,6 +45,12 @@ func TestMuxBroker(t *testing.T) {
 	if data[0] != 42 {
 		t.Fatalf("bad: %d", data[0])
 	}
+
+	for err := range errChan {
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
+	}
 }
 
 func testYamux(t *testing.T) (client *yamux.Session, server *yamux.Session) {
@@ -50,18 +60,19 @@ func testYamux(t *testing.T) (client *yamux.Session, server *yamux.Session) {
 	}
 
 	// Server side
-	doneCh := make(chan struct{})
+	errChan := make(chan error)
 	go func() {
-		defer close(doneCh)
+		defer close(errChan)
 		conn, err := l.Accept()
 		l.Close()
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- err
+			return
 		}
 
 		server, err = yamux.Server(conn, nil)
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- err
 		}
 	}()
 
@@ -76,7 +87,10 @@ func testYamux(t *testing.T) (client *yamux.Session, server *yamux.Session) {
 	}
 
 	// Wait for the server
-	<-doneCh
+	err = <-errChan
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 
 	return
 }

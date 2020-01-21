@@ -11,10 +11,10 @@ import (
 
 type stepAddImageMembers struct{}
 
-func (s *stepAddImageMembers) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepAddImageMembers) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	if len(config.ImageMembers) == 0 {
 		return multistep.ActionContinue

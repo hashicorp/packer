@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -62,6 +63,13 @@ type TestT interface {
 	Skip(args ...interface{})
 }
 
+type TestBuilderStore struct {
+	packer.BuilderStore
+	StartFn func(name string) (packer.Builder, error)
+}
+
+func (tbs TestBuilderStore) Start(name string) (packer.Builder, error) { return tbs.StartFn(name) }
+
 // Test performs an acceptance test on a backend with the given test case.
 //
 // Tests are not run unless an environmental variable "PACKER_ACC" is
@@ -105,12 +113,14 @@ func Test(t TestT, c TestCase) {
 	log.Printf("[DEBUG] Initializing core...")
 	core, err := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
-			Builder: func(n string) (packer.Builder, error) {
-				if n == "test" {
-					return c.Builder, nil
-				}
+			BuilderStore: TestBuilderStore{
+				StartFn: func(n string) (packer.Builder, error) {
+					if n == "test" {
+						return c.Builder, nil
+					}
 
-				return nil, nil
+					return nil, nil
+				},
 			},
 		},
 		Template: tpl,
@@ -145,13 +155,12 @@ func Test(t TestT, c TestCase) {
 	// Run it! We use a temporary directory for caching and discard
 	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
 	ui := &packer.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,
 	}
-	artifacts, err := build.Run(ui, cache)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Run error:\n\n%s", err))
 		goto TEARDOWN

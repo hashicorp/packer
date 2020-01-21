@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/packer/packer/tmp"
 	"io"
 	"log"
 	"os"
@@ -126,6 +127,10 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 			return err
 		}
 
+		// go >=1.10 wants to use GNU tar format to workaround issues in
+		// libarchive < 3.3.2
+		setHeaderFormat(header)
+
 		// We have to set the Name explicitly because it is supposed to
 		// be a relative path to the root. Otherwise, the tar ends up
 		// being a bunch of files in the root, even if they're actually
@@ -152,6 +157,39 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 
 	// Tar.gz everything up
 	return filepath.Walk(dir, tarWalk)
+}
+
+// CreateDummyBox create a dummy Vagrant-compatible box under temporary dir
+// This function is mainly used to check cases such as the host system having
+// a GNU tar incompatible uname that will cause the actual Vagrant box creation
+// to fail later
+func CreateDummyBox(ui packer.Ui, level int) error {
+	ui.Say("Creating a dummy Vagrant box to ensure the host system can create one correctly")
+
+	// Create a temporary dir to create dummy Vagrant box from
+	tempDir, err := tmp.Dir("packer")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Write some dummy metadata for the box
+	if err := WriteMetadata(tempDir, make(map[string]string)); err != nil {
+		return err
+	}
+
+	// Create the dummy Vagrant box
+	tempBox, err := tmp.File("box-*.box")
+	if err != nil {
+		return err
+	}
+	defer tempBox.Close()
+	defer os.Remove(tempBox.Name())
+	if err := DirToBox(tempBox.Name(), tempDir, nil, level); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // WriteMetadata writes the "metadata.json" file for a Vagrant box.

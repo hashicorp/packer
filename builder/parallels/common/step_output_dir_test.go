@@ -28,6 +28,8 @@ func TestStepOutputDir_impl(t *testing.T) {
 func TestStepOutputDir(t *testing.T) {
 	state := testState(t)
 	step := testStepOutputDir(t)
+	// Delete the test output directory when done
+	defer os.RemoveAll(step.Path)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {

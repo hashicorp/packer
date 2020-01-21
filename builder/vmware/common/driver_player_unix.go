@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -44,7 +45,24 @@ func playerDhcpLeasesPath(device string) string {
 		log.Printf("Error finding VMware root: %s", err)
 		return ""
 	}
-	return filepath.Join(base, device, "dhcpd/dhcpd.leases")
+
+	// Build the base path to VMware configuration for specified device: `/etc/vmware/${device}`
+	devicebase := filepath.Join(base, device)
+
+	// Walk through a list of paths searching for the correct permutation...
+	// ...as it appears that in >= WS14 and < WS14, the leases file may be labelled differently.
+
+	// Docs say we should expect: dhcpd/dhcpd.leases
+	paths := []string{"dhcpd/dhcpd.leases", "dhcpd/dhcp.leases", "dhcp/dhcpd.leases", "dhcp/dhcp.leases"}
+	for _, p := range paths {
+		fp := filepath.Join(devicebase, p)
+		if _, err := os.Stat(fp); !os.IsNotExist(err) {
+			return fp
+		}
+	}
+
+	log.Printf("Error finding VMWare DHCP Server Leases (dhcpd.leases) under device path: %s", devicebase)
+	return ""
 }
 
 func playerVmDhcpConfPath(device string) string {
@@ -53,7 +71,24 @@ func playerVmDhcpConfPath(device string) string {
 		log.Printf("Error finding VMware root: %s", err)
 		return ""
 	}
-	return filepath.Join(base, device, "dhcp/dhcp.conf")
+
+	// Build the base path to VMware configuration for specified device: `/etc/vmware/${device}`
+	devicebase := filepath.Join(base, device)
+
+	// Walk through a list of paths searching for the correct permutation...
+	// ...as it appears that in >= WS14 and < WS14, the dhcp config may be labelled differently.
+
+	// Docs say we should expect: dhcp/dhcp.conf
+	paths := []string{"dhcp/dhcp.conf", "dhcp/dhcpd.conf", "dhcpd/dhcp.conf", "dhcpd/dhcpd.conf"}
+	for _, p := range paths {
+		fp := filepath.Join(devicebase, p)
+		if _, err := os.Stat(fp); !os.IsNotExist(err) {
+			return fp
+		}
+	}
+
+	log.Printf("Error finding VMWare DHCP Server Configuration (dhcp.conf) under device path: %s", devicebase)
+	return ""
 }
 
 func playerVmnetnatConfPath(device string) string {

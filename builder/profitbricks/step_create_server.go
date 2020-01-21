@@ -16,7 +16,7 @@ import (
 
 type stepCreateServer struct{}
 
-func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
@@ -147,6 +147,9 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	state.Put("volume_id", server.Entities.Volumes.Items[0].Id)
 
 	server = profitbricks.GetServer(datacenter.Id, server.Id)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", server.Id)
 
 	state.Put("server_ip", server.Entities.Nics.Items[0].Properties.Ips[0])
 

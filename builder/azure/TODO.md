@@ -4,7 +4,7 @@ Here's a list of things we like to get done in no particular order:
 - [ ] Blob/image rename post-processor
 - [ ] SSH to private ip through subnet
 - [ ] chroot builder
-- [ ] support cross-storage account image source (ie. pre-build blob copy)
+- [ ] support cross-storage account image source (i.e. pre-build blob copy)
 - [ ] look up object id when using device code (graph api /me ?)
 - [ ] device flow support for Windows
 - [x] look up tenant id in all cases (see device flow code)

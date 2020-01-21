@@ -1,0 +1,5 @@
+---
+- hosts: all
+  tasks:
+    - name: write world!
+      shell: echo -n " world!" >> /tmp/hello_world

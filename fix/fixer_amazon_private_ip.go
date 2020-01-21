@@ -1,7 +1,8 @@
 package fix
 
 import (
-	"log"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
@@ -49,8 +50,11 @@ func (FixerAmazonPrivateIP) Fix(input map[string]interface{}) (map[string]interf
 		}
 		privateIP, ok := privateIPi.(bool)
 		if !ok {
-			log.Fatalf("Wrong type for ssh_private_ip")
-			continue
+			var err error
+			privateIP, err = strconv.ParseBool(privateIPi.(string))
+			if err != nil {
+				return nil, fmt.Errorf("ssh_private_ip is not a boolean, %s", err)
+			}
 		}
 
 		delete(builder, "ssh_private_ip")

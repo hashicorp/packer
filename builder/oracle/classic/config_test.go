@@ -2,6 +2,8 @@ package classic
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() map[string]interface{} {
@@ -20,7 +22,8 @@ func testConfig() map[string]interface{} {
 
 func TestConfigAutoFillsSourceList(t *testing.T) {
 	tc := testConfig()
-	conf, err := NewConfig(tc)
+	var conf Config
+	err := conf.Prepare(tc)
 	if err != nil {
 		t.Fatalf("Should not have error: %s", err.Error())
 	}
@@ -40,22 +43,40 @@ func TestConfigValidationCatchesMissing(t *testing.T) {
 		"dest_image_list",
 		"source_image_list",
 		"shape",
+		"ssh_username",
 	}
 	for _, key := range required {
 		tc := testConfig()
 		delete(tc, key)
-		_, err := NewConfig(tc)
+		var c Config
+		err := c.Prepare(tc)
 		if err == nil {
 			t.Fatalf("Test should have failed when config lacked %s!", key)
 		}
 	}
 }
 
-func TestValidationsIgnoresOptional(t *testing.T) {
-	tc := testConfig()
-	delete(tc, "ssh_username")
-	_, err := NewConfig(tc)
-	if err != nil {
-		t.Fatalf("Shouldn't care if ssh_username is missing: err: %#v", err.Error())
+func TestConfigValidatesObjects(t *testing.T) {
+	var objectTests = []struct {
+		object string
+		valid  bool
+	}{
+		{"foo-BAR.0_9", true},
+		{"%", false},
+		{"Matt...?", false},
+		{"/Config-thing/myuser/myimage", true},
+	}
+	for _, s := range []string{"dest_image_list", "image_name"} {
+		for _, tt := range objectTests {
+			tc := testConfig()
+			tc[s] = tt.object
+			var c Config
+			err := c.Prepare(tc)
+			if tt.valid {
+				assert.NoError(t, err, tt.object)
+			} else {
+				assert.Error(t, err, tt.object)
+			}
+		}
 	}
 }

@@ -13,6 +13,7 @@ type DriverMock struct {
 	CloneCalled bool
 	CloneDst    string
 	CloneSrc    string
+	Linked      bool
 	CloneErr    error
 
 	CompactDiskCalled bool
@@ -98,19 +99,20 @@ type NetworkMapperMock struct {
 	DeviceIntoNameCalled int
 }
 
-func (m NetworkMapperMock) NameIntoDevice(name string) (string, error) {
+func (m NetworkMapperMock) NameIntoDevices(name string) ([]string, error) {
 	m.NameIntoDeviceCalled += 1
-	return "", nil
+	return make([]string, 0), nil
 }
 func (m NetworkMapperMock) DeviceIntoName(device string) (string, error) {
 	m.DeviceIntoNameCalled += 1
 	return "", nil
 }
 
-func (d *DriverMock) Clone(dst string, src string) error {
+func (d *DriverMock) Clone(dst string, src string, linked bool) error {
 	d.CloneCalled = true
 	d.CloneDst = dst
 	d.CloneSrc = src
+	d.Linked = linked
 	return d.CloneErr
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
 )
@@ -21,16 +21,23 @@ import (
 type StepCreateFloppy struct {
 	Files       []string
 	Directories []string
+	Label       string
 
 	floppyPath string
 
 	FilesAdded map[string]bool
 }
 
-func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateFloppy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Files) == 0 && len(s.Directories) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue
+	}
+
+	if s.Label == "" {
+		s.Label = "packer"
+	} else {
+		log.Printf("Floppy label is set to %s", s.Label)
 	}
 
 	s.FilesAdded = make(map[string]bool)
@@ -39,7 +46,7 @@ func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) mult
 	ui.Say("Creating floppy disk...")
 
 	// Create a temporary file to be our floppy drive
-	floppyF, err := ioutil.TempFile("", "packer")
+	floppyF, err := tmp.File("packer")
 	if err != nil {
 		state.Put("error",
 			fmt.Errorf("Error creating temporary file for floppy: %s", err))
@@ -70,8 +77,8 @@ func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) mult
 	log.Println("Formatting the block device with a FAT filesystem...")
 	formatConfig := &fat.SuperFloppyConfig{
 		FATType: fat.FAT12,
-		Label:   "packer",
-		OEMName: "packer",
+		Label:   s.Label,
+		OEMName: s.Label,
 	}
 	if err := fat.FormatSuperFloppy(device, formatConfig); err != nil {
 		state.Put("error", fmt.Errorf("Error creating floppy: %s", err))

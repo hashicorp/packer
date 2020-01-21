@@ -11,14 +11,13 @@ import (
 
 type stepCreateInstance struct{}
 
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Instance...")
 
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
-	keyName := state.Get("key_name").(string)
+	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
 	secListName := state.Get("security_list").(string)
 
@@ -35,9 +34,12 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Name:       config.ImageName,
 		Shape:      config.Shape,
 		ImageList:  config.SourceImageList,
-		SSHKeys:    []string{keyName},
+		Entry:      config.SourceImageListEntry,
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
 		Attributes: config.attribs,
+	}
+	if config.Comm.Type == "ssh" {
+		input.SSHKeys = []string{config.Comm.SSHKeyPairName}
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
@@ -48,24 +50,29 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
+	state.Put("instance_info", instanceInfo)
 	state.Put("instance_id", instanceInfo.ID)
 	ui.Message(fmt.Sprintf("Created instance: %s.", instanceInfo.ID))
 	return multistep.ActionContinue
 }
 
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
+	instanceID, ok := state.GetOk("instance_id")
+	if !ok {
+		return
+	}
+
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
-	imID := state.Get("instance_id").(string)
 
 	ui.Say("Terminating source instance...")
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
 		Name: config.ImageName,
-		ID:   imID,
+		ID:   instanceID.(string),
 	}
 
 	err := instanceClient.DeleteInstance(input)
@@ -75,6 +82,5 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		state.Put("error", err)
 		return
 	}
-	// TODO wait for instance state to change to deleted?
 	ui.Say("Terminated instance.")
 }

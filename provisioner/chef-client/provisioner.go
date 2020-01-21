@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that uses
 // Chef to provision the remote machine, specifically with chef-client (that is,
 // with a Chef server).
@@ -5,6 +7,7 @@ package chefclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
@@ -30,13 +34,13 @@ type guestOSTypeConfig struct {
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash -s --{{if .Version}} -v {{.Version}}{{end}}",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
 	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"",
+		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; Install-Project{{if .Version}} -version {{.Version}}{{end}}\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
 		stagingDir:     "C:/Windows/Temp/packer-chef-client",
 	},
@@ -48,8 +52,11 @@ type Config struct {
 	Json map[string]interface{}
 
 	ChefEnvironment            string   `mapstructure:"chef_environment"`
+	ChefLicense                string   `mapstructure:"chef_license"`
 	ClientKey                  string   `mapstructure:"client_key"`
 	ConfigTemplate             string   `mapstructure:"config_template"`
+	ElevatedUser               string   `mapstructure:"elevated_user"`
+	ElevatedPassword           string   `mapstructure:"elevated_password"`
 	EncryptedDataBagSecretPath string   `mapstructure:"encrypted_data_bag_secret_path"`
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	GuestOSType                string   `mapstructure:"guest_os_type"`
@@ -63,24 +70,29 @@ type Config struct {
 	ServerUrl                  string   `mapstructure:"server_url"`
 	SkipCleanClient            bool     `mapstructure:"skip_clean_client"`
 	SkipCleanNode              bool     `mapstructure:"skip_clean_node"`
+	SkipCleanStagingDirectory  bool     `mapstructure:"skip_clean_staging_directory"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	SslVerifyMode              string   `mapstructure:"ssl_verify_mode"`
 	TrustedCertsDir            string   `mapstructure:"trusted_certs_dir"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
 	ValidationClientName       string   `mapstructure:"validation_client_name"`
 	ValidationKeyPath          string   `mapstructure:"validation_key_path"`
+	Version                    string   `mapstructure:"version"`
 
 	ctx interpolate.Context
 }
 
 type Provisioner struct {
 	config            Config
+	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
+	generatedData     map[string]interface{}
 }
 
 type ConfigTemplate struct {
 	ChefEnvironment            string
+	ChefLicense                string
 	ClientKey                  string
 	EncryptedDataBagSecretPath string
 	NodeName                   string
@@ -100,7 +112,8 @@ type ExecuteTemplate struct {
 }
 
 type InstallChefTemplate struct {
-	Sudo bool
+	Sudo    bool
+	Version string
 }
 
 type KnifeTemplate struct {
@@ -108,6 +121,8 @@ type KnifeTemplate struct {
 	Flags string
 	Args  string
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -173,18 +188,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.EncryptedDataBagSecretPath != "" {
-		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
-
-		if err != nil || pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
-		}
-	}
-
 	if p.config.ServerUrl == "" {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("server_url must be set"))
+	}
+
+	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+		if p.config.ChefLicense == "" {
+			p.config.ChefLicense = "accept-silent"
+		}
 	}
 
 	if p.config.EncryptedDataBagSecretPath != "" {
@@ -227,7 +239,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	p.generatedData = generatedData
+	p.communicator = comm
 
 	nodeName := p.config.NodeName
 	if nodeName == "" {
@@ -237,7 +251,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	serverUrl := p.config.ServerUrl
 
 	if !p.config.SkipInstall {
-		if err := p.installChef(ui, comm); err != nil {
+		if err := p.installChef(ui, comm, p.config.Version); err != nil {
 			return fmt.Errorf("Error installing Chef: %s", err)
 		}
 	}
@@ -274,6 +288,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		nodeName,
 		serverUrl,
 		p.config.ClientKey,
+		p.config.ChefLicense,
 		encryptedDataBagSecretPath,
 		remoteValidationKeyPath,
 		p.config.ValidationClientName,
@@ -319,17 +334,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error executing Chef: %s", err)
 	}
 
-	if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+	if !p.config.SkipCleanStagingDirectory {
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+		}
 	}
 
 	return nil
-}
-
-func (p *Provisioner) Cancel() {
-	// Just hard quit. It isn't a big deal if what we're doing keeps
-	// running on the other side.
-	os.Exit(0)
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {
@@ -350,6 +361,7 @@ func (p *Provisioner) createConfig(
 	nodeName string,
 	serverUrl string,
 	clientKey string,
+	chefLicense string,
 	encryptedDataBagSecretPath,
 	remoteKeyPath string,
 	validationClientName string,
@@ -378,11 +390,12 @@ func (p *Provisioner) createConfig(
 		tpl = string(tplBytes)
 	}
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:                   nodeName,
 		ServerUrl:                  serverUrl,
 		ClientKey:                  clientKey,
+		ChefLicense:                chefLicense,
 		ValidationKeyPath:          remoteKeyPath,
 		ValidationClientName:       validationClientName,
 		ChefEnvironment:            chefEnvironment,
@@ -392,7 +405,7 @@ func (p *Provisioner) createConfig(
 		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}
@@ -411,15 +424,15 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 	// Read the template
 	tpl := DefaultKnifeTemplate
 
-	ctx := p.config.ctx
-	ctx.Data = &ConfigTemplate{
+	ictx := p.config.ctx
+	ictx.Data = &ConfigTemplate{
 		NodeName:        nodeName,
 		ServerUrl:       serverUrl,
 		ClientKey:       clientKey,
 		SslVerifyMode:   sslVerifyMode,
 		TrustedCertsDir: trustedCertsDir,
 	}
-	configString, err := interpolate.Render(tpl, &ctx)
+	configString, err := interpolate.Render(tpl, &ictx)
 	if err != nil {
 		return "", err
 	}
@@ -462,22 +475,23 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
 	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
 	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf("Non-zero exit status. See output above for more info.")
 	}
 
@@ -509,6 +523,7 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 		"-y",
 		"-c", knifeConfigPath,
 	}
+	ctx := context.TODO()
 
 	p.config.ctx.Data = &KnifeTemplate{
 		Sudo:  !p.config.PreventSudo,
@@ -522,10 +537,10 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 	}
 
 	cmd := &packer.RemoteCmd{Command: command}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf(
 			"Non-zero exit status. See output above for more info.\n\n"+
 				"Command: %s",
@@ -537,9 +552,10 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
+	ctx := context.TODO()
 
 	cmd := &packer.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
@@ -552,9 +568,18 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 		JsonPath:   json,
 		Sudo:       !p.config.PreventSudo,
 	}
+	ctx := context.TODO()
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
+	}
+
+	if p.config.ElevatedUser != "" {
+		command, err = provisioner.GenerateElevatedRunner(command, p)
+		if err != nil {
+			return err
+		}
 	}
 
 	ui.Message(fmt.Sprintf("Executing Chef: %s", command))
@@ -563,22 +588,24 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 		Command: command,
 	}
 
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
+	if cmd.ExitStatus() != 0 {
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus())
 	}
 
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, version string) error {
 	ui.Message("Installing Chef...")
+	ctx := context.TODO()
 
 	p.config.ctx.Data = &InstallChefTemplate{
-		Sudo: !p.config.PreventSudo,
+		Sudo:    !p.config.PreventSudo,
+		Version: version,
 	}
 	command, err := interpolate.Render(p.config.InstallCommand, &p.config.ctx)
 	if err != nil {
@@ -588,13 +615,13 @@ func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error 
 	ui.Message(command)
 
 	cmd := &packer.RemoteCmd{Command: command}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus() != 0 {
 		return fmt.Errorf(
-			"Install script exited with non-zero exit status %d", cmd.ExitStatus)
+			"Install script exited with non-zero exit status %d", cmd.ExitStatus())
 	}
 
 	return nil
@@ -682,11 +709,29 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	return result, nil
 }
 
+func (p *Provisioner) Communicator() packer.Communicator {
+	return p.communicator
+}
+
+func (p *Provisioner) ElevatedUser() string {
+	return p.config.ElevatedUser
+}
+
+func (p *Provisioner) ElevatedPassword() string {
+	// Replace ElevatedPassword for winrm users who used this feature
+	p.config.ctx.Data = p.generatedData
+
+	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
+
+	return elevatedPassword
+}
+
 var DefaultConfigTemplate = `
 log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
 client_key       "{{.ClientKey}}"
+chef_license     "{{.ChefLicense}}"
 {{if ne .EncryptedDataBagSecretPath ""}}
 encrypted_data_bag_secret "{{.EncryptedDataBagSecretPath}}"
 {{end}}

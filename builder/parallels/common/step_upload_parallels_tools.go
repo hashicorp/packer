@@ -38,7 +38,7 @@ type StepUploadParallelsTools struct {
 }
 
 // Run uploads the Parallels Tools ISO to the VM.
-func (s *StepUploadParallelsTools) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadParallelsTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	ui := state.Get("ui").(packer.Ui)
 

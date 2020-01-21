@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -156,6 +157,39 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			// underscore is not allowed
+			"image_name",
+			"foo_bar",
+			true,
+		},
+		{
+			// too long
+			"image_name",
+			"foobar123xyz_abc-456-one-two_three_five_nine_seventeen_eleventy-seven",
+			true,
+		},
+		{
+			// starts with non-alphabetic character
+			"image_name",
+			"1boohoo",
+			true,
+		},
+		{
+			"image_encryption_key",
+			map[string]string{"kmsKeyName": "foo"},
+			false,
+		},
+		{
+			"image_encryption_key",
+			map[string]string{"No such key": "foo"},
+			true,
+		},
+		{
+			"image_encryption_key",
+			map[string]string{"kmsKeyName": "foo", "RawKey": "foo"},
+			false,
+		},
+		{
 			"scopes",
 			[]string{},
 			false,
@@ -170,10 +204,37 @@ func TestConfigPrepare(t *testing.T) {
 			[]string{"https://www.googleapis.com/auth/cloud-platform"},
 			false,
 		},
+
+		{
+			"disable_default_service_account",
+			"",
+			false,
+		},
+		{
+			"disable_default_service_account",
+			nil,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			false,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			true,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			"NOT A BOOL",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		if tc.Value == nil {
 			delete(raw, tc.Key)
@@ -181,7 +242,8 @@ func TestConfigPrepare(t *testing.T) {
 			raw[tc.Key] = tc.Value
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, tc.Key)
@@ -225,7 +287,8 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		errStr := ""
 		for k := range tc.Keys {
@@ -240,13 +303,82 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 			}
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
 		} else {
 			testConfigOk(t, warns, errs)
 		}
+	}
+}
+
+func TestConfigPrepareServiceAccount(t *testing.T) {
+	cases := []struct {
+		Keys   []string
+		Values []interface{}
+		Err    bool
+	}{
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, "service@account.email.com"},
+			true,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{false, "service@account.email.com"},
+			false,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, ""},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
+
+		errStr := ""
+		for k := range tc.Keys {
+
+			// Create the string for error reporting
+			// convert value to string if it can be converted
+			errStr += fmt.Sprintf("%s:%v, ", tc.Keys[k], tc.Values[k])
+			if tc.Values[k] == nil {
+				delete(raw, tc.Keys[k])
+			} else {
+				raw[tc.Keys[k]] = tc.Values[k]
+			}
+		}
+
+		var c Config
+		warns, errs := c.Prepare(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
+func TestConfigPrepareStartupScriptFile(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":          "project",
+		"source_image":        "foo",
+		"ssh_username":        "packer",
+		"startup_script_file": "no-such-file",
+		"zone":                "us-central1-a",
+	}
+
+	var c Config
+	_, errs := c.Prepare(config)
+
+	if errs == nil || !strings.Contains(errs.Error(), "startup_script_file") {
+		t.Fatalf("should error: startup_script_file")
 	}
 }
 
@@ -267,12 +399,14 @@ func TestConfigDefaults(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
-		c, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 		testConfigOk(t, warns, errs)
 
-		actual := tc.Read(c)
+		actual := tc.Read(&c)
 		if actual != tc.Value {
 			t.Fatalf("bad: %#v", actual)
 		}
@@ -280,7 +414,11 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestImageName(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	var c Config
+	c.Prepare(raw)
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -290,7 +428,11 @@ func TestImageName(t *testing.T) {
 }
 
 func TestRegion(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	var c Config
+	c.Prepare(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
 	}
@@ -298,9 +440,11 @@ func TestRegion(t *testing.T) {
 
 // Helper stuff below
 
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
-		"account_file": testAccountFile(t),
+func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile string) {
+	tempAccountFile = testAccountFile(t)
+
+	config = map[string]interface{}{
+		"account_file": tempAccountFile,
 		"project_id":   "hashicorp",
 		"source_image": "foo",
 		"ssh_username": "root",
@@ -312,12 +456,19 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"image_licenses": []string{
 			"test-license",
 		},
-		"zone": "us-east1-a",
+		"metadata_files": map[string]string{},
+		"zone":           "us-east1-a",
 	}
+
+	return config, tempAccountFile
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	var c Config
+	warns, errs := c.Prepare(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
@@ -325,7 +476,7 @@ func testConfigStruct(t *testing.T) *Config {
 		t.Fatalf("bad: %#v", errs)
 	}
 
-	return c
+	return &c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error, extra string) {
@@ -360,6 +511,31 @@ func testAccountFile(t *testing.T) string {
 	return tf.Name()
 }
 
-// This is just some dummy data that doesn't actually work (it was revoked
-// a long time ago).
-const testAccountContent = `{}`
+const testMetadataFileContent = `testMetadata`
+
+func testMetadataFile(t *testing.T) string {
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+	if _, err := tf.Write([]byte(testMetadataFileContent)); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	return tf.Name()
+}
+
+// This is just some dummy data that doesn't actually work
+const testAccountContent = `{
+  "type": "service_account",
+  "project_id": "test-project-123456789",
+  "private_key_id": "bananaphone",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nring_ring_ring_ring_ring_ring_ring_BANANAPHONE\n-----END PRIVATE KEY-----\n",
+  "client_email": "raffi-compute@developer.gserviceaccount.com",
+  "client_id": "1234567890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/12345-compute%40developer.gserviceaccount.com"
+}`

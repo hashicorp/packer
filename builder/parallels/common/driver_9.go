@@ -15,6 +15,7 @@ import (
 
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // Parallels9Driver is a base type for Parallels builders.
@@ -43,7 +44,7 @@ func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMAC bool
 
 	srcMAC := "auto"
 	if !reassignMAC {
-		srcMAC, err = getFirtsMACAddress(srcPath)
+		srcMAC, err = getFirstMACAddress(srcPath)
 		if err != nil {
 			return err
 		}
@@ -70,7 +71,7 @@ func getVMID(path string) (string, error) {
 	return getConfigValueFromXpath(path, "/ParallelsVirtualMachine/Identification/VmUuid")
 }
 
-func getFirtsMACAddress(path string) (string, error) {
+func getFirstMACAddress(path string) (string, error) {
 	return getConfigValueFromXpath(path, "/ParallelsVirtualMachine/Hardware/NetworkAdapter[@id='0']/MAC")
 }
 
@@ -119,7 +120,7 @@ func getAppPath(bundleID string) (string, error) {
 	return pathOutput, nil
 }
 
-// CompactDisk performs the compation of the specified virtual disk image.
+// CompactDisk performs the compaction of the specified virtual disk image.
 func (d *Parallels9Driver) CompactDisk(diskPath string) error {
 	prlDiskToolPath, err := exec.LookPath("prl_disk_tool")
 	if err != nil {
@@ -153,6 +154,7 @@ func (d *Parallels9Driver) DeviceAddCDROM(name string, image string) (string, er
 		"set", name,
 		"--device-add", "cdrom",
 		"--image", image,
+		"--enable", "--connect",
 	}
 
 	out, err := exec.Command(d.PrlctlPath, command...).Output()
@@ -222,7 +224,7 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 
 // Stop forcibly stops the VM.
 func (d *Parallels9Driver) Stop(name string) error {
-	if err := d.Prlctl("stop", name); err != nil {
+	if err := d.Prlctl("stop", name, "--kill"); err != nil {
 		return err
 	}
 
@@ -275,7 +277,6 @@ func (d *Parallels9Driver) Version() (string, error) {
 	}
 
 	version := matches[1]
-	log.Printf("Parallels Desktop version: %s", version)
 	return version, nil
 }
 
@@ -289,7 +290,7 @@ func (d *Parallels9Driver) SendKeyScanCodes(vmName string, codes ...string) erro
 		return nil
 	}
 
-	f, err := ioutil.TempFile("", "prltype")
+	f, err := tmp.File("prltype")
 	if err != nil {
 		return err
 	}
@@ -332,14 +333,12 @@ func prepend(head string, tail []string) []string {
 
 // SetDefaultConfiguration applies pre-defined default settings to the VM config.
 func (d *Parallels9Driver) SetDefaultConfiguration(vmName string) error {
-	commands := make([][]string, 7)
-	commands[0] = []string{"set", vmName, "--cpus", "1"}
-	commands[1] = []string{"set", vmName, "--memsize", "512"}
-	commands[2] = []string{"set", vmName, "--startup-view", "same"}
-	commands[3] = []string{"set", vmName, "--on-shutdown", "close"}
-	commands[4] = []string{"set", vmName, "--on-window-close", "keep-running"}
-	commands[5] = []string{"set", vmName, "--auto-share-camera", "off"}
-	commands[6] = []string{"set", vmName, "--smart-guard", "off"}
+	commands := make([][]string, 5)
+	commands[0] = []string{"set", vmName, "--startup-view", "same"}
+	commands[1] = []string{"set", vmName, "--on-shutdown", "close"}
+	commands[2] = []string{"set", vmName, "--on-window-close", "keep-running"}
+	commands[3] = []string{"set", vmName, "--auto-share-camera", "off"}
+	commands[4] = []string{"set", vmName, "--smart-guard", "off"}
 
 	for _, command := range commands {
 		err := d.Prlctl(command...)

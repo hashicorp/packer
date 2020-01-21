@@ -14,24 +14,49 @@ import (
 )
 
 // The Permissions type holds fine-grained permissions that are
-// specific to a user or a specific authentication method for a
-// user. Permissions, except for "source-address", must be enforced in
-// the server application layer, after successful authentication. The
-// Permissions are passed on in ServerConn so a server implementation
-// can honor them.
+// specific to a user or a specific authentication method for a user.
+// The Permissions value for a successful authentication attempt is
+// available in ServerConn, so it can be used to pass information from
+// the user-authentication phase to the application layer.
 type Permissions struct {
-	// Critical options restrict default permissions. Common
-	// restrictions are "source-address" and "force-command". If
-	// the server cannot enforce the restriction, or does not
-	// recognize it, the user should not authenticate.
+	// CriticalOptions indicate restrictions to the default
+	// permissions, and are typically used in conjunction with
+	// user certificates. The standard for SSH certificates
+	// defines "force-command" (only allow the given command to
+	// execute) and "source-address" (only allow connections from
+	// the given address). The SSH package currently only enforces
+	// the "source-address" critical option. It is up to server
+	// implementations to enforce other critical options, such as
+	// "force-command", by checking them after the SSH handshake
+	// is successful. In general, SSH servers should reject
+	// connections that specify critical options that are unknown
+	// or not supported.
 	CriticalOptions map[string]string
 
 	// Extensions are extra functionality that the server may
-	// offer on authenticated connections. Common extensions are
-	// "permit-agent-forwarding", "permit-X11-forwarding". Lack of
-	// support for an extension does not preclude authenticating a
-	// user.
+	// offer on authenticated connections. Lack of support for an
+	// extension does not preclude authenticating a user. Common
+	// extensions are "permit-agent-forwarding",
+	// "permit-X11-forwarding". The Go SSH library currently does
+	// not act on any extension, and it is up to server
+	// implementations to honor them. Extensions can be used to
+	// pass data from the authentication callbacks to the server
+	// application layer.
 	Extensions map[string]string
+}
+
+type GSSAPIWithMICConfig struct {
+	// AllowLogin, must be set, is called when gssapi-with-mic
+	// authentication is selected (RFC 4462 section 3). The srcName is from the
+	// results of the GSS-API authentication. The format is username@DOMAIN.
+	// GSSAPI just guarantees to the server who the user is, but not if they can log in, and with what permissions.
+	// This callback is called after the user identity is established with GSSAPI to decide if the user can login with
+	// which permissions. If the user is allowed to login, it should return a nil error.
+	AllowLogin func(conn ConnMetadata, srcName string) (*Permissions, error)
+
+	// Server must be set. It's the implementation
+	// of the GSSAPIServer interface. See GSSAPIServer interface for details.
+	Server GSSAPIServer
 }
 
 // ServerConfig holds server specific configuration data.
@@ -55,9 +80,14 @@ type ServerConfig struct {
 	// attempts to authenticate using a password.
 	PasswordCallback func(conn ConnMetadata, password []byte) (*Permissions, error)
 
-	// PublicKeyCallback, if non-nil, is called when a client attempts public
-	// key authentication. It must return true if the given public key is
-	// valid for the given user. For example, see CertChecker.Authenticate.
+	// PublicKeyCallback, if non-nil, is called when a client
+	// offers a public key for authentication. It must return a nil error
+	// if the given public key can be used to authenticate the
+	// given user. For example, see CertChecker.Authenticate. A
+	// call to this function does not guarantee that the key
+	// offered is in fact used to authenticate. To record any data
+	// depending on the public key, store it inside a
+	// Permissions.Extensions entry.
 	PublicKeyCallback func(conn ConnMetadata, key PublicKey) (*Permissions, error)
 
 	// KeyboardInteractiveCallback, if non-nil, is called when
@@ -79,6 +109,14 @@ type ServerConfig struct {
 	// Note that RFC 4253 section 4.2 requires that this string start with
 	// "SSH-2.0-".
 	ServerVersion string
+
+	// BannerCallback, if present, is called and the return string is sent to
+	// the client after key exchange completed but before authentication.
+	BannerCallback func(conn ConnMetadata) string
+
+	// GSSAPIWithMICConfig includes gssapi server and callback, which if both non-nil, is used
+	// when gssapi-with-mic authentication is selected (RFC 4462 section 3).
+	GSSAPIWithMICConfig *GSSAPIWithMICConfig
 }
 
 // AddHostKey adds a private key as a host key. If an existing host
@@ -146,11 +184,20 @@ type ServerConn struct {
 // unsuccessful, it closes the connection and returns an error.  The
 // Request and NewChannel channels must be serviced, or the connection
 // will hang.
+//
+// The returned error may be of type *ServerAuthError for
+// authentication errors.
 func NewServerConn(c net.Conn, config *ServerConfig) (*ServerConn, <-chan NewChannel, <-chan *Request, error) {
 	fullConf := *config
 	fullConf.SetDefaults()
 	if fullConf.MaxAuthTries == 0 {
 		fullConf.MaxAuthTries = 6
+	}
+	// Check if the config contains any unsupported key exchanges
+	for _, kex := range fullConf.KeyExchanges {
+		if _, ok := serverForbiddenKexAlgos[kex]; ok {
+			return nil, nil, nil, fmt.Errorf("ssh: unsupported key exchange %s for server", kex)
+		}
 	}
 
 	s := &connection{
@@ -181,7 +228,9 @@ func (s *connection) serverHandshake(config *ServerConfig) (*Permissions, error)
 		return nil, errors.New("ssh: server has no host keys")
 	}
 
-	if !config.NoClientAuth && config.PasswordCallback == nil && config.PublicKeyCallback == nil && config.KeyboardInteractiveCallback == nil {
+	if !config.NoClientAuth && config.PasswordCallback == nil && config.PublicKeyCallback == nil &&
+		config.KeyboardInteractiveCallback == nil && (config.GSSAPIWithMICConfig == nil ||
+		config.GSSAPIWithMICConfig.AllowLogin == nil || config.GSSAPIWithMICConfig.Server == nil) {
 		return nil, errors.New("ssh: no authentication methods configured but NoClientAuth is also false")
 	}
 
@@ -235,8 +284,8 @@ func (s *connection) serverHandshake(config *ServerConfig) (*Permissions, error)
 
 func isAcceptableAlgo(algo string) bool {
 	switch algo {
-	case KeyAlgoRSA, KeyAlgoDSA, KeyAlgoECDSA256, KeyAlgoECDSA384, KeyAlgoECDSA521, KeyAlgoED25519,
-		CertAlgoRSAv01, CertAlgoDSAv01, CertAlgoECDSA256v01, CertAlgoECDSA384v01, CertAlgoECDSA521v01:
+	case KeyAlgoRSA, KeyAlgoDSA, KeyAlgoECDSA256, KeyAlgoECDSA384, KeyAlgoECDSA521, KeyAlgoSKECDSA256, KeyAlgoED25519, KeyAlgoSKED25519,
+		CertAlgoRSAv01, CertAlgoDSAv01, CertAlgoECDSA256v01, CertAlgoECDSA384v01, CertAlgoECDSA521v01, CertAlgoSKECDSA256v01, CertAlgoED25519v01, CertAlgoSKED25519v01:
 		return true
 	}
 	return false
@@ -272,12 +321,88 @@ func checkSourceAddress(addr net.Addr, sourceAddrs string) error {
 	return fmt.Errorf("ssh: remote address %v is not allowed because of source-address restriction", addr)
 }
 
+func gssExchangeToken(gssapiConfig *GSSAPIWithMICConfig, firstToken []byte, s *connection,
+	sessionID []byte, userAuthReq userAuthRequestMsg) (authErr error, perms *Permissions, err error) {
+	gssAPIServer := gssapiConfig.Server
+	defer gssAPIServer.DeleteSecContext()
+	var srcName string
+	for {
+		var (
+			outToken     []byte
+			needContinue bool
+		)
+		outToken, srcName, needContinue, err = gssAPIServer.AcceptSecContext(firstToken)
+		if err != nil {
+			return err, nil, nil
+		}
+		if len(outToken) != 0 {
+			if err := s.transport.writePacket(Marshal(&userAuthGSSAPIToken{
+				Token: outToken,
+			})); err != nil {
+				return nil, nil, err
+			}
+		}
+		if !needContinue {
+			break
+		}
+		packet, err := s.transport.readPacket()
+		if err != nil {
+			return nil, nil, err
+		}
+		userAuthGSSAPITokenReq := &userAuthGSSAPIToken{}
+		if err := Unmarshal(packet, userAuthGSSAPITokenReq); err != nil {
+			return nil, nil, err
+		}
+	}
+	packet, err := s.transport.readPacket()
+	if err != nil {
+		return nil, nil, err
+	}
+	userAuthGSSAPIMICReq := &userAuthGSSAPIMIC{}
+	if err := Unmarshal(packet, userAuthGSSAPIMICReq); err != nil {
+		return nil, nil, err
+	}
+	mic := buildMIC(string(sessionID), userAuthReq.User, userAuthReq.Service, userAuthReq.Method)
+	if err := gssAPIServer.VerifyMIC(mic, userAuthGSSAPIMICReq.MIC); err != nil {
+		return err, nil, nil
+	}
+	perms, authErr = gssapiConfig.AllowLogin(s, srcName)
+	return authErr, perms, nil
+}
+
+// ServerAuthError represents server authentication errors and is
+// sometimes returned by NewServerConn. It appends any authentication
+// errors that may occur, and is returned if all of the authentication
+// methods provided by the user failed to authenticate.
+type ServerAuthError struct {
+	// Errors contains authentication errors returned by the authentication
+	// callback methods. The first entry is typically ErrNoAuth.
+	Errors []error
+}
+
+func (l ServerAuthError) Error() string {
+	var errs []string
+	for _, err := range l.Errors {
+		errs = append(errs, err.Error())
+	}
+	return "[" + strings.Join(errs, ", ") + "]"
+}
+
+// ErrNoAuth is the error value returned if no
+// authentication method has been passed yet. This happens as a normal
+// part of the authentication loop, since the client first tries
+// 'none' authentication to discover available methods.
+// It is returned in ServerAuthError.Errors from NewServerConn.
+var ErrNoAuth = errors.New("ssh: no auth passed yet")
+
 func (s *connection) serverAuthenticate(config *ServerConfig) (*Permissions, error) {
 	sessionID := s.transport.getSessionID()
 	var cache pubKeyCache
 	var perms *Permissions
 
 	authFailures := 0
+	var authErrs []error
+	var displayedBanner bool
 
 userAuthLoop:
 	for {
@@ -296,6 +421,9 @@ userAuthLoop:
 
 		var userAuthReq userAuthRequestMsg
 		if packet, err := s.transport.readPacket(); err != nil {
+			if err == io.EOF {
+				return nil, &ServerAuthError{Errors: authErrs}
+			}
 			return nil, err
 		} else if err = Unmarshal(packet, &userAuthReq); err != nil {
 			return nil, err
@@ -306,8 +434,22 @@ userAuthLoop:
 		}
 
 		s.user = userAuthReq.User
+
+		if !displayedBanner && config.BannerCallback != nil {
+			displayedBanner = true
+			msg := config.BannerCallback(s)
+			if msg != "" {
+				bannerMsg := &userAuthBannerMsg{
+					Message: msg,
+				}
+				if err := s.transport.writePacket(Marshal(bannerMsg)); err != nil {
+					return nil, err
+				}
+			}
+		}
+
 		perms = nil
-		authErr := errors.New("no auth passed yet")
+		authErr := ErrNoAuth
 
 		switch userAuthReq.Method {
 		case "none":
@@ -337,7 +479,7 @@ userAuthLoop:
 			perms, authErr = config.PasswordCallback(s, password)
 		case "keyboard-interactive":
 			if config.KeyboardInteractiveCallback == nil {
-				authErr = errors.New("ssh: keyboard-interactive auth not configubred")
+				authErr = errors.New("ssh: keyboard-interactive auth not configured")
 				break
 			}
 
@@ -417,6 +559,7 @@ userAuthLoop:
 				// sig.Format.  This is usually the same, but
 				// for certs, the names differ.
 				if !isAcceptableAlgo(sig.Format) {
+					authErr = fmt.Errorf("ssh: algorithm %q not accepted", sig.Format)
 					break
 				}
 				signedData := buildDataSignedForAuth(sessionID, userAuthReq, algoBytes, pubKeyData)
@@ -428,9 +571,54 @@ userAuthLoop:
 				authErr = candidate.result
 				perms = candidate.perms
 			}
+		case "gssapi-with-mic":
+			gssapiConfig := config.GSSAPIWithMICConfig
+			userAuthRequestGSSAPI, err := parseGSSAPIPayload(userAuthReq.Payload)
+			if err != nil {
+				return nil, parseError(msgUserAuthRequest)
+			}
+			// OpenSSH supports Kerberos V5 mechanism only for GSS-API authentication.
+			if userAuthRequestGSSAPI.N == 0 {
+				authErr = fmt.Errorf("ssh: Mechanism negotiation is not supported")
+				break
+			}
+			var i uint32
+			present := false
+			for i = 0; i < userAuthRequestGSSAPI.N; i++ {
+				if userAuthRequestGSSAPI.OIDS[i].Equal(krb5Mesh) {
+					present = true
+					break
+				}
+			}
+			if !present {
+				authErr = fmt.Errorf("ssh: GSSAPI authentication must use the Kerberos V5 mechanism")
+				break
+			}
+			// Initial server response, see RFC 4462 section 3.3.
+			if err := s.transport.writePacket(Marshal(&userAuthGSSAPIResponse{
+				SupportMech: krb5OID,
+			})); err != nil {
+				return nil, err
+			}
+			// Exchange token, see RFC 4462 section 3.4.
+			packet, err := s.transport.readPacket()
+			if err != nil {
+				return nil, err
+			}
+			userAuthGSSAPITokenReq := &userAuthGSSAPIToken{}
+			if err := Unmarshal(packet, userAuthGSSAPITokenReq); err != nil {
+				return nil, err
+			}
+			authErr, perms, err = gssExchangeToken(gssapiConfig, userAuthGSSAPITokenReq.Token, s, sessionID,
+				userAuthReq)
+			if err != nil {
+				return nil, err
+			}
 		default:
 			authErr = fmt.Errorf("ssh: unknown method %q", userAuthReq.Method)
 		}
+
+		authErrs = append(authErrs, authErr)
 
 		if config.AuthLogCallback != nil {
 			config.AuthLogCallback(s, userAuthReq.Method, authErr)
@@ -451,6 +639,10 @@ userAuthLoop:
 		}
 		if config.KeyboardInteractiveCallback != nil {
 			failureMsg.Methods = append(failureMsg.Methods, "keyboard-interactive")
+		}
+		if config.GSSAPIWithMICConfig != nil && config.GSSAPIWithMICConfig.Server != nil &&
+			config.GSSAPIWithMICConfig.AllowLogin != nil {
+			failureMsg.Methods = append(failureMsg.Methods, "gssapi-with-mic")
 		}
 
 		if len(failureMsg.Methods) == 0 {

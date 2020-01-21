@@ -1,12 +1,11 @@
+// +build !windows
+
 package common
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -71,157 +70,33 @@ func TestISOConfigPrepare_ISOChecksum(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if i.ISOChecksum != "foo" {
-		t.Fatalf("should've lowercased: %s", i.ISOChecksum)
-	}
 }
 
-func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
+func TestISOConfigPrepare_ISOChecksumURLBad(t *testing.T) {
 	i := testISOConfig()
 	i.ISOChecksumURL = "file:///not_read"
+	i.ISOChecksum = "shouldoverride"
 
 	// Test ISOChecksum overrides url
 	warns, err := i.Prepare(nil)
-	if len(warns) > 0 && len(err) > 0 {
-		t.Fatalf("bad: %#v, %#v", warns, err)
+	if len(warns) != 1 {
+		t.Fatalf("Bad: should have warned because both checksum and " +
+			"checksumURL are set.")
+	}
+	if len(err) > 0 {
+		t.Fatalf("Bad; should have warned but not errored.")
 	}
 
-	// Test good - ISOChecksumURL BSD style
+	// Test that we won't try to read an iso into memory because of a user
+	// error
 	i = testISOConfig()
+	i.ISOChecksumURL = "file:///not_read.iso"
 	i.ISOChecksum = ""
-	cs_file, _ := ioutil.TempFile("", "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style), 0666)
-	filePrefix := "file://"
-	if runtime.GOOS == "windows" {
-		filePrefix += "/"
-	}
-	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
+	if err == nil {
+		t.Fatalf("should have error because iso is bad filetype: %s", err)
 	}
 
-	if i.ISOChecksum != "baz" {
-		t.Fatalf("should've found \"baz\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL GNU style
-	i = testISOConfig()
-	i.ISOChecksum = ""
-	cs_file, _ = ioutil.TempFile("", "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "bar0" {
-		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL BSD style no newline
-	i = testISOConfig()
-	i.ISOChecksum = ""
-	cs_file, _ = ioutil.TempFile("", "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style_no_newline), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "baz" {
-		t.Fatalf("should've found \"baz\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL BSD style with relative path
-	i = testISOConfig()
-	i.ISOChecksum = ""
-
-	cs_dir, _ := ioutil.TempDir("", "packer-testdir-")
-	cs_file, _ = ioutil.TempFile(cs_dir, "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style_subdir), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
-	i.RawSingleISOUrl = fmt.Sprintf("%s%s", cs_dir, "/subdir/the-OS.iso")
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "baz" {
-		t.Fatalf("should've found \"baz\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL GNU style no newline
-	i = testISOConfig()
-	i.ISOChecksum = ""
-	cs_file, _ = ioutil.TempFile("", "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style_no_newline), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "bar0" {
-		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL GNU style with query parameters
-	i = testISOConfig()
-	i.ISOChecksum = ""
-	i.RawSingleISOUrl = "http://www.packer.io/the-OS.iso?stuff=boo"
-
-	cs_file, _ = ioutil.TempFile("", "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "bar0" {
-		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
-	}
-
-	// Test good - ISOChecksumURL GNU style with relative path
-	i = testISOConfig()
-	i.ISOChecksum = ""
-
-	cs_file, _ = ioutil.TempFile(cs_dir, "packer-test-")
-	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style_subdir), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
-	i.RawSingleISOUrl = fmt.Sprintf("%s%s", cs_dir, "/subdir/the-OS.iso")
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if i.ISOChecksum != "bar0" {
-		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
-	}
 }
 
 func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {
@@ -233,8 +108,8 @@ func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatal("should have error")
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Test good
@@ -250,17 +125,6 @@ func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {
 
 	if i.ISOChecksumType != "md5" {
 		t.Fatalf("should've lowercased: %s", i.ISOChecksumType)
-	}
-
-	// Test unknown
-	i = testISOConfig()
-	i.ISOChecksumType = "fake"
-	warns, err = i.Prepare(nil)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
 	}
 
 	// Test none
@@ -300,7 +164,15 @@ func TestISOConfigPrepare_ISOUrl(t *testing.T) {
 	i.RawSingleISOUrl = ""
 	i.ISOChecksum = ""
 	i.ISOChecksumURL = ts.URL + "/basic.txt"
-	warns, err = i.Prepare(nil)
+	// ISOConfig.Prepare() returns a slice of errors
+	var errs []error
+	warns, errs = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("expected no warnings, got:%v", warns)
+	}
+	if len(errs) < 1 || err[0] == nil {
+		t.Fatalf("expected a populated error slice, got: %v", errs)
+	}
 
 	// Test iso_url set
 	i = testISOConfig()

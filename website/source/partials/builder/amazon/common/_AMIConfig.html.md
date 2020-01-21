@@ -1,0 +1,2 @@
+<!-- Code generated from the comments of the AMIConfig struct in builder/amazon/common/ami_config.go; DO NOT EDIT MANUALLY -->
+AMIConfig is for common configuration related to creating AMIs.

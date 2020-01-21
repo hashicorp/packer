@@ -10,16 +10,16 @@ import (
 
 type stepInstanceInfo struct{}
 
-func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(Driver)
 		ui     = state.Get("ui").(packer.Ui)
 		id     = state.Get("instance_id").(string)
 	)
 
-	ip, err := driver.GetInstanceIP(id)
+	ip, err := driver.GetInstanceIP(ctx, id)
 	if err != nil {
-		err = fmt.Errorf("Error getting instance's public IP: %s", err)
+		err = fmt.Errorf("Error getting instance's IP: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -27,7 +27,7 @@ func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) mult
 
 	state.Put("instance_ip", ip)
 
-	ui.Say(fmt.Sprintf("Instance has public IP: %s.", ip))
+	ui.Say(fmt.Sprintf("Instance has IP: %s.", ip))
 
 	return multistep.ActionContinue
 }

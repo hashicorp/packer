@@ -1,28 +1,38 @@
 package packer
 
 import (
+	"context"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
-func testBuild() *coreBuild {
-	return &coreBuild{
-		name:          "test",
-		builder:       &MockBuilder{ArtifactId: "b"},
-		builderConfig: 42,
-		builderType:   "foo",
+func boolPointer(tf bool) *bool {
+	return &tf
+}
+
+func testBuild() *CoreBuild {
+	return &CoreBuild{
+		Type:          "test",
+		Builder:       &MockBuilder{ArtifactId: "b"},
+		BuilderConfig: 42,
+		BuilderType:   "foo",
 		hooks: map[string][]Hook{
 			"foo": {&MockHook{}},
 		},
-		provisioners: []coreBuildProvisioner{
-			{"mock-provisioner", &MockProvisioner{}, []interface{}{42}},
-		},
-		postProcessors: [][]coreBuildPostProcessor{
+		Provisioners: []CoreBuildProvisioner{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
+				PType:       "mock-provisioner",
+				Provisioner: &MockProvisioner{},
+				config:      []interface{}{42}},
+		},
+		PostProcessors: [][]CoreBuildPostProcessor{
+			{
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", make(map[string]interface{}), boolPointer(true)},
 			},
 		},
-		variables: make(map[string]string),
+		Variables: make(map[string]string),
 		onError:   "cleanup",
 	}
 }
@@ -49,7 +59,7 @@ func TestBuild_Prepare(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 
 	build.Prepare()
 	if !builder.PrepareCalled {
@@ -59,21 +69,21 @@ func TestBuild_Prepare(t *testing.T) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
-	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*MockProvisioner)
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
 	if !prov.PrepCalled {
 		t.Fatal("prep should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 
-	corePP := build.postProcessors[0][0]
-	pp := corePP.processor.(*MockPostProcessor)
+	corePP := build.PostProcessors[0][0]
+	pp := corePP.PostProcessor.(*MockPostProcessor)
 	if !pp.ConfigureCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig}) {
+	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", pp.ConfigureConfigs)
 	}
 }
@@ -102,11 +112,11 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 	build.Prepare()
 }
 
-func TestBuildPrepare_BuilderWarniings(t *testing.T) {
+func TestBuildPrepare_BuilderWarnings(t *testing.T) {
 	expected := []string{"foo"}
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 	builder.PrepareWarnings = expected
 
 	warn, err := build.Prepare()
@@ -123,7 +133,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	packerConfig[DebugConfigKey] = true
 
 	build := testBuild()
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 
 	build.SetDebug(true)
 	build.Prepare()
@@ -134,12 +144,12 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
-	coreProv := build.provisioners[0]
-	prov := coreProv.provisioner.(*MockProvisioner)
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
 	if !prov.PrepCalled {
 		t.Fatal("prepare should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
@@ -151,8 +161,8 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 	}
 
 	build := testBuild()
-	build.variables["foo"] = "bar"
-	builder := build.builder.(*MockBuilder)
+	build.Variables["foo"] = "bar"
+	builder := build.Builder.(*MockBuilder)
 
 	warn, err := build.Prepare()
 	if len(warn) > 0 {
@@ -171,13 +181,41 @@ func TestBuildPrepare_variables_default(t *testing.T) {
 	}
 }
 
+func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
+	packerConfig := testDefaultPackerConfig()
+
+	build := testBuild()
+	builder := build.Builder.(*MockBuilder)
+	builder.GeneratedVars = []string{"PartyVar"}
+
+	build.Prepare()
+	if !builder.PrepareCalled {
+		t.Fatalf("should be called")
+	}
+	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+		t.Fatalf("bad: %#v", builder.PrepareConfig)
+	}
+
+	coreProv := build.Provisioners[0]
+	prov := coreProv.Provisioner.(*MockProvisioner)
+	if !prov.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+
+	generated := BasicPlaceholderData()
+	generated["PartyVar"] = "Build_PartyVar. " + common.PlaceholderMsg
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
+	}
+}
+
 func TestBuild_Run(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	build := testBuild()
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	ctx := context.Background()
+	artifacts, err := build.Run(ctx, ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -186,14 +224,14 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify builder was run
-	builder := build.builder.(*MockBuilder)
+	builder := build.Builder.(*MockBuilder)
 	if !builder.RunCalled {
 		t.Fatal("should be called")
 	}
 
-	// Verify hooks are disapatchable
+	// Verify hooks are dispatchable
 	dispatchHook := builder.RunHook
-	dispatchHook.Run("foo", nil, nil, 42)
+	dispatchHook.Run(ctx, "foo", nil, nil, 42)
 
 	hook := build.hooks["foo"][0].(*MockHook)
 	if !hook.RunCalled {
@@ -204,30 +242,29 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(HookProvision, nil, new(MockCommunicator), 42)
-	prov := build.provisioners[0].provisioner.(*MockProvisioner)
+	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
+	prov := build.Provisioners[0].Provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")
 	}
 
 	// Verify post-processor was run
-	pp := build.postProcessors[0][0].processor.(*MockPostProcessor)
+	pp := build.PostProcessors[0][0].PostProcessor.(*MockPostProcessor)
 	if !pp.PostProcessCalled {
 		t.Fatal("should be called")
 	}
 }
 
 func TestBuild_Run_Artifacts(t *testing.T) {
-	cache := &TestCache{}
 	ui := testUi()
 
 	// Test case: Test that with no post-processors, we only get the
 	// main build.
 	build := testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{}
+	build.PostProcessors = [][]CoreBuildPostProcessor{}
 
 	build.Prepare()
-	artifacts, err := build.Run(ui, cache)
+	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -245,14 +282,14 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that doesn't keep
 	// inputs, only that post-processors results are returned.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -270,17 +307,17 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with multiple post-processors, as long as one
 	// keeps the original, the original is kept.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -298,19 +335,19 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with sequences, intermediaries are kept if they
 	// want to be.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -328,16 +365,71 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// Test case: Test that with a single post-processor that forcibly
 	// keeps inputs, that the artifacts are kept.
 	build = testBuild()
-	build.postProcessors = [][]coreBuildPostProcessor{
+	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true}, "pp", make(map[string]interface{}), false,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
 
 	build.Prepare()
-	artifacts, err = build.Run(ui, cache)
+
+	artifacts, err = build.Run(context.Background(), ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"b", "pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are discarded if user overrides.
+	build = testBuild()
+	build.PostProcessors = [][]CoreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(context.Background(), ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expectedIds = []string{"pp"}
+	artifactIds = make([]string, len(artifacts))
+	for i, artifact := range artifacts {
+		artifactIds[i] = artifact.Id()
+	}
+
+	if !reflect.DeepEqual(artifactIds, expectedIds) {
+		t.Fatalf("unexpected ids: %#v", artifactIds)
+	}
+
+	// Test case: Test that with a single post-processor that non-forcibly
+	// keeps inputs, that the artifacts are kept if user does not have preference.
+	build = testBuild()
+	build.PostProcessors = [][]CoreBuildPostProcessor{
+		{
+			{
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), nil,
+			},
+		},
+	}
+
+	build.Prepare()
+	artifacts, err = build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -365,15 +457,24 @@ func TestBuild_RunBeforePrepare(t *testing.T) {
 		}
 	}()
 
-	testBuild().Run(testUi(), &TestCache{})
+	testBuild().Run(context.Background(), testUi())
 }
 
 func TestBuild_Cancel(t *testing.T) {
 	build := testBuild()
-	build.Cancel()
 
-	builder := build.builder.(*MockBuilder)
-	if !builder.CancelCalled {
-		t.Fatal("cancel should be called")
+	build.Prepare()
+
+	topCtx, topCtxCancel := context.WithCancel(context.Background())
+
+	builder := build.Builder.(*MockBuilder)
+
+	builder.RunFn = func(ctx context.Context) {
+		topCtxCancel()
+	}
+
+	_, err := build.Run(topCtx, testUi())
+	if err == nil {
+		t.Fatal("build should err")
 	}
 }

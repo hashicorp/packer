@@ -11,7 +11,7 @@ import (
 
 func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
-		validate: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		validate: func(context.Context, string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -30,7 +30,7 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
-		validate: func(string, string) error { return nil },
+		validate: func(context.Context, string, string) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
@@ -52,7 +52,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualDeploymentName string
 
 	var testSubject = &StepValidateTemplate{
-		validate: func(resourceGroupName string, deploymentName string) error {
+		validate: func(ctx context.Context, resourceGroupName string, deploymentName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
 

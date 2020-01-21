@@ -1,8 +1,23 @@
 package storage
 
+// Copyright 2017 Microsoft Corporation
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/xml"
@@ -15,10 +30,34 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
-	fixedTime = time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6))
+	fixedTime         = time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6))
+	accountSASOptions = AccountSASTokenOptions{
+		Services: Services{
+			Blob: true,
+		},
+		ResourceTypes: ResourceTypes{
+			Service:   true,
+			Container: true,
+			Object:    true,
+		},
+		Permissions: Permissions{
+			Read:    true,
+			Write:   true,
+			Delete:  true,
+			List:    true,
+			Add:     true,
+			Create:  true,
+			Update:  true,
+			Process: true,
+		},
+		Expiry:   fixedTime,
+		UseHTTPS: true,
+	}
 )
 
 func (c Client) computeHmac256(message string) string {
@@ -33,6 +72,10 @@ func currentTimeRfc1123Formatted() string {
 
 func timeRfc1123Formatted(t time.Time) string {
 	return t.Format(http.TimeFormat)
+}
+
+func timeRFC3339Formatted(t time.Time) string {
+	return t.Format("2006-01-02T15:04:05.0000000Z")
 }
 
 func mergeParams(v1, v2 url.Values) url.Values {
@@ -136,7 +179,7 @@ func addTimeout(params url.Values, timeout uint) url.Values {
 
 func addSnapshot(params url.Values, snapshot *time.Time) url.Values {
 	if snapshot != nil {
-		params.Add("snapshot", timeRfc1123Formatted(*snapshot))
+		params.Add("snapshot", timeRFC3339Formatted(*snapshot))
 	}
 	return params
 }
@@ -169,6 +212,11 @@ func (t *TimeRFC1123) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	return nil
 }
 
+// MarshalXML marshals using time.RFC1123.
+func (t *TimeRFC1123) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(time.Time(*t).Format(time.RFC1123), start)
+}
+
 // returns a map of custom metadata values from the specified HTTP header
 func getMetadataFromHeaders(header http.Header) map[string]string {
 	metadata := make(map[string]string)
@@ -196,4 +244,17 @@ func getMetadataFromHeaders(header http.Header) map[string]string {
 	}
 
 	return metadata
+}
+
+// newUUID returns a new uuid using RFC 4122 algorithm.
+func newUUID() (uuid.UUID, error) {
+	u := [16]byte{}
+	// Set all bits to randomly (or pseudo-randomly) chosen values.
+	_, err := rand.Read(u[:])
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+	u[8] = (u[8]&(0xff>>2) | (0x02 << 6)) // u.setVariant(ReservedRFC4122)
+	u[6] = (u[6] & 0xF) | (uuid.V4 << 4)  // u.setVersion(V4)
+	return uuid.FromBytes(u[:])
 }

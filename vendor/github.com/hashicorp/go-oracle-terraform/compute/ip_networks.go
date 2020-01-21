@@ -1,24 +1,25 @@
 package compute
 
 const (
-	IPNetworkDescription   = "ip network"
-	IPNetworkContainerPath = "/network/v1/ipnetwork/"
-	IPNetworkResourcePath  = "/network/v1/ipnetwork"
+	iPNetworkDescription   = "ip network"
+	iPNetworkContainerPath = "/network/v1/ipnetwork/"
+	iPNetworkResourcePath  = "/network/v1/ipnetwork"
 )
 
+// IPNetworksClient specifies the ip networks client
 type IPNetworksClient struct {
 	ResourceClient
 }
 
-// IPNetworks() returns an IPNetworksClient that can be used to access the
+// IPNetworks returns an IPNetworksClient that can be used to access the
 // necessary CRUD functions for IP Networks.
-func (c *ComputeClient) IPNetworks() *IPNetworksClient {
+func (c *Client) IPNetworks() *IPNetworksClient {
 	return &IPNetworksClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: IPNetworkDescription,
-			ContainerPath:       IPNetworkContainerPath,
-			ResourceRootPath:    IPNetworkResourcePath,
+			Client:              c,
+			ResourceDescription: iPNetworkDescription,
+			ContainerPath:       iPNetworkContainerPath,
+			ResourceRootPath:    iPNetworkResourcePath,
 		},
 	}
 }
@@ -26,8 +27,10 @@ func (c *ComputeClient) IPNetworks() *IPNetworksClient {
 // IPNetworkInfo contains the exported fields necessary to hold all the information about an
 // IP Network
 type IPNetworkInfo struct {
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The name of the IP Network
-	Name string `json:"name"`
+	Name string
 	// The CIDR IPv4 prefix associated with the IP Network
 	IPAddressPrefix string `json:"ipAddressPrefix"`
 	// Name of the IP Network Exchange associated with the IP Network
@@ -39,9 +42,10 @@ type IPNetworkInfo struct {
 	// Slice of tags associated with the IP Network
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier for the IP Network
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
+// CreateIPNetworkInput details the attributes needed to create an ip network
 type CreateIPNetworkInput struct {
 	// The name of the IP Network to create. Object names can only contain alphanumeric,
 	// underscore, dash, and period characters. Names are case-sensitive.
@@ -83,7 +87,7 @@ type CreateIPNetworkInput struct {
 	Tags []string `json:"tags"`
 }
 
-// Create a new IP Network from an IPNetworksClient and an input struct.
+// CreateIPNetwork creates a new IP Network from an IPNetworksClient and an input struct.
 // Returns a populated Info struct for the IP Network, and any errors
 func (c *IPNetworksClient) CreateIPNetwork(input *CreateIPNetworkInput) (*IPNetworkInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
@@ -97,13 +101,14 @@ func (c *IPNetworksClient) CreateIPNetwork(input *CreateIPNetworkInput) (*IPNetw
 	return c.success(&ipInfo)
 }
 
+// GetIPNetworkInput details the attributes needed to retrieve an ip network
 type GetIPNetworkInput struct {
 	// The name of the IP Network to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
-// Returns a populated IPNetworkInfo struct from an input struct
+// GetIPNetwork returns a populated IPNetworkInfo struct from an input struct
 func (c *IPNetworksClient) GetIPNetwork(input *GetIPNetworkInput) (*IPNetworkInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
 
@@ -115,6 +120,7 @@ func (c *IPNetworksClient) GetIPNetwork(input *GetIPNetworkInput) (*IPNetworkInf
 	return c.success(&ipInfo)
 }
 
+// UpdateIPNetworkInput details the attributes needed to update an ip network
 type UpdateIPNetworkInput struct {
 	// The name of the IP Network to update. Object names can only contain alphanumeric,
 	// underscore, dash, and period characters. Names are case-sensitive.
@@ -156,6 +162,7 @@ type UpdateIPNetworkInput struct {
 	Tags []string `json:"tags"`
 }
 
+// UpdateIPNetwork updates the specified ip network
 func (c *IPNetworksClient) UpdateIPNetwork(input *UpdateIPNetworkInput) (*IPNetworkInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
 	input.IPNetworkExchange = c.getQualifiedName(input.IPNetworkExchange)
@@ -168,19 +175,21 @@ func (c *IPNetworksClient) UpdateIPNetwork(input *UpdateIPNetworkInput) (*IPNetw
 	return c.success(&ipInfo)
 }
 
+// DeleteIPNetworkInput specifies the attributes needed to delete an ip network
 type DeleteIPNetworkInput struct {
 	// The name of the IP Network to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
+// DeleteIPNetwork deletes the specified ip network
 func (c *IPNetworksClient) DeleteIPNetwork(input *DeleteIPNetworkInput) error {
 	return c.deleteResource(input.Name)
 }
 
 // Unqualifies any qualified fields in the IPNetworkInfo struct
 func (c *IPNetworksClient) success(info *IPNetworkInfo) (*IPNetworkInfo, error) {
-	c.unqualify(&info.Name)
+	info.Name = c.getUnqualifiedName(info.FQDN)
 	c.unqualify(&info.IPNetworkExchange)
 	return info, nil
 }

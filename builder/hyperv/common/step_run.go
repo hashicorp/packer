@@ -3,26 +3,48 @@ package common
 import (
 	"context"
 	"fmt"
-	"time"
+	"log"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepRun struct {
-	BootWait time.Duration
-
-	vmName string
+	GuiCancelFunc context.CancelFunc
+	Headless      bool
+	SwitchName    string
+	vmName        string
 }
 
-func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	ui.Say("Determine Host IP for HyperV machine...")
+	hostIp, err := driver.GetHostAdapterIpAddressForSwitch(s.SwitchName)
+	if err != nil {
+		err := fmt.Errorf("Error getting host adapter ip address: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
+	common.SetHTTPIP(hostIp)
+
+	if !s.Headless {
+		ui.Say("Attempting to connect with vmconnect...")
+		s.GuiCancelFunc, err = driver.Connect(vmName)
+		if err != nil {
+			log.Printf(fmt.Sprintf("Non-fatal error starting vmconnect: %s. continuing...", err))
+		}
+	}
+
 	ui.Say("Starting the virtual machine...")
 
-	err := driver.Start(vmName)
+	err = driver.Start(vmName)
 	if err != nil {
 		err := fmt.Errorf("Error starting vm: %s", err)
 		state.Put("error", err)
@@ -31,22 +53,6 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 	}
 
 	s.vmName = vmName
-
-	if int64(s.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.BootWait))
-		wait := time.After(s.BootWait)
-	WAITLOOP:
-		for {
-			select {
-			case <-wait:
-				break WAITLOOP
-			case <-time.After(1 * time.Second):
-				if _, ok := state.GetOk(multistep.StateCancelled); ok {
-					return multistep.ActionHalt
-				}
-			}
-		}
-	}
 
 	return multistep.ActionContinue
 }
@@ -58,6 +64,11 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
+	if !s.Headless && s.GuiCancelFunc != nil {
+		ui.Say("Disconnecting from vmconnect...")
+		s.GuiCancelFunc()
+	}
 
 	if running, _ := driver.IsRunning(s.vmName); running {
 		if err := driver.Stop(s.vmName); err != nil {

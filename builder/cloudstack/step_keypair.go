@@ -3,63 +3,64 @@ package cloudstack
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
 type stepKeypair struct {
-	Debug                bool
-	DebugKeyPath         string
-	KeyPair              string
-	PrivateKeyFile       string
-	SSHAgentAuth         bool
-	TemporaryKeyPairName string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 }
 
-func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepKeypair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+	if s.Comm.SSHPrivateKeyFile != "" {
+		ui.Say("Using existing SSH private key")
+		privateKeyBytes, err := s.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"Error loading configured private key file: %s", err))
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		state.Put("keypair", s.KeyPair)
-		state.Put("privateKey", string(privateKeyBytes))
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPair == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with keypair in Source image")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPair != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing keypair %s", s.KeyPair))
-		state.Put("keypair", s.KeyPair)
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing keypair %s", s.Comm.SSHKeyPairName))
 		return multistep.ActionContinue
 	}
 
-	if s.TemporaryKeyPairName == "" {
+	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using a keypair")
-		state.Put("keypair", "")
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.Comm.SSHTemporaryKeyPairName))
 
-	p := client.SSH.NewCreateSSHKeyPairParams(s.TemporaryKeyPairName)
+	p := client.SSH.NewCreateSSHKeyPairParams(s.Comm.SSHTemporaryKeyPairName)
+
+	cfg := state.Get("config").(*Config)
+	if cfg.Project != "" {
+		p.SetProjectid(cfg.Project)
+	}
+
 	keypair, err := client.SSH.CreateSSHKeyPair(p)
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary keypair: %s", err)
@@ -75,7 +76,7 @@ func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
 
 	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {
@@ -106,29 +107,33 @@ func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep
 		}
 	}
 
-	// Set some state data for use in future steps
-	state.Put("keypair", s.TemporaryKeyPairName)
-	state.Put("privateKey", keypair.Privatekey)
+	// Set some data for use in future steps
+	s.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
+	s.Comm.SSHPrivateKey = []byte(keypair.Privatekey)
 
 	return multistep.ActionContinue
 }
 
 func (s *stepKeypair) Cleanup(state multistep.StateBag) {
-	if s.TemporaryKeyPairName == "" {
+	if s.Comm.SSHTemporaryKeyPairName == "" {
 		return
 	}
 
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*cloudstack.CloudStackClient)
+	cfg := state.Get("config").(*Config)
 
-	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
+	p := client.SSH.NewDeleteSSHKeyPairParams(s.Comm.SSHTemporaryKeyPairName)
+	if cfg.Project != "" {
+		p.SetProjectid(cfg.Project)
+	}
 
-	_, err := client.SSH.DeleteSSHKeyPair(client.SSH.NewDeleteSSHKeyPairParams(
-		s.TemporaryKeyPairName,
-	))
+	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.Comm.SSHTemporaryKeyPairName))
+
+	_, err := client.SSH.DeleteSSHKeyPair(p)
 	if err != nil {
 		ui.Error(err.Error())
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.Comm.SSHTemporaryKeyPairName))
 	}
 }

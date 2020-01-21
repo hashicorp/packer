@@ -15,7 +15,7 @@ type StepMountGuestAdditions struct {
 	Generation         uint
 }
 
-func (s *StepMountGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepMountGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.GuestAdditionsMode != "attach" {
@@ -56,7 +56,8 @@ func (s *StepMountGuestAdditions) Run(_ context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
-	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", s.GuestAdditionsPath, controllerNumber, controllerLocation))
+	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", s.GuestAdditionsPath,
+		controllerNumber, controllerLocation))
 
 	return multistep.ActionContinue
 }

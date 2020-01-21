@@ -1,0 +1,180 @@
+package vm
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+)
+
+// Builder implements packer.Builder and builds the actual VirtualBox
+// images.
+type Builder struct {
+	config Config
+	runner multistep.Runner
+}
+
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
+}
+
+// Run executes a Packer build and returns a packer.Artifact representing
+// a VirtualBox appliance.
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+	// Create the driver that we'll use to communicate with VirtualBox
+	driver, err := vboxcommon.NewDriver()
+	if err != nil {
+		return nil, fmt.Errorf("Failed creating VirtualBox driver: %s", err)
+	}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("debug", b.config.PackerDebug)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+
+	// Build the steps.
+	steps := []multistep.Step{
+		new(vboxcommon.StepSuppressMessages),
+		&common.StepCreateFloppy{
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
+		},
+		&StepSetSnapshot{
+			Name:           b.config.VMName,
+			AttachSnapshot: b.config.AttachSnapshot,
+			KeepRegistered: b.config.KeepRegistered,
+		},
+		&common.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&vboxcommon.StepDownloadGuestAdditions{
+			GuestAdditionsMode:   b.config.GuestAdditionsMode,
+			GuestAdditionsURL:    b.config.GuestAdditionsURL,
+			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
+			Ctx:                  b.config.ctx,
+		},
+		&StepImport{
+			Name: b.config.VMName,
+		},
+		&vboxcommon.StepAttachGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		},
+		&vboxcommon.StepConfigureVRDP{
+			VRDPBindAddress: b.config.VRDPBindAddress,
+			VRDPPortMin:     b.config.VRDPPortMin,
+			VRDPPortMax:     b.config.VRDPPortMax,
+		},
+		new(vboxcommon.StepAttachFloppy),
+		&vboxcommon.StepPortForwarding{
+			CommConfig:     &b.config.CommConfig.Comm,
+			HostPortMin:    b.config.HostPortMin,
+			HostPortMax:    b.config.HostPortMax,
+			SkipNatMapping: b.config.SkipNatMapping,
+		},
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManage,
+			Ctx:      b.config.ctx,
+		},
+		&vboxcommon.StepRun{
+			Headless: b.config.Headless,
+		},
+		&vboxcommon.StepTypeBootCommand{
+			BootWait:      b.config.BootWait,
+			BootCommand:   b.config.FlatBootCommand(),
+			VMName:        b.config.VMName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
+			Comm:          &b.config.Comm,
+		},
+		&communicator.StepConnect{
+			Config:    &b.config.CommConfig.Comm,
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
+			SSHPort:   vboxcommon.CommPort,
+			WinRMPort: vboxcommon.CommPort,
+		},
+		&vboxcommon.StepUploadVersion{
+			Path: *b.config.VBoxVersionFile,
+		},
+		&vboxcommon.StepUploadGuestAdditions{
+			GuestAdditionsMode: b.config.GuestAdditionsMode,
+			GuestAdditionsPath: b.config.GuestAdditionsPath,
+			Ctx:                b.config.ctx,
+		},
+		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.CommConfig.Comm,
+		},
+		&vboxcommon.StepShutdown{
+			Command:         b.config.ShutdownCommand,
+			Timeout:         b.config.ShutdownTimeout,
+			Delay:           b.config.PostShutdownDelay,
+			DisableShutdown: b.config.DisableShutdown,
+			ACPIShutdown:    b.config.ACPIShutdown,
+		},
+		&vboxcommon.StepVBoxManage{
+			Commands: b.config.VBoxManagePost,
+			Ctx:      b.config.ctx,
+		},
+		&StepCreateSnapshot{
+			Name:           b.config.VMName,
+			TargetSnapshot: b.config.TargetSnapshot,
+		},
+		&vboxcommon.StepExport{
+			Format:         b.config.Format,
+			OutputDir:      b.config.OutputDir,
+			ExportOpts:     b.config.ExportOpts,
+			SkipNatMapping: b.config.SkipNatMapping,
+			SkipExport:     b.config.SkipExport,
+		},
+	}
+
+	if !b.config.SkipExport {
+		steps = append(steps, nil)
+		copy(steps[1:], steps)
+		steps[0] = &common.StepOutputDir{
+			Force: b.config.PackerForce,
+			Path:  b.config.OutputDir,
+		}
+	}
+	// Run the steps.
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner.Run(ctx, state)
+
+	// Report any errors.
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
+	}
+
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		return nil, errors.New("build was cancelled")
+	}
+
+	if _, ok := state.GetOk(multistep.StateHalted); ok {
+		return nil, errors.New("build was halted")
+	}
+
+	if b.config.SkipExport {
+		return nil, nil
+	}
+
+	return vboxcommon.NewArtifact(b.config.OutputDir)
+}

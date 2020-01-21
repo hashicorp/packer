@@ -1,8 +1,11 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package ansible
 
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -25,9 +28,12 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/adapter"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -49,23 +55,30 @@ type Config struct {
 	EmptyGroups          []string `mapstructure:"empty_groups"`
 	HostAlias            string   `mapstructure:"host_alias"`
 	User                 string   `mapstructure:"user"`
-	LocalPort            string   `mapstructure:"local_port"`
+	LocalPort            int      `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
 	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
-	inventoryFile        string
+	InventoryFile        string   `mapstructure:"inventory_file"`
+	GalaxyFile           string   `mapstructure:"galaxy_file"`
+	GalaxyCommand        string   `mapstructure:"galaxy_command"`
+	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
+	RolesPath            string   `mapstructure:"roles_path"`
 }
 
 type Provisioner struct {
 	config            Config
-	adapter           *adapter
+	adapter           *adapter.Adapter
 	done              chan struct{}
 	ansibleVersion    string
 	ansibleMajVersion uint
+	generatedData     map[string]interface{}
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
@@ -86,6 +99,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Command = "ansible-playbook"
 	}
 
+	if p.config.GalaxyCommand == "" {
+		p.config.GalaxyCommand = "ansible-galaxy"
+	}
+
 	if p.config.HostAlias == "" {
 		p.config.HostAlias = "default"
 	}
@@ -94,6 +111,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	// Check that the galaxy file exists, if configured
+	if len(p.config.GalaxyFile) > 0 {
+		err = validateFileConfig(p.config.GalaxyFile, "galaxy_file", true)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	// Check that the authorized key file exists
@@ -118,12 +143,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_SCP_IF_SSH=True")
 	}
 
-	if len(p.config.LocalPort) > 0 {
-		if _, err := strconv.ParseUint(p.config.LocalPort, 10, 16); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %s must be a valid port", p.config.LocalPort))
-		}
-	} else {
-		p.config.LocalPort = "0"
+	if p.config.LocalPort > 65535 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
 	}
 
 	if len(p.config.InventoryDirectory) > 0 {
@@ -186,8 +207,26 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
+	// Interpolate env vars to check for generated values like password and port
+	p.generatedData = generatedData
+	p.config.ctx.Data = generatedData
+	for i, envVar := range p.config.AnsibleEnvVars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.AnsibleEnvVars[i] = envVar
+	}
+	// Interpolate extra vars to check for generated values like password and port
+	for i, arg := range p.config.ExtraArguments {
+		arg, err := interpolate.Render(arg, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.ExtraArguments[i] = arg
+	}
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
@@ -195,6 +234,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
+	if err != nil {
+		return fmt.Errorf("error creating host signer: %s", err)
+	}
+
 	// Remove the private key file
 	if len(k.privKeyFile) > 0 {
 		defer os.Remove(k.privKeyFile)
@@ -212,6 +255,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 			return nil, nil
 		},
+		IsUserAuthority: func(k ssh.PublicKey) bool { return true },
 	}
 
 	config := &ssh.ServerConfig{
@@ -225,11 +269,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	config.AddHostKey(hostSigner)
 
 	localListener, err := func() (net.Listener, error) {
-		port, err := strconv.ParseUint(p.config.LocalPort, 10, 16)
-		if err != nil {
-			return nil, err
-		}
 
+		port := p.config.LocalPort
 		tries := 1
 		if port != 0 {
 			tries = 10
@@ -241,7 +282,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				ui.Say(err.Error())
 				continue
 			}
-			_, p.config.LocalPort, err = net.SplitHostPort(l.Addr().String())
+			_, portStr, err := net.SplitHostPort(l.Addr().String())
+			if err != nil {
+				ui.Say(err.Error())
+				continue
+			}
+			p.config.LocalPort, err = strconv.Atoi(portStr)
 			if err != nil {
 				ui.Say(err.Error())
 				continue
@@ -255,8 +301,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	ui = newUi(ui)
-	p.adapter = newAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
+	ui = &packer.SafeUi{
+		Sem: make(chan int, 1),
+		Ui:  ui,
+	}
+	p.adapter = adapter.NewAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
 	defer func() {
 		log.Print("shutting down the SSH proxy")
@@ -266,17 +315,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	go p.adapter.Serve()
 
-	if len(p.config.inventoryFile) == 0 {
+	if len(p.config.InventoryFile) == 0 {
 		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		defer os.Remove(tf.Name())
 
-		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%s\n",
+		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%d\n",
 			p.config.HostAlias, p.config.User, p.config.LocalPort)
 		if p.ansibleMajVersion < 2 {
-			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%s\n",
+			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%d\n",
 				p.config.HostAlias, p.config.User, p.config.LocalPort)
 		}
 
@@ -295,9 +344,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		tf.Close()
-		p.config.inventoryFile = tf.Name()
+		p.config.InventoryFile = tf.Name()
 		defer func() {
-			p.config.inventoryFile = ""
+			p.config.InventoryFile = ""
 		}()
 	}
 
@@ -308,22 +357,79 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	return nil
 }
 
-func (p *Provisioner) Cancel() {
-	if p.done != nil {
-		close(p.done)
+func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
+	galaxyFile := filepath.ToSlash(p.config.GalaxyFile)
+
+	// ansible-galaxy install -r requirements.yml
+	args := []string{"install", "-r", galaxyFile}
+	// Add force to arguments
+	if p.config.GalaxyForceInstall {
+		args = append(args, "-f")
 	}
-	if p.adapter != nil {
-		p.adapter.Shutdown()
+	// Add roles_path argument if specified
+	if p.config.RolesPath != "" {
+		args = append(args, "-p", filepath.ToSlash(p.config.RolesPath))
 	}
-	os.Exit(0)
+
+	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
+	cmd := exec.Command(p.config.GalaxyCommand, args...)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	wg := sync.WaitGroup{}
+	repeat := func(r io.ReadCloser) {
+		reader := bufio.NewReader(r)
+		for {
+			line, err := reader.ReadString('\n')
+			if line != "" {
+				line = strings.TrimRightFunc(line, unicode.IsSpace)
+				ui.Message(line)
+			}
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					ui.Error(err.Error())
+					break
+				}
+			}
+		}
+		wg.Done()
+	}
+	wg.Add(2)
+	go repeat(stdout)
+	go repeat(stderr)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	wg.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("Non-zero exit status: %s", err)
+	}
+	return nil
 }
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.inventoryFile
+	inventory := p.config.InventoryFile
+
 	var envvars []string
 
-	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
+	// Fetch external dependencies
+	if len(p.config.GalaxyFile) > 0 {
+		if err := p.executeGalaxy(ui, comm); err != nil {
+			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
+	}
+	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s -o IdentitiesOnly=yes",
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
@@ -333,6 +439,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		// args = append(args, "--private-key", privKeyFile)
 		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
+
+	// expose packer_http_addr extra variable
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		args = append(args, "--extra-vars", fmt.Sprintf("packer_http_addr=%s", httpAddr))
+	}
+
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envvars = append(envvars, p.config.AnsibleEnvVars...)
@@ -378,7 +491,16 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
+	// remove winrm password from command, if it's been added
+	flattenedCmd := strings.Join(cmd.Args, " ")
+	sanitized := flattenedCmd
+	winRMPass, ok := p.generatedData["WinRMPassword"]
+	if ok && winRMPass != "" {
+		sanitized = strings.Replace(sanitized,
+			winRMPass.(string), "*****", -1)
+	}
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
+
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -453,7 +575,7 @@ func newUserKey(pubKeyFile string) (*userKey, error) {
 		Headers: nil,
 		Bytes:   privateKeyDer,
 	}
-	tf, err := ioutil.TempFile("", "ansible-key")
+	tf, err := tmp.File("ansible-key")
 	if err != nil {
 		return nil, errors.New("failed to create temp file for generated key")
 	}
@@ -503,46 +625,4 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
-}
-
-// Ui provides concurrency-safe access to packer.Ui.
-type Ui struct {
-	sem chan int
-	ui  packer.Ui
-}
-
-func newUi(ui packer.Ui) packer.Ui {
-	return &Ui{sem: make(chan int, 1), ui: ui}
-}
-
-func (ui *Ui) Ask(s string) (string, error) {
-	ui.sem <- 1
-	ret, err := ui.ui.Ask(s)
-	<-ui.sem
-
-	return ret, err
-}
-
-func (ui *Ui) Say(s string) {
-	ui.sem <- 1
-	ui.ui.Say(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Message(s string) {
-	ui.sem <- 1
-	ui.ui.Message(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Error(s string) {
-	ui.sem <- 1
-	ui.ui.Error(s)
-	<-ui.sem
-}
-
-func (ui *Ui) Machine(t string, args ...string) {
-	ui.sem <- 1
-	ui.ui.Machine(t, args...)
-	<-ui.sem
 }

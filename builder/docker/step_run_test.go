@@ -52,16 +52,16 @@ func TestStepRun(t *testing.T) {
 	}
 
 	// Verify we haven't called stop yet
-	if driver.StopCalled {
+	if driver.KillCalled {
 		t.Fatal("should not have stopped")
 	}
 
 	// Cleanup
 	step.Cleanup(state)
-	if !driver.StopCalled {
+	if !driver.KillCalled {
 		t.Fatal("should've stopped")
 	}
-	if driver.StopID != id {
+	if driver.KillID != id {
 		t.Fatalf("bad: %#v", driver.StopID)
 	}
 }
@@ -85,13 +85,13 @@ func TestStepRun_error(t *testing.T) {
 	}
 
 	// Verify we haven't called stop yet
-	if driver.StopCalled {
+	if driver.KillCalled {
 		t.Fatal("should not have stopped")
 	}
 
 	// Cleanup
 	step.Cleanup(state)
-	if driver.StopCalled {
+	if driver.KillCalled {
 		t.Fatal("should not have stopped")
 	}
 }

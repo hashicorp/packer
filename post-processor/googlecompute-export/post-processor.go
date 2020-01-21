@@ -1,30 +1,48 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package googlecomputeexport
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"golang.org/x/oauth2/jwt"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Paths             []string `mapstructure:"paths"`
-	KeepOriginalImage bool     `mapstructure:"keep_input_artifact"`
+	AccountFile string `mapstructure:"account_file"`
 
-	ctx interpolate.Context
+	DiskSizeGb          int64    `mapstructure:"disk_size"`
+	DiskType            string   `mapstructure:"disk_type"`
+	MachineType         string   `mapstructure:"machine_type"`
+	Network             string   `mapstructure:"network"`
+	Paths               []string `mapstructure:"paths"`
+	Subnetwork          string   `mapstructure:"subnetwork"`
+	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
+	Zone                string   `mapstructure:"zone"`
+	ServiceAccountEmail string   `mapstructure:"service_account_email"`
+
+	account *jwt.Config
+	ctx     interpolate.Context
 }
 
 type PostProcessor struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -35,92 +53,141 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	errs := new(packer.MultiError)
+
+	if len(p.config.Paths) == 0 {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("paths must be specified"))
+	}
+
+	// Set defaults.
+	if p.config.DiskSizeGb == 0 {
+		p.config.DiskSizeGb = 200
+	}
+
+	if p.config.DiskType == "" {
+		p.config.DiskType = "pd-ssd"
+	}
+
+	if p.config.MachineType == "" {
+		p.config.MachineType = "n1-highcpu-4"
+	}
+
+	if p.config.Network == "" && p.config.Subnetwork == "" {
+		p.config.Network = "default"
+	}
+
+	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("May set either account_file or "+
+				"vault_gcp_oauth_engine, but not both."))
+	}
+
+	if len(errs.Errors) > 0 {
+		return errs
+	}
+
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	ui.Say("Starting googlecompute-export...")
-	ui.Say(fmt.Sprintf("Exporting image to destinations: %v", p.config.Paths))
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != googlecompute.BuilderId {
 		err := fmt.Errorf(
 			"Unknown artifact type: %s\nCan only export from Google Compute Engine builder artifacts.",
 			artifact.BuilderId())
-		return nil, p.config.KeepOriginalImage, err
+		return nil, false, false, err
 	}
+
+	builderAccountFile := artifact.State("AccountFilePath").(string)
+	builderImageName := artifact.State("ImageName").(string)
+	builderProjectId := artifact.State("ProjectId").(string)
+	builderZone := artifact.State("BuildZone").(string)
+
+	ui.Say(fmt.Sprintf("Exporting image %v to destination: %v", builderImageName, p.config.Paths))
+
+	if p.config.Zone == "" {
+		p.config.Zone = builderZone
+	}
+
+	// Set up credentials for GCE driver.
+	if builderAccountFile != "" {
+		cfg, err := googlecompute.ProcessAccountFile(builderAccountFile)
+		if err != nil {
+			return nil, false, false, err
+		}
+		p.config.account = cfg
+	}
+	if p.config.AccountFile != "" {
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
+		if err != nil {
+			return nil, false, false, err
+		}
+		p.config.account = cfg
+	}
+
+	// Set up exporter instance configuration.
+	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
+	exporterMetadata := map[string]string{
+		"image_name":     builderImageName,
+		"name":           exporterName,
+		"paths":          strings.Join(p.config.Paths, " "),
+		"startup-script": StartupScript,
+		"zone":           p.config.Zone,
+	}
+	exporterConfig := googlecompute.Config{
+		DiskName:             exporterName,
+		DiskSizeGb:           p.config.DiskSizeGb,
+		DiskType:             p.config.DiskType,
+		InstanceName:         exporterName,
+		MachineType:          p.config.MachineType,
+		Metadata:             exporterMetadata,
+		Network:              p.config.Network,
+		NetworkProjectId:     builderProjectId,
+		StateTimeout:         5 * time.Minute,
+		SourceImageFamily:    "debian-9-worker",
+		SourceImageProjectId: "compute-image-tools",
+		Subnetwork:           p.config.Subnetwork,
+		Zone:                 p.config.Zone,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/compute",
+			"https://www.googleapis.com/auth/devstorage.full_control",
+			"https://www.googleapis.com/auth/userinfo.email",
+		},
+	}
+	if p.config.ServiceAccountEmail != "" {
+		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
+	}
+
+	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
+		p.config.account, p.config.VaultGCPOauthEngine)
+	if err != nil {
+		return nil, false, false, err
+	}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &exporterConfig)
+	state.Put("driver", driver)
+	state.Put("ui", ui)
+
+	// Build the steps.
+	steps := []multistep.Step{
+		&googlecompute.StepCreateSSHKey{
+			Debug:        p.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_%s.pem", p.config.PackerBuildName),
+		},
+		&googlecompute.StepCreateInstance{
+			Debug: p.config.PackerDebug,
+		},
+		new(googlecompute.StepWaitStartupScript),
+		new(googlecompute.StepTeardownInstance),
+	}
+
+	// Run the steps.
+	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
+	p.runner.Run(ctx, state)
 
 	result := &Artifact{paths: p.config.Paths}
 
-	if len(p.config.Paths) > 0 {
-		accountKeyFilePath := artifact.State("AccountFilePath").(string)
-		imageName := artifact.State("ImageName").(string)
-		imageSizeGb := artifact.State("ImageSizeGb").(int64)
-		projectId := artifact.State("ProjectId").(string)
-		zone := artifact.State("BuildZone").(string)
-
-		// Set up instance configuration.
-		instanceName := fmt.Sprintf("%s-exporter", artifact.Id())
-		metadata := map[string]string{
-			"image_name":     imageName,
-			"name":           instanceName,
-			"paths":          strings.Join(p.config.Paths, " "),
-			"startup-script": StartupScript,
-			"zone":           zone,
-		}
-		exporterConfig := googlecompute.Config{
-			InstanceName:         instanceName,
-			SourceImageProjectId: "debian-cloud",
-			SourceImage:          "debian-8-jessie-v20160629",
-			DiskName:             instanceName,
-			DiskSizeGb:           imageSizeGb + 10,
-			DiskType:             "pd-standard",
-			Metadata:             metadata,
-			MachineType:          "n1-standard-4",
-			Zone:                 zone,
-			Network:              "default",
-			RawStateTimeout:      "5m",
-			Scopes: []string{
-				"https://www.googleapis.com/auth/userinfo.email",
-				"https://www.googleapis.com/auth/compute",
-				"https://www.googleapis.com/auth/devstorage.full_control",
-			},
-		}
-		exporterConfig.CalcTimeout()
-
-		// Set up credentials and GCE driver.
-		if accountKeyFilePath != "" {
-			err := googlecompute.ProcessAccountFile(&exporterConfig.Account, accountKeyFilePath)
-			if err != nil {
-				return nil, p.config.KeepOriginalImage, err
-			}
-		}
-		driver, err := googlecompute.NewDriverGCE(ui, projectId, &exporterConfig.Account)
-		if err != nil {
-			return nil, p.config.KeepOriginalImage, err
-		}
-
-		// Set up the state.
-		state := new(multistep.BasicStateBag)
-		state.Put("config", &exporterConfig)
-		state.Put("driver", driver)
-		state.Put("ui", ui)
-
-		// Build the steps.
-		steps := []multistep.Step{
-			&googlecompute.StepCreateSSHKey{
-				Debug:        p.config.PackerDebug,
-				DebugKeyPath: fmt.Sprintf("gce_%s.pem", p.config.PackerBuildName),
-			},
-			&googlecompute.StepCreateInstance{
-				Debug: p.config.PackerDebug,
-			},
-			new(googlecompute.StepWaitStartupScript),
-			new(googlecompute.StepTeardownInstance),
-		}
-
-		// Run the steps.
-		p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
-		p.runner.Run(state)
-	}
-
-	return result, p.config.KeepOriginalImage, nil
+	return result, false, false, nil
 }

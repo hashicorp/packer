@@ -3,9 +3,11 @@ package shell_local
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
@@ -28,32 +30,35 @@ func TestPostProcessor_Impl(t *testing.T) {
 
 func TestPostProcessorPrepare_Defaults(t *testing.T) {
 	var p PostProcessor
-	config := testConfig()
+	raws := testConfig()
 
-	err := p.Configure(config)
+	err := p.Configure(raws)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
-	config := testConfig()
+	raws := testConfig()
 
-	delete(config, "inline_shebang")
+	delete(raws, "inline_shebang")
 	p := new(PostProcessor)
-	err := p.Configure(config)
+	err := p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
-	if p.config.InlineShebang != "/bin/sh -e" {
+	expected := ""
+	if runtime.GOOS != "windows" {
+		expected = "/bin/sh -e"
+	}
+	if p.config.InlineShebang != expected {
 		t.Fatalf("bad value: %s", p.config.InlineShebang)
 	}
 
 	// Test with a good one
-	config["inline_shebang"] = "foo"
+	raws["inline_shebang"] = "foo"
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
@@ -65,23 +70,23 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 
 func TestPostProcessorPrepare_InvalidKey(t *testing.T) {
 	var p PostProcessor
-	config := testConfig()
+	raws := testConfig()
 
 	// Add a random key
-	config["i_should_not_be_valid"] = true
-	err := p.Configure(config)
+	raws["i_should_not_be_valid"] = true
+	err := p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 }
 
 func TestPostProcessorPrepare_Script(t *testing.T) {
-	config := testConfig()
-	delete(config, "inline")
+	raws := testConfig()
+	delete(raws, "inline")
 
-	config["script"] = "/this/should/not/exist"
+	raws["script"] = "/this/should/not/exist"
 	p := new(PostProcessor)
-	err := p.Configure(config)
+	err := p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -93,23 +98,65 @@ func TestPostProcessorPrepare_Script(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config["script"] = tf.Name()
+	raws["script"] = tf.Name()
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
 
+func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
+	// Check that passing a string will work (Backwards Compatibility)
+	p := new(PostProcessor)
+	raws := testConfig()
+	raws["execute_command"] = "foo bar"
+	err := p.Configure(raws)
+	expected := []string{"sh", "-c", "foo bar"}
+	if err != nil {
+		t.Fatalf("should handle backwards compatibility: %s", err)
+	}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
+
+	// Check that passing a list will work
+	p = new(PostProcessor)
+	raws = testConfig()
+	raws["execute_command"] = []string{"foo", "bar"}
+	err = p.Configure(raws)
+	if err != nil {
+		t.Fatalf("should handle backwards compatibility: %s", err)
+	}
+	expected = []string{"foo", "bar"}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
+
+	// Check that default is as expected
+	raws = testConfig()
+	delete(raws, "execute_command")
+	p = new(PostProcessor)
+	p.Configure(raws)
+	if runtime.GOOS != "windows" {
+		expected = []string{"/bin/sh", "-c", "{{.Vars}} {{.Script}}"}
+	} else {
+		expected = []string{"cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"}
+	}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected default: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
+}
+
 func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
 	var p PostProcessor
-	config := testConfig()
+	raws := testConfig()
 
-	delete(config, "inline")
-	delete(config, "script")
-	err := p.Configure(config)
+	// Error if no scripts/inline commands provided
+	delete(raws, "inline")
+	delete(raws, "script")
+	delete(raws, "command")
+	delete(raws, "scripts")
+	err := p.Configure(raws)
 	if err == nil {
-		t.Fatal("should have error")
+		t.Fatalf("should error when no scripts/inline commands are provided")
 	}
 
 	// Test with both
@@ -119,9 +166,9 @@ func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config["inline"] = []interface{}{"foo"}
-	config["script"] = tf.Name()
-	err = p.Configure(config)
+	raws["inline"] = []interface{}{"foo"}
+	raws["script"] = tf.Name()
+	err = p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -129,7 +176,7 @@ func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
 
 func TestPostProcessorPrepare_ScriptAndScripts(t *testing.T) {
 	var p PostProcessor
-	config := testConfig()
+	raws := testConfig()
 
 	// Test with both
 	tf, err := ioutil.TempFile("", "packer")
@@ -138,21 +185,21 @@ func TestPostProcessorPrepare_ScriptAndScripts(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config["inline"] = []interface{}{"foo"}
-	config["scripts"] = []string{tf.Name()}
-	err = p.Configure(config)
+	raws["inline"] = []interface{}{"foo"}
+	raws["scripts"] = []string{tf.Name()}
+	err = p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 }
 
 func TestPostProcessorPrepare_Scripts(t *testing.T) {
-	config := testConfig()
-	delete(config, "inline")
+	raws := testConfig()
+	delete(raws, "inline")
 
-	config["scripts"] = []string{}
+	raws["scripts"] = []string{}
 	p := new(PostProcessor)
-	err := p.Configure(config)
+	err := p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -164,92 +211,55 @@ func TestPostProcessorPrepare_Scripts(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config["scripts"] = []string{tf.Name()}
+	raws["scripts"] = []string{tf.Name()}
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
 
 func TestPostProcessorPrepare_EnvironmentVars(t *testing.T) {
-	config := testConfig()
+	raws := testConfig()
 
 	// Test with a bad case
-	config["environment_vars"] = []string{"badvar", "good=var"}
+	raws["environment_vars"] = []string{"badvar", "good=var"}
 	p := new(PostProcessor)
-	err := p.Configure(config)
+	err := p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	// Test with a trickier case
-	config["environment_vars"] = []string{"=bad"}
+	raws["environment_vars"] = []string{"=bad"}
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err == nil {
 		t.Fatal("should have error")
 	}
 
 	// Test with a good case
 	// Note: baz= is a real env variable, just empty
-	config["environment_vars"] = []string{"FOO=bar", "baz="}
+	raws["environment_vars"] = []string{"FOO=bar", "baz="}
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Test when the env variable value contains an equals sign
-	config["environment_vars"] = []string{"good=withequals=true"}
+	raws["environment_vars"] = []string{"good=withequals=true"}
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Test when the env variable value starts with an equals sign
-	config["environment_vars"] = []string{"good==true"}
+	raws["environment_vars"] = []string{"good==true"}
 	p = new(PostProcessor)
-	err = p.Configure(config)
+	err = p.Configure(raws)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestPostProcessor_createFlattenedEnvVars(t *testing.T) {
-	var flattenedEnvVars string
-	config := testConfig()
-
-	userEnvVarTests := [][]string{
-		{},                     // No user env var
-		{"FOO=bar"},            // Single user env var
-		{"FOO=bar's"},          // User env var with single quote in value
-		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
-		{"FOO=bar=baz"},        // User env var with value containing equals
-		{"FOO==bar"},           // User env var with value starting with equals
-	}
-	expected := []string{
-		`PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar'"'"'s' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`BAZ='qux' FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar=baz' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='=bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-	}
-
-	p := new(PostProcessor)
-	p.Configure(config)
-
-	// Defaults provided by Packer
-	p.config.PackerBuildName = "vmware"
-	p.config.PackerBuilderType = "iso"
-
-	for i, expectedValue := range expected {
-		p.config.Vars = userEnvVarTests[i]
-		flattenedEnvVars = p.createFlattenedEnvVars()
-		if flattenedEnvVars != expectedValue {
-			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
-		}
 	}
 }

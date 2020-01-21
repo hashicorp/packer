@@ -7,15 +7,14 @@ import (
 )
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
-	var testSubject = &Builder{}
-	_, err := testSubject.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	var testSubject Builder
+	_, _, err := testSubject.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("failed to prepare: %s", err)
 	}
 
 	var expectedStateBagKeys = []string{
 		constants.AuthorizedKey,
-		constants.PrivateKey,
 
 		constants.ArmTags,
 		constants.ArmComputeName,
@@ -25,6 +24,7 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 		constants.ArmStorageAccountName,
 		constants.ArmVirtualMachineCaptureParameters,
 		constants.ArmPublicIPAddressName,
+		constants.ArmAsyncResourceGroupDelete,
 	}
 
 	for _, v := range expectedStateBagKeys {

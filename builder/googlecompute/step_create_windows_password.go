@@ -24,7 +24,7 @@ type StepCreateWindowsPassword struct {
 }
 
 // Run executes the Packer build step that sets the windows password on a Windows GCE instance.
-func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(Driver)
 	c := state.Get("config").(*Config)
@@ -32,6 +32,7 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 
 	if c.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", c.Comm.WinRMPassword)
+		packer.LogSecretFilter.Set(c.Comm.WinRMPassword)
 		return multistep.ActionContinue
 	}
 
@@ -53,12 +54,17 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 	buf := make([]byte, 4)
 	binary.BigEndian.PutUint32(buf, uint32(priv.E))
 
+	email := ""
+	if c.account != nil {
+		email = c.account.Email
+	}
+
 	data := WindowsPasswordConfig{
 		key:      priv,
 		UserName: c.Comm.WinRMUser,
 		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
 		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
-		Email:    c.Account.ClientEmail,
+		Email:    email,
 		ExpireOn: time.Now().Add(time.Minute * 5),
 	}
 
@@ -92,7 +98,7 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 		ui.Message("Waiting for windows password to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(c.stateTimeout):
+		case <-time.After(c.StateTimeout):
 			err = errors.New("time out while waiting for the password to be created")
 		}
 	}
@@ -112,6 +118,7 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 	}
 
 	state.Put("winrm_password", data.password)
+	packer.LogSecretFilter.Set(data.password)
 
 	return multistep.ActionContinue
 }

@@ -23,6 +23,13 @@ const (
 	// The image requested does not exist in the specified repository.
 	ErrCodeImageNotFoundException = "ImageNotFoundException"
 
+	// ErrCodeImageTagAlreadyExistsException for service response error code
+	// "ImageTagAlreadyExistsException".
+	//
+	// The specified image is tagged with a tag that already exists. The repository
+	// is configured for tag immutability.
+	ErrCodeImageTagAlreadyExistsException = "ImageTagAlreadyExistsException"
+
 	// ErrCodeInvalidLayerException for service response error code
 	// "InvalidLayerException".
 	//
@@ -43,6 +50,14 @@ const (
 	// The specified parameter is invalid. Review the available parameters for the
 	// API request.
 	ErrCodeInvalidParameterException = "InvalidParameterException"
+
+	// ErrCodeInvalidTagParameterException for service response error code
+	// "InvalidTagParameterException".
+	//
+	// An invalid parameter has been specified. Tag keys can have a maximum character
+	// length of 128 characters, and tag values can have a maximum length of 256
+	// characters.
+	ErrCodeInvalidTagParameterException = "InvalidTagParameterException"
 
 	// ErrCodeLayerAlreadyExistsException for service response error code
 	// "LayerAlreadyExistsException".
@@ -94,8 +109,8 @@ const (
 	//
 	// The operation did not succeed because it would have exceeded a service limit
 	// for your account. For more information, see Amazon ECR Default Service Limits
-	// (http://docs.aws.amazon.com/AmazonECR/latest/userguide/service_limits.html)
-	// in the Amazon EC2 Container Registry User Guide.
+	// (https://docs.aws.amazon.com/AmazonECR/latest/userguide/service_limits.html)
+	// in the Amazon Elastic Container Registry User Guide.
 	ErrCodeLimitExceededException = "LimitExceededException"
 
 	// ErrCodeRepositoryAlreadyExistsException for service response error code
@@ -130,6 +145,13 @@ const (
 	//
 	// These errors are usually caused by a server-side issue.
 	ErrCodeServerException = "ServerException"
+
+	// ErrCodeTooManyTagsException for service response error code
+	// "TooManyTagsException".
+	//
+	// The list of tags on the repository is over the limit. The maximum number
+	// of tags that can be applied to a repository is 50.
+	ErrCodeTooManyTagsException = "TooManyTagsException"
 
 	// ErrCodeUploadNotFoundException for service response error code
 	// "UploadNotFoundException".

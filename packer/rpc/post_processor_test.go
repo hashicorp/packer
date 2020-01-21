@@ -1,9 +1,11 @@
 package rpc
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -16,7 +18,11 @@ type TestPostProcessor struct {
 	ppArtifact   packer.Artifact
 	ppArtifactId string
 	ppUi         packer.Ui
+
+	postProcessFn func(context.Context) error
 }
+
+func (*TestPostProcessor) ConfigSpec() hcldec.ObjectSpec { return nil }
 
 func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	pp.configCalled = true
@@ -24,12 +30,15 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, error) {
+func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppArtifactId = a.Id()
 	pp.ppUi = ui
-	return testPostProcessorArtifact, false, nil
+	if pp.postProcessFn != nil {
+		return testPostProcessorArtifact, false, false, pp.postProcessFn(ctx)
+	}
+	return testPostProcessorArtifact, false, false, nil
 }
 
 func TestPostProcessorRPC(t *testing.T) {
@@ -65,7 +74,7 @@ func TestPostProcessorRPC(t *testing.T) {
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)
-	artifact, _, err := ppClient.PostProcess(ui, a)
+	artifact, _, _, err := ppClient.PostProcess(context.Background(), ui, a)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -75,11 +84,49 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	if p.ppArtifactId != "ppTestId" {
-		t.Fatalf("unknown artifact: %s", p.ppArtifact.Id())
+		t.Fatalf("unknown artifact: '%s'", p.ppArtifact.Id())
 	}
 
 	if artifact.Id() != "id" {
 		t.Fatalf("unknown artifact: %s", artifact.Id())
+	}
+}
+
+func TestPostProcessorRPC_cancel(t *testing.T) {
+	topCtx, cancelTopCtx := context.WithCancel(context.Background())
+
+	p := new(TestPostProcessor)
+	p.postProcessFn = func(ctx context.Context) error {
+		cancelTopCtx()
+		<-ctx.Done()
+		return ctx.Err()
+	}
+
+	// Start the server
+	client, server := testClientServer(t)
+	defer client.Close()
+	defer server.Close()
+	if err := server.RegisterPostProcessor(p); err != nil {
+		panic(err)
+	}
+
+	ppClient := client.PostProcessor()
+
+	// Test Configure
+	config := 42
+	err := ppClient.Configure(config)
+	if err != nil {
+		t.Fatalf("error configuring post-processor client: %s", err)
+	}
+
+	// Test PostProcess
+	a := &packer.MockArtifact{
+		IdValue: "ppTestId",
+	}
+	ui := new(testUi)
+	_, _, _, err = ppClient.PostProcess(topCtx, ui, a)
+	if err == nil {
+		t.Fatalf("should err")
 	}
 }
 

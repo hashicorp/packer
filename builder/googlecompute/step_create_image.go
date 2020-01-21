@@ -18,7 +18,7 @@ type StepCreateImage int
 //
 // The image is created from the persistent disk used by the instance. The
 // instance must be deleted and the disk retained before doing this step.
-func (s *StepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -40,11 +40,11 @@ func (s *StepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	imageCh, errCh := driver.CreateImage(
 		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
-		config.DiskName, config.ImageLabels, config.ImageLicenses)
+		config.DiskName, config.ImageLabels, config.ImageLicenses, config.ImageEncryptionKey.ComputeType())
 	var err error
 	select {
 	case err = <-errCh:
-	case <-time.After(config.stateTimeout):
+	case <-time.After(config.StateTimeout):
 		err = errors.New("time out while waiting for image to register")
 	}
 

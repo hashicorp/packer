@@ -2,11 +2,9 @@
   "variables": {
     "client_id": "{{env `ARM_CLIENT_ID`}}",
     "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
-    "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
-    "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
     "ssh_user": "packer",
-    "ssh_pass": null
+    "ssh_pass": "{{env `ARM_SSH_PASS`}}"
   },
   "builders": [{
     "type": "azure-arm",
@@ -17,8 +15,8 @@
     "storage_account": "{{user `storage_account`}}",
     "subscription_id": "{{user `subscription_id`}}",
 
-    "capture_container_name": "images",
-    "capture_name_prefix": "packer",
+    "managed_image_resource_group_name": "packertest",
+    "managed_image_name": "MyDebianOSImage",
 
     "ssh_username": "{{user `ssh_user`}}",
     "ssh_password": "{{user `ssh_pass`}}",
@@ -26,7 +24,7 @@
     "os_type": "Linux",
     "image_publisher": "credativ",
     "image_offer": "Debian",
-    "image_sku": "8",
+    "image_sku": "9",
     "ssh_pty": "true",
 
     "location": "South Central US",

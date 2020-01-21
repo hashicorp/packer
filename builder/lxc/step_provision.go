@@ -11,7 +11,7 @@ import (
 // StepProvision provisions the instance within a chroot.
 type StepProvision struct{}
 
-func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
@@ -28,7 +28,7 @@ func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multist
 
 	// Provision
 	log.Println("Running the provision hook")
-	if err := hook.Run(packer.HookProvision, ui, comm, nil); err != nil {
+	if err := hook.Run(ctx, packer.HookProvision, ui, comm, nil); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

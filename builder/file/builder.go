@@ -2,15 +2,17 @@ package file
 
 /*
 The File builder creates an artifact from a file. Because it does not require
-any virutalization or network resources, it's very fast and useful for testing.
+any virtualization or network resources, it's very fast and useful for testing.
 */
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -18,37 +20,38 @@ import (
 const BuilderId = "packer.file"
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return warnings, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
 }
 
 // Run is where the actual build should take place. It takes a Build and a Ui.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	artifact := new(FileArtifact)
 
 	if b.config.Source != "" {
 		source, err := os.Open(b.config.Source)
-		defer source.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer source.Close()
 
 		// Create will truncate an existing file
 		target, err := os.Create(b.config.Target)
-		defer target.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer target.Close()
 
 		ui.Say(fmt.Sprintf("Copying %s to %s", source.Name(), target.Name()))
 		bytes, err := io.Copy(target, source)
@@ -67,11 +70,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		artifact.filename = b.config.Target
 	}
 
-	return artifact, nil
-}
+	if hook != nil {
+		if err := hook.Run(ctx, packer.HookProvision, ui, new(packer.MockCommunicator), nil); err != nil {
+			return nil, err
+		}
+	}
 
-// Cancel cancels a possibly running Builder. This should block until
-// the builder actually cancels and cleans up after itself.
-func (b *Builder) Cancel() {
-	b.runner.Cancel()
+	return artifact, nil
 }

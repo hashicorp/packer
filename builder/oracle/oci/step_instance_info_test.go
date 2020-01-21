@@ -1,11 +1,13 @@
 package oci
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestInstanceInfo(t *testing.T) {
@@ -26,6 +28,36 @@ func TestInstanceInfo(t *testing.T) {
 
 	if instanceIPRaw.(string) != "ip" {
 		t.Fatalf("should've got ip ('%s' != 'ip')", instanceIPRaw.(string))
+	}
+}
+
+func TestInstanceInfoPrivateIP(t *testing.T) {
+	baseTestConfig := baseTestConfig()
+	baseTestConfig.UsePrivateIP = true
+	state := new(multistep.BasicStateBag)
+	state.Put("config", baseTestConfig)
+	state.Put("driver", &driverMock{cfg: baseTestConfig})
+	state.Put("hook", &packer.MockHook{})
+	state.Put("ui", &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	})
+	state.Put("instance_id", "ocid1...")
+
+	step := new(stepInstanceInfo)
+	defer step.Cleanup(state)
+
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	instanceIPRaw, ok := state.GetOk("instance_ip")
+	if !ok {
+		t.Fatalf("should have instance_ip")
+	}
+
+	if instanceIPRaw.(string) != "private_ip" {
+		t.Fatalf("should've got ip ('%s' != 'private_ip')", instanceIPRaw.(string))
 	}
 }
 

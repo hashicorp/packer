@@ -1,9 +1,11 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package compress
 
 import (
 	"archive/tar"
 	"archive/zip"
-	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -12,12 +14,14 @@ import (
 	"runtime"
 
 	"github.com/biogo/hts/bgzf"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/klauspost/pgzip"
 	"github.com/pierrec/lz4"
+	"github.com/ulikunitz/xz"
 )
 
 var (
@@ -36,10 +40,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Fields from config file
-	OutputPath        string `mapstructure:"output"`
-	Format            string `mapstructure:"format"`
-	CompressionLevel  int    `mapstructure:"compression_level"`
-	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
+	OutputPath       string `mapstructure:"output"`
+	Format           string `mapstructure:"format"`
+	CompressionLevel int    `mapstructure:"compression_level"`
 
 	// Derived fields
 	Archive   string
@@ -51,6 +54,8 @@ type Config struct {
 type PostProcessor struct {
 	config Config
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -99,7 +104,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcess(
+	ctx context.Context,
+	ui packer.Ui,
+	artifact packer.Artifact,
+) (packer.Artifact, bool, bool, error) {
 
 	// These are extra variables that will be made available for interpolation.
 	p.config.ctx.Data = map[string]string{
@@ -109,21 +118,20 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	target, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
 	if err != nil {
-		return nil, false, fmt.Errorf("Error interpolating output value: %s", err)
+		return nil, false, false, fmt.Errorf("Error interpolating output value: %s", err)
 	} else {
 		fmt.Println(target)
 	}
 
-	keep := p.config.KeepInputArtifact
 	newArtifact := &Artifact{Path: target}
 
 	if err = os.MkdirAll(filepath.Dir(target), os.FileMode(0755)); err != nil {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unable to create dir for archive %s: %s", target, err)
 	}
 	outputFile, err := os.Create(target)
 	if err != nil {
-		return nil, false, fmt.Errorf(
+		return nil, false, false, fmt.Errorf(
 			"Unable to create archive %s: %s", target, err)
 	}
 	defer outputFile.Close()
@@ -131,21 +139,40 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Setup output interface. If we're using compression, output is a
 	// compression writer. Otherwise it's just a file.
 	var output io.WriteCloser
+	errTmpl := "error creating %s writer: %s"
 	switch p.config.Algorithm {
 	case "bgzf":
 		ui.Say(fmt.Sprintf("Using bgzf compression with %d cores for %s",
 			runtime.GOMAXPROCS(-1), target))
 		output, err = makeBGZFWriter(outputFile, p.config.CompressionLevel)
+		if err != nil {
+			return nil, false, false, fmt.Errorf(errTmpl, p.config.Algorithm, err)
+		}
 		defer output.Close()
 	case "lz4":
 		ui.Say(fmt.Sprintf("Using lz4 compression with %d cores for %s",
 			runtime.GOMAXPROCS(-1), target))
 		output, err = makeLZ4Writer(outputFile, p.config.CompressionLevel)
+		if err != nil {
+			return nil, false, false, fmt.Errorf(errTmpl, p.config.Algorithm, err)
+		}
+		defer output.Close()
+	case "xz":
+		ui.Say(fmt.Sprintf("Using xz compression with 1 core for %s (library does not support MT)",
+			target))
+		output, err = makeXZWriter(outputFile)
+		if err != nil {
+			return nil, false, false, fmt.Errorf(errTmpl, p.config.Algorithm, err)
+		}
 		defer output.Close()
 	case "pgzip":
 		ui.Say(fmt.Sprintf("Using pgzip compression with %d cores for %s",
 			runtime.GOMAXPROCS(-1), target))
 		output, err = makePgzipWriter(outputFile, p.config.CompressionLevel)
+		if err != nil {
+			return nil, false, false,
+				fmt.Errorf(errTmpl, p.config.Algorithm, err)
+		}
 		defer output.Close()
 	default:
 		output = outputFile
@@ -162,19 +189,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Say(fmt.Sprintf("Tarring %s with %s", target, compression))
 		err = createTarArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, fmt.Errorf("Error creating tar: %s", err)
+			return nil, false, false, fmt.Errorf("Error creating tar: %s", err)
 		}
 	case "zip":
 		ui.Say(fmt.Sprintf("Zipping %s", target))
 		err = createZipArchive(artifact.Files(), output)
 		if err != nil {
-			return nil, keep, fmt.Errorf("Error creating zip: %s", err)
+			return nil, false, false, fmt.Errorf("Error creating zip: %s", err)
 		}
 	default:
 		// Filename indicates no tarball (just compress) so we'll do an io.Copy
 		// into our compressor.
 		if len(artifact.Files()) != 1 {
-			return nil, keep, fmt.Errorf(
+			return nil, false, false, fmt.Errorf(
 				"Can only have 1 input file when not using tar/zip. Found %d "+
 					"files: %v", len(artifact.Files()), artifact.Files())
 		}
@@ -183,21 +210,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		source, err := os.Open(archiveFile)
 		if err != nil {
-			return nil, keep, fmt.Errorf(
+			return nil, false, false, fmt.Errorf(
 				"Failed to open source file %s for reading: %s",
 				archiveFile, err)
 		}
 		defer source.Close()
 
 		if _, err = io.Copy(output, source); err != nil {
-			return nil, keep, fmt.Errorf("Failed to compress %s: %s",
+			return nil, false, false, fmt.Errorf("Failed to compress %s: %s",
 				archiveFile, err)
 		}
 	}
 
 	ui.Say(fmt.Sprintf("Archive %s completed", target))
 
-	return newArtifact, keep, nil
+	return newArtifact, false, false, nil
 }
 
 func (config *Config) detectFromFilename() {
@@ -209,6 +236,7 @@ func (config *Config) detectFromFilename() {
 		"gz":   "pgzip",
 		"lz4":  "lz4",
 		"bgzf": "bgzf",
+		"xz":   "xz",
 	}
 
 	if config.Format == "" {
@@ -267,10 +295,18 @@ func makeBGZFWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser
 
 func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
 	lzwriter := lz4.NewWriter(output)
-	if compressionLevel > gzip.DefaultCompression {
-		lzwriter.Header.HighCompression = true
+	if compressionLevel > 0 {
+		lzwriter.Header.CompressionLevel = compressionLevel
 	}
 	return lzwriter, nil
+}
+
+func makeXZWriter(output io.WriteCloser) (io.WriteCloser, error) {
+	xzwriter, err := xz.NewWriter(output)
+	if err != nil {
+		return nil, err
+	}
+	return xzwriter, nil
 }
 
 func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
@@ -302,6 +338,9 @@ func createTarArchive(files []string, output io.WriteCloser) error {
 		if err != nil {
 			return fmt.Errorf("Failed to create tar header for %s: %s", path, err)
 		}
+
+		// workaround for archive format on go >=1.10
+		setHeaderFormat(header)
 
 		if err := archive.WriteHeader(header); err != nil {
 			return fmt.Errorf("Failed to write tar header for %s: %s", path, err)

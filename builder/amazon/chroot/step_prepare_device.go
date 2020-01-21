@@ -3,6 +3,7 @@ package chroot
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder"
 	"log"
 	"os"
 
@@ -12,9 +13,10 @@ import (
 
 // StepPrepareDevice finds an available device and sets it.
 type StepPrepareDevice struct {
+	GeneratedData *builder.GeneratedData
 }
 
-func (s *StepPrepareDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepPrepareDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -40,6 +42,7 @@ func (s *StepPrepareDevice) Run(_ context.Context, state multistep.StateBag) mul
 
 	log.Printf("Device: %s", device)
 	state.Put("device", device)
+	s.GeneratedData.Put("Device", device)
 	return multistep.ActionContinue
 }
 

@@ -14,7 +14,9 @@ func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get:      func(string, string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
+			get: func(context.Context, string, string, string) (string, error) {
+				return "", fmt.Errorf("!! Unit Test FAIL !!")
+			},
 			endpoint: endpoint,
 			say:      func(message string) {},
 			error:    func(e error) {},
@@ -38,7 +40,7 @@ func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get:      func(string, string, string) (string, error) { return "", nil },
+			get:      func(context.Context, string, string, string) (string, error) { return "", nil },
 			endpoint: endpoint,
 			say:      func(message string) {},
 			error:    func(e error) {},
@@ -65,7 +67,7 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get: func(resourceGroupName string, ipAddressName string, nicName string) (string, error) {
+			get: func(ctx context.Context, resourceGroupName string, ipAddressName string, nicName string) (string, error) {
 				actualResourceGroupName = resourceGroupName
 				actualIPAddressName = ipAddressName
 				actualNicName = nicName

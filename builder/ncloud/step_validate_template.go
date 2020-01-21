@@ -13,7 +13,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-//StepValidateTemplate : struct for Validation a tempalte
+//StepValidateTemplate : struct for Validation a template
 type StepValidateTemplate struct {
 	Conn              *ncloud.Conn
 	Validate          func() error
@@ -25,7 +25,7 @@ type StepValidateTemplate struct {
 	FeeSystemTypeCode string
 }
 
-// NewStepValidateTemplate : funciton for Validation a tempalte
+// NewStepValidateTemplate : function for Validation a template
 func NewStepValidateTemplate(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
 		Conn:   conn,
@@ -249,8 +249,8 @@ func (s *StepValidateTemplate) validateTemplate() error {
 	return s.validateServerProductCode()
 }
 
-// Run : main funciton for validation a template
-func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+// Run : main function for validation a template
+func (s *StepValidateTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Validating deployment template ...")
 
 	err := s.Validate()

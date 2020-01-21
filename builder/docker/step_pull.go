@@ -11,10 +11,15 @@ import (
 
 type StepPull struct{}
 
-func (s *StepPull) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(Driver)
+func (s *StepPull) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config, ok := state.Get("config").(*Config)
+	if !ok {
+		err := fmt.Errorf("error encountered obtaining docker config")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	if !config.Pull {
 		log.Println("Pull disabled, won't docker pull")
@@ -38,6 +43,7 @@ func (s *StepPull) Run(_ context.Context, state multistep.StateBag) multistep.St
 		config.LoginPassword = password
 	}
 
+	driver := state.Get("driver").(Driver)
 	if config.Login || config.EcrLogin {
 		ui.Message("Logging in...")
 		err := driver.Login(

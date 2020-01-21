@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -15,7 +14,11 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	getter "github.com/hashicorp/go-getter"
 )
+
+var ErrInterrupted = errors.New("interrupted")
 
 type UiColor uint
 
@@ -37,42 +40,30 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
+	getter.ProgressTracker
 }
+
+type NoopUi struct {
+	NoopProgressTracker
+}
+
+var _ Ui = new(NoopUi)
+
+func (*NoopUi) Ask(string) (string, error) { return "", errors.New("this is a noop ui") }
+func (*NoopUi) Say(string)                 { return }
+func (*NoopUi) Message(string)             { return }
+func (*NoopUi) Error(string)               { return }
+func (*NoopUi) Machine(string, ...string)  { return }
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
 	Color      UiColor
 	ErrorColor UiColor
 	Ui         Ui
+	*uiProgressBar
 }
 
-// TargetedUI is a UI that wraps another UI implementation and modifies
-// the output to indicate a specific target. Specifically, all Say output
-// is prefixed with the target name. Message output is not prefixed but
-// is offset by the length of the target so that output is lined up properly
-// with Say output. Machine-readable output has the proper target set.
-type TargetedUI struct {
-	Target string
-	Ui     Ui
-}
-
-// The BasicUI is a UI that reads and writes from a standard Go reader
-// and writer. It is safe to be called from multiple goroutines. Machine
-// readable output is simply logged for this UI.
-type BasicUi struct {
-	Reader      io.Reader
-	Writer      io.Writer
-	ErrorWriter io.Writer
-	l           sync.Mutex
-	interrupted bool
-	scanner     *bufio.Scanner
-}
-
-// MachineReadableUi is a UI that only outputs machine-readable output
-// to the given Writer.
-type MachineReadableUi struct {
-	Writer io.Writer
-}
+var _ Ui = new(ColoredUi)
 
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
@@ -132,6 +123,19 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
+// TargetedUI is a UI that wraps another UI implementation and modifies
+// the output to indicate a specific target. Specifically, all Say output
+// is prefixed with the target name. Message output is not prefixed but
+// is offset by the length of the target so that output is lined up properly
+// with Say output. Machine-readable output has the proper target set.
+type TargetedUI struct {
+	Target string
+	Ui     Ui
+	*uiProgressBar
+}
+
+var _ Ui = new(TargetedUI)
+
 func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
@@ -168,16 +172,31 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
 }
 
+// The BasicUI is a UI that reads and writes from a standard Go reader
+// and writer. It is safe to be called from multiple goroutines. Machine
+// readable output is simply logged for this UI.
+type BasicUi struct {
+	Reader      io.Reader
+	Writer      io.Writer
+	ErrorWriter io.Writer
+	l           sync.Mutex
+	interrupted bool
+	TTY         TTY
+	*uiProgressBar
+}
+
+var _ Ui = new(BasicUi)
+
 func (rw *BasicUi) Ask(query string) (string, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
 	if rw.interrupted {
-		return "", errors.New("interrupted")
+		return "", ErrInterrupted
 	}
 
-	if rw.scanner == nil {
-		rw.scanner = bufio.NewScanner(rw.Reader)
+	if rw.TTY == nil {
+		return "", errors.New("no available tty")
 	}
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
@@ -192,15 +211,12 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 
 	result := make(chan string, 1)
 	go func() {
-		var line string
-		if rw.scanner.Scan() {
-			line = rw.scanner.Text()
-		}
-		if err := rw.scanner.Err(); err != nil {
+		line, err := rw.TTY.ReadString()
+		if err != nil {
 			log.Printf("ui: scan err: %s", err)
 			return
 		}
-		result <- line
+		result <- strings.TrimSpace(line)
 	}()
 
 	select {
@@ -214,13 +230,20 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		// Mark that we were interrupted so future Ask calls fail.
 		rw.interrupted = true
 
-		return "", errors.New("interrupted")
+		return "", ErrInterrupted
 	}
 }
 
 func (rw *BasicUi) Say(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
+
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
 
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
@@ -232,6 +255,13 @@ func (rw *BasicUi) Say(message string) {
 func (rw *BasicUi) Message(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
+
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
 
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
@@ -249,6 +279,13 @@ func (rw *BasicUi) Error(message string) {
 		writer = rw.Writer
 	}
 
+	// Use LogSecretFilter to scrub out sensitive variables
+	for s := range LogSecretFilter.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
+
 	log.Printf("ui error: %s", message)
 	_, err := fmt.Fprint(writer, message+"\n")
 	if err != nil {
@@ -259,6 +296,15 @@ func (rw *BasicUi) Error(message string) {
 func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
 }
+
+// MachineReadableUi is a UI that only outputs machine-readable output
+// to the given Writer.
+type MachineReadableUi struct {
+	Writer io.Writer
+	NoopProgressTracker
+}
+
+var _ Ui = new(MachineReadableUi)
 
 func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
@@ -289,6 +335,12 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 
 	// Prepare the args
 	for i, v := range args {
+		// Use LogSecretFilter to scrub out sensitive variables
+		for s := range LogSecretFilter.s {
+			if s != "" {
+				args[i] = strings.Replace(args[i], s, "<sensitive>", -1)
+			}
+		}
 		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
 		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
 		args[i] = strings.Replace(args[i], "\n", "\\n", -1)
@@ -304,4 +356,80 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 			panic(err)
 		}
 	}
+	log.Printf("%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
+}
+
+// TimestampedUi is a UI that wraps another UI implementation and
+// prefixes each message with an RFC3339 timestamp
+type TimestampedUi struct {
+	Ui Ui
+	*uiProgressBar
+}
+
+var _ Ui = new(TimestampedUi)
+
+func (u *TimestampedUi) Ask(query string) (string, error) {
+	return u.Ui.Ask(query)
+}
+
+func (u *TimestampedUi) Say(message string) {
+	u.Ui.Say(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Message(message string) {
+	u.Ui.Message(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Error(message string) {
+	u.Ui.Error(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Machine(message string, args ...string) {
+	u.Ui.Machine(message, args...)
+}
+
+func (u *TimestampedUi) timestampLine(string string) string {
+	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
+}
+
+// Safe is a UI that wraps another UI implementation and
+// provides concurrency-safe access
+type SafeUi struct {
+	Sem chan int
+	Ui  Ui
+	*uiProgressBar
+}
+
+var _ Ui = new(SafeUi)
+
+func (u *SafeUi) Ask(s string) (string, error) {
+	u.Sem <- 1
+	ret, err := u.Ui.Ask(s)
+	<-u.Sem
+
+	return ret, err
+}
+
+func (u *SafeUi) Say(s string) {
+	u.Sem <- 1
+	u.Ui.Say(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Message(s string) {
+	u.Sem <- 1
+	u.Ui.Message(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Error(s string) {
+	u.Sem <- 1
+	u.Ui.Error(s)
+	<-u.Sem
+}
+
+func (u *SafeUi) Machine(t string, args ...string) {
+	u.Sem <- 1
+	u.Ui.Machine(t, args...)
+	<-u.Sem
 }
