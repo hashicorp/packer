@@ -197,6 +197,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ImageListVersion: state.Get("image_list_version").(int),
 		MachineImageName: state.Get("machine_image_name").(string),
 		MachineImageFile: state.Get("machine_image_file").(string),
+		StateData:        map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

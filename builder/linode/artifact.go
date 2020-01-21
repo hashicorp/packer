@@ -13,6 +13,10 @@ type Artifact struct {
 	ImageLabel string
 
 	Driver *linodego.Client
+
+	// SateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (a Artifact) BuilderId() string { return BuilderID }
@@ -23,7 +27,9 @@ func (a Artifact) String() string {
 	return fmt.Sprintf("Linode image: %s (%s)", a.ImageLabel, a.ImageID)
 }
 
-func (a Artifact) State(name string) interface{} { return nil }
+func (a Artifact) State(name string) interface{} {
+	return a.StateData[name]
+}
 
 func (a Artifact) Destroy() error {
 	log.Printf("Destroying image: %s (%s)", a.ImageID, a.ImageLabel)

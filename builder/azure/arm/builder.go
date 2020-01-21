@@ -289,13 +289,29 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
+	generatedData := map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")}
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s",
 			b.config.ClientConfig.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
 		if b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
-			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix, b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string))
+			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType,
+				b.config.ManagedImageResourceGroupName,
+				b.config.ManagedImageName,
+				b.config.manageImageLocation,
+				managedImageID,
+				b.config.ManagedImageOSDiskSnapshotName,
+				b.config.ManagedImageDataDiskSnapshotPrefix,
+				b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string),
+				generatedData)
 		}
-		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix)
+		return NewManagedImageArtifact(b.config.OSType,
+			b.config.ManagedImageResourceGroupName,
+			b.config.ManagedImageName,
+			b.config.manageImageLocation,
+			managedImageID,
+			b.config.ManagedImageOSDiskSnapshotName,
+			b.config.ManagedImageDataDiskSnapshotPrefix,
+			generatedData)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
@@ -307,10 +323,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				sasUrl, _ := blob.GetSASURI(options)
 				return sasUrl
 			},
-			b.config.OSType)
+			b.config.OSType,
+			generatedData)
 	}
 
-	return &Artifact{}, nil
+	return &Artifact{
+		StateData: generatedData,
+	}, nil
 }
 
 func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {

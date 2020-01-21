@@ -26,6 +26,10 @@ type artifact struct {
 	dir       OutputDir
 	f         []string
 	config    map[string]string
+
+	// SateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (a *artifact) BuilderId() string {
@@ -45,6 +49,9 @@ func (a *artifact) String() string {
 }
 
 func (a *artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
 	return a.config[name]
 }
 
@@ -87,5 +94,6 @@ func NewArtifact(remoteType string, format string, exportOutputPath string, vmNa
 		dir:       dir,
 		f:         files,
 		config:    config,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}, nil
 }

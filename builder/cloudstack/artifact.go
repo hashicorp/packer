@@ -13,6 +13,10 @@ type Artifact struct {
 	client   *cloudstack.CloudStackClient
 	config   *Config
 	template *cloudstack.CreateTemplateResponse
+
+	// SateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 // BuilderId returns the builder ID.
@@ -60,5 +64,5 @@ func (a *Artifact) String() string {
 
 // State returns specific details from the artifact.
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }

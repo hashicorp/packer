@@ -92,6 +92,10 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 
 	hookData := PopulateProvisionHookData(state)
 
+	// Update state generated_data with complete hookData
+	// to make them accessible by post-processors
+	state.Put("generated_data", hookData)
+
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...
 	if hooktype == packer.HookProvision {

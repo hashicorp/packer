@@ -44,3 +44,22 @@ func TestArtifactString(t *testing.T) {
 		t.Fatalf("artifact string should match: expected: %s received: %s", expected, a.String())
 	}
 }
+
+func TestArtifactState(t *testing.T) {
+	expectedData := "this is the data"
+	artifact := &artifact{
+		StateData: map[string]interface{}{"state_data": expectedData},
+	}
+
+	// Valid state
+	result := artifact.State("state_data")
+	if result != expectedData {
+		t.Fatalf("Bad: State data was %s instead of %s", result, expectedData)
+	}
+
+	// Invalid state
+	result = artifact.State("invalid_key")
+	if result != nil {
+		t.Fatalf("Bad: State should be nil for invalid state data name")
+	}
+}
