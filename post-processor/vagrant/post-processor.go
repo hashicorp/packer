@@ -83,11 +83,17 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	config.ctx.Data = &outputPathTemplate{
-		ArtifactId: artifact.Id(),
-		BuildName:  config.PackerBuildName,
-		Provider:   name,
+	generatedData := make(map[string]interface{})
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[string]interface{})
 	}
+	generatedData["ArtifactId"] = artifact.Id()
+	generatedData["BuildName"] = config.PackerBuildName
+	generatedData["Provider"] = name
+	config.ctx.Data = generatedData
+
 	outputPath, err := interpolate.Render(config.OutputPath, &config.ctx)
 	if err != nil {
 		return nil, false, err
@@ -269,14 +275,6 @@ func providerForName(name string) Provider {
 	default:
 		return nil
 	}
-}
-
-// OutputPathTemplate is the structure that is available within the
-// OutputPath variables.
-type outputPathTemplate struct {
-	ArtifactId string
-	BuildName  string
-	Provider   string
 }
 
 type vagrantfileTemplate struct {

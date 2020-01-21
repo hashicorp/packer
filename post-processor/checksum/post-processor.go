@@ -105,6 +105,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	files := artifact.Files()
 	var h hash.Hash
 
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
+
 	newartifact := NewArtifact(artifact.Files())
 	opTpl := &outputPathTemplate{
 		BuildName:   p.config.PackerBuildName,

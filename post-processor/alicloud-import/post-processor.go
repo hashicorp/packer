@@ -135,6 +135,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
 
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
+
 	// Render this key since we didn't in the configure phase
 	p.config.OSSKey, err = interpolate.Render(p.config.OSSKey, &p.config.ctx)
 	if err != nil {

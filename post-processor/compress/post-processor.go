@@ -109,12 +109,18 @@ func (p *PostProcessor) PostProcess(
 	ui packer.Ui,
 	artifact packer.Artifact,
 ) (packer.Artifact, bool, bool, error) {
+	generatedData := make(map[string]interface{})
+
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[string]interface{})
+	}
 
 	// These are extra variables that will be made available for interpolation.
-	p.config.ctx.Data = map[string]string{
-		"BuildName":   p.config.PackerBuildName,
-		"BuilderType": p.config.PackerBuilderType,
-	}
+	generatedData["BuildName"] = p.config.PackerBuildName
+	generatedData["BuilderType"] = p.config.PackerBuilderType
+	p.config.ctx.Data = generatedData
 
 	target, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
 	if err != nil {
