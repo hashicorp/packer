@@ -149,11 +149,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error getting provider name: %s", err)
 	}
 
-	generatedData := make(map[string]interface{})
+	generatedData := make(map[interface{}]interface{})
 	stateData := artifact.State("generated_data")
 	if stateData != nil {
 		// Make sure it's not a nil map so we can assign to it later.
-		generatedData = stateData.(map[string]interface{})
+		generatedData = stateData.(map[interface{}]interface{})
 	}
 	generatedData["ArtifactId"] = artifact.Id()
 	generatedData["Provider"] = providerName
