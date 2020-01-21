@@ -36,9 +36,6 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	// Implemented in most others including digitalOcean (droplet id),
 	// docker (container_id), and clouds which use "server" internally instead
 	// of instance.
-
-	// Also note that Chroot and lxc/lxd builders tend to have their own custom
-	// step_provision, so they won't use this code path.
 	id, ok := state.GetOk("instance_id")
 	if ok {
 		hookData["ID"] = id
