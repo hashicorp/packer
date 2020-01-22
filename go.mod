@@ -11,7 +11,7 @@ require (
 	github.com/Azure/go-autorest v12.0.0+incompatible
 	github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
-	github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
+	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340
@@ -115,11 +115,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/moul/anonuuid v0.0.0-20160222162117-609b752a95ef // indirect
 	github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215 // indirect
-	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/onsi/ginkgo v1.7.0 // indirect
-	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/oracle/oci-go-sdk v1.8.0
 	github.com/outscale/osc-go v0.0.1
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
@@ -166,7 +163,6 @@ require (
 	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect
 	google.golang.org/grpc v1.25.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/h2non/gock.v1 v1.0.12 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
