@@ -58,7 +58,12 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	return err
 }
 
-func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
+func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
+	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
+	var deploymentName = s.name
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say(fmt.Sprintf("Removing the created Deployment object: '%s'", deploymentName))
+
 	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)
 	if err == nil {
 		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
@@ -172,6 +177,8 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 }
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
+	defer s.deleteTemplate(context.Background(), state)
+
 	//Only clean up if this was an existing resource group and the resource group
 	//is marked as created
 	var existingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
@@ -235,8 +242,5 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 				"Name: %s\n"+
 				"Error: %s", imageName, err))
 		}
-
-		ui.Say(fmt.Sprintf(" -> Deployment: '%s'", deploymentName))
-		s.deleteTemplate(context.Background(), resourceGroupName, deploymentName)
 	}
 }
