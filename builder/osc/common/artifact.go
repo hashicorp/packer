@@ -23,7 +23,7 @@ type Artifact struct {
 	// OAPI connection for performing API stuff.
 	Config *oapi.Config
 
-	// SateData should store data such as GeneratedData
+	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
 	StateData map[string]interface{}
 }

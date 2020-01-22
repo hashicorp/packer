@@ -19,7 +19,7 @@ type Artifact struct {
 	// The hcloudClient for making API calls
 	hcloudClient *hcloud.Client
 
-	// SateData should store data such as GeneratedData
+	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
 	StateData map[string]interface{}
 }

@@ -23,7 +23,7 @@ type Artifact struct {
 	// Azure client for performing API stuff.
 	AzureClientSet client.AzureClientSet
 
-	// SateData should store data such as GeneratedData
+	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
 	StateData map[string]interface{}
 }

@@ -8,7 +8,7 @@ import (
 type Artifact struct {
 	dir string
 	f   []string
-	// SateData should store data such as GeneratedData
+	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
 	StateData map[string]interface{}
 }
