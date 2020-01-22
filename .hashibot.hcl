@@ -5,7 +5,7 @@ behavior "regexp_issue_labeler" "panic_label" {
 }
 
 behavior "remove_labels_on_reply" "remove_stale" {
-    labels = ["waiting-response", "stale"]
+    labels = ["waiting-reply", "stale"]
     only_non_maintainers = true
 }
 
