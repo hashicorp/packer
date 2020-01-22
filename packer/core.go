@@ -397,6 +397,8 @@ func (c *Core) init() error {
 		allVariables[k] = v
 	}
 
+	// One idea: Don't interpolate variables
+
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
 		// First, loop over the variables in the template
