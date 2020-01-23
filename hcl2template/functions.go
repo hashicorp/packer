@@ -102,7 +102,6 @@ func Functions() map[string]function.Function {
 		"timestamp":        unimplFunc, // funcs.TimestampFunc,
 		"timeadd":          unimplFunc, // funcs.TimeAddFunc,
 		"title":            unimplFunc, // funcs.TitleFunc,
-		"transpose":        unimplFunc, // funcs.TransposeFunc,
 		"trim":             unimplFunc, // funcs.TrimFunc,
 		"trimprefix":       unimplFunc, // funcs.TrimPrefixFunc,
 		"trimspace":        unimplFunc, // funcs.TrimSpaceFunc,
