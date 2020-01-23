@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2/ext/tryfunc"
+	"github.com/hashicorp/hcl/v2/ext/typeexpr"
 	ctyyaml "github.com/zclconf/go-cty-yaml"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
@@ -41,6 +42,7 @@ func Functions() map[string]function.Function {
 		"compact":          unimplFunc, // funcs.CompactFunc,
 		"concat":           stdlib.ConcatFunc,
 		"contains":         unimplFunc, // funcs.ContainsFunc,
+		"convert":          typeexpr.ConvertFunc,
 		"csvdecode":        stdlib.CSVDecodeFunc,
 		"dirname":          unimplFunc, // funcs.DirnameFunc,
 		"distinct":         unimplFunc, // funcs.DistinctFunc,
