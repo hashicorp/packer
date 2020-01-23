@@ -48,7 +48,7 @@ func Render(v string, ctx *Context) (string, error) {
 		return renderedV, err
 	}
 	// Second interpolation in case value is a user variable
-	// It won't affect the result only when one interpolation is enough
+	// It won't affect the results when one interpolation is enough
 	renderedV, err = (&I{Value: renderedV}).Render(ctx)
 	return renderedV, err
 }
