@@ -42,15 +42,15 @@ func NewContext() *Context {
 }
 
 // Render is shorthand for constructing an I and calling Render.
-func Render(v string, ctx *Context) (string, error) {
-	renderedV, err := (&I{Value: v}).Render(ctx)
-	if err != nil {
-		return renderedV, err
+func Render(v string, ctx *Context) (rendered string, err error) {
+	for {
+		rendered, err = (&I{Value: v}).Render(ctx)
+		if err != nil || rendered == v {
+			break
+		}
+		v = rendered
 	}
-	// Second interpolation in case value is a user variable
-	// It won't affect the results when one interpolation is enough
-	renderedV, err = (&I{Value: renderedV}).Render(ctx)
-	return renderedV, err
+	return
 }
 
 // Validate is shorthand for constructing an I and calling Validate.

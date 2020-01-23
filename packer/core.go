@@ -2,11 +2,15 @@ package packer
 
 import (
 	"fmt"
+	"sort"
+	"strings"
+
+	ttmp "text/template"
+
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
-	"sort"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -346,11 +350,41 @@ func (c *Core) init() error {
 	if c.variables == nil {
 		c.variables = make(map[string]string)
 	}
+	// Go through the variables and interpolate the environment and
+	// user variables
 
 	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = make(map[string]string)
+	shouldRetry := true
+	changed := false
+	failedInterpolation := ""
 
+	// Why this giant loop?  User variables can be recursively defined. For
+	// example:
+	// "variables": {
+	//    	"foo":  "bar",
+	//	 	"baz":  "{{user `foo`}}baz",
+	// 		"bang": "bang{{user `baz`}}"
+	// },
+	// In this situation, we cannot guarantee that we've added "foo" to
+	// UserVariables before we try to interpolate "baz" the first time. We need
+	// to have the option to loop back over in order to add the properly
+	// interpolated "baz" to the UserVariables map.
+	// Likewise, we'd need to loop up to two times to properly add "bang",
+	// since that depends on "baz" being set, which depends on "foo" being set.
+
+	// We break out of the while loop either if all our variables have been
+	// interpolated or if after 100 loops we still haven't succeeded in
+	// interpolating them.  Please don't actually nest your variables in 100
+	// layers of other variables. Please.
+
+	// c.Template.Variables is populated by variables defined within the Template
+	// itself
+	// c.variables is populated by variables read in from the command line and
+	// var-files.
+	// We need to read the keys from both, then loop over all of them to figure
+	// out the appropriate interpolations.
 
 	allVariables := make(map[string]string)
 	// load in template variables
@@ -361,6 +395,46 @@ func (c *Core) init() error {
 	// overwrite template variables with command-line-read variables
 	for k, v := range c.variables {
 		allVariables[k] = v
+	}
+
+	for i := 0; i < 100; i++ {
+		shouldRetry = false
+		// First, loop over the variables in the template
+		for k, v := range allVariables {
+			// Interpolate the default
+			renderedV, err := interpolate.Render(v, ctx)
+			switch err.(type) {
+			case nil:
+				// We only get here if interpolation has succeeded, so something is
+				// different in this loop than in the last one.
+				changed = true
+				c.variables[k] = renderedV
+				ctx.UserVariables = c.variables
+			case ttmp.ExecError:
+				castError := err.(ttmp.ExecError)
+				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
+					shouldRetry = true
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
+				} else {
+					return err
+				}
+			default:
+				return fmt.Errorf(
+					// unexpected interpolation error: abort the run
+					"error interpolating default value for '%s': %s",
+					k, err)
+			}
+		}
+		if !shouldRetry {
+			break
+		}
+	}
+
+	if !changed && shouldRetry {
+		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
+			"the variable you're referencing has been defined; Packer treats "+
+			"all variables used to interpolate other user varaibles as "+
+			"required.", failedInterpolation)
 	}
 
 	for _, v := range c.Template.SensitiveVariables {
