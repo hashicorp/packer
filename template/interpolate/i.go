@@ -3,7 +3,6 @@ package interpolate
 import (
 	"bytes"
 	"github.com/google/uuid"
-	"log"
 	"regexp"
 	"strings"
 	"text/template"
@@ -47,6 +46,8 @@ func NewContext() *Context {
 
 // Render is shorthand for constructing an I and calling Render.
 func Render(v string, ctx *Context) (rendered string, err error) {
+	// Keep interpolating until all variables are done
+	// Sometimes a variable can been inside another one
 	for {
 		rendered, err = (&I{Value: v}).Render(ctx)
 		if err != nil || rendered == v {
@@ -58,6 +59,7 @@ func Render(v string, ctx *Context) (rendered string, err error) {
 }
 
 // Render is shorthand for constructing an I and calling Render.
+// Use regex to filter variables that are not supposed to be interpolated now
 func RenderRegex(v string, ctx *Context, regex string) (string, error) {
 	re := regexp.MustCompile(regex)
 	matches := re.FindAllStringSubmatch(v, -1)
@@ -65,7 +67,6 @@ func RenderRegex(v string, ctx *Context, regex string) (string, error) {
 	// Replace variables to be excluded with a unique UUID
 	excluded := make(map[string]string)
 	for _, value := range matches {
-		log.Printf("MOSS Match: %s", value[0])
 		id := uuid.New().String()
 		excluded[id] = value[0]
 		v = strings.ReplaceAll(v, value[0], id)
