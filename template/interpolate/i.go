@@ -43,7 +43,14 @@ func NewContext() *Context {
 
 // Render is shorthand for constructing an I and calling Render.
 func Render(v string, ctx *Context) (string, error) {
-	return (&I{Value: v}).Render(ctx)
+	renderedV, err := (&I{Value: v}).Render(ctx)
+	if err != nil {
+		return renderedV, err
+	}
+	// Second interpolation in case value is a user variable
+	// It won't affect the result only when one interpolation is enough
+	renderedV, err = (&I{Value: renderedV}).Render(ctx)
+	return renderedV, err
 }
 
 // Validate is shorthand for constructing an I and calling Validate.

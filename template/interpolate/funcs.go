@@ -45,7 +45,6 @@ var FuncGens = map[string]interface{}{
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
 	"build":          funcGenBuild,
-	"cli":            funcGenCli,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -162,13 +161,6 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 		}
 
 		return path, nil
-	}
-}
-
-// Another idea: create cli function to be used when variable it's inside file passed by cli
-func funcGenCli(ctx *Context) interface{} {
-	return func(s string) (string, error) {
-		return fmt.Sprintf("{{.%s}}", s), nil
 	}
 }
 

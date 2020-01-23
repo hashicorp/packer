@@ -82,8 +82,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	ui.Say("Typing the boot command...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
-	// Second interpolation
-	command, err = interpolate.Render(command, &s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing boot command: %s", err)
 		state.Put("error", err)
