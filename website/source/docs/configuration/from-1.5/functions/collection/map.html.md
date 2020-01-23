@@ -37,7 +37,3 @@ built-in map construction syntax, which achieves the same result:
   "c" = "d"
 }
 ```
-
-## Related Functions
-
-* [`tomap`](./tomap.html) performs a type conversion to a map type.

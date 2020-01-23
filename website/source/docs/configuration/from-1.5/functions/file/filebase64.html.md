@@ -44,6 +44,6 @@ SGVsbG8gV29ybGQ=
 * [`file`](./file.html) also reads the contents of a given file,
   but interprets the data as UTF-8 text and returns the result directly
   as a string, without any further encoding.
-* [`base64decode`](./base64decode.html) can decode a Base64 string representing
+* [`base64decode`](../encoding/base64decode.html) can decode a Base64 string representing
   bytes in UTF-8, but in practice `base64decode(filebase64(...))` is equivalent
   to the shorter expression `file(...)`.

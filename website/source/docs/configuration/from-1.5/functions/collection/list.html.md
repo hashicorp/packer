@@ -40,6 +40,3 @@ built-in list construction syntax, which achieves the same result:
 ]
 ```
 
-## Related Functions
-
-* [`tolist`](./tolist.html) converts a set value to a list.

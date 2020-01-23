@@ -103,7 +103,7 @@ configuration as needed:
 
 ## Related Functions
 
-* [`format`](./format.html) is a more general formatting function for arbitrary
+* [`format`](../string/format.html) is a more general formatting function for arbitrary
   data.
 * [`timestamp`](./timestamp.html) returns the current date and time in a format
   suitable for input to `formatdate`.

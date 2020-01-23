@@ -25,4 +25,4 @@ with all of the same elements as the given sequence but in reverse order.
 
 ## Related Functions
 
-* [`strrev`](./strrev.html) reverses a string.
+* [`strrev`](../string/strrev.html) reverses a string.

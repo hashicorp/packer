@@ -116,7 +116,7 @@ for an unsupported format verb.
 
 ## Related Functions
 
-* [`formatdate`](./formatdate.html) is a specialized formatting function for
+* [`formatdate`](../datetime/formatdate.html) is a specialized formatting function for
   human-readable timestamps.
 * [`formatlist`](./formatlist.html) uses the same specification syntax to
   produce a list of strings.

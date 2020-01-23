@@ -26,4 +26,4 @@ olleh
 
 ## Related Functions
 
-* [`reverse`](./reverse.html) reverses a sequence.
+* [`reverse`](../collection/reverse.html) reverses a sequence.
