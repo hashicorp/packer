@@ -399,8 +399,8 @@ func (c *Core) init() error {
 
 	// Regex to exclude any build function variable or template variable
 	// from interpolating earlier
-	// E.g.: {{ build `Host` }} or {{ .HTTPIP }}  won't interpolate now
-	renderFilter := "{{(\\s|)(build\\s\x60(.*?)\x60|\\.(.*?))(\\s|)}}"
+	// E.g.: {{ .HTTPIP }}  won't interpolate now
+	renderFilter := "{{(\\s|)\\.(.*?)(\\s|)}}"
 
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
