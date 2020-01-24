@@ -4,8 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-cty-funcs/cidr"
+	"github.com/hashicorp/go-cty-funcs/crypto"
+	"github.com/hashicorp/go-cty-funcs/filesystem"
 	"github.com/hashicorp/hcl/v2/ext/tryfunc"
 	"github.com/hashicorp/hcl/v2/ext/typeexpr"
+	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	ctyyaml "github.com/zclconf/go-cty-yaml"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
@@ -20,7 +23,7 @@ func Functions() map[string]function.Function {
 	// defined in "github.com/hashicorp/terraform/lang/funcs" for now we will
 	// only use/import the stdlib funcs to later on copy the usefull ones to
 	// the stdlib.
-
+	var basedir string
 	funcs := map[string]function.Function{
 		"abs":              stdlib.AbsoluteFunc,
 		"abspath":          unimplFunc, // funcs.AbsPathFunc,
@@ -28,9 +31,9 @@ func Functions() map[string]function.Function {
 		"base64decode":     unimplFunc, // funcs.Base64DecodeFunc,
 		"base64encode":     unimplFunc, // funcs.Base64EncodeFunc,
 		"base64gzip":       unimplFunc, // funcs.Base64GzipFunc,
-		"base64sha256":     unimplFunc, // funcs.Base64Sha256Func,
-		"base64sha512":     unimplFunc, // funcs.Base64Sha512Func,
-		"bcrypt":           unimplFunc, // funcs.BcryptFunc,
+		"base64sha256":     crypto.Base64Sha256Func,
+		"base64sha512":     crypto.Base64Sha512Func,
+		"bcrypt":           crypto.BcryptFunc,
 		"can":              tryfunc.CanFunc,
 		"ceil":             unimplFunc, // funcs.CeilFunc,
 		"chomp":            unimplFunc, // funcs.ChompFunc,
@@ -49,16 +52,16 @@ func Functions() map[string]function.Function {
 		"distinct":         unimplFunc, // funcs.DistinctFunc,
 		"element":          unimplFunc, // funcs.ElementFunc,
 		"chunklist":        unimplFunc, // funcs.ChunklistFunc,
-		"file":             unimplFunc, // funcs.MakeFileFunc(s.BaseDir, false),
-		"fileexists":       unimplFunc, // funcs.MakeFileExistsFunc(s.BaseDir),
-		"fileset":          unimplFunc, // funcs.MakeFileSetFunc(s.BaseDir),
-		"filebase64":       unimplFunc, // funcs.MakeFileFunc(s.BaseDir, true),
-		"filebase64sha256": unimplFunc, // funcs.MakeFileBase64Sha256Func(s.BaseDir),
-		"filebase64sha512": unimplFunc, // funcs.MakeFileBase64Sha512Func(s.BaseDir),
-		"filemd5":          unimplFunc, // funcs.MakeFileMd5Func(s.BaseDir),
-		"filesha1":         unimplFunc, // funcs.MakeFileSha1Func(s.BaseDir),
-		"filesha256":       unimplFunc, // funcs.MakeFileSha256Func(s.BaseDir),
-		"filesha512":       unimplFunc, // funcs.MakeFileSha512Func(s.BaseDir),
+		"file":             unimplFunc, // filesystem.MakeFileFunc(basedir, false),
+		"fileexists":       filesystem.MakeFileExistsFunc(basedir),
+		"fileset":          filesystem.MakeFileSetFunc(basedir),
+		"filebase64":       unimplFunc, // funcs.MakeFileFunc(basedir, true),
+		"filebase64sha256": crypto.MakeFileBase64Sha256Func(basedir),
+		"filebase64sha512": crypto.MakeFileBase64Sha512Func(basedir),
+		"filemd5":          crypto.MakeFileMd5Func(basedir),
+		"filesha1":         crypto.MakeFileSha1Func(basedir),
+		"filesha256":       crypto.MakeFileSha256Func(basedir),
+		"filesha512":       crypto.MakeFileSha512Func(basedir),
 		"flatten":          unimplFunc, // funcs.FlattenFunc,
 		"floor":            unimplFunc, // funcs.FloorFunc,
 		"format":           stdlib.FormatFunc,
@@ -78,31 +81,31 @@ func Functions() map[string]function.Function {
 		"map":              unimplFunc, // funcs.MapFunc,
 		"matchkeys":        unimplFunc, // funcs.MatchkeysFunc,
 		"max":              stdlib.MaxFunc,
-		"md5":              unimplFunc, // funcs.Md5Func,
+		"md5":              crypto.Md5Func,
 		"merge":            unimplFunc, // funcs.MergeFunc,
 		"min":              stdlib.MinFunc,
 		"parseint":         unimplFunc, // funcs.ParseIntFunc,
-		"pathexpand":       unimplFunc, // funcs.PathExpandFunc,
+		"pathexpand":       filesystem.PathExpandFunc,
 		"pow":              unimplFunc, // funcs.PowFunc,
 		"range":            stdlib.RangeFunc,
 		"regex":            stdlib.RegexFunc,
 		"regexall":         stdlib.RegexAllFunc,
 		"replace":          unimplFunc, // funcs.ReplaceFunc,
 		"reverse":          unimplFunc, // funcs.ReverseFunc,
-		"rsadecrypt":       unimplFunc, // funcs.RsaDecryptFunc,
+		"rsadecrypt":       crypto.RsaDecryptFunc,
 		"setintersection":  stdlib.SetIntersectionFunc,
 		"setproduct":       unimplFunc, // funcs.SetProductFunc,
 		"setunion":         stdlib.SetUnionFunc,
-		"sha1":             unimplFunc, // funcs.Sha1Func,
-		"sha256":           unimplFunc, // funcs.Sha256Func,
-		"sha512":           unimplFunc, // funcs.Sha512Func,
+		"sha1":             crypto.Sha1Func,
+		"sha256":           crypto.Sha256Func,
+		"sha512":           crypto.Sha512Func,
 		"signum":           unimplFunc, // funcs.SignumFunc,
 		"slice":            unimplFunc, // funcs.SliceFunc,
 		"sort":             unimplFunc, // funcs.SortFunc,
 		"split":            unimplFunc, // funcs.SplitFunc,
 		"strrev":           stdlib.ReverseFunc,
 		"substr":           stdlib.SubstrFunc,
-		"timestamp":        unimplFunc, // funcs.TimestampFunc,
+		"timestamp":        pkrfunction.TimestampFunc,
 		"timeadd":          unimplFunc, // funcs.TimeAddFunc,
 		"title":            unimplFunc, // funcs.TitleFunc,
 		"trim":             unimplFunc, // funcs.TrimFunc,
@@ -112,15 +115,15 @@ func Functions() map[string]function.Function {
 		"try":              tryfunc.TryFunc,
 		"upper":            stdlib.UpperFunc,
 		"urlencode":        unimplFunc, // funcs.URLEncodeFunc,
-		"uuid":             unimplFunc, // funcs.UUIDFunc,
-		"uuidv5":           unimplFunc, // funcs.UUIDV5Func,
+		"uuid":             crypto.UUIDFunc,
+		"uuidv5":           crypto.UUIDV5Func,
 		"values":           unimplFunc, // funcs.ValuesFunc,
 		"yamldecode":       ctyyaml.YAMLDecodeFunc,
 		"yamlencode":       ctyyaml.YAMLEncodeFunc,
 		"zipmap":           unimplFunc, // funcs.ZipmapFunc,
 	}
 
-	// s.funcs["templatefile"] = funcs.MakeTemplateFileFunc(s.BaseDir, func() map[string]function.Function {
+	// s.funcs["templatefile"] = funcs.MakeTemplateFileFunc(basedir, func() map[string]function.Function {
 	// 	// The templatefile function prevents recursive calls to itself
 	// 	// by copying this map and overwriting the "templatefile" entry.
 	// 	return s.funcs
