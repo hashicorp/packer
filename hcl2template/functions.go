@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"fmt"
 
+	"github.com/hashicorp/go-cty-funcs/cidr"
 	"github.com/hashicorp/hcl/v2/ext/tryfunc"
 	"github.com/hashicorp/hcl/v2/ext/typeexpr"
 	ctyyaml "github.com/zclconf/go-cty-yaml"
@@ -33,10 +34,10 @@ func Functions() map[string]function.Function {
 		"can":              tryfunc.CanFunc,
 		"ceil":             unimplFunc, // funcs.CeilFunc,
 		"chomp":            unimplFunc, // funcs.ChompFunc,
-		"cidrhost":         unimplFunc, // funcs.CidrHostFunc,
-		"cidrnetmask":      unimplFunc, // funcs.CidrNetmaskFunc,
-		"cidrsubnet":       unimplFunc, // funcs.CidrSubnetFunc,
-		"cidrsubnets":      unimplFunc, // funcs.CidrSubnetsFunc,
+		"cidrhost":         cidr.HostFunc,
+		"cidrnetmask":      cidr.NetmaskFunc,
+		"cidrsubnet":       cidr.SubnetFunc,
+		"cidrsubnets":      cidr.SubnetsFunc,
 		"coalesce":         unimplFunc, // funcs.CoalesceFunc,
 		"coalescelist":     unimplFunc, // funcs.CoalesceListFunc,
 		"compact":          unimplFunc, // funcs.CompactFunc,

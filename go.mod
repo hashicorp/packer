@@ -67,6 +67,7 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.0
+	github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200124154056-476681ae9d62
 	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
@@ -149,7 +150,7 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
-	github.com/zclconf/go-cty v1.2.0
+	github.com/zclconf/go-cty v1.2.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
