@@ -45,7 +45,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	debug := state.Get("debug").(bool)
-	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	vncIp := state.Get("vnc_ip").(string)
