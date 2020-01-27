@@ -143,6 +143,36 @@ func TestCoreBuild_env(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_IgnoreTemplateVariables(t *testing.T) {
+	os.Setenv("PACKER_TEST_ENV", "test")
+	defer os.Setenv("PACKER_TEST_ENV", "")
+
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-ignore-template-variable.json"))
+	core := TestCore(t, config)
+
+	if core.variables["http_ip"] != "{{ .HTTPIP }}" {
+		t.Fatalf("bad: User variable http_ip={{ .HTTPIP }} should not be interpolated")
+	}
+
+	if core.variables["var"] != "test_{{ .PACKER_TEST_TEMP }}" {
+		t.Fatalf("bad: User variable var should be half interpolated to var=test_{{ .PACKER_TEST_TEMP }} but was var=%s", core.variables["var"])
+	}
+
+	if core.variables["array_var"] != "us-west-1,us-west-2" {
+		t.Fatalf("bad: User variable array_var should be \"us-west-1,us-west-2\" but was %s", core.variables["var"])
+	}
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestCoreBuild_buildNameVar(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-var-build-name.json"))
