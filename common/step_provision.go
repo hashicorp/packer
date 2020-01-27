@@ -48,6 +48,7 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	}
 
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
+	hookData["PackerHTTPAddr"] = GetHTTPAddr()
 
 	// Read communicator data into hook data
 	comm, ok := state.GetOk("communicator_config")
