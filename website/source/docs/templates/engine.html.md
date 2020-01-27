@@ -76,7 +76,7 @@ Here is a full list of the available functions for reference.
     
     Valid variables to request are: "ID", "Host",
     "Port", "User", "Password", "ConnType",
-    "PackerRunUUID", "SSHPublicKey", and "SSHPrivateKey".
+    "PackerRunUUID", "PackerHTTPAddr", "SSHPublicKey", and "SSHPrivateKey".
     Depending on which communicator you are using, some of these values may be
     empty -- for example, the public and private keys are unique to the SSH
     communicator. InstanceID represents the vm being provisioned. For example,
