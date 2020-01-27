@@ -26,8 +26,8 @@ func Functions() map[string]function.Function {
 	var basedir string
 	funcs := map[string]function.Function{
 		"abs":              stdlib.AbsoluteFunc,
-		"abspath":          unimplFunc, // funcs.AbsPathFunc,
-		"basename":         unimplFunc, // funcs.BasenameFunc,
+		"abspath":          filesystem.AbsPathFunc,
+		"basename":         filesystem.BasenameFunc,
 		"base64decode":     unimplFunc, // funcs.Base64DecodeFunc,
 		"base64encode":     unimplFunc, // funcs.Base64EncodeFunc,
 		"base64gzip":       unimplFunc, // funcs.Base64GzipFunc,
@@ -48,7 +48,7 @@ func Functions() map[string]function.Function {
 		"contains":         unimplFunc, // funcs.ContainsFunc,
 		"convert":          typeexpr.ConvertFunc,
 		"csvdecode":        stdlib.CSVDecodeFunc,
-		"dirname":          unimplFunc, // funcs.DirnameFunc,
+		"dirname":          filesystem.DirnameFunc,
 		"distinct":         unimplFunc, // funcs.DistinctFunc,
 		"element":          unimplFunc, // funcs.ElementFunc,
 		"chunklist":        unimplFunc, // funcs.ChunklistFunc,
