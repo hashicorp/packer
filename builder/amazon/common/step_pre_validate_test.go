@@ -26,7 +26,7 @@ func (m *mockEC2Conn) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeV
 
 	output := &ec2.DescribeVpcsOutput{
 		Vpcs: []*ec2.Vpc{
-			&ec2.Vpc{IsDefault: aws.Bool(isDefault),
+			{IsDefault: aws.Bool(isDefault),
 				VpcId: aws.String(vpcID),
 			},
 		},

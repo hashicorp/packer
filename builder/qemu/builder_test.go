@@ -165,12 +165,12 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 
 	testCases := []testcase{
-		testcase{"", "40960M", false},       // not provided
-		testcase{"12345", "12345M", false},  // no unit given, defaults to M
-		testcase{"12345x", "12345x", true},  // invalid unit
-		testcase{"12345T", "12345T", false}, // terabytes
-		testcase{"12345b", "12345b", false}, // bytes get preserved when set.
-		testcase{"60000M", "60000M", false}, // Original test case
+		{"", "40960M", false},       // not provided
+		{"12345", "12345M", false},  // no unit given, defaults to M
+		{"12345x", "12345x", true},  // invalid unit
+		{"12345T", "12345T", false}, // terabytes
+		{"12345b", "12345b", false}, // bytes get preserved when set.
+		{"60000M", "60000M", false}, // Original test case
 	}
 	for _, tc := range testCases {
 		// Set input disk size
