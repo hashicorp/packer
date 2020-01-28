@@ -51,6 +51,7 @@ Once the plugin is named properly, Packer automatically discovers plugins in
 the following directories in the given order. If a conflicting plugin is found
 later, it will take precedence over one found earlier.
 
+
 1.  The directory where `packer` is, or the executable directory.
 
 2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
@@ -61,6 +62,14 @@ later, it will take precedence over one found earlier.
     (windows)
 
 5.  The current working directory.
+
+6. The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
+than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
+Separate directories in the PATH string using a colon (`:`) on posix systems and
+a semicolon (`;`) on windows systems. The above example path would be able to
+find a provisioner named `packer-provisioner-foo` in either
+`~/custom-dir-1/packer-provisioner-foo` or
+`~/custom-dir-2/packer-provisioner-foo`.
 
 The valid types for plugins are:
 
