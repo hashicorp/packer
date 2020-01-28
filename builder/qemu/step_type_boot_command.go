@@ -96,8 +96,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
-	hostIP := "10.0.2.2"
-	common.SetHTTPIP(hostIP)
+	hostIP := common.GetHTTPIP()
 	configCtx := config.ctx
 	configCtx.Data = &bootCommandTemplateData{
 		hostIP,
