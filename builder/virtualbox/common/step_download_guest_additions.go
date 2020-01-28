@@ -67,16 +67,13 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 
 	checksumType := "sha256"
 
-	// Grab the guest_additions_url as specified by the user.
-	url := s.GuestAdditionsURL
-
 	// Initialize the template context so we can interpolate some variables..
 	s.Ctx.Data = &guestAdditionsUrlTemplate{
 		Version: version,
 	}
 
 	// Interpolate any user-variables specified within the guest_additions_url
-	url, err = interpolate.Render(s.GuestAdditionsURL, &s.Ctx)
+	url, err := interpolate.Render(s.GuestAdditionsURL, &s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions url: %s", err)
 		state.Put("error", err)

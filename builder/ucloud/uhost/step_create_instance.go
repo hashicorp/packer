@@ -3,15 +3,16 @@ package uhost
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
+
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
-	"math/rand"
-	"strings"
-	"time"
 )
 
 type stepCreateInstance struct {
@@ -77,6 +78,9 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	s.instanceId = instanceId
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance)
 
 	if instance.BootDiskState != ucloudcommon.BootDiskStateNormal {
 		ui.Say("Waiting for boot disk of instance initialized")

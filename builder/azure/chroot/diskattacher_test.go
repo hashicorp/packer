@@ -2,8 +2,9 @@ package chroot
 
 import (
 	"context"
-	"github.com/Azure/go-autorest/autorest/to"
 	"testing"
+
+	"github.com/Azure/go-autorest/autorest/to"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/client"

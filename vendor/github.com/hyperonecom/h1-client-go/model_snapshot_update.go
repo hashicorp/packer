@@ -9,6 +9,7 @@
 
 package openapi
 
+// SnapshotUpdate struct for SnapshotUpdate
 type SnapshotUpdate struct {
 	Name string `json:"name,omitempty"`
 }

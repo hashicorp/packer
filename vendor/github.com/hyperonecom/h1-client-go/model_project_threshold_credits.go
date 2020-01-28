@@ -9,6 +9,7 @@
 
 package openapi
 
+// ProjectThresholdCredits struct for ProjectThresholdCredits
 type ProjectThresholdCredits struct {
 	Levels []float32 `json:"levels,omitempty"`
 }

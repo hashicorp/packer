@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -11,8 +10,7 @@ import (
 // An implementation of packer.PostProcessor where the PostProcessor is actually
 // executed over an RPC connection.
 type postProcessor struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
@@ -21,8 +19,8 @@ type PostProcessorServer struct {
 	context       context.Context
 	contextCancel func()
 
-	mux *muxBroker
-	p   packer.PostProcessor
+	commonServer
+	p packer.PostProcessor
 }
 
 type PostProcessorConfigureArgs struct {
@@ -36,13 +34,13 @@ type PostProcessorProcessResponse struct {
 	StreamId      uint32
 }
 
-func (p *postProcessor) Configure(raw ...interface{}) (err error) {
-	args := &PostProcessorConfigureArgs{Configs: raw}
-	if cerr := p.client.Call("PostProcessor.Configure", args, new(interface{})); cerr != nil {
-		err = cerr
+func (p *postProcessor) Configure(raw ...interface{}) error {
+	raw, err := encodeCTYValues(raw)
+	if err != nil {
+		return err
 	}
-
-	return
+	args := &PostProcessorConfigureArgs{Configs: raw}
+	return p.client.Call(p.endpoint+".Configure", args, new(interface{}))
 }
 
 func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
@@ -59,7 +57,7 @@ func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 		select {
 		case <-ctx.Done():
 			log.Printf("Cancelling post-processor after context cancellation %v", ctx.Err())
-			if err := p.client.Call("PostProcessor.Cancel", new(interface{}), new(interface{})); err != nil {
+			if err := p.client.Call(p.endpoint+".Cancel", new(interface{}), new(interface{})); err != nil {
 				log.Printf("Error cancelling post-processor: %s", err)
 			}
 		case <-done:
@@ -67,7 +65,7 @@ func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 	}()
 
 	var response PostProcessorProcessResponse
-	if err := p.client.Call("PostProcessor.PostProcess", nextId, &response); err != nil {
+	if err := p.client.Call(p.endpoint+".PostProcess", nextId, &response); err != nil {
 		return nil, false, false, err
 	}
 
@@ -87,8 +85,12 @@ func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 	return client.Artifact(), response.Keep, response.ForceOverride, nil
 }
 
-func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *interface{}) error {
-	err := p.p.Configure(args.Configs...)
+func (p *PostProcessorServer) Configure(args *PostProcessorConfigureArgs, reply *interface{}) (err error) {
+	config, err := decodeCTYValues(args.Configs)
+	if err != nil {
+		return err
+	}
+	err = p.p.Configure(config...)
 	return err
 }
 

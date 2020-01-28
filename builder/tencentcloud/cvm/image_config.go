@@ -4,13 +4,14 @@ package cvm
 
 import (
 	"fmt"
+	"unicode/utf8"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type TencentCloudImageConfig struct {
 	// The name you want to create your customize image,
-	// it should be composed of no more than 20 characters, of letters, numbers
+	// it should be composed of no more than 60 characters, of letters, numbers
 	// or minus sign.
 	ImageName string `mapstructure:"image_name" required:"true"`
 	// Image description.
@@ -40,11 +41,11 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	cf.ForcePoweroff = true
 	if cf.ImageName == "" {
 		errs = append(errs, fmt.Errorf("image_name must be specified"))
-	} else if len(cf.ImageName) > 20 {
-		errs = append(errs, fmt.Errorf("image_name length should not exceed 20 characters"))
+	} else if utf8.RuneCountInString(cf.ImageName) > 60 {
+		errs = append(errs, fmt.Errorf("image_name length should not exceed 60 characters"))
 	}
 
-	if len(cf.ImageDescription) > 60 {
+	if utf8.RuneCountInString(cf.ImageDescription) > 60 {
 		errs = append(errs, fmt.Errorf("image_description length should not exceed 60 characters"))
 	}
 

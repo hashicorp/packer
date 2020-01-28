@@ -9,7 +9,8 @@
 
 package openapi
 
+// VmCreatePassword struct for VmCreatePassword
 type VmCreatePassword struct {
-	Type string `json:"type,omitempty"`
+	Type  string `json:"type,omitempty"`
 	Value string `json:"value,omitempty"`
 }

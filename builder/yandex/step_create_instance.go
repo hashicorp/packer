@@ -249,6 +249,9 @@ runcmd:
 	}
 
 	state.Put("disk_id", instance.BootDisk.DiskId)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.Id)
 
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Instance ID %s started. Current instance status %s", instance.Id, instance.Status))

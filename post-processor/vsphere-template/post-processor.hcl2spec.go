@@ -25,15 +25,19 @@ type FlatConfig struct {
 	SnapshotEnable      *bool             `mapstructure:"snapshot_enable" cty:"snapshot_enable"`
 	SnapshotName        *string           `mapstructure:"snapshot_name" cty:"snapshot_name"`
 	SnapshotDescription *string           `mapstructure:"snapshot_description" cty:"snapshot_description"`
+	ReregisterVM        *bool             `mapstructure:"reregister_vm" default:"true" cty:"reregister_vm"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -52,6 +56,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"snapshot_enable":            &hcldec.AttrSpec{Name: "snapshot_enable", Type: cty.Bool, Required: false},
 		"snapshot_name":              &hcldec.AttrSpec{Name: "snapshot_name", Type: cty.String, Required: false},
 		"snapshot_description":       &hcldec.AttrSpec{Name: "snapshot_description", Type: cty.String, Required: false},
+		"reregister_vm":              &hcldec.AttrSpec{Name: "reregister_vm", Type: cty.Bool, Required: false},
 	}
 	return s
 }

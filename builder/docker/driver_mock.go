@@ -51,9 +51,9 @@ type MockDriver struct {
 	SaveImageReader io.Reader
 	SaveImageError  error
 
-	TagImageCalled  bool
+	TagImageCalled  int
 	TagImageImageId string
-	TagImageRepo    string
+	TagImageRepo    []string
 	TagImageForce   bool
 	TagImageErr     error
 
@@ -177,9 +177,9 @@ func (d *MockDriver) StopContainer(id string) error {
 }
 
 func (d *MockDriver) TagImage(id string, repo string, force bool) error {
-	d.TagImageCalled = true
+	d.TagImageCalled += 1
 	d.TagImageImageId = id
-	d.TagImageRepo = repo
+	d.TagImageRepo = append(d.TagImageRepo, repo)
 	d.TagImageForce = force
 	return d.TagImageErr
 }

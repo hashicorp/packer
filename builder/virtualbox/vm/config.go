@@ -25,7 +25,7 @@ type Config struct {
 	vboxcommon.ExportConfig      `mapstructure:",squash"`
 	vboxcommon.OutputConfig      `mapstructure:",squash"`
 	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.SSHConfig         `mapstructure:",squash"`
+	vboxcommon.CommConfig        `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
@@ -44,8 +44,7 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -60,7 +59,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Defaults
@@ -84,7 +83,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CommConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
@@ -203,8 +202,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return warnings, errs
 	}
 
-	return c, warnings, nil
+	return warnings, nil
 }

@@ -9,6 +9,7 @@
 
 package openapi
 
+// VaultActionResize struct for VaultActionResize
 type VaultActionResize struct {
 	Size float32 `json:"size,omitempty"`
 }

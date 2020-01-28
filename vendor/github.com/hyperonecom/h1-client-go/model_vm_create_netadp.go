@@ -9,8 +9,10 @@
 
 package openapi
 
+// VmCreateNetadp struct for VmCreateNetadp
 type VmCreateNetadp struct {
-	Service string `json:"service,omitempty"`
-	Network string `json:"network,omitempty"`
-	Ip []string `json:"ip,omitempty"`
+	Service  string   `json:"service"`
+	Network  string   `json:"network,omitempty"`
+	Ip       []string `json:"ip,omitempty"`
+	Firewall string   `json:"firewall,omitempty"`
 }

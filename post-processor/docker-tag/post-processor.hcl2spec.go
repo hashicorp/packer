@@ -17,17 +17,20 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
 	Repository          *string           `mapstructure:"repository" cty:"repository"`
-	Tag                 *string           `mapstructure:"tag" cty:"tag"`
+	Tag                 []string          `mapstructure:"tag" cty:"tag"`
 	Force               *bool             `cty:"force"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -38,7 +41,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"repository":                 &hcldec.AttrSpec{Name: "repository", Type: cty.String, Required: false},
-		"tag":                        &hcldec.AttrSpec{Name: "tag", Type: cty.String, Required: false},
+		"tag":                        &hcldec.AttrSpec{Name: "tag", Type: cty.List(cty.String), Required: false},
 		"force":                      &hcldec.AttrSpec{Name: "force", Type: cty.Bool, Required: false},
 	}
 	return s

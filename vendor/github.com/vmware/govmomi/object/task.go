@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -47,7 +48,19 @@ func (t *Task) Wait(ctx context.Context) error {
 	return err
 }
 
-func (t *Task) WaitForResult(ctx context.Context, s progress.Sinker) (*types.TaskInfo, error) {
+func (t *Task) WaitForResult(ctx context.Context, s ...progress.Sinker) (*types.TaskInfo, error) {
+	var pr progress.Sinker
+	if len(s) == 1 {
+		pr = s[0]
+	}
 	p := property.DefaultCollector(t.c)
-	return task.Wait(ctx, t.Reference(), p, s)
+	return task.Wait(ctx, t.Reference(), p, pr)
+}
+
+func (t *Task) Cancel(ctx context.Context) error {
+	_, err := methods.CancelTask(ctx, t.Client(), &types.CancelTask{
+		This: t.Reference(),
+	})
+
+	return err
 }

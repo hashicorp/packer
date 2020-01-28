@@ -9,8 +9,9 @@
 
 package openapi
 
+// ProjectBilling struct for ProjectBilling
 type ProjectBilling struct {
-	Credits float32 `json:"credits,omitempty"`
+	Credits      float32 `json:"credits,omitempty"`
 	CreditsBonus float32 `json:"creditsBonus,omitempty"`
-	CreditLimit float32 `json:"creditLimit,omitempty"`
+	CreditLimit  float32 `json:"creditLimit,omitempty"`
 }

@@ -14,11 +14,17 @@ type StepCommit struct {
 }
 
 func (s *StepCommit) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
+	config, ok := state.Get("config").(*Config)
+	if !ok {
+		err := fmt.Errorf("error encountered obtaining docker config")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
-	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
-
 	if config.WindowsContainer {
 		// docker can't commit a running Windows container
 		err := driver.StopContainer(containerId)

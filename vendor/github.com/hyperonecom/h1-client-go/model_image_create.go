@@ -9,11 +9,12 @@
 
 package openapi
 
+// ImageCreate struct for ImageCreate
 type ImageCreate struct {
-	Name string `json:"name"`
-	Vm string `json:"vm,omitempty"`
-	Replica string `json:"replica,omitempty"`
-	Service string `json:"service,omitempty"`
-	Description string `json:"description,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Name        string            `json:"name"`
+	Vm          string            `json:"vm,omitempty"`
+	Replica     string            `json:"replica,omitempty"`
+	Service     string            `json:"service,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Tag         map[string]string `json:"tag,omitempty"`
 }

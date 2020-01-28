@@ -55,7 +55,7 @@ func TestBuilder_Prepare(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Builder{}
 
-			_, err := b.Prepare(tt.config)
+			_, _, err := b.Prepare(tt.config)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Builder.Prepare() error = %v, wantErr %v", err, tt.wantErr)

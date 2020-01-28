@@ -53,12 +53,18 @@ type StepDownload struct {
 }
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if len(s.Url) == 0 {
+		log.Printf("No URLs were provided to Step Download. Continuing...")
+		return multistep.ActionContinue
+	}
+
 	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	var errs []error
+
 	for _, source := range s.Url {
 		if ctx.Err() != nil {
 			state.Put("error", fmt.Errorf("Download cancelled: %v", errs))
@@ -150,11 +156,12 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		if s.Extension != "" {
 			targetPath += "." + s.Extension
 		}
+		targetPath, err = packer.CachePath(targetPath)
+		if err != nil {
+			return "", fmt.Errorf("CachePath: %s", err)
+		}
 	}
-	targetPath, err = packer.CachePath(targetPath)
-	if err != nil {
-		return "", fmt.Errorf("CachePath: %s", err)
-	}
+
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)

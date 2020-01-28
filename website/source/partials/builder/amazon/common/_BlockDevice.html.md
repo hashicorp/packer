@@ -8,7 +8,7 @@ The following mapping will tell Packer to encrypt the root volume of the
 build instance at launch using a specific non-default kms key:
 
 ``` json
-"launch_block_device_mappings": [{
+"[{
 		"device_name": "/dev/sda1",
 		"encrypted": true,
 		"kms_key_id": "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
@@ -17,7 +17,3 @@ build instance at launch using a specific non-default kms key:
 
 Documentation for Block Devices Mappings can be found here:
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html
-
-These mappings give you control over either the volumes generated for the
-Packer build via `launch_block_device_mappings`, or the volumes that Packer will
-save with the artifact AMI via `ami_block_device_mappings`.

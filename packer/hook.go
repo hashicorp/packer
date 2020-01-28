@@ -34,7 +34,6 @@ type DispatchHook struct {
 // hooks if a mapping exists. If a mapping doesn't exist, then nothing
 // happens.
 func (h *DispatchHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
-
 	hooks, ok := h.Mapping[name]
 	if !ok {
 		// No hooks for that name. No problem.

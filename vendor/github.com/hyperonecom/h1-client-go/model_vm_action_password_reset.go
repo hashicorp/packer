@@ -9,8 +9,9 @@
 
 package openapi
 
+// VmActionPasswordReset struct for VmActionPasswordReset
 type VmActionPasswordReset struct {
 	UserName string `json:"userName"`
-	Modulus string `json:"modulus"`
+	Modulus  string `json:"modulus"`
 	Exponent string `json:"exponent"`
 }

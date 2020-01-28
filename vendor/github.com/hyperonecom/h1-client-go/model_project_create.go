@@ -9,9 +9,10 @@
 
 package openapi
 
+// ProjectCreate struct for ProjectCreate
 type ProjectCreate struct {
-	Name string `json:"name"`
+	Name         string                      `json:"name"`
 	AccessRights []ProjectCreateAccessRights `json:"accessRights,omitempty"`
-	Organisation string `json:"organisation"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Organisation string                      `json:"organisation"`
+	Tag          map[string]string           `json:"tag,omitempty"`
 }

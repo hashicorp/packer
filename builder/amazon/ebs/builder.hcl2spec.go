@@ -55,6 +55,7 @@ type FlatConfig struct {
 	EbsOptimized                              *bool                                  `mapstructure:"ebs_optimized" required:"false" cty:"ebs_optimized"`
 	EnableT2Unlimited                         *bool                                  `mapstructure:"enable_t2_unlimited" required:"false" cty:"enable_t2_unlimited"`
 	IamInstanceProfile                        *string                                `mapstructure:"iam_instance_profile" required:"false" cty:"iam_instance_profile"`
+	SkipProfileValidation                     *bool                                  `mapstructure:"skip_profile_validation" required:"false" cty:"skip_profile_validation"`
 	TemporaryIamInstanceProfilePolicyDocument *common.FlatPolicyDocument             `mapstructure:"temporary_iam_instance_profile_policy_document" required:"false" cty:"temporary_iam_instance_profile_policy_document"`
 	InstanceInitiatedShutdownBehavior         *string                                `mapstructure:"shutdown_behavior" required:"false" cty:"shutdown_behavior"`
 	InstanceType                              *string                                `mapstructure:"instance_type" required:"true" cty:"instance_type"`
@@ -106,8 +107,8 @@ type FlatConfig struct {
 	SSHReadWriteTimeout                       *string                                `mapstructure:"ssh_read_write_timeout" cty:"ssh_read_write_timeout"`
 	SSHRemoteTunnels                          []string                               `mapstructure:"ssh_remote_tunnels" cty:"ssh_remote_tunnels"`
 	SSHLocalTunnels                           []string                               `mapstructure:"ssh_local_tunnels" cty:"ssh_local_tunnels"`
-	SSHPublicKey                              []byte                                 `cty:"ssh_public_key"`
-	SSHPrivateKey                             []byte                                 `cty:"ssh_private_key"`
+	SSHPublicKey                              []byte                                 `mapstructure:"ssh_public_key" cty:"ssh_public_key"`
+	SSHPrivateKey                             []byte                                 `mapstructure:"ssh_private_key" cty:"ssh_private_key"`
 	WinRMUser                                 *string                                `mapstructure:"winrm_username" cty:"winrm_username"`
 	WinRMPassword                             *string                                `mapstructure:"winrm_password" cty:"winrm_password"`
 	WinRMHost                                 *string                                `mapstructure:"winrm_host" cty:"winrm_host"`
@@ -120,15 +121,19 @@ type FlatConfig struct {
 	AMIMappings                               []common.FlatBlockDevice               `mapstructure:"ami_block_device_mappings" required:"false" cty:"ami_block_device_mappings"`
 	LaunchMappings                            []common.FlatBlockDevice               `mapstructure:"launch_block_device_mappings" required:"false" cty:"launch_block_device_mappings"`
 	VolumeRunTags                             common.TagMap                          `mapstructure:"run_volume_tags" cty:"run_volume_tags"`
+	NoEphemeral                               *bool                                  `mapstructure:"no_ephemeral" required:"false" cty:"no_ephemeral"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":             &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -157,7 +162,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ami_groups":                    &hcldec.AttrSpec{Name: "ami_groups", Type: cty.List(cty.String), Required: false},
 		"ami_product_codes":             &hcldec.AttrSpec{Name: "ami_product_codes", Type: cty.List(cty.String), Required: false},
 		"ami_regions":                   &hcldec.AttrSpec{Name: "ami_regions", Type: cty.List(cty.String), Required: false},
-		"tags":                          &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"tags":                          &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
 		"ena_support":                   &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                 &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"force_deregister":              &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
@@ -166,7 +171,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"kms_key_id":                    &hcldec.AttrSpec{Name: "kms_key_id", Type: cty.String, Required: false},
 		"region_kms_key_ids":            &hcldec.BlockAttrsSpec{TypeName: "region_kms_key_ids", ElementType: cty.String, Required: false},
 		"skip_save_build_region":        &hcldec.AttrSpec{Name: "skip_save_build_region", Type: cty.Bool, Required: false},
-		"snapshot_tags":                 &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"snapshot_tags":                 &hcldec.BlockAttrsSpec{TypeName: "snapshot_tags", ElementType: cty.String, Required: false},
 		"snapshot_users":                &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":               &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"associate_public_ip_address":   &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
@@ -176,6 +181,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ebs_optimized":                 &hcldec.AttrSpec{Name: "ebs_optimized", Type: cty.Bool, Required: false},
 		"enable_t2_unlimited":           &hcldec.AttrSpec{Name: "enable_t2_unlimited", Type: cty.Bool, Required: false},
 		"iam_instance_profile":          &hcldec.AttrSpec{Name: "iam_instance_profile", Type: cty.String, Required: false},
+		"skip_profile_validation":       &hcldec.AttrSpec{Name: "skip_profile_validation", Type: cty.Bool, Required: false},
 		"temporary_iam_instance_profile_policy_document": &hcldec.BlockSpec{TypeName: "temporary_iam_instance_profile_policy_document", Nested: hcldec.ObjectSpec((*common.FlatPolicyDocument)(nil).HCL2Spec())},
 		"shutdown_behavior":                     &hcldec.AttrSpec{Name: "shutdown_behavior", Type: cty.String, Required: false},
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
@@ -238,9 +244,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                        &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                        &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_interface":                         &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
-		"ami_block_device_mappings":             &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: &hcldec.BlockSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())}},
-		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: &hcldec.BlockSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())}},
-		"run_volume_tags":                       &hcldec.BlockAttrsSpec{TypeName: "common.TagMap", ElementType: cty.String, Required: false},
+		"ami_block_device_mappings":             &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
+		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
+		"run_volume_tags":                       &hcldec.BlockAttrsSpec{TypeName: "run_volume_tags", ElementType: cty.String, Required: false},
+		"no_ephemeral":                          &hcldec.AttrSpec{Name: "no_ephemeral", Type: cty.Bool, Required: false},
 	}
 	return s
 }

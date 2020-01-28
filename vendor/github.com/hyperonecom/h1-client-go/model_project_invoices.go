@@ -9,12 +9,13 @@
 
 package openapi
 
+// ProjectInvoices struct for ProjectInvoices
 type ProjectInvoices struct {
-	Id string `json:"_id,omitempty"`
-	InvoiceNo string `json:"invoiceNo,omitempty"`
-	IssueDate string `json:"issueDate,omitempty"`
-	Summary string `json:"summary,omitempty"`
-	Project string `json:"project,omitempty"`
-	Organisation string `json:"organisation,omitempty"`
-	Duplicate ProjectDuplicate `json:"duplicate,omitempty"`
+	Id           string           `json:"id,omitempty"`
+	InvoiceNo    string           `json:"invoiceNo,omitempty"`
+	IssueDate    string           `json:"issueDate,omitempty"`
+	Summary      string           `json:"summary,omitempty"`
+	Project      string           `json:"project,omitempty"`
+	Organisation string           `json:"organisation,omitempty"`
+	Duplicate    ProjectDuplicate `json:"duplicate,omitempty"`
 }

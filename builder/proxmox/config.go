@@ -23,6 +23,7 @@ import (
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	common.HTTPConfig      `mapstructure:",squash"`
+	common.ISOConfig       `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
 	BootKeyInterval        time.Duration       `mapstructure:"boot_key_interval"`
 	Comm                   communicator.Config `mapstructure:",squash"`
@@ -46,12 +47,15 @@ type Config struct {
 	NICs           []nicConfig  `mapstructure:"network_adapters"`
 	Disks          []diskConfig `mapstructure:"disks"`
 	ISOFile        string       `mapstructure:"iso_file"`
+	ISOStoragePool string       `mapstructure:"iso_storage_pool"`
 	Agent          bool         `mapstructure:"qemu_agent"`
 	SCSIController string       `mapstructure:"scsi_controller"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
 	UnmountISO          bool   `mapstructure:"unmount_iso"`
+
+	shouldUploadISO bool
 
 	ctx interpolate.Context
 }
@@ -71,8 +75,7 @@ type diskConfig struct {
 	DiskFormat      string `mapstructure:"format"`
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	// Agent defaults to true
 	c.Agent = true
 
@@ -88,10 +91,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
+	warnings := make([]string, 0)
 
 	// Defaults
 	if c.ProxmoxURLRaw == "" {
@@ -173,6 +177,26 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
+	// Check ISO config
+	// Either a pre-uploaded ISO should be referenced in iso_file, OR a URL
+	// (possibly to a local file) to an ISO file that will be downloaded and
+	// then uploaded to Proxmox.
+	if c.ISOFile != "" {
+		c.shouldUploadISO = false
+	} else {
+		isoWarnings, isoErrors := c.ISOConfig.Prepare(&c.ctx)
+		errs = packer.MultiErrorAppend(errs, isoErrors...)
+		warnings = append(warnings, isoWarnings...)
+		c.shouldUploadISO = true
+	}
+
+	if (c.ISOFile == "" && len(c.ISOConfig.ISOUrls) == 0) || (c.ISOFile != "" && len(c.ISOConfig.ISOUrls) != 0) {
+		errs = packer.MultiErrorAppend(errs, errors.New("either iso_file or iso_url, but not both, must be specified"))
+	}
+	if len(c.ISOConfig.ISOUrls) != 0 && c.ISOStoragePool == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("when specifying iso_url, iso_storage_pool must also be specified"))
+	}
+
 	// Required configurations that will display errors if not set
 	if c.Username == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("username must be specified"))
@@ -185,9 +209,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 	if c.proxmoxURL, err = url.Parse(c.ProxmoxURLRaw); err != nil {
 		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("Could not parse proxmox_url: %s", err)))
-	}
-	if c.ISOFile == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("iso_file must be specified"))
 	}
 	if c.Node == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("node must be specified"))
@@ -207,11 +228,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.Password)
-	return c, nil, nil
+	return nil, nil
 }
 
 func contains(haystack []string, needle string) bool {

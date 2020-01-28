@@ -9,7 +9,8 @@
 
 package openapi
 
+// VmSourceImage struct for VmSourceImage
 type VmSourceImage struct {
 	Name string `json:"name,omitempty"`
-	Id string `json:"_id,omitempty"`
+	Id   string `json:"_id,omitempty"`
 }

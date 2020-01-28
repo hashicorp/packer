@@ -22,7 +22,7 @@ import (
 type FloppyConfig struct {
 	// A list of files to place onto a floppy disk that is attached when the VM
 	// is booted. Currently, no support exists for creating sub-directories on
-	// the floppy. Wildcard characters (\*, ?, and \[\]) are allowed. Directory
+	// the floppy. Wildcard characters (\\*, ?, and \[\]) are allowed. Directory
 	// names are also allowed, which will add all the files found in the
 	// directory to the floppy.
 	FloppyFiles []string `mapstructure:"floppy_files"`
@@ -30,7 +30,7 @@ type FloppyConfig struct {
 	// similar to the `floppy_files` option except that the directory structure
 	// is preserved. This is useful for when your floppy disk includes drivers
 	// or if you just want to organize it's contents as a hierarchy. Wildcard
-	// characters (\*, ?, and \[\]) are allowed. The maximum summary size of
+	// characters (\\*, ?, and \[\]) are allowed. The maximum summary size of
 	// all files in the listed directories are the same as in `floppy_files`.
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
 	FloppyLabel       string   `mapstructure:"floppy_label"`

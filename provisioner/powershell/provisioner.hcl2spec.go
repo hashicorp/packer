@@ -16,15 +16,15 @@ type FlatConfig struct {
 	PackerOnError          *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars         map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars    []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Binary                 *bool             `cty:"binary"`
-	ExecuteCommand         *string           `mapstructure:"execute_command" cty:"execute_command"`
 	Inline                 []string          `cty:"inline"`
-	RemotePath             *string           `mapstructure:"remote_path" cty:"remote_path"`
 	Script                 *string           `cty:"script"`
 	Scripts                []string          `cty:"scripts"`
 	ValidExitCodes         []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
 	Vars                   []string          `mapstructure:"environment_vars" cty:"environment_vars"`
 	EnvVarFormat           *string           `mapstructure:"env_var_format" cty:"env_var_format"`
+	Binary                 *bool             `cty:"binary"`
+	RemotePath             *string           `mapstructure:"remote_path" cty:"remote_path"`
+	ExecuteCommand         *string           `mapstructure:"execute_command" cty:"execute_command"`
 	RemoteEnvVarPath       *string           `mapstructure:"remote_env_var_path" cty:"remote_env_var_path"`
 	ElevatedExecuteCommand *string           `mapstructure:"elevated_execute_command" cty:"elevated_execute_command"`
 	StartRetryTimeout      *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
@@ -37,10 +37,13 @@ type FlatConfig struct {
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -50,15 +53,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
-		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"inline":                     &hcldec.AttrSpec{Name: "inline", Type: cty.List(cty.String), Required: false},
-		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
 		"script":                     &hcldec.AttrSpec{Name: "script", Type: cty.String, Required: false},
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
 		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
+		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
+		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
+		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"remote_env_var_path":        &hcldec.AttrSpec{Name: "remote_env_var_path", Type: cty.String, Required: false},
 		"elevated_execute_command":   &hcldec.AttrSpec{Name: "elevated_execute_command", Type: cty.String, Required: false},
 		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},

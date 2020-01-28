@@ -134,6 +134,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			log.Printf("[DEBUG] Error getting SSH address: %s", err)
 			continue
 		}
+		// store host and port in config so we can access them from provisioners
+		s.Config.SSHHost = host
 		port := s.Config.SSHPort
 		if s.SSHPort != nil {
 			port, err = s.SSHPort(state)
@@ -141,7 +143,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 				log.Printf("[DEBUG] Error getting SSH port: %s", err)
 				continue
 			}
+			s.Config.SSHPort = port
 		}
+		state.Put("communicator_config", s.Config)
 
 		// Retrieve the SSH configuration
 		sshConfig, err := s.SSHConfig(state)
@@ -204,7 +208,6 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		}
 
 		log.Printf("[INFO] Attempting SSH connection to %s...", address)
-		log.Printf("[DEBUG] Config to %#v...", config)
 		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)

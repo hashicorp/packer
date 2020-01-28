@@ -36,6 +36,9 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	}
 
 	s.vmName = vmName
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", vmName)
 
 	return multistep.ActionContinue
 }

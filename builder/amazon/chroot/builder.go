@@ -10,9 +10,11 @@ package chroot
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/packer/builder"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
@@ -70,10 +72,9 @@ type Config struct {
 	// manually set nvme_device_path and device_path.
 	NVMEDevicePath string `mapstructure:"nvme_device_path" required:"false"`
 	// Build a new volume instead of starting from an existing AMI root volume
-	// snapshot. Default false. If true, source_ami is no longer used and the
-	// following options become required: ami_virtualization_type,
-	// pre_mount_commands and root_volume_size. The below options are also
-	// required in this mode only:
+	// snapshot. Default false. If true, source_ami/source_ami_filter are no
+	// longer used and the following options become required:
+	// ami_virtualization_type, pre_mount_commands and root_volume_size.
 	FromScratch bool `mapstructure:"from_scratch" required:"false"`
 	// Options to supply the mount command when mounting devices. Each option
 	// will be prefixed with -o and supplied to the mount command ran by
@@ -183,7 +184,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -202,7 +205,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.Architecture == "" {
@@ -320,11 +323,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warns, errs
+		return nil, warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return warns, nil
+	generatedData := []string{"SourceAMIName", "Device", "MountPath"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -354,6 +358,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
+	generatedData := &builder.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -379,7 +384,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps = append(steps,
 		&StepFlock{},
-		&StepPrepareDevice{},
+		&StepPrepareDevice{
+			GeneratedData: generatedData,
+		},
 		&StepCreateVolume{
 			RootVolumeType: b.config.RootVolumeType,
 			RootVolumeSize: b.config.RootVolumeSize,
@@ -394,6 +401,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
+			GeneratedData:  generatedData,
 		},
 		&chroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
@@ -437,6 +445,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
@@ -464,6 +473,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Session:        session,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil
