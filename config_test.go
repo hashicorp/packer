@@ -90,6 +90,7 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create a temporary test dir.")
 	}
+	defer os.Remove(decoyDir)
 
 	pluginPath := dir + pathsep + decoyDir
 
