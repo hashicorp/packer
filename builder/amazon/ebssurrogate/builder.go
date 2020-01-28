@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,RootBlockDevice,BlockDevice
 
 // The ebssurrogate package contains a packer.Builder implementation that
 // builds a new EBS-backed AMI using an ephemeral instance.
@@ -8,9 +9,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -70,7 +72,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -87,7 +91,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -123,13 +127,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
 	}
 
-	if b.config.IsSpotInstance() && (b.config.AMIENASupport.True() || b.config.AMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Spot instances do not support modification, which is required "+
-				"when either `ena_support` or `sriov_support` are set. Please ensure "+
-				"you use an AMI that already has either SR-IOV or ENA enabled."))
-	}
-
 	if b.config.RunConfig.SpotPriceAutoProduct != "" {
 		warns = append(warns, "spot_price_auto_product is deprecated and no "+
 			"longer necessary for Packer builds. In future versions of "+
@@ -152,12 +149,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 	if errs != nil && len(errs.Errors) > 0 {
-		return warns, errs
+		return nil, warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 
-	return warns, nil
+	generatedData := []string{"SourceAMIName"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -179,6 +177,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -234,6 +233,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ForceDeregister: b.config.AMIForceDeregister,
 			VpcId:           b.config.VpcId,
 			SubnetId:        b.config.SubnetId,
+			HasSubnetFilter: len(b.config.SubnetFilter.Filters) > 0,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -264,6 +264,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
+			SkipProfileValidation:                     b.config.SkipProfileValidation,
 			TemporaryIamInstanceProfilePolicyDocument: b.config.TemporaryIamInstanceProfilePolicyDocument,
 		},
 		&awscommon.StepCleanupVolumes{
@@ -294,6 +295,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
+			Skip:                     b.config.IsSpotInstance(),
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
@@ -335,6 +337,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
@@ -358,6 +361,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Amis:           amis.(map[string]string),
 			BuilderIdValue: BuilderId,
 			Session:        session,
+			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 
 		return artifact, nil

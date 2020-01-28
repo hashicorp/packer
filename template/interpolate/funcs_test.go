@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -314,6 +315,90 @@ func TestFuncUser(t *testing.T) {
 
 		if result != tc.Output {
 			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
+func TestFuncPackerBuild(t *testing.T) {
+	type cases struct {
+		DataMap     interface{}
+		ErrExpected bool
+		Template    string
+		OutVal      string
+	}
+
+	testCases := []cases{
+		// Data map is empty; there should be an error.
+		{
+			DataMap:     nil,
+			ErrExpected: true,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "",
+		},
+		// Data map is a map[string]string and contains value
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[string]string and contains value
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[string]string and contains value with placeholder.
+		{
+			DataMap:     map[string]string{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "{{.PartyVar}}",
+		},
+		// Data map is a map[interface{}]interface{} and contains value
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[interface{}]interface{} and contains value
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
+		// Data map is a map[interface{}]interface{} and contains value with placeholder.
+		{
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "{{.PartyVar}}",
+		},
+		// Data map is a map[interface{}]interface{} and doesn't have value.
+		{
+			DataMap:     map[interface{}]interface{}{"BadVar": "PartyVal" + common.PlaceholderMsg},
+			ErrExpected: true,
+			Template:    "{{ build `MissingVar` }}",
+			OutVal:      "",
+		},
+	}
+
+	for _, tc := range testCases {
+		ctx := &Context{}
+		ctx.Data = tc.DataMap
+		i := &I{Value: tc.Template}
+
+		result, err := i.Render(ctx)
+		if (err != nil) != tc.ErrExpected {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Template, err)
+		}
+
+		if ok := strings.Compare(result, tc.OutVal); ok != 0 {
+			t.Fatalf("Expected input to include: %s\n\nGot: %s",
+				tc.OutVal, result)
 		}
 	}
 }

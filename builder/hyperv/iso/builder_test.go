@@ -42,7 +42,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -60,7 +60,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "disk_size")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -74,7 +74,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	config["disk_size"] = 256
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -96,7 +96,7 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 
 	// Test default with empty disk_block_size
 	delete(config, "disk_block_size")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -112,7 +112,7 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 	for _, test_size := range test_sizes {
 		config["disk_block_size"] = test_size
 		b = Builder{}
-		warns, err = b.Prepare(config)
+		_, warns, err = b.Prepare(config)
 		if test_size > expected_max_block_size || test_size < expected_min_block_size {
 			if len(warns) > 0 {
 				t.Fatalf("bad, should have no warns: %#v", warns)
@@ -153,7 +153,7 @@ func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
 
 	// use_fixed_vhd_format should work with generation = 1, skip_compaction
 	// = true, and differencing_disk = false
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -164,7 +164,7 @@ func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
 	//use_fixed_vhd_format should not work with differencing_disk = true
 	config["differencing_disk"] = true
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -176,7 +176,7 @@ func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
 	//use_fixed_vhd_format should not work with skip_compaction = false
 	config["skip_compaction"] = false
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -188,7 +188,7 @@ func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
 	//use_fixed_vhd_format should not work with generation = 2
 	config["generation"] = 2
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -202,7 +202,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	delete(config, "floppy_files")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -217,7 +217,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	floppiesPath := "../../../common/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppiesPath), fmt.Sprintf("%s/foo.ps1", floppiesPath)}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -236,7 +236,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig()
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
-	_, errs := b.Prepare(config)
+	_, _, errs := b.Prepare(config)
 	if errs == nil {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
@@ -252,7 +252,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -267,7 +267,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 
 	// Test bad
 	config["iso_checksum"] = ""
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -278,7 +278,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	// Test good
 	config["iso_checksum"] = "FOo"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -294,7 +294,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	// Test bad
 	config["iso_checksum_type"] = ""
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -305,7 +305,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	// Test good
 	config["iso_checksum_type"] = "mD5"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -320,7 +320,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	// Test unknown
 	config["iso_checksum_type"] = "fake"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -331,7 +331,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	// Test none
 	config["iso_checksum_type"] = "none"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) == 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -353,7 +353,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test both empty
 	config["iso_url"] = ""
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -364,7 +364,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test iso_url set
 	config["iso_url"] = "http://www.packer.io"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -381,7 +381,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	config["iso_url"] = "http://www.packer.io"
 	config["iso_urls"] = []string{"http://www.packer.io"}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -397,7 +397,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -431,7 +431,7 @@ func TestBuilderPrepare_SizeNotRequiredWhenUsingExistingHarddrive(t *testing.T) 
 	}
 
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -455,7 +455,7 @@ func TestBuilderPrepare_SizeNotRequiredWhenUsingExistingHarddrive(t *testing.T) 
 	}
 
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -489,7 +489,7 @@ func TestBuilderPrepare_SizeIsRequiredWhenNotUsingExistingHarddrive(t *testing.T
 	}
 
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -517,7 +517,7 @@ func TestBuilderPrepare_MaximumOfSixtyFourAdditionalDisks(t *testing.T) {
 	config["disk_additional_size"] = disks
 
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -537,7 +537,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["winrm_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -565,7 +565,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["ssh_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -593,7 +593,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
 	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -634,7 +634,7 @@ func TestBuilderPrepare_UseLegacyNetworkAdapter(t *testing.T) {
 	config["use_legacy_network_adapter"] = true
 
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -646,7 +646,7 @@ func TestBuilderPrepare_UseLegacyNetworkAdapter(t *testing.T) {
 	config["generation"] = 2
 
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}

@@ -3,6 +3,7 @@ package jdcloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"

@@ -45,6 +45,9 @@ func init() {
 		"clean-image-name":           new(FixerCleanImageName),
 		"spot-price-auto-product":    new(FixerAmazonSpotPriceProductDeprecation),
 		"qemu-disk-size":             new(FixerQEMUDiskSize),
+		"galaxy-command":             new(FixerGalaxyCommand),
+		"comm-config":                new(FixerCommConfig),
+		"ssh-wait-timeout":           new(FixerSSHTimout),
 	}
 
 	FixerOrder = []string{
@@ -73,5 +76,8 @@ func init() {
 		"clean-image-name",
 		"spot-price-auto-product",
 		"qemu-disk-size",
+		"galaxy-command",
+		"comm-config",
+		"ssh-wait-timeout",
 	}
 }

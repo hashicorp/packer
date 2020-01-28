@@ -20,6 +20,7 @@ import (
 type StepSnapshotVolumes struct {
 	LaunchDevices   []*ec2.BlockDeviceMapping
 	snapshotIds     map[string]string
+	snapshotMutex   sync.Mutex
 	SnapshotOmitMap map[string]bool
 }
 
@@ -50,7 +51,9 @@ func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName str
 	}
 
 	// Set the snapshot ID so we can delete it later
+	s.snapshotMutex.Lock()
 	s.snapshotIds[deviceName] = *createSnapResp.SnapshotId
+	s.snapshotMutex.Unlock()
 
 	// Wait for snapshot to be created
 	err = awscommon.WaitUntilSnapshotDone(ctx, ec2conn, *createSnapResp.SnapshotId)
@@ -104,11 +107,13 @@ func (s *StepSnapshotVolumes) Cleanup(state multistep.StateBag) {
 		ec2conn := state.Get("ec2").(*ec2.EC2)
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshots since we cancelled or halted...")
+		s.snapshotMutex.Lock()
 		for _, snapshotId := range s.snapshotIds {
 			_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotId: &snapshotId})
 			if err != nil {
 				ui.Error(fmt.Sprintf("Error: %s", err))
 			}
 		}
+		s.snapshotMutex.Unlock()
 	}
 }

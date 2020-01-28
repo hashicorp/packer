@@ -9,6 +9,7 @@
 
 package openapi
 
+// ContainerUpdate struct for ContainerUpdate
 type ContainerUpdate struct {
 	Name string `json:"name,omitempty"`
 }

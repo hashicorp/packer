@@ -9,6 +9,9 @@
 
 package openapi
 
+// FirewallUpdate struct for FirewallUpdate
 type FirewallUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name    string                  `json:"name,omitempty"`
+	Ingress []FirewallCreateIngress `json:"ingress,omitempty"`
+	Egress  []FirewallCreateIngress `json:"egress,omitempty"`
 }

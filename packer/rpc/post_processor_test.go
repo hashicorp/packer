@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -20,6 +21,8 @@ type TestPostProcessor struct {
 
 	postProcessFn func(context.Context) error
 }
+
+func (*TestPostProcessor) ConfigSpec() hcldec.ObjectSpec { return nil }
 
 func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	pp.configCalled = true
@@ -81,7 +84,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	if p.ppArtifactId != "ppTestId" {
-		t.Fatalf("unknown artifact: %s", p.ppArtifact.Id())
+		t.Fatalf("unknown artifact: '%s'", p.ppArtifact.Id())
 	}
 
 	if artifact.Id() != "id" {

@@ -2,8 +2,8 @@
 
 # builders
 
-/builder/alicloud/                      @chhaj5236
-/website/source/docs/builders/alicloud* @chhaj5236
+/builder/alicloud/                      @chhaj5236 @alexyueer
+/website/source/docs/builders/alicloud* @chhaj5236 @alexyueer
 
 /builder/azure/                      @paulmey
 /website/source/docs/builders/azure* @paulmey

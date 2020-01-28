@@ -35,7 +35,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"access_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -50,7 +50,7 @@ func TestBuilderPrepare_ECSImageName(t *testing.T) {
 
 	// Test good
 	config["image_name"] = "ecs.n1.tiny"
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -61,7 +61,7 @@ func TestBuilderPrepare_ECSImageName(t *testing.T) {
 	// Test bad
 	config["ecs_image_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -72,7 +72,7 @@ func TestBuilderPrepare_ECSImageName(t *testing.T) {
 	// Test bad
 	delete(config, "image_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -87,7 +87,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -120,7 +120,7 @@ func TestBuilderPrepare_Devices(t *testing.T) {
 			"disk_device": "/dev/xvdc",
 		},
 	}
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -160,7 +160,7 @@ func TestBuilderPrepare_IgnoreDataDisks(t *testing.T) {
 	var b Builder
 	config := testBuilderConfig()
 
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -173,7 +173,7 @@ func TestBuilderPrepare_IgnoreDataDisks(t *testing.T) {
 	}
 
 	config["image_ignore_data_disks"] = "false"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -186,7 +186,7 @@ func TestBuilderPrepare_IgnoreDataDisks(t *testing.T) {
 	}
 
 	config["image_ignore_data_disks"] = "true"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -203,7 +203,7 @@ func TestBuilderPrepare_WaitSnapshotReadyTimeout(t *testing.T) {
 	var b Builder
 	config := testBuilderConfig()
 
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -219,7 +219,7 @@ func TestBuilderPrepare_WaitSnapshotReadyTimeout(t *testing.T) {
 	}
 
 	config["wait_snapshot_ready_timeout"] = ALICLOUD_DEFAULT_TIMEOUT
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

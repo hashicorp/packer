@@ -216,7 +216,7 @@ type Config struct {
 	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type" required:"false"`
 	managedImageStorageAccountType compute.StorageAccountTypes
 
-	// the user can define up to 15
+	// The user can define up to 15
 	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
 	// 256 characters. Tags are applied to every resource deployed by a Packer
 	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
@@ -269,15 +269,47 @@ type Config struct {
 	DiskCachingType string `mapstructure:"disk_caching_type" required:"false"`
 	diskCachingType compute.CachingTypes
 
-	// DTL values
-	StorageType           string `mapstructure:"storage_type"`
-	LabVirtualNetworkName string `mapstructure:"lab_virtual_network_name"`
-	LabName               string `mapstructure:"lab_name"`
-	LabSubnetName         string `mapstructure:"lab_subnet_name"`
-	LabResourceGroupName  string `mapstructure:"lab_resource_group_name"`
+	StorageType string `mapstructure:"storage_type"`
+	// The virtual netowrk which is used for the Lab Virtual machines creation. This should be specified with
+	// LabSubnetName that the user wishes to create the virtual machine. If both LabVirtualNetworkName and LabSubnetName
+	// are not specified then packer picks the first network that it can find. The build can fail if this subnetname picked is
+	// not empty.
+	LabVirtualNetworkName string `mapstructure:"lab_virtual_network_name" required:"false"`
 
+	// The name of the DevTest Lab in which user creates the virtual machine and the image.
+	LabName string `mapstructure:"lab_name"`
+
+	// The DevTest Lab subnet in which the user wishes to create the temporary virtual machine. Should be specified
+	// with LabVirtualNetworkName
+	LabSubnetName string `mapstructure:"lab_subnet_name" required:"false"`
+
+	// The resource group in which DevTest Lab is located
+	LabResourceGroupName string `mapstructure:"lab_resource_group_name"`
+
+	// The list of DevTest labs artifacts that can be applied while preparing the Virtual machine. It is often recommended and
+	// faster to install the artifacts during the creation of the Virtual Machine. For example,
+	//   {
+	//     "artifact_name": "linux-apt-package",
+	//     "parameters" : [{
+	//       "name": "packages",
+	//       "value": "vim"
+	//     },
+	//     {
+	//       "name":"update",
+	//       "value": "true"
+	//     },
+	//     {
+	//       "name": "options",
+	//       "value": "--fix-broken"
+	//     }
+	//   ]},
+	//   {
+	//     "artifact_name": "linux-install-mongodb"
+	//   }
 	DtlArtifacts []DtlArtifact `mapstructure:"dtl_artifacts"`
-	VMName       string        `mapstructure:"vm_name"`
+
+	// Name of the temporary virtual machine that can be optionally specified.
+	VMName string `mapstructure:"vm_name" required:"false"`
 
 	// Runtime Values
 	UserName                string
@@ -485,6 +517,14 @@ func setSshValues(c *Config) error {
 }
 
 func setWinRMCertificate(c *Config) error {
+	if c.Comm.WinRMTimeout == 0 {
+		c.Comm.WinRMTimeout = 20 * time.Minute
+	}
+
+	// Hard coding to useSSL as the default Configure WinRM Artifact in DevTest Labs public repo
+	// only adds exception to 5986 port.
+	c.Comm.WinRMUseSSL = true
+	c.Comm.WinRMInsecure = true
 	c.Comm.WinRMTransportDecorator =
 		func() winrm.Transporter {
 			return &winrm.ClientNTLM{}
@@ -501,12 +541,12 @@ func setWinRMCertificate(c *Config) error {
 func setRuntimeValues(c *Config) {
 	var tempName = NewTempName(c)
 
-	c.tmpAdminPassword = "Packer~1" //tempName.AdminPassword
+	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
 	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
-	c.tmpCertificatePassword = "Packer~1" //tempName.CertificatePassword
+	c.tmpCertificatePassword = tempName.CertificatePassword
 	c.tmpComputeName = tempName.ComputeName
 
 	c.tmpDeploymentName = tempName.DeploymentName
@@ -535,6 +575,17 @@ func setUserNamePassword(c *Config) {
 	} else {
 		c.Password = c.tmpAdminPassword
 	}
+
+	if c.Comm.WinRMUser == "" {
+		c.Comm.WinRMUser = DefaultUserName
+	}
+
+	if c.Comm.WinRMPassword != "" {
+		c.Password = c.Comm.WinRMPassword
+	} else {
+		c.Password = c.tmpAdminPassword
+	}
+
 }
 
 func provideDefaultValues(c *Config) {

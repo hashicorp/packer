@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -15,20 +16,20 @@ const BuilderId = "packer.cloudstack"
 
 // Builder represents the CloudStack builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 	ui     packer.Ui
 }
 
-// Prepare implements the packer.Builder interface.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	config, errs := NewConfig(raws...)
-	if errs != nil {
-		return nil, errs
-	}
-	b.config = config
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return nil, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, nil, errs
+	}
+
+	return nil, nil, nil
 }
 
 // Run implements the packer.Builder interface.
@@ -52,7 +53,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("client", client)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -109,7 +110,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the artifact and return it
 	artifact := &Artifact{
 		client:   client,
-		config:   b.config,
+		config:   &b.config,
 		template: state.Get("template").(*cloudstack.CreateTemplateResponse),
 	}
 

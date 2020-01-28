@@ -9,7 +9,8 @@
 
 package openapi
 
+// ImageUpdate struct for ImageUpdate
 type ImageUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 }

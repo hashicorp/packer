@@ -106,11 +106,11 @@ func GetVirtualMachineDeployment(config *Config) (*dtl.LabVirtualMachineCreation
 			winrma)
 
 		var hostname = "hostName"
-		//var hostNameValue = fmt.Sprintf("%s.%s.cloudapp.azure.com", config.VMName, config.Location)
+		var hostNameValue = fmt.Sprintf("%s.%s.cloudapp.azure.com", config.VMName, config.Location)
 		dparams := []dtl.ArtifactParameterProperties{}
 		dp := &dtl.ArtifactParameterProperties{}
 		dp.Name = &hostname
-		dp.Value = &config.tmpFQDN
+		dp.Value = &hostNameValue
 		dparams = append(dparams, *dp)
 
 		winrmArtifact := &dtl.ArtifactInstallProperties{

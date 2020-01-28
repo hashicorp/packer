@@ -34,15 +34,15 @@ func testConfigOk(t *testing.T, warns []string, err error) {
 
 func TestNewConfig_sourcePath(t *testing.T) {
 	// Bad
-	c := testConfig(t)
-	delete(c, "source_path")
-	_, warns, errs := NewConfig(c)
+	cfg := testConfig(t)
+	delete(cfg, "source_path")
+	warns, errs := (&Config{}).Prepare(cfg)
 	testConfigErr(t, warns, errs)
 
 	// Bad
-	c = testConfig(t)
-	c["source_path"] = "/i/dont/exist"
-	_, warns, errs = NewConfig(c)
+	cfg = testConfig(t)
+	cfg["source_path"] = "/i/dont/exist"
+	warns, errs = (&Config{}).Prepare(cfg)
 	testConfigErr(t, warns, errs)
 
 	// Good
@@ -53,8 +53,8 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	tf.Close()
 	defer os.Remove(tf.Name())
 
-	c = testConfig(t)
-	c["source_path"] = tf.Name()
-	_, warns, errs = NewConfig(c)
+	cfg = testConfig(t)
+	cfg["source_path"] = tf.Name()
+	warns, errs = (&Config{}).Prepare(cfg)
 	testConfigOk(t, warns, errs)
 }

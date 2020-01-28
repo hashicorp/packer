@@ -19,6 +19,13 @@ type FlatConfig struct {
 	HTTPDir                   *string           `mapstructure:"http_directory" cty:"http_directory"`
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max"`
+	ISOChecksum               *string           `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum"`
+	ISOChecksumURL            *string           `mapstructure:"iso_checksum_url" cty:"iso_checksum_url"`
+	ISOChecksumType           *string           `mapstructure:"iso_checksum_type" cty:"iso_checksum_type"`
+	RawSingleISOUrl           *string           `mapstructure:"iso_url" required:"true" cty:"iso_url"`
+	ISOUrls                   []string          `mapstructure:"iso_urls" cty:"iso_urls"`
+	TargetPath                *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
+	TargetExtension           *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
 	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval"`
 	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
@@ -53,8 +60,8 @@ type FlatConfig struct {
 	SSHReadWriteTimeout       *string           `mapstructure:"ssh_read_write_timeout" cty:"ssh_read_write_timeout"`
 	SSHRemoteTunnels          []string          `mapstructure:"ssh_remote_tunnels" cty:"ssh_remote_tunnels"`
 	SSHLocalTunnels           []string          `mapstructure:"ssh_local_tunnels" cty:"ssh_local_tunnels"`
-	SSHPublicKey              []byte            `cty:"ssh_public_key"`
-	SSHPrivateKey             []byte            `cty:"ssh_private_key"`
+	SSHPublicKey              []byte            `mapstructure:"ssh_public_key" cty:"ssh_public_key"`
+	SSHPrivateKey             []byte            `mapstructure:"ssh_private_key" cty:"ssh_private_key"`
 	WinRMUser                 *string           `mapstructure:"winrm_username" cty:"winrm_username"`
 	WinRMPassword             *string           `mapstructure:"winrm_password" cty:"winrm_password"`
 	WinRMHost                 *string           `mapstructure:"winrm_host" cty:"winrm_host"`
@@ -79,6 +86,7 @@ type FlatConfig struct {
 	NICs                      []FlatnicConfig   `mapstructure:"network_adapters" cty:"network_adapters"`
 	Disks                     []FlatdiskConfig  `mapstructure:"disks" cty:"disks"`
 	ISOFile                   *string           `mapstructure:"iso_file" cty:"iso_file"`
+	ISOStoragePool            *string           `mapstructure:"iso_storage_pool" cty:"iso_storage_pool"`
 	Agent                     *bool             `mapstructure:"qemu_agent" cty:"qemu_agent"`
 	SCSIController            *string           `mapstructure:"scsi_controller" cty:"scsi_controller"`
 	TemplateName              *string           `mapstructure:"template_name" cty:"template_name"`
@@ -89,10 +97,13 @@ type FlatConfig struct {
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":            &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -105,6 +116,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
+		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
+		"iso_checksum_url":             &hcldec.AttrSpec{Name: "iso_checksum_url", Type: cty.String, Required: false},
+		"iso_checksum_type":            &hcldec.AttrSpec{Name: "iso_checksum_type", Type: cty.String, Required: false},
+		"iso_url":                      &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
+		"iso_urls":                     &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
+		"iso_target_path":              &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
+		"iso_target_extension":         &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -162,9 +180,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cpu_type":                     &hcldec.AttrSpec{Name: "cpu_type", Type: cty.String, Required: false},
 		"sockets":                      &hcldec.AttrSpec{Name: "sockets", Type: cty.Number, Required: false},
 		"os":                           &hcldec.AttrSpec{Name: "os", Type: cty.String, Required: false},
-		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: &hcldec.BlockSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatnicConfig)(nil).HCL2Spec())}},
-		"disks":                        &hcldec.BlockListSpec{TypeName: "disks", Nested: &hcldec.BlockSpec{TypeName: "disks", Nested: hcldec.ObjectSpec((*FlatdiskConfig)(nil).HCL2Spec())}},
+		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatnicConfig)(nil).HCL2Spec())},
+		"disks":                        &hcldec.BlockListSpec{TypeName: "disks", Nested: hcldec.ObjectSpec((*FlatdiskConfig)(nil).HCL2Spec())},
 		"iso_file":                     &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
+		"iso_storage_pool":             &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
 		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
 		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
@@ -188,10 +207,13 @@ type FlatdiskConfig struct {
 // FlatMapstructure returns a new FlatdiskConfig.
 // FlatdiskConfig is an auto-generated flat version of diskConfig.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*diskConfig) FlatMapstructure() interface{} { return new(FlatdiskConfig) }
+func (*diskConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatdiskConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatdiskConfig.
-// This spec is used by HCL to read the fields of FlatdiskConfig.
+// HCL2Spec returns the hcl spec of a diskConfig.
+// This spec is used by HCL to read the fields of diskConfig.
+// The decoded values from this spec will then be applied to a FlatdiskConfig.
 func (*FlatdiskConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"type":              &hcldec.AttrSpec{Name: "type", Type: cty.String, Required: false},
@@ -216,10 +238,13 @@ type FlatnicConfig struct {
 // FlatMapstructure returns a new FlatnicConfig.
 // FlatnicConfig is an auto-generated flat version of nicConfig.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*nicConfig) FlatMapstructure() interface{} { return new(FlatnicConfig) }
+func (*nicConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatnicConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatnicConfig.
-// This spec is used by HCL to read the fields of FlatnicConfig.
+// HCL2Spec returns the hcl spec of a nicConfig.
+// This spec is used by HCL to read the fields of nicConfig.
+// The decoded values from this spec will then be applied to a FlatnicConfig.
 func (*FlatnicConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"model":       &hcldec.AttrSpec{Name: "model", Type: cty.String, Required: false},

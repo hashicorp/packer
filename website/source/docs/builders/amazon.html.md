@@ -202,7 +202,10 @@ work, but specifics will depend on your use-case.
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
-    "Action": "iam:PassRole",
+    "Action": [
+        "iam:PassRole",
+        "iam:GetInstanceProfile"
+    ],
     "Resource": [
         "*"
     ]
@@ -247,6 +250,15 @@ following policies at a minimum:
     "Resource": "*"
 }
 ```
+
+If you are using a key provided by a different account than the one you are
+using to run the Packer build, your key will also need
+
+``` json
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+```
+
 
 ### Checking that system time is current
 

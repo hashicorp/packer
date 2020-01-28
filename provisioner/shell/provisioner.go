@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
@@ -28,6 +29,8 @@ import (
 
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
+
+	shell.ProvisionerRemoteSpecific `mapstructure:",squash"`
 
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
@@ -72,6 +75,8 @@ type ExecuteCommandTemplate struct {
 	EnvVarFile string
 	Path       string
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -124,8 +129,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = fmt.Sprintf(
-			"%s/%s", p.config.RemoteFolder, p.config.RemoteFile)
+		p.config.RemotePath = fmt.Sprintf("%s/%s", p.config.RemoteFolder, p.config.RemoteFile)
 	}
 
 	if p.config.Scripts == nil {
@@ -177,7 +181,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -227,7 +231,6 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 
 		p.config.envVarFile = tf.Name()
-		defer os.Remove(p.config.envVarFile)
 
 		// upload the var file
 		var cmd *packer.RemoteCmd
@@ -251,9 +254,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
 			}
 			if err := comm.Start(ctx, cmd); err != nil {
-				return fmt.Errorf(
-					"Error chmodding script file to 0600 in remote "+
-						"machine: %s", err)
+				return fmt.Errorf("Error chmodding script file to 0600 in remote machine: %s", err)
 			}
 			cmd.Wait()
 			p.config.envVarFile = remoteVFName
@@ -340,19 +341,22 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			return err
 		}
 
-		if !p.config.SkipClean {
+		if p.config.SkipClean {
+			continue
+		}
 
-			// Delete the temporary file we created. We retry this a few times
-			// since if the above rebooted we have to wait until the reboot
-			// completes.
-			err = p.cleanupRemoteFile(p.config.RemotePath, comm)
-			if err != nil {
-				return err
-			}
-			err = p.cleanupRemoteFile(p.config.envVarFile, comm)
-			if err != nil {
-				return err
-			}
+		// Delete the temporary file we created. We retry this a few times
+		// since if the above rebooted we have to wait until the reboot
+		// completes.
+		if err := p.cleanupRemoteFile(p.config.RemotePath, comm); err != nil {
+			return err
+		}
+
+	}
+
+	if !p.config.SkipClean {
+		if err := p.cleanupRemoteFile(p.config.envVarFile, comm); err != nil {
+			return err
 		}
 	}
 

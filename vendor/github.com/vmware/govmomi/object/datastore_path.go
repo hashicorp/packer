@@ -18,6 +18,7 @@ package object
 
 import (
 	"fmt"
+	"path"
 	"strings"
 )
 
@@ -30,7 +31,7 @@ type DatastorePath struct {
 // FromString parses a datastore path.
 // Returns true if the path could be parsed, false otherwise.
 func (p *DatastorePath) FromString(s string) bool {
-	if len(s) == 0 {
+	if s == "" {
 		return false
 	}
 
@@ -62,4 +63,9 @@ func (p *DatastorePath) String() string {
 	}
 
 	return strings.Join([]string{s, p.Path}, " ")
+}
+
+// IsVMDK returns true if Path has a ".vmdk" extension
+func (p *DatastorePath) IsVMDK() bool {
+	return path.Ext(p.Path) == ".vmdk"
 }

@@ -11,9 +11,10 @@ package ebs
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -53,6 +54,16 @@ type Config struct {
 	// engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	// Relevant only to Windows guests: If you set this flag, we'll add clauses
+	// to the launch_block_device_mappings that make sure ephemeral drives
+	// don't show up in the EC2 console. If you launched from the EC2 console,
+	// you'd get this automatically, but the SDK does not provide this service.
+	// For more information, see
+	// https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/InstanceStorage.html.
+	// Because we don't validate the OS type of your guest, it is up to you to
+	// make sure you don't set this for *nix guests; behavior may be
+	// unpredictable.
+	NoEphemeral bool `mapstructure:"no_ephemeral" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -62,7 +73,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -79,7 +92,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -113,11 +126,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warns, errs
+		return nil, warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return warns, nil
+
+	generatedData := []string{"SourceAMIName"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -139,6 +154,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -162,6 +178,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
+			NoEphemeral:                       b.config.NoEphemeral,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
@@ -181,6 +198,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
+			NoEphemeral:                       b.config.NoEphemeral,
 		}
 	}
 
@@ -192,6 +210,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 			VpcId:              b.config.VpcId,
 			SubnetId:           b.config.SubnetId,
+			HasSubnetFilter:    len(b.config.SubnetFilter.Filters) > 0,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -222,6 +241,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
+			SkipProfileValidation:                     b.config.SkipProfileValidation,
 			TemporaryIamInstanceProfilePolicyDocument: b.config.TemporaryIamInstanceProfilePolicyDocument,
 		},
 		&awscommon.StepCleanupVolumes{
@@ -283,6 +303,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
@@ -309,6 +330,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Session:        session,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

@@ -9,6 +9,7 @@
 
 package openapi
 
+// VmData struct for VmData
 type VmData struct {
 	Username string `json:"username,omitempty"`
 }

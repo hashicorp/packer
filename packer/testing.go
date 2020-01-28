@@ -9,12 +9,8 @@ import (
 func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
-		Builder: func(n string) (Builder, error) {
-			if n != "test" {
-				return nil, nil
-			}
-
-			return &MockBuilder{}, nil
+		BuilderStore: MapOfBuilder{
+			"test": func() (Builder, error) { return &MockBuilder{}, nil },
 		},
 	}
 
@@ -46,12 +42,8 @@ func TestUi(t *testing.T) Ui {
 func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 	var b MockBuilder
 
-	c.Components.Builder = func(actual string) (Builder, error) {
-		if actual != n {
-			return nil, nil
-		}
-
-		return &b, nil
+	c.Components.BuilderStore = MapOfBuilder{
+		n: func() (Builder, error) { return &b, nil },
 	}
 
 	return &b
@@ -62,12 +54,8 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
 	var b MockProvisioner
 
-	c.Components.Provisioner = func(actual string) (Provisioner, error) {
-		if actual != n {
-			return nil, nil
-		}
-
-		return &b, nil
+	c.Components.ProvisionerStore = MapOfProvisioner{
+		n: func() (Provisioner, error) { return &b, nil },
 	}
 
 	return &b
@@ -78,12 +66,8 @@ func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
 func TestPostProcessor(t *testing.T, c *CoreConfig, n string) *MockPostProcessor {
 	var b MockPostProcessor
 
-	c.Components.PostProcessor = func(actual string) (PostProcessor, error) {
-		if actual != n {
-			return nil, nil
-		}
-
-		return &b, nil
+	c.Components.PostProcessorStore = MapOfPostProcessor{
+		n: func() (PostProcessor, error) { return &b, nil },
 	}
 
 	return &b

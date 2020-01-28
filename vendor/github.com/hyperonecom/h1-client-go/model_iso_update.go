@@ -9,6 +9,7 @@
 
 package openapi
 
+// IsoUpdate struct for IsoUpdate
 type IsoUpdate struct {
 	Name string `json:"name,omitempty"`
 }

@@ -9,7 +9,8 @@
 
 package openapi
 
+// VmPostHdd struct for VmPostHdd
 type VmPostHdd struct {
-	Disk string `json:"disk"`
+	Disk           string `json:"disk"`
 	ControllerType string `json:"controllerType,omitempty"`
 }

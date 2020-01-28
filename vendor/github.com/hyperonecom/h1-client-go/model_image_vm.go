@@ -11,6 +11,6 @@ package openapi
 
 type ImageVm struct {
 	Flavour string `json:"flavour,omitempty"`
-	Name string `json:"name,omitempty"`
-	Id string `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Id      string `json:"id,omitempty"`
 }

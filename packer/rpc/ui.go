@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"log"
-	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -10,7 +9,7 @@ import (
 // An implementation of packer.Ui where the Ui is actually executed
 // over an RPC connection.
 type Ui struct {
-	client   *rpc.Client
+	commonClient
 	endpoint string
 }
 

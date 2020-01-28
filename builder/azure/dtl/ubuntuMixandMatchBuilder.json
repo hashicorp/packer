@@ -1,0 +1,88 @@
+{
+    "variables": {
+      "client_id": "{{env `client_id`}}",
+      "client_secret": "{{env `client_secret`}}",
+      "tenant_id": "{{env `tenant_id`}}",
+      "subscription_id": "{{env `subscription_id`}}",
+      "lab_name": "NewpackerRG",
+      "resource_group_name": "NewPackerRG",
+      "vm_name" : "vm137"
+    },
+    "builders": [{
+      "type": "azure-dtl",
+  
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+      "subscription_id": "{{user `subscription_id`}}",  
+  
+      "managed_image_resource_group_name": "NewPackerRG",
+      "managed_image_name": "myPackerImage12",
+  
+      "os_type": "Linux",
+      "image_publisher": "Canonical",
+      "image_offer": "UbuntuServer",
+      "image_sku": "18.04-LTS",
+  
+      "azure_tags": {
+          "dept": "Engineering",
+          "task": "Image deployment"
+      },
+      
+      "dtl_artifacts": [{
+        "artifact_name": "linux-apt-package",
+        "parameters" : [{
+          "name": "packages",
+          "value": "vim"
+        },
+        {
+          "name":"update",
+          "value": "true"
+        },
+        {
+          "name": "options",
+          "value": "--fix-broken"
+        }
+      ]},
+      {
+        "artifact_name": "linux-install-mongodb"
+      }],
+      "lab_name": "{{user `lab_name`}}",
+      "vm_name": "{{user `vm_name`}}",
+      "lab_virtual_network_name": "dtlnewpackerrg",
+      "lab_resource_group_name": "{{user `resource_group_name`}}",
+      "lab_subnet_name": "dtlnewpackerrgSubnet",
+      "location": "Central US",
+      "vm_size": "Standard_DS2_v2"
+    }],
+
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "./ubuntu.json",
+      "destination": "/tmp/app.tar.gz"
+    },
+    {
+      "type": "azure-dtlartifact",
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+      "subscription_id": "{{user `subscription_id`}}",  
+      
+      "lab_name": "{{user `lab_name`}}",
+      "resource_group_name": "{{user `resource_group_name`}}",
+      "vm_name" : "{{user `vm_name`}}",
+      "dtl_artifacts": [
+      {
+        "artifact_name": "linux-install-mongodb"
+      }]
+    },
+    {
+      "type": "file",
+      "source": "./ubuntu.json",
+      "destination": "/tmp/ubuntu2.json"
+    }
+ 
+  ]
+
+  }

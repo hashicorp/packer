@@ -20,7 +20,7 @@ func TestBuilderPrepare(t *testing.T) {
 
 	// Test Prepare
 	config := 42
-	warnings, err := bClient.Prepare(config)
+	_, warnings, err := bClient.Prepare(config)
 	if err != nil {
 		t.Fatalf("bad: %s", err)
 	}
@@ -50,7 +50,7 @@ func TestBuilderPrepare_Warnings(t *testing.T) {
 	b.PrepareWarnings = expected
 
 	// Test Prepare
-	warnings, err := bClient.Prepare(nil)
+	_, warnings, err := bClient.Prepare(nil)
 	if err != nil {
 		t.Fatalf("bad: %s", err)
 	}

@@ -63,6 +63,9 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 
 	// Store the droplet id for later
 	state.Put("droplet_id", droplet.ID)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", droplet.ID)
 
 	return multistep.ActionContinue
 }

@@ -101,7 +101,6 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 
 	if host, err := s.Host(state); err == nil {
 		ui.Say(fmt.Sprintf("Using %s communicator to connect: %s", s.Config.Type, host))
-
 	} else {
 		log.Printf("[DEBUG] Unable to get address during connection step: %s", err)
 	}
@@ -118,6 +117,10 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 			return multistep.ActionHalt
 		}
 	}
+
+	// Put communicator config into state so we can pass it to provisioners
+	// for specialized interpolation later
+	state.Put("communicator_config", s.Config)
 
 	return multistep.ActionContinue
 }

@@ -22,7 +22,8 @@ func testConfig() map[string]interface{} {
 
 func TestConfigAutoFillsSourceList(t *testing.T) {
 	tc := testConfig()
-	conf, err := NewConfig(tc)
+	var conf Config
+	err := conf.Prepare(tc)
 	if err != nil {
 		t.Fatalf("Should not have error: %s", err.Error())
 	}
@@ -47,7 +48,8 @@ func TestConfigValidationCatchesMissing(t *testing.T) {
 	for _, key := range required {
 		tc := testConfig()
 		delete(tc, key)
-		_, err := NewConfig(tc)
+		var c Config
+		err := c.Prepare(tc)
 		if err == nil {
 			t.Fatalf("Test should have failed when config lacked %s!", key)
 		}
@@ -68,7 +70,8 @@ func TestConfigValidatesObjects(t *testing.T) {
 		for _, tt := range objectTests {
 			tc := testConfig()
 			tc[s] = tt.object
-			_, err := NewConfig(tc)
+			var c Config
+			err := c.Prepare(tc)
 			if tt.valid {
 				assert.NoError(t, err, tt.object)
 			} else {

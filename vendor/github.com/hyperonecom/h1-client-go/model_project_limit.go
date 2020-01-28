@@ -9,18 +9,29 @@
 
 package openapi
 
+// ProjectLimit struct for ProjectLimit
 type ProjectLimit struct {
-	Vm ProjectLimitVm `json:"vm,omitempty"`
-	Disk ProjectLimitDisk `json:"disk,omitempty"`
-	Iso ProjectLimitIso `json:"iso,omitempty"`
-	Network ProjectLimitIso `json:"network,omitempty"`
-	Image ProjectLimitIso `json:"image,omitempty"`
-	Ip ProjectLimitIso `json:"ip,omitempty"`
-	Firewall ProjectLimitIso `json:"firewall,omitempty"`
-	Netgw ProjectLimitIso `json:"netgw,omitempty"`
-	Vault ProjectLimitDisk `json:"vault,omitempty"`
-	Snapshot ProjectLimitIso `json:"snapshot,omitempty"`
-	Domain ProjectLimitDomain `json:"domain,omitempty"`
-	LogArchive ProjectLimitIso `json:"logArchive,omitempty"`
-	Reservation ProjectLimitIso `json:"reservation,omitempty"`
+	Agent       ProjectLimitAgent       `json:"agent,omitempty"`
+	Container   ProjectLimitContainer   `json:"container,omitempty"`
+	Database    ProjectLimitContainer   `json:"database,omitempty"`
+	Journal     ProjectLimitContainer   `json:"journal,omitempty"`
+	Registry    ProjectLimitRegistry    `json:"registry,omitempty"`
+	Volume      ProjectLimitVolume      `json:"volume,omitempty"`
+	Website     ProjectLimitContainer   `json:"website,omitempty"`
+	Zone        ProjectLimitContainer   `json:"zone,omitempty"`
+	Disk        ProjectLimitDisk        `json:"disk,omitempty"`
+	Firewall    ProjectLimitContainer   `json:"firewall,omitempty"`
+	Image       ProjectLimitContainer   `json:"image,omitempty"`
+	Ip          ProjectLimitContainer   `json:"ip,omitempty"`
+	Iso         ProjectLimitRegistry    `json:"iso,omitempty"`
+	Netadp      string                  `json:"netadp,omitempty"`
+	Netgw       ProjectLimitContainer   `json:"netgw,omitempty"`
+	Network     ProjectLimitNetwork     `json:"network,omitempty"`
+	Replica     string                  `json:"replica,omitempty"`
+	Snapshot    ProjectLimitSnapshot    `json:"snapshot,omitempty"`
+	User        string                  `json:"user,omitempty"`
+	Vault       ProjectLimitVault       `json:"vault,omitempty"`
+	Vm          ProjectLimitVm          `json:"vm,omitempty"`
+	Reservation ProjectLimitReservation `json:"reservation,omitempty"`
+	Vmhost      string                  `json:"vmhost,omitempty"`
 }

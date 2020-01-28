@@ -9,9 +9,10 @@
 
 package openapi
 
+// SnapshotCreate struct for SnapshotCreate
 type SnapshotCreate struct {
-	Vault string `json:"vault"`
-	Service string `json:"service,omitempty"`
-	Name string `json:"name"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Vault   string            `json:"vault"`
+	Service string            `json:"service,omitempty"`
+	Name    string            `json:"name"`
+	Tag     map[string]string `json:"tag,omitempty"`
 }

@@ -40,6 +40,9 @@ type Driver interface {
 	// Stop stops a running machine, forcefully.
 	Stop(string) error
 
+	// ACPIStop stops a running machine via ACPI power button.
+	StopViaACPI(string) error
+
 	// SuppressMessages should do what needs to be done in order to
 	// suppress any annoying popups from VirtualBox.
 	SuppressMessages() error

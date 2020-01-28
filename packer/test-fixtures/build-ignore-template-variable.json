@@ -1,0 +1,11 @@
+{
+    "variables": {
+        "var": "{{env `PACKER_TEST_ENV`}}_{{ .PACKER_TEST_TEMP }}",
+        "http_ip": "{{ .HTTPIP }}",
+        "array_var": "us-west-1,us-west-2"
+    },
+
+    "builders": [{
+        "type": "test"
+    }]
+}

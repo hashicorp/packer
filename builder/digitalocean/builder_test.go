@@ -32,7 +32,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"api_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -47,7 +47,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -62,7 +62,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 
 	// Test default
 	delete(config, "region")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -75,7 +75,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	// Test set
 	config["region"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -94,7 +94,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 
 	// Test default
 	delete(config, "size")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -107,7 +107,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	// Test set
 	config["size"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -126,7 +126,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 
 	// Test default
 	delete(config, "image")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -139,7 +139,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	// Test set
 	config["image"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -157,7 +157,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -172,7 +172,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	// Test set
 	config["state_timeout"] = "5m"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -183,7 +183,7 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	// Test bad
 	config["state_timeout"] = "tubes"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -197,7 +197,7 @@ func TestBuilderPrepare_SnapshotTimeout(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -212,7 +212,7 @@ func TestBuilderPrepare_SnapshotTimeout(t *testing.T) {
 	// Test set
 	config["snapshot_timeout"] = "15m"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -223,7 +223,7 @@ func TestBuilderPrepare_SnapshotTimeout(t *testing.T) {
 	// Test bad
 	config["snapshot_timeout"] = "badstring"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -237,7 +237,7 @@ func TestBuilderPrepare_PrivateNetworking(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -252,7 +252,7 @@ func TestBuilderPrepare_PrivateNetworking(t *testing.T) {
 	// Test set
 	config["private_networking"] = true
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -270,7 +270,7 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -285,7 +285,7 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	// Test set
 	config["snapshot_name"] = "foobarbaz"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -296,7 +296,7 @@ func TestBuilderPrepare_SnapshotName(t *testing.T) {
 	// Test set with template
 	config["snapshot_name"] = "{{timestamp}}"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -316,7 +316,7 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -331,7 +331,7 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 	// Test normal set
 	config["droplet_name"] = "foobar"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -342,7 +342,7 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 	// Test with template
 	config["droplet_name"] = "foobar-{{timestamp}}"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -353,7 +353,7 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 	// Test with bad template
 	config["droplet_name"] = "foobar-{{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

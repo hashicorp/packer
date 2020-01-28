@@ -68,7 +68,7 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 		t.info = &ti
 	}
 
-	// t.info could be nil if pc can't satify the rules above
+	// t.info could be nil if pc can't satisfy the rules above
 	if t.info == nil {
 		return false
 	}

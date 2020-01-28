@@ -8,25 +8,27 @@
  */
 
 package openapi
+
 import (
 	"time"
 )
 
+// Netgw struct for Netgw
 type Netgw struct {
-	Id string `json:"_id,omitempty"`
-	Name string `json:"name,omitempty"`
-	Services []ProjectServices `json:"services,omitempty"`
-	Flavour string `json:"flavour,omitempty"`
-	ModifiedOn time.Time `json:"modifiedOn,omitempty"`
-	ModifiedBy string `json:"modifiedBy,omitempty"`
-	CreatedBy string `json:"createdBy,omitempty"`
-	CreatedOn time.Time `json:"createdOn,omitempty"`
-	Processing bool `json:"processing,omitempty"`
-	Created bool `json:"created,omitempty"`
-	Queue []Event `json:"queue,omitempty"`
-	State string `json:"state,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
-	Project string `json:"project,omitempty"`
-	PrimaryIP string `json:"primaryIP,omitempty"`
-	Network string `json:"network,omitempty"`
+	Id         string            `json:"id,omitempty"`
+	Name       string            `json:"name,omitempty"`
+	Services   []ProjectServices `json:"services,omitempty"`
+	Flavour    string            `json:"flavour,omitempty"`
+	ModifiedOn time.Time         `json:"modifiedOn,omitempty"`
+	ModifiedBy string            `json:"modifiedBy,omitempty"`
+	CreatedBy  string            `json:"createdBy,omitempty"`
+	CreatedOn  time.Time         `json:"createdOn,omitempty"`
+	Processing bool              `json:"processing,omitempty"`
+	Created    bool              `json:"created,omitempty"`
+	Queue      []Event           `json:"queue,omitempty"`
+	State      string            `json:"state,omitempty"`
+	Tag        map[string]string `json:"tag,omitempty"`
+	Project    string            `json:"project,omitempty"`
+	PrimaryIP  string            `json:"primaryIP,omitempty"`
+	Network    string            `json:"network,omitempty"`
 }

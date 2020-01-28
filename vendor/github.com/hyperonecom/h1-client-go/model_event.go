@@ -8,16 +8,18 @@
  */
 
 package openapi
+
 import (
 	"time"
 )
 
+// Event struct for Event
 type Event struct {
-	Id string `json:"_id,omitempty"`
-	Name string `json:"name,omitempty"`
-	CreatedBy string `json:"createdBy,omitempty"`
-	Queued time.Time `json:"queued,omitempty"`
-	State string `json:"state,omitempty"`
-	Stage string `json:"stage,omitempty"`
-	Resource EventResource `json:"resource,omitempty"`
+	Id        string        `json:"id,omitempty"`
+	Name      string        `json:"name,omitempty"`
+	CreatedBy string        `json:"createdBy,omitempty"`
+	Queued    time.Time     `json:"queued,omitempty"`
+	State     string        `json:"state,omitempty"`
+	Stage     string        `json:"stage,omitempty"`
+	Resource  EventResource `json:"resource,omitempty"`
 }

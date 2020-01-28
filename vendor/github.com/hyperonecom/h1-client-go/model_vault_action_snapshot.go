@@ -9,6 +9,8 @@
 
 package openapi
 
+// VaultActionSnapshot struct for VaultActionSnapshot
 type VaultActionSnapshot struct {
+	Name    string `json:"name"`
 	Service string `json:"service,omitempty"`
 }

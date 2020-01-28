@@ -35,6 +35,7 @@ type StepRunSourceInstance struct {
 	UserData                          string
 	UserDataFile                      string
 	VolumeTags                        TagMap
+	NoEphemeral                       bool
 
 	instanceId string
 }
@@ -116,6 +117,25 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
+	if s.NoEphemeral {
+		// This is only relevant for windows guests. Ephemeral drives by
+		// default are assigned to drive names xvdca-xvdcz.
+		// When vms are launched from the AWS console, they're automatically
+		// removed from the block devices if the user hasn't said to use them,
+		// but the SDK does not perform this cleanup. The following code just
+		// manually removes the ephemeral drives from the mapping so that they
+		// don't clutter up console views and cause confusion.
+		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
+		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
+		for _, letter := range DefaultEphemeralDeviceLetters {
+			bd := &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("xvdc" + string(letter)),
+				NoDevice:   aws.String(""),
+			}
+			runOpts.BlockDeviceMappings = append(runOpts.BlockDeviceMappings, bd)
+		}
+	}
+
 	if s.EnableT2Unlimited {
 		creditOption := "unlimited"
 		runOpts.CreditSpecification = &ec2.CreditSpecificationRequest{CpuCredits: &creditOption}
@@ -174,9 +194,20 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 	}
 
-	runReq, runResp := ec2conn.RunInstancesRequest(runOpts)
-	runReq.RetryCount = 11
-	err = runReq.Send()
+	var runResp *ec2.Reservation
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(err error) bool {
+			if isAWSErr(err, "InvalidParameterValue", "iamInstanceProfile") {
+				return true
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		runResp, err = ec2conn.RunInstances(runOpts)
+		return err
+	})
 
 	if isAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
 		err := fmt.Errorf("Error launching source instance: a valid Subnet Id was not specified")
@@ -249,6 +280,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.InstanceId)
 
 	// If we're in a region that doesn't support tagging on instance creation,
 	// do that now.
