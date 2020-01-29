@@ -133,7 +133,7 @@ func (s *stepRunInstance) Run(ctx context.Context, state multistep.StateBag) mul
 	resourceType := "instance"
 	if len(tags) > 0 {
 		req.TagSpecification = []*cvm.TagSpecification{
-			&cvm.TagSpecification{
+			{
 				ResourceType: &resourceType,
 				Tags:         tags,
 			},

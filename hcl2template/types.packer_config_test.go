@@ -20,7 +20,7 @@ func TestParser_complete(t *testing.T) {
 			parseTestArgs{"testdata/complete"},
 			&PackerConfig{
 				Sources: map[SourceRef]*Source{
-					refVBIsoUbuntu1204: &Source{Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
 				Builds: Builds{
 					&BuildBlock{
