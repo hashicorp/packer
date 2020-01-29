@@ -166,7 +166,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	b.setRuntimeParameters(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
 	b.setImageParameters(b.stateBag)
-	var steps []multistep.Step
 
 	deploymentName := b.stateBag.Get(constants.ArmDeploymentName).(string)
 
@@ -195,6 +194,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
 	}
 
+	var steps []multistep.Step
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
@@ -240,7 +240,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.UserName,
-						Password: b.config.tmpAdminPassword,
+						Password: b.config.Comm.WinRMPassword,
 					}, nil
 				},
 			},
