@@ -209,7 +209,7 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 		st, _ := structtag.Parse(tag)
 		ctyTag, _ := st.Get("cty")
 		fmt.Fprintf(w, "	\"%s\": ", ctyTag.Name)
-		outputHCL2SpecField(w, ctyTag.Name, field.Type(), st)
+		outputHCL2SpecFieldTest(w, ctyTag.Name, field.Type(), st)
 		fmt.Fprintln(w, `,`)
 	}
 
@@ -217,81 +217,81 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
-func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
+func outputHCL2SpecFieldTest(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
 	}
+	spec, specType := writeSpecField(accessor, fieldType)
+	switch specType {
+	case cty.NilType:
+		fmt.Fprintf(w, spec.(string))
+	default:
+		fmt.Fprintf(w, `%#v`, spec)
+	}
+
+}
+
+func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
-		outputHCL2SpecField(w, accessor, f.Elem(), tag)
+		return writeSpecField(accessor, f.Elem())
 	case *types.Basic:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
+		ctyType := basicKindToCtyType(f.Kind())
+		return &hcldec.AttrSpec{
 			Name:     accessor,
-			Type:     basicKindToCtyType(f.Kind()),
+			Type:     ctyType,
 			Required: false,
-		})
+		}, ctyType
 	case *types.Map:
-		fmt.Fprintf(w, `%#v`, &hcldec.BlockAttrsSpec{
+		return &hcldec.BlockAttrsSpec{
 			TypeName:    accessor,
 			ElementType: cty.String, // for now everything can be simplified to a map[string]string
 			Required:    false,
-		})
+		}, cty.String
+	case *types.Named:
+		underlyingType := f.Underlying()
+		switch underlyingType.(type) {
+		case *types.Struct:
+			return fmt.Sprintf(`&hcldec.BlockSpec{TypeName: "%s",`+
+				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String()), cty.NilType
+		default:
+			return writeSpecField(accessor, underlyingType)
+		}
 	case *types.Slice:
 		elem := f.Elem()
 		if ptr, isPtr := elem.(*types.Pointer); isPtr {
 			elem = ptr.Elem()
 		}
 		switch elem := elem.(type) {
-		case *types.Basic:
-			fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-				Name:     accessor,
-				Type:     cty.List(basicKindToCtyType(elem.Kind())),
-				Required: false,
-			})
 		case *types.Named:
 			b := bytes.NewBuffer(nil)
 			underlyingType := elem.Underlying()
 			switch underlyingType.(type) {
 			case *types.Struct:
 				fmt.Fprintf(b, `hcldec.ObjectSpec((*%s)(nil).HCL2Spec())`, elem.String())
-			default:
-				outputHCL2SpecField(b, accessor, elem, tag)
 			}
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
-		case *types.Slice:
-			elemElem := elem.Elem()
-			if ptr, isPtr := elemElem.(*types.Pointer); isPtr {
-				elemElem = ptr.Elem()
-			}
-			switch elem := elemElem.(type) {
-			case *types.Basic:
-				fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-					Name:     accessor,
-					Type:     cty.List(cty.List(basicKindToCtyType(elem.Kind()))),
-					Required: false,
-				})
-			}
+			return fmt.Sprintf(`&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String()), cty.NilType
 		default:
-			outputHCL2SpecField(w, accessor, elem.Underlying(), tag)
+			_, specType := writeSpecField(accessor, elem)
+			if specType == cty.NilType {
+				return writeSpecField(accessor, elem.Underlying())
+			}
+			return &hcldec.AttrSpec{
+				Name:     accessor,
+				Type:     cty.List(specType),
+				Required: false,
+			}, cty.List(specType)
 		}
-	case *types.Named:
-		underlyingType := f.Underlying()
-		switch underlyingType.(type) {
-		case *types.Struct:
-			fmt.Fprintf(w, `&hcldec.BlockSpec{TypeName: "%s",`+
-				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String())
-		default:
-			outputHCL2SpecField(w, accessor, underlyingType, tag)
-		}
-	default:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-			Name:     accessor,
-			Type:     basicKindToCtyType(types.Bool),
-			Required: false,
-		})
-		fmt.Fprintf(w, `/* TODO(azr): could not find type */`)
 	}
+	b := bytes.NewBuffer(nil)
+	fmt.Fprintf(b, `%#v`, &hcldec.AttrSpec{
+		Name:     accessor,
+		Type:     basicKindToCtyType(types.Bool),
+		Required: false,
+	})
+	fmt.Fprintf(b, `/* TODO(azr): could not find type */`)
+	return b.String(), cty.NilType
 }
 
 func basicKindToCtyType(kind types.BasicKind) cty.Type {
