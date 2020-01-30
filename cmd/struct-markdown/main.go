@@ -114,6 +114,8 @@ func main() {
 			switch fieldType {
 			case "time.Duration":
 				fieldType = `duration string | ex: "1h5m2s"`
+			case "config.Trilean":
+				fieldType = `boolean`
 			}
 
 			field := Field{
