@@ -209,7 +209,7 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 		st, _ := structtag.Parse(tag)
 		ctyTag, _ := st.Get("cty")
 		fmt.Fprintf(w, "	\"%s\": ", ctyTag.Name)
-		outputHCL2SpecFieldTest(w, ctyTag.Name, field.Type(), st)
+		outputHCL2SpecField(w, ctyTag.Name, field.Type(), st)
 		fmt.Fprintln(w, `,`)
 	}
 
@@ -217,7 +217,7 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
-func outputHCL2SpecFieldTest(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
+func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
