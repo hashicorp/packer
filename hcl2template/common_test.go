@@ -194,6 +194,10 @@ var (
 			"b",
 			"c",
 		},
+		SliceSliceString: [][]string{
+			{"a", "b"},
+			{"c", "d"},
+		},
 	}
 
 	basicMockBuilder = &MockBuilder{
