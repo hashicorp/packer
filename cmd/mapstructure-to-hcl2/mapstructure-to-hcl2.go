@@ -260,9 +260,18 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 			}
 			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
 		case *types.Slice:
-			b := bytes.NewBuffer(nil)
-			outputHCL2SpecField(b, accessor, elem.Underlying(), tag)
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
+			elemElem := elem.Elem()
+			if ptr, isPtr := elemElem.(*types.Pointer); isPtr {
+				elemElem = ptr.Elem()
+			}
+			switch elem := elemElem.(type) {
+			case *types.Basic:
+				fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
+					Name:     accessor,
+					Type:     cty.List(cty.List(basicKindToCtyType(elem.Kind()))),
+					Required: false,
+				})
+			}
 		default:
 			outputHCL2SpecField(w, accessor, elem.Underlying(), tag)
 		}
