@@ -91,8 +91,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	artifact := &Artifact{
-		image:  image.(*compute.Image),
-		config: &b.config,
+		image:     image.(*compute.Image),
+		config:    &b.config,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

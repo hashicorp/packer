@@ -448,6 +448,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &azcommon.Artifact{
 		Resources:      []string{b.config.ImageResourceID},
 		BuilderIdValue: BuilderId,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

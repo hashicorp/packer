@@ -41,10 +41,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	// this particular post-processor doesn't do anything with the artifact
-	// except to return it.
+	generatedData := make(map[string]interface{})
+	artifactSateData := artifact.State("generated_data")
+	if artifactSateData != nil {
+		for k, v := range artifactSateData.(map[interface{}]interface{}) {
+			generatedData[k.(string)] = v
+		}
+	}
 
-	success, retErr := sl.Run(ctx, ui, &p.config, map[string]interface{}{})
+	success, retErr := sl.Run(ctx, ui, &p.config, generatedData)
 	if !success {
 		return nil, false, false, retErr
 	}

@@ -16,14 +16,19 @@ type artifact struct {
 	OutputDir string
 	BoxName   string
 	Provider  string
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 // NewArtifact returns a vagrant artifact containing the .box file
-func NewArtifact(provider, dir string) packer.Artifact {
+func NewArtifact(provider, dir string, generatedData map[string]interface{}) packer.Artifact {
 	return &artifact{
 		OutputDir: dir,
 		BoxName:   "package.box",
 		Provider:  provider,
+		StateData: generatedData,
 	}
 }
 
@@ -44,7 +49,7 @@ func (a *artifact) String() string {
 }
 
 func (a *artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 func (a *artifact) Destroy() error {

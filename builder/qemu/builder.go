@@ -726,6 +726,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		state: make(map[string]interface{}),
 	}
 
+	artifact.state["generated_data"] = state.Get("generated_data")
 	artifact.state["diskName"] = b.config.VMName
 	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
 	if ok {
