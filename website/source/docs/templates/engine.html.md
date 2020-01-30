@@ -62,7 +62,7 @@ Here is a full list of the available functions for reference.
     each function will behave.
 -   `env` - Returns environment variables. See example in [using home
     variable](/docs/templates/user-variables.html#using-home-variable)
--   `build` - This engine will allow you to access special variables that
+-   `build` - This engine will allow you to access, from provisioners and post-processors, special variables that
     provide connection information and basic instance state information.
     Usage example:
 
