@@ -34,12 +34,6 @@ type PostProcessor struct {
 	config Config
 }
 
-type outputPathTemplate struct {
-	BuildName    string
-	BuilderType  string
-	ChecksumType string
-}
-
 func getHash(t string) hash.Hash {
 	var h hash.Hash
 	switch t {
@@ -105,16 +99,26 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	files := artifact.Files()
 	var h hash.Hash
 
-	newartifact := NewArtifact(artifact.Files())
-	opTpl := &outputPathTemplate{
-		BuildName:   p.config.PackerBuildName,
-		BuilderType: p.config.PackerBuilderType,
+	var generatedData map[interface{}]interface{}
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[interface{}]interface{})
 	}
+	// If stateData has a nil map generatedData will be nil
+	// and we need to make sure it's not
+	if generatedData == nil {
+		generatedData = make(map[interface{}]interface{})
+	}
+	generatedData["BuildName"] = p.config.PackerBuildName
+	generatedData["BuilderType"] = p.config.PackerBuilderType
+
+	newartifact := NewArtifact(artifact.Files())
 
 	for _, ct := range p.config.ChecksumTypes {
 		h = getHash(ct)
-		opTpl.ChecksumType = ct
-		p.config.ctx.Data = &opTpl
+		generatedData["ChecksumType"] = ct
+		p.config.ctx.Data = generatedData
 
 		for _, art := range files {
 			checksumFile, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)

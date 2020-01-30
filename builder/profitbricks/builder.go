@@ -64,6 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	artifact := &Artifact{
 		snapshotData: config.SnapshotName,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

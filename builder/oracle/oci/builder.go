@@ -98,9 +98,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the artifact and return it
 	artifact := &Artifact{
-		Image:  image.(core.Image),
-		Region: region,
-		driver: driver,
+		Image:     image.(core.Image),
+		Region:    region,
+		driver:    driver,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

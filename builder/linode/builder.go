@@ -95,6 +95,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (ret 
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
 		Driver:     &client,
+		StateData:  map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil
