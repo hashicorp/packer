@@ -11,7 +11,7 @@ import (
 func CommHost(host string, statebagKey string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		if host != "" {
-			log.Printf("Using ssh_host value: %s", host)
+			log.Printf("Using host value: %s", host)
 			return host, nil
 		}
 		ipAddress, hasIP := state.Get(statebagKey).(string)
