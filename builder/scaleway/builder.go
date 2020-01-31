@@ -98,6 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		snapshotID:   state.Get("snapshot_id").(string),
 		regionName:   state.Get("region").(string),
 		client:       client,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

@@ -45,7 +45,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	debug := state.Get("debug").(bool)
-	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(int)
 	ui := state.Get("ui").(packer.Ui)
 	vncIp := state.Get("vnc_ip").(string)
@@ -99,18 +98,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
-	// Determine the host IP
-	hostIP, err := driver.HostIP(state)
-	if err != nil {
-		err := fmt.Errorf("Error detecting host IP: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	log.Printf("Host IP for the VMware machine: %s", hostIP)
-	common.SetHTTPIP(hostIP)
-
+	hostIP := common.GetHTTPIP()
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIP,
 		httpPort,

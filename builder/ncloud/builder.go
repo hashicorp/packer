@@ -112,7 +112,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Build the artifact and return it
-	artifact := &Artifact{}
+	artifact := &Artifact{
+		StateData: map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")},
+	}
 
 	if serverImage, ok := b.stateBag.GetOk("memberServerImage"); ok {
 		artifact.MemberServerImage = serverImage.(*server.MemberServerImage)

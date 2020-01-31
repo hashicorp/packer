@@ -51,11 +51,6 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-type boxDownloadUrlTemplate struct {
-	ArtifactId string
-	Provider   string
-}
-
 type PostProcessor struct {
 	config                Config
 	client                *VagrantCloudClient
@@ -154,10 +149,20 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error getting provider name: %s", err)
 	}
 
-	p.config.ctx.Data = &boxDownloadUrlTemplate{
-		ArtifactId: artifact.Id(),
-		Provider:   providerName,
+	var generatedData map[interface{}]interface{}
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[interface{}]interface{})
 	}
+	// If stateData has a nil map generatedData will be nil
+	// and we need to make sure it's not
+	if generatedData == nil {
+		generatedData = make(map[interface{}]interface{})
+	}
+	generatedData["ArtifactId"] = artifact.Id()
+	generatedData["Provider"] = providerName
+	p.config.ctx.Data = generatedData
 
 	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
 	if err != nil {

@@ -23,6 +23,7 @@ type StepPreValidate struct {
 	AMISkipBuildRegion bool
 	VpcId              string
 	SubnetId           string
+	HasSubnetFilter    bool
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -121,10 +122,11 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 }
 
 func (s *StepPreValidate) checkVpc(conn ec2iface.EC2API) error {
-	if s.VpcId == "" || (s.VpcId != "" && s.SubnetId != "") {
+	if s.VpcId == "" || (s.VpcId != "" && (s.SubnetId != "" || s.HasSubnetFilter)) {
 		// Skip validation if:
 		// * The user has not provided a VpcId.
 		// * Both VpcId and SubnetId are provided; AWS API will error if something is wrong.
+		// * Both VpcId and SubnetFilter are provided
 		return nil
 	}
 
@@ -135,7 +137,7 @@ func (s *StepPreValidate) checkVpc(conn ec2iface.EC2API) error {
 
 	if res != nil && len(res.Vpcs) == 1 && res.Vpcs[0] != nil {
 		if isDefault := aws.BoolValue(res.Vpcs[0].IsDefault); !isDefault {
-			return fmt.Errorf("Error: subnet_id must be provided for non-default VPCs (%s)", s.VpcId)
+			return fmt.Errorf("Error: subnet_id or subnet_filter must be provided for non-default VPCs (%s)", s.VpcId)
 		}
 	}
 	return nil

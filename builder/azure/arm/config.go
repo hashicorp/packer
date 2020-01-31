@@ -640,8 +640,13 @@ func setUserNamePassword(c *Config) {
 
 	if c.Comm.SSHPassword != "" {
 		c.Password = c.Comm.SSHPassword
-	} else {
-		c.Password = c.tmpAdminPassword
+		return
+	}
+
+	// Configure password settings using Azure generated credentials
+	c.Password = c.tmpAdminPassword
+	if c.Comm.WinRMPassword == "" {
+		c.Comm.WinRMPassword = c.Password
 	}
 }
 
