@@ -79,7 +79,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepDetachIso{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.SSHHost, "ipaddress"),
+			Host:      communicator.CommHost(b.config.Comm.Host(), "ipaddress"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			SSHPort:   commPort,
 			WinRMPort: commPort,
