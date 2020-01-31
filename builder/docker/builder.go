@@ -50,7 +50,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRun{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.SSHHost),
+			Host:      commHost(b.config.Comm.Host()),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			CustomConnect: map[string]multistep.Step{
 				"docker":                 &StepConnectDocker{},
