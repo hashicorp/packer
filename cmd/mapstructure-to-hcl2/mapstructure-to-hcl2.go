@@ -201,6 +201,7 @@ type StructDef struct {
 	Struct             *types.Struct
 }
 
+// outputStructHCL2SpecBody writes the hcl spec of a Config
 func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintf(w, "s := map[string]hcldec.Spec{\n")
 
@@ -217,6 +218,9 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
+// outputHCL2SpecField writes the Config field in hcl Spec types
+// such as AttrSpec, BlockAttrsSpec, and others.
+// These defines how the field's format will be in the hcl templates.
 func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
@@ -232,6 +236,12 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 
 }
 
+// writeSpecField it's a recursive method that based on the field type
+// will create a relative Spec type.
+// To allow it to be recursive, the method returns two values: an interface
+// that has the content to be written, and the type that will be used by the parent
+// scope to create it's own content. E.g. []strings will use the `string` basic type
+// to create a content of a list of strings.
 func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
@@ -250,9 +260,14 @@ func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Typ
 			Required:    false,
 		}, cty.Map(cty.String)
 	case *types.Named:
+		// Named is the relative type when of a field with a struct.
+		// E.g. SourceAmiFilter    *common.FlatAmiFilterOptions
+		// SourceAmiFilter will become a block with nested elements from the struct itself.
 		underlyingType := f.Underlying()
 		switch underlyingType.(type) {
 		case *types.Struct:
+			// A struct returns NilType because its HCL2Spec is written in the related file
+			// and we don't need to write it again.
 			return fmt.Sprintf(`&hcldec.BlockSpec{TypeName: "%s",`+
 				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String()), cty.NilType
 		default:
@@ -265,6 +280,9 @@ func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Typ
 		}
 		switch elem := elem.(type) {
 		case *types.Named:
+			// A Slice of Named is the relative type of a filed with a slice of structs.
+			// E.g. LaunchMappings []common.FlatBlockDevice
+			// LaunchMappings will validate more than one block with nested elements.
 			b := bytes.NewBuffer(nil)
 			underlyingType := elem.Underlying()
 			switch underlyingType.(type) {
