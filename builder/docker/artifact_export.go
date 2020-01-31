@@ -9,6 +9,9 @@ import (
 // exported from docker into a single flat file.
 type ExportArtifact struct {
 	path string
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (*ExportArtifact) BuilderId() string {
@@ -28,7 +31,7 @@ func (a *ExportArtifact) String() string {
 }
 
 func (a *ExportArtifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 func (a *ExportArtifact) Destroy() error {

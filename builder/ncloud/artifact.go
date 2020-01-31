@@ -11,6 +11,10 @@ const BuilderID = "ncloud.server.image"
 
 type Artifact struct {
 	ServerImage *ncloud.ServerImage
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (*Artifact) BuilderId() string {
@@ -38,6 +42,9 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
 	return a.ServerImage.MemberServerImageStatus
 }
 

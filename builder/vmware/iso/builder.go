@@ -109,6 +109,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&vmwcommon.StepHTTPIPDiscover{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,

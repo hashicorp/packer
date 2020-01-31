@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -164,12 +165,12 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 
 	testCases := []testcase{
-		testcase{"", "40960M", false},       // not provided
-		testcase{"12345", "12345M", false},  // no unit given, defaults to M
-		testcase{"12345x", "12345x", true},  // invalid unit
-		testcase{"12345T", "12345T", false}, // terabytes
-		testcase{"12345b", "12345b", false}, // bytes get preserved when set.
-		testcase{"60000M", "60000M", false}, // Original test case
+		{"", "40960M", false},       // not provided
+		{"12345", "12345M", false},  // no unit given, defaults to M
+		{"12345x", "12345x", true},  // invalid unit
+		{"12345T", "12345T", false}, // terabytes
+		{"12345b", "12345b", false}, // bytes get preserved when set.
+		{"60000M", "60000M", false}, // Original test case
 	}
 	for _, tc := range testCases {
 		// Set input disk size
@@ -622,5 +623,24 @@ func TestBuilderPrepare_VNCPassword(t *testing.T) {
 	expected := filepath.Join("not-a-real-directory", "packer-foo.monitor")
 	if !reflect.DeepEqual(b.config.QMPSocketPath, expected) {
 		t.Fatalf("Bad QMP socket Path: %s", b.config.QMPSocketPath)
+	}
+}
+
+func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	sshTimeout := 2 * time.Minute
+	config["ssh_wait_timeout"] = sshTimeout
+
+	_, warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.Comm.SSHTimeout != sshTimeout {
+		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.Comm.SSHTimeout.String())
 	}
 }

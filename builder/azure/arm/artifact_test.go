@@ -10,6 +10,10 @@ func getFakeSasUrl(name string) string {
 	return fmt.Sprintf("SAS-%s", name)
 }
 
+func generatedData() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
 func TestArtifactIdVHD(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
@@ -28,7 +32,7 @@ func TestArtifactIdVHD(t *testing.T) {
 		},
 	}
 
-	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -42,7 +46,7 @@ func TestArtifactIdVHD(t *testing.T) {
 }
 
 func TestArtifactIDManagedImage(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -65,7 +69,7 @@ ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
 }
 
 func TestArtifactIDManagedImageWithoutOSDiskSnapshotName(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -87,7 +91,7 @@ ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
 }
 
 func TestArtifactIDManagedImageWithoutDataDiskSnapshotPrefix(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -109,7 +113,7 @@ ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
 }
 
 func TestArtifactIDManagedImageWithSharedImageGalleryId(t *testing.T) {
-	artifact, err := NewManagedImageArtifactWithSIGAsDestination("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGallery")
+	artifact, err := NewManagedImageArtifactWithSIGAsDestination("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", "fakeSharedImageGallery", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -150,7 +154,7 @@ func TestArtifactString(t *testing.T) {
 		},
 	}
 
-	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -201,7 +205,7 @@ func TestAdditionalDiskArtifactString(t *testing.T) {
 		},
 	}
 
-	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	artifact, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -251,7 +255,7 @@ func TestArtifactProperties(t *testing.T) {
 		},
 	}
 
-	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -301,7 +305,7 @@ func TestAdditionalDiskArtifactProperties(t *testing.T) {
 		},
 	}
 
-	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -356,7 +360,7 @@ func TestArtifactOverHyphenatedCaptureUri(t *testing.T) {
 		},
 	}
 
-	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	testSubject, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -369,7 +373,7 @@ func TestArtifactOverHyphenatedCaptureUri(t *testing.T) {
 func TestArtifactRejectMalformedTemplates(t *testing.T) {
 	template := CaptureTemplate{}
 
-	_, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	_, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err == nil {
 		t.Fatalf("Expected artifact creation to fail, but it succeeded.")
 	}
@@ -392,8 +396,34 @@ func TestArtifactRejectMalformedStorageUri(t *testing.T) {
 		},
 	}
 
-	_, err := NewArtifact(&template, getFakeSasUrl, "Linux")
+	_, err := NewArtifact(&template, getFakeSasUrl, "Linux", generatedData())
 	if err == nil {
 		t.Fatalf("Expected artifact creation to fail, but it succeeded.")
+	}
+}
+
+func TestArtifactState_StateData(t *testing.T) {
+	expectedData := "this is the data"
+	artifact := &Artifact{
+		StateData: map[string]interface{}{"state_data": expectedData},
+	}
+
+	// Valid state
+	result := artifact.State("state_data")
+	if result != expectedData {
+		t.Fatalf("Bad: State data was %s instead of %s", result, expectedData)
+	}
+
+	// Invalid state
+	result = artifact.State("invalid_key")
+	if result != nil {
+		t.Fatalf("Bad: State should be nil for invalid state data name")
+	}
+
+	// Nil StateData should not fail and should return nil
+	artifact = &Artifact{}
+	result = artifact.State("key")
+	if result != nil {
+		t.Fatalf("Bad: State should be nil for nil StateData")
 	}
 }

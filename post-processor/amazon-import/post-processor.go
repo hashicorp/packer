@@ -127,6 +127,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
 
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
+
 	session, err := p.config.Session()
 	if err != nil {
 		return nil, false, false, err

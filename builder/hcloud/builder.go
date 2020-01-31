@@ -84,6 +84,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		snapshotName: state.Get("snapshot_name").(string),
 		snapshotId:   state.Get("snapshot_id").(int),
 		hcloudClient: b.hcloudClient,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

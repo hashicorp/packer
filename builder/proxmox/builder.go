@@ -118,6 +118,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &Artifact{
 		templateID:    tplID,
 		proxmoxClient: b.proxmoxClient,
+		StateData:     map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

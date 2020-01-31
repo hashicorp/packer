@@ -39,12 +39,17 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	generatedData := map[string]interface{}{"Data": "generated"}
 	instanceId := 11111
 	packerRunUUID := "1fa225b8-27d1-42d1-9117-221772213962"
+	httpIP := "10.0.2.2"
+	httpPort := "2222"
+	httpAddr := fmt.Sprintf("%s:%s", httpIP, httpPort)
 
 	state.Put("generated_data", generatedData)
 	state.Put("instance_id", instanceId)
 	state.Put("communicator_config", commConfig)
 
 	os.Setenv("PACKER_RUN_UUID", packerRunUUID)
+	SetHTTPIP(httpIP)
+	SetHTTPPort(httpPort)
 
 	hookData := PopulateProvisionHookData(state)
 
@@ -59,6 +64,9 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	}
 	if hookData["PackerRunUUID"] != packerRunUUID {
 		t.Fatalf("Bad: Expecting hookData[\"PackerRunUUID\"]  was %s but actual value was %s", packerRunUUID, hookData["PackerRunUUID"])
+	}
+	if hookData["PackerHTTPAddr"] != httpAddr {
+		t.Fatalf("Bad: Expecting hookData[\"PackerHTTPAddr\"]  was %s but actual value was %s", httpAddr, hookData["PackerHTTPAddr"])
 	}
 	if hookData["Host"] != commConfig.Host() {
 		t.Fatalf("Bad: Expecting hookData[\"Host\"]  was %s but actual value was %s", commConfig.Host(), hookData["Host"])

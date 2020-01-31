@@ -129,8 +129,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = fmt.Sprintf(
-			"%s/%s", p.config.RemoteFolder, p.config.RemoteFile)
+		p.config.RemotePath = fmt.Sprintf("%s/%s", p.config.RemoteFolder, p.config.RemoteFile)
 	}
 
 	if p.config.Scripts == nil {
@@ -232,7 +231,6 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 
 		p.config.envVarFile = tf.Name()
-		defer os.Remove(p.config.envVarFile)
 
 		// upload the var file
 		var cmd *packer.RemoteCmd
@@ -256,9 +254,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
 			}
 			if err := comm.Start(ctx, cmd); err != nil {
-				return fmt.Errorf(
-					"Error chmodding script file to 0600 in remote "+
-						"machine: %s", err)
+				return fmt.Errorf("Error chmodding script file to 0600 in remote machine: %s", err)
 			}
 			cmd.Wait()
 			p.config.envVarFile = remoteVFName
@@ -345,19 +341,22 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			return err
 		}
 
-		if !p.config.SkipClean {
+		if p.config.SkipClean {
+			continue
+		}
 
-			// Delete the temporary file we created. We retry this a few times
-			// since if the above rebooted we have to wait until the reboot
-			// completes.
-			err = p.cleanupRemoteFile(p.config.RemotePath, comm)
-			if err != nil {
-				return err
-			}
-			err = p.cleanupRemoteFile(p.config.envVarFile, comm)
-			if err != nil {
-				return err
-			}
+		// Delete the temporary file we created. We retry this a few times
+		// since if the above rebooted we have to wait until the reboot
+		// completes.
+		if err := p.cleanupRemoteFile(p.config.RemotePath, comm); err != nil {
+			return err
+		}
+
+	}
+
+	if !p.config.SkipClean {
+		if err := p.cleanupRemoteFile(p.config.envVarFile, comm); err != nil {
+			return err
 		}
 	}
 
