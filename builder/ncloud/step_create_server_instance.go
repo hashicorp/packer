@@ -8,13 +8,14 @@ import (
 	"log"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepCreateServerInstance struct {
-	Conn                               *ncloud.Conn
+	Conn                               *NcloudAPIClient
 	CreateServerInstance               func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error)
 	CheckServerInstanceStatusIsRunning func(serverInstanceNo string) error
 	Say                                func(message string)
@@ -23,7 +24,7 @@ type StepCreateServerInstance struct {
 	serverInstanceNo                   string
 }
 
-func NewStepCreateServerInstance(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepCreateServerInstance {
+func NewStepCreateServerInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreateServerInstance {
 	var step = &StepCreateServerInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -37,18 +38,18 @@ func NewStepCreateServerInstance(conn *ncloud.Conn, ui packer.Ui, config *Config
 }
 
 func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) {
-	reqParams := new(ncloud.RequestCreateServerInstance)
-	reqParams.ServerProductCode = s.Config.ServerProductCode
-	reqParams.MemberServerImageNo = s.Config.MemberServerImageNo
+	reqParams := new(server.CreateServerInstancesRequest)
+	reqParams.ServerProductCode = &s.Config.ServerProductCode
+	reqParams.MemberServerImageNo = &s.Config.MemberServerImageNo
 	if s.Config.MemberServerImageNo == "" {
-		reqParams.ServerImageProductCode = s.Config.ServerImageProductCode
+		reqParams.ServerImageProductCode = &s.Config.ServerImageProductCode
 	}
-	reqParams.LoginKeyName = loginKeyName
-	reqParams.ZoneNo = zoneNo
-	reqParams.FeeSystemTypeCode = feeSystemTypeCode
+	reqParams.LoginKeyName = &loginKeyName
+	reqParams.ZoneNo = &zoneNo
+	reqParams.FeeSystemTypeCode = &feeSystemTypeCode
 
 	if s.Config.UserData != "" {
-		reqParams.UserData = s.Config.UserData
+		reqParams.UserData = &s.Config.UserData
 	}
 
 	if s.Config.UserDataFile != "" {
@@ -57,19 +58,19 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 			return "", fmt.Errorf("Problem reading user data file: %s", err)
 		}
 
-		reqParams.UserData = string(contents)
+		reqParams.UserData = ncloud.String(string(contents))
 	}
 
 	if s.Config.AccessControlGroupConfigurationNo != "" {
-		reqParams.AccessControlGroupConfigurationNoList = []string{s.Config.AccessControlGroupConfigurationNo}
+		reqParams.AccessControlGroupConfigurationNoList = []*string{&s.Config.AccessControlGroupConfigurationNo}
 	}
 
-	serverInstanceList, err := s.Conn.CreateServerInstances(reqParams)
+	serverInstanceList, err := s.Conn.server.V2Api.CreateServerInstances(reqParams)
 	if err != nil {
 		return "", err
 	}
 
-	s.serverInstanceNo = serverInstanceList.ServerInstanceList[0].ServerInstanceNo
+	s.serverInstanceNo = *serverInstanceList.ServerInstanceList[0].ServerInstanceNo
 	s.Say(fmt.Sprintf("Server Instance is creating. Server InstanceNo is %s", s.serverInstanceNo))
 	log.Println("Server Instance information : ", serverInstanceList.ServerInstanceList[0])
 
@@ -116,11 +117,11 @@ func (s *StepCreateServerInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	reqParams := new(ncloud.RequestGetServerInstanceList)
-	reqParams.ServerInstanceNoList = []string{s.serverInstanceNo}
+	reqParams := new(server.GetServerInstanceListRequest)
+	reqParams.ServerInstanceNoList = []*string{&s.serverInstanceNo}
 
-	serverInstanceList, err := s.Conn.GetServerInstanceList(reqParams)
-	if err != nil || serverInstanceList.TotalRows == 0 {
+	serverInstanceList, err := s.Conn.server.V2Api.GetServerInstanceList(reqParams)
+	if err != nil || *serverInstanceList.TotalRows == 0 {
 		return
 	}
 
@@ -128,21 +129,21 @@ func (s *StepCreateServerInstance) Cleanup(state multistep.StateBag) {
 
 	serverInstance := serverInstanceList.ServerInstanceList[0]
 	// stop server instance
-	if serverInstance.ServerInstanceStatus.Code != "NSTOP" && serverInstance.ServerInstanceStatus.Code != "TERMT" {
-		reqParams := new(ncloud.RequestStopServerInstances)
-		reqParams.ServerInstanceNoList = []string{s.serverInstanceNo}
+	if *serverInstance.ServerInstanceStatus.Code != "NSTOP" && *serverInstance.ServerInstanceStatus.Code != "TERMT" {
+		reqParams := new(server.StopServerInstancesRequest)
+		reqParams.ServerInstanceNoList = []*string{&s.serverInstanceNo}
 
 		log.Println("Stop Server Instance")
-		s.Conn.StopServerInstances(reqParams)
+		s.Conn.server.V2Api.StopServerInstances(reqParams)
 		waiterServerInstanceStatus(s.Conn, s.serverInstanceNo, "NSTOP", time.Minute)
 	}
 
 	// terminate server instance
-	if serverInstance.ServerInstanceStatus.Code != "TERMT" {
-		reqParams := new(ncloud.RequestTerminateServerInstances)
-		reqParams.ServerInstanceNoList = []string{s.serverInstanceNo}
+	if *serverInstance.ServerInstanceStatus.Code != "TERMT" {
+		reqParams := new(server.TerminateServerInstancesRequest)
+		reqParams.ServerInstanceNoList = []*string{&s.serverInstanceNo}
 
 		log.Println("Terminate Server Instance")
-		s.Conn.TerminateServerInstances(reqParams)
+		s.Conn.server.V2Api.TerminateServerInstances(reqParams)
 	}
 }
