@@ -222,10 +222,10 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
 	}
-	spec, specType := writeSpecField(accessor, fieldType)
-	switch specType {
-	case cty.NilType:
-		fmt.Fprintf(w, spec.(string))
+	spec, _ := writeSpecField(accessor, fieldType)
+	switch spec := spec.(type) {
+	case string:
+		fmt.Fprintf(w, spec)
 	default:
 		fmt.Fprintf(w, `%#v`, spec)
 	}
@@ -248,7 +248,7 @@ func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Typ
 			TypeName:    accessor,
 			ElementType: cty.String, // for now everything can be simplified to a map[string]string
 			Required:    false,
-		}, cty.String
+		}, cty.Map(cty.String)
 	case *types.Named:
 		underlyingType := f.Underlying()
 		switch underlyingType.(type) {
