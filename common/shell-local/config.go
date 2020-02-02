@@ -5,7 +5,6 @@ package shell_local
 import (
 	"errors"
 	"fmt"
-	// "log"
 	"os"
 	"path/filepath"
 	"runtime"

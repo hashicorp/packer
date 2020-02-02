@@ -1,8 +1,9 @@
 package ebssurrogate
 
 import (
-	"github.com/hashicorp/packer/builder/amazon/common"
 	"testing"
+
+	"github.com/hashicorp/packer/builder/amazon/common"
 
 	"github.com/hashicorp/packer/packer"
 )

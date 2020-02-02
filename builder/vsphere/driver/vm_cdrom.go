@@ -2,6 +2,7 @@ package driver
 
 import (
 	"errors"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
