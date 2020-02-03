@@ -6,21 +6,22 @@ import (
 	"log"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepCreatePublicIPInstance struct {
-	Conn                                    *ncloud.Conn
-	CreatePublicIPInstance                  func(serverInstanceNo string) (*ncloud.PublicIPInstance, error)
+	Conn                                    *NcloudAPIClient
+	CreatePublicIPInstance                  func(serverInstanceNo string) (*server.PublicIpInstance, error)
 	WaiterAssociatePublicIPToServerInstance func(serverInstanceNo string, publicIP string) error
 	Say                                     func(message string)
 	Error                                   func(e error)
 	Config                                  *Config
 }
 
-func NewStepCreatePublicIPInstance(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepCreatePublicIPInstance {
+func NewStepCreatePublicIPInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreatePublicIPInstance {
 	var step = &StepCreatePublicIPInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -35,21 +36,21 @@ func NewStepCreatePublicIPInstance(conn *ncloud.Conn, ui packer.Ui, config *Conf
 }
 
 func (s *StepCreatePublicIPInstance) waiterAssociatePublicIPToServerInstance(serverInstanceNo string, publicIP string) error {
-	reqParams := new(ncloud.RequestGetServerInstanceList)
-	reqParams.ServerInstanceNoList = []string{serverInstanceNo}
+	reqParams := new(server.GetServerInstanceListRequest)
+	reqParams.ServerInstanceNoList = []*string{&serverInstanceNo}
 
 	c1 := make(chan error, 1)
 
 	go func() {
 		for {
-			serverInstanceList, err := s.Conn.GetServerInstanceList(reqParams)
+			serverInstanceList, err := s.Conn.server.V2Api.GetServerInstanceList(reqParams)
 
 			if err != nil {
 				c1 <- err
 				return
 			}
 
-			if publicIP == serverInstanceList.ServerInstanceList[0].PublicIP {
+			if publicIP == *serverInstanceList.ServerInstanceList[0].PublicIp {
 				c1 <- nil
 				return
 			}
@@ -67,25 +68,25 @@ func (s *StepCreatePublicIPInstance) waiterAssociatePublicIPToServerInstance(ser
 	}
 }
 
-func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo string) (*ncloud.PublicIPInstance, error) {
-	reqParams := new(ncloud.RequestCreatePublicIPInstance)
-	reqParams.ServerInstanceNo = serverInstanceNo
+func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo string) (*server.PublicIpInstance, error) {
+	reqParams := new(server.CreatePublicIpInstanceRequest)
+	reqParams.ServerInstanceNo = &serverInstanceNo
 
-	publicIPInstanceList, err := s.Conn.CreatePublicIPInstance(reqParams)
+	publicIPInstanceList, err := s.Conn.server.V2Api.CreatePublicIpInstance(reqParams)
 	if err != nil {
 		return nil, err
 	}
 
-	publicIPInstance := publicIPInstanceList.PublicIPInstanceList[0]
-	publicIP := publicIPInstance.PublicIP
-	s.Say(fmt.Sprintf("Public IP Instance [%s:%s] is created", publicIPInstance.PublicIPInstanceNo, publicIP))
+	publicIPInstance := publicIPInstanceList.PublicIpInstanceList[0]
+	publicIP := publicIPInstance.PublicIp
+	s.Say(fmt.Sprintf("Public IP Instance [%s:%s] is created", *publicIPInstance.PublicIpInstanceNo, *publicIP))
 
-	err = s.waiterAssociatePublicIPToServerInstance(serverInstanceNo, publicIP)
+	err = s.waiterAssociatePublicIPToServerInstance(serverInstanceNo, *publicIP)
 	if err != nil {
 		return nil, err
 	}
 
-	return &publicIPInstance, nil
+	return publicIPInstance, nil
 }
 
 func (s *StepCreatePublicIPInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -95,11 +96,11 @@ func (s *StepCreatePublicIPInstance) Run(ctx context.Context, state multistep.St
 
 	publicIPInstance, err := s.CreatePublicIPInstance(serverInstanceNo)
 	if err == nil {
-		state.Put("PublicIP", publicIPInstance.PublicIP)
+		state.Put("PublicIP", *publicIPInstance.PublicIp)
 		state.Put("PublicIPInstance", publicIPInstance)
 		// instance_id is the generic term used so that users can have access to the
 		// instance id inside of the provisioners, used in step_provision.
-		state.Put("instance_id", publicIPInstance)
+		state.Put("instance_id", *publicIPInstance)
 	}
 
 	return processStepResult(err, s.Error, state)
@@ -112,43 +113,45 @@ func (s *StepCreatePublicIPInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	s.Say("Clean up Public IP Instance")
-	publicIPInstanceNo := publicIPInstance.(*ncloud.PublicIPInstance).PublicIPInstanceNo
+	publicIPInstanceNo := publicIPInstance.(*server.PublicIpInstance).PublicIpInstanceNo
 	s.waitPublicIPInstanceStatus(publicIPInstanceNo, "USED")
 
 	log.Println("Disassociate Public IP Instance ", publicIPInstanceNo)
-	s.Conn.DisassociatePublicIP(publicIPInstanceNo)
+	reqParams := &server.DisassociatePublicIpFromServerInstanceRequest{PublicIpInstanceNo: publicIPInstanceNo}
+	s.Conn.server.V2Api.DisassociatePublicIpFromServerInstance(reqParams)
 
 	s.waitPublicIPInstanceStatus(publicIPInstanceNo, "CREAT")
 
-	reqParams := new(ncloud.RequestDeletePublicIPInstances)
-	reqParams.PublicIPInstanceNoList = []string{publicIPInstanceNo}
+	reqDeleteParams := &server.DeletePublicIpInstancesRequest{
+		PublicIpInstanceNoList: ncloud.StringList([]string{*publicIPInstanceNo}),
+	}
 
 	log.Println("Delete Public IP Instance ", publicIPInstanceNo)
-	s.Conn.DeletePublicIPInstances(reqParams)
+	s.Conn.server.V2Api.DeletePublicIpInstances(reqDeleteParams)
 }
 
-func (s *StepCreatePublicIPInstance) waitPublicIPInstanceStatus(publicIPInstanceNo string, status string) {
+func (s *StepCreatePublicIPInstance) waitPublicIPInstanceStatus(publicIPInstanceNo *string, status string) {
 	c1 := make(chan error, 1)
 
 	go func() {
-		reqParams := new(ncloud.RequestPublicIPInstanceList)
-		reqParams.PublicIPInstanceNoList = []string{publicIPInstanceNo}
+		reqParams := new(server.GetPublicIpInstanceListRequest)
+		reqParams.PublicIpInstanceNoList = []*string{publicIPInstanceNo}
 
 		for {
-			resp, err := s.Conn.GetPublicIPInstanceList(reqParams)
+			resp, err := s.Conn.server.V2Api.GetPublicIpInstanceList(reqParams)
 			if err != nil {
 				log.Printf(err.Error())
 				c1 <- err
 				return
 			}
 
-			if resp.TotalRows == 0 {
+			if *resp.TotalRows == 0 {
 				c1 <- nil
 				return
 			}
 
-			instance := resp.PublicIPInstanceList[0]
-			if instance.PublicIPInstanceStatus.Code == status && instance.PublicIPInstanceOperation.Code == "NULL" {
+			instance := resp.PublicIpInstanceList[0]
+			if *instance.PublicIpInstanceStatus.Code == status && *instance.PublicIpInstanceOperation.Code == "NULL" {
 				c1 <- nil
 				return
 			}

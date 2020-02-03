@@ -5,37 +5,38 @@ import (
 	"log"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 )
 
-func waiterBlockStorageInstanceStatus(conn *ncloud.Conn, blockStorageInstanceNo string, status string, timeout time.Duration) error {
-	reqParams := new(ncloud.RequestBlockStorageInstanceList)
-	reqParams.BlockStorageInstanceNoList = []string{blockStorageInstanceNo}
+func waiterBlockStorageInstanceStatus(conn *NcloudAPIClient, blockStorageInstanceNo *string, status string, timeout time.Duration) error {
+	reqParams := new(server.GetBlockStorageInstanceListRequest)
+	reqParams.BlockStorageInstanceNoList = []*string{blockStorageInstanceNo}
 
 	c1 := make(chan error, 1)
 
 	go func() {
 		for {
-			blockStorageInstanceList, err := conn.GetBlockStorageInstance(reqParams)
+			blockStorageInstanceList, err := conn.server.V2Api.GetBlockStorageInstanceList(reqParams)
 			if err != nil {
 				c1 <- err
 				return
 			}
 
-			if status == "DETAC" && len(blockStorageInstanceList.BlockStorageInstance) == 0 {
+			if status == "DETAC" && len(blockStorageInstanceList.BlockStorageInstanceList) == 0 {
 				c1 <- nil
 				return
 			}
 
-			code := blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceStatus.Code
-			operationCode := blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceOperation.Code
+			blockStorageInstance := blockStorageInstanceList.BlockStorageInstanceList[0]
+			code := blockStorageInstance.BlockStorageInstanceStatus.Code
+			operationCode := blockStorageInstance.BlockStorageInstanceOperation.Code
 
-			if code == status && operationCode == "NULL" {
+			if *code == status && *operationCode == "NULL" {
 				c1 <- nil
 				return
 			}
 
-			log.Println(blockStorageInstanceList.BlockStorageInstance[0])
+			log.Println(blockStorageInstance)
 			time.Sleep(time.Second * 5)
 		}
 	}()
@@ -48,21 +49,21 @@ func waiterBlockStorageInstanceStatus(conn *ncloud.Conn, blockStorageInstanceNo 
 	}
 }
 
-func waiterDetachedBlockStorageInstance(conn *ncloud.Conn, serverInstanceNo string, timeout time.Duration) error {
-	reqParams := new(ncloud.RequestBlockStorageInstanceList)
-	reqParams.ServerInstanceNo = serverInstanceNo
+func waiterDetachedBlockStorageInstance(conn *NcloudAPIClient, serverInstanceNo string, timeout time.Duration) error {
+	reqParams := new(server.GetBlockStorageInstanceListRequest)
+	reqParams.ServerInstanceNo = &serverInstanceNo
 
 	c1 := make(chan error, 1)
 
 	go func() {
 		for {
-			blockStorageInstanceList, err := conn.GetBlockStorageInstance(reqParams)
+			blockStorageInstanceList, err := conn.server.V2Api.GetBlockStorageInstanceList(reqParams)
 			if err != nil {
 				c1 <- err
 				return
 			}
 
-			if blockStorageInstanceList.TotalRows == 1 {
+			if *blockStorageInstanceList.TotalRows == 1 {
 				c1 <- nil
 				return
 			}

@@ -54,11 +54,10 @@ github.com/ChrisTrenkamp/goxpath/tree/xmltree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
-# github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
-github.com/NaverCloudPlatform/ncloud-sdk-go/common
-github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
-github.com/NaverCloudPlatform/ncloud-sdk-go/request
-github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
+# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
 # github.com/PuerkitoBio/goquery v1.5.0
 github.com/PuerkitoBio/goquery
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d

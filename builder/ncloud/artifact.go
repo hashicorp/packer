@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 )
 
 const BuilderID = "ncloud.server.image"
 
 type Artifact struct {
-	ServerImage *ncloud.ServerImage
+	MemberServerImage *server.MemberServerImage
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -27,7 +27,7 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.ServerImage.MemberServerImageNo
+	return *a.MemberServerImage.MemberServerImageNo
 }
 
 func (a *Artifact) String() string {
@@ -35,8 +35,8 @@ func (a *Artifact) String() string {
 
 	// TODO : Logging artifact information
 	buf.WriteString(fmt.Sprintf("%s:\n\n", a.BuilderId()))
-	buf.WriteString(fmt.Sprintf("Member Server Image Name: %s\n", a.ServerImage.MemberServerImageName))
-	buf.WriteString(fmt.Sprintf("Member Server Image No: %s\n", a.ServerImage.MemberServerImageNo))
+	buf.WriteString(fmt.Sprintf("Member Server Image Name: %s\n", *a.MemberServerImage.MemberServerImageName))
+	buf.WriteString(fmt.Sprintf("Member Server Image No: %s\n", *a.MemberServerImage.MemberServerImageNo))
 
 	return buf.String()
 }
@@ -45,7 +45,7 @@ func (a *Artifact) State(name string) interface{} {
 	if _, ok := a.StateData[name]; ok {
 		return a.StateData[name]
 	}
-	return a.ServerImage.MemberServerImageStatus
+	return a.MemberServerImage.MemberServerImageStatus
 }
 
 func (a *Artifact) Destroy() error {
