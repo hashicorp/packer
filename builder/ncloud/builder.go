@@ -3,7 +3,7 @@ package ncloud
 import (
 	"context"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -33,7 +33,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Message("Creating Naver Cloud Platform Connection ...")
-	conn := ncloud.NewConnection(b.config.AccessKey, b.config.SecretKey)
+	config := Config{
+		AccessKey: b.config.AccessKey,
+		SecretKey: b.config.SecretKey,
+	}
+
+	conn, err := config.Client()
+	if err != nil {
+		return nil, err
+	}
 
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put("ui", ui)
@@ -109,7 +117,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	if serverImage, ok := b.stateBag.GetOk("memberServerImage"); ok {
-		artifact.ServerImage = serverImage.(*ncloud.ServerImage)
+		artifact.MemberServerImage = serverImage.(*server.MemberServerImage)
 	}
 
 	return artifact, nil

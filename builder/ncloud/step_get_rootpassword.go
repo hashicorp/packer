@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepGetRootPassword struct {
-	Conn            *ncloud.Conn
+	Conn            *NcloudAPIClient
 	GetRootPassword func(serverInstanceNo string, privateKey string) (string, error)
 	Say             func(message string)
 	Error           func(e error)
 	Config          *Config
 }
 
-func NewStepGetRootPassword(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepGetRootPassword {
+func NewStepGetRootPassword(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepGetRootPassword {
 	var step = &StepGetRootPassword{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -31,18 +31,18 @@ func NewStepGetRootPassword(conn *ncloud.Conn, ui packer.Ui, config *Config) *St
 }
 
 func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKey string) (string, error) {
-	reqParams := new(ncloud.RequestGetRootPassword)
-	reqParams.ServerInstanceNo = serverInstanceNo
-	reqParams.PrivateKey = privateKey
+	reqParams := new(server.GetRootPasswordRequest)
+	reqParams.ServerInstanceNo = &serverInstanceNo
+	reqParams.PrivateKey = &privateKey
 
-	rootPassword, err := s.Conn.GetRootPassword(reqParams)
+	rootPassword, err := s.Conn.server.V2Api.GetRootPassword(reqParams)
 	if err != nil {
 		return "", err
 	}
 
-	s.Say(fmt.Sprintf("Root password is %s", rootPassword.RootPassword))
+	s.Say(fmt.Sprintf("Root password is %s", *rootPassword.RootPassword))
 
-	return rootPassword.RootPassword, nil
+	return *rootPassword.RootPassword, nil
 }
 
 func (s *StepGetRootPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

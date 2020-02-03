@@ -5,19 +5,19 @@ import (
 	"errors"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepTerminateServerInstance struct {
-	Conn                    *ncloud.Conn
+	Conn                    *NcloudAPIClient
 	TerminateServerInstance func(serverInstanceNo string) error
 	Say                     func(message string)
 	Error                   func(e error)
 }
 
-func NewStepTerminateServerInstance(conn *ncloud.Conn, ui packer.Ui) *StepTerminateServerInstance {
+func NewStepTerminateServerInstance(conn *NcloudAPIClient, ui packer.Ui) *StepTerminateServerInstance {
 	var step = &StepTerminateServerInstance{
 		Conn:  conn,
 		Say:   func(message string) { ui.Say(message) },
@@ -30,10 +30,10 @@ func NewStepTerminateServerInstance(conn *ncloud.Conn, ui packer.Ui) *StepTermin
 }
 
 func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo string) error {
-	reqParams := new(ncloud.RequestTerminateServerInstances)
-	reqParams.ServerInstanceNoList = []string{serverInstanceNo}
+	reqParams := new(server.TerminateServerInstancesRequest)
+	reqParams.ServerInstanceNoList = []*string{&serverInstanceNo}
 
-	_, err := s.Conn.TerminateServerInstances(reqParams)
+	_, err := s.Conn.server.V2Api.TerminateServerInstances(reqParams)
 	if err != nil {
 		return err
 	}
@@ -41,16 +41,16 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 	c1 := make(chan error, 1)
 
 	go func() {
-		reqParams := new(ncloud.RequestGetServerInstanceList)
-		reqParams.ServerInstanceNoList = []string{serverInstanceNo}
+		reqParams := new(server.GetServerInstanceListRequest)
+		reqParams.ServerInstanceNoList = []*string{&serverInstanceNo}
 
 		for {
 
-			serverInstanceList, err := s.Conn.GetServerInstanceList(reqParams)
+			serverInstanceList, err := s.Conn.server.V2Api.GetServerInstanceList(reqParams)
 			if err != nil {
 				c1 <- err
 				return
-			} else if serverInstanceList.TotalRows == 0 {
+			} else if *serverInstanceList.TotalRows == 0 {
 				c1 <- nil
 				return
 			}
