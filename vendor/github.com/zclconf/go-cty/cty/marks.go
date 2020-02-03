@@ -200,7 +200,7 @@ func (val Value) Unmark() (Value, ValueMarks) {
 func (val Value) UnmarkDeep() (Value, ValueMarks) {
 	marks := make(ValueMarks)
 	ret, _ := Transform(val, func(_ Path, v Value) (Value, error) {
-		unmarkedV, valueMarks := val.Unmark()
+		unmarkedV, valueMarks := v.Unmark()
 		for m, s := range valueMarks {
 			marks[m] = s
 		}
