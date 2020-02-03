@@ -201,7 +201,10 @@ type StructDef struct {
 	Struct             *types.Struct
 }
 
-// outputStructHCL2SpecBody writes the hcl spec of a Config
+// outputStructHCL2SpecBody writes the map[string]hcldec.Spec that defines the HCL spec of a
+// struct. Based on the layout of said struct.
+// If a field of s is a struct then the HCL2Spec() function of that struct will be called, otherwise a
+// cty.Type is outputed.
 func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintf(w, "s := map[string]hcldec.Spec{\n")
 
@@ -218,9 +221,9 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
-// outputHCL2SpecField writes the Config field in hcl Spec types
-// such as AttrSpec, BlockAttrsSpec, and others.
-// These defines how the field's format will be in the hcl templates.
+// outputHCL2SpecField is called on each field of a struct.
+// outputHCL2SpecField writes the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
 func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
@@ -236,12 +239,13 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 
 }
 
-// writeSpecField it's a recursive method that based on the field type
-// will create a relative Spec type.
-// To allow it to be recursive, the method returns two values: an interface
-// that has the content to be written, and the type that will be used by the parent
-// scope to create it's own content. E.g. []strings will use the `string` basic type
-// to create a content of a list of strings.
+// goFieldToCtyType is a recursive method that returns a cty.Type (or a string) based on the fieldType.
+// goFieldToCtyType returns the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
+// To allow it to be recursive, the method returns two values: an interface that can either be
+// a cty.Type or a string. The second argument is used for recursion and is the
+// type that will be used by the parent. For example when fieldType is a []string; a
+// recursive goFieldToCtyType call will return a cty.String.
 func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
