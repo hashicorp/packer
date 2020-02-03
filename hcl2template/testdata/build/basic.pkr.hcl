@@ -22,6 +22,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -38,6 +42,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 
@@ -61,6 +69,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -77,6 +89,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 
@@ -100,6 +116,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -116,6 +136,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 
