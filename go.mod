@@ -67,9 +67,11 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.0
-	github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200124154056-476681ae9d62
+	github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/crypto v0.0.0-20200124154056-476681ae9d62
-	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200124154056-476681ae9d62
+	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
+	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
+	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
