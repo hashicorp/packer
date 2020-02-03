@@ -17,6 +17,7 @@ type FlatMockConfig struct {
 	Duration             *string                `mapstructure:"duration" cty:"duration"`
 	MapStringString      map[string]string      `mapstructure:"map_string_string" cty:"map_string_string"`
 	SliceString          []string               `mapstructure:"slice_string" cty:"slice_string"`
+	SliceSliceString     [][]string             `mapstructure:"slice_slice_string" cty:"slice_slice_string"`
 	NamedMapStringString NamedMapStringString   `mapstructure:"named_map_string_string" cty:"named_map_string_string"`
 	NamedString          *NamedString           `mapstructure:"named_string" cty:"named_string"`
 	Nested               *FlatNestedMockConfig  `mapstructure:"nested" cty:"nested"`
@@ -43,6 +44,7 @@ func (*FlatMockConfig) HCL2Spec() map[string]hcldec.Spec {
 		"duration":                &hcldec.AttrSpec{Name: "duration", Type: cty.String, Required: false},
 		"map_string_string":       &hcldec.BlockAttrsSpec{TypeName: "map_string_string", ElementType: cty.String, Required: false},
 		"slice_string":            &hcldec.AttrSpec{Name: "slice_string", Type: cty.List(cty.String), Required: false},
+		"slice_slice_string":      &hcldec.AttrSpec{Name: "slice_slice_string", Type: cty.List(cty.List(cty.String)), Required: false},
 		"named_map_string_string": &hcldec.BlockAttrsSpec{TypeName: "named_map_string_string", ElementType: cty.String, Required: false},
 		"named_string":            &hcldec.AttrSpec{Name: "named_string", Type: cty.String, Required: false},
 		"nested":                  &hcldec.BlockSpec{TypeName: "nested", Nested: hcldec.ObjectSpec((*FlatNestedMockConfig)(nil).HCL2Spec())},
@@ -62,6 +64,7 @@ type FlatNestedMockConfig struct {
 	Duration             *string              `mapstructure:"duration" cty:"duration"`
 	MapStringString      map[string]string    `mapstructure:"map_string_string" cty:"map_string_string"`
 	SliceString          []string             `mapstructure:"slice_string" cty:"slice_string"`
+	SliceSliceString     [][]string           `mapstructure:"slice_slice_string" cty:"slice_slice_string"`
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string" cty:"named_map_string_string"`
 	NamedString          *NamedString         `mapstructure:"named_string" cty:"named_string"`
 }
@@ -86,6 +89,7 @@ func (*FlatNestedMockConfig) HCL2Spec() map[string]hcldec.Spec {
 		"duration":                &hcldec.AttrSpec{Name: "duration", Type: cty.String, Required: false},
 		"map_string_string":       &hcldec.BlockAttrsSpec{TypeName: "map_string_string", ElementType: cty.String, Required: false},
 		"slice_string":            &hcldec.AttrSpec{Name: "slice_string", Type: cty.List(cty.String), Required: false},
+		"slice_slice_string":      &hcldec.AttrSpec{Name: "slice_slice_string", Type: cty.List(cty.List(cty.String)), Required: false},
 		"named_map_string_string": &hcldec.BlockAttrsSpec{TypeName: "named_map_string_string", ElementType: cty.String, Required: false},
 		"named_string":            &hcldec.AttrSpec{Name: "named_string", Type: cty.String, Required: false},
 	}
