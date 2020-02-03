@@ -184,6 +184,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
 		Client:         imageClient,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

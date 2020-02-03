@@ -56,7 +56,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if len(artifact.Files()) > 0 {
-		ui.Say(fmt.Sprintf("Discarding artifact files: %s", strings.Join(artifact.Files(), ", ")))
+		ui.Say(fmt.Sprintf("Discarding files from artifact: %s", strings.Join(artifact.Files(), ", ")))
 	}
 
 	artifact, err := NewArtifact(p.config.Files)

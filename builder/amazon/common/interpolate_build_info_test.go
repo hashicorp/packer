@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/hashicorp/packer/builder"
 	"reflect"
 	"testing"
 
@@ -33,9 +34,15 @@ func testState() multistep.StateBag {
 	return state
 }
 
+func testGeneratedData(state multistep.StateBag) builder.GeneratedData {
+	generatedData := builder.GeneratedData{State: state}
+	return generatedData
+}
+
 func TestInterpolateBuildInfo_extractBuildInfo_noSourceImage(t *testing.T) {
 	state := testState()
-	buildInfo := extractBuildInfo("foo", state)
+	generatedData := testGeneratedData(state)
+	buildInfo := extractBuildInfo("foo", state, &generatedData)
 
 	expected := BuildInfoTemplate{
 		BuildRegion: "foo",
@@ -48,7 +55,8 @@ func TestInterpolateBuildInfo_extractBuildInfo_noSourceImage(t *testing.T) {
 func TestInterpolateBuildInfo_extractBuildInfo_withSourceImage(t *testing.T) {
 	state := testState()
 	state.Put("source_image", testImage())
-	buildInfo := extractBuildInfo("foo", state)
+	generatedData := testGeneratedData(state)
+	buildInfo := extractBuildInfo("foo", state, &generatedData)
 
 	expected := BuildInfoTemplate{
 		BuildRegion:        "foo",
@@ -69,11 +77,12 @@ func TestInterpolateBuildInfo_extractBuildInfo_withSourceImage(t *testing.T) {
 func TestInterpolateBuildInfo_extractBuildInfo_GeneratedDataWithSourceImageName(t *testing.T) {
 	state := testState()
 	state.Put("source_image", testImage())
-	extractBuildInfo("foo", state)
+	generatedData := testGeneratedData(state)
+	extractBuildInfo("foo", state, &generatedData)
 
-	generatedData := state.Get("generated_data").(map[string]interface{})
+	generatedDataState := state.Get("generated_data").(map[string]interface{})
 
-	if generatedData["SourceAMIName"] != "ami_test_name" {
-		t.Fatalf("Unexpected state SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedData["SourceAMIName"])
+	if generatedDataState["SourceAMIName"] != "ami_test_name" {
+		t.Fatalf("Unexpected state SourceAMIName: expected %#v got %#v\n", "ami_test_name", generatedDataState["SourceAMIName"])
 	}
 }

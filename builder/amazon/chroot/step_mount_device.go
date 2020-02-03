@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,7 +30,8 @@ type StepMountDevice struct {
 	MountOptions   []string
 	MountPartition string
 
-	mountPath string
+	mountPath     string
+	GeneratedData *builder.GeneratedData
 }
 
 func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -118,6 +120,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 	// Set the mount path so we remember to unmount it later
 	s.mountPath = mountPath
 	state.Put("mount_path", s.mountPath)
+	s.GeneratedData.Put("MountPath", s.mountPath)
 	state.Put("mount_device_cleanup", s)
 
 	return multistep.ActionContinue

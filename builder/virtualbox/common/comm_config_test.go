@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -116,11 +117,13 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	hostPortMin := 1234
 	hostPortMax := 4321
 	skipNatMapping := true
+	sshTimeout := 2 * time.Minute
 
 	c = testCommConfig()
 	c.SSHHostPortMin = hostPortMin
 	c.SSHHostPortMax = hostPortMax
 	c.SSHSkipNatMapping = skipNatMapping
+	c.SSHWaitTimeout = sshTimeout
 
 	err := c.Prepare(interpolate.NewContext())
 	if err != nil {
@@ -137,6 +140,10 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 
 	if c.SkipNatMapping != skipNatMapping {
 		t.Fatalf("SkipNatMapping should be %t for backwards compatibility, but it was %t", skipNatMapping, c.SkipNatMapping)
+	}
+
+	if c.Comm.SSHTimeout != sshTimeout {
+		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), c.Comm.SSHTimeout.String())
 	}
 }
 

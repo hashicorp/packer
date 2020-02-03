@@ -26,7 +26,7 @@ func (m *mockEC2Conn) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeV
 
 	output := &ec2.DescribeVpcsOutput{
 		Vpcs: []*ec2.Vpc{
-			&ec2.Vpc{IsDefault: aws.Bool(isDefault),
+			{IsDefault: aws.Bool(isDefault),
 				VpcId: aws.String(vpcID),
 			},
 		},
@@ -45,6 +45,7 @@ func TestStepPreValidate_checkVpc(t *testing.T) {
 		{"NonDefaultVpcWithSubnet", StepPreValidate{VpcId: "vpc-1234567890", SubnetId: "subnet-1234567890"}, false},
 		{"SubnetWithNoVpc", StepPreValidate{SubnetId: "subnet-1234567890"}, false},
 		{"NoVpcInformation", StepPreValidate{}, false},
+		{"NonDefaultVpcWithSubnetFilter", StepPreValidate{VpcId: "vpc-1234567890", HasSubnetFilter: true}, false},
 	}
 
 	mockConn, err := getMockConn(nil, "")

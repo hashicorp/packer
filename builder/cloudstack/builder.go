@@ -79,7 +79,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepDetachIso{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.SSHHost, "ipaddress"),
+			Host:      communicator.CommHost(b.config.Comm.Host(), "ipaddress"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			SSHPort:   commPort,
 			WinRMPort: commPort,
@@ -109,9 +109,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the artifact and return it
 	artifact := &Artifact{
-		client:   client,
-		config:   &b.config,
-		template: state.Get("template").(*cloudstack.CreateTemplateResponse),
+		client:    client,
+		config:    &b.config,
+		template:  state.Get("template").(*cloudstack.CreateTemplateResponse),
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

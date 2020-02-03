@@ -252,7 +252,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
-				b.config.Comm.SSHHost,
+				b.config.Comm.Host(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},

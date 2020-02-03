@@ -15,7 +15,7 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
 			&PackerConfig{
 				Sources: map[SourceRef]*Source{
-					SourceRef{
+					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",
 					}: {
@@ -57,7 +57,7 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
 			&PackerConfig{
 				Sources: map[SourceRef]*Source{
-					SourceRef{
+					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",
 					}: {

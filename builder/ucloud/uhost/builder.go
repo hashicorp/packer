@@ -149,6 +149,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		UCloudImages:   state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet),
 		BuilderIdValue: BuilderId,
 		Client:         client,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

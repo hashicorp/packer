@@ -59,7 +59,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepServerInfo),
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.SSHHost, "server_ip"),
+			Host:      communicator.CommHost(b.config.Comm.Host(), "server_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
@@ -98,6 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		snapshotID:   state.Get("snapshot_id").(string),
 		regionName:   state.Get("region").(string),
 		client:       client,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

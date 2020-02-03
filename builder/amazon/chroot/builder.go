@@ -10,6 +10,7 @@ package chroot
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/packer/builder"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -326,7 +327,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	return nil, warns, nil
+	generatedData := []string{"SourceAMIName", "Device", "MountPath"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -356,6 +358,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
+	generatedData := &builder.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -381,7 +384,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps = append(steps,
 		&StepFlock{},
-		&StepPrepareDevice{},
+		&StepPrepareDevice{
+			GeneratedData: generatedData,
+		},
 		&StepCreateVolume{
 			RootVolumeType: b.config.RootVolumeType,
 			RootVolumeSize: b.config.RootVolumeSize,
@@ -396,6 +401,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepMountDevice{
 			MountOptions:   b.config.MountOptions,
 			MountPartition: b.config.MountPartition,
+			GeneratedData:  generatedData,
 		},
 		&chroot.StepPostMountCommands{
 			Commands: b.config.PostMountCommands,
@@ -439,6 +445,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
@@ -466,6 +473,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Session:        session,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

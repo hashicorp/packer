@@ -10,6 +10,10 @@ type Artifact struct {
 	config *Config
 	driver Driver
 	image  *compute.Image
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 //revive:disable:var-naming
@@ -31,6 +35,10 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
+
 	switch name {
 	case "ImageID":
 		return a.image.Id

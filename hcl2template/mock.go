@@ -20,6 +20,7 @@ type NestedMockConfig struct {
 	Duration             time.Duration        `mapstructure:"duration"`
 	MapStringString      map[string]string    `mapstructure:"map_string_string"`
 	SliceString          []string             `mapstructure:"slice_string"`
+	SliceSliceString     [][]string           `mapstructure:"slice_slice_string"`
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
 	NamedString          NamedString          `mapstructure:"named_string"`
 }

@@ -19,6 +19,10 @@ build {
             c = "d"
         }
         slice_string = var.availability_zone_names
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -32,6 +36,10 @@ build {
                 c = "d"
             }
             slice_string = var.availability_zone_names
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
         }
 
         nested_slice {
@@ -55,6 +63,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -71,6 +83,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 
@@ -95,6 +111,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -111,6 +131,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 
@@ -134,6 +158,10 @@ build {
             "b",
             "c",
         ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
 
         nested {
             string   = "string"
@@ -150,6 +178,10 @@ build {
                 "a",
                 "b",
                 "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
             ]
         }
 

@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"testing"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCreatePublicIPInstanceShouldFailIfOperationCreatePublicIPInstanceFails(t *testing.T) {
 	var testSubject = &StepCreatePublicIPInstance{
-		CreatePublicIPInstance: func(serverInstanceNo string) (*ncloud.PublicIPInstance, error) {
+		CreatePublicIPInstance: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
 			return nil, fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		Say:   func(message string) {},
@@ -38,8 +39,8 @@ func TestStepCreatePublicIPInstanceShouldPassIfOperationCreatePublicIPInstancePa
 	c.Comm.Type = "ssh"
 
 	var testSubject = &StepCreatePublicIPInstance{
-		CreatePublicIPInstance: func(serverInstanceNo string) (*ncloud.PublicIPInstance, error) {
-			return &ncloud.PublicIPInstance{PublicIPInstanceNo: "a", PublicIP: "b"}, nil
+		CreatePublicIPInstance: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
+			return &server.PublicIpInstance{PublicIpInstanceNo: ncloud.String("a"), PublicIp: ncloud.String("b")}, nil
 		},
 		Say:    func(message string) {},
 		Error:  func(e error) {},

@@ -276,8 +276,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	if p.config.ValidationKeyPath != "" {
+		path, err := packer.ExpandUser(p.config.ValidationKeyPath)
+		if err != nil {
+			return fmt.Errorf("Error while expanding a tilde in the validation key: %s", err)
+		}
 		remoteValidationKeyPath = fmt.Sprintf("%s/validation.pem", p.config.StagingDir)
-		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, p.config.ValidationKeyPath); err != nil {
+		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, path); err != nil {
 			return fmt.Errorf("Error copying validation key: %s", err)
 		}
 	}

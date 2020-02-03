@@ -22,6 +22,10 @@ type Artifact struct {
 
 	// The client for making API calls
 	Client *godo.Client
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (*Artifact) BuilderId() string {
@@ -42,7 +46,7 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 func (a *Artifact) Destroy() error {

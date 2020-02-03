@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/olekukonko/tablewriter"
@@ -15,7 +16,7 @@ import (
 
 //StepValidateTemplate : struct for Validation a template
 type StepValidateTemplate struct {
-	Conn              *ncloud.Conn
+	Conn              *NcloudAPIClient
 	Validate          func() error
 	Say               func(message string)
 	Error             func(e error)
@@ -26,7 +27,7 @@ type StepValidateTemplate struct {
 }
 
 // NewStepValidateTemplate : function for Validation a template
-func NewStepValidateTemplate(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepValidateTemplate {
+func NewStepValidateTemplate(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -45,15 +46,15 @@ func (s *StepValidateTemplate) getZoneNo() error {
 		return nil
 	}
 
-	regionList, err := s.Conn.GetRegionList()
+	regionList, err := s.Conn.server.V2Api.GetRegionList(&server.GetRegionListRequest{})
 	if err != nil {
 		return err
 	}
 
 	var regionNo string
 	for _, region := range regionList.RegionList {
-		if strings.EqualFold(region.RegionName, s.Config.Region) {
-			regionNo = region.RegionNo
+		if strings.EqualFold(*region.RegionName, s.Config.Region) {
+			regionNo = *region.RegionNo
 		}
 	}
 
@@ -64,13 +65,13 @@ func (s *StepValidateTemplate) getZoneNo() error {
 	s.regionNo = regionNo
 
 	// Get ZoneNo
-	ZoneList, err := s.Conn.GetZoneList(regionNo)
+	resp, err := s.Conn.server.V2Api.GetZoneList(&server.GetZoneListRequest{RegionNo: &regionNo})
 	if err != nil {
 		return err
 	}
 
-	if len(ZoneList.Zone) > 0 {
-		s.zoneNo = ZoneList.Zone[0].ZoneNo
+	if len(resp.ZoneList) > 0 {
+		s.zoneNo = *resp.ZoneList[0].ZoneNo
 	}
 
 	return nil
@@ -79,10 +80,10 @@ func (s *StepValidateTemplate) getZoneNo() error {
 func (s *StepValidateTemplate) validateMemberServerImage() error {
 	var serverImageName = s.Config.ServerImageName
 
-	reqParams := new(ncloud.RequestServerImageList)
-	reqParams.RegionNo = s.regionNo
+	reqParams := new(server.GetMemberServerImageListRequest)
+	reqParams.RegionNo = &s.regionNo
 
-	memberServerImageList, err := s.Conn.GetMemberServerImageList(reqParams)
+	memberServerImageList, err := s.Conn.server.V2Api.GetMemberServerImageList(reqParams)
 	if err != nil {
 		return err
 	}
@@ -90,17 +91,17 @@ func (s *StepValidateTemplate) validateMemberServerImage() error {
 	var isExistMemberServerImageNo = false
 	for _, image := range memberServerImageList.MemberServerImageList {
 		// Check duplicate server_image_name
-		if image.MemberServerImageName == serverImageName {
+		if *image.MemberServerImageName == serverImageName {
 			return fmt.Errorf("server_image_name %s is exists", serverImageName)
 		}
 
-		if image.MemberServerImageNo == s.Config.MemberServerImageNo {
+		if *image.MemberServerImageNo == s.Config.MemberServerImageNo {
 			isExistMemberServerImageNo = true
 			if s.Config.ServerProductCode == "" {
-				s.Config.ServerProductCode = image.OriginalServerProductCode
-				s.Say("server_product_code for member server image '" + image.OriginalServerProductCode + "' is configured automatically")
+				s.Config.ServerProductCode = *image.OriginalServerProductCode
+				s.Say("server_product_code for member server image '" + *image.OriginalServerProductCode + "' is configured automatically")
 			}
-			s.Config.ServerImageProductCode = image.OriginalServerImageProductCode
+			s.Config.ServerImageProductCode = *image.OriginalServerImageProductCode
 		}
 	}
 
@@ -117,10 +118,10 @@ func (s *StepValidateTemplate) validateServerImageProduct() error {
 		return nil
 	}
 
-	reqParams := new(ncloud.RequestGetServerImageProductList)
-	reqParams.RegionNo = s.regionNo
+	reqParams := new(server.GetServerImageProductListRequest)
+	reqParams.RegionNo = &s.regionNo
 
-	serverImageProductList, err := s.Conn.GetServerImageProductList(reqParams)
+	serverImageProductList, err := s.Conn.server.V2Api.GetServerImageProductList(reqParams)
 	if err != nil {
 		return err
 	}
@@ -131,34 +132,34 @@ func (s *StepValidateTemplate) validateServerImageProduct() error {
 	table := tablewriter.NewWriter(&buf)
 	table.SetHeader([]string{"Name", "Code"})
 
-	for _, product := range serverImageProductList.Product {
+	for _, product := range serverImageProductList.ProductList {
 		// Check exist server image product code
-		if product.ProductCode == serverImageProductCode {
+		if *product.ProductCode == serverImageProductCode {
 			isExistServerImage = true
-			productName = product.ProductName
+			productName = *product.ProductName
 			break
 		}
 
-		table.Append([]string{product.ProductName, product.ProductCode})
+		table.Append([]string{*product.ProductName, *product.ProductCode})
 	}
 
 	if !isExistServerImage {
-		reqParams.BlockStorageSize = 100
+		reqParams.BlockStorageSize = ncloud.Int32(100)
 
-		serverImageProductList, err := s.Conn.GetServerImageProductList(reqParams)
+		serverImageProductList, err := s.Conn.server.V2Api.GetServerImageProductList(reqParams)
 		if err != nil {
 			return err
 		}
 
-		for _, product := range serverImageProductList.Product {
+		for _, product := range serverImageProductList.ProductList {
 			// Check exist server image product code
-			if product.ProductCode == serverImageProductCode {
+			if *product.ProductCode == serverImageProductCode {
 				isExistServerImage = true
-				productName = product.ProductName
+				productName = *product.ProductName
 				break
 			}
 
-			table.Append([]string{product.ProductName, product.ProductCode})
+			table.Append([]string{*product.ProductName, *product.ProductCode})
 		}
 	}
 
@@ -180,33 +181,33 @@ func (s *StepValidateTemplate) validateServerProductCode() error {
 	var serverImageProductCode = s.Config.ServerImageProductCode
 	var productCode = s.Config.ServerProductCode
 
-	reqParams := new(ncloud.RequestGetServerProductList)
-	reqParams.ServerImageProductCode = serverImageProductCode
-	reqParams.RegionNo = s.regionNo
+	reqParams := new(server.GetServerProductListRequest)
+	reqParams.ServerImageProductCode = &serverImageProductCode
+	reqParams.RegionNo = &s.regionNo
 
-	productList, err := s.Conn.GetServerProductList(reqParams)
+	resp, err := s.Conn.server.V2Api.GetServerProductList(reqParams)
 	if err != nil {
 		return err
 	}
 
 	var isExistProductCode = false
-	for _, product := range productList.Product {
+	for _, product := range resp.ProductList {
 		// Check exist server image product code
-		if product.ProductCode == productCode {
+		if *product.ProductCode == productCode {
 			isExistProductCode = true
-			if strings.Contains(product.ProductName, "mssql") {
+			if strings.Contains(*product.ProductName, "mssql") {
 				s.FeeSystemTypeCode = "FXSUM"
 			}
 
-			if product.ProductType.Code == "VDS" {
+			if *product.ProductType.Code == "VDS" {
 				return errors.New("You cannot create my server image for VDS servers")
 			}
 
 			break
-		} else if productCode == "" && product.ProductType.Code == "STAND" {
+		} else if productCode == "" && *product.ProductType.Code == "STAND" {
 			isExistProductCode = true
-			s.Config.ServerProductCode = product.ProductCode
-			s.Say("server_product_code '" + product.ProductCode + "' is configured automatically")
+			s.Config.ServerProductCode = *product.ProductCode
+			s.Say("server_product_code '" + *product.ProductCode + "' is configured automatically")
 			break
 		}
 	}
@@ -215,8 +216,8 @@ func (s *StepValidateTemplate) validateServerProductCode() error {
 		var buf bytes.Buffer
 		table := tablewriter.NewWriter(&buf)
 		table.SetHeader([]string{"Name", "Code"})
-		for _, product := range productList.Product {
-			table.Append([]string{product.ProductName, product.ProductCode})
+		for _, product := range resp.ProductList {
+			table.Append([]string{*product.ProductName, *product.ProductCode})
 		}
 		table.Render()
 

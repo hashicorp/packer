@@ -1,6 +1,6 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/ebsvolume/builder.go; DO NOT EDIT MANUALLY -->
 
--   `ena_support` (config.Trilean) - Enable enhanced networking (ENA but not SriovNetSupport) on
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
     AWS IAM policy. Note: you must make sure enhanced networking is enabled
     on your instance. See [Amazon's documentation on enabling enhanced

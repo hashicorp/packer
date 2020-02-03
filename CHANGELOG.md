@@ -1,20 +1,49 @@
 ## 1.5.2 (Upcoming)
+** New Builder ** The vsphere-iso builder, previously maintained by JetBrains,
+has been merged with the Packer core. It will be officially supported by the
+Packer team at HashiCorp moving forward. [GH-8480]
 
 ### IMPROVEMENTS:
+* builder/alicloud: Add AlicloudProfile option. [GH-8560]
 * builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
 * builder/azure: Set expiry for image versions in SIG [GH-8561]
+* builder/proxmox: Add option to upload the boot ISO rather than pointing out a
+    previously manually uploaded one. [GH-8624]
+* builder/vagrant: Fix a crash in the Vagrant driver [GH-8607]
 * core: clean up messy log line in plugin execution. [GH-8542]
+* core: Fix loading external plugins defined in PACKER_CONFIG [GH-8582]
+* core: Log name of postprocessor running to disambiguate long chains of post-
+    processors. [GH-8613]
+* core: step_download: return without error if Urls is empty [GH-8579]
+* post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
+    (optionally) [GH-8511]
+* scripts: Fix some issues with mapstructure-to-hcl2 code generator. [GH-8574]
+* scripts: Update Vagrant bootstrapping scripts [GH-8604]
 
 ### Bug Fixes:
+* builder/alicloud: Fix "security group doesn't exist" error when there are >10
+    security groups. [GH-8535]
+* builder/amazon: Allow AWS builder pre-validation to pass when subnet filters
+    are present [GH-8622]
+* builder/azure: Fix bug where deployments were not being cleaned up: [GH-8496]
+* builder/null: Fix crash when configuring builder using HCL2. [GH-8612]
+* builder/osc: Fix ssh host detection in Public Cloud and Nets [GH-8414]
+* builder/vagrant: Fix bug with reading key from a path with spaces [GH-8605]
 * builder/virtualbox-ovf: Remove config dependency from StepImport [GH-8509]
 * builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
 * core: Fix crash when build.sources is set to an invalid name [GH-8569]
+* core: Fix error loading .packerconfig [GH-8623]
 * core: Fix loading of external plugins. GH-8543]
-* post-processor/docker-tag: Fix regression if no tags were specified. [GH-8593]
+* post-processor/docker-tag: Fix regression if no tags were specified.
+    [GH-8593]
+* post-processor/vagrant-cloud: Update error handling for Vagrant Cloud API
+    [GH-8594]
 * post-processor/vagrant: correctly handle the diskSize property as a qemu size
     string [GH-8567]
 * provisioner/ansible: Fix password sanitization to account for empty string
     values. [GH-8570]
+* provisioner/shell: Fix bug with shell provisioner failing to clean up the
+    environment var file when env_var_file is true. [GH-8639]
 
 ## 1.5.1 (December 20, 2019)
 This was a fast-follow release to fix a number of panics that we introduced when

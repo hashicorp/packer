@@ -11,10 +11,10 @@ package ebs
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -154,6 +154,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -209,6 +210,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 			VpcId:              b.config.VpcId,
 			SubnetId:           b.config.SubnetId,
+			HasSubnetFilter:    len(b.config.SubnetFilter.Filters) > 0,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -257,7 +259,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
-				b.config.Comm.SSHHost,
+				b.config.Comm.Host(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -301,6 +303,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
