@@ -39,17 +39,20 @@ The example below is fully functional.
     ``` powershell
     powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
     ```
-
-    The value of this is treated as [configuration
-    template](/docs/templates/engine.html). There are two available variables:
-    `Path`, which is the path to the script to run, and `Vars`, which is the
-    location of a temp file containing the list of `environment_vars`, if
-    configured.
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. In addition,
+    you may use two extra variables:
+      - `Path`: The path to the script to run
+      - `Vars`: The location of a temp file containing the list of
+        `environment_vars`, if configured.
 
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the
-    environment, as well, which are covered in the section below. If you are
+    environment, as well, which are covered in the section below.
+
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. If you are
     running on AWS, Azure, Google Compute, or OpenStack and would like to access
     the generated password that Packer uses to connect to the instance via WinRM,
     you can use the template variable `{{.WinRMPassword}}` to set this as an
@@ -70,12 +73,14 @@ The example below is fully functional.
     powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
     ```
 
-    The value of this is treated as [configuration
-    template](/docs/templates/engine.html). There are two available variables:
-    `Path`, which is the path to the script to run, and `Vars`, which is the
-    location of a temp file containing the list of `environment_vars`. The
-    value of both `Path` and `Vars` can be manually configured by setting the
-    values for `remote_path` and `remote_env_var_path` respectively.
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. In addition,
+    you may use two extra variables:
+      - `Path`: The path to the script to run
+      - `Vars`: The location of a temp file containing the list of
+        `environment_vars`, if configured.
+    The value of both `Path` and `Vars` can be manually configured by setting
+    the values for `remote_path` and `remote_env_var_path` respectively.
 
     If you use the SSH communicator and have changed your default shell, you
     may need to modify your `execute_command` to make sure that the command is
@@ -84,10 +89,14 @@ The example below is fully functional.
 
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
-    Windows user. If you are running a build on AWS, Azure, Google Compute,
+    Windows user.
+
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. If you are
+    running a build on AWS, Azure, Google Compute,
     or OpenStack and would like to run using the generated password that Packer
-    uses to connect to the instance via WinRM, you may do so by using the template
-    variable {{.WinRMPassword}}. For example:
+    uses to connect to the instance via WinRM, you may do so by using the
+    template variable {{.WinRMPassword}}. For example:
 
     ``` json
     "elevated_user": "Administrator",

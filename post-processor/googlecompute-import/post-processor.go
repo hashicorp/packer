@@ -129,7 +129,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	p.config.GCSObjectName, err = interpolate.Render(p.config.GCSObjectName, &p.config.ctx)
+	p.config.
+	, err = interpolate.Render(p.config.GCSObjectName, &p.config.ctx)
 	if err != nil {
 		return nil, false, false, fmt.Errorf("Error rendering gcs_object_name template: %s", err)
 	}

@@ -58,9 +58,9 @@ The example below is fully functional.
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`, unless the
     user has set `"use_env_var_file": true` -- in that case, the default
     `execute_command` is `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`.
-    The value of this is treated as a [configuration
-    template](/docs/templates/engine.html). There are three available
-    variables:
+    This is a [template engine](/docs/templates/engine.html). Therefore, you may
+    use user variables and template functions in this field. In addition, there
+    are three available extra variables:
     -   `Path` is the path to the script to run
     -   `Vars` is the list of `environment_vars`, if configured.
     -   `EnvVarFile` is the path to the file containing env vars, if
