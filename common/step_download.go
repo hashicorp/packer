@@ -141,24 +141,38 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		u.RawQuery = q.Encode()
 	}
 
+	// store file under sha1(hash) if set
+	// hash can sometimes be a checksum url
+	// otherwise, use sha1(source_url)
+	var shaSum [20]byte
+	if s.Checksum != "" {
+		shaSum = sha1.Sum([]byte(s.Checksum))
+	} else {
+		shaSum = sha1.Sum([]byte(u.String()))
+	}
+	shaSumString := hex.EncodeToString(shaSum[:])
+
 	targetPath := s.TargetPath
 	if targetPath == "" {
-		// store file under sha1(hash) if set
-		// hash can sometimes be a checksum url
-		// otherwise, use sha1(source_url)
-		var shaSum [20]byte
-		if s.Checksum != "" {
-			shaSum = sha1.Sum([]byte(s.Checksum))
-		} else {
-			shaSum = sha1.Sum([]byte(u.String()))
-		}
-		targetPath = hex.EncodeToString(shaSum[:])
+		targetPath = shaSumString
 		if s.Extension != "" {
 			targetPath += "." + s.Extension
 		}
 		targetPath, err = packer.CachePath(targetPath)
 		if err != nil {
 			return "", fmt.Errorf("CachePath: %s", err)
+		}
+	} else if filepath.Ext(targetPath) == "" {
+		// When an absolute path is provided
+		// this adds the file to the targetPath
+		if !strings.HasSuffix(targetPath, "/") {
+			targetPath += "/"
+		}
+		targetPath += shaSumString
+		if s.Extension != "" {
+			targetPath += "." + s.Extension
+		} else {
+			targetPath += ".iso"
 		}
 	}
 
