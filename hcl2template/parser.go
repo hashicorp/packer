@@ -30,6 +30,10 @@ var configSchema = &hcl.BodySchema{
 	},
 }
 
+// Parser helps you parse HCL folders. It will parse an hcl file or directory
+// and start builders, provisioners and post-processors to configure them with
+// the parsed HCL and then return a []packer.CoreBuildPostProcessor. Packer
+// will use that list of CoreBuildPostProcessor to run everything in order.
 type Parser struct {
 	*hclparse.Parser
 
