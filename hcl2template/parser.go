@@ -128,6 +128,9 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	return cfg, diags
 }
 
+// decodeLocalVariables looks in the found blocks for 'variables' and
+// 'variable' blocks. It should be called firsthand so that other blocks can
+// use the variables.
 func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -148,6 +151,9 @@ func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagno
 	return diags
 }
 
+// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
+// should be called after parsing input variables so that they can be
+// referenced.
 func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -165,6 +171,9 @@ func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagno
 	return diags
 }
 
+// decodeConfig looks in the found blocks for everything that is not a variable
+// block. It should be called after parsing input variables and locals so that
+// they can be referenced.
 func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
