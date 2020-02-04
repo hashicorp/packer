@@ -26,7 +26,7 @@ func TestParser_complete(t *testing.T) {
 					"port":                    &Variable{},
 					"availability_zone_names": &Variable{},
 				},
-				Sources: map[SourceRef]*Source{
+				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
 				Builds: Builds{

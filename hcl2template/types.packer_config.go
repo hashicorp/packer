@@ -6,19 +6,29 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-// PackerConfig represents a loaded packer config
+// PackerConfig represents a loaded Packer HCL config. It will contain
+// references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
 	// Directory where the config files are defined
 	Basedir string
 
-	Sources map[SourceRef]*Source
+	// Available Source blocks
+	Sources map[SourceRef]*SourceBlock
 
+	// InputVariables and LocalVariables are the list of defined input and
+	// local variables. They are of the same type but are not used in the same
+	// way. Local variables will not be decoded from any config file, env var,
+	// or ect. Like the Input variables will.
 	InputVariables Variables
 	LocalVariables Variables
 
+	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 }
 
+// EvalContext returns the *hcl.EvalContext that will be passed to an hcl
+// decoder in order to tell what is the actual value of a var or a local and
+// the list of defined functions.
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),

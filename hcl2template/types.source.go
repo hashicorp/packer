@@ -7,9 +7,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// A source field in an HCL file will load into the Source type.
-//
-type Source struct {
+// SourceBlock references an HCL 'source' block.
+type SourceBlock struct {
 	// Type of source; ex: virtualbox-iso
 	Type string
 	// Given name; if any
@@ -18,8 +17,8 @@ type Source struct {
 	block *hcl.Block
 }
 
-func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
-	source := &Source{
+func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) {
+	source := &SourceBlock{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
 		block: block,
@@ -39,7 +38,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (p *Parser) StartBuilder(source *Source, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
+func (p *Parser) StartBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := p.BuilderSchemas.Start(source.Type)
@@ -64,7 +63,7 @@ func (p *Parser) StartBuilder(source *Source, ectx *hcl.EvalContext) (packer.Bui
 	return builder, diags, generatedVars
 }
 
-func (source *Source) Ref() SourceRef {
+func (source *SourceBlock) Ref() SourceRef {
 	return SourceRef{
 		Type: source.Type,
 		Name: source.Name,

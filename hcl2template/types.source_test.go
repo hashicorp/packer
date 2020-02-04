@@ -15,7 +15,7 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: "testdata/sources",
-				Sources: map[SourceRef]*Source{
+				Sources: map[SourceRef]*SourceBlock{
 					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",
@@ -64,7 +64,7 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: "testdata/sources",
-				Sources: map[SourceRef]*Source{
+				Sources: map[SourceRef]*SourceBlock{
 					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",

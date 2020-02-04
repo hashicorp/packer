@@ -190,7 +190,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 
 			if cfg.Sources == nil {
-				cfg.Sources = map[SourceRef]*Source{}
+				cfg.Sources = map[SourceRef]*SourceBlock{}
 			}
 			cfg.Sources[ref] = source
 

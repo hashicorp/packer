@@ -68,7 +68,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					cty.Value{},
 					cty.Type{},
 					Variable{},
-					Source{},
+					SourceBlock{},
 					ProvisionerBlock{},
 					PostProcessorBlock{},
 				),
