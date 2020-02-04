@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -19,7 +20,7 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete", nil},
 			&PackerConfig{
-				Basedir: "testdata/complete",
+				Basedir: filepath.Join("testdata", "complete"),
 				InputVariables: Variables{
 					"foo":                     &Variable{},
 					"image_id":                &Variable{},
@@ -100,7 +101,7 @@ func TestParser_complete(t *testing.T) {
 			parser: defaultParser,
 			args:   parseTestArgs{"testdata/build.pkr.hcl", nil},
 			parseWantCfg: &PackerConfig{
-				Basedir: "testdata/build.pkr.hcl",
+				Basedir: filepath.Join("testdata", "build.pkr.hcl"),
 				Builds: Builds{
 					&BuildBlock{
 						Sources: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
@@ -123,7 +124,7 @@ func TestParser_complete(t *testing.T) {
 			parser: defaultParser,
 			args:   parseTestArgs{"testdata/unknown", nil},
 			parseWantCfg: &PackerConfig{
-				Basedir: "testdata/unknown",
+				Basedir: filepath.Join("testdata", "unknown"),
 			},
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
