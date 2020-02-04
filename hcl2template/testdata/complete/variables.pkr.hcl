@@ -19,3 +19,7 @@ variable "availability_zone_names" {
   type    = list(string)
   default = ["a", "b", "c"]
 }
+
+locals {
+  feefoo = "${var.foo}_${var.image_id}"
+}
