@@ -183,6 +183,22 @@ Optional Parameters:
 -   `user` (string) - The `ansible_user` to use. Defaults to the user running
     packer.
 
+-   `use_proxy` (boolean) - Whether or not to set up a localhost proxy adapter
+    so that Ansible has an IP address to connect to, even if your guest does not
+    have an IP address. For example, the adapter is necessary for Docker builds
+    to use the Ansible provisioner. Defaults to "true". If you set this option
+    to `false`, but Packer cannot find an IP address to connect Ansible to, it
+    will automatically set up the adapter anyway.
+
+    In order for Ansible to connect properly even when use_proxy is false, you
+    need to make sure that you are either providing a valid username and ssh key
+    to the ansible provisioner directly, or that the username and ssh key
+    being used by the ssh communicator will work for your needs. If you do not
+    provide a user to ansible, it will use the user associated with your
+    builder, not the user running Packer.
+
+    use_proxy=false is currently only supported for SSH, not winRM.
+
 <%= partial "partials/provisioners/common-config" %>
 
 ## Default Extra Variables

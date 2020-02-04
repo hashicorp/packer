@@ -36,6 +36,7 @@ type FlatConfig struct {
 	GalaxyCommand        *string           `mapstructure:"galaxy_command" cty:"galaxy_command"`
 	GalaxyForceInstall   *bool             `mapstructure:"galaxy_force_install" cty:"galaxy_force_install"`
 	RolesPath            *string           `mapstructure:"roles_path" cty:"roles_path"`
+	UseProxy             *bool             `mapstructure:"use_proxy" cty:"use_proxy"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -77,6 +78,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"galaxy_command":             &hcldec.AttrSpec{Name: "galaxy_command", Type: cty.String, Required: false},
 		"galaxy_force_install":       &hcldec.AttrSpec{Name: "galaxy_force_install", Type: cty.Bool, Required: false},
 		"roles_path":                 &hcldec.AttrSpec{Name: "roles_path", Type: cty.String, Required: false},
+		"use_proxy":                  &hcldec.AttrSpec{Name: "use_proxy", Type: cty.Bool, Required: false},
 	}
 	return s
 }

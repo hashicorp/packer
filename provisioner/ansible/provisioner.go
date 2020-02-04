@@ -67,6 +67,9 @@ type Config struct {
 	GalaxyCommand        string   `mapstructure:"galaxy_command"`
 	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
 	RolesPath            string   `mapstructure:"roles_path"`
+	//TODO: change default to false in v1.6.0.
+	UseProxy     config.Trilean `mapstructure:"use_proxy"`
+	userWasEmpty bool
 }
 
 type Provisioner struct {
@@ -76,6 +79,9 @@ type Provisioner struct {
 	ansibleVersion    string
 	ansibleMajVersion uint
 	generatedData     map[string]interface{}
+
+	setupAdapterFunc   func(ui packer.Ui, comm packer.Communicator) (string, error)
+	executeAnsibleFunc func(ui packer.Ui, comm packer.Communicator, privKeyFile string) error
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -163,6 +169,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
+		p.config.userWasEmpty = true
 		usr, err := user.Current()
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
@@ -172,6 +179,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
+	}
+
+	// These fields exist so that we can replace the functions for testing
+	// logic inside of the Provision func; in actual use, these don't ever
+	// need to get set.
+	if p.setupAdapterFunc == nil {
+		p.setupAdapterFunc = p.setupAdapter
+	}
+	if p.executeAnsibleFunc == nil {
+		p.executeAnsibleFunc = p.executeAnsible
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -207,40 +224,17 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
-	ui.Say("Provisioning with Ansible...")
-	// Interpolate env vars to check for generated values like password and port
-	p.generatedData = generatedData
-	p.config.ctx.Data = generatedData
-	for i, envVar := range p.config.AnsibleEnvVars {
-		envVar, err := interpolate.Render(envVar, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
-		}
-		p.config.AnsibleEnvVars[i] = envVar
-	}
-	// Interpolate extra vars to check for generated values like password and port
-	for i, arg := range p.config.ExtraArguments {
-		arg, err := interpolate.Render(arg, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
-		}
-		p.config.ExtraArguments[i] = arg
-	}
+func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (string, error) {
+	ui.Message("Setting up proxy adapter for Ansible....")
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
 	if err != nil {
-		return fmt.Errorf("error creating host signer: %s", err)
-	}
-
-	// Remove the private key file
-	if len(k.privKeyFile) > 0 {
-		defer os.Remove(k.privKeyFile)
+		return "", fmt.Errorf("error creating host signer: %s", err)
 	}
 
 	keyChecker := ssh.CertChecker{
@@ -298,7 +292,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	ui = &packer.SafeUi{
@@ -307,50 +301,155 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 	p.adapter = adapter.NewAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
-	defer func() {
-		log.Print("shutting down the SSH proxy")
-		close(p.done)
-		p.adapter.Shutdown()
-	}()
+	return k.privKeyFile, nil
+}
 
-	go p.adapter.Serve()
+func (p *Provisioner) createInventoryFile(hostIP string, hostPort int) error {
+	log.Printf("Creating inventory file for Ansible run...")
+	tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
+	if err != nil {
+		return fmt.Errorf("Error preparing inventory file: %s", err)
+	}
+	host := fmt.Sprintf("%s ansible_host=%s ansible_user=%s ansible_port=%d\n",
+		p.config.HostAlias, hostIP, p.config.User, hostPort)
+	if p.ansibleMajVersion < 2 {
+		host = fmt.Sprintf("%s ansible_ssh_host=%s ansible_ssh_user=%s ansible_ssh_port=%d\n",
+			p.config.HostAlias, hostIP, p.config.User, hostPort)
+	}
+
+	w := bufio.NewWriter(tf)
+	w.WriteString(host)
+
+	for _, group := range p.config.Groups {
+		fmt.Fprintf(w, "[%s]\n%s", group, host)
+	}
+
+	for _, group := range p.config.EmptyGroups {
+		fmt.Fprintf(w, "[%s]\n", group)
+	}
+
+	if err := w.Flush(); err != nil {
+		tf.Close()
+		os.Remove(tf.Name())
+		return fmt.Errorf("Error preparing inventory file: %s", err)
+	}
+	tf.Close()
+	p.config.InventoryFile = tf.Name()
+
+	return nil
+}
+
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	ui.Say("Provisioning with Ansible...")
+	// Interpolate env vars to check for generated values like password and port
+	p.generatedData = generatedData
+	p.config.ctx.Data = generatedData
+	for i, envVar := range p.config.AnsibleEnvVars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.AnsibleEnvVars[i] = envVar
+	}
+	// Interpolate extra vars to check for generated values like password and port
+	for i, arg := range p.config.ExtraArguments {
+		arg, err := interpolate.Render(arg, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.ExtraArguments[i] = arg
+	}
+
+	// Set up proxy if there's no host IP to access, regardless of user config.
+	hostIP := generatedData["Host"].(string)
+
+	if hostIP == "" && p.config.UseProxy.False() {
+		ui.Error("Warning: use_proxy is false, but instance does" +
+			" not have an IP address to give to Ansible. Falling back" +
+			" to use localhost proxy.")
+		p.config.UseProxy = config.TriTrue
+	}
+
+	privKeyFile := ""
+	if !p.config.UseProxy.False() {
+		// We set up the proxy if useProxy is either true or unset.
+		pkf, err := p.setupAdapterFunc(ui, comm)
+		if err != nil {
+			return err
+		}
+		// This is necessary to avoid accidentally redeclaring
+		// privKeyFile in the scope of this if statement.
+		privKeyFile = pkf
+
+		defer func() {
+			log.Print("shutting down the SSH proxy")
+			close(p.done)
+			p.adapter.Shutdown()
+		}()
+
+		go p.adapter.Serve()
+
+		// Remove the private key file
+		if len(privKeyFile) > 0 {
+			defer os.Remove(privKeyFile)
+		}
+	} else {
+		ui.Message("Not using Proxy adapter for Ansible run:\n" +
+			"\tUsing ssh keys from Packer communicator...")
+		// In this situation, we need to make sure we have the
+		// private key we actually use to access the instance.
+		SSHPrivateKeyFile := generatedData["SSHPrivateKeyFile"].(string)
+		if SSHPrivateKeyFile != "" {
+			privKeyFile = SSHPrivateKeyFile
+		} else {
+			// See if we can get a private key and write that to a tmpfile
+			SSHPrivateKey := generatedData["SSHPrivateKey"].([]byte)
+			tmpSSHPrivateKey, err := tmp.File("ansible-key")
+			if err != nil {
+				return fmt.Errorf("Error writing private key to temp file for"+
+					"ansible connection: %v", err)
+			}
+			_, err = tmpSSHPrivateKey.Write(SSHPrivateKey)
+			if err != nil {
+				return errors.New("failed to write private key to temp file")
+			}
+			err = tmpSSHPrivateKey.Close()
+			if err != nil {
+				return errors.New("failed to close private key temp file")
+			}
+			privKeyFile = tmpSSHPrivateKey.Name()
+		}
+
+		// Also make sure that the username matches the SSH keys given.
+		if p.config.userWasEmpty {
+			p.config.User = generatedData["User"].(string)
+		}
+	}
 
 	if len(p.config.InventoryFile) == 0 {
-		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
+		hostIP = "127.0.0.1"
+		hostPort := p.config.LocalPort
+		if p.config.UseProxy.False() {
+			// We aren't using a proxy, so we need to retrieve the
+			// host IP and port from generated data.
+			hostIP = generatedData["Host"].(string)
+			hostPort = int(generatedData["Port"].(int64))
+		}
+
+		// Create the inventory file
+		err := p.createInventoryFile(hostIP, hostPort)
 		if err != nil {
-			return fmt.Errorf("Error preparing inventory file: %s", err)
-		}
-		defer os.Remove(tf.Name())
-
-		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%d\n",
-			p.config.HostAlias, p.config.User, p.config.LocalPort)
-		if p.ansibleMajVersion < 2 {
-			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%d\n",
-				p.config.HostAlias, p.config.User, p.config.LocalPort)
+			return err
 		}
 
-		w := bufio.NewWriter(tf)
-		w.WriteString(host)
-		for _, group := range p.config.Groups {
-			fmt.Fprintf(w, "[%s]\n%s", group, host)
-		}
-
-		for _, group := range p.config.EmptyGroups {
-			fmt.Fprintf(w, "[%s]\n", group)
-		}
-
-		if err := w.Flush(); err != nil {
-			tf.Close()
-			return fmt.Errorf("Error preparing inventory file: %s", err)
-		}
-		tf.Close()
-		p.config.InventoryFile = tf.Name()
+		// Delete the generated inventory file
 		defer func() {
+			os.Remove(p.config.InventoryFile)
 			p.config.InventoryFile = ""
 		}()
 	}
 
-	if err := p.executeAnsible(ui, comm, k.privKeyFile); err != nil {
+	if err := p.executeAnsibleFunc(ui, comm, privKeyFile); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
 
