@@ -49,7 +49,7 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	return postProcessor, diags
 }
 
-func (p *Parser) StartPostProcessor(pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
+func (p *Parser) startPostProcessor(pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)

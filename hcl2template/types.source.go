@@ -38,7 +38,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) 
 	return source, diags
 }
 
-func (p *Parser) StartBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
+func (p *Parser) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := p.BuilderSchemas.Start(source.Type)

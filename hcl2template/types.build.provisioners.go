@@ -47,7 +47,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 	return provisioner, diags
 }
 
-func (p *Parser) StartProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
+func (p *Parser) startProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)

@@ -46,7 +46,7 @@ func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		provisioner, moreDiags := p.StartProvisioner(pb, ectx, generatedVars)
+		provisioner, moreDiags := p.startProvisioner(pb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -60,13 +60,13 @@ func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.
 	return res, diags
 }
 
-// getCoreBuildProvisioners takes a list of post processor block, starts according
-// provisioners and sends parsed HCL2 over to it.
+// getCoreBuildProvisioners takes a list of post processor block, starts
+// according provisioners and sends parsed HCL2 over to it.
 func (p *Parser) getCoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
-		postProcessor, moreDiags := p.StartPostProcessor(ppb, ectx)
+		postProcessor, moreDiags := p.startPostProcessor(ppb, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -99,7 +99,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				})
 				continue
 			}
-			builder, moreDiags, generatedVars := p.StartBuilder(src, cfg.EvalContext())
+			builder, moreDiags, generatedVars := p.startBuilder(src, cfg.EvalContext())
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -135,6 +135,9 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 //
 // Parse will first parse variables and then the rest; so that interpolation
 // can happen.
+//
+// For each build block a packer.Build will be started, and for each builder,
+// all provisioners and post-processors will be started.
 //
 // Parse then return a slice of packer.Builds; which are what packer core uses
 // to run builds.
