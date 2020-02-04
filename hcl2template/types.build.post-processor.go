@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// PostProcessorBlock represents a parsed PostProcessorBlock
+// ProvisionerBlock references a detected but unparsed post processor
 type PostProcessorBlock struct {
 	PType string
 	PName string
@@ -50,6 +50,7 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 }
 
 func (p *Parser) startPostProcessor(pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
+	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
 	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)

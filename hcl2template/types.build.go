@@ -24,7 +24,7 @@ var buildSchema = &hcl.BodySchema{
 	},
 }
 
-// BuildBlock references an HCL 'build' block, for example :
+// BuildBlock references an HCL 'build' block and it content, for example :
 //
 //	build {
 //		sources = [
@@ -41,7 +41,7 @@ type BuildBlock struct {
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
 
-	// ProvisionerBlocks references a list of HCL post-processors block that will
+	// ProvisionerBlocks references a list of HCL post-processors block that
 	// will be ran against the artifacts from the provisioning steps.
 	PostProcessors []*PostProcessorBlock
 
@@ -50,6 +50,8 @@ type BuildBlock struct {
 
 type Builds []*BuildBlock
 
+// decodeBuildConfig is called when a 'build' block has been detected. It will
+// load the references to the contents of the build block.
 func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnostics) {
 	build := &BuildBlock{}
 

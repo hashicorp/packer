@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// ProvisionerBlock represents a parsed provisioner
+// ProvisionerBlock references a detected but unparsed provisioner
 type ProvisionerBlock struct {
 	PType string
 	PName string
