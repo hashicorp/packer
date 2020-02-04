@@ -7,7 +7,13 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type StepRemoveCDRom struct{}
+type RemoveCDRomConfig struct {
+	RemoveCdrom bool `mapstructure:"remove_cdrom"`
+}
+
+type StepRemoveCDRom struct {
+	Config *RemoveCDRomConfig
+}
 
 func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
@@ -20,7 +26,16 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	return multistep.ActionContinue
+  if s.Config.RemoveCdrom == true {
+		ui.Say("Deleting CD-ROM drives...")
+		err := vm.RemoveCdroms()
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	}
+
+  return multistep.ActionContinue
 }
 
 func (s *StepRemoveCDRom) Cleanup(state multistep.StateBag) {}
