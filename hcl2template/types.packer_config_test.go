@@ -19,6 +19,7 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete", nil},
 			&PackerConfig{
+				Basedir: "testdata/complete",
 				InputVariables: Variables{
 					"foo":                     &Variable{},
 					"image_id":                &Variable{},
@@ -99,6 +100,7 @@ func TestParser_complete(t *testing.T) {
 			parser: defaultParser,
 			args:   parseTestArgs{"testdata/build.pkr.hcl", nil},
 			parseWantCfg: &PackerConfig{
+				Basedir: "testdata/build.pkr.hcl",
 				Builds: Builds{
 					&BuildBlock{
 						Froms: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
@@ -118,9 +120,11 @@ func TestParser_complete(t *testing.T) {
 			getBuildsWantDiags:     true,
 		},
 		{name: "unknown block type",
-			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/unknown", nil},
-			parseWantCfg:           &PackerConfig{},
+			parser: defaultParser,
+			args:   parseTestArgs{"testdata/unknown", nil},
+			parseWantCfg: &PackerConfig{
+				Basedir: "testdata/unknown",
+			},
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
 		},

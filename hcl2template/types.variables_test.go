@@ -20,6 +20,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/basic.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/variables",
 				InputVariables: Variables{
 					"image_name": &Variable{},
 					"key":        &Variable{},
@@ -47,6 +48,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/duplicate_variable.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/variables",
 				InputVariables: Variables{
 					"boolean_value": &Variable{},
 				},
@@ -59,6 +61,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/duplicate_variables.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/variables",
 				InputVariables: Variables{
 					"boolean_value": &Variable{},
 				},
@@ -71,6 +74,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/invalid_default.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/variables",
 				InputVariables: Variables{
 					"broken_type": &Variable{},
 				},
@@ -83,6 +87,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/variables",
 				InputVariables: Variables{
 					"broken_type": &Variable{},
 				},

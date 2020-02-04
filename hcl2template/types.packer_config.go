@@ -8,6 +8,9 @@ import (
 
 // PackerConfig represents a loaded packer config
 type PackerConfig struct {
+	// Directory where the config files are defined
+	Basedir string
+
 	Sources map[SourceRef]*Source
 
 	InputVariables Variables
@@ -18,7 +21,7 @@ type PackerConfig struct {
 
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	ectx := &hcl.EvalContext{
-		Functions: Functions(),
+		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
 			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
 			"local": cty.ObjectVal(cfg.LocalVariables.Values()),

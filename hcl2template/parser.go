@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -77,8 +78,15 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 		}
 	}
 
+	basedir := filename
+	if isDir, err := isDir(basedir); err == nil && !isDir {
+		basedir = filepath.Dir(basedir)
+	}
+	cfg := &PackerConfig{
+		Basedir: basedir,
+	}
+
 	// decode variable blocks
-	cfg := &PackerConfig{}
 	{
 		for _, file := range files {
 			diags = append(diags, p.decodeInputVariables(file, cfg)...)

@@ -17,15 +17,15 @@ import (
 	"github.com/zclconf/go-cty/cty/function/stdlib"
 )
 
-// Functions returns the set of functions that should be used to when evaluating
-// expressions in the receiving scope.
-func Functions() map[string]function.Function {
+// Functions returns the set of functions that should be used to when
+// evaluating expressions in the receiving scope.
+//
+// basedir is used with file functions and allows a user to reference a file
+// using local path. Usually basedir is the directory in which the config file
+// is located
+//
+func Functions(basedir string) map[string]function.Function {
 
-	// Our functions are from the cty stdlib functions. A lot HLC2 funcs are
-	// defined in "github.com/hashicorp/terraform/lang/funcs" for now we will
-	// only use/import the stdlib funcs to later on copy the usefull ones to
-	// the stdlib.
-	var basedir string
 	funcs := map[string]function.Function{
 		"abs":             stdlib.AbsoluteFunc,
 		"abspath":         filesystem.AbsPathFunc,

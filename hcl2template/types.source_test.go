@@ -14,6 +14,7 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/sources",
 				Sources: map[SourceRef]*Source{
 					{
 						Type: "virtualbox-iso",
@@ -31,7 +32,9 @@ func TestParse_source(t *testing.T) {
 		{"untyped source",
 			defaultParser,
 			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil},
-			&PackerConfig{},
+			&PackerConfig{
+				Basedir: "testdata/sources",
+			},
 			true, true,
 			nil,
 			false,
@@ -39,7 +42,9 @@ func TestParse_source(t *testing.T) {
 		{"unnamed source",
 			defaultParser,
 			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil},
-			&PackerConfig{},
+			&PackerConfig{
+				Basedir: "testdata/sources",
+			},
 			true, true,
 			nil,
 			false,
@@ -47,7 +52,9 @@ func TestParse_source(t *testing.T) {
 		{"inexistent source",
 			defaultParser,
 			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil},
-			&PackerConfig{},
+			&PackerConfig{
+				Basedir: "testdata/sources",
+			},
 			true, true,
 			nil,
 			false,
@@ -56,6 +63,7 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/sources",
 				Sources: map[SourceRef]*Source{
 					{
 						Type: "virtualbox-iso",

@@ -14,6 +14,7 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/basic.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: "testdata/build",
 				Builds: Builds{
 					&BuildBlock{
 						Froms: []SourceRef{
@@ -47,7 +48,8 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/provisioner_untyped.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: "testdata/build",
+				Builds:  nil,
 			},
 			true, true,
 			nil,
@@ -57,7 +59,8 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: "testdata/build",
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{&packer.CoreBuild{}},
@@ -67,7 +70,8 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: "testdata/build",
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{&packer.CoreBuild{}},
@@ -77,7 +81,8 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: "testdata/build",
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{},
@@ -87,7 +92,8 @@ func TestParse_build(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: "testdata/build",
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{},

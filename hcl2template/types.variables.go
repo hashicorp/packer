@@ -201,6 +201,8 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 	return diags
 }
 
+// Prefix your environment variables with VarEnvPrefix so that Packer can see
+// them.
 const VarEnvPrefix = "PKR_VAR_"
 
 func (variables Variables) collectVariableValues(env []string, files []*hcl.File, argv map[string]string) hcl.Diagnostics {
