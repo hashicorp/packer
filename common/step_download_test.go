@@ -1,9 +1,11 @@
 package common
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -242,6 +244,61 @@ func TestStepDownload_Run(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStepDownload_download(t *testing.T) {
+	step := &StepDownload{
+		Checksum:     "f572d396fae9206628714fb2ce00f72e94f2258f",
+		ChecksumType: "sha1",
+		Description:  "ISO",
+		ResultKey:    "iso_path",
+		Url:          nil,
+	}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	dir := createTempDir(t)
+	defer os.RemoveAll(dir)
+
+	defer os.Setenv("PACKER_CACHE_DIR", os.Getenv("PACKER_CACHE_DIR"))
+	os.Setenv("PACKER_CACHE_DIR", dir)
+
+	// Abs path with extension provided
+	step.TargetPath = "./packer"
+	step.Extension = "ova"
+	path, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	if filepath.Ext(path) != "." + step.Extension {
+		t.Fatalf("bad: path should contain extension %s but it was %s", step.Extension, filepath.Ext(path))
+	}
+	os.RemoveAll(step.TargetPath)
+
+	// Abs path with no extension provided
+	step.TargetPath = "./packer"
+	step.Extension = ""
+	path, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	if filepath.Ext(path) != ".iso" {
+		t.Fatalf("bad: path should contain extension %s but it was .iso", step.Extension)
+	}
+	os.RemoveAll(step.TargetPath)
+
+	// Path with file
+	step.TargetPath = "./packer/file.iso"
+	path, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	if path != "./packer/file.iso" {
+		t.Fatalf("bad: path should be ./packer/file.iso but it was %s", path)
+	}
+	os.RemoveAll(step.TargetPath)
 }
 
 func createTempDir(t *testing.T) string {
