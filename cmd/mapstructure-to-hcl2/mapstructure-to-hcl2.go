@@ -229,7 +229,7 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
 	}
-	spec, _ := writeSpecField(accessor, fieldType)
+	spec, _ := goFieldToCtyType(accessor, fieldType)
 	switch spec := spec.(type) {
 	case string:
 		fmt.Fprintf(w, spec)
@@ -246,10 +246,10 @@ func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag
 // a cty.Type or a string. The second argument is used for recursion and is the
 // type that will be used by the parent. For example when fieldType is a []string; a
 // recursive goFieldToCtyType call will return a cty.String.
-func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Type) {
+func goFieldToCtyType(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
-		return writeSpecField(accessor, f.Elem())
+		return goFieldToCtyType(accessor, f.Elem())
 	case *types.Basic:
 		ctyType := basicKindToCtyType(f.Kind())
 		return &hcldec.AttrSpec{
@@ -275,7 +275,7 @@ func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Typ
 			return fmt.Sprintf(`&hcldec.BlockSpec{TypeName: "%s",`+
 				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String()), cty.NilType
 		default:
-			return writeSpecField(accessor, underlyingType)
+			return goFieldToCtyType(accessor, underlyingType)
 		}
 	case *types.Slice:
 		elem := f.Elem()
@@ -295,9 +295,9 @@ func writeSpecField(accessor string, fieldType types.Type) (interface{}, cty.Typ
 			}
 			return fmt.Sprintf(`&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String()), cty.NilType
 		default:
-			_, specType := writeSpecField(accessor, elem)
+			_, specType := goFieldToCtyType(accessor, elem)
 			if specType == cty.NilType {
-				return writeSpecField(accessor, elem.Underlying())
+				return goFieldToCtyType(accessor, elem.Underlying())
 			}
 			return &hcldec.AttrSpec{
 				Name:     accessor,
