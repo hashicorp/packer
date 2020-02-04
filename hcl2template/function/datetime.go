@@ -18,9 +18,9 @@ var TimestampFunc = function.New(&function.Spec{
 
 // Timestamp returns a string representation of the current date and time.
 //
-// In the Terraform language, timestamps are conventionally represented as
-// strings using RFC 3339 "Date and Time format" syntax, and so timestamp
-// returns a string in this format.
+// In the HCL language, timestamps are conventionally represented as strings
+// using RFC 3339 "Date and Time format" syntax, and so timestamp returns a
+// string in this format.
 func Timestamp() (cty.Value, error) {
 	return TimestampFunc.Call([]cty.Value{})
 }
