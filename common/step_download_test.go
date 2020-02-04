@@ -272,7 +272,7 @@ func TestStepDownload_download(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	if filepath.Ext(path) != "." + step.Extension {
+	if filepath.Ext(path) != "."+step.Extension {
 		t.Fatalf("bad: path should contain extension %s but it was %s", step.Extension, filepath.Ext(path))
 	}
 	os.RemoveAll(step.TargetPath)
