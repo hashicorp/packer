@@ -64,6 +64,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 
+	//When running Packer on an Azure instance using Managed Identity, FillParameters will update SubscriptionID from the instance
+	// so lets make sure to update our state bag with the valid subscriptionID.
+	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
+		b.stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
+	}
+
 	log.Print(":: Configuration")
 	packerAzureCommon.DumpConfig(&b.config, func(s string) { log.Print(s) })
 
@@ -384,30 +390,34 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmTags, b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
+
 	if b.config.OSType == constants.Target_Windows {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
+
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
-	if b.config.TempResourceGroupName != "" && b.config.BuildResourceGroupName != "" {
-		stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
-	}
+	stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+
 	if b.config.tmpResourceGroupName != "" {
 		stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 		stateBag.Put(constants.ArmIsExistingResourceGroup, false)
-	} else {
-		stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
-		stateBag.Put(constants.ArmIsExistingResourceGroup, true)
-	}
-	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 
+		if b.config.BuildResourceGroupName != "" {
+			stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
+		}
+	}
+
+	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
 	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
 	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
 	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
+
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		stateBag.Put(constants.ArmManagedImageSigPublishResourceGroup, b.config.SharedGalleryDestination.SigDestinationResourceGroup)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
