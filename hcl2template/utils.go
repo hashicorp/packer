@@ -37,6 +37,13 @@ func isDir(name string) (bool, error) {
 	return s.IsDir(), nil
 }
 
+// GetHCL2Files returns two slices of json formatted and hcl formatted files,
+// hclSuffix and jsonSuffix tell which file is what. Filename can be a folder
+// or a file.
+//
+// When filename is a folder all files of folder matching the suffixes will be
+// returned. Otherwise if filename references a file and filename matches one
+// of the suffixes it is returned in the according slice.
 func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles []string, diags hcl.Diagnostics) {
 	isDir, err := isDir(filename)
 	if err != nil {
