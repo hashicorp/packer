@@ -31,7 +31,7 @@ func TestParser_complete(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{refVBIsoUbuntu1204},
+						Sources: []SourceRef{refVBIsoUbuntu1204},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
 								PType: "shell",
@@ -103,7 +103,7 @@ func TestParser_complete(t *testing.T) {
 				Basedir: "testdata/build.pkr.hcl",
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
+						Sources: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{PType: "shell"},
 							{PType: "file"},

@@ -17,7 +17,7 @@ func TestParse_build(t *testing.T) {
 				Basedir: "testdata/build",
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{
+						Sources: []SourceRef{
 							{
 								Type: "amazon-ebs",
 								Name: "ubuntu-1604",

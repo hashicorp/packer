@@ -72,7 +72,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
-		for _, from := range build.Froms {
+		for _, from := range build.Sources {
 			src, found := cfg.Sources[from]
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
