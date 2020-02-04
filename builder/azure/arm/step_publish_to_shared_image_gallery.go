@@ -106,17 +106,21 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 
 	s.say("Publishing to Shared Image Gallery ...")
 
-	var miSigPubRg = stateBag.Get(constants.ArmManagedImageSigPublishResourceGroup).(string)
-	var miSIGalleryName = stateBag.Get(constants.ArmManagedImageSharedGalleryName).(string)
-	var miSGImageName = stateBag.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
-	var miSGImageVersion = stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
-	var location = stateBag.Get(constants.ArmLocation).(string)
-	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
-	var miSigReplicationRegions = stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
-	var targetManagedImageResourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
-	var targetManagedImageName = stateBag.Get(constants.ArmManagedImageName).(string)
-	var managedImageSubscription = stateBag.Get(constants.ArmManagedImageSubscription).(string)
-	var mdiID = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", managedImageSubscription, targetManagedImageResourceGroupName, targetManagedImageName)
+	location := stateBag.Get(constants.ArmLocation).(string)
+
+	miSigPubRg := stateBag.Get(constants.ArmManagedImageSigPublishResourceGroup).(string)
+	miSIGalleryName := stateBag.Get(constants.ArmManagedImageSharedGalleryName).(string)
+	miSGImageName := stateBag.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
+	miSGImageVersion := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
+	miSigReplicationRegions := stateBag.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
+
+	tags := stateBag.Get(constants.ArmTags).(map[string]*string)
+	targetManagedImageResourceGroupName := stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
+	targetManagedImageName := stateBag.Get(constants.ArmManagedImageName).(string)
+
+	managedImageSubscription := stateBag.Get(constants.ArmManagedImageSubscription).(string)
+	mdiID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", managedImageSubscription, targetManagedImageResourceGroupName, targetManagedImageName)
+
 	miSGImageVersionEndOfLifeDate, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate).(string)
 	miSGImageVersionExcludeFromLatest, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest).(bool)
 	miSigReplicaCount, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount).(int32)
