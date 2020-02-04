@@ -40,6 +40,8 @@ func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	return ectx
 }
 
+// CoreBuildProvisioners takes a list of provisioner block, starts according
+// provisioners and sends parsed HCL2 over to it.
 func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
@@ -58,6 +60,8 @@ func (p *Parser) CoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.Eva
 	return res, diags
 }
 
+// CoreBuildProvisioners takes a list of post processor block, starts according
+// provisioners and sends parsed HCL2 over to it.
 func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
@@ -77,6 +81,9 @@ func (p *Parser) CoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl
 	return res, diags
 }
 
+// getBuilds will return a list of packer Build based on the HCL2 parsed build
+// blocks. All Builders, Provisioners and Post Processors will be started and
+// configured.
 func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
