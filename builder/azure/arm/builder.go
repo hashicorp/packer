@@ -64,7 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 
-	//When running Packer on an Azure instance FillParameters will update SubscriptionID from the instance
+	//When running Packer on an Azure instance using Managed Identity, FillParameters will update SubscriptionID from the instance
 	// so lets make sure to update our state bag with the valid subscriptionID.
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		b.stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
