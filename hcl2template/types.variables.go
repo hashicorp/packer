@@ -256,11 +256,11 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 	// files will contain files found in the folder then files passed as
 	// arguments.
 	for _, file := range files {
-		// Before we do our real decode, we'll probe to see if there are any blocks
-		// of type "variable" in this body, since it's a common mistake for new
-		// users to put variable declarations in tfvars rather than variable value
-		// definitions, and otherwise our error message for that case is not so
-		// helpful.
+		// Before we do our real decode, we'll probe to see if there are any
+		// blocks of type "variable" in this body, since it's a common mistake
+		// for new users to put variable declarations in pkrvars rather than
+		// variable value definitions, and otherwise our error message for that
+		// case is not so helpful.
 		{
 			content, _, _ := file.Body.PartialContent(&hcl.BodySchema{
 				Blocks: []hcl.BlockHeaderSchema{
