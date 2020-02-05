@@ -30,6 +30,6 @@ negotiated out-of-band.
 ## Examples
 
 ```
-> rsadecrypt(filebase64("${path.folder}/ciphertext"), file("privatekey.pem"))
+> rsadecrypt(base64(file("${path.folder}/ciphertext")), file("privatekey.pem"))
 Hello, world!
 ```

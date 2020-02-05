@@ -15,10 +15,10 @@ description: |-
 formatdate(spec, timestamp)
 ```
 
-In the Packer language, timestamps are conventionally represented as
-strings using [RFC 3339](https://tools.ietf.org/html/rfc3339)
-"Date and Time format" syntax. `formatdate` requires the `timestamp` argument
-to be a string conforming to this syntax.
+In Packer, timestamps are conventionally represented as strings using [RFC
+3339](https://tools.ietf.org/html/rfc3339) "Date and Time format" syntax.
+`formatdate` requires the `timestamp` argument to be a string conforming to
+this syntax.
 
 ## Examples
 

@@ -19,14 +19,13 @@ in this format.
 
 The result of this function will change every second, so using this function
 directly with resource attributes will cause a diff to be detected on every
-Packer run. We do not recommend using this function in resource attributes,
-but in rare cases it can be used in conjunction with
-[the `ignore_changes` lifecycle meta-argument](../resources.html#ignore_changes)
-to take the timestamp only on initial creation of the resource.
+Packer run.
 
-Due to the constantly changing return value, the result of this function cannot
-be predicted during Packer's planning phase, and so the timestamp will be
-taken only once the plan is being applied.
+-> **Breaking change note:** Packer previously let you decide your own "Date
+and Time format" syntax. With HCL2 and for parity with Terraform, Packer will
+be using the [RFC 3339](https://tools.ietf.org/html/rfc3339) "Date and Time
+format" syntax. As a string. [`formatdate`](./formatdate.html) still allows you
+to format a date.
 
 ## Examples
 

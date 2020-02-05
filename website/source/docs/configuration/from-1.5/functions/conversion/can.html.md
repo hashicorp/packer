@@ -18,23 +18,6 @@ its argument. For most situations where you could use `can` it's better to use
 [`try`](./try.html) instead, because it allows for more concise definition of
 fallback values for failing expressions.
 
-The primary purpose of `can` is to turn an error condition into a boolean
-validation result when writing
-[custom variable validation rules](../variables.html#custom-validation-rules).
-For example:
-
-```
-variable "timestamp" {
-  type        = string
-
-  validation { # NOTE: custom validation is currently an opt-in experiment (see link above)
-    # formatdate fails if the second argument is not a valid timestamp
-    condition     = can(formatdate("", var.timestamp))
-    error_message = "The timestamp argument requires a valid RFC 3339 timestamp."
-  }
-}
-```
-
 The `can` function can only catch and handle _dynamic_ errors resulting from
 access to data that isn't known until runtime. It will not catch errors
 relating to expressions that can be proven to be invalid for any input, such

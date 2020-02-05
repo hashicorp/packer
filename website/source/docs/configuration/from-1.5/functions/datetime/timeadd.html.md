@@ -29,6 +29,12 @@ number may be negative to indicate a negative duration, like `"-2h5m"`.
 The result is a string, also in RFC 3339 format, representing the result
 of adding the given direction to the given timestamp.
 
+-> **Breaking change note:** Packer previously let you decide your own "Date
+and Time format" syntax. With HCL2 and for parity with Terraform, Packer will
+be using the [RFC 3339](https://tools.ietf.org/html/rfc3339) "Date and Time
+format" syntax. As a string. [`formatdate`](./formatdate.html) still allows you
+to format a date.
+
 ## Examples
 
 ```
