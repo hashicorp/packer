@@ -2,7 +2,7 @@
 
 -   `cdrom_type` (string) - Which controller to use. Example: `sata`. Defaults to `ide`.
     
--   `remove_cdrom` (boolean) - Remove CD/DVD-ROM devices from template. Ddefaults to `false`.
+-   `remove_cdrom` (boolean) - Remove CD/DVD-ROM devices from template. Defaults to `false`.
     
 -   `iso_paths` ([]string) - List of datastore paths to ISO files that will be mounted to the VM.
     Example: `"[datastore1] ISO/ubuntu.iso"`.
