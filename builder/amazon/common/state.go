@@ -66,6 +66,19 @@ func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string
 	return err
 }
 
+func WaitUntilInstanceRunning(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
+
+	instanceInput := ec2.DescribeInstancesInput{
+		InstanceIds: []*string{&instanceId},
+	}
+
+	err := conn.WaitUntilInstanceRunningWithContext(
+		ctx,
+		&instanceInput,
+		getWaiterOptions()...)
+	return err
+}
+
 func WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
 
 	instanceInput := ec2.DescribeInstancesInput{
