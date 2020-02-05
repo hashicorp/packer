@@ -19,12 +19,28 @@ func AvailableDevice() (string, error) {
 
 	letters := "fghijklmnop"
 	for _, letter := range letters {
-		device := fmt.Sprintf("/dev/%s%c", prefix, letter)
+		var device string
 
-		// If the block device itself, i.e. /dev/sf, exists, then we
-		// can't use any of the numbers either.
-		if _, err := os.Stat(device); err == nil {
-			continue
+		if prefix == "nvme" {
+			i := 0
+			for i <= 26 {
+				device = fmt.Sprintf("/dev/%s%dn1%c", prefix, i, letter)
+
+				// If the block device itself, i.e. /dev/sf, exists, then we
+				// can't use any of the numbers either.
+				if _, err := os.Stat(device); err == nil {
+					continue
+				}
+				i++
+			}
+		} else {
+			device = fmt.Sprintf("/dev/%s%c", prefix, letter)
+
+			// If the block device itself, i.e. /dev/sf, exists, then we
+			// can't use any of the numbers either.
+			if _, err := os.Stat(device); err == nil {
+				continue
+			}
 		}
 
 		// To be able to build both Paravirtual and HVM images, the unnumbered
@@ -42,7 +58,7 @@ func AvailableDevice() (string, error) {
 // devicePrefix returns the prefix ("sd" or "xvd" or so on) of the devices
 // on the system.
 func devicePrefix() (string, error) {
-	available := []string{"sd", "xvd"}
+	available := []string{"sd", "xvd", "nvme"}
 
 	f, err := os.Open("/sys/block")
 	if err != nil {
