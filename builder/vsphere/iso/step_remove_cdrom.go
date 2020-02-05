@@ -26,7 +26,7 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-  if s.Config.RemoveCdrom == true {
+	if s.Config.RemoveCdrom == true {
 		ui.Say("Deleting CD-ROM drives...")
 		err := vm.RemoveCdroms()
 		if err != nil {
@@ -35,7 +35,7 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 		}
 	}
 
-  return multistep.ActionContinue
+	return multistep.ActionContinue
 }
 
 func (s *StepRemoveCDRom) Cleanup(state multistep.StateBag) {}
