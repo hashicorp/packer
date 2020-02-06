@@ -9,6 +9,7 @@ import (
 // FlatMockConfig is an auto-generated flat version of MockConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockConfig struct {
+	NotSquashed          *string                `mapstructure:"not_squashed" cty:"not_squashed"`
 	String               *string                `mapstructure:"string" cty:"string"`
 	Int                  *int                   `mapstructure:"int" cty:"int"`
 	Int64                *int64                 `mapstructure:"int64" cty:"int64"`
@@ -36,6 +37,7 @@ func (*MockConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Sp
 // The decoded values from this spec will then be applied to a FlatMockConfig.
 func (*FlatMockConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
+		"not_squashed":            &hcldec.AttrSpec{Name: "not_squashed", Type: cty.String, Required: false},
 		"string":                  &hcldec.AttrSpec{Name: "string", Type: cty.String, Required: false},
 		"int":                     &hcldec.AttrSpec{Name: "int", Type: cty.Number, Required: false},
 		"int64":                   &hcldec.AttrSpec{Name: "int64", Type: cty.Number, Required: false},

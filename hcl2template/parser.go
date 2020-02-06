@@ -2,6 +2,8 @@ package hcl2template
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -11,6 +13,8 @@ import (
 const (
 	sourceLabel       = "source"
 	variablesLabel    = "variables"
+	variableLabel     = "variable"
+	localsLabel       = "locals"
 	buildLabel        = "build"
 	communicatorLabel = "communicator"
 )
@@ -19,11 +23,17 @@ var configSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
 		{Type: sourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: variablesLabel},
+		{Type: variableLabel, LabelNames: []string{"name"}},
+		{Type: localsLabel},
 		{Type: buildLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
 }
 
+// Parser helps you parse HCL folders. It will parse an hcl file or directory
+// and start builders, provisioners and post-processors to configure them with
+// the parsed HCL and then return a []packer.Build. Packer will use that list
+// of Builds to run everything in order.
 type Parser struct {
 	*hclparse.Parser
 
@@ -35,46 +45,136 @@ type Parser struct {
 }
 
 const (
-	hcl2FileExt     = ".pkr.hcl"
-	hcl2JsonFileExt = ".pkr.json"
+	hcl2FileExt        = ".pkr.hcl"
+	hcl2JsonFileExt    = ".pkr.json"
+	hcl2VarFileExt     = ".auto.pkrvars.hcl"
+	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-func (p *Parser) parse(filename string) (*PackerConfig, hcl.Diagnostics) {
-
-	hclFiles, jsonFiles, diags := GetHCL2Files(filename)
+func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
-	for _, filename := range hclFiles {
-		f, moreDiags := p.ParseHCLFile(filename)
-		diags = append(diags, moreDiags...)
-		files = append(files, f)
-	}
-	for _, filename := range jsonFiles {
-		f, moreDiags := p.ParseJSONFile(filename)
-		diags = append(diags, moreDiags...)
-		files = append(files, f)
-	}
-	if diags.HasErrors() {
-		return nil, diags
+	var diags hcl.Diagnostics
+
+	// parse config files
+	{
+		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
+		if len(hclFiles)+len(jsonFiles) == 0 {
+			diags = append(moreDiags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Could not find any config file in " + filename,
+				Detail: "A config file must be suffixed with `.pkr.hcl` or " +
+					"`.pkr.json`. A folder can be referenced.",
+			})
+		}
+		for _, filename := range hclFiles {
+			f, moreDiags := p.ParseHCLFile(filename)
+			diags = append(diags, moreDiags...)
+			files = append(files, f)
+		}
+		for _, filename := range jsonFiles {
+			f, moreDiags := p.ParseJSONFile(filename)
+			diags = append(diags, moreDiags...)
+			files = append(files, f)
+		}
+		if diags.HasErrors() {
+			return nil, diags
+		}
 	}
 
-	cfg := &PackerConfig{}
-	for _, file := range files {
-		moreDiags := p.parseFile(file, cfg)
+	basedir := filename
+	if isDir, err := isDir(basedir); err == nil && !isDir {
+		basedir = filepath.Dir(basedir)
+	}
+	cfg := &PackerConfig{
+		Basedir: basedir,
+	}
+
+	// Decode variable blocks so that they are available later on. Here locals
+	// can use input variables so we decode them firsthand.
+	{
+		for _, file := range files {
+			diags = append(diags, p.decodeInputVariables(file, cfg)...)
+		}
+		for _, file := range files {
+			diags = append(diags, p.decodeLocalVariables(file, cfg)...)
+		}
+	}
+
+	// parse var files
+	{
+		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
 		diags = append(diags, moreDiags...)
+		var varFiles []*hcl.File
+		for _, filename := range hclVarFiles {
+			f, moreDiags := p.ParseHCLFile(filename)
+			diags = append(diags, moreDiags...)
+			varFiles = append(varFiles, f)
+		}
+		for _, filename := range jsonVarFiles {
+			f, moreDiags := p.ParseJSONFile(filename)
+			diags = append(diags, moreDiags...)
+			varFiles = append(varFiles, f)
+		}
+
+		diags = append(diags, cfg.InputVariables.collectVariableValues(os.Environ(), varFiles, vars)...)
+	}
+
+	// decode the actual content
+	for _, file := range files {
+		diags = append(diags, p.decodeConfig(file, cfg)...)
 	}
 
 	return cfg, diags
 }
 
-// parseFile filename content into cfg.
-//
-// parseFile may be called multiple times with the same cfg on a different file.
-//
-// parseFile returns as complete a config as we can manage, even if there are
-// errors, since a partial result can be useful for careful analysis by
-// development tools such as text editor extensions.
-func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+// decodeLocalVariables looks in the found blocks for 'variables' and
+// 'variable' blocks. It should be called firsthand so that other blocks can
+// use the variables.
+func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case variableLabel:
+			moreDiags := cfg.InputVariables.decodeConfig(block, nil)
+			diags = append(diags, moreDiags...)
+		case variablesLabel:
+			moreDiags := cfg.InputVariables.decodeConfigMap(block, nil)
+			diags = append(diags, moreDiags...)
+		}
+	}
+
+	return diags
+}
+
+// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
+// should be called after parsing input variables so that they can be
+// referenced.
+func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case localsLabel:
+			moreDiags := cfg.LocalVariables.decodeConfigMap(block, cfg.EvalContext())
+			diags = append(diags, moreDiags...)
+		}
+	}
+
+	return diags
+}
+
+// decodeConfig looks in the found blocks for everything that is not a variable
+// block. It should be called after parsing input variables and locals so that
+// they can be referenced.
+func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -104,20 +204,9 @@ func (p *Parser) parseFile(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 
 			if cfg.Sources == nil {
-				cfg.Sources = map[SourceRef]*Source{}
+				cfg.Sources = map[SourceRef]*SourceBlock{}
 			}
 			cfg.Sources[ref] = source
-
-		case variablesLabel:
-			if cfg.Variables == nil {
-				cfg.Variables = PackerV1Variables{}
-			}
-
-			moreDiags := cfg.Variables.decodeConfig(block)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			diags = append(diags, moreDiags...)
 
 		case buildLabel:
 			build, moreDiags := p.decodeBuildConfig(block)

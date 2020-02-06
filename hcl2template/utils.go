@@ -37,7 +37,14 @@ func isDir(name string) (bool, error) {
 	return s.IsDir(), nil
 }
 
-func GetHCL2Files(filename string) (hclFiles, jsonFiles []string, diags hcl.Diagnostics) {
+// GetHCL2Files returns two slices of json formatted and hcl formatted files,
+// hclSuffix and jsonSuffix tell which file is what. Filename can be a folder
+// or a file.
+//
+// When filename is a folder all files of folder matching the suffixes will be
+// returned. Otherwise if filename references a file and filename matches one
+// of the suffixes it is returned in the according slice.
+func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles []string, diags hcl.Diagnostics) {
 	isDir, err := isDir(filename)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
@@ -48,12 +55,13 @@ func GetHCL2Files(filename string) (hclFiles, jsonFiles []string, diags hcl.Diag
 		return nil, nil, diags
 	}
 	if !isDir {
-		if strings.HasSuffix(filename, hcl2JsonFileExt) {
+		if strings.HasSuffix(filename, jsonSuffix) {
 			return nil, []string{filename}, diags
 		}
-		if strings.HasSuffix(filename, hcl2FileExt) {
+		if strings.HasSuffix(filename, hclSuffix) {
 			return []string{filename}, nil, diags
 		}
+		return nil, nil, diags
 	}
 
 	fileInfos, err := ioutil.ReadDir(filename)
@@ -71,19 +79,11 @@ func GetHCL2Files(filename string) (hclFiles, jsonFiles []string, diags hcl.Diag
 			continue
 		}
 		filename := filepath.Join(filename, fileInfo.Name())
-		if strings.HasSuffix(filename, hcl2FileExt) {
+		if strings.HasSuffix(filename, hclSuffix) {
 			hclFiles = append(hclFiles, filename)
-		} else if strings.HasSuffix(filename, hcl2JsonFileExt) {
+		} else if strings.HasSuffix(filename, jsonSuffix) {
 			jsonFiles = append(jsonFiles, filename)
 		}
-	}
-	if len(hclFiles)+len(jsonFiles) == 0 {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Could not find any config file in " + filename,
-			Detail: "A config file must be suffixed with `.pkr.hcl` or " +
-				"`.pkr.json`. A folder can be referenced.",
-		})
 	}
 
 	return hclFiles, jsonFiles, diags

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// ProvisionerBlock represents a parsed provisioner
+// ProvisionerBlock references a detected but unparsed provisioner
 type ProvisionerBlock struct {
 	PType string
 	PName string
@@ -47,7 +47,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 	return provisioner, diags
 }
 
-func (p *Parser) StartProvisioner(pb *ProvisionerBlock, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
+func (p *Parser) startProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)
@@ -59,7 +59,7 @@ func (p *Parser) StartProvisioner(pb *ProvisionerBlock, generatedVars []string) 
 		})
 		return nil, diags
 	}
-	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.HCL2Ref.Rest, nil, provisioner)
+	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.HCL2Ref.Rest, ectx, provisioner)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return nil, diags

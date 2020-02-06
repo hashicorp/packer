@@ -1,7 +1,6 @@
 package hcl2template
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -18,105 +18,23 @@ import (
 func getBasicParser() *Parser {
 	return &Parser{
 		Parser: hclparse.NewParser(),
-		BuilderSchemas: mapOfBuilder(map[string]packer.Builder{
-			"amazon-ebs":     &MockBuilder{},
-			"virtualbox-iso": &MockBuilder{},
-		}),
-		ProvisionersSchemas: mapOfProvisioner(map[string]packer.Provisioner{
-			"shell": &MockProvisioner{},
-			"file":  &MockProvisioner{},
-		}),
-		PostProcessorsSchemas: mapOfPostProcessor(map[string]packer.PostProcessor{
-			"amazon-import": &MockPostProcessor{},
-		}),
+		BuilderSchemas: packer.MapOfBuilder{
+			"amazon-ebs":     func() (packer.Builder, error) { return &MockBuilder{}, nil },
+			"virtualbox-iso": func() (packer.Builder, error) { return &MockBuilder{}, nil },
+		},
+		ProvisionersSchemas: packer.MapOfProvisioner{
+			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
+			"file":  func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
+		},
+		PostProcessorsSchemas: packer.MapOfPostProcessor{
+			"amazon-import": func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },
+		},
 	}
-}
-
-type mapOfBuilder map[string]packer.Builder
-
-func (mob mapOfBuilder) Has(builder string) bool {
-	_, res := mob[builder]
-	return res
-}
-
-func (mob mapOfBuilder) Start(builder string) (packer.Builder, error) {
-	d, found := mob[builder]
-	var err error
-	if !found {
-		err = fmt.Errorf("Unknown entry %s", builder)
-	}
-	return d, err
-}
-
-func (mob mapOfBuilder) List() []string {
-	res := []string{}
-	for k := range mob {
-		res = append(res, k)
-	}
-	return res
-}
-
-type mapOfCommunicator map[string]packer.ConfigurableCommunicator
-
-func (mob mapOfCommunicator) Start(communicator string) (packer.ConfigurableCommunicator, error) {
-	c, found := mob[communicator]
-	var err error
-	if !found {
-		err = fmt.Errorf("Unknown entry %s", communicator)
-	}
-	return c, err
-}
-
-type mapOfProvisioner map[string]packer.Provisioner
-
-func (mop mapOfProvisioner) Has(provisioner string) bool {
-	_, res := mop[provisioner]
-	return res
-}
-
-func (mop mapOfProvisioner) Start(provisioner string) (packer.Provisioner, error) {
-	p, found := mop[provisioner]
-	var err error
-	if !found {
-		err = fmt.Errorf("Unknown provisioner %s", provisioner)
-	}
-	return p, err
-}
-
-func (mod mapOfProvisioner) List() []string {
-	res := []string{}
-	for k := range mod {
-		res = append(res, k)
-	}
-	return res
-}
-
-type mapOfPostProcessor map[string]packer.PostProcessor
-
-func (mop mapOfPostProcessor) Has(provisioner string) bool {
-	_, res := mop[provisioner]
-	return res
-}
-
-func (mop mapOfPostProcessor) Start(postProcessor string) (packer.PostProcessor, error) {
-	p, found := mop[postProcessor]
-	var err error
-	if !found {
-		err = fmt.Errorf("Unknown post-processor %s", postProcessor)
-	}
-	return p, err
-}
-
-func (mod mapOfPostProcessor) List() []string {
-	res := []string{}
-	for k := range mod {
-		res = append(res, k)
-	}
-	return res
 }
 
 type parseTestArgs struct {
 	filename string
+	vars     map[string]string
 }
 
 type parseTest struct {
@@ -138,7 +56,7 @@ func testParse(t *testing.T, tests []parseTest) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCfg, gotDiags := tt.parser.parse(tt.args.filename)
+			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected diagnostics. %s", gotDiags)
 			}
@@ -146,7 +64,14 @@ func testParse(t *testing.T, tests []parseTest) {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
 			if diff := cmp.Diff(tt.parseWantCfg, gotCfg,
-				cmpopts.IgnoreUnexported(cty.Value{}, Source{}, ProvisionerBlock{}, PostProcessorBlock{}),
+				cmpopts.IgnoreUnexported(
+					cty.Value{},
+					cty.Type{},
+					Variable{},
+					SourceBlock{},
+					ProvisionerBlock{},
+					PostProcessorBlock{},
+				),
 				cmpopts.IgnoreTypes(HCL2Ref{}),
 				cmpopts.IgnoreTypes([]hcl.Range{}),
 				cmpopts.IgnoreTypes(hcl.Range{}),
@@ -164,7 +89,10 @@ func testParse(t *testing.T, tests []parseTest) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
 			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds,
-				cmpopts.IgnoreUnexported(packer.CoreBuild{},
+				cmpopts.IgnoreUnexported(
+					cty.Value{},
+					cty.Type{},
+					packer.CoreBuild{},
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
 				),
@@ -213,6 +141,7 @@ var (
 
 	basicMockProvisioner = &MockProvisioner{
 		Config: MockConfig{
+			NotSquashed:      "value",
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
