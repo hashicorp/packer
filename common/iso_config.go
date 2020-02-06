@@ -3,12 +3,11 @@
 package common
 
 import (
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
-	"os"
 	"strings"
 
 	getter "github.com/hashicorp/go-getter/v2"
@@ -108,7 +107,7 @@ type ISOConfig struct {
 	TargetExtension string `mapstructure:"iso_target_extension"`
 }
 
-func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
+func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []error) {
 	if len(c.ISOUrls) != 0 && c.RawSingleISOUrl != "" {
 		errs = append(
 			errs, errors.New("Only one of iso_url or iso_urls must be specified"))
@@ -166,20 +165,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 			errs = append(errs, fmt.Errorf("error parsing URL <%s>: %s",
 				c.ISOUrls[0], err))
 		}
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Printf("get working directory: %v", err)
-			// here we ignore the error in case the
-			// working directory is not needed.
-		}
-		gc := getter.Client{
-			Dst:     "no-op",
-			Src:     u.String(),
-			Pwd:     wd,
-			Dir:     false,
-			Getters: getter.Getters,
-		}
-		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
+		cksum, err := getter.DefaultClient.ChecksumFromFile(context.TODO(), c.ISOChecksumURL, u.Path)
 		if cksum == nil || err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
 		} else {
