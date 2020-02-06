@@ -198,9 +198,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		ProgressListener: ui,
 		Pwd:              wd,
 		Mode:             getter.ModeFile,
-	}
-	if runtime.GOOS == "windows" {
-		req.Inplace = true
+		Inplace:          true,
 	}
 
 	switch op, err := defaultGetterClient.Get(ctx, req); err.(type) {
