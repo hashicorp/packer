@@ -1,22 +1,42 @@
-// +build windows
-
 package getter
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
-	"syscall"
 )
 
-func (g *FileGetter) Get(dst string, u *url.URL) error {
-	ctx := g.Context()
+// FileGetter is a Getter implementation that will download a module from
+// a file scheme.
+type FileGetter struct {
+	getter
+}
+
+func (g *FileGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	path := u.Path
 	if u.RawPath != "" {
 		path = u.RawPath
+	}
+
+	fi, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+
+	// Check if the source is a directory.
+	if fi.IsDir() {
+		return ModeDir, nil
+	}
+
+	return ModeFile, nil
+}
+
+func (g *FileGetter) Get(ctx context.Context, req *Request) error {
+	path := req.u.Path
+	if req.u.RawPath != "" {
+		path = req.u.RawPath
 	}
 
 	// The source path must exist and be a directory to be usable.
@@ -26,9 +46,14 @@ func (g *FileGetter) Get(dst string, u *url.URL) error {
 		return fmt.Errorf("source path must be a directory")
 	}
 
-	fi, err := os.Lstat(dst)
+	fi, err := os.Lstat(req.Dst)
 	if err != nil && !os.IsNotExist(err) {
 		return err
+	}
+
+	if req.Inplace {
+		req.Dst = path
+		return nil
 	}
 
 	// If the destination already exists, it must be a symlink
@@ -39,42 +64,38 @@ func (g *FileGetter) Get(dst string, u *url.URL) error {
 		}
 
 		// Remove the destination
-		if err := os.Remove(dst); err != nil {
+		if err := os.Remove(req.Dst); err != nil {
 			return err
 		}
 	}
 
 	// Create all the parent directories
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(req.Dst), 0755); err != nil {
 		return err
 	}
 
-	sourcePath := toBackslash(path)
-
-	// Use mklink to create a junction point
-	output, err := exec.CommandContext(ctx, "cmd", "/c", "mklink", "/J", dst, sourcePath).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to run mklink %v %v: %v %q", dst, sourcePath, err, output)
-	}
-
-	return nil
+	return SymlinkAny(path, req.Dst)
 }
 
-func (g *FileGetter) GetFile(dst string, u *url.URL) error {
-	ctx := g.Context()
-	path := u.Path
-	if u.RawPath != "" {
-		path = u.RawPath
+func (g *FileGetter) GetFile(ctx context.Context, req *Request) error {
+	path := req.u.Path
+	if req.u.RawPath != "" {
+		path = req.u.RawPath
 	}
 
-	// The source path must exist and be a directory to be usable.
+	// The source path must exist and be a file to be usable.
 	if fi, err := os.Stat(path); err != nil {
 		return fmt.Errorf("source path error: %s", err)
 	} else if fi.IsDir() {
 		return fmt.Errorf("source path must be a file")
 	}
 
-	_, err := os.Lstat(dst)
+	if req.Inplace {
+		req.Dst = path
+		return nil
+	}
+
+	_, err := os.Lstat(req.Dst)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -82,19 +103,19 @@ func (g *FileGetter) GetFile(dst string, u *url.URL) error {
 	// If the destination already exists, it must be a symlink
 	if err == nil {
 		// Remove the destination
-		if err := os.Remove(dst); err != nil {
+		if err := os.Remove(req.Dst); err != nil {
 			return err
 		}
 	}
 
 	// Create all the parent directories
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(req.Dst), 0755); err != nil {
 		return err
 	}
 
 	// If we're not copying, just symlink and we're done
-	if !g.Copy {
-		if err = os.Symlink(path, dst); err == nil {
+	if !req.Copy {
+		if err = os.Symlink(path, req.Dst); err == nil {
 			return err
 		}
 		lerr, ok := err.(*os.LinkError)
@@ -102,8 +123,9 @@ func (g *FileGetter) GetFile(dst string, u *url.URL) error {
 			return err
 		}
 		switch lerr.Err {
-		case syscall.ERROR_PRIVILEGE_NOT_HELD:
-			// no symlink privilege, let's
+		case ErrUnauthorized:
+			// On windows this  means we don't have
+			// symlink privilege, let's
 			// fallback to a copy to avoid an error.
 			break
 		default:
@@ -118,7 +140,7 @@ func (g *FileGetter) GetFile(dst string, u *url.URL) error {
 	}
 	defer srcF.Close()
 
-	dstF, err := os.Create(dst)
+	dstF, err := os.Create(req.Dst)
 	if err != nil {
 		return err
 	}
@@ -126,11 +148,4 @@ func (g *FileGetter) GetFile(dst string, u *url.URL) error {
 
 	_, err = Copy(ctx, dstF, srcF)
 	return err
-}
-
-// toBackslash returns the result of replacing each slash character
-// in path with a backslash ('\') character. Multiple separators are
-// replaced by multiple backslashes.
-func toBackslash(path string) string {
-	return strings.Replace(path, "/", "\\", -1)
 }

@@ -19,17 +19,16 @@ type HgGetter struct {
 	getter
 }
 
-func (g *HgGetter) ClientMode(_ *url.URL) (ClientMode, error) {
-	return ClientModeDir, nil
+func (g *HgGetter) Mode(ctx context.Context, _ *url.URL) (Mode, error) {
+	return ModeDir, nil
 }
 
-func (g *HgGetter) Get(dst string, u *url.URL) error {
-	ctx := g.Context()
+func (g *HgGetter) Get(ctx context.Context, req *Request) error {
 	if _, err := exec.LookPath("hg"); err != nil {
 		return fmt.Errorf("hg must be available and on the PATH")
 	}
 
-	newURL, err := urlhelper.Parse(u.String())
+	newURL, err := urlhelper.Parse(req.u.String())
 	if err != nil {
 		return err
 	}
@@ -48,26 +47,26 @@ func (g *HgGetter) Get(dst string, u *url.URL) error {
 		newURL.RawQuery = q.Encode()
 	}
 
-	_, err = os.Stat(dst)
+	_, err = os.Stat(req.Dst)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	if err != nil {
-		if err := g.clone(dst, newURL); err != nil {
+		if err := g.clone(req.Dst, newURL); err != nil {
 			return err
 		}
 	}
 
-	if err := g.pull(dst, newURL); err != nil {
+	if err := g.pull(req.Dst, newURL); err != nil {
 		return err
 	}
 
-	return g.update(ctx, dst, newURL, rev)
+	return g.update(ctx, req.Dst, newURL, rev)
 }
 
 // GetFile for Hg doesn't support updating at this time. It will download
 // the file every time.
-func (g *HgGetter) GetFile(dst string, u *url.URL) error {
+func (g *HgGetter) GetFile(ctx context.Context, req *Request) error {
 	// Create a temporary directory to store the full source. This has to be
 	// a non-existent directory.
 	td, tdcloser, err := safetemp.Dir("", "getter")
@@ -78,27 +77,31 @@ func (g *HgGetter) GetFile(dst string, u *url.URL) error {
 
 	// Get the filename, and strip the filename from the URL so we can
 	// just get the repository directly.
-	filename := filepath.Base(u.Path)
-	u.Path = filepath.ToSlash(filepath.Dir(u.Path))
+	filename := filepath.Base(req.u.Path)
+	req.u.Path = filepath.Dir(req.u.Path)
+	dst := req.Dst
+	req.Dst = td
 
 	// If we're on Windows, we need to set the host to "localhost" for hg
 	if runtime.GOOS == "windows" {
-		u.Host = "localhost"
+		req.u.Host = "localhost"
 	}
 
 	// Get the full repository
-	if err := g.Get(td, u); err != nil {
+	if err := g.Get(ctx, req); err != nil {
 		return err
 	}
 
 	// Copy the single file
-	u, err = urlhelper.Parse(fmtFileURL(filepath.Join(td, filename)))
+	req.u, err = urlhelper.Parse(fmtFileURL(filepath.Join(td, filename)))
 	if err != nil {
 		return err
 	}
 
-	fg := &FileGetter{Copy: true, getter: g.getter}
-	return fg.GetFile(dst, u)
+	fg := &FileGetter{}
+	req.Copy = true
+	req.Dst = dst
+	return fg.GetFile(ctx, req)
 }
 
 func (g *HgGetter) clone(dst string, u *url.URL) error {

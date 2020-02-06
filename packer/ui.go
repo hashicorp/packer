@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode"
 
-	getter "github.com/hashicorp/go-getter"
+	getter "github.com/hashicorp/go-getter/v2"
 )
 
 var ErrInterrupted = errors.New("interrupted")

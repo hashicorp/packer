@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	safetemp "github.com/hashicorp/go-safetemp"
@@ -53,22 +52,21 @@ type HttpGetter struct {
 	Header http.Header
 }
 
-func (g *HttpGetter) ClientMode(u *url.URL) (ClientMode, error) {
+func (g *HttpGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	if strings.HasSuffix(u.Path, "/") {
-		return ClientModeDir, nil
+		return ModeDir, nil
 	}
-	return ClientModeFile, nil
+	return ModeFile, nil
 }
 
-func (g *HttpGetter) Get(dst string, u *url.URL) error {
-	ctx := g.Context()
+func (g *HttpGetter) Get(ctx context.Context, req *Request) error {
 	// Copy the URL so we can modify it
-	var newU url.URL = *u
-	u = &newU
+	var newU url.URL = *req.u
+	req.u = &newU
 
 	if g.Netrc {
 		// Add auth from netrc if we can
-		if err := addAuthFromNetrc(u); err != nil {
+		if err := addAuthFromNetrc(req.u); err != nil {
 			return err
 		}
 	}
@@ -78,18 +76,20 @@ func (g *HttpGetter) Get(dst string, u *url.URL) error {
 	}
 
 	// Add terraform-get to the parameter.
-	q := u.Query()
+	q := req.u.Query()
 	q.Add("terraform-get", "1")
-	u.RawQuery = q.Encode()
+	req.u.RawQuery = q.Encode()
 
 	// Get the URL
-	req, err := http.NewRequest("GET", u.String(), nil)
+	httpReq, err := http.NewRequest("GET", req.u.String(), nil)
 	if err != nil {
 		return err
 	}
 
-	req.Header = g.Header
-	resp, err := g.Client.Do(req)
+	if g.Header != nil {
+		httpReq.Header = g.Header.Clone()
+	}
+	resp, err := g.Client.Do(httpReq)
 	if err != nil {
 		return err
 	}
@@ -116,33 +116,38 @@ func (g *HttpGetter) Get(dst string, u *url.URL) error {
 	// If there is a subdir component, then we download the root separately
 	// into a temporary directory, then copy over the proper subdir.
 	source, subDir := SourceDirSubdir(source)
-	if subDir == "" {
-		var opts []ClientOption
-		if g.client != nil {
-			opts = g.client.Options
-		}
-		return Get(dst, source, opts...)
+	req = &Request{
+		Mode: ModeDir,
+		Src:  source,
+		Dst:  req.Dst,
 	}
-
+	if subDir == "" {
+		_, err = DefaultClient.Get(ctx, req)
+		return err
+	}
 	// We have a subdir, time to jump some hoops
-	return g.getSubdir(ctx, dst, source, subDir)
+	return g.getSubdir(ctx, req.Dst, source, subDir)
 }
 
-func (g *HttpGetter) GetFile(dst string, src *url.URL) error {
-	ctx := g.Context()
+// GetFile fetches the file from src and stores it at dst.
+// If the server supports Accept-Range, HttpGetter will attempt a range
+// request. This means it is the caller's responsibility to ensure that an
+// older version of the destination file does not exist, else it will be either
+// falsely identified as being replaced, or corrupted with extra bytes
+// appended.
+func (g *HttpGetter) GetFile(ctx context.Context, req *Request) error {
 	if g.Netrc {
 		// Add auth from netrc if we can
-		if err := addAuthFromNetrc(src); err != nil {
+		if err := addAuthFromNetrc(req.u); err != nil {
 			return err
 		}
 	}
-
 	// Create all the parent directories if needed
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(req.Dst), 0755); err != nil {
 		return err
 	}
 
-	f, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE, os.FileMode(0666))
+	f, err := os.OpenFile(req.Dst, os.O_RDWR|os.O_CREATE, os.FileMode(0666))
 	if err != nil {
 		return err
 	}
@@ -157,26 +162,25 @@ func (g *HttpGetter) GetFile(dst string, src *url.URL) error {
 	// We first make a HEAD request so we can check
 	// if the server supports range queries. If the server/URL doesn't
 	// support HEAD requests, we just fall back to GET.
-	req, err := http.NewRequest("HEAD", src.String(), nil)
+	httpReq, err := http.NewRequest("HEAD", req.u.String(), nil)
 	if err != nil {
 		return err
 	}
 	if g.Header != nil {
-		req.Header = g.Header
+		httpReq.Header = g.Header.Clone()
 	}
-	headResp, err := g.Client.Do(req)
-	if err == nil && headResp != nil {
+	headResp, err := g.Client.Do(httpReq)
+	if err == nil {
 		headResp.Body.Close()
 		if headResp.StatusCode == 200 {
 			// If the HEAD request succeeded, then attempt to set the range
 			// query if we can.
-			if headResp.Header.Get("Accept-Ranges") == "bytes" {
+			if headResp.Header.Get("Accept-Ranges") == "bytes" && headResp.ContentLength >= 0 {
 				if fi, err := f.Stat(); err == nil {
-					if _, err = f.Seek(0, os.SEEK_END); err == nil {
-						req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+					if _, err = f.Seek(0, io.SeekEnd); err == nil {
 						currentFileSize = fi.Size()
-						totalFileSize, _ := strconv.ParseInt(headResp.Header.Get("Content-Length"), 10, 64)
-						if currentFileSize >= totalFileSize {
+						httpReq.Header.Set("Range", fmt.Sprintf("bytes=%d-", currentFileSize))
+						if currentFileSize >= headResp.ContentLength {
 							// file already present
 							return nil
 						}
@@ -185,9 +189,9 @@ func (g *HttpGetter) GetFile(dst string, src *url.URL) error {
 			}
 		}
 	}
-	req.Method = "GET"
+	httpReq.Method = "GET"
 
-	resp, err := g.Client.Do(req)
+	resp, err := g.Client.Do(httpReq)
 	if err != nil {
 		return err
 	}
@@ -201,10 +205,10 @@ func (g *HttpGetter) GetFile(dst string, src *url.URL) error {
 
 	body := resp.Body
 
-	if g.client != nil && g.client.ProgressListener != nil {
+	if req.ProgressListener != nil {
 		// track download
-		fn := filepath.Base(src.EscapedPath())
-		body = g.client.ProgressListener.TrackProgress(fn, currentFileSize, currentFileSize+resp.ContentLength, resp.Body)
+		fn := filepath.Base(req.u.EscapedPath())
+		body = req.ProgressListener.TrackProgress(fn, currentFileSize, currentFileSize+resp.ContentLength, resp.Body)
 	}
 	defer body.Close()
 
@@ -226,12 +230,8 @@ func (g *HttpGetter) getSubdir(ctx context.Context, dst, source, subDir string) 
 	}
 	defer tdcloser.Close()
 
-	var opts []ClientOption
-	if g.client != nil {
-		opts = g.client.Options
-	}
 	// Download that into the given directory
-	if err := Get(td, source, opts...); err != nil {
+	if _, err := Get(ctx, td, source); err != nil {
 		return err
 	}
 

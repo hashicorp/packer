@@ -1,6 +1,7 @@
 package getter
 
 import (
+	"context"
 	"net/url"
 )
 
@@ -23,32 +24,32 @@ type MockGetter struct {
 	GetFileErr    error
 }
 
-func (g *MockGetter) Get(dst string, u *url.URL) error {
+func (g *MockGetter) Get(ctx context.Context, req *Request) error {
 	g.GetCalled = true
-	g.GetDst = dst
-	g.GetURL = u
+	g.GetDst = req.Dst
+	g.GetURL = req.u
 
 	if g.Proxy != nil {
-		return g.Proxy.Get(dst, u)
+		return g.Proxy.Get(ctx, req)
 	}
 
 	return g.GetErr
 }
 
-func (g *MockGetter) GetFile(dst string, u *url.URL) error {
+func (g *MockGetter) GetFile(ctx context.Context, req *Request) error {
 	g.GetFileCalled = true
-	g.GetFileDst = dst
-	g.GetFileURL = u
+	g.GetFileDst = req.Dst
+	g.GetFileURL = req.u
 
 	if g.Proxy != nil {
-		return g.Proxy.GetFile(dst, u)
+		return g.Proxy.GetFile(ctx, req)
 	}
 	return g.GetFileErr
 }
 
-func (g *MockGetter) ClientMode(u *url.URL) (ClientMode, error) {
+func (g *MockGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	if l := len(u.Path); l > 0 && u.Path[l-1:] == "/" {
-		return ClientModeDir, nil
+		return ModeDir, nil
 	}
-	return ClientModeFile, nil
+	return ModeFile, nil
 }

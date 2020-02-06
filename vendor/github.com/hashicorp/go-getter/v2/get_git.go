@@ -1,6 +1,7 @@
 package getter
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -24,12 +26,13 @@ type GitGetter struct {
 	getter
 }
 
-func (g *GitGetter) ClientMode(_ *url.URL) (ClientMode, error) {
-	return ClientModeDir, nil
+var defaultBranchRegexp = regexp.MustCompile(`\s->\sorigin/(.*)`)
+
+func (g *GitGetter) Mode(_ context.Context, u *url.URL) (Mode, error) {
+	return ModeDir, nil
 }
 
-func (g *GitGetter) Get(dst string, u *url.URL) error {
-	ctx := g.Context()
+func (g *GitGetter) Get(ctx context.Context, req *Request) error {
 	if _, err := exec.LookPath("git"); err != nil {
 		return fmt.Errorf("git must be available and on the PATH")
 	}
@@ -37,7 +40,10 @@ func (g *GitGetter) Get(dst string, u *url.URL) error {
 	// The port number must be parseable as an integer. If not, the user
 	// was probably trying to use a scp-style address, in which case the
 	// ssh:// prefix must be removed to indicate that.
-	if portStr := u.Port(); portStr != "" {
+	//
+	// This is not necessary in versions of Go which have patched
+	// CVE-2019-14809 (e.g. Go 1.12.8+)
+	if portStr := req.u.Port(); portStr != "" {
 		if _, err := strconv.ParseUint(portStr, 10, 16); err != nil {
 			return fmt.Errorf("invalid port number %q; if using the \"scp-like\" git address scheme where a colon introduces the path instead, remove the ssh:// portion and use just the git:: prefix", portStr)
 		}
@@ -46,7 +52,7 @@ func (g *GitGetter) Get(dst string, u *url.URL) error {
 	// Extract some query parameters we use
 	var ref, sshKey string
 	var depth int
-	q := u.Query()
+	q := req.u.Query()
 	if len(q) > 0 {
 		ref = q.Get("ref")
 		q.Del("ref")
@@ -60,9 +66,9 @@ func (g *GitGetter) Get(dst string, u *url.URL) error {
 		q.Del("depth")
 
 		// Copy the URL
-		var newU url.URL = *u
-		u = &newU
-		u.RawQuery = q.Encode()
+		var newU url.URL = *req.u
+		req.u = &newU
+		req.u.RawQuery = q.Encode()
 	}
 
 	var sshKeyFile string
@@ -100,14 +106,14 @@ func (g *GitGetter) Get(dst string, u *url.URL) error {
 	}
 
 	// Clone or update the repository
-	_, err := os.Stat(dst)
+	_, err := os.Stat(req.Dst)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	if err == nil {
-		err = g.update(ctx, dst, sshKeyFile, ref, depth)
+		err = g.update(ctx, req.Dst, sshKeyFile, ref, depth)
 	} else {
-		err = g.clone(ctx, dst, sshKeyFile, u, depth)
+		err = g.clone(ctx, sshKeyFile, depth, req)
 	}
 	if err != nil {
 		return err
@@ -115,18 +121,18 @@ func (g *GitGetter) Get(dst string, u *url.URL) error {
 
 	// Next: check out the proper tag/branch if it is specified, and checkout
 	if ref != "" {
-		if err := g.checkout(dst, ref); err != nil {
+		if err := g.checkout(req.Dst, ref); err != nil {
 			return err
 		}
 	}
 
 	// Lastly, download any/all submodules.
-	return g.fetchSubmodules(ctx, dst, sshKeyFile, depth)
+	return g.fetchSubmodules(ctx, req.Dst, sshKeyFile, depth)
 }
 
 // GetFile for Git doesn't support updating at this time. It will download
 // the file every time.
-func (g *GitGetter) GetFile(dst string, u *url.URL) error {
+func (g *GitGetter) GetFile(ctx context.Context, req *Request) error {
 	td, tdcloser, err := safetemp.Dir("", "getter")
 	if err != nil {
 		return err
@@ -135,22 +141,26 @@ func (g *GitGetter) GetFile(dst string, u *url.URL) error {
 
 	// Get the filename, and strip the filename from the URL so we can
 	// just get the repository directly.
-	filename := filepath.Base(u.Path)
-	u.Path = filepath.Dir(u.Path)
+	filename := filepath.Base(req.u.Path)
+	req.u.Path = filepath.Dir(req.u.Path)
+	dst := req.Dst
+	req.Dst = td
 
 	// Get the full repository
-	if err := g.Get(td, u); err != nil {
+	if err := g.Get(ctx, req); err != nil {
 		return err
 	}
 
 	// Copy the single file
-	u, err = urlhelper.Parse(fmtFileURL(filepath.Join(td, filename)))
+	req.u, err = urlhelper.Parse(fmtFileURL(filepath.Join(td, filename)))
 	if err != nil {
 		return err
 	}
 
-	fg := &FileGetter{Copy: true}
-	return fg.GetFile(dst, u)
+	fg := &FileGetter{}
+	req.Copy = true
+	req.Dst = dst
+	return fg.GetFile(ctx, req)
 }
 
 func (g *GitGetter) checkout(dst string, ref string) error {
@@ -159,14 +169,14 @@ func (g *GitGetter) checkout(dst string, ref string) error {
 	return getRunCommand(cmd)
 }
 
-func (g *GitGetter) clone(ctx context.Context, dst, sshKeyFile string, u *url.URL, depth int) error {
+func (g *GitGetter) clone(ctx context.Context, sshKeyFile string, depth int, req *Request) error {
 	args := []string{"clone"}
 
 	if depth > 0 {
 		args = append(args, "--depth", strconv.Itoa(depth))
 	}
 
-	args = append(args, u.String(), dst)
+	args = append(args, req.u.String(), req.Dst)
 	cmd := exec.CommandContext(ctx, "git", args...)
 	setupGitEnv(cmd, sshKeyFile)
 	return getRunCommand(cmd)
@@ -179,10 +189,10 @@ func (g *GitGetter) update(ctx context.Context, dst, sshKeyFile, ref string, dep
 	cmd.Dir = dst
 
 	if getRunCommand(cmd) != nil {
-		// Not a branch, switch to master. This will also catch non-existent
-		// branches, in which case we want to switch to master and then
-		// checkout the proper branch later.
-		ref = "master"
+		// Not a branch, switch to default branch. This will also catch
+		// non-existent branches, in which case we want to switch to default
+		// and then checkout the proper branch later.
+		ref = findDefaultBranch(dst)
 	}
 
 	// We have to be on a branch to pull
@@ -211,6 +221,22 @@ func (g *GitGetter) fetchSubmodules(ctx context.Context, dst, sshKeyFile string,
 	cmd.Dir = dst
 	setupGitEnv(cmd, sshKeyFile)
 	return getRunCommand(cmd)
+}
+
+// findDefaultBranch checks the repo's origin remote for its default branch
+// (generally "master"). "master" is returned if an origin default branch
+// can't be determined.
+func findDefaultBranch(dst string) string {
+	var stdoutbuf bytes.Buffer
+	cmd := exec.Command("git", "branch", "-r", "--points-at", "refs/remotes/origin/HEAD")
+	cmd.Dir = dst
+	cmd.Stdout = &stdoutbuf
+	err := cmd.Run()
+	matches := defaultBranchRegexp.FindStringSubmatch(stdoutbuf.String())
+	if err != nil || matches == nil {
+		return "master"
+	}
+	return matches[len(matches)-1]
 }
 
 // setupGitEnv sets up the environment for the given command. This is used to
