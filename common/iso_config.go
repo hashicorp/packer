@@ -29,11 +29,9 @@ import (
 // * Amazon S3
 //
 //
-// \~&gt; On windows - when referencing a local iso - if packer is running
-// without symlinking rights, the iso will be copied to the cache folder. Read
-// [Symlinks in Windows 10
-// !](https://blogs.windows.com/buildingapps/2016/12/02/symlinks-windows-10/)
-// for more info.
+// \~&gt; On Windows, using a symlink to refer to local files is currently
+// unsupported. Packer will always copy a local iso into the Packer cache
+// directory.
 //
 // Examples:
 // go-getter can guess the checksum type based on `iso_checksum` len.
