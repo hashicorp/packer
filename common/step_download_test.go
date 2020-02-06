@@ -74,7 +74,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}},
 			multistep.ActionContinue,
 			[]string{
-				// toSha1(abs(t, "./test-fixtures/root/another.txt")),
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
 			},
 		},
