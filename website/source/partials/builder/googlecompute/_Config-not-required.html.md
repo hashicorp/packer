@@ -108,7 +108,7 @@
     project's default service account unless disable_default_service_account
     is true.
     
--   `source_image_project_id` (string) - The project ID of the project containing the source image.
+-   `source_image_project_id` ([]string) - The project ID's of the project containing the source image.
     
 -   `startup_script_file` (string) - The path to a startup script to run on the VM from which the image will
     be made.

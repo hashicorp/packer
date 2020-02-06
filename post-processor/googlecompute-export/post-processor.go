@@ -145,7 +145,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		NetworkProjectId:     builderProjectId,
 		StateTimeout:         5 * time.Minute,
 		SourceImageFamily:    "debian-9-worker",
-		SourceImageProjectId: "compute-image-tools",
+		SourceImageProjectId: []string{"compute-image-tools"},
 		Subnetwork:           p.config.Subnetwork,
 		Zone:                 p.config.Zone,
 		Scopes: []string{
