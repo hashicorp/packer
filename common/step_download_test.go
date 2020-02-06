@@ -258,7 +258,7 @@ func TestStepDownload_download(t *testing.T) {
 	// Abs path with extension provided
 	step.TargetPath = "./packer"
 	step.Extension = "ova"
-	path, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	_, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
@@ -269,7 +269,7 @@ func TestStepDownload_download(t *testing.T) {
 	// Abs path with no extension provided
 	step.TargetPath = "./packer"
 	step.Extension = ""
-	path, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	_, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
