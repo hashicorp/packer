@@ -57,7 +57,7 @@ require (
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
-	github.com/google/uuid v1.0.0
+	github.com/google/uuid v1.1.1
 	github.com/gophercloud/gophercloud v0.2.0
 	github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
@@ -67,16 +67,21 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.0
+	github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
+	github.com/hashicorp/go-cty-funcs/crypto v0.0.0-20200124154056-476681ae9d62
+	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
+	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
+	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
 	github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90 // indirect
-	github.com/hashicorp/go-uuid v1.0.1
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.0.0
+	github.com/hashicorp/hcl/v2 v2.3.0
 	github.com/hashicorp/serf v0.8.2 // indirect
 	github.com/hashicorp/vault v1.1.0
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
@@ -104,9 +109,8 @@ require (
 	github.com/miekg/dns v1.1.1 // indirect
 	github.com/mitchellh/cli v1.0.0
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
-	github.com/mitchellh/go-homedir v1.0.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -147,9 +151,10 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
-	github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
+	github.com/zclconf/go-cty v1.2.1
+	github.com/zclconf/go-cty-yaml v1.0.1
 	go.opencensus.io v0.22.2 // indirect
-	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
+	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
@@ -172,5 +177,7 @@ require (
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
 
 replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653
+
+replace github.com/zclconf/go-cty => github.com/azr/go-cty v1.1.1-0.20200203143058-28fcda2fe0cc
 
 go 1.13

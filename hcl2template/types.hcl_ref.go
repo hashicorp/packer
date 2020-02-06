@@ -4,9 +4,12 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
-// reference to the source definition in configuration text file
+// HCL2Ref references to the source definition in configuration text file. It
+// is used to tell were something was wrong, - like a warning or an error -
+// long after it was parsed; allowing to give pointers as to where change/fix
+// things in a file.
 type HCL2Ref struct {
-	// reference to the source definition in configuration text file
+	// references
 	DefRange     hcl.Range
 	TypeRange    hcl.Range
 	LabelsRanges []hcl.Range

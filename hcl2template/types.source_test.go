@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -12,9 +13,10 @@ func TestParse_source(t *testing.T) {
 	tests := []parseTest{
 		{"two basic sources",
 			defaultParser,
-			parseTestArgs{"testdata/sources/basic.pkr.hcl"},
+			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
 			&PackerConfig{
-				Sources: map[SourceRef]*Source{
+				Basedir: filepath.Join("testdata", "sources"),
+				Sources: map[SourceRef]*SourceBlock{
 					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",
@@ -30,33 +32,40 @@ func TestParse_source(t *testing.T) {
 		},
 		{"untyped source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/untyped.pkr.hcl"},
-			&PackerConfig{},
+			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "sources"),
+			},
 			true, true,
 			nil,
 			false,
 		},
 		{"unnamed source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/unnamed.pkr.hcl"},
-			&PackerConfig{},
+			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "sources"),
+			},
 			true, true,
 			nil,
 			false,
 		},
 		{"inexistent source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent.pkr.hcl"},
-			&PackerConfig{},
+			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "sources"),
+			},
 			true, true,
 			nil,
 			false,
 		},
 		{"duplicate source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/duplicate.pkr.hcl"},
+			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
 			&PackerConfig{
-				Sources: map[SourceRef]*Source{
+				Basedir: filepath.Join("testdata", "sources"),
+				Sources: map[SourceRef]*SourceBlock{
 					{
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",

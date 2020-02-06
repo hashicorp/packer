@@ -7,9 +7,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// A source field in an HCL file will load into the Source type.
-//
-type Source struct {
+// SourceBlock references an HCL 'source' block.
+type SourceBlock struct {
 	// Type of source; ex: virtualbox-iso
 	Type string
 	// Given name; if any
@@ -18,8 +17,8 @@ type Source struct {
 	block *hcl.Block
 }
 
-func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
-	source := &Source{
+func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) {
+	source := &SourceBlock{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
 		block: block,
@@ -39,7 +38,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (*Source, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics, []string) {
+func (p *Parser) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := p.BuilderSchemas.Start(source.Type)
@@ -52,7 +51,7 @@ func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics, 
 		return builder, diags, nil
 	}
 
-	decoded, moreDiags := decodeHCL2Spec(source.block.Body, nil, builder)
+	decoded, moreDiags := decodeHCL2Spec(source.block.Body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags, nil
@@ -64,7 +63,7 @@ func (p *Parser) StartBuilder(source *Source) (packer.Builder, hcl.Diagnostics, 
 	return builder, diags, generatedVars
 }
 
-func (source *Source) Ref() SourceRef {
+func (source *SourceBlock) Ref() SourceRef {
 	return SourceRef{
 		Type: source.Type,
 		Name: source.Name,
@@ -79,54 +78,6 @@ type SourceRef struct {
 // NoSource is the zero value of sourceRef, representing the absense of an
 // source.
 var NoSource SourceRef
-
-func sourceRefFromAbsTraversal(t hcl.Traversal) (SourceRef, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-	if len(t) != 3 {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid " + sourceLabel + " reference",
-			Detail:   "A " + sourceLabel + " reference must have three parts separated by periods: the keyword \"" + sourceLabel + "\", the builder type name, and the source name.",
-			Subject:  t.SourceRange().Ptr(),
-		})
-		return NoSource, diags
-	}
-
-	if t.RootName() != sourceLabel {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid " + sourceLabel + " reference",
-			Detail:   "The first part of an source reference must be the keyword \"" + sourceLabel + "\".",
-			Subject:  t[0].SourceRange().Ptr(),
-		})
-		return NoSource, diags
-	}
-	btStep, ok := t[1].(hcl.TraverseAttr)
-	if !ok {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid " + sourceLabel + " reference",
-			Detail:   "The second part of an " + sourceLabel + " reference must be an identifier giving the builder type of the " + sourceLabel + ".",
-			Subject:  t[1].SourceRange().Ptr(),
-		})
-		return NoSource, diags
-	}
-	nameStep, ok := t[2].(hcl.TraverseAttr)
-	if !ok {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid " + sourceLabel + " reference",
-			Detail:   "The third part of an " + sourceLabel + " reference must be an identifier giving the name of the " + sourceLabel + ".",
-			Subject:  t[2].SourceRange().Ptr(),
-		})
-		return NoSource, diags
-	}
-
-	return SourceRef{
-		Type: btStep.Name,
-		Name: nameStep.Name,
-	}, diags
-}
 
 func (r SourceRef) String() string {
 	return fmt.Sprintf("%s.%s", r.Type, r.Name)
