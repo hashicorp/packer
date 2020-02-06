@@ -59,6 +59,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AttachSnapshot: b.config.AttachSnapshot,
 			KeepRegistered: b.config.KeepRegistered,
 		},
+		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
