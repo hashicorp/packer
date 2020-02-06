@@ -1,24 +1,24 @@
 package getter
 
-// ClientMode is the mode that the client operates in.
-type ClientMode uint
+// Mode is the mode that the client operates in.
+type Mode uint
 
 const (
-	ClientModeInvalid ClientMode = iota
+	ModeInvalid Mode = iota
 
-	// ClientModeAny downloads anything it can. In this mode, dst must
+	// ModeAny downloads anything it can. In this mode, dst must
 	// be a directory. If src is a file, it is saved into the directory
 	// with the basename of the URL. If src is a directory or archive,
 	// it is unpacked directly into dst.
-	ClientModeAny
+	ModeAny
 
-	// ClientModeFile downloads a single file. In this mode, dst must
+	// ModeFile downloads a single file. In this mode, dst must
 	// be a file path (doesn't have to exist). src must point to a single
 	// file. It is saved as dst.
-	ClientModeFile
+	ModeFile
 
-	// ClientModeDir downloads a directory. In this mode, dst must be
+	// ModeDir downloads a directory. In this mode, dst must be
 	// a directory path (doesn't have to exist). src must point to an
 	// archive or directory (such as in s3).
-	ClientModeDir
+	ModeDir
 )

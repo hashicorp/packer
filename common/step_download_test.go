@@ -16,7 +16,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer/tmp"
 )
