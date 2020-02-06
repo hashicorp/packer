@@ -2,10 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/helper/communicator"
 	"os"
 	"testing"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
