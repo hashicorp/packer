@@ -437,7 +437,7 @@ func TestCoreBuild_invalidPostProcess(t *testing.T) {
 	if err == nil {
 		t.Fatalf("bad: build should faild to invalid post processor")
 	}
-	if err.Error() != "post processor 'vsphere' is not valid to be used with builder test" {
+	if err.Error() != "post processor 'vsphere' cannot be used with builder test" {
 		t.Fatalf("wrong err message: %s", err.Error())
 	}
 }
