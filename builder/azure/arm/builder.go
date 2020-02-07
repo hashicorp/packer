@@ -403,14 +403,14 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
 
+	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
+	stateBag.Put(constants.ArmIsExistingKeyVault, false)
 	if b.config.BuildKeyVaultName != "" {
 		stateBag.Put(constants.ArmKeyVaultName, b.config.BuildKeyVaultName)
 		b.config.tmpKeyVaultName = b.config.BuildKeyVaultName
-		stateBag.Put(constants.ArmIsExistingKeyVault, false)
-	} else {
-		stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 		stateBag.Put(constants.ArmIsExistingKeyVault, true)
 	}
+
 	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
