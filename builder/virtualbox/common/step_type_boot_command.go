@@ -63,8 +63,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
-	hostIP := "10.0.2.2"
-	common.SetHTTPIP(hostIP)
+	hostIP := common.GetHTTPIP()
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:       hostIP,
 		HTTPPort:     httpPort,
