@@ -12,6 +12,10 @@
 -   `insecure_skip_tls_verify` (bool) - This allows skipping TLS
     verification of the AWS EC2 endpoint. The default is false.
     
+-   `max_retries` (int) - This is the maximum number of times an API call is retried, in the case
+    where requests are being throttled or experiencing transient failures.
+    The delay between the subsequent API calls increases exponentially.
+    
 -   `mfa_code` (string) - The MFA
     [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the
