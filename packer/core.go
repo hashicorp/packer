@@ -7,8 +7,8 @@ import (
 
 	ttmp "text/template"
 
-	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/go-version"
+	multierror "github.com/hashicorp/go-multierror"
+	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -235,7 +235,7 @@ func (c *Core) Build(n string) (Build, error) {
 			// Some Post Processors only works for specific builders
 			if !rawP.IsValidToBuilder(rawName) {
 				return nil, fmt.Errorf(
-					"post processor '%s' is not valid to be used with builder %s",
+					"post processor '%s' cannot be used with builder %s",
 					rawP.Name, rawName)
 			}
 			// -except skips post-processor & build

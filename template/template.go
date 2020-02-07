@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Template represents the parsed template that is used to configure
@@ -140,15 +140,17 @@ var validBuildersPerPostProcessor = map[string][]string{
 }
 
 func (p *PostProcessor) IsValidToBuilder(builder string) bool {
-	if builders, ok := validBuildersPerPostProcessor[p.Name]; ok {
-		for _, b := range builders {
-			if b == builder {
-				return true
-			}
-		}
-		return false
+	builders, ok := validBuildersPerPostProcessor[p.Name]
+	if !ok {
+		return true
 	}
-	return true
+
+	for _, b := range builders {
+		if b == builder {
+			return true
+		}
+	}
+	return false
 }
 
 // Provisioner represents a provisioner within the template.
