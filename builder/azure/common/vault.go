@@ -16,6 +16,15 @@ const (
 	AzureVaultApiVersion = "2016-10-01"
 )
 
+// Enables us to test steps that access this cli
+type AZVaultClientIface interface {
+	GetSecret(string, string) (*Secret, error)
+	SetSecret(string, string, string) error
+	DeletePreparer(string, string) (*http.Request, error)
+	DeleteResponder(*http.Response) (autorest.Response, error)
+	DeleteSender(*http.Request) (*http.Response, error)
+}
+
 type VaultClient struct {
 	autorest.Client
 	keyVaultEndpoint url.URL

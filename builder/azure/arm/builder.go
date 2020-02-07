@@ -238,7 +238,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
 			)
 		} else {
-			steps = append(steps, NewStepCertificateInKeyVault(azureClient, ui, &b.config))
+			steps = append(steps, NewStepCertificateInKeyVault(&azureClient.VaultClient, ui, &b.config))
 		}
 		steps = append(steps,
 			NewStepGetCertificate(azureClient, ui),
