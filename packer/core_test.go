@@ -428,6 +428,20 @@ func TestCoreBuild_postProcess(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_invalidPostProcess(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-invalid-pp.json"))
+	core := TestCore(t, config)
+
+	_, err := core.Build("test")
+	if err == nil {
+		t.Fatalf("bad: build should faild to invalid post processor")
+	}
+	if err.Error() != "post processor 'vsphere' is not valid to be used with builder test" {
+		t.Fatalf("wrong err message: %s", err.Error())
+	}
+}
+
 func TestCoreBuild_templatePath(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-template-path.json"))

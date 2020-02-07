@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-multierror"
 )
 
 // Template represents the parsed template that is used to configure
@@ -131,6 +131,24 @@ func (p *PostProcessor) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(m)
+}
+
+// If Post Processor Is not in this list it means that it's valid for all builders
+var validBuildersPerPostProcessor = map[string][]string{
+	"vsphere":          {"vmware-iso", "vmware-vmx"},
+	"vsphere-template": {"vmware-iso", "vmware-vmx"},
+}
+
+func (p *PostProcessor) IsValidToBuilder(builder string) bool {
+	if builders, ok := validBuildersPerPostProcessor[p.Name]; ok {
+		for _, b := range builders {
+			if b == builder {
+				return true
+			}
+		}
+		return false
+	}
+	return true
 }
 
 // Provisioner represents a provisioner within the template.

@@ -140,3 +140,36 @@ func TestOnlyExceptSkip(t *testing.T) {
 		}
 	}
 }
+
+func TestPostProcessor_IsValidToBuilder(t *testing.T) {
+	pp := &PostProcessor{
+		Name: "vsphere",
+	}
+
+	// valid builder vmware-iso
+	valid := pp.IsValidToBuilder("vmware-iso")
+	if !valid {
+		t.Fatalf("vsphere post processor should be valid for vmware-iso builder")
+	}
+
+	// valid builder vmware-vmx
+	valid = pp.IsValidToBuilder("vmware-vmx")
+	if !valid {
+		t.Fatalf("vsphere post processor should be valid for vmware-vmx builder")
+	}
+
+	// invalid builder test
+	valid = pp.IsValidToBuilder("test")
+	if valid {
+		t.Fatalf("vsphere post processor should be valid for test builder")
+	}
+
+	// another post processor should be valid for any builder
+	pp = &PostProcessor{
+		Name: "test",
+	}
+	valid = pp.IsValidToBuilder("test")
+	if !valid {
+		t.Fatalf("test post processor should be valid for test builder")
+	}
+}
