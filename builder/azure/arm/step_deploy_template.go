@@ -76,10 +76,6 @@ func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep
 }
 
 func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	if s.config.BuildKeyVaultName != "" {
-		// Deployment already exists
-
-	}
 	s.say("Deploying deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
