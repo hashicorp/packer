@@ -58,7 +58,12 @@ func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) m
 
 	state.Put("os.dvd.properties", dvdControllerProperties)
 
-	ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
+	if ((s.Generation == 1) && (!s.LegacyGen1BootOrder)) {
+		ui.Say("Setting boot drive to IDE and then CD drive. Use legacy_gen1_boot_order to override.")
+	} else {
+		ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
+	}
+
 	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, s.Generation, s.LegacyGen1BootOrder)
 	if err != nil {
 		err := fmt.Errorf(errorMsg, err)
