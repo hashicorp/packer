@@ -148,6 +148,13 @@ type CommonConfig struct {
 	// built. When this value is set to true, the machine will start without a
 	// console.
 	Headless bool `mapstructure:"headless" required:"false"`
+	// Over time the Hyper-V builder has been modified to change the original
+	// boot order that is used when an ISO is mounted. Hyper-V's default is to
+	// boot from the CD first, the original Hyper-V builder included code to 
+	// codify this setting when the primary ISO is mounted, that code was eventually
+	// modified to place the IDE adapter before the the CD (only in generation 1).
+	// Setting this value to true, forces the original method of operation.
+	LegacyGen1BootOrder bool `mapstructure:"legacy_gen1_boot_order" required:"false"`
 }
 
 func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) ([]error, []string) {

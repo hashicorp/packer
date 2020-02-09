@@ -111,7 +111,7 @@ type Driver interface {
 
 	MountDvdDrive(string, string, uint, uint) error
 
-	SetBootDvdDrive(string, uint, uint, uint) error
+	SetBootDvdDrive(string, uint, uint, uint, bool) error
 
 	UnmountDvdDrive(string, uint, uint) error
 

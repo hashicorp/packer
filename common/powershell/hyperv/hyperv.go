@@ -156,13 +156,21 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 	return err
 }
 
-func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
+func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint, legacyGen1BootOrder bool) error {
 
 	if generation < 2 {
-		script := `
+		var script string
+		if (legacyGen1BootOrder) {
+			script = `
+param([string]$vmName)
+Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD","IDE","LegacyNetworkAdapter","Floppy")
+`
+		} else {
+			script = `
 param([string]$vmName)
 Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("IDE","CD","LegacyNetworkAdapter","Floppy")
 `
+		}
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName)
 		return err
