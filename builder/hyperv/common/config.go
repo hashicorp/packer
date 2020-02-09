@@ -150,7 +150,7 @@ type CommonConfig struct {
 	Headless bool `mapstructure:"headless" required:"false"`
 	// Over time the Hyper-V builder has been modified to change the original
 	// boot order that is used when an ISO is mounted. Hyper-V's default is to
-	// boot from the CD first, the original Hyper-V builder included code to 
+	// boot from the CD first, the original Hyper-V builder included code to
 	// codify this setting when the primary ISO is mounted, that code was eventually
 	// modified to place the IDE adapter before the the CD (only in generation 1).
 	// Setting this value to true, forces the original method of operation.
