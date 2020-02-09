@@ -229,12 +229,13 @@ type DriverMock struct {
 	MountDvdDrive_ControllerLocation uint
 	MountDvdDrive_Err                error
 
-	SetBootDvdDrive_Called             bool
-	SetBootDvdDrive_VmName             string
-	SetBootDvdDrive_ControllerNumber   uint
-	SetBootDvdDrive_ControllerLocation uint
-	SetBootDvdDrive_Generation         uint
-	SetBootDvdDrive_Err                error
+	SetBootDvdDrive_Called              bool
+	SetBootDvdDrive_VmName              string
+	SetBootDvdDrive_ControllerNumber    uint
+	SetBootDvdDrive_ControllerLocation  uint
+	SetBootDvdDrive_Generation          uint
+	SetBootDvdDrive_LegacyGen1BootOrder bool
+	SetBootDvdDrive_Err                 error
 
 	UnmountDvdDrive_Called             bool
 	UnmountDvdDrive_VmName             string
@@ -566,12 +567,13 @@ func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber 
 }
 
 func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
-	generation uint) error {
+	generation uint, legacyGen1BootOrder bool) error {
 	d.SetBootDvdDrive_Called = true
 	d.SetBootDvdDrive_VmName = vmName
 	d.SetBootDvdDrive_ControllerNumber = controllerNumber
 	d.SetBootDvdDrive_ControllerLocation = controllerLocation
 	d.SetBootDvdDrive_Generation = generation
+	d.SetBootDvdDrive_LegacyGen1BootOrder = legacyGen1BootOrder
 	return d.SetBootDvdDrive_Err
 }
 
