@@ -160,7 +160,7 @@ func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation ui
 
 	if generation < 2 {
 		var script string
-		if (legacyGen1BootOrder) {
+		if legacyGen1BootOrder {
 			script = `
 param([string]$vmName)
 Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD","IDE","LegacyNetworkAdapter","Floppy")

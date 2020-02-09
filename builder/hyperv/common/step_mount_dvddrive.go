@@ -12,7 +12,7 @@ import (
 )
 
 type StepMountDvdDrive struct {
-	Generation uint
+	Generation          uint
 	LegacyGen1BootOrder bool
 }
 
@@ -58,7 +58,7 @@ func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) m
 
 	state.Put("os.dvd.properties", dvdControllerProperties)
 
-	if ((s.Generation == 1) && (!s.LegacyGen1BootOrder)) {
+	if (s.Generation == 1) && (!s.LegacyGen1BootOrder) {
 		ui.Say("Setting boot drive to IDE and then CD drive. Use legacy_gen1_boot_order to override.")
 	} else {
 		ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
