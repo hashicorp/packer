@@ -263,8 +263,8 @@ func (d *HypervPS4Driver) MountDvdDrive(vmName string, path string, controllerNu
 }
 
 func (d *HypervPS4Driver) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
-	generation uint) error {
-	return hyperv.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, generation)
+	generation uint, legacyGen1BootOrder bool) error {
+	return hyperv.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, generation, legacyGen1BootOrder)
 }
 
 func (d *HypervPS4Driver) UnmountDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {

@@ -242,7 +242,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&hypervcommon.StepEnableIntegrationService{},
 
 		&hypervcommon.StepMountDvdDrive{
-			Generation: b.config.Generation,
+			Generation:          b.config.Generation,
+			LegacyGen1BootOrder: b.config.LegacyGen1BootOrder,
 		},
 		&hypervcommon.StepMountFloppydrive{
 			Generation: b.config.Generation,
