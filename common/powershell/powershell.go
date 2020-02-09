@@ -259,7 +259,7 @@ func DoesVirtualMachineExist(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-return (Hyper-V\Get-VM | ?{$_.Name -eq $vmName}) -ne $null
+return (Hyper-V\Get-VM -Name $vmName | ?{$_.Name -eq $vmName}) -ne $null
 `
 
 	var ps PowerShellCmd

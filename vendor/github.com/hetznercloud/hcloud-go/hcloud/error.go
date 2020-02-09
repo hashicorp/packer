@@ -20,6 +20,8 @@ const (
 	ErrorCodeUniquenessError       ErrorCode = "uniqueness_error"        // One or more fields must be unique
 	ErrorCodeProtected             ErrorCode = "protected"               // The actions you are trying is protected
 	ErrorCodeMaintenance           ErrorCode = "maintenance"             // Cannot perform operation due to maintenance
+	ErrorCodeConflict              ErrorCode = "conflict"                // The resource has changed during the request, please retry
+	ErrorCodeServerAlreadyAttached ErrorCode = "server_already_attached" // The server is already attached to the resource
 
 	// Deprecated error codes
 

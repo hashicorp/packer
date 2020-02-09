@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,ModuleDir
+
 // This package implements a provisioner for Packer that executes
 // Converge to provision a remote machine
 
@@ -13,6 +15,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -54,7 +57,8 @@ type Provisioner struct {
 	config Config
 }
 
-// Prepare provisioner somehow. TODO: actual docs
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(
 		&p.config,
@@ -106,7 +110,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // Provision node somehow. TODO: actual docs
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Converge")
 
 	// bootstrapping

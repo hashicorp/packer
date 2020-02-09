@@ -9,8 +9,9 @@
 
 package openapi
 
+// VmActionImage struct for VmActionImage
 type VmActionImage struct {
-	Service string `json:"service,omitempty"`
+	Service     string `json:"service,omitempty"`
 	Description string `json:"description,omitempty"`
-	Name string `json:"name,omitempty"`
+	Name        string `json:"name,omitempty"`
 }

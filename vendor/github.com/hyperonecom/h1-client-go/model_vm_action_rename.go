@@ -9,6 +9,7 @@
 
 package openapi
 
+// VmActionRename struct for VmActionRename
 type VmActionRename struct {
 	Newname string `json:"newname"`
 }

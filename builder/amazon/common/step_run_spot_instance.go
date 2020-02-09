@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
@@ -19,15 +18,18 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+type EC2BlockDeviceMappingsBuilder interface {
+	BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping
+}
+
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	BlockDevices                      BlockDevices
+	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	BlockDurationMinutes              int64
 	Debug                             bool
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
-	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	SourceAMI                         string
@@ -39,12 +41,32 @@ type StepRunSpotInstance struct {
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
+	NoEphemeral                       bool
 
 	instanceId string
 }
 
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	state multistep.StateBag, marketOptions *ec2.LaunchTemplateInstanceMarketOptionsRequest) *ec2.RequestLaunchTemplateData {
+	blockDeviceMappings := s.LaunchMappings.BuildEC2BlockDeviceMappings()
+	if s.NoEphemeral {
+		// This is only relevant for windows guests. Ephemeral drives by
+		// default are assigned to drive names xvdca-xvdcz.
+		// When vms are launched from the AWS console, they're automatically
+		// removed from the block devices if the user hasn't said to use them,
+		// but the SDK does not perform this cleanup. The following code just
+		// manually removes the ephemeral drives from the mapping so that they
+		// don't clutter up console views and cause confusion.
+		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
+		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
+		for _, letter := range DefaultEphemeralDeviceLetters {
+			bd := &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("xvdc" + string(letter)),
+				NoDevice:   aws.String(""),
+			}
+			blockDeviceMappings = append(blockDeviceMappings, bd)
+		}
+	}
 	// Convert the BlockDeviceMapping into a
 	// LaunchTemplateBlockDeviceMappingRequest. These structs are identical,
 	// except for the EBS field -- on one, that field contains a
@@ -53,7 +75,6 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	// LaunchTemplateEbsBlockDeviceRequest structs are themselves
 	// identical except for the struct's name, so you can cast one directly
 	// into the other.
-	blockDeviceMappings := s.BlockDevices.BuildLaunchDevices()
 	var launchMappingRequests []*ec2.LaunchTemplateBlockDeviceMappingRequest
 	for _, mapping := range blockDeviceMappings {
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{
@@ -65,12 +86,14 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 		launchMappingRequests = append(launchMappingRequests, launchRequest)
 	}
 
+	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
+
 	// Create a launch template.
 	templateData := ec2.RequestLaunchTemplateData{
 		BlockDeviceMappings:   launchMappingRequests,
 		DisableApiTermination: aws.Bool(false),
 		EbsOptimized:          &s.EbsOptimized,
-		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: &s.IamInstanceProfile},
+		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: iamInstanceProfile},
 		ImageId:               &s.SourceAMI,
 		InstanceMarketOptions: marketOptions,
 		Placement: &ec2.LaunchTemplatePlacementRequest{
@@ -260,24 +283,58 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// Actually send the spot connection request.
 	err = req.Send()
 	if err != nil {
-		err := fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
+		if createOutput.FleetId != nil {
+			err = fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
+		} else {
+			err = fmt.Errorf("Error waiting for fleet request: %s", err)
+		}
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if len(createOutput.Errors) > 0 {
-		errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
-		for _, outErr := range createOutput.Errors {
-			errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+	if len(createOutput.Instances) == 0 {
+		// We can end up with errors because one of the allowed availability
+		// zones doesn't have one of the allowed instance types; as long as
+		// an instance is launched, these errors aren't important.
+		if len(createOutput.Errors) > 0 {
+			errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
+			for _, outErr := range createOutput.Errors {
+				errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+			}
+			err = fmt.Errorf(errString)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
-		err = fmt.Errorf(errString)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
 	}
 
 	instanceId = *createOutput.Instances[0].InstanceIds[0]
+	// Set the instance ID so that the cleanup works properly
+	s.instanceId = instanceId
+
+	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
+
+	// Get information about the created instance
+	var describeOutput *ec2.DescribeInstancesOutput
+	err = retry.Config{
+		Tries:      11,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		describeOutput, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{aws.String(instanceId)},
+		})
+		return err
+	})
+	if err != nil || len(describeOutput.Reservations) == 0 || len(describeOutput.Reservations[0].Instances) == 0 {
+		err := fmt.Errorf("Error finding source instance.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	instance := describeOutput.Reservations[0].Instances[0]
+
 	// Tag the spot instance request (not the eventual spot instance)
 	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
@@ -289,30 +346,8 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	if len(spotTags) > 0 && s.SpotTags.IsSet() {
 		spotTags.Report(ui)
-
 		// Use the instance ID to find out the SIR, so that we can tag the spot
 		// request associated with this instance.
-
-		err = retry.Config{
-			Tries:       11,
-			ShouldRetry: func(error) bool { return true },
-			RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			_, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-				InstanceIds: []*string{aws.String(instanceId)},
-			})
-			return err
-		})
-		if err != nil {
-			err := fmt.Errorf("Error describing instance for spot request tags: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		describeOutput, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-			InstanceIds: []*string{aws.String(instanceId)},
-		})
 		sir := describeOutput.Reservations[0].Instances[0].SpotInstanceRequestId
 
 		// Apply tags to the spot request.
@@ -335,34 +370,13 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	// Set the instance ID so that the cleanup works properly
-	s.instanceId = instanceId
-
-	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
-
-	r, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{aws.String(instanceId)},
-	})
-	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
-		err := fmt.Errorf("Error finding source instance.")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	instance := r.Reservations[0].Instances[0]
-
 	// Retry creating tags for about 2.5 minutes
-	err = retry.Config{
-		Tries: 11,
-		ShouldRetry: func(error) bool {
-			if awsErr, ok := err.(awserr.Error); ok {
-				switch awsErr.Code() {
-				case "InvalidInstanceID.NotFound":
-					return true
-				}
-			}
-			return false
-		},
+	err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
+		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			return true
+		}
+		return false
+	},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
@@ -427,6 +441,9 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.InstanceId)
 
 	return multistep.ActionContinue
 }

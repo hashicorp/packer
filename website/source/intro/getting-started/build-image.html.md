@@ -106,12 +106,6 @@ Template validated successfully.
 
 Next, let's build the image from this template.
 
-An astute reader may notice that we said earlier we'd be building an image with
-Redis pre-installed, and yet the template we made doesn't reference Redis
-anywhere. In fact, this part of the documentation will only cover making a first
-basic, non-provisioned image. The [next section on provisioning](./provision.html) will cover
-installing Redis.
-
 ## Your First Image
 
 With a properly validated template, it is time to build your first image. This
@@ -235,7 +229,7 @@ Now save the following text in a file named `firstrun.json`:
             "access_key": "{{user `aws_access_key`}}",
             "ami_name": "packer-linux-aws-demo-{{timestamp}}",
             "instance_type": "t2.micro",
-            "region": "us-east-1",
+            "region": "{{user `region`}}",
             "secret_key": "{{user `aws_secret_key`}}",
             "source_ami_filter": {
               "filters": {
@@ -372,7 +366,7 @@ for more info about what's going on behind the scenes here.
 ```powershell
 <powershell>
 # Set administrator password
-net user Administrator SuperS3cr3t!
+net user Administrator SuperS3cr3t!!!!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
 # First, make sure WinRM can't be connected to
@@ -381,6 +375,14 @@ netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" n
 # Delete any existing WinRM listeners
 winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
 winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Disable group policies which block basic authentication and unencrypted login
+
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowUnencryptedTraffic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowUnencryptedTraffic -Value 1
+
 
 # Create a new WinRM listener and configure
 winrm create winrm/config/listener?Address=*+Transport=HTTP
@@ -512,7 +514,7 @@ customize and control the build process:
       "user_data_file": "./bootstrap_win.txt",
       "communicator": "winrm",
       "winrm_username": "Administrator",
-      "winrm_password": "SuperS3cr3t!"
+      "winrm_password": "SuperS3cr3t!!!!"
     }
   ],
   "provisioners": [

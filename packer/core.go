@@ -54,14 +54,36 @@ type PostProcessorFunc func(name string) (PostProcessor, error)
 // The function type used to lookup Provisioner implementations.
 type ProvisionerFunc func(name string) (Provisioner, error)
 
+type BasicStore interface {
+	Has(name string) bool
+	List() (names []string)
+}
+
+type BuilderStore interface {
+	BasicStore
+	Start(name string) (Builder, error)
+}
+
+type ProvisionerStore interface {
+	BasicStore
+	Start(name string) (Provisioner, error)
+}
+
+type PostProcessorStore interface {
+	BasicStore
+	Start(name string) (PostProcessor, error)
+}
+
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
 type ComponentFinder struct {
-	Builder       BuilderFunc
-	Hook          HookFunc
-	PostProcessor PostProcessorFunc
-	Provisioner   ProvisionerFunc
+	Hook HookFunc
+
+	// For HCL2
+	BuilderStore       BuilderStore
+	ProvisionerStore   ProvisionerStore
+	PostProcessorStore PostProcessorStore
 }
 
 // NewCore creates a new Core.
@@ -112,6 +134,49 @@ func (c *Core) BuildNames() []string {
 	return r
 }
 
+func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (CoreBuildProvisioner, error) {
+	// Get the provisioner
+	cbp := CoreBuildProvisioner{}
+	provisioner, err := c.components.ProvisionerStore.Start(rawP.Type)
+	if err != nil {
+		return cbp, fmt.Errorf(
+			"error initializing provisioner '%s': %s",
+			rawP.Type, err)
+	}
+	if provisioner == nil {
+		return cbp, fmt.Errorf(
+			"provisioner type not found: %s", rawP.Type)
+	}
+
+	// Get the configuration
+	config := make([]interface{}, 1, 2)
+	config[0] = rawP.Config
+	if rawP.Override != nil {
+		if override, ok := rawP.Override[rawName]; ok {
+			config = append(config, override)
+		}
+	}
+	// If we're pausing, we wrap the provisioner in a special pauser.
+	if rawP.PauseBefore != 0 {
+		provisioner = &PausedProvisioner{
+			PauseBefore: rawP.PauseBefore,
+			Provisioner: provisioner,
+		}
+	} else if rawP.Timeout != 0 {
+		provisioner = &TimeoutProvisioner{
+			Timeout:     rawP.Timeout,
+			Provisioner: provisioner,
+		}
+	}
+	cbp = CoreBuildProvisioner{
+		PType:       rawP.Type,
+		Provisioner: provisioner,
+		config:      config,
+	}
+
+	return cbp, nil
+}
+
 // Build returns the Build object for the given name.
 func (c *Core) Build(n string) (Build, error) {
 	// Setup the builder
@@ -119,7 +184,7 @@ func (c *Core) Build(n string) (Build, error) {
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
-	builder, err := c.components.Builder(configBuilder.Type)
+	builder, err := c.components.BuilderStore.Start(configBuilder.Type)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error initializing builder '%s': %s",
@@ -134,58 +199,35 @@ func (c *Core) Build(n string) (Build, error) {
 	rawName := configBuilder.Name
 
 	// Setup the provisioners for this build
-	provisioners := make([]coreBuildProvisioner, 0, len(c.Template.Provisioners))
+	provisioners := make([]CoreBuildProvisioner, 0, len(c.Template.Provisioners))
 	for _, rawP := range c.Template.Provisioners {
 		// If we're skipping this, then ignore it
 		if rawP.OnlyExcept.Skip(rawName) {
 			continue
 		}
-
-		// Get the provisioner
-		provisioner, err := c.components.Provisioner(rawP.Type)
+		cbp, err := c.generateCoreBuildProvisioner(rawP, rawName)
 		if err != nil {
-			return nil, fmt.Errorf(
-				"error initializing provisioner '%s': %s",
-				rawP.Type, err)
-		}
-		if provisioner == nil {
-			return nil, fmt.Errorf(
-				"provisioner type not found: %s", rawP.Type)
+			return nil, err
 		}
 
-		// Get the configuration
-		config := make([]interface{}, 1, 2)
-		config[0] = rawP.Config
-		if rawP.Override != nil {
-			if override, ok := rawP.Override[rawName]; ok {
-				config = append(config, override)
-			}
-		}
+		provisioners = append(provisioners, cbp)
+	}
 
-		// If we're pausing, we wrap the provisioner in a special pauser.
-		if rawP.PauseBefore > 0 {
-			provisioner = &PausedProvisioner{
-				PauseBefore: rawP.PauseBefore,
-				Provisioner: provisioner,
-			}
-		} else if rawP.Timeout > 0 {
-			provisioner = &TimeoutProvisioner{
-				Timeout:     rawP.Timeout,
-				Provisioner: provisioner,
-			}
+	var cleanupProvisioner CoreBuildProvisioner
+	if c.Template.CleanupProvisioner != nil {
+		// This is a special instantiation of the shell-local provisioner that
+		// is only run on error at end of provisioning step before other step
+		// cleanup occurs.
+		cleanupProvisioner, err = c.generateCoreBuildProvisioner(c.Template.CleanupProvisioner, rawName)
+		if err != nil {
+			return nil, err
 		}
-
-		provisioners = append(provisioners, coreBuildProvisioner{
-			pType:       rawP.Type,
-			provisioner: provisioner,
-			config:      config,
-		})
 	}
 
 	// Setup the post-processors
-	postProcessors := make([][]coreBuildPostProcessor, 0, len(c.Template.PostProcessors))
+	postProcessors := make([][]CoreBuildPostProcessor, 0, len(c.Template.PostProcessors))
 	for _, rawPs := range c.Template.PostProcessors {
-		current := make([]coreBuildPostProcessor, 0, len(rawPs))
+		current := make([]CoreBuildPostProcessor, 0, len(rawPs))
 		for _, rawP := range rawPs {
 			if rawP.Skip(rawName) {
 				continue
@@ -202,7 +244,7 @@ func (c *Core) Build(n string) (Build, error) {
 			}
 
 			// Get the post-processor
-			postProcessor, err := c.components.PostProcessor(rawP.Type)
+			postProcessor, err := c.components.PostProcessorStore.Start(rawP.Type)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"error initializing post-processor '%s': %s",
@@ -213,9 +255,10 @@ func (c *Core) Build(n string) (Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
-			current = append(current, coreBuildPostProcessor{
-				processor:         postProcessor,
-				processorType:     rawP.Type,
+			current = append(current, CoreBuildPostProcessor{
+				PostProcessor:     postProcessor,
+				PType:             rawP.Type,
+				PName:             rawP.Name,
 				config:            rawP.Config,
 				keepInputArtifact: rawP.KeepInputArtifact,
 			})
@@ -231,15 +274,16 @@ func (c *Core) Build(n string) (Build, error) {
 
 	// TODO hooks one day
 
-	return &coreBuild{
-		name:           n,
-		builder:        builder,
-		builderConfig:  configBuilder.Config,
-		builderType:    configBuilder.Type,
-		postProcessors: postProcessors,
-		provisioners:   provisioners,
-		templatePath:   c.Template.Path,
-		variables:      c.variables,
+	return &CoreBuild{
+		Type:               n,
+		Builder:            builder,
+		BuilderConfig:      configBuilder.Config,
+		BuilderType:        configBuilder.Type,
+		PostProcessors:     postProcessors,
+		Provisioners:       provisioners,
+		CleanupProvisioner: cleanupProvisioner,
+		TemplatePath:       c.Template.Path,
+		Variables:          c.variables,
 	}, nil
 }
 
@@ -353,12 +397,17 @@ func (c *Core) init() error {
 		allVariables[k] = v
 	}
 
+	// Regex to exclude any build function variable or template variable
+	// from interpolating earlier
+	// E.g.: {{ .HTTPIP }}  won't interpolate now
+	renderFilter := "{{(\\s|)\\.(.*?)(\\s|)}}"
+
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
 		// First, loop over the variables in the template
 		for k, v := range allVariables {
 			// Interpolate the default
-			renderedV, err := interpolate.Render(v, ctx)
+			renderedV, err := interpolate.RenderRegex(v, ctx, renderFilter)
 			switch err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
@@ -386,7 +435,7 @@ func (c *Core) init() error {
 		}
 	}
 
-	if (changed == false) && (shouldRetry == true) {
+	if !changed && shouldRetry {
 		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
 			"the variable you're referencing has been defined; Packer treats "+
 			"all variables used to interpolate other user varaibles as "+
@@ -396,11 +445,6 @@ func (c *Core) init() error {
 	for _, v := range c.Template.SensitiveVariables {
 		secret := ctx.UserVariables[v.Key]
 		c.secrets = append(c.secrets, secret)
-	}
-
-	// Interpolate the push configuration
-	if _, err := interpolate.RenderInterface(&c.Template.Push, c.Context()); err != nil {
-		return fmt.Errorf("Error interpolating 'push': %s", err)
 	}
 
 	return nil

@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package vsphere_template
 
 import (
@@ -8,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -34,6 +37,7 @@ type Config struct {
 	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
 	SnapshotName        string `mapstructure:"snapshot_name"`
 	SnapshotDescription string `mapstructure:"snapshot_description"`
+	ReregisterVM        bool   `mapstructure:"reregister_vm" default:"true"`
 
 	ctx interpolate.Context
 }
@@ -42,6 +46,8 @@ type PostProcessor struct {
 	config Config
 	url    *url.URL
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -130,7 +136,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			Folder: p.config.Folder,
 		},
 		NewStepCreateSnapshot(artifact, p),
-		NewStepMarkAsTemplate(artifact),
+		NewStepMarkAsTemplate(artifact, p),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(ctx, state)

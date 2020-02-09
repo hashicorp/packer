@@ -3,12 +3,14 @@ package proxmox
 // inspired by https://github.com/Telmate/vagrant-proxmox/blob/master/lib/vagrant-proxmox/proxmox/connection.rb
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"regexp"
@@ -31,14 +33,17 @@ type Client struct {
 	ApiUrl   string
 	Username string
 	Password string
+	Otp      string
 }
 
 // VmRef - virtual machine ref parts
 // map[type:qemu node:proxmox1-xx id:qemu/132 diskread:5.57424738e+08 disk:0 netin:5.9297450593e+10 mem:3.3235968e+09 uptime:1.4567097e+07 vmid:132 template:0 maxcpu:2 netout:6.053310416e+09 maxdisk:3.4359738368e+10 maxmem:8.592031744e+09 diskwrite:1.49663619584e+12 status:running cpu:0.00386980694947209 name:appt-app1-dev.xxx.xx]
 type VmRef struct {
-	vmId   int
-	node   string
-	vmType string
+	vmId    int
+	node    string
+	pool    string
+	vmType  string
+	haState string
 }
 
 func (vmr *VmRef) SetNode(node string) {
@@ -46,9 +51,17 @@ func (vmr *VmRef) SetNode(node string) {
 	return
 }
 
+func (vmr *VmRef) SetPool(pool string) {
+	vmr.pool = pool
+}
+
 func (vmr *VmRef) SetVmType(vmType string) {
 	vmr.vmType = vmType
 	return
+}
+
+func (vmr *VmRef) GetVmType() string {
+	return vmr.vmType
 }
 
 func (vmr *VmRef) VmId() int {
@@ -57,6 +70,14 @@ func (vmr *VmRef) VmId() int {
 
 func (vmr *VmRef) Node() string {
 	return vmr.node
+}
+
+func (vmr *VmRef) Pool() string {
+	return vmr.pool
+}
+
+func (vmr *VmRef) HaState() string {
+	return vmr.haState
 }
 
 func NewVmRef(vmId int) (vmr *VmRef) {
@@ -73,10 +94,11 @@ func NewClient(apiUrl string, hclient *http.Client, tls *tls.Config) (client *Cl
 	return client, err
 }
 
-func (c *Client) Login(username string, password string) (err error) {
+func (c *Client) Login(username string, password string, otp string) (err error) {
 	c.Username = username
 	c.Password = password
-	return c.session.Login(username, password)
+	c.Otp = otp
+	return c.session.Login(username, password, otp)
 }
 
 func (c *Client) GetJsonRetryable(url string, data *map[string]interface{}, tries int) error {
@@ -120,6 +142,13 @@ func (c *Client) GetVmInfo(vmr *VmRef) (vmInfo map[string]interface{}, err error
 			vmInfo = vm
 			vmr.node = vmInfo["node"].(string)
 			vmr.vmType = vmInfo["type"].(string)
+			vmr.pool = ""
+			if vmInfo["pool"] != nil {
+				vmr.pool = vmInfo["pool"].(string)
+			}
+			if vmInfo["hastate"] != nil {
+				vmr.haState = vmInfo["hastate"].(string)
+			}
 			return
 		}
 	}
@@ -135,6 +164,13 @@ func (c *Client) GetVmRefByName(vmName string) (vmr *VmRef, err error) {
 			vmr = NewVmRef(int(vm["vmid"].(float64)))
 			vmr.node = vm["node"].(string)
 			vmr.vmType = vm["type"].(string)
+			vmr.pool = ""
+			if vm["pool"] != nil {
+				vmr.pool = vm["pool"].(string)
+			}
+			if vm["hastate"] != nil {
+				vmr.haState = vm["hastate"].(string)
+			}
 			return
 		}
 	}
@@ -275,8 +311,24 @@ func (c *Client) MonitorCmd(vmr *VmRef, command string) (monitorRes map[string]i
 	reqbody := ParamsToBody(map[string]interface{}{"command": command})
 	url := fmt.Sprintf("/nodes/%s/%s/%d/monitor", vmr.node, vmr.vmType, vmr.vmId)
 	resp, err := c.session.Post(url, nil, nil, &reqbody)
+	if err != nil {
+		return nil, err
+	}
 	monitorRes, err = ResponseJSON(resp)
 	return
+}
+
+func (c *Client) Sendkey(vmr *VmRef, qmKey string) error {
+	err := c.CheckVmRef(vmr)
+	if err != nil {
+		return err
+	}
+	reqbody := ParamsToBody(map[string]interface{}{"key": qmKey})
+	url := fmt.Sprintf("/nodes/%s/%s/%d/sendkey", vmr.node, vmr.vmType, vmr.vmId)
+	// No return, even for errors: https://bugzilla.proxmox.com/show_bug.cgi?id=2275
+	_, err = c.session.Put(url, nil, nil, &reqbody)
+
+	return err
 }
 
 // WaitForCompletion - poll the API for task completion
@@ -372,6 +424,23 @@ func (c *Client) DeleteVm(vmr *VmRef) (exitStatus string, err error) {
 	if err != nil {
 		return "", err
 	}
+
+	//Remove HA if required
+	if vmr.haState != "" {
+		url := fmt.Sprintf("/cluster/ha/resources/%d", vmr.vmId)
+		resp, err := c.session.Delete(url, nil, nil)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return "", err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
 	url := fmt.Sprintf("/nodes/%s/%s/%d", vmr.node, vmr.vmType, vmr.vmId)
 	var taskResponse map[string]interface{}
 	_, err = c.session.RequestJSON("DELETE", url, nil, nil, nil, &taskResponse)
@@ -412,6 +481,29 @@ func (c *Client) CreateQemuVm(node string, vmParams map[string]interface{}) (exi
 			return "", deleteDisksErr
 		}
 	}
+
+	return
+}
+
+func (c *Client) CreateLxcContainer(node string, vmParams map[string]interface{}) (exitStatus string, err error) {
+	reqbody := ParamsToBody(vmParams)
+	url := fmt.Sprintf("/nodes/%s/lxc", node)
+	var resp *http.Response
+	resp, err = c.session.Post(url, nil, nil, &reqbody)
+	defer resp.Body.Close()
+	if err != nil {
+		// This might not work if we never got a body. We'll ignore errors in trying to read,
+		// but extract the body if possible to give any error information back in the exitStatus
+		b, _ := ioutil.ReadAll(resp.Body)
+		exitStatus = string(b)
+		return exitStatus, err
+	}
+
+	taskResponse, err := ResponseJSON(resp)
+	if err != nil {
+		return "", err
+	}
+	exitStatus, err = c.WaitForCompletion(taskResponse)
 
 	return
 }
@@ -457,6 +549,37 @@ func (c *Client) SetVmConfig(vmr *VmRef, vmParams map[string]interface{}) (exitS
 	return
 }
 
+// SetLxcConfig - send config options
+func (c *Client) SetLxcConfig(vmr *VmRef, vmParams map[string]interface{}) (exitStatus interface{}, err error) {
+	reqbody := ParamsToBody(vmParams)
+	url := fmt.Sprintf("/nodes/%s/%s/%d/config", vmr.node, vmr.vmType, vmr.vmId)
+	resp, err := c.session.Put(url, nil, nil, &reqbody)
+	if err == nil {
+		taskResponse, err := ResponseJSON(resp)
+		if err != nil {
+			return nil, err
+		}
+		exitStatus, err = c.WaitForCompletion(taskResponse)
+	}
+	return
+}
+
+// MigrateNode - Migrate a VM
+func (c *Client) MigrateNode(vmr *VmRef, newTargetNode string, online bool) (exitStatus interface{}, err error) {
+	reqbody := ParamsToBody(map[string]interface{}{"target": newTargetNode, "online": online})
+	url := fmt.Sprintf("/nodes/%s/%s/%d/migrate", vmr.node, vmr.vmType, vmr.vmId)
+	resp, err := c.session.Post(url, nil, nil, &reqbody)
+	if err == nil {
+		taskResponse, err := ResponseJSON(resp)
+		if err != nil {
+			return nil, err
+		}
+		exitStatus, err = c.WaitForCompletion(taskResponse)
+		return exitStatus, err
+	}
+	return nil, err
+}
+
 func (c *Client) ResizeQemuDisk(vmr *VmRef, disk string, moreSizeGB int) (exitStatus interface{}, err error) {
 	// PUT
 	//disk:virtio0
@@ -468,6 +591,23 @@ func (c *Client) ResizeQemuDisk(vmr *VmRef, disk string, moreSizeGB int) (exitSt
 	reqbody := ParamsToBody(map[string]interface{}{"disk": disk, "size": size})
 	url := fmt.Sprintf("/nodes/%s/%s/%d/resize", vmr.node, vmr.vmType, vmr.vmId)
 	resp, err := c.session.Put(url, nil, nil, &reqbody)
+	if err == nil {
+		taskResponse, err := ResponseJSON(resp)
+		if err != nil {
+			return nil, err
+		}
+		exitStatus, err = c.WaitForCompletion(taskResponse)
+	}
+	return
+}
+
+func (c *Client) MoveQemuDisk(vmr *VmRef, disk string, storage string) (exitStatus interface{}, err error) {
+	if disk == "" {
+		disk = "virtio0"
+	}
+	reqbody := ParamsToBody(map[string]interface{}{"disk": disk, "storage": storage, "delete": true})
+	url := fmt.Sprintf("/nodes/%s/%s/%d/move_disk", vmr.node, vmr.vmType, vmr.vmId)
+	resp, err := c.session.Post(url, nil, nil, &reqbody)
 	if err == nil {
 		taskResponse, err := ResponseJSON(resp)
 		if err != nil {
@@ -581,6 +721,65 @@ func (c *Client) DeleteVMDisks(
 	return nil
 }
 
+func (c *Client) Upload(node string, storage string, contentType string, filename string, file io.Reader) error {
+	body, mimetype, err := createUploadBody(contentType, filename, file)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%s/nodes/%s/storage/%s/upload", c.session.ApiUrl, node, storage)
+	req, err := c.session.NewRequest(http.MethodPost, url, nil, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", mimetype)
+	req.Header.Add("Accept", "application/json")
+
+	resp, err := c.session.Do(req)
+	if err != nil {
+		return err
+	}
+
+	taskResponse, err := ResponseJSON(resp)
+	if err != nil {
+		return err
+	}
+	exitStatus, err := c.WaitForCompletion(taskResponse)
+	if err != nil {
+		return err
+	}
+	if exitStatus != exitStatusSuccess {
+		return fmt.Errorf("Moving file to destination failed: %v", exitStatus)
+	}
+	return nil
+}
+
+func createUploadBody(contentType string, filename string, r io.Reader) (io.Reader, string, error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+
+	err := w.WriteField("content", contentType)
+	if err != nil {
+		return nil, "", err
+	}
+
+	fw, err := w.CreateFormFile("filename", filename)
+	if err != nil {
+		return nil, "", err
+	}
+	_, err = io.Copy(fw, r)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = w.Close()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &buf, w.FormDataContentType(), nil
+}
+
 // getStorageAndVolumeName - Extract disk storage and disk volume, since disk name is saved
 // in Proxmox with its storage.
 func getStorageAndVolumeName(
@@ -598,4 +797,110 @@ func getStorageAndVolumeName(
 	}
 
 	return storageName, volumeName
+}
+
+func (c *Client) UpdateVMPool(vmr *VmRef, pool string) (exitStatus interface{}, err error) {
+	// Same pool
+	if vmr.pool == pool {
+		return
+	}
+
+	// Remove from old pool
+	if vmr.pool != "" {
+		paramMap := map[string]interface{}{
+			"vms":    vmr.vmId,
+			"delete": 1,
+		}
+		reqbody := ParamsToBody(paramMap)
+		url := fmt.Sprintf("/pools/%s", vmr.pool)
+		resp, err := c.session.Put(url, nil, nil, &reqbody)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	// Add to the new pool
+	if pool != "" {
+		paramMap := map[string]interface{}{
+			"vms": vmr.vmId,
+		}
+		reqbody := ParamsToBody(paramMap)
+		url := fmt.Sprintf("/pools/%s", pool)
+		resp, err := c.session.Put(url, nil, nil, &reqbody)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+		} else {
+			return nil, err
+		}
+	}
+	return
+}
+
+func (c *Client) UpdateVMHA(vmr *VmRef, haState string) (exitStatus interface{}, err error) {
+	// Same hastate
+	if vmr.haState == haState {
+		return
+	}
+
+	//Remove HA
+	if haState == "" {
+		url := fmt.Sprintf("/cluster/ha/resources/%d", vmr.vmId)
+		resp, err := c.session.Delete(url, nil, nil)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+		}
+		return nil, err
+	}
+
+	//Activate HA
+	if vmr.haState == "" {
+		paramMap := map[string]interface{}{
+			"sid": vmr.vmId,
+		}
+		reqbody := ParamsToBody(paramMap)
+		resp, err := c.session.Post("/cluster/ha/resources", nil, nil, &reqbody)
+		if err == nil {
+			taskResponse, err := ResponseJSON(resp)
+			if err != nil {
+				return nil, err
+			}
+			exitStatus, err = c.WaitForCompletion(taskResponse)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	//Set wanted state
+	paramMap := map[string]interface{}{
+		"state": haState,
+	}
+	reqbody := ParamsToBody(paramMap)
+	url := fmt.Sprintf("/cluster/ha/resources/%d", vmr.vmId)
+	resp, err := c.session.Put(url, nil, nil, &reqbody)
+	if err == nil {
+		taskResponse, err := ResponseJSON(resp)
+		if err != nil {
+			return nil, err
+		}
+		exitStatus, err = c.WaitForCompletion(taskResponse)
+	}
+
+	return
 }

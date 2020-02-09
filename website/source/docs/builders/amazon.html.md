@@ -202,12 +202,63 @@ work, but specifics will depend on your use-case.
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
-    "Action": "iam:PassRole",
+    "Action": [
+        "iam:PassRole",
+        "iam:GetInstanceProfile"
+    ],
     "Resource": [
         "*"
     ]
 }
 ```
+
+In case when you're creating a temporary instance profile you will require to have following
+IAM policies.
+
+``` json
+{
+    "Sid": "PackerIAMCreateRole",
+    "Effect": "Allow",
+    "Action": [
+        "iam:PassRole",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:GetRole",
+        "iam:GetInstanceProfile",
+        "iam:DeleteRolePolicy",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:PutRolePolicy",
+        "iam:AddRoleToInstanceProfile"
+    ],
+    "Resource": "*"
+}
+```
+
+In cases where you are using a KMS key for encryption, your key will need the
+following policies at a minimum:
+
+```json
+{
+    "Sid": "Allow use of the key",
+    "Effect": "Allow",
+    "Action": [
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*"
+    ],
+    "Resource": "*"
+}
+```
+
+If you are using a key provided by a different account than the one you are
+using to run the Packer build, your key will also need
+
+``` json
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+```
+
 
 ### Checking that system time is current
 
@@ -223,20 +274,47 @@ If you suspect your system's date is wrong, you can compare it against
 Linux/OS X, you can run the `date` command to get the current time. If you're
 on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
 
-### `exceeded wait attempts` while waiting for tasks to complete
+### ResourceNotReady Error
+This error generally appears as either `ResourceNotReady: exceeded wait
+attempts` or `ResourceNotReady: failed waiting for successful resource state`.
 
-We use the AWS SDK's built-in waiters to wait for longer-running tasks to
-complete. These waiters have default delays between queries and maximum number
-of queries that don't always work for our users.
+This opaque error gets returned from AWS's API for a number of reasons,
+generally during image copy/encryption. Possible reasons for the error include:
 
-If you find that you are being rate-limited or have exceeded your max wait
-attempts, you can override the defaults by setting the following packer
-environment variables (note that these will apply to all aws tasks that we have
-to wait for):
+- You aren't waiting long enough. This is where you'll see the `exceeded wait
+  attempts` variety of this error message:
+  We use the AWS SDK's built-in waiters to wait for longer-running tasks to
+    complete. These waiters have default delays between queries and maximum
+    number of queries that don't always work for our users.
 
-`AWS_MAX_ATTEMPTS` - This is how many times to re-send a status update request.
-Excepting tasks that we know can take an extremely long time, this defaults to
-40tries.
+    If you find that you are being rate-limited or have exceeded your max wait
+    attempts, you can override the defaults by setting the following packer
+    environment variables (note that these will apply to all AWS tasks that we
+    have to wait for):
 
-`AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
-requests. Generally defaults to 2 or 5 seconds, depending on the task.
+    - `AWS_MAX_ATTEMPTS` - This is how many times to re-send a status update
+    request. Excepting tasks that we know can take an extremely long time, this
+    defaults to 40 tries.
+
+    - `AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
+    requests. Generally defaults to 2 or 5 seconds, depending on the task.
+
+- You are using short-lived credentials that expired during the build. If this
+    is the problem, you may also see `RequestExpired: Request has expired.`
+    errors displayed in the Packer output:
+
+    - If you are using STS credentials, make sure that they expire only after the
+    build has completed
+
+    - If you are chaining roles, make sure your build doesn't last more than an
+    hour, since when you chain roles the maximum length of time your credentials
+    will last is an hour:
+    https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html
+
+- Something is wrong with your KMS key. This is where you'll see the
+  `ResourceNotReady: failed waiting for successful resource state` variety of
+  this error message. Issues we've seen include:
+    - Your KMS key is invalid, possibly because of a typo
+    - Your KMS key is valid but does not have the necessary permissions (see
+      above for the necessary key permissions)
+    - Your KMS key is valid, but not in the region you've told us to use it in.

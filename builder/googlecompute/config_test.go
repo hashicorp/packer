@@ -157,6 +157,24 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			// underscore is not allowed
+			"image_name",
+			"foo_bar",
+			true,
+		},
+		{
+			// too long
+			"image_name",
+			"foobar123xyz_abc-456-one-two_three_five_nine_seventeen_eleventy-seven",
+			true,
+		},
+		{
+			// starts with non-alphabetic character
+			"image_name",
+			"1boohoo",
+			true,
+		},
+		{
 			"image_encryption_key",
 			map[string]string{"kmsKeyName": "foo"},
 			false,
@@ -224,7 +242,8 @@ func TestConfigPrepare(t *testing.T) {
 			raw[tc.Key] = tc.Value
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, tc.Key)
@@ -284,7 +303,8 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 			}
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
@@ -334,7 +354,8 @@ func TestConfigPrepareServiceAccount(t *testing.T) {
 			}
 		}
 
-		_, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
@@ -353,7 +374,8 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 		"zone":                "us-central1-a",
 	}
 
-	_, _, errs := NewConfig(config)
+	var c Config
+	_, errs := c.Prepare(config)
 
 	if errs == nil || !strings.Contains(errs.Error(), "startup_script_file") {
 		t.Fatalf("should error: startup_script_file")
@@ -380,10 +402,11 @@ func TestConfigDefaults(t *testing.T) {
 		raw, tempfile := testConfig(t)
 		defer os.Remove(tempfile)
 
-		c, warns, errs := NewConfig(raw)
+		var c Config
+		warns, errs := c.Prepare(raw)
 		testConfigOk(t, warns, errs)
 
-		actual := tc.Read(c)
+		actual := tc.Read(&c)
 		if actual != tc.Value {
 			t.Fatalf("bad: %#v", actual)
 		}
@@ -394,7 +417,8 @@ func TestImageName(t *testing.T) {
 	raw, tempfile := testConfig(t)
 	defer os.Remove(tempfile)
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -407,7 +431,8 @@ func TestRegion(t *testing.T) {
 	raw, tempfile := testConfig(t)
 	defer os.Remove(tempfile)
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
 	}
@@ -442,7 +467,8 @@ func testConfigStruct(t *testing.T) *Config {
 	raw, tempfile := testConfig(t)
 	defer os.Remove(tempfile)
 
-	c, warns, errs := NewConfig(raw)
+	var c Config
+	warns, errs := c.Prepare(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
@@ -450,7 +476,7 @@ func testConfigStruct(t *testing.T) *Config {
 		t.Fatalf("bad: %#v", errs)
 	}
 
-	return c
+	return &c
 }
 
 func testConfigErr(t *testing.T, warns []string, err error, extra string) {

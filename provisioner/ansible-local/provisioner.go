@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package ansiblelocal
 
 import (
@@ -7,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
@@ -65,7 +68,7 @@ type Config struct {
 	GalaxyFile string `mapstructure:"galaxy_file"`
 
 	// The command to run ansible-galaxy
-	GalaxyCommand string
+	GalaxyCommand string `mapstructure:"galaxy_command"`
 }
 
 type Provisioner struct {
@@ -73,6 +76,8 @@ type Provisioner struct {
 
 	playbookFiles []string
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -186,7 +191,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
 
 	if len(p.config.PlaybookDir) > 0 {

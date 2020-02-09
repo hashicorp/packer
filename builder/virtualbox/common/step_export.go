@@ -3,10 +3,8 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -46,16 +44,13 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
-	// Wait a second to ensure VM is really shutdown.
-	log.Println("1 second timeout to ensure VM is really shutdown")
-	time.Sleep(1 * time.Second)
 	ui.Say("Preparing to export machine...")
 
 	// Clear out the Packer-created forwarding rule
-	sshPort := state.Get("sshHostPort")
-	if !s.SkipNatMapping && sshPort != 0 {
+	commPort := state.Get("commHostPort")
+	if !s.SkipNatMapping && commPort != 0 {
 		ui.Message(fmt.Sprintf(
-			"Deleting forwarded port mapping for the communicator (SSH, WinRM, etc) (host port %d)", sshPort))
+			"Deleting forwarded port mapping for the communicator (SSH, WinRM, etc) (host port %d)", commPort))
 		command := []string{"modifyvm", vmName, "--natpf1", "delete", "packercomm"}
 		if err := driver.VBoxManage(command...); err != nil {
 			err := fmt.Errorf("Error deleting port forwarding rule: %s", err)

@@ -23,9 +23,11 @@ import (
 // Produces:
 //   <nothing>
 type StepShutdown struct {
-	Command string
-	Timeout time.Duration
-	Delay   time.Duration
+	Command         string
+	Timeout         time.Duration
+	Delay           time.Duration
+	DisableShutdown bool
+	ACPIShutdown    bool
 }
 
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -34,25 +36,37 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
-	if s.Command != "" {
-		ui.Say("Gracefully halting virtual machine...")
-		log.Printf("Executing shutdown command: %s", s.Command)
-		cmd := &packer.RemoteCmd{Command: s.Command}
-		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
-			err := fmt.Errorf("Failed to send shutdown command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-	} else {
-		ui.Say("Halting the virtual machine...")
-		if err := driver.Stop(vmName); err != nil {
+	if s.ACPIShutdown {
+		ui.Say("Shuting down the virtual machine via ACPI power button...")
+		if err := driver.StopViaACPI(vmName); err != nil {
 			err := fmt.Errorf("Error stopping VM: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+	} else if !s.DisableShutdown {
+		if s.Command != "" {
+			ui.Say("Gracefully halting virtual machine...")
+			log.Printf("Executing shutdown command: %s", s.Command)
+			cmd := &packer.RemoteCmd{Command: s.Command}
+			if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
+				err := fmt.Errorf("Failed to send shutdown command: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+		} else {
+			ui.Say("Halting the virtual machine...")
+			if err := driver.Stop(vmName); err != nil {
+				err := fmt.Errorf("Error stopping VM: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	} else {
+		ui.Say("Automatic shutdown disabled. Please shutdown virtual machine.")
 	}
 
 	// Wait for the machine to actually shut down
@@ -72,7 +86,7 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 
 		select {
 		case <-shutdownTimer:
-			err := errors.New("Timeout while waiting for machine to shut down.")
+			err := errors.New("Timeout while waiting for machine to shutdown.")
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

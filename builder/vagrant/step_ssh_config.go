@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"context"
+	"log"
 	"strconv"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,7 +31,11 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 	driver := state.Get("driver").(VagrantDriver)
 	config := state.Get("config").(*Config)
 
-	sshConfig, err := driver.SSHConfig(s.GlobalID)
+	box := "source"
+	if s.GlobalID != "" {
+		box = s.GlobalID
+	}
+	sshConfig, err := driver.SSHConfig(box)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -48,6 +53,12 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 		// If user has set the username within the communicator, use the
 		// auth provided there.
 		return multistep.ActionContinue
+	}
+	log.Printf("identity file is %s", sshConfig.IdentityFile)
+	log.Printf("Removing quotes from identity file")
+	sshConfig.IdentityFile, err = strconv.Unquote(sshConfig.IdentityFile)
+	if err != nil {
+		log.Printf("Error unquoting identity file: %s", err)
 	}
 	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
 	config.Comm.SSHUsername = sshConfig.User

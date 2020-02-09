@@ -143,6 +143,36 @@ func TestCoreBuild_env(t *testing.T) {
 	}
 }
 
+func TestCoreBuild_IgnoreTemplateVariables(t *testing.T) {
+	os.Setenv("PACKER_TEST_ENV", "test")
+	defer os.Setenv("PACKER_TEST_ENV", "")
+
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-ignore-template-variable.json"))
+	core := TestCore(t, config)
+
+	if core.variables["http_ip"] != "{{ .HTTPIP }}" {
+		t.Fatalf("bad: User variable http_ip={{ .HTTPIP }} should not be interpolated")
+	}
+
+	if core.variables["var"] != "test_{{ .PACKER_TEST_TEMP }}" {
+		t.Fatalf("bad: User variable var should be half interpolated to var=test_{{ .PACKER_TEST_TEMP }} but was var=%s", core.variables["var"])
+	}
+
+	if core.variables["array_var"] != "us-west-1,us-west-2" {
+		t.Fatalf("bad: User variable array_var should be \"us-west-1,us-west-2\" but was %s", core.variables["var"])
+	}
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestCoreBuild_buildNameVar(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-var-build-name.json"))
@@ -427,40 +457,6 @@ func TestCoreBuild_templatePath(t *testing.T) {
 	}
 }
 
-func TestCore_pushInterpolate(t *testing.T) {
-	cases := []struct {
-		File   string
-		Vars   map[string]string
-		Result template.Push
-	}{
-		{
-			"push-vars.json",
-			map[string]string{"foo": "bar"},
-			template.Push{Name: "bar"},
-		},
-	}
-
-	for _, tc := range cases {
-		tpl, err := template.ParseFile(fixtureDir(tc.File))
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
-		}
-
-		core, err := NewCore(&CoreConfig{
-			Template:  tpl,
-			Variables: tc.Vars,
-		})
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
-		}
-
-		expected := core.Template.Push
-		if !reflect.DeepEqual(expected, tc.Result) {
-			t.Fatalf("err: %s\n\n%#v", tc.File, expected)
-		}
-	}
-}
-
 func TestCoreValidate(t *testing.T) {
 	cases := []struct {
 		File string
@@ -701,17 +697,6 @@ func TestSensitiveVars(t *testing.T) {
 
 		// clear filter so it doesn't break other tests
 		LogSecretFilter.s = make(map[string]struct{})
-	}
-}
-
-func testComponentFinder() *ComponentFinder {
-	builderFactory := func(n string) (Builder, error) { return new(MockBuilder), nil }
-	ppFactory := func(n string) (PostProcessor, error) { return new(MockPostProcessor), nil }
-	provFactory := func(n string) (Provisioner, error) { return new(MockProvisioner), nil }
-	return &ComponentFinder{
-		Builder:       builderFactory,
-		PostProcessor: ppFactory,
-		Provisioner:   provFactory,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -28,7 +29,11 @@ type ParallelTestBuilder struct {
 	wg sync.WaitGroup
 }
 
-func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
+func (b *ParallelTestBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
+
+func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	return nil, nil, nil
+}
 
 func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("building")
@@ -39,7 +44,9 @@ func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer
 // LockedBuilder wont run until unlock is called
 type LockedBuilder struct{ unlock chan interface{} }
 
-func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, error) { return nil, nil }
+func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
+
+func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error) { return nil, nil, nil }
 
 func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("locking build")
@@ -57,25 +64,13 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 	return Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				Builder: func(n string) (packer.Builder, error) {
-					switch n {
-					case "parallel-test":
-						return builder, nil
-					case "file":
-						return &file.Builder{}, nil
-					case "lock":
-						return locked, nil
-					default:
-						panic(n)
-					}
+				BuilderStore: packer.MapOfBuilder{
+					"parallel-test": func() (packer.Builder, error) { return builder, nil },
+					"file":          func() (packer.Builder, error) { return &file.Builder{}, nil },
+					"lock":          func() (packer.Builder, error) { return locked, nil },
 				},
-				Provisioner: func(n string) (packer.Provisioner, error) {
-					switch n {
-					case "sleep":
-						return &sleep.Provisioner{}, nil
-					default:
-						panic(n)
-					}
+				ProvisionerStore: packer.MapOfProvisioner{
+					"sleep": func() (packer.Provisioner, error) { return &sleep.Provisioner{}, nil },
 				},
 			},
 		},

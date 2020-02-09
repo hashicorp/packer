@@ -12,6 +12,10 @@ type Artifact struct {
 	Image  core.Image
 	Region string
 	driver Driver
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 // BuilderId uniquely identifies the builder.
@@ -44,7 +48,7 @@ func (a *Artifact) String() string {
 
 // State ...
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 // Destroy deletes the custom image associated with the artifact.

@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -28,7 +30,8 @@ type StepMountDevice struct {
 	MountOptions   []string
 	MountPartition string
 
-	mountPath string
+	mountPath     string
+	GeneratedData *builder.GeneratedData
 }
 
 func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -39,7 +42,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 		// customizable device path for mounting NVME block devices on c5 and m5 HVM
 		device = config.NVMEDevicePath
 	}
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	var virtualizationType string
 	if config.FromScratch || config.AMIVirtType != "" {
@@ -104,7 +107,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 	log.Printf("[DEBUG] (step mount) mount command is %s", mountCommand)
-	cmd := ShellCommand(mountCommand)
+	cmd := common.ShellCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf(
@@ -117,6 +120,7 @@ func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) mul
 	// Set the mount path so we remember to unmount it later
 	s.mountPath = mountPath
 	state.Put("mount_path", s.mountPath)
+	s.GeneratedData.Put("MountPath", s.mountPath)
 	state.Put("mount_device_cleanup", s)
 
 	return multistep.ActionContinue
@@ -135,7 +139,7 @@ func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	ui.Say("Unmounting the root device...")
 	unmountCommand, err := wrappedCommand(fmt.Sprintf("umount %s", s.mountPath))
@@ -143,7 +147,7 @@ func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
 		return fmt.Errorf("Error creating unmount command: %s", err)
 	}
 
-	cmd := ShellCommand(unmountCommand)
+	cmd := common.ShellCommand(unmountCommand)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("Error unmounting root device: %s", err)
 	}

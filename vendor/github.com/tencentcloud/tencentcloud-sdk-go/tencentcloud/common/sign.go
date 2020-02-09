@@ -1,14 +1,13 @@
 package common
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"sort"
-	"strings"
 
 	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
 )
@@ -65,7 +64,11 @@ func getStringToSign(request tchttp.Request) string {
 	domain := request.GetDomain()
 	path := request.GetPath()
 
-	text := method + domain + path + "?"
+	var buf bytes.Buffer
+	buf.WriteString(method)
+	buf.WriteString(domain)
+	buf.WriteString(path)
+	buf.WriteString("?")
 
 	params := request.GetParams()
 	// sort params
@@ -77,11 +80,15 @@ func getStringToSign(request tchttp.Request) string {
 
 	for i := range keys {
 		k := keys[i]
+		// TODO: check if server side allows empty value in url.
 		if params[k] == "" {
 			continue
 		}
-		text += fmt.Sprintf("%v=%v&", strings.Replace(k, "_", ".", -1), params[k])
+		buf.WriteString(k)
+		buf.WriteString("=")
+		buf.WriteString(params[k])
+		buf.WriteString("&")
 	}
-	text = text[:len(text)-1]
-	return text
+	buf.Truncate(buf.Len() - 1)
+	return buf.String()
 }

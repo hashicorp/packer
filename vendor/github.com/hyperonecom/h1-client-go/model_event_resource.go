@@ -9,7 +9,8 @@
 
 package openapi
 
+// EventResource struct for EventResource
 type EventResource struct {
-	Id string `json:"id"`
+	Id   string `json:"id"`
 	Type string `json:"type"`
 }

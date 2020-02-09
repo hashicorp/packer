@@ -104,7 +104,7 @@ func TestProvisionerProvision_Success(t *testing.T) {
 	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
 		return nil
 	}
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -140,7 +140,7 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
 		return nil
 	}
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -163,7 +163,7 @@ func TestProvisionerProvision_RestartCommandFail(t *testing.T) {
 	comm.StartExitStatus = 1
 
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -182,7 +182,7 @@ func TestProvisionerProvision_WaitForRestartFail(t *testing.T) {
 	waitForCommunicator = func(context.Context, *Provisioner) error {
 		return fmt.Errorf("Machine did not restart properly")
 	}
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -216,7 +216,7 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 	}
 
 	go func() {
-		err = p.Provision(context.Background(), ui, comm)
+		err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 		waitDone <- true
 	}()
 	<-waitContinue
@@ -327,7 +327,7 @@ func TestProvision_Cancel(t *testing.T) {
 	// Create two go routines to provision and cancel in parallel
 	// Provision will block until cancel happens
 	go func() {
-		done <- p.Provision(topCtx, ui, comm)
+		done <- p.Provision(topCtx, ui, comm, make(map[string]interface{}))
 	}()
 
 	// Expect interrupt error

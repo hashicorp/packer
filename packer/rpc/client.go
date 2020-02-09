@@ -69,56 +69,79 @@ func (c *Client) Close() error {
 
 func (c *Client) Artifact() packer.Artifact {
 	return &artifact{
-		client:   c.client,
-		endpoint: DefaultArtifactEndpoint,
+		commonClient: commonClient{
+			endpoint: DefaultArtifactEndpoint,
+			client:   c.client,
+		},
 	}
 }
 
 func (c *Client) Build() packer.Build {
 	return &build{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultBuildEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) Builder() packer.Builder {
 	return &builder{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultBuilderEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) Communicator() packer.Communicator {
 	return &communicator{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultCommunicatorEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) Hook() packer.Hook {
 	return &hook{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultHookEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) PostProcessor() packer.PostProcessor {
 	return &postProcessor{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultPostProcessorEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) Provisioner() packer.Provisioner {
 	return &provisioner{
-		client: c.client,
-		mux:    c.mux,
+		commonClient: commonClient{
+			endpoint: DefaultProvisionerEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
 	}
 }
 
 func (c *Client) Ui() packer.Ui {
 	return &Ui{
-		client:   c.client,
+		commonClient: commonClient{
+			endpoint: DefaultUiEndpoint,
+			client:   c.client,
+		},
 		endpoint: DefaultUiEndpoint,
 	}
 }

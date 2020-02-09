@@ -58,6 +58,23 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	return err
 }
 
+func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
+	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
+	var deploymentName = s.name
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say(fmt.Sprintf("Removing the created Deployment object: '%s'", deploymentName))
+
+	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)
+	if err == nil {
+		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
+	}
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+
+	return err
+}
+
 func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deploying deployment template ...")
 
@@ -115,6 +132,12 @@ func deleteResource(ctx context.Context, client *AzureClient, resourceType strin
 			err = f.WaitForCompletionRef(ctx, client.VirtualNetworksClient.Client)
 		}
 		return err
+	case "Microsoft.Network/networkSecurityGroups":
+		f, err := client.SecurityGroupsClient.Delete(ctx, resourceGroupName, resourceName)
+		if err == nil {
+			err = f.WaitForCompletionRef(ctx, client.SecurityGroupsClient.Client)
+		}
+		return err
 	case "Microsoft.Network/publicIPAddresses":
 		f, err := client.PublicIPAddressesClient.Delete(ctx, resourceGroupName, resourceName)
 		if err == nil {
@@ -154,6 +177,8 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 }
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
+	defer s.deleteTemplate(context.Background(), state)
+
 	//Only clean up if this was an existing resource group and the resource group
 	//is marked as created
 	var existingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
@@ -172,7 +197,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		ui.Error("Could not retrieve OS Image details")
 	}
 
-	ui.Say(" -> Deployment: " + deploymentName)
+	ui.Say(" -> Deployment Resources within: " + deploymentName)
 	if deploymentName != "" {
 		maxResources := int32(50)
 		deploymentOperations, err := s.client.DeploymentOperationsClient.ListComplete(context.TODO(), resourceGroupName, deploymentName, &maxResources)

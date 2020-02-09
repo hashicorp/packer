@@ -23,7 +23,9 @@ func testRunConfig() *RunConfig {
 		Flavor:      "m1.small",
 
 		Comm: communicator.Config{
-			SSHUsername: "foo",
+			SSH: communicator.SSH{
+				SSHUsername: "foo",
+			},
 		},
 	}
 }

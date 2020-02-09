@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -13,24 +14,25 @@ import (
 const BuilderId = "packer.profitbricks"
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return warnings, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	steps := []multistep.Step{
@@ -41,7 +43,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepCreateServer),
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.SSHHost, "server_ip"),
+			Host:      communicator.CommHost(b.config.Comm.Host(), "server_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -62,6 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	artifact := &Artifact{
 		snapshotData: config.SnapshotName,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

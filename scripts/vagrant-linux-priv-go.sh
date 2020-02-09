@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 function install_go() {
-	local go_version=1.11.1
+	local go_version=1.13
 	local download=
-	
-	download="https://storage.googleapis.com/golang/go${go_version}.linux-amd64.tar.gz"
+	download="https://dl.google.com/go/go${go_version}.linux-amd64.tar.gz"
 
 	if [ -d /usr/local/go ] ; then
 		return
@@ -18,7 +17,7 @@ function install_go() {
 }
 
 install_go
-	
+
 # Ensure that the GOPATH tree is owned by vagrant:vagrant
 mkdir -p /opt/gopath
 chown -R vagrant:vagrant /opt/gopath

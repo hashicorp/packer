@@ -11,6 +11,7 @@ type Driver interface {
 	SDK() *ycsdk.SDK
 	GetImage(imageID string) (*Image, error)
 	GetImageFromFolder(ctx context.Context, folderID string, family string) (*Image, error)
+	GetImageFromFolderByName(ctx context.Context, folderID string, name string) (*Image, error)
 	DeleteDisk(ctx context.Context, diskID string) error
 	DeleteInstance(ctx context.Context, instanceID string) error
 	DeleteSubnet(ctx context.Context, subnetID string) error

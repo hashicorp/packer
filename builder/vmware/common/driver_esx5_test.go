@@ -69,6 +69,9 @@ func TestESX5Driver_CommHost(t *testing.T) {
 
 	var commConfig communicator.Config
 	err := config.Decode(&commConfig, nil, conf)
+	if err != nil {
+		t.Fatalf("error decoding config: %v", err)
+	}
 	state := new(multistep.BasicStateBag)
 	sshConfig := SSHConfig{Comm: commConfig}
 	state.Put("sshConfig", &sshConfig)

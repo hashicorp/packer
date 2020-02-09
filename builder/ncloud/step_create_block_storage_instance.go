@@ -7,22 +7,23 @@ import (
 	"log"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 // StepCreateBlockStorageInstance struct is for making extra block storage
 type StepCreateBlockStorageInstance struct {
-	Conn                       *ncloud.Conn
-	CreateBlockStorageInstance func(serverInstanceNo string) (string, error)
+	Conn                       *NcloudAPIClient
+	CreateBlockStorageInstance func(serverInstanceNo string) (*string, error)
 	Say                        func(message string)
 	Error                      func(e error)
 	Config                     *Config
 }
 
 // NewStepCreateBlockStorageInstance make StepCreateBlockStorage struct to make extra block storage
-func NewStepCreateBlockStorageInstance(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepCreateBlockStorageInstance {
+func NewStepCreateBlockStorageInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreateBlockStorageInstance {
 	var step = &StepCreateBlockStorageInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -35,24 +36,25 @@ func NewStepCreateBlockStorageInstance(conn *ncloud.Conn, ui packer.Ui, config *
 	return step
 }
 
-func (s *StepCreateBlockStorageInstance) createBlockStorageInstance(serverInstanceNo string) (string, error) {
+func (s *StepCreateBlockStorageInstance) createBlockStorageInstance(serverInstanceNo string) (*string, error) {
 
-	reqParams := new(ncloud.RequestBlockStorageInstance)
-	reqParams.BlockStorageSize = s.Config.BlockStorageSize
-	reqParams.ServerInstanceNo = serverInstanceNo
+	reqParams := new(server.CreateBlockStorageInstanceRequest)
+	reqParams.BlockStorageSize = ncloud.Int64(int64(s.Config.BlockStorageSize))
+	reqParams.ServerInstanceNo = &serverInstanceNo
 
-	blockStorageInstanceList, err := s.Conn.CreateBlockStorageInstance(reqParams)
+	resp, err := s.Conn.server.V2Api.CreateBlockStorageInstance(reqParams)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	log.Println("Block Storage Instance information : ", blockStorageInstanceList.BlockStorageInstance[0])
+	blockStorageInstance := resp.BlockStorageInstanceList[0]
+	log.Println("Block Storage Instance information : ", blockStorageInstance.BlockStorageInstanceNo)
 
-	if err := waiterBlockStorageInstanceStatus(s.Conn, blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceNo, "ATTAC", 10*time.Minute); err != nil {
-		return "", errors.New("TIMEOUT : Block Storage instance status is not attached")
+	if err := waiterBlockStorageInstanceStatus(s.Conn, blockStorageInstance.BlockStorageInstanceNo, "ATTAC", 10*time.Minute); err != nil {
+		return nil, errors.New("TIMEOUT : Block Storage instance status is not attached")
 	}
 
-	return blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceNo, nil
+	return blockStorageInstance.BlockStorageInstanceNo, nil
 }
 
 func (s *StepCreateBlockStorageInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -66,7 +68,7 @@ func (s *StepCreateBlockStorageInstance) Run(ctx context.Context, state multiste
 
 	blockStorageInstanceNo, err := s.CreateBlockStorageInstance(serverInstanceNo)
 	if err == nil {
-		state.Put("BlockStorageInstanceNo", blockStorageInstanceNo)
+		state.Put("BlockStorageInstanceNo", *blockStorageInstanceNo)
 	}
 
 	return processStepResult(err, s.Error, state)
@@ -86,16 +88,18 @@ func (s *StepCreateBlockStorageInstance) Cleanup(state multistep.StateBag) {
 
 	if blockStorageInstanceNo, ok := state.GetOk("BlockStorageInstanceNo"); ok {
 		s.Say("Clean up Block Storage Instance")
-		no := blockStorageInstanceNo.(string)
-		blockStorageInstanceList, err := s.Conn.DeleteBlockStorageInstances([]string{no})
+		reqParams := server.DeleteBlockStorageInstancesRequest{
+			BlockStorageInstanceNoList: []*string{blockStorageInstanceNo.(*string)},
+		}
+		blockStorageInstanceList, err := s.Conn.server.V2Api.DeleteBlockStorageInstances(&reqParams)
 		if err != nil {
 			return
 		}
 
-		s.Say(fmt.Sprintf("Block Storage Instance is deleted. Block Storage InstanceNo is %s", no))
-		log.Println("Block Storage Instance information : ", blockStorageInstanceList.BlockStorageInstance[0])
+		s.Say(fmt.Sprintf("Block Storage Instance is deleted. Block Storage InstanceNo is %s", blockStorageInstanceNo.(string)))
+		log.Println("Block Storage Instance information : ", blockStorageInstanceList.BlockStorageInstanceList[0])
 
-		if err := waiterBlockStorageInstanceStatus(s.Conn, no, "DETAC", time.Minute); err != nil {
+		if err := waiterBlockStorageInstanceStatus(s.Conn, blockStorageInstanceNo.(*string), "DETAC", time.Minute); err != nil {
 			s.Say("TIMEOUT : Block Storage instance status is not deattached")
 		}
 	}

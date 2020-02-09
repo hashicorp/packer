@@ -3,6 +3,7 @@ package shell_local
 import (
 	"context"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 )
@@ -15,6 +16,8 @@ type ExecuteCommandTemplate struct {
 	Vars   string
 	Script string
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := sl.Decode(&p.config, raws...)
@@ -38,10 +41,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	// this particular post-processor doesn't do anything with the artifact
-	// except to return it.
+	generatedData := make(map[string]interface{})
+	artifactSateData := artifact.State("generated_data")
+	if artifactSateData != nil {
+		for k, v := range artifactSateData.(map[interface{}]interface{}) {
+			generatedData[k.(string)] = v
+		}
+	}
 
-	success, retErr := sl.Run(ctx, ui, &p.config)
+	success, retErr := sl.Run(ctx, ui, &p.config, generatedData)
 	if !success {
 		return nil, false, false, retErr
 	}

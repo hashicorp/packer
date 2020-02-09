@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
+
 package lxc
 
 import (
@@ -14,33 +17,66 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	ConfigFile          string   `mapstructure:"config_file"`
-	OutputDir           string   `mapstructure:"output_directory"`
-	ContainerName       string   `mapstructure:"container_name"`
-	CommandWrapper      string   `mapstructure:"command_wrapper"`
-	RawInitTimeout      string   `mapstructure:"init_timeout"`
-	CreateOptions       []string `mapstructure:"create_options"`
-	StartOptions        []string `mapstructure:"start_options"`
-	AttachOptions       []string `mapstructure:"attach_options"`
-	Name                string   `mapstructure:"template_name"`
-	Parameters          []string `mapstructure:"template_parameters"`
-	EnvVars             []string `mapstructure:"template_environment_vars"`
-	TargetRunlevel      int      `mapstructure:"target_runlevel"`
-	InitTimeout         time.Duration
+	// The path to the lxc configuration file.
+	ConfigFile string `mapstructure:"config_file" required:"true"`
+	// The directory in which to save the exported
+	// tar.gz. Defaults to output-<BuildName> in the current directory.
+	OutputDir string `mapstructure:"output_directory" required:"false"`
+	// The name of the LXC container. Usually stored
+	// in /var/lib/lxc/containers/<container_name>. Defaults to
+	// packer-<BuildName>.
+	ContainerName string `mapstructure:"container_name" required:"false"`
+	// Allows you to specify a wrapper command, such
+	// as ssh so you can execute packer builds on a remote host. Defaults to
+	// Empty.
+	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
+	// The timeout in seconds to wait for the the
+	// container to start. Defaults to 20 seconds.
+	InitTimeout time.Duration `mapstructure:"init_timeout" required:"false"`
+
+	// Options to pass to lxc-create. For
+	// instance, you can specify a custom LXC container configuration file with
+	// ["-f", "/path/to/lxc.conf"]. Defaults to []. See man 1 lxc-create for
+	// available options.
+	CreateOptions []string `mapstructure:"create_options" required:"false"`
+	// Options to pass to lxc-start. For
+	// instance, you can override parameters from the LXC container configuration
+	// file via ["--define", "KEY=VALUE"]. Defaults to []. See
+	// man 1 lxc-start for available options.
+	StartOptions []string `mapstructure:"start_options" required:"false"`
+	// Options to pass to lxc-attach. For
+	// instance, you can prevent the container from inheriting the host machine's
+	// environment by specifying ["--clear-env"]. Defaults to []. See
+	// man 1 lxc-attach for available options.
+	AttachOptions []string `mapstructure:"attach_options" required:"false"`
+	// The LXC template name to use.
+	Name string `mapstructure:"template_name" required:"true"`
+	// Options to pass to the given
+	// lxc-template command, usually located in
+	// /usr/share/lxc/templates/lxc-<template_name>. Note: This gets passed as
+	// ARGV to the template command. Ensure you have an array of strings, as a
+	// single string with spaces probably won't work. Defaults to [].
+	Parameters []string `mapstructure:"template_parameters" required:"false"`
+	// Environmental variables to
+	// use to build the template with.
+	EnvVars []string `mapstructure:"template_environment_vars" required:"true"`
+	// The minimum run level to wait for the
+	// container to reach. Note some distributions (Ubuntu) simulate run levels
+	// and may report 5 rather than 3.
+	TargetRunlevel int `mapstructure:"target_runlevel" required:"false"`
 
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) error {
 
 	var md mapstructure.Metadata
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Metadata:    &md,
 		Interpolate: true,
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Accumulate any errors
@@ -62,13 +98,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.CommandWrapper = "{{.Command}}"
 	}
 
-	if c.RawInitTimeout == "" {
-		c.RawInitTimeout = "20s"
-	}
-
-	c.InitTimeout, err = time.ParseDuration(c.RawInitTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing init_timeout: %s", err))
+	if c.InitTimeout == 0 {
+		c.InitTimeout = 20 * time.Second
 	}
 
 	if _, err := os.Stat(c.ConfigFile); os.IsNotExist(err) {
@@ -76,8 +107,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return errs
 	}
 
-	return &c, nil
+	return nil
 }

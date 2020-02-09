@@ -1,9 +1,14 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // The ucloud-uhost contains a packer.Builder implementation that
 // builds uhost images for UCloud UHost instance.
 package uhost
 
 import (
 	"context"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -16,10 +21,10 @@ import (
 const BuilderId = "ucloud.uhost"
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	AccessConfig        `mapstructure:",squash"`
-	ImageConfig         `mapstructure:",squash"`
-	RunConfig           `mapstructure:",squash"`
+	common.PackerConfig       `mapstructure:",squash"`
+	ucloudcommon.AccessConfig `mapstructure:",squash"`
+	ucloudcommon.ImageConfig  `mapstructure:",squash"`
+	ucloudcommon.RunConfig    `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -29,7 +34,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -41,7 +48,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 	b.config.ctx.EnableEnv = true
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors
@@ -51,11 +58,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.PublicKey, b.config.PrivateKey)
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -108,7 +115,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: SSHHost(
+			Host: ucloudcommon.SSHHost(
 				b.config.UseSSHPrivateIp),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -116,9 +123,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepStopInstance{},
 		&stepCreateImage{},
 		&stepCopyUCloudImage{
-			ImageDestinations: b.config.ImageDestinations,
-			RegionId:          b.config.Region,
-			ProjectId:         b.config.ProjectId,
+			ImageDestinations:     b.config.ImageDestinations,
+			RegionId:              b.config.Region,
+			ProjectId:             b.config.ProjectId,
+			WaitImageReadyTimeout: b.config.WaitImageReadyTimeout,
 		},
 	}
 
@@ -137,10 +145,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Build the artifact and return it
-	artifact := &Artifact{
-		UCloudImages:   state.Get("ucloud_images").(*imageInfoSet),
+	artifact := &ucloudcommon.Artifact{
+		UCloudImages:   state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet),
 		BuilderIdValue: BuilderId,
 		Client:         client,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

@@ -28,6 +28,7 @@ type rawTemplate struct {
 	Push               map[string]interface{} `json:"push,omitempty"`
 	PostProcessors     []interface{}          `mapstructure:"post-processors" json:"post-processors,omitempty"`
 	Provisioners       []interface{}          `json:"provisioners,omitempty"`
+	CleanupProvisioner interface{}            `mapstructure:"error-cleanup-provisioner" json:"error-cleanup-provisioner,omitempty"`
 	Variables          map[string]interface{} `json:"variables,omitempty"`
 	SensitiveVariables []string               `mapstructure:"sensitive-variables" json:"sensitive-variables,omitempty"`
 
@@ -54,6 +55,34 @@ func (r *rawTemplate) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(m)
+}
+
+func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
+	var p Provisioner
+	if err := r.decoder(&p, nil).Decode(raw); err != nil {
+		return p, fmt.Errorf("Error decoding provisioner: %s", err)
+
+	}
+
+	// Type is required before any richer validation
+	if p.Type == "" {
+		return p, fmt.Errorf("Provisioner missing 'type'")
+	}
+
+	// Set the raw configuration and delete any special keys
+	p.Config = raw.(map[string]interface{})
+
+	delete(p.Config, "except")
+	delete(p.Config, "only")
+	delete(p.Config, "override")
+	delete(p.Config, "pause_before")
+	delete(p.Config, "type")
+	delete(p.Config, "timeout")
+
+	if len(p.Config) == 0 {
+		p.Config = nil
+	}
+	return p, nil
 }
 
 // Template returns the actual Template object built from this raw
@@ -211,46 +240,25 @@ func (r *rawTemplate) Template() (*Template, error) {
 		result.Provisioners = make([]*Provisioner, 0, len(r.Provisioners))
 	}
 	for i, v := range r.Provisioners {
-		var p Provisioner
-		if err := r.decoder(&p, nil).Decode(v); err != nil {
+		p, err := r.decodeProvisioner(v)
+		if err != nil {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"provisioner %d: %s", i+1, err))
 			continue
 		}
 
-		// Type is required before any richer validation
-		if p.Type == "" {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"provisioner %d: missing 'type'", i+1))
-			continue
-		}
-
-		// Set the raw configuration and delete any special keys
-		p.Config = v.(map[string]interface{})
-
-		delete(p.Config, "except")
-		delete(p.Config, "only")
-		delete(p.Config, "override")
-		delete(p.Config, "pause_before")
-		delete(p.Config, "type")
-		delete(p.Config, "timeout")
-
-		if len(p.Config) == 0 {
-			p.Config = nil
-		}
-
 		result.Provisioners = append(result.Provisioners, &p)
 	}
 
-	// Push
-	if len(r.Push) > 0 {
-		var p Push
-		if err := r.decoder(&p, nil).Decode(r.Push); err != nil {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"push: %s", err))
+	// Gather the error-cleanup-provisioner
+	if r.CleanupProvisioner != nil {
+		p, err := r.decodeProvisioner(r.CleanupProvisioner)
+		if err != nil {
+			errs = multierror.Append(errs,
+				fmt.Errorf("On Error Cleanup Provisioner error: %s", err))
 		}
 
-		result.Push = p
+		result.CleanupProvisioner = &p
 	}
 
 	// If we have errors, return those with a nil result
@@ -363,7 +371,7 @@ func Parse(r io.Reader) (*Template, error) {
 			if unused[0] == '_' {
 				commentVal, ok := unusedMap[unused].(string)
 				if !ok {
-					return nil, fmt.Errorf("Failed to cast root level comment value to string")
+					return nil, fmt.Errorf("Failed to cast root level comment value in comment \"%s\" to string.", unused)
 				}
 
 				comment := map[string]string{
@@ -400,7 +408,7 @@ func ParseFile(path string) (*Template, error) {
 		defer os.Remove(f.Name())
 		defer f.Close()
 		io.Copy(f, os.Stdin)
-		f.Seek(0, os.SEEK_SET)
+		f.Seek(0, io.SeekStart)
 	} else {
 		f, err = os.Open(path)
 		if err != nil {
@@ -415,7 +423,7 @@ func ParseFile(path string) (*Template, error) {
 			return nil, err
 		}
 		// Rewind the file and get a better error
-		f.Seek(0, os.SEEK_SET)
+		f.Seek(0, io.SeekStart)
 		// Grab the error location, and return a string to point to offending syntax error
 		line, col, highlight := highlightPosition(f, syntaxErr.Offset)
 		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)

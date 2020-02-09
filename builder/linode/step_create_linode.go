@@ -49,6 +49,9 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 			return multistep.ActionHalt
 		}
 		state.Put("instance", instance)
+		// instance_id is the generic term used so that users can have access to the
+		// instance id inside of the provisioners, used in step_provision.
+		state.Put("instance_id", instance.ID)
 	}
 
 	disk, err := s.findDisk(ctx, instance.ID)

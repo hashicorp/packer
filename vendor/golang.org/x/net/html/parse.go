@@ -881,7 +881,7 @@ func inBodyIM(p *parser) bool {
 			p.addElement()
 			p.im = inFramesetIM
 			return true
-		case a.Address, a.Article, a.Aside, a.Blockquote, a.Center, a.Details, a.Dir, a.Div, a.Dl, a.Fieldset, a.Figcaption, a.Figure, a.Footer, a.Header, a.Hgroup, a.Menu, a.Nav, a.Ol, a.P, a.Section, a.Summary, a.Ul:
+		case a.Address, a.Article, a.Aside, a.Blockquote, a.Center, a.Details, a.Dialog, a.Dir, a.Div, a.Dl, a.Fieldset, a.Figcaption, a.Figure, a.Footer, a.Header, a.Hgroup, a.Main, a.Menu, a.Nav, a.Ol, a.P, a.Section, a.Summary, a.Ul:
 			p.popUntil(buttonScope, a.P)
 			p.addElement()
 		case a.H1, a.H2, a.H3, a.H4, a.H5, a.H6:
@@ -1137,7 +1137,7 @@ func inBodyIM(p *parser) bool {
 				return false
 			}
 			return true
-		case a.Address, a.Article, a.Aside, a.Blockquote, a.Button, a.Center, a.Details, a.Dir, a.Div, a.Dl, a.Fieldset, a.Figcaption, a.Figure, a.Footer, a.Header, a.Hgroup, a.Listing, a.Menu, a.Nav, a.Ol, a.Pre, a.Section, a.Summary, a.Ul:
+		case a.Address, a.Article, a.Aside, a.Blockquote, a.Button, a.Center, a.Details, a.Dialog, a.Dir, a.Div, a.Dl, a.Fieldset, a.Figcaption, a.Figure, a.Footer, a.Header, a.Hgroup, a.Listing, a.Main, a.Menu, a.Nav, a.Ol, a.Pre, a.Section, a.Summary, a.Ul:
 			p.popUntil(defaultScope, p.tok.DataAtom)
 		case a.Form:
 			if p.oe.contains(a.Template) {
@@ -2136,28 +2136,31 @@ func parseForeignContent(p *parser) bool {
 			Data: p.tok.Data,
 		})
 	case StartTagToken:
-		b := breakout[p.tok.Data]
-		if p.tok.DataAtom == a.Font {
-		loop:
-			for _, attr := range p.tok.Attr {
-				switch attr.Key {
-				case "color", "face", "size":
-					b = true
-					break loop
+		if !p.fragment {
+			b := breakout[p.tok.Data]
+			if p.tok.DataAtom == a.Font {
+			loop:
+				for _, attr := range p.tok.Attr {
+					switch attr.Key {
+					case "color", "face", "size":
+						b = true
+						break loop
+					}
 				}
 			}
-		}
-		if b {
-			for i := len(p.oe) - 1; i >= 0; i-- {
-				n := p.oe[i]
-				if n.Namespace == "" || htmlIntegrationPoint(n) || mathMLTextIntegrationPoint(n) {
-					p.oe = p.oe[:i+1]
-					break
+			if b {
+				for i := len(p.oe) - 1; i >= 0; i-- {
+					n := p.oe[i]
+					if n.Namespace == "" || htmlIntegrationPoint(n) || mathMLTextIntegrationPoint(n) {
+						p.oe = p.oe[:i+1]
+						break
+					}
 				}
+				return false
 			}
-			return false
 		}
-		switch p.top().Namespace {
+		current := p.adjustedCurrentNode()
+		switch current.Namespace {
 		case "math":
 			adjustAttributeNames(p.tok.Attr, mathMLAttributeAdjustments)
 		case "svg":
@@ -2172,7 +2175,7 @@ func parseForeignContent(p *parser) bool {
 			panic("html: bad parser state: unexpected namespace")
 		}
 		adjustForeignAttributes(p.tok.Attr)
-		namespace := p.top().Namespace
+		namespace := current.Namespace
 		p.addElement()
 		p.top().Namespace = namespace
 		if namespace != "" {
@@ -2201,12 +2204,20 @@ func parseForeignContent(p *parser) bool {
 	return true
 }
 
+// Section 12.2.4.2.
+func (p *parser) adjustedCurrentNode() *Node {
+	if len(p.oe) == 1 && p.fragment && p.context != nil {
+		return p.context
+	}
+	return p.oe.top()
+}
+
 // Section 12.2.6.
 func (p *parser) inForeignContent() bool {
 	if len(p.oe) == 0 {
 		return false
 	}
-	n := p.oe[len(p.oe)-1]
+	n := p.adjustedCurrentNode()
 	if n.Namespace == "" {
 		return false
 	}
@@ -2300,6 +2311,33 @@ func (p *parser) parse() error {
 //
 // The input is assumed to be UTF-8 encoded.
 func Parse(r io.Reader) (*Node, error) {
+	return ParseWithOptions(r)
+}
+
+// ParseFragment parses a fragment of HTML and returns the nodes that were
+// found. If the fragment is the InnerHTML for an existing element, pass that
+// element in context.
+//
+// It has the same intricacies as Parse.
+func ParseFragment(r io.Reader, context *Node) ([]*Node, error) {
+	return ParseFragmentWithOptions(r, context)
+}
+
+// ParseOption configures a parser.
+type ParseOption func(p *parser)
+
+// ParseOptionEnableScripting configures the scripting flag.
+// https://html.spec.whatwg.org/multipage/webappapis.html#enabling-and-disabling-scripting
+//
+// By default, scripting is enabled.
+func ParseOptionEnableScripting(enable bool) ParseOption {
+	return func(p *parser) {
+		p.scripting = enable
+	}
+}
+
+// ParseWithOptions is like Parse, with options.
+func ParseWithOptions(r io.Reader, opts ...ParseOption) (*Node, error) {
 	p := &parser{
 		tokenizer: NewTokenizer(r),
 		doc: &Node{
@@ -2309,6 +2347,11 @@ func Parse(r io.Reader) (*Node, error) {
 		framesetOK: true,
 		im:         initialIM,
 	}
+
+	for _, f := range opts {
+		f(p)
+	}
+
 	err := p.parse()
 	if err != nil {
 		return nil, err
@@ -2316,12 +2359,8 @@ func Parse(r io.Reader) (*Node, error) {
 	return p.doc, nil
 }
 
-// ParseFragment parses a fragment of HTML and returns the nodes that were
-// found. If the fragment is the InnerHTML for an existing element, pass that
-// element in context.
-//
-// It has the same intricacies as Parse.
-func ParseFragment(r io.Reader, context *Node) ([]*Node, error) {
+// ParseFragmentWithOptions is like ParseFragment, with options.
+func ParseFragmentWithOptions(r io.Reader, context *Node, opts ...ParseOption) ([]*Node, error) {
 	contextTag := ""
 	if context != nil {
 		if context.Type != ElementNode {
@@ -2336,13 +2375,21 @@ func ParseFragment(r io.Reader, context *Node) ([]*Node, error) {
 		contextTag = context.DataAtom.String()
 	}
 	p := &parser{
-		tokenizer: NewTokenizerFragment(r, contextTag),
 		doc: &Node{
 			Type: DocumentNode,
 		},
 		scripting: true,
 		fragment:  true,
 		context:   context,
+	}
+	if context != nil && context.Namespace != "" {
+		p.tokenizer = NewTokenizer(r)
+	} else {
+		p.tokenizer = NewTokenizerFragment(r, contextTag)
+	}
+
+	for _, f := range opts {
+		f(p)
 	}
 
 	root := &Node{

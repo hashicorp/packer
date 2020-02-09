@@ -14,7 +14,7 @@ import (
 // remain after termination of the instance. These volumes are typically ones
 // that are marked as "delete on terminate:false" in the source_ami of a build.
 type StepCleanupVolumes struct {
-	BlockDevices BlockDevices
+	LaunchMappings BlockDevices
 }
 
 func (s *StepCleanupVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -60,7 +60,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	})
 
 	if err != nil {
-		ui.Say(fmt.Sprintf("Error describing volumes: %s", err))
+		ui.Error(fmt.Sprintf("Error describing volumes: %s", err))
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	// Filter out any devices created as part of the launch mappings, since
 	// we'll let amazon follow the `delete_on_termination` setting.
-	for _, b := range s.BlockDevices.LaunchMappings {
+	for _, b := range s.LaunchMappings {
 		for volKey, volName := range volList {
 			if volName == b.DeviceName {
 				delete(volList, volKey)

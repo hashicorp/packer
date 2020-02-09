@@ -16,8 +16,6 @@ import (
 type StepRunSourceServer struct {
 	Name                  string
 	SecurityGroups        []string
-	Networks              []string
-	Ports                 []string
 	AvailabilityZone      string
 	UserData              string
 	UserDataFile          string
@@ -32,6 +30,7 @@ func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag)
 	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
 	sourceImage := state.Get("source_image").(string)
+	networks := state.Get("networks").([]servers.Network)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -40,15 +39,6 @@ func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag)
 		err = fmt.Errorf("Error initializing compute client: %s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
-	}
-
-	networks := make([]servers.Network, len(s.Networks)+len(s.Ports))
-	i := 0
-	for ; i < len(s.Ports); i++ {
-		networks[i].Port = s.Ports[i]
-	}
-	for ; i < len(networks); i++ {
-		networks[i].UUID = s.Networks[i-len(s.Ports)]
 	}
 
 	userData := []byte(s.UserData)
@@ -138,6 +128,9 @@ func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag)
 
 	s.server = latestServer.(*servers.Server)
 	state.Put("server", s.server)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.server.ID)
 
 	return multistep.ActionContinue
 }

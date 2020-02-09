@@ -1,11 +1,12 @@
 package common
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/helper/config"
 )
 
 func TestBlockDevice(t *testing.T) {
@@ -71,7 +72,7 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           aws.Bool(true),
+				Encrypted:           config.TriTrue,
 			},
 
 			Result: &ec2.BlockDeviceMapping{
@@ -90,7 +91,7 @@ func TestBlockDevice(t *testing.T) {
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,
-				Encrypted:           aws.Bool(true),
+				Encrypted:           config.TriTrue,
 				KmsKeyId:            "2Fa48a521f-3aff-4b34-a159-376ac5d37812",
 			},
 
@@ -145,26 +146,20 @@ func TestBlockDevice(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		amiBlockDevices := AMIBlockDevices{
-			AMIMappings: []BlockDevice{*tc.Config},
-		}
+		var amiBlockDevices BlockDevices = []BlockDevice{*tc.Config}
 
-		launchBlockDevices := LaunchBlockDevices{
-			LaunchMappings: []BlockDevice{*tc.Config},
-		}
+		var launchBlockDevices BlockDevices = []BlockDevice{*tc.Config}
 
 		expected := []*ec2.BlockDeviceMapping{tc.Result}
 
-		amiResults := amiBlockDevices.BuildAMIDevices()
-		if !reflect.DeepEqual(expected, amiResults) {
-			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
-				expected, amiResults)
+		amiResults := amiBlockDevices.BuildEC2BlockDeviceMappings()
+		if diff := cmp.Diff(expected, amiResults); diff != "" {
+			t.Fatalf("Bad block device: %s", diff)
 		}
 
-		launchResults := launchBlockDevices.BuildLaunchDevices()
-		if !reflect.DeepEqual(expected, launchResults) {
-			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
-				expected, launchResults)
+		launchResults := launchBlockDevices.BuildEC2BlockDeviceMappings()
+		if diff := cmp.Diff(expected, launchResults); diff != "" {
+			t.Fatalf("Bad block device: %s", diff)
 		}
 	}
 }

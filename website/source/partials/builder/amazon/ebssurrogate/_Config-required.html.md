@@ -1,0 +1,10 @@
+<!-- Code generated from the comments of the Config struct in builder/amazon/ebssurrogate/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `ami_root_device` (RootBlockDevice) - A block device mapping describing the root device of the AMI. This looks
+    like the mappings in `ami_block_device_mapping`, except with an
+    additional field:
+    
+    -   `source_device_name` (string) - The device name of the block device on
+        the source instance to be used as the root device for the AMI. This
+        must correspond to a block device in `launch_block_device_mapping`.
+    

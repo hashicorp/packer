@@ -1,0 +1,16 @@
+<!-- Code generated from the comments of the TencentCloudAccessConfig struct in builder/tencentcloud/cvm/access_config.go; DO NOT EDIT MANUALLY -->
+
+-   `secret_id` (string) - Tencentcloud secret id. You should set it directly,
+    or set the TENCENTCLOUD_ACCESS_KEY environment variable.
+    
+-   `secret_key` (string) - Tencentcloud secret key. You should set it directly,
+    or set the TENCENTCLOUD_SECRET_KEY environment variable.
+    
+-   `region` (string) - The region where your cvm will be launch. You should
+    reference Region and Zone
+     for parameter taking.
+    
+-   `zone` (string) - The zone where your cvm will be launch. You should
+    reference Region and Zone
+     for parameter taking.
+    

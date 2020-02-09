@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -17,7 +18,7 @@ type StepAMIRegionCopy struct {
 	Regions           []string
 	AMIKmsKeyId       string
 	RegionKeyIds      map[string]string
-	EncryptBootVolume *bool // nil means preserve
+	EncryptBootVolume config.Trilean // nil means preserve
 	Name              string
 	OriginalRegion    string
 
@@ -53,7 +54,7 @@ func (s *StepAMIRegionCopy) DeduplicateRegions(intermediary bool) {
 	}
 
 	// Now print all those keys into the region slice again
-	for k, _ := range RegionMap {
+	for k := range RegionMap {
 		RegionSlice = append(RegionSlice, k)
 	}
 
@@ -74,7 +75,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		s.toDelete = ami
 	}
 
-	if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
+	if s.EncryptBootVolume.True() {
 		// encrypt_boot is true, so we have to copy the temporary
 		// AMI with required encryption setting.
 		// temp image was created by stepCreateAMI.
@@ -82,9 +83,16 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			s.RegionKeyIds = make(map[string]string)
 		}
 
-		// Make sure the kms_key_id for the original region is in the map
-		if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
-			s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+		// Make sure the kms_key_id for the original region is in the map, as
+		// long as the AMIKmsKeyId isn't being defaulted.
+		if s.AMIKmsKeyId != "" {
+			if _, ok := s.RegionKeyIds[s.OriginalRegion]; !ok {
+				s.RegionKeyIds[s.OriginalRegion] = s.AMIKmsKeyId
+			}
+		} else {
+			if regionKey, ok := s.RegionKeyIds[s.OriginalRegion]; ok {
+				s.AMIKmsKeyId = regionKey
+			}
 		}
 	}
 
@@ -102,7 +110,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 		var regKeyID string
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
-		if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
+		if s.EncryptBootVolume.True() {
 			// Encrypt is true, explicitly
 			regKeyID = s.RegionKeyIds[region]
 		} else {
@@ -112,7 +120,9 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 		go func(region string) {
 			defer wg.Done()
-			id, snapshotIds, err := s.amiRegionCopy(ctx, state, s.AccessConfig, s.Name, ami, region, s.OriginalRegion, regKeyID, s.EncryptBootVolume)
+			id, snapshotIds, err := s.amiRegionCopy(ctx, state, s.AccessConfig,
+				s.Name, ami, region, s.OriginalRegion, regKeyID,
+				s.EncryptBootVolume.ToBoolPointer())
 			lock.Lock()
 			defer lock.Unlock()
 			amis[region] = id
@@ -149,48 +159,11 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 	// Delete the unencrypted amis and snapshots
 	ui.Say("Deregistering the AMI and deleting unencrypted temporary " +
 		"AMIs and snapshots")
-
-	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-		ImageIds: []*string{&s.toDelete},
-	})
-
+	err := DestroyAMIs([]*string{&s.toDelete}, ec2conn)
 	if err != nil {
-		err := fmt.Errorf("Error describing AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return
-	}
-
-	// Deregister image by name.
-	for _, i := range resp.Images {
-		_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
-			ImageId: i.ImageId,
-		})
-
-		if err != nil {
-			err := fmt.Errorf("Error deregistering existing AMI: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return
-		}
-		ui.Say(fmt.Sprintf("Deregistered AMI id: %s", *i.ImageId))
-
-		// Delete snapshot(s) by image
-		for _, b := range i.BlockDeviceMappings {
-			if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
-				_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
-					SnapshotId: b.Ebs.SnapshotId,
-				})
-
-				if err != nil {
-					err := fmt.Errorf("Error deleting existing snapshot: %s", err)
-					state.Put("error", err)
-					ui.Error(err.Error())
-					return
-				}
-				ui.Say(fmt.Sprintf("Deleted snapshot: %s", *b.Ebs.SnapshotId))
-			}
-		}
 	}
 }
 

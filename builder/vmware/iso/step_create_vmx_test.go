@@ -137,17 +137,17 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 
 	// create our config to test the vmware-iso builder
 	components := packer.ComponentFinder{
-		Builder: func(n string) (packer.Builder, error) {
-			return &Builder{}, nil
+		BuilderStore: packer.MapOfBuilder{
+			"vmware-iso": func() (packer.Builder, error) { return &Builder{}, nil },
 		},
 		Hook: func(n string) (packer.Hook, error) {
 			return &packer.DispatchHook{}, nil
 		},
-		PostProcessor: func(n string) (packer.PostProcessor, error) {
-			return &packer.MockPostProcessor{}, nil
+		ProvisionerStore: packer.MapOfProvisioner{
+			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
-		Provisioner: func(n string) (packer.Provisioner, error) {
-			return &shell.Provisioner{}, nil
+		PostProcessorStore: packer.MapOfPostProcessor{
+			"something": func() (packer.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
 		},
 	}
 	config := packer.CoreConfig{
@@ -168,6 +168,9 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	warn, err := b.Prepare()
+	if err != nil {
+		t.Fatalf("error preparing build: %v", err)
+	}
 	if len(warn) > 0 {
 		for _, w := range warn {
 			t.Logf("Configuration warning: %s", w)

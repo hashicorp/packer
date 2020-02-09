@@ -38,8 +38,9 @@ post-processors such as Docker and Artifice.
     to `packer-manifest.json`.
 -   `strip_path` (boolean) Write only filename without the path to the manifest
     file. This defaults to false.
--   `custom_data` (map of strings) Arbitrary data to add to the manifest.
-
+-   `custom_data` (map of strings) Arbitrary data to add to the manifest. This
+    is a [template engine](/docs/templates/engine.html); see
+    [Build template data](#build-template-data) for more information.
 -   `keep_input_artifact` (boolean) - Unlike most other post-processors, the
     keep_input_artifact option will have no effect for the manifest
     post-processor. We will always retain the input artifact for manifest,
@@ -136,3 +137,20 @@ The above manifest was generated with this packer.json:
   ]
 }
 ```
+
+Example usage:
+
+The manifest can be very useful for cleaning up old artifacts, or printing
+important values to logs. The following example uses jq, a command-line tool for
+parsing json output, to find and echo the AWS ami-id of an ami created by a
+build.
+
+``` bash
+
+#!/bin/bash
+
+AMI_ID=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ":" -f2)
+echo $AMI_ID
+
+```
+

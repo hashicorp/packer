@@ -20,6 +20,10 @@ type Artifact struct {
 	// BuilderId is the unique ID for the builder that created this AMI
 	BuilderIdValue string
 
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
+
 	// EC2 connection for performing API stuff.
 	Session *session.Session
 }
@@ -55,6 +59,10 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
+
 	switch name {
 	case "atlas.artifact.metadata":
 		return a.stateAtlasMetadata()
@@ -85,15 +93,10 @@ func (a *Artifact) Destroy() error {
 			errors = append(errors, err)
 		}
 
-		// Deregister ami
-		input := &ec2.DeregisterImageInput{
-			ImageId: &imageId,
-		}
-		if _, err := regionConn.DeregisterImage(input); err != nil {
+		err = DestroyAMIs([]*string{&imageId}, regionConn)
+		if err != nil {
 			errors = append(errors, err)
 		}
-
-		// TODO(mitchellh): Delete the snapshots associated with an AMI too
 	}
 
 	if len(errors) > 0 {

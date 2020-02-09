@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -16,18 +17,19 @@ const (
 )
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return warnings, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -48,7 +50,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRun{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.SSHHost),
+			Host:      commHost(b.config.Comm.Host()),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			CustomConnect: map[string]multistep.Step{
 				"docker":                 &StepConnectDocker{},
@@ -75,7 +77,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -103,9 +105,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			IdValue:        state.Get("image_id").(string),
 			BuilderIdValue: BuilderIdImport,
 			Driver:         driver,
+			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 	} else {
-		artifact = &ExportArtifact{path: b.config.ExportPath}
+		artifact = &ExportArtifact{
+			path:      b.config.ExportPath,
+			StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
+		}
 	}
 
 	return artifact, nil

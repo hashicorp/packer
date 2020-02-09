@@ -91,11 +91,19 @@ func getImage(ctx context.Context, c *Config, d Driver) (*Image, error) {
 		return d.GetImage(c.SourceImageID)
 	}
 
-	familyName := c.SourceImageFamily
-	if c.SourceImageFolderID != "" {
-		return d.GetImageFromFolder(ctx, c.SourceImageFolderID, familyName)
+	folderID := c.SourceImageFolderID
+	if folderID == "" {
+		folderID = StandardImagesFolderID
 	}
-	return d.GetImageFromFolder(ctx, StandardImagesFolderID, familyName)
+
+	switch {
+	case c.SourceImageFamily != "":
+		return d.GetImageFromFolder(ctx, folderID, c.SourceImageFamily)
+	case c.SourceImageName != "":
+		return d.GetImageFromFolderByName(ctx, folderID, c.SourceImageName)
+	}
+
+	return &Image{}, errors.New("neither source_image_name nor source_image_family defined in config")
 }
 
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -173,6 +181,7 @@ runcmd:
 		ResourcesSpec: &compute.ResourcesSpec{
 			Memory: toBytes(config.InstanceMemory),
 			Cores:  int64(config.InstanceCores),
+			Gpus:   int64(config.InstanceGpus),
 		},
 		Metadata: instanceMetadata,
 		BootDiskSpec: &compute.AttachedDiskSpec{
@@ -240,6 +249,9 @@ runcmd:
 	}
 
 	state.Put("disk_id", instance.BootDisk.DiskId)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.Id)
 
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Instance ID %s started. Current instance status %s", instance.Id, instance.Status))

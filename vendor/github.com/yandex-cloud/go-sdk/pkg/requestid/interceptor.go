@@ -17,13 +17,23 @@ const (
 	serverTraceIDHeader   = "x-server-trace-id"
 )
 
-func Interceptor() func(ctx context.Context, method string, req interface{}, reply interface{}, conn *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+func Interceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req interface{}, reply interface{}, conn *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		clientTraceID := uuid.New().String()
 		clientRequestID := uuid.New().String()
+
+		md, ok := metadata.FromOutgoingContext(ctx)
+		if ok && len(md.Get(clientTraceIDHeader)) > 0 {
+			clientTraceID = md.Get(clientTraceIDHeader)[0]
+		}
+
+		ctx = withMetadata(ctx, map[string]string{
+			clientRequestIDHeader: clientRequestID,
+			clientTraceIDHeader:   clientTraceID,
+		})
+
 		var responseHeader metadata.MD
 		opts = append(opts, grpc.Header(&responseHeader))
-		ctx = withClientRequestIDs(ctx, clientTraceID, clientRequestID)
 		err := invoker(ctx, method, req, reply, conn, opts...)
 		return wrapError(err, clientTraceID, clientRequestID, responseHeader)
 	}
@@ -41,15 +51,17 @@ type errorWithRequestIDs struct {
 	ids     RequestIDs
 }
 
-func (e *errorWithRequestIDs) Error() string {
-	switch {
-	case e.ids.ServerRequestID != "":
-		return fmt.Sprintf("request-id = %s %s", e.ids.ServerRequestID, e.origErr.Error())
-	case e.ids.ClientRequestID != "":
-		return fmt.Sprintf("client-request-id = %s %s", e.ids.ClientRequestID, e.origErr.Error())
-	default:
-		return e.origErr.Error()
+func (e *errorWithRequestIDs) Error() (msg string) {
+	if e.ids.ServerRequestID != "" {
+		msg += fmt.Sprintf("server-request-id = %s ", e.ids.ServerRequestID)
 	}
+	if e.ids.ClientRequestID != "" {
+		msg += fmt.Sprintf("client-request-id = %s ", e.ids.ClientRequestID)
+	}
+	if e.ids.ClientTraceID != "" {
+		msg += fmt.Sprintf("client-trace-id = %s ", e.ids.ClientTraceID)
+	}
+	return msg + e.origErr.Error()
 }
 
 func (e errorWithRequestIDs) GRPCStatus() *status.Status {
@@ -61,6 +73,12 @@ func RequestIDsFromError(err error) (*RequestIDs, bool) {
 		return &withID.ids, ok
 	}
 	return nil, false
+}
+
+func ContextWithClientTraceID(ctx context.Context, clientTraceID string) context.Context {
+	return withMetadata(ctx, map[string]string{
+		clientTraceIDHeader: clientTraceID,
+	})
 }
 
 func wrapError(err error, clientTraceID, clientRequestID string, responseHeader metadata.MD) error {
@@ -95,14 +113,15 @@ func getServerHeader(responseHeader metadata.MD, key string) string {
 	return serverHeaderIDRaw[0]
 }
 
-func withClientRequestIDs(ctx context.Context, clientTraceID, clientRequestID string) context.Context {
+func withMetadata(ctx context.Context, meta map[string]string) context.Context {
 	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
 		md = metadata.MD{}
 	} else {
 		md = md.Copy()
 	}
-	md.Set(clientRequestIDHeader, clientRequestID)
-	md.Set(clientTraceIDHeader, clientTraceID)
+	for k, v := range meta {
+		md.Set(k, v)
+	}
 	return metadata.NewOutgoingContext(ctx, md)
 }

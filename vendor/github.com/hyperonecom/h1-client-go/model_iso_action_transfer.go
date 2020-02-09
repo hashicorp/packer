@@ -9,6 +9,7 @@
 
 package openapi
 
+// IsoActionTransfer struct for IsoActionTransfer
 type IsoActionTransfer struct {
 	Project string `json:"project"`
 }

@@ -32,6 +32,8 @@ type StepCloneVM struct {
 	EnableVirtualizationExtensions bool
 	MacAddress                     string
 	KeepRegistered                 bool
+	AdditionalDiskSize             []uint
+	DiskBlockSize                  uint
 }
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -125,6 +127,21 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		}
 	}
 
+	if len(s.AdditionalDiskSize) > 0 {
+		for index, size := range s.AdditionalDiskSize {
+			diskSize := int64(size * 1024 * 1024)
+			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
+			diskBlockSize := int64(s.DiskBlockSize) * 1024 * 1024
+			err = driver.AddVirtualMachineHardDrive(s.VMName, path, diskFile, diskSize, diskBlockSize, "SCSI")
+			if err != nil {
+				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	}
+
 	if s.MacAddress != "" {
 		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
 		if err != nil {
@@ -137,6 +154,9 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.VMName)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", s.VMName)
 
 	return multistep.ActionContinue
 }

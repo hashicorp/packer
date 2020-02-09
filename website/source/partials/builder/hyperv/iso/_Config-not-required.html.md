@@ -1,0 +1,23 @@
+<!-- Code generated from the comments of the Config struct in builder/hyperv/iso/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `disk_size` (uint) - The size, in megabytes, of the hard disk to create
+    for the VM. By default, this is 40 GB.
+    
+-   `use_legacy_network_adapter` (bool) - If true use a legacy network adapter as the NIC.
+    This defaults to false. A legacy network adapter is fully emulated NIC, and is thus
+    supported by various exotic operating systems, but this emulation requires
+    additional overhead and should only be used if absolutely necessary.
+    
+-   `differencing_disk` (bool) - If true enables differencing disks. Only
+    the changes will be written to the new disk. This is especially useful if
+    your source is a VHD/VHDX. This defaults to false.
+    
+-   `use_fixed_vhd_format` (bool) - If true, creates the boot disk on the
+    virtual machine as a fixed VHD format disk. The default is false, which
+    creates a dynamic VHDX format disk. This option requires setting
+    generation to 1, skip_compaction to true, and
+    differencing_disk to false. Additionally, any value entered for
+    disk_block_size will be ignored. The most likely use case for this
+    option is outputing a disk that is in the format required for upload to
+    Azure.
+    

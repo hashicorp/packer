@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package digitaloceanimport
 
 import (
@@ -17,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/digitalocean/godo"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/digitalocean"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -33,16 +36,17 @@ type Config struct {
 	SpacesKey    string `mapstructure:"spaces_key"`
 	SpacesSecret string `mapstructure:"spaces_secret"`
 
-	SpacesRegion string        `mapstructure:"spaces_region"`
-	SpaceName    string        `mapstructure:"space_name"`
-	ObjectName   string        `mapstructure:"space_object_name"`
-	SkipClean    bool          `mapstructure:"skip_clean"`
-	Tags         []string      `mapstructure:"image_tags"`
-	Name         string        `mapstructure:"image_name"`
-	Description  string        `mapstructure:"image_description"`
-	Distribution string        `mapstructure:"image_distribution"`
-	ImageRegions []string      `mapstructure:"image_regions"`
-	Timeout      time.Duration `mapstructure:"timeout"`
+	SpacesRegion string   `mapstructure:"spaces_region"`
+	SpaceName    string   `mapstructure:"space_name"`
+	ObjectName   string   `mapstructure:"space_object_name"`
+	SkipClean    bool     `mapstructure:"skip_clean"`
+	Tags         []string `mapstructure:"image_tags"`
+	Name         string   `mapstructure:"image_name"`
+	Description  string   `mapstructure:"image_description"`
+	Distribution string   `mapstructure:"image_distribution"`
+	ImageRegions []string `mapstructure:"image_regions"`
+
+	Timeout time.Duration `mapstructure:"timeout"`
 
 	ctx interpolate.Context
 }
@@ -68,6 +72,8 @@ func (t *apiTokenSource) Token() (*oauth2.Token, error) {
 func (l logger) Log(args ...interface{}) {
 	l.logger.Println(args...)
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -119,13 +125,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"spaces_region": &p.config.SpacesRegion,
 		"space_name":    &p.config.SpaceName,
 		"image_name":    &p.config.Name,
-		"image_regions": &p.config.ImageRegions[0],
 	}
 	for key, ptr := range requiredArgs {
 		if *ptr == "" {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
+
+	if len(p.config.ImageRegions) == 0 {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("image_regions must be set"))
 	}
 
 	if len(errs.Errors) > 0 {
@@ -139,6 +149,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
+
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
 
 	p.config.ObjectName, err = interpolate.Render(p.config.ObjectName, &p.config.ctx)
 	if err != nil {

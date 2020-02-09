@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package ansible
 
 import (
@@ -26,9 +28,9 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/adapter"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -73,20 +75,13 @@ type Provisioner struct {
 	done              chan struct{}
 	ansibleVersion    string
 	ansibleMajVersion uint
+	generatedData     map[string]interface{}
 }
 
-type PassthroughTemplate struct {
-	WinRMPassword string
-}
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
-
-	// Create passthrough for winrm password so we can fill it in once we know
-	// it
-	p.config.ctx.Data = &PassthroughTemplate{
-		WinRMPassword: `{{.WinRMPassword}}`,
-	}
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -212,12 +207,11 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
-	// Interpolate env vars to check for .WinRMPassword
-	p.config.ctx.Data = &PassthroughTemplate{
-		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
-	}
+	// Interpolate env vars to check for generated values like password and port
+	p.generatedData = generatedData
+	p.config.ctx.Data = generatedData
 	for i, envVar := range p.config.AnsibleEnvVars {
 		envVar, err := interpolate.Render(envVar, &p.config.ctx)
 		if err != nil {
@@ -225,7 +219,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 		p.config.AnsibleEnvVars[i] = envVar
 	}
-	// Interpolate extra vars to check for .WinRMPassword
+	// Interpolate extra vars to check for generated values like password and port
 	for i, arg := range p.config.ExtraArguments {
 		arg, err := interpolate.Render(arg, &p.config.ctx)
 		if err != nil {
@@ -240,6 +234,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
+	if err != nil {
+		return fmt.Errorf("error creating host signer: %s", err)
+	}
+
 	// Remove the private key file
 	if len(k.privKeyFile) > 0 {
 		defer os.Remove(k.privKeyFile)
@@ -496,9 +494,10 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	// remove winrm password from command, if it's been added
 	flattenedCmd := strings.Join(cmd.Args, " ")
 	sanitized := flattenedCmd
-	if len(getWinRMPassword(p.config.PackerBuildName)) > 0 {
+	winRMPass, ok := p.generatedData["WinRMPassword"]
+	if ok && winRMPass != "" {
 		sanitized = strings.Replace(sanitized,
-			getWinRMPassword(p.config.PackerBuildName), "*****", -1)
+			winRMPass.(string), "*****", -1)
 	}
 	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
 
@@ -626,10 +625,4 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
-}
-
-func getWinRMPassword(buildName string) string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
-	packer.LogSecretFilter.Set(winRMPass)
-	return winRMPass
 }

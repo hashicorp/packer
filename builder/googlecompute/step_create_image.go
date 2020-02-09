@@ -40,11 +40,11 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 
 	imageCh, errCh := driver.CreateImage(
 		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
-		config.DiskName, config.ImageLabels, config.ImageLicenses, config.ImageEncryptionKey)
+		config.DiskName, config.ImageLabels, config.ImageLicenses, config.ImageEncryptionKey.ComputeType())
 	var err error
 	select {
 	case err = <-errCh:
-	case <-time.After(config.stateTimeout):
+	case <-time.After(config.StateTimeout):
 		err = errors.New("time out while waiting for image to register")
 	}
 

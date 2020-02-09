@@ -3,9 +3,11 @@ package proxmox
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -26,26 +28,29 @@ var _ packer.Builder = &Builder{}
 
 var pluginVersion = "1.0.0"
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	config, warnings, errs := NewConfig(raws...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
-	b.config = *config
-	return nil, nil
+	return nil, nil, nil
 }
+
+const downloadPathKey = "downloaded_iso_path"
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	var err error
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: b.config.SkipCertValidation,
 	}
-	b.proxmoxClient, err = proxmox.NewClient(b.config.ProxmoxURL.String(), nil, tlsConfig)
+	b.proxmoxClient, err = proxmox.NewClient(b.config.proxmoxURL.String(), nil, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	err = b.proxmoxClient.Login(b.config.Username, b.config.Password)
+	err = b.proxmoxClient.Login(b.config.Username, b.config.Password, "")
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +64,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the steps
 	steps := []multistep.Step{
+		&common.StepDownload{
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
+			Description:  "ISO",
+			Extension:    b.config.TargetExtension,
+			ResultKey:    downloadPathKey,
+			TargetPath:   b.config.TargetPath,
+			Url:          b.config.ISOUrls,
+		},
+		&stepUploadISO{},
 		&stepStartVM{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -89,10 +104,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
+	// If we were interrupted or cancelled, then just exit.
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		return nil, errors.New("build was cancelled")
+	}
+
+	// Verify that the template_id was set properly, otherwise we didn't progress through the last step
+	tplID, ok := state.Get("template_id").(int)
+	if !ok {
+		return nil, fmt.Errorf("template ID could not be determined")
+	}
 
 	artifact := &Artifact{
-		templateID:    state.Get("template_id").(int),
+		templateID:    tplID,
 		proxmoxClient: b.proxmoxClient,
+		StateData:     map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

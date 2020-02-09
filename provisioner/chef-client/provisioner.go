@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that uses
 // Chef to provision the remote machine, specifically with chef-client (that is,
 // with a Chef server).
@@ -13,9 +15,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner"
@@ -32,13 +34,13 @@ type guestOSTypeConfig struct {
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash -s --{{if .Version}} -v {{.Version}}{{end}}",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
 	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"",
+		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; Install-Project{{if .Version}} -version {{.Version}}{{end}}\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
 		stagingDir:     "C:/Windows/Temp/packer-chef-client",
 	},
@@ -75,6 +77,7 @@ type Config struct {
 	StagingDir                 string   `mapstructure:"staging_directory"`
 	ValidationClientName       string   `mapstructure:"validation_client_name"`
 	ValidationKeyPath          string   `mapstructure:"validation_key_path"`
+	Version                    string   `mapstructure:"version"`
 
 	ctx interpolate.Context
 }
@@ -84,6 +87,7 @@ type Provisioner struct {
 	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
+	generatedData     map[string]interface{}
 }
 
 type ConfigTemplate struct {
@@ -101,10 +105,6 @@ type ConfigTemplate struct {
 	ValidationKeyPath          string
 }
 
-type EnvVarsTemplate struct {
-	WinRMPassword string
-}
-
 type ExecuteTemplate struct {
 	ConfigPath string
 	JsonPath   string
@@ -112,7 +112,8 @@ type ExecuteTemplate struct {
 }
 
 type InstallChefTemplate struct {
-	Sudo bool
+	Sudo    bool
+	Version string
 }
 
 type KnifeTemplate struct {
@@ -121,13 +122,9 @@ type KnifeTemplate struct {
 	Args  string
 }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// Create passthrough for winrm password so we can fill it in once we know
-	// it
-	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: `{{.WinRMPassword}}`,
-	}
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
+func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -242,8 +239,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
-
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	p.generatedData = generatedData
 	p.communicator = comm
 
 	nodeName := p.config.NodeName
@@ -254,7 +251,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	serverUrl := p.config.ServerUrl
 
 	if !p.config.SkipInstall {
-		if err := p.installChef(ui, comm); err != nil {
+		if err := p.installChef(ui, comm, p.config.Version); err != nil {
 			return fmt.Errorf("Error installing Chef: %s", err)
 		}
 	}
@@ -279,8 +276,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	if p.config.ValidationKeyPath != "" {
+		path, err := packer.ExpandUser(p.config.ValidationKeyPath)
+		if err != nil {
+			return fmt.Errorf("Error while expanding a tilde in the validation key: %s", err)
+		}
 		remoteValidationKeyPath = fmt.Sprintf("%s/validation.pem", p.config.StagingDir)
-		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, p.config.ValidationKeyPath); err != nil {
+		if err := p.uploadFile(ui, comm, remoteValidationKeyPath, path); err != nil {
 			return fmt.Errorf("Error copying validation key: %s", err)
 		}
 	}
@@ -602,12 +603,13 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, version string) error {
 	ui.Message("Installing Chef...")
 	ctx := context.TODO()
 
 	p.config.ctx.Data = &InstallChefTemplate{
-		Sudo: !p.config.PreventSudo,
+		Sudo:    !p.config.PreventSudo,
+		Version: version,
 	}
 	command, err := interpolate.Render(p.config.InstallCommand, &p.config.ctx)
 	if err != nil {
@@ -711,12 +713,6 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	return result, nil
 }
 
-func getWinRMPassword(buildName string) string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
-	packer.LogSecretFilter.Set(winRMPass)
-	return winRMPass
-}
-
 func (p *Provisioner) Communicator() packer.Communicator {
 	return p.communicator
 }
@@ -727,9 +723,7 @@ func (p *Provisioner) ElevatedUser() string {
 
 func (p *Provisioner) ElevatedPassword() string {
 	// Replace ElevatedPassword for winrm users who used this feature
-	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
-	}
+	p.config.ctx.Data = p.generatedData
 
 	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
 

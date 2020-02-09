@@ -3,23 +3,14 @@ package common
 import (
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
-
-func testHWConfig() *HWConfig {
-	return &HWConfig{
-		CpuCount:   1,
-		CoreCount:  1,
-		MemorySize: 512,
-
-		Sound: true,
-		USB:   true,
-	}
-}
 
 func TestHWConfigPrepare(t *testing.T) {
 	c := new(HWConfig)
 
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -56,7 +47,7 @@ func TestHWConfigParallel_File(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Parallel = "file:filename"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -85,7 +76,7 @@ func TestHWConfigParallel_Device(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Parallel = "device:devicename,uni"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -118,7 +109,7 @@ func TestHWConfigParallel_Auto(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Parallel = "auto:bi"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -147,7 +138,7 @@ func TestHWConfigParallel_None(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Parallel = "none"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -169,7 +160,7 @@ func TestHWConfigSerial_File(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Serial = "file:filename,true"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -202,7 +193,7 @@ func TestHWConfigSerial_Device(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Serial = "device:devicename,true"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -235,7 +226,7 @@ func TestHWConfigSerial_Pipe(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Serial = "pipe:mypath,client,app,true"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -276,7 +267,7 @@ func TestHWConfigSerial_Auto(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Serial = "auto:true"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
@@ -305,7 +296,7 @@ func TestHWConfigSerial_None(t *testing.T) {
 	c := new(HWConfig)
 
 	c.Serial = "none"
-	if errs := c.Prepare(testConfigTemplate(t)); len(errs) > 0 {
+	if errs := c.Prepare(interpolate.NewContext()); len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 

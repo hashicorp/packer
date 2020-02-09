@@ -51,6 +51,18 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 	return d.VBoxManage(command...)
 }
 
+func (d *VBox42Driver) CreateNVMeController(vmName string, name string, portcount int) error {
+	command := []string{
+		"storagectl", vmName,
+		"--name", name,
+		"--add", "pcie",
+		"--controller", "NVMe",
+		"--portcount", strconv.Itoa(portcount),
+	}
+
+	return d.VBoxManage(command...)
+}
+
 func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 
 	command := []string{
@@ -64,14 +76,7 @@ func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 }
 
 func (d *VBox42Driver) Delete(name string) error {
-	ctx := context.TODO()
-	return retry.Config{
-		Tries:      5,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 1 * time.Second, MaxBackoff: 1 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
-		err := d.VBoxManage("unregistervm", name, "--delete")
-		return err
-	})
+	return d.VBoxManage("unregistervm", name, "--delete")
 }
 
 func (d *VBox42Driver) Iso() (string, error) {
@@ -153,8 +158,13 @@ func (d *VBox42Driver) Stop(name string) error {
 		return err
 	}
 
-	// We sleep here for a little bit to let the session "unlock"
-	time.Sleep(2 * time.Second)
+	return nil
+}
+
+func (d *VBox42Driver) StopViaACPI(name string) error {
+	if err := d.VBoxManage("controlvm", name, "acpipowerbutton"); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -177,7 +187,18 @@ func (d *VBox42Driver) SuppressMessages() error {
 }
 
 func (d *VBox42Driver) VBoxManage(args ...string) error {
-	_, err := d.VBoxManageWithOutput(args...)
+	ctx := context.TODO()
+	err := retry.Config{
+		Tries: 5,
+		ShouldRetry: func(err error) bool {
+			return strings.Contains(err.Error(), "VBOX_E_INVALID_OBJECT_STATE")
+		},
+		RetryDelay: func() time.Duration { return 1 * time.Minute },
+	}.Run(ctx, func(ctx context.Context) error {
+		_, err := d.VBoxManageWithOutput(args...)
+		return err
+	})
+
 	return err
 }
 
@@ -252,17 +273,18 @@ func (d *VBox42Driver) LoadSnapshots(vmName string) (*VBoxSnapshot, error) {
 	}
 	log.Printf("Executing LoadSnapshots: VM: %s", vmName)
 
+	var rootNode *VBoxSnapshot
 	stdoutString, err := d.VBoxManageWithOutput("snapshot", vmName, "list", "--machinereadable")
+	if stdoutString == "This machine does not have any snapshots" {
+		return rootNode, nil
+	}
 	if nil != err {
 		return nil, err
 	}
 
-	var rootNode *VBoxSnapshot
-	if stdoutString != "This machine does not have any snapshots" {
-		rootNode, err = ParseSnapshotData(stdoutString)
-		if nil != err {
-			return nil, err
-		}
+	rootNode, err = ParseSnapshotData(stdoutString)
+	if nil != err {
+		return nil, err
 	}
 
 	return rootNode, nil

@@ -72,7 +72,11 @@ func TestListenRangeConfig_Listen(t *testing.T) {
 			l.Close()
 			t.Fatalf("port should be taken, this should timeout.")
 		}
-		if p := int(err.(ErrPortFileLocked)); p != lockedListener.Port {
+		portErr, ok := err.(ErrPortFileLocked)
+		if !ok {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if p := int(portErr); p != lockedListener.Port {
 			t.Fatalf("wrong fileport: %d", p)
 		}
 		cancel()

@@ -82,7 +82,8 @@ func (s *StepAddBox) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
-	ui.Say("Adding box using vagrant box add..")
+	ui.Say("Adding box using vagrant box add ...")
+	ui.Message("(this can take some time if we need to download the box)")
 	addArgs := s.generateAddArgs()
 
 	log.Printf("[vagrant] Calling box add with following args %s", strings.Join(addArgs, " "))

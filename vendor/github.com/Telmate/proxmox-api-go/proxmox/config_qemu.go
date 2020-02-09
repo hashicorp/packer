@@ -23,18 +23,32 @@ type (
 
 // ConfigQemu - Proxmox API QEMU options
 type ConfigQemu struct {
+	VmID         int         `json:"vmid"`
 	Name         string      `json:"name"`
 	Description  string      `json:"desc"`
+	Pool         string      `json:"pool,omitempty"`
+	Bios         string      `json:"bios"`
 	Onboot       bool        `json:"onboot"`
 	Agent        int         `json:"agent"`
 	Memory       int         `json:"memory"`
+	Balloon      int         `json:"balloon"`
 	QemuOs       string      `json:"os"`
 	QemuCores    int         `json:"cores"`
 	QemuSockets  int         `json:"sockets"`
+	QemuVcpus    int         `json:"vcpus"`
+	QemuCpu      string      `json:"cpu"`
+	QemuNuma     bool        `json:"numa"`
+	Hotplug      string      `json:"hotplug"`
 	QemuIso      string      `json:"iso"`
 	FullClone    *int        `json:"fullclone"`
+	Boot         string      `json:"boot"`
+	BootDisk     string      `json:"bootdisk,omitempty"`
+	Scsihw       string      `json:"scsihw,omitempty"`
 	QemuDisks    QemuDevices `json:"disk"`
+	QemuVga      QemuDevice  `json:"vga,omitempty"`
 	QemuNetworks QemuDevices `json:"network"`
+	QemuSerials  QemuDevices `json:"serial,omitempty"`
+	HaState      string      `json:"hastate,omitempty"`
 
 	// Deprecated single disk.
 	DiskSize    float64 `json:"diskGB"`
@@ -50,14 +64,16 @@ type ConfigQemu struct {
 	// cloud-init options
 	CIuser     string `json:"ciuser"`
 	CIpassword string `json:"cipassword"`
+	CIcustom   string `json:"cicustom"`
 
 	Searchdomain string `json:"searchdomain"`
 	Nameserver   string `json:"nameserver"`
 	Sshkeys      string `json:"sshkeys"`
 
-	// arrays are hard, support 2 interfaces for now
+	// arrays are hard, support 3 interfaces for now
 	Ipconfig0 string `json:"ipconfig0"`
 	Ipconfig1 string `json:"ipconfig1"`
+	Ipconfig2 string `json:"ipconfig2"`
 }
 
 // CreateVm - Tell Proxmox API to make the VM
@@ -76,21 +92,61 @@ func (config ConfigQemu) CreateVm(vmr *VmRef, client *Client) (err error) {
 		"ostype":      config.QemuOs,
 		"sockets":     config.QemuSockets,
 		"cores":       config.QemuCores,
-		"cpu":         "host",
+		"cpu":         config.QemuCpu,
+		"numa":        config.QemuNuma,
+		"hotplug":     config.Hotplug,
 		"memory":      config.Memory,
+		"boot":        config.Boot,
 		"description": config.Description,
+	}
+
+	if config.Bios != "" {
+		params["bios"] = config.Bios
+	}
+
+	if config.Balloon >= 1 {
+		params["balloon"] = config.Balloon
+	}
+	
+	if config.QemuVcpus >= 1 {
+		params["vcpus"] = config.QemuVcpus
+	}
+	
+	if vmr.pool != "" {
+		params["pool"] = vmr.pool
+	}
+
+	if config.BootDisk != "" {
+		params["bootdisk"] = config.BootDisk
+	}
+
+	if config.Scsihw != "" {
+		params["scsihw"] = config.Scsihw
 	}
 
 	// Create disks config.
 	config.CreateQemuDisksParams(vmr.vmId, params, false)
 
+	// Create vga config.
+	vgaParam := QemuDeviceParam{}
+	vgaParam = vgaParam.createDeviceParam(config.QemuVga, nil)
+	if len(vgaParam) > 0 {
+		params["vga"] = strings.Join(vgaParam, ",")
+	}
+
 	// Create networks config.
 	config.CreateQemuNetworksParams(vmr.vmId, params)
+
+	// Create serial interfaces
+	config.CreateQemuSerialsParams(vmr.vmId, params)
 
 	exitStatus, err := client.CreateQemuVm(vmr.node, params)
 	if err != nil {
 		return fmt.Errorf("Error creating VM: %v, error status: %s (params: %v)", err, exitStatus, params)
 	}
+
+	client.UpdateVMHA(vmr, config.HaState)
+
 	return
 }
 
@@ -102,7 +158,8 @@ func (config ConfigQemu) HasCloudInit() bool {
 		config.Nameserver != "" ||
 		config.Sshkeys != "" ||
 		config.Ipconfig0 != "" ||
-		config.Ipconfig1 != ""
+		config.Ipconfig1 != "" ||
+		config.CIcustom != ""
 }
 
 /*
@@ -130,16 +187,24 @@ func (config ConfigQemu) CloneVm(sourceVmr *VmRef, vmr *VmRef, client *Client) (
 		storage = disk0Storage
 	}
 	params := map[string]interface{}{
-		"newid":   vmr.vmId,
-		"target":  vmr.node,
-		"name":    config.Name,
-		"storage": storage,
-		"full":    fullclone,
+		"newid":  vmr.vmId,
+		"target": vmr.node,
+		"name":   config.Name,
+		"full":   fullclone,
 	}
+	if vmr.pool != "" {
+		params["pool"] = vmr.pool
+	}
+
+	if fullclone == "1" {
+		params["storage"] = storage
+	}
+
 	_, err = client.CloneQemuVm(sourceVmr, params)
 	if err != nil {
 		return
 	}
+
 	return config.UpdateConfig(vmr, client)
 }
 
@@ -151,14 +216,68 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 		"agent":       config.Agent,
 		"sockets":     config.QemuSockets,
 		"cores":       config.QemuCores,
+		"cpu":         config.QemuCpu,
+		"numa":        config.QemuNuma,
+		"hotplug":     config.Hotplug,
 		"memory":      config.Memory,
+		"boot":        config.Boot,
+	}
+
+	//Array to list deleted parameters
+	deleteParams := []string{}
+
+	if config.Bios != "" {
+		configParams["bios"] = config.Bios
+	}
+
+	if config.Balloon >= 1 {
+		configParams["balloon"] = config.Balloon
+	} else {
+		deleteParams = append(deleteParams, "balloon")
+	}
+	
+	if config.QemuVcpus >= 1 {
+		configParams["vcpus"] = config.QemuVcpus
+	} else {
+		deleteParams = append(deleteParams, "vcpus")
+	}
+	
+	if config.BootDisk != "" {
+		configParams["bootdisk"] = config.BootDisk
+	}
+
+	if config.Scsihw != "" {
+		configParams["scsihw"] = config.Scsihw
 	}
 
 	// Create disks config.
-	config.CreateQemuDisksParams(vmr.vmId, configParams, true)
+	configParamsDisk := map[string]interface{} {
+		"vmid": vmr.vmId,
+	}
+	config.CreateQemuDisksParams(vmr.vmId, configParamsDisk, false)
+	client.createVMDisks(vmr.node, configParamsDisk)
+	//Copy the disks to the global configParams
+	for key, value := range configParamsDisk {
+		//vmid is only required in createVMDisks
+		if key != "vmid" {
+			configParams[key] = value
+		}
+	}
 
 	// Create networks config.
 	config.CreateQemuNetworksParams(vmr.vmId, configParams)
+
+	// Create vga config.
+	vgaParam := QemuDeviceParam{}
+	vgaParam = vgaParam.createDeviceParam(config.QemuVga, nil)
+	if len(vgaParam) > 0 {
+		configParams["vga"] = strings.Join(vgaParam, ",")
+	} else {
+		deleteParams = append(deleteParams, "vga")
+	}
+
+	// Create serial interfaces
+	config.CreateQemuSerialsParams(vmr.vmId, configParams)
 
 	// cloud-init options
 	if config.CIuser != "" {
@@ -166,6 +285,9 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 	}
 	if config.CIpassword != "" {
 		configParams["cipassword"] = config.CIpassword
+	}
+	if config.CIcustom != "" {
+		configParams["cicustom"] = config.CIcustom
 	}
 	if config.Searchdomain != "" {
 		configParams["searchdomain"] = config.Searchdomain
@@ -186,7 +308,24 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 	if config.Ipconfig1 != "" {
 		configParams["ipconfig1"] = config.Ipconfig1
 	}
+	if config.Ipconfig2 != "" {
+		configParams["ipconfig2"] = config.Ipconfig2
+	}
+	
+	if len(deleteParams) > 0 {
+		configParams["delete"] = strings.Join(deleteParams, ", ")
+	}
+	
 	_, err = client.SetVmConfig(vmr, configParams)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	client.UpdateVMHA(vmr, config.HaState)
+
+	_, err = client.UpdateVMPool(vmr, config.Pool)
+
 	return err
 }
 
@@ -202,11 +341,13 @@ func NewConfigQemuFromJson(io io.Reader) (config *ConfigQemu, err error) {
 }
 
 var (
-	rxIso      = regexp.MustCompile(`(.*?),media`)
-	rxDeviceID = regexp.MustCompile(`\d+`)
-	rxDiskName = regexp.MustCompile(`(virtio|scsi)\d+`)
-	rxDiskType = regexp.MustCompile(`\D+`)
-	rxNicName  = regexp.MustCompile(`net\d+`)
+	rxIso        = regexp.MustCompile(`(.*?),media`)
+	rxDeviceID   = regexp.MustCompile(`\d+`)
+	rxDiskName   = regexp.MustCompile(`(virtio|scsi)\d+`)
+	rxDiskType   = regexp.MustCompile(`\D+`)
+	rxNicName    = regexp.MustCompile(`net\d+`)
+	rxMpName     = regexp.MustCompile(`mp\d+`)
+	rxSerialName = regexp.MustCompile(`serial\d+`)
 )
 
 func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err error) {
@@ -247,6 +388,10 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	if _, isSet := vmConfig["description"]; isSet {
 		description = vmConfig["description"].(string)
 	}
+	bios := "seabios"
+	if _, isSet := vmConfig["bios"]; isSet {
+		bios = vmConfig["bios"].(string)
+	}
 	onboot := true
 	if _, isSet := vmConfig["onboot"]; isSet {
 		onboot = Itob(int(vmConfig["onboot"].(float64)))
@@ -270,26 +415,82 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	if _, isSet := vmConfig["memory"]; isSet {
 		memory = vmConfig["memory"].(float64)
 	}
+	balloon := 0.0
+	if _, isSet := vmConfig["balloon"]; isSet {
+		balloon = vmConfig["balloon"].(float64)
+	}
 	cores := 1.0
 	if _, isSet := vmConfig["cores"]; isSet {
 		cores = vmConfig["cores"].(float64)
+	}
+	vcpus := 0.0
+	if _, isSet := vmConfig["vcpus"]; isSet {
+		vcpus = vmConfig["vcpus"].(float64)
 	}
 	sockets := 1.0
 	if _, isSet := vmConfig["sockets"]; isSet {
 		sockets = vmConfig["sockets"].(float64)
 	}
+	cpu := "host"
+	if _, isSet := vmConfig["cpu"]; isSet {
+		cpu = vmConfig["cpu"].(string)
+	}
+	numa := false
+	if _, isSet := vmConfig["numa"]; isSet {
+		numa = Itob(int(vmConfig["numa"].(float64)))
+	}
+	//Can be network,disk,cpu,memory,usb
+	hotplug := "network,disk,usb"
+	if _, isSet := vmConfig["hotplug"]; isSet {
+		hotplug = vmConfig["hotplug"].(string)
+	}
+	//boot by default from hard disk (c), CD-ROM (d), network (n).
+	boot := "cdn"
+	if _, isSet := vmConfig["boot"]; isSet {
+		boot = vmConfig["boot"].(string)
+	}
+	bootdisk := ""
+	if _, isSet := vmConfig["bootdisk"]; isSet {
+		bootdisk = vmConfig["bootdisk"].(string)
+	}
+	scsihw := "lsi"
+	if _, isSet := vmConfig["scsihw"]; isSet {
+		scsihw = vmConfig["scsihw"].(string)
+	}
+	hastate := ""
+	if _, isSet := vmConfig["hastate"]; isSet {
+		hastate = vmConfig["hastate"].(string)
+	}
+
 	config = &ConfigQemu{
 		Name:         name,
 		Description:  strings.TrimSpace(description),
+		Bios:         bios,
 		Onboot:       onboot,
 		Agent:        agent,
 		QemuOs:       ostype,
 		Memory:       int(memory),
 		QemuCores:    int(cores),
 		QemuSockets:  int(sockets),
+		QemuCpu:      cpu,
+		QemuNuma:     numa,
+		Hotplug:      hotplug,
 		QemuVlanTag:  -1,
+		Boot:         boot,
+		BootDisk:     bootdisk,
+		Scsihw:       scsihw,
+		HaState:      hastate,
 		QemuDisks:    QemuDevices{},
+		QemuVga:      QemuDevice{},
 		QemuNetworks: QemuDevices{},
+		QemuSerials:  QemuDevices{},
+	}
+	
+	if balloon >= 1 {
+		config.Balloon = int(balloon);
+	}
+	if vcpus >= 1 {
+		config.QemuVcpus = int(vcpus);
 	}
 
 	if vmConfig["ide2"] != nil {
@@ -302,6 +503,9 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	}
 	if _, isSet := vmConfig["cipassword"]; isSet {
 		config.CIpassword = vmConfig["cipassword"].(string)
+	}
+	if _, isSet := vmConfig["cicustom"]; isSet {
+		config.CIcustom = vmConfig["cicustom"].(string)
 	}
 	if _, isSet := vmConfig["searchdomain"]; isSet {
 		config.Searchdomain = vmConfig["searchdomain"].(string)
@@ -317,6 +521,9 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	}
 	if _, isSet := vmConfig["ipconfig1"]; isSet {
 		config.Ipconfig1 = vmConfig["ipconfig1"].(string)
+	}
+	if _, isSet := vmConfig["ipconfig2"]; isSet {
+		config.Ipconfig2 = vmConfig["ipconfig2"].(string)
 	}
 
 	// Add disks.
@@ -355,6 +562,16 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		}
 	}
 
+	//Display
+	if vga, isSet := vmConfig["vga"]; isSet {
+		vgaList := strings.Split(vga.(string), ",")
+		vgaMap := QemuDevice{}
+		vgaMap.readDeviceConfig(vgaList)
+		if len(vgaMap) > 0 {
+			config.QemuVga = vgaMap
+		}
+	}
+
 	// Add networks.
 	nicNames := []string{}
 
@@ -385,6 +602,30 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		// And device config to networks.
 		if len(nicConfMap) > 0 {
 			config.QemuNetworks[nicID] = nicConfMap
+		}
+	}
+
+	// Add serials
+	serialNames := []string{}
+
+	for k, _ := range vmConfig {
+		if serialName := rxSerialName.FindStringSubmatch(k); len(serialName) > 0 {
+			serialNames = append(serialNames, serialName[0])
+		}
+	}
+
+	for _, serialName := range serialNames {
+		id := rxDeviceID.FindStringSubmatch(serialName)
+		serialID, _ := strconv.Atoi(id[0])
+
+		serialConfMap := QemuDevice{
+			"id":   serialID,
+			"type": vmConfig[serialName],
+		}
+
+		// And device config to serials map.
+		if len(serialConfMap) > 0 {
+			config.QemuSerials[serialID] = serialConfMap
 		}
 	}
 
@@ -620,7 +861,9 @@ func (c ConfigQemu) CreateQemuDisksParams(
 			"storage_type": "lvm",  // default old style
 			"cache":        "none", // default old value
 		}
-
+		if c.QemuDisks == nil {
+			c.QemuDisks = make(QemuDevices)
+		}
 		c.QemuDisks[0] = deprecatedStyleMap
 	}
 
@@ -646,9 +889,9 @@ func (c ConfigQemu) CreateQemuDisksParams(
 
 		// Disk name.
 		var diskFile string
-		// Currently ZFS local, LVM, and Directory are considered.
+		// Currently ZFS local, LVM, Ceph RBD, CephFS and Directory are considered.
 		// Other formats are not verified, but could be added if they're needed.
-		rxStorageTypes := `(zfspool|lvm)`
+		rxStorageTypes := `(zfspool|lvm|rbd|cephfs)`
 		storageType := diskConfMap["storage_type"].(string)
 		if matched, _ := regexp.MatchString(rxStorageTypes, storageType); matched {
 			diskFile = fmt.Sprintf("file=%v:vm-%v-disk-%v", diskConfMap["storage"], vmID, diskID)
@@ -715,4 +958,50 @@ func (confMap QemuDevice) readDeviceConfig(confList []string) error {
 func (c ConfigQemu) String() string {
 	jsConf, _ := json.Marshal(c)
 	return string(jsConf)
+}
+
+// Create parameters for serial interface
+func (c ConfigQemu) CreateQemuSerialsParams(
+	vmID int,
+	params map[string]interface{},
+) error {
+
+	// For new style with multi disk device.
+	for serialID, serialConfMap := range c.QemuSerials {
+		// Device name.
+		deviceType := serialConfMap["type"].(string)
+		qemuSerialName := "serial" + strconv.Itoa(serialID)
+
+		// Add back to Qemu prams.
+		params[qemuSerialName] = deviceType
+	}
+
+	return nil
+}
+
+// NextId - Get next free VMID
+func (c *Client) NextId() (id int, err error) {
+	var data map[string]interface{}
+	_, err = c.session.GetJSON("/cluster/nextid", nil, nil, &data)
+	if err != nil {
+		return -1, err
+	}
+	if data["data"] == nil || data["errors"] != nil {
+		return -1, fmt.Errorf(data["errors"].(string))
+	}
+
+	i, err := strconv.Atoi(data["data"].(string))
+	if err != nil {
+		return -1, err
+	}
+	return i, nil
+}
+
+// VMIdExists - If you pass an VMID that exists it will raise an error otherwise it will return the vmID
+func (c *Client) VMIdExists(vmID int) (id int, err error) {
+	_, err = c.session.Get(fmt.Sprintf("/cluster/nextid?vmid=%d", vmID), nil, nil)
+	if err != nil {
+		return -1, err
+	}
+	return vmID, nil
 }

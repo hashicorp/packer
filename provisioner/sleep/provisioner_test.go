@@ -40,15 +40,15 @@ func TestProvisioner_Provision(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"valid sleep", fields{time.Millisecond}, args{context.Background()}, false},
-		{"timeout", fields{time.Millisecond}, args{ctxCancelled}, true},
+		{"valid sleep", fields{1 * time.Millisecond}, args{context.Background()}, false},
+		{"timeout", fields{1 * time.Millisecond}, args{ctxCancelled}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provisioner{
 				Duration: tt.fields.Duration,
 			}
-			if err := p.Provision(tt.args.ctx, nil, nil); (err != nil) != tt.wantErr {
+			if err := p.Provision(tt.args.ctx, nil, nil, make(map[string]interface{})); (err != nil) != tt.wantErr {
 				t.Errorf("Provisioner.Provision() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

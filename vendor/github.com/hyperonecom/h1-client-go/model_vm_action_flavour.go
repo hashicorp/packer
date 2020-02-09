@@ -9,6 +9,7 @@
 
 package openapi
 
+// VmActionFlavour struct for VmActionFlavour
 type VmActionFlavour struct {
 	Service string `json:"service"`
 }

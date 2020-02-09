@@ -187,7 +187,9 @@ func runAndLog(cmd *exec.Cmd) (string, string, error) {
 					"often has extremely vague error messages such as this and Packer\n"+
 					"itself can't do much about that. Please check the vmware.log files\n"+
 					"created by VMware when a VM is started (in the directory of the\n"+
-					"vmx file), which often contains more detailed error information.")
+					"vmx file), which often contains more detailed error information.\n\n"+
+					"You may need to set the command line flag --on-error=abort to\n\n"+
+					"prevent Packer from cleaning up the vmx file directory.")
 		}
 	}
 

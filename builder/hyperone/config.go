@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
+
 package hyperone
 
 import (
@@ -32,32 +35,61 @@ const (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
-
-	APIURL     string `mapstructure:"api_url"`
-	Token      string `mapstructure:"token"`
-	Project    string `mapstructure:"project"`
-	TokenLogin string `mapstructure:"token_login"`
-
-	StateTimeout time.Duration `mapstructure:"state_timeout"`
-
-	SourceImage      string                 `mapstructure:"source_image"`
-	ImageName        string                 `mapstructure:"image_name"`
-	ImageDescription string                 `mapstructure:"image_description"`
-	ImageTags        map[string]interface{} `mapstructure:"image_tags"`
-	ImageService     string                 `mapstructure:"image_service"`
-
-	VmType string                 `mapstructure:"vm_type"`
-	VmName string                 `mapstructure:"vm_name"`
-	VmTags map[string]interface{} `mapstructure:"vm_tags"`
-
-	DiskName string  `mapstructure:"disk_name"`
-	DiskType string  `mapstructure:"disk_type"`
-	DiskSize float32 `mapstructure:"disk_size"`
-
-	Network             string `mapstructure:"network"`
-	PrivateIP           string `mapstructure:"private_ip"`
-	PublicIP            string `mapstructure:"public_ip"`
-	PublicNetAdpService string `mapstructure:"public_netadp_service"`
+	// Custom API endpoint URL, compatible with HyperOne.
+	// It can also be specified via environment variable HYPERONE_API_URL.
+	APIURL string `mapstructure:"api_url" required:"false"`
+	// The authentication token used to access your account.
+	// This can be either a session token or a service account token.
+	// If not defined, the builder will attempt to find it in the following order:
+	Token string `mapstructure:"token" required:"true"`
+	// The id or name of the project. This field is required
+	// only if using session tokens. It should be skipped when using service
+	// account authentication.
+	Project string `mapstructure:"project" required:"true"`
+	// Login (an e-mail) on HyperOne platform. Set this
+	// if you want to fetch the token by SSH authentication.
+	TokenLogin string `mapstructure:"token_login" required:"false"`
+	// Timeout for waiting on the API to complete
+	// a request. Defaults to 5m.
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
+	// ID or name of the image to launch server from.
+	SourceImage string `mapstructure:"source_image" required:"true"`
+	// The name of the resulting image. Defaults to
+	// "packer-{{timestamp}}"
+	// (see configuration templates for more info).
+	ImageName string `mapstructure:"image_name" required:"false"`
+	// The description of the resulting image.
+	ImageDescription string `mapstructure:"image_description" required:"false"`
+	// Key/value pair tags to
+	// add to the created image.
+	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
+	// The service of the resulting image.
+	ImageService string `mapstructure:"image_service" required:"false"`
+	// ID or name of the type this server should be created with.
+	VmType string `mapstructure:"vm_type" required:"true"`
+	// The name of the created server.
+	VmName string `mapstructure:"vm_name" required:"false"`
+	// Key/value pair tags to
+	// add to the created server.
+	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
+	// The name of the created disk.
+	DiskName string `mapstructure:"disk_name" required:"false"`
+	// The type of the created disk. Defaults to ssd.
+	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Size of the created disk, in GiB.
+	DiskSize float32 `mapstructure:"disk_size" required:"true"`
+	// The ID of the network to attach to the created server.
+	Network string `mapstructure:"network" required:"false"`
+	// The ID of the private IP within chosen network
+	// that should be assigned to the created server.
+	PrivateIP string `mapstructure:"private_ip" required:"false"`
+	// The ID of the public IP that should be assigned to
+	// the created server. If network is chosen, the public IP will be associated
+	// with server's private IP.
+	PublicIP string `mapstructure:"public_ip" required:"false"`
+	// Custom service of public network adapter.
+	// Can be useful when using custom api_url. Defaults to public.
+	PublicNetAdpService string `mapstructure:"public_netadp_service" required:"false"`
 
 	ChrootDisk           bool       `mapstructure:"chroot_disk"`
 	ChrootDiskSize       float32    `mapstructure:"chroot_disk_size"`
@@ -71,15 +103,18 @@ type Config struct {
 	MountPartition    string   `mapstructure:"mount_partition"`
 	PreMountCommands  []string `mapstructure:"pre_mount_commands"`
 	PostMountCommands []string `mapstructure:"post_mount_commands"`
-
-	SSHKeys  []string `mapstructure:"ssh_keys"`
-	UserData string   `mapstructure:"user_data"`
+	// List of SSH keys by name or id to be added
+	// to the server on launch.
+	SSHKeys []string `mapstructure:"ssh_keys" required:"false"`
+	// User data to launch with the server. Packer will not
+	// automatically wait for a user script to finish before shutting down the
+	// instance, this must be handled in a provisioner.
+	UserData string `mapstructure:"user_data" required:"false"`
 
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := &Config{}
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
@@ -97,12 +132,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	cliConfig, err := loadCLIConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Defaults
@@ -129,7 +164,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if c.TokenLogin != "" && c.APIURL == "" {
 			c.Token, err = fetchTokenBySSH(c.TokenLogin)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 		}
 	}
@@ -145,7 +180,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageName == "" {
 		name, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		c.ImageName = name
 	}
@@ -181,7 +216,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ChrootMountPath == "" {
 		path, err := interpolate.Render("/mnt/packer-hyperone-volumes/{{timestamp}}", nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		c.ChrootMountPath = path
 	}
@@ -245,19 +280,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.Token)
 
-	return c, nil, nil
+	return nil, nil
 }
 
 type cliConfig struct {
 	Profile struct {
 		APIKey  string `json:"apiKey"`
 		Project struct {
-			ID string `json:"_id"`
+			ID string `json:"id"`
 		} `json:"project"`
 	} `json:"profile"`
 }

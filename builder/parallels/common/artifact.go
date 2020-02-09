@@ -21,11 +21,15 @@ var unnecessaryFiles = []string{"\\.log$", "\\.backup$", "\\.Backup$", "\\.app"}
 type artifact struct {
 	dir string
 	f   []string
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 // NewArtifact returns a Parallels artifact containing the files
 // in the given directory.
-func NewArtifact(dir string) (packer.Artifact, error) {
+func NewArtifact(dir string, generatedData map[string]interface{}) (packer.Artifact, error) {
 	files := make([]string, 0, 5)
 	visit := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -57,8 +61,9 @@ func NewArtifact(dir string) (packer.Artifact, error) {
 	}
 
 	return &artifact{
-		dir: dir,
-		f:   files,
+		dir:       dir,
+		f:         files,
+		StateData: generatedData,
 	}, nil
 }
 
@@ -79,7 +84,7 @@ func (a *artifact) String() string {
 }
 
 func (a *artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 func (a *artifact) Destroy() error {

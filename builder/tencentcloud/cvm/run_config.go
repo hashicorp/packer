@@ -1,8 +1,12 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type tencentCloudDataDisk
+
 package cvm
 
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -17,28 +21,68 @@ type tencentCloudDataDisk struct {
 }
 
 type TencentCloudRunConfig struct {
-	AssociatePublicIpAddress bool                   `mapstructure:"associate_public_ip_address"`
-	SourceImageId            string                 `mapstructure:"source_image_id"`
-	InstanceType             string                 `mapstructure:"instance_type"`
-	InstanceName             string                 `mapstructure:"instance_name"`
-	DiskType                 string                 `mapstructure:"disk_type"`
-	DiskSize                 int64                  `mapstructure:"disk_size"`
-	DataDisks                []tencentCloudDataDisk `mapstructure:"data_disks"`
-	VpcId                    string                 `mapstructure:"vpc_id"`
-	VpcName                  string                 `mapstructure:"vpc_name"`
-	VpcIp                    string                 `mapstructure:"vpc_ip"`
-	SubnetId                 string                 `mapstructure:"subnet_id"`
-	SubnetName               string                 `mapstructure:"subnet_name"`
-	CidrBlock                string                 `mapstructure:"cidr_block"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
-	SubnectCidrBlock         string                 `mapstructure:"subnect_cidr_block"`
-	InternetChargeType       string                 `mapstructure:"internet_charge_type"`
-	InternetMaxBandwidthOut  int64                  `mapstructure:"internet_max_bandwidth_out"`
-	SecurityGroupId          string                 `mapstructure:"security_group_id"`
-	SecurityGroupName        string                 `mapstructure:"security_group_name"`
-	UserData                 string                 `mapstructure:"user_data"`
-	UserDataFile             string                 `mapstructure:"user_data_file"`
-	HostName                 string                 `mapstructure:"host_name"`
-	RunTags                  map[string]string      `mapstructure:"run_tags"`
+	// Whether allocate public ip to your cvm.
+	// Default value is false.
+	AssociatePublicIpAddress bool `mapstructure:"associate_public_ip_address" required:"false"`
+	// The base image id of Image you want to create
+	// your customized image from.
+	SourceImageId string `mapstructure:"source_image_id" required:"true"`
+	// The instance type your cvm will be launched by.
+	// You should reference Instace Type
+	//  for parameter taking.
+	InstanceType string `mapstructure:"instance_type" required:"true"`
+	// Instance name.
+	InstanceName string `mapstructure:"instance_name" required:"false"`
+	// Root disk type your cvm will be launched by. you could
+	// reference Disk Type
+	// for parameter taking.
+	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Root disk size your cvm will be launched by. values range(in GB):
+	DiskSize int64 `mapstructure:"disk_size" required:"false"`
+	// Add one or more data disks to the instance before creating the image.
+	// Note that if the source image has data disk snapshots, this argument
+	// will be ignored, and the running instance will use source image data
+	// disk settings, in such case, `disk_type` argument will be used as disk
+	// type for all data disks, and each data disk size will use the origin
+	// value in source image.
+	// The data disks allow for the following argument:
+	// -  `disk_type` - Type of the data disk. Valid choices: `CLOUD_BASIC`, `CLOUD_PREMIUM` and `CLOUD_SSD`.
+	// -  `disk_size` - Size of the data disk.
+	// -  `disk_snapshot_id` - Id of the snapshot for a data disk.
+	DataDisks []tencentCloudDataDisk `mapstructure:"data_disks"`
+	// Specify vpc your cvm will be launched by.
+	VpcId string `mapstructure:"vpc_id" required:"false"`
+	// Specify vpc name you will create. if vpc_id is not set, packer will
+	// create a vpc for you named this parameter.
+	VpcName string `mapstructure:"vpc_name" required:"false"`
+	VpcIp   string `mapstructure:"vpc_ip"`
+	// Specify subnet your cvm will be launched by.
+	SubnetId string `mapstructure:"subnet_id" required:"false"`
+	// Specify subnet name you will create. if subnet_id is not set, packer will
+	// create a subnet for you named this parameter.
+	SubnetName string `mapstructure:"subnet_name" required:"false"`
+	// Specify cider block of the vpc you will create if vpc_id not set
+	CidrBlock string `mapstructure:"cidr_block" required:"false"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
+	// Specify cider block of the subnet you will create if
+	// subnet_id not set
+	SubnectCidrBlock   string `mapstructure:"subnect_cidr_block" required:"false"`
+	InternetChargeType string `mapstructure:"internet_charge_type"`
+	// Max bandwidth out your cvm will be launched by(in MB).
+	// values can be set between 1 ~ 100.
+	InternetMaxBandwidthOut int64 `mapstructure:"internet_max_bandwidth_out" required:"false"`
+	// Specify securitygroup your cvm will be launched by.
+	SecurityGroupId string `mapstructure:"security_group_id" required:"false"`
+	// Specify security name you will create if security_group_id not set.
+	SecurityGroupName string `mapstructure:"security_group_name" required:"false"`
+	// userdata.
+	UserData string `mapstructure:"user_data" required:"false"`
+	// userdata file.
+	UserDataFile string `mapstructure:"user_data_file" required:"false"`
+	// host name.
+	HostName string `mapstructure:"host_name" required:"false"`
+	// Tags to apply to the instance that is *launched* to create the image.
+	// These tags are *not* applied to the resulting image.
+	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`
@@ -50,10 +94,11 @@ var ValidCBSType = []string{
 }
 
 func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
+	packerId := fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
 	if cf.Comm.SSHKeyPairName == "" && cf.Comm.SSHTemporaryKeyPairName == "" &&
 		cf.Comm.SSHPrivateKeyFile == "" && cf.Comm.SSHPassword == "" && cf.Comm.WinRMPassword == "" {
 		//tencentcloud support key pair name length max to 25
-		cf.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
+		cf.Comm.SSHTemporaryKeyPairName = packerId
 	}
 
 	errs := cf.Comm.Prepare(ctx)
@@ -84,7 +129,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if cf.VpcId == "" {
 		if cf.VpcName == "" {
-			cf.VpcName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+			cf.VpcName = packerId
 		}
 		if cf.CidrBlock == "" {
 			cf.CidrBlock = "10.0.0.0/16"
@@ -93,9 +138,10 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New("can't set subnet_id without set vpc_id"))
 		}
 	}
+
 	if cf.SubnetId == "" {
 		if cf.SubnetName == "" {
-			cf.SubnetName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+			cf.SubnetName = packerId
 		}
 		if cf.SubnectCidrBlock == "" {
 			cf.SubnectCidrBlock = "10.0.8.0/24"
@@ -103,7 +149,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.SecurityGroupId == "" && cf.SecurityGroupName == "" {
-		cf.SecurityGroupName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		cf.SecurityGroupName = packerId
 	}
 
 	if cf.DiskType != "" && !checkDiskType(cf.DiskType) {
@@ -121,12 +167,17 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.InstanceName == "" {
-		cf.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+		cf.InstanceName = packerId
 	}
 
 	if cf.HostName == "" {
-		cf.HostName = cf.InstanceName[:15]
+		cf.HostName = cf.InstanceName
 	}
+
+	if len(cf.HostName) > 15 {
+		cf.HostName = cf.HostName[:15]
+	}
+	cf.HostName = strings.Replace(cf.HostName, "_", "-", -1)
 
 	if cf.RunTags == nil {
 		cf.RunTags = make(map[string]string)
@@ -141,5 +192,6 @@ func checkDiskType(diskType string) bool {
 			return true
 		}
 	}
+
 	return false
 }

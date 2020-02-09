@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
+
 package iso
 
 import (
@@ -6,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
@@ -30,38 +34,106 @@ type Config struct {
 	common.FloppyConfig             `mapstructure:",squash"`
 	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
-	vboxcommon.ExportOpts           `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
 	vboxcommon.RunConfig            `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
-	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.CommConfig           `mapstructure:",squash"`
 	vboxcommon.HWConfig             `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
-	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.VBoxBundleConfig     `mapstructure:",squash"`
 	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
-
-	DiskSize                uint   `mapstructure:"disk_size"`
-	GuestAdditionsMode      string `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath      string `mapstructure:"guest_additions_path"`
-	GuestAdditionsSHA256    string `mapstructure:"guest_additions_sha256"`
-	GuestAdditionsURL       string `mapstructure:"guest_additions_url"`
-	GuestAdditionsInterface string `mapstructure:"guest_additions_interface"`
-	GuestOSType             string `mapstructure:"guest_os_type"`
-	HardDriveDiscard        bool   `mapstructure:"hard_drive_discard"`
-	HardDriveInterface      string `mapstructure:"hard_drive_interface"`
-	SATAPortCount           int    `mapstructure:"sata_port_count"`
-	HardDriveNonrotational  bool   `mapstructure:"hard_drive_nonrotational"`
-	ISOInterface            string `mapstructure:"iso_interface"`
-	KeepRegistered          bool   `mapstructure:"keep_registered"`
-	SkipExport              bool   `mapstructure:"skip_export"`
-	VMName                  string `mapstructure:"vm_name"`
+	// The size, in megabytes, of the hard disk to create for the VM. By
+	// default, this is 40000 (about 40 GB).
+	DiskSize uint `mapstructure:"disk_size" required:"false"`
+	// The method by which guest additions are made available to the guest for
+	// installation. Valid options are upload, attach, or disable. If the mode
+	// is attach the guest additions ISO will be attached as a CD device to the
+	// virtual machine. If the mode is upload the guest additions ISO will be
+	// uploaded to the path specified by guest_additions_path. The default
+	// value is upload. If disable is used, guest additions won't be
+	// downloaded, either.
+	GuestAdditionsMode string `mapstructure:"guest_additions_mode" required:"false"`
+	// The path on the guest virtual machine where the VirtualBox guest
+	// additions ISO will be uploaded. By default this is
+	// VBoxGuestAdditions.iso which should upload into the login directory of
+	// the user. This is a configuration template where the Version variable is
+	// replaced with the VirtualBox version.
+	GuestAdditionsPath string `mapstructure:"guest_additions_path" required:"false"`
+	// The SHA256 checksum of the guest additions ISO that will be uploaded to
+	// the guest VM. By default the checksums will be downloaded from the
+	// VirtualBox website, so this only needs to be set if you want to be
+	// explicit about the checksum.
+	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256" required:"false"`
+	// The URL to the guest additions ISO to upload. This can also be a file
+	// URL if the ISO is at a local path. By default, the VirtualBox builder
+	// will attempt to find the guest additions ISO on the local file system.
+	// If it is not available locally, the builder will download the proper
+	// guest additions ISO from the internet.
+	GuestAdditionsURL string `mapstructure:"guest_additions_url" required:"false"`
+	// The interface type to use to mount guest additions when
+	// guest_additions_mode is set to attach. Will default to the value set in
+	// iso_interface, if iso_interface is set. Will default to "ide", if
+	// iso_interface is not set. Options are "ide" and "sata".
+	GuestAdditionsInterface string `mapstructure:"guest_additions_interface" required:"false"`
+	// The guest OS type being installed. By default this is other, but you can
+	// get dramatic performance improvements by setting this to the proper
+	// value. To view all available values for this run VBoxManage list
+	// ostypes. Setting the correct value hints to VirtualBox how to optimize
+	// the virtual hardware to work best with that operating system.
+	GuestOSType string `mapstructure:"guest_os_type" required:"false"`
+	// When this value is set to true, a VDI image will be shrunk in response
+	// to the trim command from the guest OS. The size of the cleared area must
+	// be at least 1MB. Also set hard_drive_nonrotational to true to enable
+	// TRIM support.
+	HardDriveDiscard bool `mapstructure:"hard_drive_discard" required:"false"`
+	// The type of controller that the primary hard drive is attached to,
+	// defaults to ide. When set to sata, the drive is attached to an AHCI SATA
+	// controller. When set to scsi, the drive is attached to an LsiLogic SCSI
+	// controller. When set to pcie, the drive is attached to an NVMe
+	// controller. Please note that when you use "pcie", you'll need to have
+	// Virtualbox 6, install an [extension
+	// pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
+	// and you will need to enable EFI mode for nvme to work, ex:
+	//   "vboxmanage": [
+	//       [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
+	//    ]
+	HardDriveInterface string `mapstructure:"hard_drive_interface" required:"false"`
+	// The number of ports available on any SATA controller created, defaults
+	// to 1. VirtualBox supports up to 30 ports on a maximum of 1 SATA
+	// controller. Increasing this value can be useful if you want to attach
+	// additional drives.
+	SATAPortCount int `mapstructure:"sata_port_count" required:"false"`
+	// The number of ports available on any NVMe controller created, defaults
+	// to 1. VirtualBox supports up to 255 ports on a maximum of 1 NVMe
+	// controller. Increasing this value can be useful if you want to attach
+	// additional drives.
+	NVMePortCount int `mapstructure:"nvme_port_count" required:"false"`
+	// Forces some guests (i.e. Windows 7+) to treat disks as SSDs and stops
+	// them from performing disk fragmentation. Also set hard_drive_discard to
+	// true to enable TRIM support.
+	HardDriveNonrotational bool `mapstructure:"hard_drive_nonrotational" required:"false"`
+	// The type of controller that the ISO is attached to, defaults to ide.
+	// When set to sata, the drive is attached to an AHCI SATA controller.
+	ISOInterface string `mapstructure:"iso_interface" required:"false"`
+	// Set this to true if you would like to keep the VM registered with
+	// virtualbox. Defaults to false.
+	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
+	// Defaults to false. When enabled, Packer will not export the VM. Useful
+	// if the build output is not the resultant image, but created inside the
+	// VM.
+	SkipExport bool `mapstructure:"skip_export" required:"false"`
+	// This is the name of the OVF file for the new virtual machine, without
+	// the file extension. By default this is packer-BUILDNAME, where
+	// "BUILDNAME" is the name of the build.
+	VMName string `mapstructure:"vm_name" required:"false"`
 
 	ctx interpolate.Context
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -76,7 +148,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors and warnings
@@ -88,18 +160,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ExportOpts.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.CommConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HWConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxBundleConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(&b.config.ctx)...)
@@ -137,9 +208,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			"packer-%s-%d", b.config.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
-	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
+	switch b.config.HardDriveInterface {
+	case "ide", "sata", "scsi", "pcie":
+		// do nothing
+	default:
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
+			errs, errors.New("hard_drive_interface can only be ide, sata, pcie or scsi"))
 	}
 
 	if b.config.SATAPortCount == 0 {
@@ -149,6 +223,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.SATAPortCount > 30 {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("sata_port_count cannot be greater than 30"))
+	}
+
+	if b.config.NVMePortCount == 0 {
+		b.config.NVMePortCount = 1
+	}
+
+	if b.config.NVMePortCount > 255 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("nvme_port_count cannot be greater than 255"))
 	}
 
 	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
@@ -187,10 +270,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -223,7 +306,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
@@ -248,11 +333,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			VRDPPortMax:     b.config.VRDPPortMax,
 		},
 		new(vboxcommon.StepAttachFloppy),
-		&vboxcommon.StepForwardSSH{
-			CommConfig:     &b.config.SSHConfig.Comm,
-			HostPortMin:    b.config.SSHHostPortMin,
-			HostPortMax:    b.config.SSHHostPortMax,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+		&vboxcommon.StepPortForwarding{
+			CommConfig:     &b.config.CommConfig.Comm,
+			HostPortMin:    b.config.HostPortMin,
+			HostPortMax:    b.config.HostPortMax,
+			SkipNatMapping: b.config.SkipNatMapping,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManage,
@@ -270,11 +355,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm:          &b.config.Comm,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.SSHConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
-			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
-			SSHPort:   vboxcommon.SSHPort,
-			WinRMPort: vboxcommon.SSHPort,
+			Config:    &b.config.CommConfig.Comm,
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
+			SSHPort:   vboxcommon.CommPort,
+			WinRMPort: vboxcommon.CommPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: *b.config.VBoxVersionFile,
@@ -286,12 +371,14 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		new(common.StepProvision),
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.SSHConfig.Comm,
+			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
-			Command: b.config.ShutdownCommand,
-			Timeout: b.config.ShutdownTimeout,
-			Delay:   b.config.PostShutdownDelay,
+			Command:         b.config.ShutdownCommand,
+			Timeout:         b.config.ShutdownTimeout,
+			Delay:           b.config.PostShutdownDelay,
+			DisableShutdown: b.config.DisableShutdown,
+			ACPIShutdown:    b.config.ACPIShutdown,
 		},
 		&vboxcommon.StepRemoveDevices{
 			Bundling:                b.config.VBoxBundleConfig,
@@ -304,9 +391,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&vboxcommon.StepExport{
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,
-			ExportOpts:     b.config.ExportOpts.ExportOpts,
+			ExportOpts:     b.config.ExportConfig.ExportOpts,
 			Bundling:       b.config.VBoxBundleConfig,
-			SkipNatMapping: b.config.SSHSkipNatMapping,
+			SkipNatMapping: b.config.SkipNatMapping,
 			SkipExport:     b.config.SkipExport,
 		},
 	}
@@ -337,5 +424,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return vboxcommon.NewArtifact(b.config.OutputDir, generatedData)
 }

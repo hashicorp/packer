@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,AlicloudDiskDevice
+
 // The alicloud  contains a packer.Builder implementation that
 // builds ecs images for alicloud.
 package ecs
@@ -6,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -39,7 +42,9 @@ const (
 	ALICLOUD_DEFAULT_LONG_TIMEOUT  = 3600
 )
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -51,7 +56,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 	b.config.ctx.EnableEnv = true
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -66,11 +71,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {

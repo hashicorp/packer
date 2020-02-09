@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package null
 
 import (
@@ -16,15 +18,14 @@ type Config struct {
 	CommConfig communicator.Config `mapstructure:",squash"`
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:       true,
 		InterpolateFilter: &interpolate.RenderFilter{},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
@@ -58,8 +59,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
-	return &c, nil, nil
+	return nil, nil
 }

@@ -232,7 +232,7 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	errCh := make(chan error, 1)
 
 	config := state.Get("config").(*Config)
-	config.stateTimeout = 1 * time.Microsecond
+	config.StateTimeout = 1 * time.Millisecond
 
 	d := state.Get("driver").(*DriverMock)
 	d.RunInstanceErrCh = errCh

@@ -9,7 +9,8 @@
 
 package openapi
 
+// NetadpAssigned struct for NetadpAssigned
 type NetadpAssigned struct {
 	Resource string `json:"resource,omitempty"`
-	Id string `json:"id,omitempty"`
+	Id       string `json:"id,omitempty"`
 }

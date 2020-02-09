@@ -95,14 +95,15 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 				return nil, errors.New("WinRM wait cancelled")
 			case <-time.After(5 * time.Second):
 			}
-			first = false
 		}
+		first = false
 
 		host, err := s.Host(state)
 		if err != nil {
 			log.Printf("[DEBUG] Error getting WinRM host: %s", err)
 			continue
 		}
+		s.Config.WinRMHost = host
 
 		port := s.Config.WinRMPort
 		if s.WinRMPort != nil {
@@ -111,7 +112,10 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 				log.Printf("[DEBUG] Error getting WinRM port: %s", err)
 				continue
 			}
+			s.Config.WinRMPort = port
 		}
+
+		state.Put("communicator_config", s.Config)
 
 		user := s.Config.WinRMUser
 		password := s.Config.WinRMPassword

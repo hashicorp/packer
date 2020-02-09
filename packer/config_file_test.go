@@ -42,7 +42,7 @@ func TestExpandUser_Empty(t *testing.T) {
 	var path, expected string
 
 	// Try an invalid user
-	path, err := ExpandUser("~invalid-user-that-should-not-exist")
+	_, err := ExpandUser("~invalid-user-that-should-not-exist")
 	if err == nil {
 		t.Fatalf("expected failure")
 	}

@@ -20,6 +20,7 @@ import (
 	amazonebsvolumebuilder "github.com/hashicorp/packer/builder/amazon/ebsvolume"
 	amazoninstancebuilder "github.com/hashicorp/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
+	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
 	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	dockerbuilder "github.com/hashicorp/packer/builder/docker"
@@ -58,6 +59,8 @@ import (
 	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
+	vsphereclonebuilder "github.com/hashicorp/packer/builder/vsphere/clone"
+	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
@@ -74,6 +77,7 @@ import (
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
+	ucloudimportpostprocessor "github.com/hashicorp/packer/post-processor/ucloud-import"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
@@ -109,6 +113,7 @@ var Builders = map[string]packer.Builder{
 	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"azure-arm":           new(azurearmbuilder.Builder),
+	"azure-chroot":        new(azurechrootbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
 	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
@@ -147,6 +152,8 @@ var Builders = map[string]packer.Builder{
 	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
+	"vsphere-clone":       new(vsphereclonebuilder.Builder),
+	"vsphere-iso":         new(vsphereisobuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
 }
 
@@ -186,6 +193,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),
 	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
+	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),

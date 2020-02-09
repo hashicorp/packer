@@ -24,7 +24,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config["source_path"] = tf.Name()
 
 	delete(config, "floppy_files")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -39,7 +39,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	floppies_path := "../../../common/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -58,7 +58,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig(t)
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
-	_, errs := b.Prepare(config)
+	_, _, errs := b.Prepare(config)
 	if errs == nil {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}

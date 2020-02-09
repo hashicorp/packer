@@ -11,24 +11,20 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-type ExecuteCommandTemplate struct {
-	Vars          string
-	Script        string
-	Command       string
-	WinRMPassword string
-}
-
-type EnvVarsTemplate struct {
-	WinRMPassword string
-}
-
-func Run(ctx context.Context, ui packer.Ui, config *Config) (bool, error) {
+func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[string]interface{}) (bool, error) {
+	if generatedData != nil {
+		config.generatedData = generatedData
+	} else {
+		// No fear; probably just in the post-processor, not provisioner.
+		// Make sure it's not a nil map so we can assign to it later.
+		config.generatedData = make(map[string]interface{})
+	}
+	config.ctx.Data = generatedData
 	// Check if shell-local can even execute against this runtime OS
 	if len(config.OnlyOn) > 0 {
 		runCommand := false
@@ -97,12 +93,9 @@ func Run(ctx context.Context, ui packer.Ui, config *Config) (bool, error) {
 					"Please see output above for more information.",
 				script)
 		}
-		if cmd.ExitStatus() != 0 {
-			return false, fmt.Errorf(
-				"Erroneous exit code %d while executing script: %s\n\n"+
-					"Please see output above for more information.",
-				cmd.ExitStatus(),
-				script)
+
+		if err := config.ValidExitCode(cmd.ExitStatus()); err != nil {
+			return false, err
 		}
 	}
 
@@ -123,14 +116,9 @@ func createInlineScriptFile(config *Config) (string, error) {
 		writer.WriteString(shebang)
 	}
 
-	// generate context so you can interpolate the command
-	config.Ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: getWinRMPassword(config.PackerBuildName),
-	}
-
 	for _, command := range config.Inline {
 		// interpolate command to check for template variables.
-		command, err := interpolate.Render(command, &config.Ctx)
+		command, err := interpolate.Render(command, &config.ctx)
 		if err != nil {
 			return "", err
 		}
@@ -155,16 +143,15 @@ func createInlineScriptFile(config *Config) (string, error) {
 // user-provided ExecuteCommand or defaulting to something that makes sense for
 // the host OS
 func createInterpolatedCommands(config *Config, script string, flattenedEnvVars string) ([]string, error) {
-	config.Ctx.Data = &ExecuteCommandTemplate{
-		Vars:          flattenedEnvVars,
-		Script:        script,
-		Command:       script,
-		WinRMPassword: getWinRMPassword(config.PackerBuildName),
-	}
+	config.generatedData["Vars"] = flattenedEnvVars
+	config.generatedData["Script"] = script
+	config.generatedData["Command"] = script
+
+	config.ctx.Data = config.generatedData
 
 	interpolatedCmds := make([]string, len(config.ExecuteCommand))
 	for i, cmd := range config.ExecuteCommand {
-		interpolatedCmd, err := interpolate.Render(cmd, &config.Ctx)
+		interpolatedCmd, err := interpolate.Render(cmd, &config.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("Error processing command: %s", err)
 		}
@@ -195,13 +182,9 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 		envVars["PACKER_HTTP_PORT"] = httpPort
 	}
 
-	// interpolate environment variables
-	config.Ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: getWinRMPassword(config.PackerBuildName),
-	}
 	// Split vars into key/value components
 	for _, envVar := range config.Vars {
-		envVar, err := interpolate.Render(envVar, &config.Ctx)
+		envVar, err := interpolate.Render(envVar, &config.ctx)
 		if err != nil {
 			return "", err
 		}
@@ -223,10 +206,4 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 		flattened += fmt.Sprintf(config.EnvVarFormat, key, envVars[key])
 	}
 	return flattened, nil
-}
-
-func getWinRMPassword(buildName string) string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
-	packer.LogSecretFilter.Set(winRMPass)
-	return winRMPass
 }

@@ -9,6 +9,7 @@
 
 package openapi
 
+// NetgwPostAccessrights struct for NetgwPostAccessrights
 type NetgwPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

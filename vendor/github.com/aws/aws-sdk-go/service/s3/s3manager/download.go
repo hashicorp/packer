@@ -99,7 +99,7 @@ func NewDownloader(c client.ConfigProvider, options ...func(*Downloader)) *Downl
 //     sess := session.Must(session.NewSession())
 //
 //     // The S3 client the S3 Downloader will use
-//     s3Svc := s3.new(sess)
+//     s3Svc := s3.New(sess)
 //
 //     // Create a downloader with the s3 client and default options
 //     downloader := s3manager.NewDownloaderWithClient(s3Svc)

@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package amazonimport
 
 import (
@@ -11,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -49,7 +52,8 @@ type PostProcessor struct {
 	config Config
 }
 
-// Entry point for configuration parsing when we've defined
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -122,6 +126,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
+
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
 
 	session, err := p.config.Session()
 	if err != nil {
@@ -273,11 +284,19 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 		ui.Message(fmt.Sprintf("Starting rename of AMI (%s)", createdami))
 
-		resp, err := ec2conn.CopyImage(&ec2.CopyImageInput{
+		copyInput := &ec2.CopyImageInput{
 			Name:          &p.config.Name,
 			SourceImageId: &createdami,
 			SourceRegion:  config.Region,
-		})
+		}
+		if p.config.Encrypt {
+			copyInput.Encrypted = aws.Bool(p.config.Encrypt)
+			if p.config.KMSKey != "" {
+				copyInput.KmsKeyId = &p.config.KMSKey
+			}
+		}
+
+		resp, err := ec2conn.CopyImage(copyInput)
 
 		if err != nil {
 			return nil, false, false, fmt.Errorf("Error Copying AMI (%s): %s", createdami, err)
@@ -289,10 +308,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			return nil, false, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
-		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
-			ImageId: &createdami,
-		})
-
+		// Clean up intermediary image now that it has successfully been renamed.
+		ui.Message("Destroying intermediary AMI...")
+		err = awscommon.DestroyAMIs([]*string{&createdami}, ec2conn)
 		if err != nil {
 			return nil, false, false, fmt.Errorf("Error deregistering existing AMI: %s", err)
 		}

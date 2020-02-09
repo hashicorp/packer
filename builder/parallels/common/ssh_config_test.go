@@ -1,24 +1,27 @@
 package common
 
 import (
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 	"io/ioutil"
 	"os"
 	"testing"
-
-	"github.com/hashicorp/packer/helper/communicator"
+	"time"
 )
 
 func testSSHConfig() *SSHConfig {
 	return &SSHConfig{
 		Comm: communicator.Config{
-			SSHUsername: "foo",
+			SSH: communicator.SSH{
+				SSHUsername: "foo",
+			},
 		},
 	}
 }
 
 func TestSSHConfigPrepare(t *testing.T) {
 	c := testSSHConfig()
-	errs := c.Prepare(testConfigTemplate(t))
+	errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
@@ -34,14 +37,14 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = ""
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = "/i/dont/exist"
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -60,7 +63,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
 	}
@@ -71,9 +74,25 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
+	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
+	}
+}
+
+func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
+	var c *SSHConfig
+	sshTimeout := 2 * time.Minute
+
+	c = testSSHConfig()
+	c.SSHWaitTimeout = sshTimeout
+
+	err := c.Prepare(interpolate.NewContext())
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if c.Comm.SSHTimeout != sshTimeout {
+		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), c.Comm.SSHTimeout.String())
 	}
 }
 

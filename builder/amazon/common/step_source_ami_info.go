@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,7 +21,7 @@ import (
 type StepSourceAMIInfo struct {
 	SourceAmi                string
 	EnableAMISriovNetSupport bool
-	EnableAMIENASupport      *bool
+	EnableAMIENASupport      confighelper.Trilean
 	AMIVirtType              string
 	AmiFilters               AmiFilterOptions
 }
@@ -57,7 +58,7 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
 	}
 	if len(s.AmiFilters.Owners) > 0 {
-		params.Owners = s.AmiFilters.Owners
+		params.Owners = s.AmiFilters.GetOwners()
 	}
 
 	log.Printf("Using AMI Filters %v", params)
@@ -94,7 +95,7 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 
 	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if (s.EnableAMIENASupport != nil && *s.EnableAMIENASupport) || s.EnableAMISriovNetSupport {
+	if s.EnableAMIENASupport.True() || s.EnableAMISriovNetSupport {
 		err = s.canEnableEnhancedNetworking(image)
 		if err != nil {
 			state.Put("error", err)

@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -11,8 +10,7 @@ import (
 // An implementation of packer.Provisioner where the provisioner is actually
 // executed over an RPC connection.
 type provisioner struct {
-	client *rpc.Client
-	mux    *muxBroker
+	commonClient
 }
 
 // ProvisionerServer wraps a packer.Provisioner implementation and makes it
@@ -21,24 +19,29 @@ type ProvisionerServer struct {
 	context       context.Context
 	contextCancel func()
 
-	p   packer.Provisioner
-	mux *muxBroker
+	commonServer
+	p packer.Provisioner
 }
 
 type ProvisionerPrepareArgs struct {
 	Configs []interface{}
 }
 
-func (p *provisioner) Prepare(configs ...interface{}) (err error) {
-	args := &ProvisionerPrepareArgs{configs}
-	if cerr := p.client.Call("Provisioner.Prepare", args, new(interface{})); cerr != nil {
-		err = cerr
+func (p *provisioner) Prepare(configs ...interface{}) error {
+	configs, err := encodeCTYValues(configs)
+	if err != nil {
+		return err
 	}
-
-	return
+	args := &ProvisionerPrepareArgs{configs}
+	return p.client.Call(p.endpoint+".Prepare", args, new(interface{}))
 }
 
-func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+type ProvisionerProvisionArgs struct {
+	GeneratedData map[string]interface{}
+	StreamID      uint32
+}
+
+func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)
@@ -52,21 +55,27 @@ func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		select {
 		case <-ctx.Done():
 			log.Printf("Cancelling provisioner after context cancellation %v", ctx.Err())
-			if err := p.client.Call("Provisioner.Cancel", new(interface{}), new(interface{})); err != nil {
+			if err := p.client.Call(p.endpoint+".Cancel", new(interface{}), new(interface{})); err != nil {
 				log.Printf("Error cancelling provisioner: %s", err)
 			}
 		case <-done:
 		}
 	}()
 
-	return p.client.Call("Provisioner.Provision", nextId, new(interface{}))
+	args := &ProvisionerProvisionArgs{generatedData, nextId}
+	return p.client.Call(p.endpoint+".Provision", args, new(interface{}))
 }
 
 func (p *ProvisionerServer) Prepare(args *ProvisionerPrepareArgs, reply *interface{}) error {
-	return p.p.Prepare(args.Configs...)
+	config, err := decodeCTYValues(args.Configs)
+	if err != nil {
+		return err
+	}
+	return p.p.Prepare(config...)
 }
 
-func (p *ProvisionerServer) Provision(streamId uint32, reply *interface{}) error {
+func (p *ProvisionerServer) Provision(args *ProvisionerProvisionArgs, reply *interface{}) error {
+	streamId := args.StreamID
 	client, err := newClientWithMux(p.mux, streamId)
 	if err != nil {
 		return NewBasicError(err)
@@ -76,8 +85,7 @@ func (p *ProvisionerServer) Provision(streamId uint32, reply *interface{}) error
 	if p.context == nil {
 		p.context, p.contextCancel = context.WithCancel(context.Background())
 	}
-
-	if err := p.p.Provision(p.context, client.Ui(), client.Communicator()); err != nil {
+	if err := p.p.Provision(p.context, client.Ui(), client.Communicator(), args.GeneratedData); err != nil {
 		return NewBasicError(err)
 	}
 

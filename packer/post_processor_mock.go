@@ -1,6 +1,10 @@
 package packer
 
-import "context"
+import (
+	"context"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
+)
 
 // MockPostProcessor is an implementation of PostProcessor that can be
 // used for tests.
@@ -18,6 +22,8 @@ type MockPostProcessor struct {
 	PostProcessArtifact Artifact
 	PostProcessUi       Ui
 }
+
+func (t *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec { return t.FlatMapstructure().HCL2Spec() }
 
 func (t *MockPostProcessor) Configure(configs ...interface{}) error {
 	t.ConfigureCalled = true

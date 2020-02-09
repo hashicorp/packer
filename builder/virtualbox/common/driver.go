@@ -22,6 +22,9 @@ type Driver interface {
 	// Create a SCSI controller.
 	CreateSCSIController(vm string, controller string) error
 
+	// Create an NVME controller
+	CreateNVMeController(vm string, controller string, portcount int) error
+
 	// Delete a VM by name
 	Delete(string) error
 
@@ -36,6 +39,9 @@ type Driver interface {
 
 	// Stop stops a running machine, forcefully.
 	Stop(string) error
+
+	// ACPIStop stops a running machine via ACPI power button.
+	StopViaACPI(string) error
 
 	// SuppressMessages should do what needs to be done in order to
 	// suppress any annoying popups from VirtualBox.

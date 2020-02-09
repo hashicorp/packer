@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/hashicorp/packer/helper/config"
 )
 
 func testAMIConfig() *AMIConfig {
@@ -68,7 +69,6 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
-	errs = errs[:0]
 
 	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-1"}
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
@@ -138,7 +138,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 	c.SnapshotUsers = []string{"foo", "bar"}
 	c.AMIKmsKeyId = "123-abc-456"
-	c.AMIEncryptBootVolume = &[]bool{true}[0]
+	c.AMIEncryptBootVolume = config.TriTrue
 	c.AMIRegions = []string{"us-east-1", "us-west-1"}
 	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
@@ -161,7 +161,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIUsers = []string{"testAccountID"}
-	c.AMIEncryptBootVolume = &[]bool{true}[0]
+	c.AMIEncryptBootVolume = config.TriTrue
 
 	accessConf := testAccessConfig()
 
@@ -177,7 +177,7 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 
 func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
 	c := testAMIConfig()
-	c.AMIEncryptBootVolume = aws.Bool(true)
+	c.AMIEncryptBootVolume = config.TriTrue
 
 	accessConf := testAccessConfig()
 

@@ -1,10 +1,14 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package googlecomputeexport
 
 import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -19,15 +23,17 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 
-	DiskSizeGb  int64    `mapstructure:"disk_size"`
-	DiskType    string   `mapstructure:"disk_type"`
-	MachineType string   `mapstructure:"machine_type"`
-	Network     string   `mapstructure:"network"`
-	Paths       []string `mapstructure:"paths"`
-	Subnetwork  string   `mapstructure:"subnetwork"`
-	Zone        string   `mapstructure:"zone"`
+	DiskSizeGb          int64    `mapstructure:"disk_size"`
+	DiskType            string   `mapstructure:"disk_type"`
+	MachineType         string   `mapstructure:"machine_type"`
+	Network             string   `mapstructure:"network"`
+	Paths               []string `mapstructure:"paths"`
+	Subnetwork          string   `mapstructure:"subnetwork"`
+	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
+	Zone                string   `mapstructure:"zone"`
+	ServiceAccountEmail string   `mapstructure:"service_account_email"`
 
-	Account *jwt.Config
+	account *jwt.Config
 	ctx     interpolate.Context
 }
 
@@ -35,6 +41,8 @@ type PostProcessor struct {
 	config Config
 	runner multistep.Runner
 }
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -69,6 +77,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.Network = "default"
 	}
 
+	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("May set either account_file or "+
+				"vault_gcp_oauth_engine, but not both."))
+	}
+
 	if len(errs.Errors) > 0 {
 		return errs
 	}
@@ -101,14 +115,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		if err != nil {
 			return nil, false, false, err
 		}
-		p.config.Account = cfg
+		p.config.account = cfg
 	}
 	if p.config.AccountFile != "" {
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
-		p.config.Account = cfg
+		p.config.account = cfg
 	}
 
 	// Set up exporter instance configuration.
@@ -129,7 +143,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		Metadata:             exporterMetadata,
 		Network:              p.config.Network,
 		NetworkProjectId:     builderProjectId,
-		RawStateTimeout:      "5m",
+		StateTimeout:         5 * time.Minute,
 		SourceImageFamily:    "debian-9-worker",
 		SourceImageProjectId: "compute-image-tools",
 		Subnetwork:           p.config.Subnetwork,
@@ -140,9 +154,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			"https://www.googleapis.com/auth/userinfo.email",
 		},
 	}
-	exporterConfig.CalcTimeout()
+	if p.config.ServiceAccountEmail != "" {
+		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
+	}
 
-	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId, p.config.Account)
+	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
+		p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}

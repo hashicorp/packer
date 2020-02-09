@@ -9,7 +9,8 @@
 
 package openapi
 
+// OrganisationUpdate struct for OrganisationUpdate
 type OrganisationUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name    string                    `json:"name,omitempty"`
 	Billing OrganisationUpdateBilling `json:"billing,omitempty"`
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -52,6 +53,29 @@ func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string
 		ctx,
 		&imageInput,
 		waitOpts...)
+	if err != nil {
+		if strings.Contains(err.Error(), request.WaiterResourceNotReadyErrorCode) {
+			err = fmt.Errorf("Failed with ResourceNotReady error, which can "+
+				"have a variety of causes. For help troubleshooting, check "+
+				"our docs: "+
+				"https://www.packer.io/docs/builders/amazon.html#resourcenotready-error\n"+
+				"original error: %s", err.Error())
+		}
+	}
+
+	return err
+}
+
+func WaitUntilInstanceRunning(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
+
+	instanceInput := ec2.DescribeInstancesInput{
+		InstanceIds: []*string{&instanceId},
+	}
+
+	err := conn.WaitUntilInstanceRunningWithContext(
+		ctx,
+		&instanceInput,
+		getWaiterOptions()...)
 	return err
 }
 

@@ -9,6 +9,7 @@
 
 package openapi
 
+// ProjectTransfer struct for ProjectTransfer
 type ProjectTransfer struct {
 	Organisation string `json:"organisation,omitempty"`
 }
