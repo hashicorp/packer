@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config,ImageFilter,ImageFilterOptions
+
 // The openstack package contains a packer.Builder implementation that
 // builds Images for openstack.
 
@@ -7,6 +9,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -33,13 +36,15 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors
@@ -49,11 +54,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
 
 	if b.config.ImageConfig.ImageDiskFormat != "" && !b.config.RunConfig.UseBlockStorageVolume {
-		return nil, fmt.Errorf("use_blockstorage_volume must be true if image_disk_format is specified.")
+		return nil, nil, fmt.Errorf("use_blockstorage_volume must be true if image_disk_format is specified.")
 	}
 
 	// By default, instance name is same as image name
@@ -62,7 +67,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.Password)
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -99,6 +104,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
 			SourceProperties: b.config.SourceImageFilters.Filters.Properties,
 		},
+		&StepDiscoverNetwork{
+			Networks:              b.config.Networks,
+			NetworkDiscoveryCIDRs: b.config.NetworkDiscoveryCIDRs,
+			Ports:                 b.config.Ports,
+		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
 			VolumeName:             b.config.VolumeName,
@@ -108,8 +118,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRunSourceServer{
 			Name:                  b.config.InstanceName,
 			SecurityGroups:        b.config.SecurityGroups,
-			Networks:              b.config.Networks,
-			Ports:                 b.config.Ports,
 			AvailabilityZone:      b.config.AvailabilityZone,
 			UserData:              b.config.UserData,
 			UserDataFile:          b.config.UserDataFile,
@@ -176,6 +184,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ImageId:        state.Get("image").(string),
 		BuilderIdValue: BuilderId,
 		Client:         imageClient,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

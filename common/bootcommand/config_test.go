@@ -2,6 +2,7 @@ package bootcommand
 
 import (
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -11,26 +12,18 @@ func TestConfigPrepare(t *testing.T) {
 
 	// Test a default boot_wait
 	c = new(BootConfig)
-	c.RawBootWait = ""
+	c.BootWait = 0
 	errs := c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)
 	}
-	if c.RawBootWait != "10s" {
-		t.Fatalf("bad value: %s", c.RawBootWait)
-	}
-
-	// Test with a bad boot_wait
-	c = new(BootConfig)
-	c.RawBootWait = "this is not good"
-	errs = c.Prepare(&interpolate.Context{})
-	if len(errs) == 0 {
-		t.Fatal("should error")
+	if c.BootWait != 10*time.Second {
+		t.Fatalf("bad value: %s", c.BootWait)
 	}
 
 	// Test with a good one
 	c = new(BootConfig)
-	c.RawBootWait = "5s"
+	c.BootWait = 5 * time.Second
 	errs = c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
 		t.Fatalf("bad: %#v", errs)

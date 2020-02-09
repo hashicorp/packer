@@ -9,8 +9,9 @@
 
 package openapi
 
+// OrganisationUpdateBilling struct for OrganisationUpdateBilling
 type OrganisationUpdateBilling struct {
-	Email string `json:"email,omitempty"`
-	Company string `json:"company,omitempty"`
+	Email   string                           `json:"email,omitempty"`
+	Company string                           `json:"company,omitempty"`
 	Address OrganisationUpdateBillingAddress `json:"address,omitempty"`
 }

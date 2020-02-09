@@ -355,7 +355,7 @@ func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 200
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -378,7 +378,7 @@ func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 201 // Invalid!
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -399,7 +399,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -419,7 +419,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.ps1"
 
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -448,7 +448,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -484,7 +484,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm)
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -510,8 +510,8 @@ func TestProvisionerProvision_UploadFails(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.ScriptUploadErrorMockCommunicator)
 	p.Prepare(config)
-	p.config.StartRetryTimeout = time.Second
-	err := p.Provision(context.Background(), ui, comm)
+	p.config.StartRetryTimeout = 1 * time.Second
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
 		t.Fatalf("expected Provision() error %q to contain %q",
 			err.Error(),
@@ -621,6 +621,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 
 	// Non-elevated
+	p.generatedData = make(map[string]interface{})
 	cmd, _ := p.createCommandText()
 
 	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)

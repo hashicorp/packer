@@ -1,6 +1,7 @@
 package vagrant
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"log"
@@ -96,7 +97,13 @@ func (d *Vagrant_2_2_Driver) Verify() error {
 	}
 
 	constraints, err := version.NewConstraint(VAGRANT_MIN_VERSION)
+	if err != nil {
+		return fmt.Errorf("error parsing vagrant minimum version: %v", err)
+	}
 	vers, err := d.Version()
+	if err != nil {
+		return fmt.Errorf("error getting virtualbox version: %v", err)
+	}
 	v, err := version.NewVersion(vers)
 	if err != nil {
 		return fmt.Errorf("Error figuring out Vagrant version.")
@@ -183,25 +190,77 @@ func (d *Vagrant_2_2_Driver) Version() (string, error) {
 	return version, nil
 }
 
-func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) {
-	var stdout, stderr bytes.Buffer
+// Copied and modified from Bufio; this will return data that contains a
+// carriage return, not just data that contains a newline.
+// This allows us to stream progress output from vagrant that would otherwise
+// be smothered. It is a bit noisy, but probably prefereable to suppressing
+// the output in a way that looks like Packer has hung.
+func ScanLinesInclCR(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 1, data[0:i], nil
+	}
+	if i := bytes.IndexByte(data, '\r'); i >= 0 {
+		// We have a CR-terminated line.
+		return i + 1, data[0:i], nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), data, nil
+	}
+	// Request more data.
+	return 0, nil, nil
+}
 
+func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) {
 	log.Printf("Calling Vagrant CLI: %#v", args)
 	cmd := exec.Command(d.vagrantBinary, args...)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("VAGRANT_CWD=%s", d.VagrantCWD))
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
 
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		log.Printf("error getting err pipe")
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Printf("error getting out pipe")
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return "", "", fmt.Errorf("Error starting vagrant command with args: %q",
+			strings.Join(args, " "))
+	}
+
+	stdoutString := ""
+	stderrString := ""
+
+	scanOut := bufio.NewScanner(stdout)
+	scanOut.Split(ScanLinesInclCR)
+	scanErr := bufio.NewScanner(stderr)
+	scanErr.Split(ScanLinesInclCR)
+	go func() {
+		for scanErr.Scan() {
+			line := scanErr.Text()
+			log.Printf("[vagrant driver] stderr: %s", line)
+			stderrString += line + "\n"
+		}
+	}()
+
+	for scanOut.Scan() {
+		line := scanOut.Text()
+		log.Printf("[vagrant driver] stdout: %s", line)
+		stdoutString += line + "\n"
+	}
+	cmd.Wait()
 
 	if _, ok := err.(*exec.ExitError); ok {
 		err = fmt.Errorf("Vagrant error: %s", stderrString)
 	}
-
-	log.Printf("[vagrant driver] stdout: %s", stdoutString)
-	log.Printf("[vagrant driver] stderr: %s", stderrString)
 
 	return stdoutString, stderrString, err
 }

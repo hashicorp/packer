@@ -26,7 +26,8 @@ var requiredConfigValues = []string{
 }
 
 func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
-	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if err != nil {
 		t.Error("Expected configuration creation to succeed, but it failed!\n")
@@ -41,8 +42,8 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 		t.Error("Expected 'VMSize' to be populated, but it was empty!")
 	}
 
-	if c.ObjectID != "" {
-		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
+	if c.ClientConfig.ObjectID != "" {
+		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ClientConfig.ObjectID)
 	}
 
 	if c.managedImageStorageAccountType == "" {
@@ -63,7 +64,8 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues["managed_image_storage_account_type"] = "Premium_LRS"
 	builderValues["disk_caching_type"] = "None"
 
-	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(builderValues, getPackerConfiguration())
 
 	if err != nil {
 		t.Fatalf("newConfig failed: %s", err)
@@ -99,7 +101,8 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 }
 
 func TestConfigShouldDefaultVMSizeToStandardA1(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if c.VMSize != "Standard_A1" {
 		t.Errorf("Expected 'VMSize' to default to 'Standard_A1', but got '%s'.", c.VMSize)
@@ -107,7 +110,8 @@ func TestConfigShouldDefaultVMSizeToStandardA1(t *testing.T) {
 }
 
 func TestConfigShouldDefaultImageVersionToLatest(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if c.ImageVersion != "latest" {
 		t.Errorf("Expected 'ImageVersion' to default to 'latest', but got '%s'.", c.ImageVersion)
@@ -127,7 +131,8 @@ func TestConfigShouldNotDefaultImageVersionIfCustomImage(t *testing.T) {
 		"communicator":           "none",
 	}
 
-	c, _, _ := newConfig(config, getPackerConfiguration())
+	var c Config
+	c.Prepare(config, getPackerConfiguration())
 	if c.ImageVersion != "" {
 		t.Errorf("Expected 'ImageVersion' to empty, but got '%s'.", c.ImageVersion)
 	}
@@ -153,7 +158,8 @@ func TestConfigShouldNormalizeOSTypeCase(t *testing.T) {
 	for k, v := range os_types {
 		for _, os_type := range v {
 			config["os_type"] = os_type
-			c, _, err := newConfig(config, getPackerConfiguration())
+			var c Config
+			_, err := c.Prepare(config, getPackerConfiguration())
 			if err != nil {
 				t.Fatalf("Expected config to accept the value %q, but it did not", os_type)
 			}
@@ -167,7 +173,8 @@ func TestConfigShouldNormalizeOSTypeCase(t *testing.T) {
 	bad_os_types := []string{"", "does-not-exist"}
 	for _, os_type := range bad_os_types {
 		config["os_type"] = os_type
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 		if err == nil {
 			t.Fatalf("Expected config to not accept the value %q, but it did", os_type)
 		}
@@ -191,7 +198,8 @@ func TestConfigShouldRejectCustomImageAndMarketPlace(t *testing.T) {
 
 	for _, x := range marketPlace {
 		config[x] = "ignore"
-		_, _, err := newConfig(config, packerConfiguration)
+		var c Config
+		_, err := c.Prepare(config, packerConfiguration)
 		if err == nil {
 			t.Errorf("Expected Config to reject image_url and %s, but it did not", x)
 		}
@@ -212,7 +220,8 @@ func TestConfigVirtualNetworkNameIsOptional(t *testing.T) {
 		"virtual_network_name":   "MyVirtualNetwork",
 	}
 
-	c, _, _ := newConfig(config, getPackerConfiguration())
+	var c Config
+	c.Prepare(config, getPackerConfiguration())
 	if c.VirtualNetworkName != "MyVirtualNetwork" {
 		t.Errorf("Expected Config to set virtual_network_name to MyVirtualNetwork, but got %q", c.VirtualNetworkName)
 	}
@@ -241,7 +250,8 @@ func TestConfigVirtualNetworkResourceGroupNameMustBeSetWithVirtualNetworkName(t 
 		"virtual_network_resource_group_name": "MyVirtualNetworkRG",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Error("Expected Config to reject virtual_network_resource_group_name, if virtual_network_name is not set.")
 	}
@@ -264,21 +274,153 @@ func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testin
 		"virtual_network_subnet_name": "MyVirtualNetworkRG",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Error("Expected Config to reject virtual_network_subnet_name, if virtual_network_name is not set.")
 	}
 }
 
-func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-
-	if c.CloudEnvironmentName != "Public" {
-		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.CloudEnvironmentName)
+func TestConfigAllowedInboundIpAddressesIsOptional(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+		"virtual_network_name":   "MyVirtualNetwork",
 	}
 
-	if c.cloudEnvironment == nil || c.cloudEnvironment.Name != "AzurePublicCloud" {
-		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.cloudEnvironment)
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.AllowedInboundIpAddresses != nil {
+		t.Errorf("Expected Config to set allowed_inbound_ip_addresses to nil, but got %v", c.AllowedInboundIpAddresses)
+	}
+}
+
+func TestConfigShouldAcceptCorrectInboundIpAddresses(t *testing.T) {
+	ipValue0 := "127.0.0.1"
+	ipValue1 := "127.0.0.2"
+	cidrValue2 := "192.168.100.0/24"
+	cidrValue3 := "10.10.1.16/32"
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	config["allowed_inbound_ip_addresses"] = ipValue0
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.AllowedInboundIpAddresses == nil || len(c.AllowedInboundIpAddresses) != 1 ||
+		c.AllowedInboundIpAddresses[0] != ipValue0 {
+		t.Errorf("Expected 'allowed_inbound_ip_addresses' to have one element (%s), but got '%v'.", ipValue0, c.AllowedInboundIpAddresses)
+	}
+
+	config["allowed_inbound_ip_addresses"] = cidrValue2
+	_, err = c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.AllowedInboundIpAddresses == nil || len(c.AllowedInboundIpAddresses) != 1 ||
+		c.AllowedInboundIpAddresses[0] != cidrValue2 {
+		t.Errorf("Expected 'allowed_inbound_ip_addresses' to have one element (%s), but got '%v'.", cidrValue2, c.AllowedInboundIpAddresses)
+	}
+
+	config["allowed_inbound_ip_addresses"] = []string{ipValue0, cidrValue2, ipValue1, cidrValue3}
+	_, err = c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.AllowedInboundIpAddresses == nil || len(c.AllowedInboundIpAddresses) != 4 ||
+		c.AllowedInboundIpAddresses[0] != ipValue0 || c.AllowedInboundIpAddresses[1] != cidrValue2 ||
+		c.AllowedInboundIpAddresses[2] != ipValue1 || c.AllowedInboundIpAddresses[3] != cidrValue3 {
+		t.Errorf("Expected 'allowed_inbound_ip_addresses' to have four elements (%s %s %s %s), but got '%v'.", ipValue0, cidrValue2, ipValue1,
+			cidrValue3, c.AllowedInboundIpAddresses)
+	}
+}
+
+func TestConfigShouldRejectIncorrectInboundIpAddresses(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	config["allowed_inbound_ip_addresses"] = []string{"127.0.0.1", "127.0.0.two"}
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err == nil {
+		t.Errorf("Expected configuration creation to fail, but it succeeded with the malformed allowed_inbound_ip_addresses set to %v", c.AllowedInboundIpAddresses)
+	}
+
+	config["allowed_inbound_ip_addresses"] = []string{"192.168.100.1000/24", "10.10.1.16/32"}
+	_, err = c.Prepare(config, getPackerConfiguration())
+	if err == nil {
+		// 192.168.100.1000/24 is invalid
+		t.Errorf("Expected configuration creation to fail, but it succeeded with the malformed allowed_inbound_ip_addresses set to %v", c.AllowedInboundIpAddresses)
+	}
+}
+
+func TestConfigShouldRejectInboundIpAddressesWithVirtualNetwork(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":          "ignore",
+		"capture_container_name":       "ignore",
+		"location":                     "ignore",
+		"image_url":                    "ignore",
+		"storage_account":              "ignore",
+		"resource_group_name":          "ignore",
+		"subscription_id":              "ignore",
+		"os_type":                      constants.Target_Linux,
+		"communicator":                 "none",
+		"allowed_inbound_ip_addresses": "127.0.0.1",
+	}
+
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config["virtual_network_name"] = "some_vnet_name"
+	_, err = c.Prepare(config, getPackerConfiguration())
+	if err == nil {
+		t.Errorf("Expected configuration creation to fail, but it succeeded with allowed_inbound_ip_addresses and virtual_network_name both specified")
+	}
+}
+
+func TestConfigShouldDefaultToPublicCloud(t *testing.T) {
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+
+	if c.ClientConfig.CloudEnvironmentName != "Public" {
+		t.Errorf("Expected 'CloudEnvironmentName' to default to 'Public', but got '%s'.", c.ClientConfig.CloudEnvironmentName)
+	}
+
+	if c.ClientConfig.CloudEnvironment() == nil || c.ClientConfig.CloudEnvironment().Name != "AzurePublicCloud" {
+		t.Errorf("Expected 'cloudEnvironment' to be set to 'AzurePublicCloud', but got '%s'.", c.ClientConfig.CloudEnvironment())
 	}
 }
 
@@ -322,13 +464,14 @@ func TestConfigInstantiatesCorrectAzureEnvironment(t *testing.T) {
 
 	for _, x := range table {
 		config["cloud_environment_name"] = x.name
-		c, _, err := newConfig(config, packerConfiguration)
+		var c Config
+		_, err := c.Prepare(config, packerConfiguration)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if c.cloudEnvironment == nil || c.cloudEnvironment.Name != x.environmentName {
-			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.cloudEnvironment)
+		if c.ClientConfig.CloudEnvironment() == nil || c.ClientConfig.CloudEnvironment().Name != x.environmentName {
+			t.Errorf("Expected 'cloudEnvironment' to be set to '%s', but got '%s'.", x.environmentName, c.ClientConfig.CloudEnvironment())
 		}
 	}
 }
@@ -337,7 +480,8 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 	builderValues := getArmBuilderConfiguration()
 
 	// Ensure we can successfully create a config.
-	_, _, err := newConfig(builderValues, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(builderValues, getPackerConfiguration())
 	if err != nil {
 		t.Error("Expected configuration creation to succeed, but it failed!\n")
 		t.Fatalf(" -> %+v\n", builderValues)
@@ -348,7 +492,8 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 		originalValue := builderValues[v]
 		delete(builderValues, v)
 
-		_, _, err := newConfig(builderValues, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(builderValues, getPackerConfiguration())
 		if err == nil {
 			t.Error("Expected configuration creation to fail, but it succeeded!\n")
 			t.Fatalf(" -> %+v\n", builderValues)
@@ -359,7 +504,8 @@ func TestUserShouldProvideRequiredValues(t *testing.T) {
 }
 
 func TestSystemShouldDefineRuntimeValues(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 
 	if c.Password == "" {
 		t.Errorf("Expected Password to not be empty, but it was '%s'!", c.Password)
@@ -380,10 +526,15 @@ func TestSystemShouldDefineRuntimeValues(t *testing.T) {
 	if c.tmpOSDiskName == "" {
 		t.Errorf("Expected tmpOSDiskName to not be empty, but it was '%s'!", c.tmpOSDiskName)
 	}
+
+	if c.tmpNsgName == "" {
+		t.Errorf("Expected tmpNsgName to not be empty, but it was '%s'!", c.tmpNsgName)
+	}
 }
 
 func TestConfigShouldTransformToVirtualMachineCaptureParameters(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 	parameters := c.toVirtualMachineCaptureParameters()
 
 	if *parameters.DestinationContainerName != c.CaptureContainerName {
@@ -400,7 +551,8 @@ func TestConfigShouldTransformToVirtualMachineCaptureParameters(t *testing.T) {
 }
 
 func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
-	c, _, err := newConfig(
+	var c Config
+	_, err := c.Prepare(
 		getArmBuilderConfiguration(),
 		getPackerConfiguration(),
 		getPackerCommunicatorConfiguration())
@@ -424,7 +576,8 @@ func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
 	config["winrm_username"] = "username"
 	config["winrm_password"] = "password"
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -449,7 +602,8 @@ func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 		"communicator":           "none",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("failed to use device login for Linux: %s", err)
 	}
@@ -480,7 +634,8 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 
 	for _, x := range wellFormedCaptureNamePrefix {
 		config["capture_name_prefix"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err != nil {
 			t.Errorf("Expected test to pass, but it failed with the well-formed capture_name_prefix set to %q.", x)
@@ -498,7 +653,8 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 
 	for _, x := range malformedCaptureNamePrefix {
 		config["capture_name_prefix"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_name_prefix set to %q.", x)
@@ -530,7 +686,8 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 
 	for _, x := range wellFormedCaptureContainerName {
 		config["capture_container_name"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err != nil {
 			t.Errorf("Expected test to pass, but it failed with the well-formed capture_container_name set to %q.", x)
@@ -548,7 +705,8 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 
 	for _, x := range malformedCaptureContainerName {
 		config["capture_container_name"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed capture_container_name set to %q.", x)
@@ -580,7 +738,8 @@ func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T)
 
 	for _, x := range wellFormedManagedImageOSDiskSnapshotName {
 		config["managed_image_os_disk_snapshot_name"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err != nil {
 			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_os_disk_snapshot_name set to %q.", x)
@@ -597,7 +756,8 @@ func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T)
 
 	for _, x := range malformedManagedImageOSDiskSnapshotName {
 		config["managed_image_os_disk_snapshot_name"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_os_disk_snapshot_name set to %q.", x)
@@ -630,7 +790,8 @@ func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testin
 
 	for _, x := range wellFormedManagedImageDataDiskSnapshotPrefix {
 		config["managed_image_data_disk_snapshot_prefix"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err != nil {
 			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_data_disk_snapshot_prefix set to %q.", x)
@@ -647,7 +808,8 @@ func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testin
 
 	for _, x := range malformedManagedImageDataDiskSnapshotPrefix {
 		config["managed_image_data_disk_snapshot_prefix"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 
 		if err == nil {
 			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_data_disk_snapshot_prefix set to %q.", x)
@@ -675,7 +837,8 @@ func TestConfigShouldAcceptTags(t *testing.T) {
 		},
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 
 	if err != nil {
 		t.Fatal(err)
@@ -725,7 +888,8 @@ func TestConfigShouldRejectTagsInExcessOf15AcceptTags(t *testing.T) {
 		"azure_tags": tooManyTags,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 
 	if err == nil {
 		t.Fatal("expected config to reject based on an excessive amount of tags (> 15)")
@@ -757,7 +921,8 @@ func TestConfigShouldRejectExcessiveTagNameLength(t *testing.T) {
 		"azure_tags": tags,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject tag name based on length (> 512)")
 	}
@@ -788,7 +953,8 @@ func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
 		"azure_tags": tags,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject tag value based on length (> 256)")
 	}
@@ -805,7 +971,8 @@ func TestConfigZoneResilientShouldDefaultToFalse(t *testing.T) {
 		"os_type":                           "linux",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -828,7 +995,8 @@ func TestConfigZoneResilientSetFromConfig(t *testing.T) {
 		"managed_image_zone_resilient":      true,
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -856,7 +1024,8 @@ func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 		"custom_data_file": "/this/file/does/not/exist",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject missing custom data file")
 	}
@@ -876,7 +1045,8 @@ func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageName
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image name")
 	}
@@ -896,7 +1066,8 @@ func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageReso
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image resource group name")
 	}
@@ -916,7 +1087,8 @@ func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageName(t 
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image name")
 	}
@@ -936,7 +1108,8 @@ func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageResourc
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image resource group name")
 	}
@@ -958,7 +1131,8 @@ func TestConfigShouldAcceptManagedImageOSDiskSnapshotNameAndManagedImageDataDisk
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal("expected config to accept platform managed image build")
 	}
@@ -979,7 +1153,8 @@ func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDisk
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture container name")
 	}
@@ -1000,7 +1175,8 @@ func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDisk
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture name prefix")
 	}
@@ -1021,7 +1197,8 @@ func TestConfigShouldAcceptPlatformManagedImageBuild(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal("expected config to accept platform managed image build")
 	}
@@ -1045,7 +1222,8 @@ func TestConfigShouldRejectVhdAndManagedImageOutput(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject VHD and Managed Image build")
 	}
@@ -1065,7 +1243,8 @@ func TestConfigShouldRejectManagedImageSourceAndVhdOutput(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject VHD and Managed Image build")
 	}
@@ -1088,7 +1267,8 @@ func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject custom and platform input for a managed image build")
 	}
@@ -1109,7 +1289,8 @@ func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject custom and platform input for a managed image build")
 	}
@@ -1130,7 +1311,8 @@ func TestConfigShouldRejectMalformedManageImageStorageAccountTypes(t *testing.T)
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject custom and platform input for a managed image build")
 	}
@@ -1151,7 +1333,8 @@ func TestConfigShouldRejectMalformedDiskCachingType(t *testing.T) {
 		"os_type": constants.Target_Linux,
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject custom and platform input for a managed image build")
 	}
@@ -1175,7 +1358,8 @@ func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 
 	for _, x := range storage_account_types {
 		config["managed_image_storage_account_type"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 		if err != nil {
 			t.Fatalf("expected config to accept a managed_image_storage_account_type of %q", x)
 		}
@@ -1200,7 +1384,8 @@ func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
 
 	for _, x := range storage_account_types {
 		config["disk_caching_type"] = x
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 		if err != nil {
 			t.Fatalf("expected config to accept a disk_caching_type of %q", x)
 		}
@@ -1225,7 +1410,8 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 		"build_resource_group_name": "rgn00",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject the use of both temp_resource_group_name and build_resource_group_name")
 	}
@@ -1272,7 +1458,8 @@ func TestConfigShouldRejectInvalidResourceGroupNames(t *testing.T) {
 		for _, y := range tests {
 			config[x] = y.name
 
-			_, _, err := newConfig(config, getPackerConfiguration())
+			var c Config
+			_, err := c.Prepare(config, getPackerConfiguration())
 			if !y.ok && err == nil {
 				t.Errorf("expected config to reject %q for setting %q", y.name, x)
 			} else if y.ok && err != nil {
@@ -1322,7 +1509,8 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 	for _, y := range testsResourceGroupNames {
 		config[settingUnderTest] = y.name
 
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 		if !y.ok && err == nil {
 			t.Errorf("expected config to reject %q for setting %q", y.name, settingUnderTest)
 		} else if y.ok && err != nil {
@@ -1356,7 +1544,8 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 	for _, y := range testNames {
 		config[settingUnderTest] = y.name
 
-		_, _, err := newConfig(config, getPackerConfiguration())
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
 		if !y.ok && err == nil {
 			t.Logf("expected config to reject %q for setting %q", y.name, settingUnderTest)
 		} else if y.ok && err != nil {
@@ -1366,7 +1555,8 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 }
 
 func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
 	if c.AdditionalDiskSize != nil {
 		t.Errorf("Expected Config to not have a set of additional disks, but got a non nil value")
 	}
@@ -1389,7 +1579,8 @@ func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
 		"disk_additional_size": {32, 64},
 	}
 
-	c, _, _ := newConfig(config, diskconfig, getPackerConfiguration())
+	var c Config
+	c.Prepare(config, diskconfig, getPackerConfiguration())
 	if c.AdditionalDiskSize == nil {
 		t.Errorf("Expected Config to have a set of additional disks, but got nil")
 	}
@@ -1431,19 +1622,20 @@ func TestPlanInfoConfiguration(t *testing.T) {
 	}
 	config["plan_info"] = planInfo
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject the use of plan_name without plan_product and plan_publisher")
 	}
 
 	planInfo["plan_product"] = "--plan-product--"
-	_, _, err = newConfig(config, getPackerConfiguration())
+	_, err = c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject the use of plan_name and plan_product without plan_publisher")
 	}
 
 	planInfo["plan_publisher"] = "--plan-publisher--"
-	c, _, err := newConfig(config, getPackerConfiguration())
+	_, err = c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("expected config to accept a complete plan configuration: %s", err)
 	}
@@ -1480,7 +1672,8 @@ func TestPlanInfoPromotionCode(t *testing.T) {
 		},
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("expected config to accept plan_info configuration, but got %s", err)
 	}
@@ -1529,7 +1722,8 @@ func TestPlanInfoTooManyTagsErrors(t *testing.T) {
 		},
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject configuration due to excess tags")
 	}
@@ -1552,7 +1746,8 @@ func TestConfigShouldAllowTempNameOverrides(t *testing.T) {
 		"temp_compute_name":                 "myTempComputeName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("newConfig failed with %q", err)
 	}
@@ -1586,7 +1781,8 @@ func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
 		"async_resourcegroup_delete":        "true",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("newConfig failed with %q", err)
 	}
@@ -1608,7 +1804,8 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
 		"managed_image_resource_group_name": "ignore",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("newConfig failed with %q", err)
 	}
@@ -1631,10 +1828,10 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
 		"async_resourcegroup_delete":        "asdasda",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
-	if err != nil && c == nil {
-		t.Log("newConfig failed  which is expected ", err)
-
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Log("newConfig failed which is expected ", err)
 	}
 
 }
@@ -1652,7 +1849,8 @@ func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 		},
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err == nil {
 		t.Log("expected config to accept Shared Image Gallery options", err)
 	}
@@ -1677,7 +1875,8 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 		"capture_name_prefix":    "ignore",
 	}
 
-	_, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err)
 	}
@@ -1688,7 +1887,8 @@ func Test_GivenZoneNotSupportingResiliency_ConfigValidate_ShouldWarn(t *testing.
 	builderValues["managed_image_zone_resilient"] = "true"
 	builderValues["location"] = "ukwest"
 
-	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(builderValues, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("newConfig failed with %q", err)
 	}
@@ -1706,7 +1906,8 @@ func Test_GivenZoneSupportingResiliency_ConfigValidate_ShouldNotWarn(t *testing.
 	builderValues["managed_image_zone_resilient"] = "true"
 	builderValues["location"] = "westeurope"
 
-	c, _, err := newConfig(builderValues, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(builderValues, getPackerConfiguration())
 	if err != nil {
 		t.Errorf("newConfig failed with %q", err)
 	}

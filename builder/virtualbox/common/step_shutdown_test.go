@@ -16,6 +16,8 @@ func TestStepShutdown_impl(t *testing.T) {
 func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	state := testState(t)
 	step := new(StepShutdown)
+	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -45,6 +47,8 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	step := new(StepShutdown)
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
+	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -82,6 +86,8 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	step := new(StepShutdown)
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
+	step.DisableShutdown = false
+	step.ACPIShutdown = false
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -106,12 +112,12 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	}
 }
 
-func TestStepShutdown_shutdownDelay(t *testing.T) {
+func TestStepShutdown_DisableShutdown(t *testing.T) {
 	state := testState(t)
 	step := new(StepShutdown)
-	step.Command = "poweroff"
-	step.Timeout = 5 * time.Second
-	step.Delay = 2 * time.Second
+	step.DisableShutdown = true
+	step.ACPIShutdown = false
+	step.Timeout = 2 * time.Second
 
 	comm := new(packer.MockCommunicator)
 	state.Put("communicator", comm)
@@ -119,36 +125,9 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 
 	driver := state.Get("driver").(*DriverMock)
 	driver.IsRunningReturn = true
-	start := time.Now()
 
 	go func() {
-		time.Sleep(10 * time.Millisecond)
-		driver.Lock()
-		defer driver.Unlock()
-		driver.IsRunningReturn = false
-	}()
-
-	// Test the run
-
-	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
-		t.Fatalf("bad action: %#v", action)
-	}
-	testDuration := time.Since(start)
-	if testDuration < 2500*time.Millisecond || testDuration > 2700*time.Millisecond {
-		t.Fatalf("incorrect duration %s", testDuration)
-	}
-
-	if _, ok := state.GetOk("error"); ok {
-		t.Fatal("should NOT have error")
-	}
-
-	step.Delay = 0
-
-	driver.IsRunningReturn = true
-	start = time.Now()
-
-	go func() {
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 		driver.Lock()
 		defer driver.Unlock()
 		driver.IsRunningReturn = false
@@ -158,13 +137,36 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
-	testDuration = time.Since(start)
-	if testDuration > 600*time.Millisecond {
-		t.Fatalf("incorrect duration %s", testDuration)
+	if _, ok := state.GetOk("error"); ok {
+		t.Fatal("should NOT have error")
 	}
+}
 
+func TestStepShutdown_ACPIShutdown(t *testing.T) {
+	state := testState(t)
+	step := new(StepShutdown)
+	step.ACPIShutdown = true
+	step.Timeout = 2 * time.Second
+
+	comm := new(packer.MockCommunicator)
+	state.Put("communicator", comm)
+	state.Put("vmName", "foo")
+
+	driver := state.Get("driver").(*DriverMock)
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
 
+	// Test that Stop was just called
+	if driver.StopViaACPIName != "foo" {
+		t.Fatal("should call stop via ACPI")
+	}
+	if comm.StartCalled {
+		t.Fatal("comm start should not be called")
+	}
 }

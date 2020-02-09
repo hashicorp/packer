@@ -13,8 +13,9 @@ import (
 
 // Ensure the link values are not set, and the concrete values are set.
 func TestVirtualMachineDeployment00(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,8 +43,9 @@ func TestVirtualMachineDeployment00(t *testing.T) {
 
 // Ensure the Virtual Machine template is a valid JSON document.
 func TestVirtualMachineDeployment01(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +58,9 @@ func TestVirtualMachineDeployment01(t *testing.T) {
 
 // Ensure the Virtual Machine template parameters are correct.
 func TestVirtualMachineDeployment02(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,8 +107,9 @@ func TestVirtualMachineDeployment03(t *testing.T) {
 	m["image_sku"] = "ImageSku"
 	m["image_version"] = "ImageVersion"
 
-	c, _, _ := newConfig(m, getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(m, getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,12 +134,13 @@ func TestVirtualMachineDeployment04(t *testing.T) {
 		"communicator":           "none",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,12 +167,13 @@ func TestVirtualMachineDeployment05(t *testing.T) {
 		"virtual_network_subnet_name":         "virtualNetworkSubnetName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,12 +203,13 @@ func TestVirtualMachineDeployment06(t *testing.T) {
 		},
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +234,8 @@ func TestVirtualMachineDeployment07(t *testing.T) {
 		"communicator":           "none",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +255,7 @@ growpart:
 	base64CustomData := base64.StdEncoding.EncodeToString([]byte(customData))
 	c.customData = base64CustomData
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,12 +279,13 @@ func TestVirtualMachineDeployment08(t *testing.T) {
 		"managed_image_resource_group_name":        "ManagedImageResourceGroupName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -302,12 +311,13 @@ func TestVirtualMachineDeployment09(t *testing.T) {
 		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -339,12 +349,13 @@ func TestVirtualMachineDeployment10(t *testing.T) {
 		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -375,12 +386,13 @@ func TestVirtualMachineDeployment11(t *testing.T) {
 		"capture_container_name": "packerimages",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,12 +421,48 @@ func TestVirtualMachineDeployment12(t *testing.T) {
 		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deployment, err := GetVirtualMachineDeployment(c)
+	deployment, err := GetVirtualMachineDeployment(&c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building with list of allowed IP addresses
+func TestVirtualMachineDeployment13(t *testing.T) {
+	config := map[string]interface{}{
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"os_type":                           constants.Target_Windows,
+		"communicator":                      "winrm",
+		"winrm_username":                    "ignore",
+		"image_publisher":                   "--image-publisher--",
+		"image_offer":                       "--image-offer--",
+		"image_sku":                         "--image-sku--",
+		"image_version":                     "--version--",
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
+		"allowed_inbound_ip_addresses":      []string{"127.0.0.1", "192.168.100.0/24"},
+	}
+
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.tmpKeyVaultName = "--keyvault-name--"
+
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -427,8 +475,9 @@ func TestVirtualMachineDeployment12(t *testing.T) {
 
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetKeyVaultDeployment(c)
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetKeyVaultDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -456,8 +505,9 @@ func TestKeyVaultDeployment00(t *testing.T) {
 
 // Ensure the KeyVault template is a valid JSON document.
 func TestKeyVaultDeployment01(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetKeyVaultDeployment(c)
+	var c Config
+	c.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetKeyVaultDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -470,9 +520,10 @@ func TestKeyVaultDeployment01(t *testing.T) {
 
 // Ensure the KeyVault template parameters are correct.
 func TestKeyVaultDeployment02(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
+	var c Config
+	c.Prepare(getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
 
-	deployment, err := GetKeyVaultDeployment(c)
+	deployment, err := GetKeyVaultDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -488,11 +539,11 @@ func TestKeyVaultDeployment02(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if params.ObjectId.Value != c.ObjectID {
-		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ObjectID)
+	if params.ObjectId.Value != c.ClientConfig.ObjectID {
+		t.Errorf("Expected template parameter 'ObjectId' to be %s, but got %s.", params.ObjectId.Value, c.ClientConfig.ObjectID)
 	}
-	if params.TenantId.Value != c.TenantID {
-		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.TenantID)
+	if params.TenantId.Value != c.ClientConfig.TenantID {
+		t.Errorf("Expected template parameter 'TenantId' to be %s, but got %s.", params.TenantId.Value, c.ClientConfig.TenantID)
 	}
 	if params.KeyVaultName.Value != c.tmpKeyVaultName {
 		t.Errorf("Expected template parameter 'KeyVaultName' to be %s, but got %s.", params.KeyVaultName.Value, c.tmpKeyVaultName)
@@ -512,8 +563,9 @@ func TestKeyVaultDeployment03(t *testing.T) {
 		},
 	}
 
-	c, _, _ := newConfig(tags, getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
-	deployment, err := GetKeyVaultDeployment(c)
+	var c Config
+	c.Prepare(tags, getArmBuilderConfigurationWithWindows(), getPackerConfiguration())
+	deployment, err := GetKeyVaultDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -533,8 +585,9 @@ func TestPlanInfo01(t *testing.T) {
 		},
 	}
 
-	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -558,8 +611,9 @@ func TestPlanInfo02(t *testing.T) {
 		},
 	}
 
-	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
-	deployment, err := GetVirtualMachineDeployment(c)
+	var c Config
+	c.Prepare(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
+	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
 	}

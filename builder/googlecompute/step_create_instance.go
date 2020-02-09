@@ -154,7 +154,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		ui.Message("Waiting for creation operation to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(c.stateTimeout):
+		case <-time.After(c.StateTimeout):
 			err = errors.New("time out while waiting for instance to create")
 		}
 	}
@@ -176,6 +176,9 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	// Things succeeded, store the name so we can remove it later
 	state.Put("instance_name", name)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", name)
 
 	return multistep.ActionContinue
 }
@@ -200,7 +203,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.stateTimeout):
+		case <-time.After(config.StateTimeout):
 			err = errors.New("time out while waiting for instance to delete")
 		}
 	}
@@ -222,7 +225,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	if err == nil {
 		select {
 		case err = <-errCh:
-		case <-time.After(config.stateTimeout):
+		case <-time.After(config.StateTimeout):
 			err = errors.New("time out while waiting for disk to delete")
 		}
 	}

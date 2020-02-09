@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // vagrant implements the packer.PostProcessor interface and adds a
 // post-processor that turns artifacts of known builders into Vagrant
 // boxes.
@@ -12,6 +14,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -53,45 +56,49 @@ type Config struct {
 }
 
 type PostProcessor struct {
-	configs map[string]*Config
+	config Config
+}
+
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec {
+	return p.config.FlatMapstructure().HCL2Spec()
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	p.configs = make(map[string]*Config)
-	p.configs[""] = new(Config)
-	if err := p.configureSingle(p.configs[""], raws...); err != nil {
+	if err := p.configureSingle(&p.config, raws...); err != nil {
 		return err
 	}
-
-	// Go over any of the provider-specific overrides and load those up.
-	for name, override := range p.configs[""].Override {
-		subRaws := make([]interface{}, len(raws)+1)
-		copy(subRaws, raws)
-		subRaws[len(raws)] = override
-
-		config := new(Config)
-		p.configs[name] = config
-		if err := p.configureSingle(config, subRaws...); err != nil {
-			return fmt.Errorf("Error configuring %s: %s", name, err)
-		}
-	}
-
 	return nil
 }
 
 func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	config := p.configs[""]
-	if specificConfig, ok := p.configs[name]; ok {
-		config = specificConfig
+	config, err := p.specificConfig(name)
+	if err != nil {
+		return nil, false, err
+	}
+
+	err = CreateDummyBox(ui, config.CompressionLevel)
+	if err != nil {
+		return nil, false, err
 	}
 
 	ui.Say(fmt.Sprintf("Creating Vagrant box for '%s' provider", name))
 
-	config.ctx.Data = &outputPathTemplate{
-		ArtifactId: artifact.Id(),
-		BuildName:  config.PackerBuildName,
-		Provider:   name,
+	var generatedData map[interface{}]interface{}
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[interface{}]interface{})
 	}
+	// If stateData has a nil map generatedData will be nil
+	// and we need to make sure it's not
+	if generatedData == nil {
+		generatedData = make(map[interface{}]interface{})
+	}
+	generatedData["ArtifactId"] = artifact.Id()
+	generatedData["BuildName"] = config.PackerBuildName
+	generatedData["Provider"] = name
+	config.ctx.Data = generatedData
+
 	outputPath, err := interpolate.Render(config.OutputPath, &config.ctx)
 	if err != nil {
 		return nil, false, err
@@ -233,6 +240,17 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	return nil
 }
 
+func (p *PostProcessor) specificConfig(name string) (Config, error) {
+	config := p.config
+	if _, ok := config.Override[name]; ok {
+		if err := mapstructure.Decode(config.Override[name], &config); err != nil {
+			err = fmt.Errorf("Error overriding config for %s: %s", name, err)
+			return config, err
+		}
+	}
+	return config, nil
+}
+
 func providerForName(name string) Provider {
 	switch name {
 	case "aws":
@@ -262,14 +280,6 @@ func providerForName(name string) Provider {
 	default:
 		return nil
 	}
-}
-
-// OutputPathTemplate is the structure that is available within the
-// OutputPath variables.
-type outputPathTemplate struct {
-	ArtifactId string
-	BuildName  string
-	Provider   string
 }
 
 type vagrantfileTemplate struct {

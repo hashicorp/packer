@@ -42,7 +42,8 @@ func testConfigForMemberServerImage() map[string]interface{} {
 func TestConfigWithServerImageProductCode(t *testing.T) {
 	raw := testConfig()
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 
 	if c.AccessKey != "access_key" {
 		t.Errorf("Expected 'access_key' to be set to '%s', but got '%s'.", raw["access_key"], c.AccessKey)
@@ -76,7 +77,8 @@ func TestConfigWithServerImageProductCode(t *testing.T) {
 func TestConfigWithMemberServerImageCode(t *testing.T) {
 	raw := testConfigForMemberServerImage()
 
-	c, _, _ := NewConfig(raw)
+	var c Config
+	c.Prepare(raw)
 
 	if c.AccessKey != "access_key" {
 		t.Errorf("Expected 'access_key' to be set to '%s', but got '%s'.", raw["access_key"], c.AccessKey)
@@ -110,7 +112,8 @@ func TestConfigWithMemberServerImageCode(t *testing.T) {
 func TestEmptyConfig(t *testing.T) {
 	raw := new(map[string]interface{})
 
-	_, _, err := NewConfig(raw)
+	var c Config
+	_, err := c.Prepare(raw)
 
 	if err == nil {
 		t.Error("Expected Config to require 'access_key', 'secret_key' and some mandatory fields, but it did not")
@@ -138,7 +141,8 @@ func TestExistsBothServerImageProductCodeAndMemberServerImageNoConfig(t *testing
 		"member_server_image_no":    "2440",
 	}
 
-	_, _, err := NewConfig(raw)
+	var c Config
+	_, err := c.Prepare(raw)
 
 	if !strings.Contains(err.Error(), "Only one of server_image_product_code and member_server_image_no can be set") {
 		t.Error("Expected Config to require Only one of 'server_image_product_code' and 'member_server_image_no' can be set, but it did not")

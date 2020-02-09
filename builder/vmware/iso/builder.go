@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -18,16 +19,15 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-// Prepare processes the build configuration parameters.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
-	b.config = *c
-
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -86,15 +86,20 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&stepRemoteUpload{
-			Key:       "floppy_path",
-			Message:   "Uploading Floppy to remote machine...",
-			DoCleanup: true,
+		&vmwcommon.StepRemoteUpload{
+			Key:          "floppy_path",
+			Message:      "Uploading Floppy to remote machine...",
+			DoCleanup:    true,
+			Checksum:     "",
+			ChecksumType: "none",
 		},
-		&stepRemoteUpload{
-			Key:     "iso_path",
-			Message: "Uploading ISO to remote machine...",
+		&vmwcommon.StepRemoteUpload{
+			Key:          "iso_path",
+			Message:      "Uploading ISO to remote machine...",
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
 		},
 		&stepCreateDisk{},
 		&stepCreateVMX{},
@@ -104,6 +109,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepSuppressMessages{},
+		&vmwcommon.StepHTTPIPDiscover{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,

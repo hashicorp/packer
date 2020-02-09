@@ -26,18 +26,23 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		agent = 0
 	}
 
+	isoFile := state.Get("iso_file").(string)
+
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
 		Agent:        agent,
+		Boot:         "cdn", // Boot priority, c:CDROM -> d:Disk -> n:Network
+		QemuCpu:      c.CPUType,
 		Description:  "Packer ephemeral build VM",
 		Memory:       c.Memory,
 		QemuCores:    c.Cores,
 		QemuSockets:  c.Sockets,
 		QemuOs:       c.OS,
-		QemuIso:      c.ISOFile,
+		QemuIso:      isoFile,
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
+		Scsihw:       c.SCSIController,
 	}
 
 	if c.VMID == 0 {
@@ -60,6 +65,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 	vmRef := proxmox.NewVmRef(c.VMID)
 	vmRef.SetNode(c.Node)
+	if c.Pool != "" {
+		vmRef.SetPool(c.Pool)
+	}
 
 	err := config.CreateVm(vmRef, client)
 	if err != nil {
@@ -70,6 +78,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	// Store the vm id for later
 	state.Put("vmRef", vmRef)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", vmRef)
 
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
@@ -142,7 +153,7 @@ func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 	ui.Say("Stopping VM")
 	_, err := client.StopVm(vmRef)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error stop VM. Please stop and delete it manually: %s", err))
+		ui.Error(fmt.Sprintf("Error stopping VM. Please stop and delete it manually: %s", err))
 		return
 	}
 

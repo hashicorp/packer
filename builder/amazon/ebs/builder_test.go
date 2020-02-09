@@ -32,7 +32,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"access_key": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -48,7 +48,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test good
 	config["ami_name"] = "foo"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -59,7 +59,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	config["ami_name"] = "foo {{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -70,7 +70,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 	// Test bad
 	delete(config, "ami_name")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -85,7 +85,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -101,7 +101,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 	// Test good
 	config["shutdown_behavior"] = "terminate"
 	config["skip_region_validation"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -111,7 +111,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test good
 	config["shutdown_behavior"] = "stop"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -121,11 +121,30 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test bad
 	config["shutdown_behavior"] = "foobar"
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	generatedData, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
+	if generatedData[0] != "SourceAMIName" {
+		t.Fatalf("Generated data should contain SourceAMIName")
 	}
 }

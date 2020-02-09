@@ -9,6 +9,7 @@
 
 package openapi
 
+// SnapshotPostAccessrights struct for SnapshotPostAccessrights
 type SnapshotPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

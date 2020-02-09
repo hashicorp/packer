@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the VaultAWSEngineOptions struct in builder/amazon/common/access_config.go; DO NOT EDIT MANUALLY -->
+
+-   `name` (string) - Name
+-   `role_arn` (string) - Role ARN
+-   `ttl` (string) - Specifies the TTL for the use of the STS token. This
+    is specified as a string with a duration suffix. Valid only when
+    credential_type is assumed_role or federation_token. When not
+    specified, the default_sts_ttl set for the role will be used. If that
+    is also not set, then the default value of 3600s will be used. AWS
+    places limits on the maximum TTL allowed. See the AWS documentation on
+    the DurationSeconds parameter for AssumeRole (for assumed_role
+    credential types) and GetFederationToken (for federation_token
+    credential types) for more details.
+    
+-   `engine_name` (string) - Engine Name

@@ -1,0 +1,8 @@
+<!-- Code generated from the comments of the BlockDevice struct in builder/amazon/ebssurrogate/block_device.go; DO NOT EDIT MANUALLY -->
+
+-   `omit_from_artifact` (bool) - If true, this block device will not be snapshotted and the created AMI
+    will not contain block device mapping information for this volume. If
+    false, the block device will be mapped into the final created AMI. Set
+    this option to true if you need a block device mounted in the surrogate
+    AMI but not in the final created AMI.
+    

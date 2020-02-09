@@ -140,6 +140,9 @@ Optional parameters:
     the standard windows path to the script when providing a `script`. This is
     a beta feature.
 
+-   `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
+    default this is just 0.
+
 ## Execute Command
 
 To many new users, the `execute_command` is puzzling. However, it provides an

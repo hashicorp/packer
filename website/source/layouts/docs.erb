@@ -1,9 +1,33 @@
 <% wrap_layout :inner do %>
   <% content_for :sidebar do %>
     <ul class="nav docs-sidenav">
-      <li<%= sidebar_current("docs-install") %>>
-        <a href="/docs/install/index.html">Installing Packer</a>
+
+      <li<%= sidebar_current("configuration") %>>
+        <a href="/docs/configuration/from-1.5/index.html">v1.5 Configuration Language</a>
+        <ul class="nav">
+          <li<%= sidebar_current("configuration-variables") %>>
+            <a href="/docs/configuration/from-1.5/variables.html">Variables</a>
+          </li>
+          <li<%= sidebar_current("configuration-locals") %>>
+            <a href="/docs/configuration/from-1.5/locals.html">Locals</a>
+          </li>
+          <li<%= sidebar_current("configuration-syntax") %>>
+            <a href="/docs/configuration/from-1.5/syntax.html">Syntax</a>
+          </li>
+          <li<%= sidebar_current("configuration-expressions") %>>
+            <a href="/docs/configuration/from-1.5/expressions.html">Expressions</a>
+          </li>
+          <li<%= sidebar_current("configuration-json-syntax") %>>
+            <a href="/docs/configuration/from-1.5/syntax-json.html">JSON Syntax</a>
+          </li>
+
+          <%= partial "layouts/functions" %>
+
+        </ul>
       </li>
+
+      <hr>
+
       <li><a href="/docs/basics/terminology.html">Terminology</a></li>
 
       <li<%= sidebar_current("docs-commands") %>>
@@ -53,6 +77,18 @@
 
       <hr>
 
+      <li<%= sidebar_current("docs-communicators") %>>
+        <a href="/docs/communicators/index.html">Communicators</a>
+        <ul class="nav">
+          <li<%= sidebar_current("docs-communicators-ssh") %>>
+            <a href="/docs/communicators/ssh.html">SSH</a>
+          </li>
+          <li<%= sidebar_current("docs-communicators-winrm") %>>
+            <a href="/docs/communicators/winrm.html">WINRM</a>
+          </li>
+        </ul>
+      </li>
+
       <li<%= sidebar_current("docs-builders") %>>
         <a href="/docs/builders/index.html">Builders</a>
         <ul class="nav">
@@ -82,8 +118,11 @@
           <li<%= sidebar_current("docs-builders-azure") %>>
             <a href="/docs/builders/azure.html">Azure</a>
             <ul class="nav">
-              <li<%= sidebar_current("docs-builders-azure-setup") %>>
-                <a href="/docs/builders/azure-setup.html">Setup</a>
+              <li<%= sidebar_current("docs-builders-azure-arm") %>>
+                <a href="/docs/builders/azure-arm.html">ARM</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-azure-chroot") %>>
+                <a href="/docs/builders/azure-chroot.html">chroot</a>
               </li>
             </ul>
           </li>
@@ -182,6 +221,9 @@
           <li<%= sidebar_current("docs-builders-profitbricks") %>>
             <a href="/docs/builders/profitbricks.html">ProfitBricks</a>
           </li>
+          <li<%= sidebar_current("docs-builders-proxmox") %>>
+            <a href="/docs/builders/proxmox.html">Proxmox</a>
+          </li>
           <li<%= sidebar_current("docs-builders-qemu") %>>
             <a href="/docs/builders/qemu.html">QEMU</a>
           </li>
@@ -221,10 +263,16 @@
             <a href="/docs/builders/vmware.html">VMware</a>
             <ul class="nav">
               <li<%= sidebar_current("docs-builders-vmware-iso") %>>
-                <a href="/docs/builders/vmware-iso.html">ISO</a>
+                <a href="/docs/builders/vmware-iso.html">VMWare ISO</a>
               </li>
               <li<%= sidebar_current("docs-builders-vmware-vmx") %>>
-                <a href="/docs/builders/vmware-vmx.html">VMX</a>
+                <a href="/docs/builders/vmware-vmx.html">VMWare VMX</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-vsphere-iso") %>>
+                <a href="/docs/builders/vsphere-iso.html">VSphere ISO</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-vsphere-clone") %>>
+                <a href="/docs/builders/vsphere-clone.html">VSphere Clone</a>
               </li>
             </ul>
           </li>
@@ -233,6 +281,9 @@
           </li>
           <li<%= sidebar_current("docs-builders-custom") %>>
             <a href="/docs/builders/custom.html">Custom</a>
+          </li>
+          <li<%= sidebar_current("docs-builders-community") %>>
+            <a href="/docs/builders/community-supported.html">Community-Supported</a>
           </li>
         </ul>
       </li>
@@ -290,6 +341,9 @@
           <li<%= sidebar_current("docs-provisioners-custom")%>>
             <a href="/docs/provisioners/custom.html">Custom</a>
           </li>
+          <li<%= sidebar_current("docs-provisioners-community") %>>
+            <a href="/docs/provisioners/community-supported.html">Community-Supported</a>
+          </li>
         </ul>
       </li>
       <li<%= sidebar_current("docs-post-processors") %>>
@@ -340,6 +394,9 @@
           <li<%= sidebar_current("docs-post-processors-shell-local") %>>
             <a href="/docs/post-processors/shell-local.html">Shell (Local)</a>
           </li>
+          <li<%= sidebar_current("docs-post-processors-ucloud-import") %>>
+            <a href="/docs/post-processors/ucloud-import.html">UCloud Import</a>
+          </li>
           <li<%= sidebar_current("docs-post-processors-vagrant-box") %>>
             <a href="/docs/post-processors/vagrant.html">Vagrant</a>
           </li>
@@ -353,6 +410,12 @@
             <a href="/docs/post-processors/vsphere-template.html">vSphere Template</a>
           </li>
         </ul>
+      </li>
+
+      <hr>
+
+      <li<%= sidebar_current("docs-install") %>>
+        <a href="/docs/install/index.html">Installing Packer</a>
       </li>
 
       <hr>

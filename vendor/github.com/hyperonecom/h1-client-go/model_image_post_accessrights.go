@@ -9,6 +9,7 @@
 
 package openapi
 
+// ImagePostAccessrights struct for ImagePostAccessrights
 type ImagePostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

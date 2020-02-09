@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -41,17 +40,12 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 		// does not exist.
 
 		// Work around this by retrying a few times, up to about 5 minutes.
-		err := retry.Config{
-			Tries: 6,
-			ShouldRetry: func(error) bool {
-				if awsErr, ok := err.(awserr.Error); ok {
-					switch awsErr.Code() {
-					case "InvalidInstanceID.NotFound":
-						return true
-					}
-				}
-				return false
-			},
+		err := retry.Config{Tries: 6, ShouldRetry: func(error) bool {
+			if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+				return true
+			}
+			return false
+		},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
 			ui.Message(fmt.Sprintf("Stopping instance"))

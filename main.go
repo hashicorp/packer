@@ -62,8 +62,6 @@ func realMain() int {
 
 		packer.LogSecretFilter.SetOutput(logWriter)
 
-		//packer.LogSecrets.
-
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
 
@@ -137,18 +135,22 @@ func wrappedMain() int {
 	packer.LogSecretFilter.SetOutput(os.Stderr)
 	log.SetOutput(&packer.LogSecretFilter)
 
-	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
-	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
-	log.Printf("Built with Go Version: %s", runtime.Version())
-
 	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+	if inPlugin {
+		// This prevents double-logging timestamps
+		log.SetFlags(0)
+	}
+
+	log.Printf("[INFO] Packer version: %s [%s %s %s]",
+		version.FormattedVersion(),
+		runtime.Version(),
+		runtime.GOOS, runtime.GOARCH)
 
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
 		return 1
 	}
-	log.Printf("Packer config: %+v", config)
 
 	// Fire off the checkpoint.
 	go runCheckpoint(config)
@@ -192,7 +194,15 @@ func wrappedMain() int {
 		}
 		ui = basicUi
 		if !inPlugin {
-			if TTY, err := openTTY(); err != nil {
+			currentPID := os.Getpid()
+			backgrounded, err := checkProcess(currentPID)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot determine if process is in "+
+					"background: %s\n", err)
+			}
+			if backgrounded {
+				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+			} else if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			} else {
 				basicUi.TTY = TTY
@@ -204,10 +214,11 @@ func wrappedMain() int {
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				Builder:       config.LoadBuilder,
-				Hook:          config.LoadHook,
-				PostProcessor: config.LoadPostProcessor,
-				Provisioner:   config.LoadProvisioner,
+				Hook: config.StarHook,
+
+				BuilderStore:       config.Builders,
+				ProvisionerStore:   config.Provisioners,
+				PostProcessorStore: config.PostProcessors,
 			},
 			Version: version.Version,
 		},
@@ -281,17 +292,21 @@ func loadConfig() (*config, error) {
 	var config config
 	config.PluginMinPort = 10000
 	config.PluginMaxPort = 25000
+	config.Builders = packer.MapOfBuilder{}
+	config.PostProcessors = packer.MapOfPostProcessor{}
+	config.Provisioners = packer.MapOfProvisioner{}
 	if err := config.Discover(); err != nil {
 		return nil, err
 	}
 
+	// start by loading from PACKER_CONFIG if available
+	log.Print("Checking 'PACKER_CONFIG' for a config file path")
 	configFilePath := os.Getenv("PACKER_CONFIG")
-	if configFilePath != "" {
-		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
-	} else {
-		var err error
-		configFilePath, err = packer.ConfigFile()
 
+	if configFilePath == "" {
+		var err error
+		log.Print("'PACKER_CONFIG' not set; checking the default config file path")
+		configFilePath, err = packer.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
 		}
@@ -316,6 +331,8 @@ func loadConfig() (*config, error) {
 	if err := decodeConfig(f, &config); err != nil {
 		return nil, err
 	}
+
+	config.LoadExternalComponentsFromConfig()
 
 	return &config, nil
 }

@@ -12,6 +12,10 @@ import (
 type Artifact struct {
 	templateID    int
 	proxmoxClient *proxmox.Client
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 // Artifact implements packer.Artifact
@@ -34,7 +38,7 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.StateData[name]
 }
 
 func (a *Artifact) Destroy() error {

@@ -51,7 +51,7 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 
 		params := &ec2.DescribeSecurityGroupsInput{}
 		if vpcId != "" {
-			s.SecurityGroupFilter.Filters[aws.String("vpc-id")] = &vpcId
+			s.SecurityGroupFilter.Filters["vpc-id"] = vpcId
 		}
 		params.Filters = buildEc2Filters(s.SecurityGroupFilter.Filters)
 
@@ -183,7 +183,8 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up security group. Please delete the group manually: %s", s.createdGroupId))
+			"Error cleaning up security group. Please delete the group manually:"+
+				" err: %s; security group ID: %s", err, s.createdGroupId))
 	}
 }
 

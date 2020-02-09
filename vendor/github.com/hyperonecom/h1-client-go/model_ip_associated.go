@@ -9,8 +9,9 @@
 
 package openapi
 
+// IpAssociated struct for IpAssociated
 type IpAssociated struct {
-	Ip string `json:"ip,omitempty"`
-	Fip string `json:"fip,omitempty"`
+	Ip     string `json:"ip,omitempty"`
+	Fip    string `json:"fip,omitempty"`
 	Netadp string `json:"netadp,omitempty"`
 }

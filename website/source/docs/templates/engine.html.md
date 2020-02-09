@@ -36,30 +36,12 @@ Here is a full list of the available functions for reference.
 
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
--   `env` - Returns environment variables. See example in [using home
-    variable](/docs/templates/user-variables.html#using-home-variable)
--   `isotime [FORMAT]` - UTC time, which can be
-    [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
-    examples below in [the `isotime` format
-    reference](/docs/templates/engine.html#isotime-function-format-reference).
--   `lower` - Lowercases the string.
--   `pwd` - The working directory while executing Packer.
--   `sed` - Use [a golang implementation of
-    sed](https://github.com/rwtodd/Go.Sed) to parse an input string.
--   `split` - Split an input string using separator and return the requested
-    substring.
--   `template_dir` - The directory to the template for the build.
--   `timestamp` - The current Unix timestamp in UTC.
--   `uuid` - Returns a random UUID.
--   `upper` - Uppercases the string.
--   `user` - Specifies a user variable.
--   `packer_version` - Returns Packer version.
 -   `clean_resource_name` - Image names can only contain certain characters and
     have a maximum length, eg 63 on GCE & 80 on Azure. `clean_resource_name`
     will convert upper cases to lower cases and replace illegal characters with
     a "-" character.  Example:
 
-   `"mybuild-{{isotime | clean_image_name}}"` will become
+   `"mybuild-{{isotime | clean_resource_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid Azure image names must match the regex
@@ -75,22 +57,97 @@ Here is a full list of the available functions for reference.
     clean_resource_name}}"` will cause your build to fail because the image
     name will start with a number, which is why in the above example we prepend
     the isotime with "mybuild".
+    Exact behavior of `clean_resource_name` will depend on which builder it is
+    being applied to; refer to build-specific docs below for more detail on how
+    each function will behave.
+-   `env` - Returns environment variables. See example in [using home
+    variable](/docs/templates/user-variables.html#using-home-variable)
+-   `build` - This engine will allow you to access, from provisioners and post-processors, special variables that
+    provide connection information and basic instance state information.
+    Usage example:
+
+    ```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
+      "inline": ["echo $TESTVAR"]
+    }
+    ```
+
+    Valid variables to request are: "ID", "Host",
+    "Port", "User", "Password", "ConnType",
+    "PackerRunUUID", "PackerHTTPAddr", "SSHPublicKey", and "SSHPrivateKey".
+    Depending on which communicator you are using, some of these values may be
+    empty -- for example, the public and private keys are unique to the SSH
+    communicator. InstanceID represents the vm being provisioned. For example,
+    in Amazon it is the instance id; in digitalocean, it is the droplet id; in
+    Vmware, it is the vm name.
+
+    For backwards compatability, `WinRMPassword` is also available through this
+    engine, though it is no different than using the more general `Password`.
+
+    This function is only for use within specific options inside of
+    _provisioners_ -- these options will be listed as being template engines
+    in the provisioner documentation. This feature does not yet work
+    if the provisioners are being used in conjunction with our chroot builders
+    or with lxc/lxd builders.
+
+    For builder-specific engine variables, please also refer to the builder docs.
+
+    This engine is in beta; please report any issues or requests on the Packer
+    issue tracker on GitHub.
+-   `isotime [FORMAT]` - UTC time, which can be
+    [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
+    examples below in [the `isotime` format
+    reference](/docs/templates/engine.html#isotime-function-format-reference).
+    `strftime FORMAT` - UTC time, formated using the ISO C standard format
+    `FORMAT`. See
+    [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
+    of available format specifier.
+
+    Please note that if you are using a large number of builders,
+    provisioners or post-processors, the isotime may be slightly
+    different for each one because it is from when the plugin is
+    launched not the initial Packer process. In order to avoid this and make
+    the timestamp consistent across all plugins, set it as a user variable
+    and then access the user variable within your plugins.
+
+-   `lower` - Lowercases the string.
+-   `packer_version` - Returns Packer version.
+-   `pwd` - The working directory while executing Packer.
+-   `replace` - ( old, new string, n int, s ) Replace returns a copy of the
+    string s with the first n non-overlapping instances of old replaced by new.
+-   `replace_all` - ( old, new string, s )  ReplaceAll returns a copy of the
+    string s with all non-overlapping instances of old replaced by new.
+-   `split` - Split an input string using separator and return the requested
+    substring.
+-   `template_dir` - The directory to the template for the build.
+-   `timestamp` - The Unix timestamp in UTC when the Packer process was
+      launched. Please note that if you are using a large number of builders,
+      provisioners or post-processors, the timestamp may be slightly
+      different for each one because it is from when the plugin is
+      launched not the initial Packer process. In order to avoid this and make
+      the timestamp consistent across all plugins, set it as a user variable
+      and then access the user variable within your plugins.
+-   `uuid` - Returns a random UUID.
+-   `upper` - Uppercases the string.
+-   `user` - Specifies a user variable.
 
 #### Specific to Amazon builders:
 
--   `clean_ami_name` - DEPRECATED use `clean_resource_name` instead - AMI names
+-   `clean_resource_name` - AMI names
     can only contain certain characters. This function will replace illegal
     characters with a '-" character. Example usage since ":" is not a legal AMI
-    name is: `{{isotime | clean_ami_name}}`.
+    name is: `{{isotime | clean_resource_name}}`.
 
 #### Specific to Google Compute builders:
 
--   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - GCE
+-   `clean_resource_name` - GCE
     image names can only contain certain characters and the maximum length is
     63. This function will convert upper cases to lower cases and replace
         illegal characters with a "-" character. Example:
 
-    `"mybuild-{{isotime | clean_image_name}}"` will become
+    `"mybuild-{{isotime | clean_resource_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid GCE image names must match the regex
@@ -105,12 +162,12 @@ Here is a full list of the available functions for reference.
 
 #### Specific to Azure builders:
 
--   `clean_image_name` - DEPRECATED use `clean_resource_name` instead - Azure
+-   `clean_resource_name` - Azure
     managed image names can only contain certain characters and the maximum
     length is 80. This function will replace illegal characters with a "-"
     character. Example:
 
-    `"mybuild-{{isotime | clean_image_name}}"` will become
+    `"mybuild-{{isotime | clean_resource_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid Azure image names must match the regex
@@ -254,6 +311,9 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
 
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
+For those unfamiliar with GO date/time formatting, here is a link to the
+documentation: [go date/time formatting](https://programming.guide/go/format-parse-string-time-date-example.html)
+
 Note that "-0700" is always formatted into "+0000" because `isotime` is always
 UTC time.
 
@@ -333,17 +393,13 @@ this case, on the `fixed-string` value):
 }
 ```
 
-# sed Function Format Reference
+# replace Function Format Reference
 
-See the library documentation
-<a href="https://github.com/rwtodd/Go.Sed" class="uri">https://github.com/rwtodd/Go.Sed</a>
-for notes about the difference between this golang implementation of sed and
-the regexes you may be used to. A very simple example of this functionality:
+Here are some examples using the replace options:
 
-        "provisioners": [
-          {
-              "type": "shell-local",
-              "environment_vars": ["EXAMPLE={{ sed \"s/null/awesome/\" build_type}}"],
-              "inline": ["echo build_type is $EXAMPLE\n"]
-          }
-        ]
+``` liquid
+build_name = foo-bar-provider
+
+{{ replace_all "-" "/" build_name }}  = foo/bar/provider
+{{ build_name | replace "-" "/" 1 }} = foo/bar-provider
+```

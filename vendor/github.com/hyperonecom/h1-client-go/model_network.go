@@ -8,30 +8,33 @@
  */
 
 package openapi
+
 import (
 	"time"
 )
 
+// Network struct for Network
 type Network struct {
-	Id string `json:"_id,omitempty"`
-	Name string `json:"name,omitempty"`
-	Services []ProjectServices `json:"services,omitempty"`
-	Flavour string `json:"flavour,omitempty"`
-	ModifiedOn time.Time `json:"modifiedOn,omitempty"`
-	ModifiedBy string `json:"modifiedBy,omitempty"`
-	CreatedBy string `json:"createdBy,omitempty"`
-	CreatedOn time.Time `json:"createdOn,omitempty"`
-	AccessRights []string `json:"accessRights,omitempty"`
-	Processing bool `json:"processing,omitempty"`
-	Created bool `json:"created,omitempty"`
-	Queue []Event `json:"queue,omitempty"`
-	State string `json:"state,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
-	Project string `json:"project,omitempty"`
-	Address string `json:"address,omitempty"`
-	Broadcast string `json:"broadcast,omitempty"`
-	Gateway string `json:"gateway,omitempty"`
-	Type string `json:"type,omitempty"`
-	Dns NetworkDns `json:"dns,omitempty"`
-	Netgw string `json:"netgw,omitempty"`
+	Id           string            `json:"id,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Services     []ProjectServices `json:"services,omitempty"`
+	Flavour      string            `json:"flavour,omitempty"`
+	ModifiedOn   time.Time         `json:"modifiedOn,omitempty"`
+	ModifiedBy   string            `json:"modifiedBy,omitempty"`
+	CreatedBy    string            `json:"createdBy,omitempty"`
+	CreatedOn    time.Time         `json:"createdOn,omitempty"`
+	AccessRights []string          `json:"accessRights,omitempty"`
+	Processing   bool              `json:"processing,omitempty"`
+	Created      bool              `json:"created,omitempty"`
+	Queue        []Event           `json:"queue,omitempty"`
+	State        string            `json:"state,omitempty"`
+	Tag          map[string]string `json:"tag,omitempty"`
+	Project      string            `json:"project,omitempty"`
+	Address      string            `json:"address,omitempty"`
+	Broadcast    string            `json:"broadcast,omitempty"`
+	Gateway      string            `json:"gateway,omitempty"`
+	Type         string            `json:"type,omitempty"`
+	Dns          NetworkDns        `json:"dns,omitempty"`
+	Netgw        string            `json:"netgw,omitempty"`
+	Firewall     string            `json:"firewall,omitempty"`
 }

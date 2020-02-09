@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -20,13 +21,13 @@ type Builder struct {
 	client *openapi.APIClient
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	config, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	b.config = *config
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
 
 	cfg := openapi.NewConfiguration()
 	cfg.AddDefaultHeader("x-auth-token", b.config.Token)
@@ -43,7 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	b.client = openapi.NewAPIClient(cfg)
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 type wrappedCommandTemplate struct {
@@ -107,6 +108,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		imageID:   state.Get("image_id").(string),
 		imageName: state.Get("image_name").(string),
 		client:    b.client,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

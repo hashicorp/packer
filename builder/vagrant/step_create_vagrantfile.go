@@ -17,11 +17,21 @@ type StepCreateVagrantfile struct {
 	OutputDir    string
 	SyncedFolder string
 	GlobalID     string
+	SourceBox    string
 	BoxName      string
+	InsertKey    bool
 }
 
 var DEFAULT_TEMPLATE = `Vagrant.configure("2") do |config|
-  config.vm.box = "{{.BoxName}}"
+  config.vm.define "source", autostart: false do |source|
+	source.vm.box = "{{.SourceBox}}"
+	config.ssh.insert_key = {{.InsertKey}}
+  end
+  config.vm.define "output" do |output|
+	output.vm.box = "{{.BoxName}}"
+	output.vm.box_url = "file://package.box"
+	config.ssh.insert_key = {{.InsertKey}}
+  end
   {{ if ne .SyncedFolder "" -}}
   		config.vm.synced_folder "{{.SyncedFolder}}", "/vagrant"
   {{- else -}}
@@ -31,7 +41,9 @@ end`
 
 type VagrantfileOptions struct {
 	SyncedFolder string
+	SourceBox    string
 	BoxName      string
+	InsertKey    bool
 }
 
 func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
@@ -57,6 +69,8 @@ func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
 	opts := &VagrantfileOptions{
 		SyncedFolder: s.SyncedFolder,
 		BoxName:      s.BoxName,
+		SourceBox:    s.SourceBox,
+		InsertKey:    s.InsertKey,
 	}
 
 	err = tpl.Execute(templateFile, opts)

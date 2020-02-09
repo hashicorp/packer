@@ -33,6 +33,12 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	ui.Say("Creating temporary ssh key for droplet...")
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2014)
+	if err != nil {
+		err := fmt.Errorf("error generating RSA key: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	// ASN.1 DER encoded form
 	priv_der := x509.MarshalPKCS1PrivateKey(priv)

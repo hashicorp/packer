@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/hashicorp/packer/common/retry"
@@ -21,14 +20,13 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
-	BlockDevices                      BlockDevices
+	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
 	Debug                             bool
 	EbsOptimized                      bool
 	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
-	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	IsRestricted                      bool
@@ -37,6 +35,7 @@ type StepRunSourceInstance struct {
 	UserData                          string
 	UserDataFile                      string
 	VolumeTags                        TagMap
+	NoEphemeral                       bool
 
 	instanceId string
 }
@@ -45,6 +44,8 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
+	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
+
 	ui := state.Get("ui").(packer.Ui)
 
 	userData := s.UserData
@@ -110,10 +111,29 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		UserData:            &userData,
 		MaxCount:            aws.Int64(1),
 		MinCount:            aws.Int64(1),
-		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: iamInstanceProfile},
+		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
 		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
+	}
+
+	if s.NoEphemeral {
+		// This is only relevant for windows guests. Ephemeral drives by
+		// default are assigned to drive names xvdca-xvdcz.
+		// When vms are launched from the AWS console, they're automatically
+		// removed from the block devices if the user hasn't said to use them,
+		// but the SDK does not perform this cleanup. The following code just
+		// manually removes the ephemeral drives from the mapping so that they
+		// don't clutter up console views and cause confusion.
+		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
+		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
+		for _, letter := range DefaultEphemeralDeviceLetters {
+			bd := &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("xvdc" + string(letter)),
+				NoDevice:   aws.String(""),
+			}
+			runOpts.BlockDeviceMappings = append(runOpts.BlockDeviceMappings, bd)
+		}
 	}
 
 	if s.EnableT2Unlimited {
@@ -174,7 +194,28 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
 	}
 
-	runResp, err := ec2conn.RunInstances(runOpts)
+	var runResp *ec2.Reservation
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(err error) bool {
+			if isAWSErr(err, "InvalidParameterValue", "iamInstanceProfile") {
+				return true
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		runResp, err = ec2conn.RunInstances(runOpts)
+		return err
+	})
+
+	if isAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
+		err := fmt.Errorf("Error launching source instance: a valid Subnet Id was not specified")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	if err != nil {
 		err := fmt.Errorf("Error launching source instance: %s", err)
 		state.Put("error", err)
@@ -192,21 +233,37 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
+
+	if err := WaitUntilInstanceRunning(ctx, ec2conn, instanceId); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	r, err := ec2conn.DescribeInstances(describeInstance)
+	// there's a race condition that can happen because of AWS's eventual
+	// consistency where even though the wait is complete, the describe call
+	// will fail. Retry a couple of times to try to mitigate that race.
 
+	var r *ec2.DescribeInstancesOutput
+	err = retry.Config{Tries: 11, ShouldRetry: func(err error) bool {
+		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			return true
+		}
+		return false
+	},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		r, err = ec2conn.DescribeInstances(describeInstance)
+		return err
+	})
 	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
 		err := fmt.Errorf("Error finding source instance.")
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
 	instance := r.Reservations[0].Instances[0]
 
 	if s.Debug {
@@ -224,6 +281,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	state.Put("instance", instance)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", instance.InstanceId)
 
 	// If we're in a region that doesn't support tagging on instance creation,
 	// do that now.
@@ -231,17 +291,12 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	if s.IsRestricted {
 		ec2Tags.Report(ui)
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Config{
-			Tries: 11,
-			ShouldRetry: func(error) bool {
-				if awsErr, ok := err.(awserr.Error); ok {
-					switch awsErr.Code() {
-					case "InvalidInstanceID.NotFound":
-						return true
-					}
-				}
-				return false
-			},
+		err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
+			if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+				return true
+			}
+			return false
+		},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
 			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{

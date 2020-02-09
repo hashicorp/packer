@@ -9,6 +9,7 @@
 
 package openapi
 
+// ReservationPostAccessrights struct for ReservationPostAccessrights
 type ReservationPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

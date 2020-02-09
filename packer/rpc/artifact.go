@@ -1,16 +1,13 @@
 package rpc
 
 import (
-	"net/rpc"
-
 	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Artifact where the artifact is actually
 // available over an RPC connection.
 type artifact struct {
-	client   *rpc.Client
-	endpoint string
+	commonClient
 }
 
 // ArtifactServer wraps a packer.Artifact implementation and makes it

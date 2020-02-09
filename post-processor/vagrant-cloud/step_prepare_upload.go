@@ -36,6 +36,9 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 		} else {
 			cloudErrors := &VagrantCloudErrors{}
 			err = decodeBody(resp, cloudErrors)
+			if err != nil {
+				ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+			}
 			state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
 		}
 		return multistep.ActionHalt

@@ -1,0 +1,6 @@
+<!-- Code generated from the comments of the PlanInformation struct in builder/azure/arm/config.go; DO NOT EDIT MANUALLY -->
+
+-   `plan_name` (string) - Plan Name
+-   `plan_product` (string) - Plan Product
+-   `plan_publisher` (string) - Plan Publisher
+-   `plan_promotion_code` (string) - Plan Promotion Code

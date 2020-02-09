@@ -32,20 +32,25 @@ type scriptOptions struct {
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
 param([string]$switchName, [int]$addressIndex)
-
-$HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
+$HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName | Select-Object -First 1
 if ($HostVMAdapter){
-    $HostNetAdapter = Get-NetAdapter | ?{ $_.DeviceId -eq $HostVMAdapter.DeviceId }
-    if ($HostNetAdapter){
-        $HostNetAdapterIfIndex = @()
-        $HostNetAdapterIfIndex +=  $HostNetAdapter.ifIndex
-        $HostNetAdapterConfiguration =  @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex) }
-        if ($HostNetAdapterConfiguration){
-            return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
-        }
+  $HostNetAdapter = Get-NetAdapter | Where-Object { $_.DeviceId -eq $HostVMAdapter.DeviceId }
+  if ($HostNetAdapter){
+    $HostNetAdapterIfIndex = @()
+    $HostNetAdapterIfIndex += $HostNetAdapter.ifIndex
+    $HostNetAdapterConfiguration = @(get-wmiobject win32_networkadapterconfiguration -filter "IPEnabled = 'TRUE'") | Where-Object { $HostNetAdapterIfIndex.Contains($_.InterfaceIndex)}
+    if ($HostNetAdapterConfiguration){
+      return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
     }
+  }
+} else {
+  $HostNetAdapterConfiguration=@(Get-NetIPAddress -CimSession $env:computername -AddressFamily IPv4 | Where-Object { ( $_.InterfaceAlias -notmatch 'Loopback' ) -and ( $_.SuffixOrigin -notmatch "Link" )})
+  if ($HostNetAdapterConfiguration) {
+    return @($HostNetAdapterConfiguration.IpAddress)[$addressIndex]
+  } else {
+    return $false
+ }
 }
-return $false
 `
 
 	var ps powershell.PowerShellCmd
@@ -278,6 +283,9 @@ Hyper-V\New-VM -Name "{{ .VMName }}" -Path "{{ .Path }}" -MemoryStartupBytes {{ 
 	}
 	final := regex.ReplaceAllString(b.String(), "")
 	regex, err = regexp.Compile("\n\n")
+	if err != nil {
+		return "", err
+	}
 	final = regex.ReplaceAllString(final, "\n")
 
 	return final, nil
@@ -853,7 +861,7 @@ func CompactDisks(path string) (result string, err error) {
 	var script = `
 param([string]$srcPath)
 
-$disks = Get-ChildItem -Path $srcPath -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+$disks = Get-ChildItem -Path $srcPath -Recurse -ErrorAction SilentlyContinue |where {$_.extension -in ".vhdx",".vhd"} |foreach { $_.FullName }
 # Failure to find any disks is treated as a 'soft' error. Simply print out
 # a warning and exit
 if ($disks.Length -eq 0) {

@@ -9,6 +9,7 @@
 
 package openapi
 
+// ContainerPostAccessrights struct for ContainerPostAccessrights
 type ContainerPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

@@ -30,7 +30,7 @@ type bootCommandTemplateData struct {
 }
 
 type commandTyper interface {
-	MonitorCmd(*proxmox.VmRef, string) (map[string]interface{}, error)
+	Sendkey(*proxmox.VmRef, string) error
 }
 
 var _ commandTyper = &proxmox.Client{}
@@ -47,7 +47,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	if int64(s.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot", s.BootWait.String()))
+		ui.Say(fmt.Sprintf("Waiting %s for boot", s.BootWait))
 		select {
 		case <-time.After(s.BootWait):
 			break

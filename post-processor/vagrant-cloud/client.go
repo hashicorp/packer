@@ -26,14 +26,22 @@ type VagrantCloudClient struct {
 }
 
 type VagrantCloudErrors struct {
-	Errors map[string][]string `json:"errors"`
+	Errors []interface{} `json:"errors"`
 }
 
 func (v VagrantCloudErrors) FormatErrors() string {
 	errs := make([]string, 0)
-	for e := range v.Errors {
-		msg := fmt.Sprintf("%s %s", e, strings.Join(v.Errors[e], ","))
-		errs = append(errs, msg)
+	for _, err := range v.Errors {
+		switch e := err.(type) {
+		case string:
+			errs = append(errs, e)
+		case map[string]interface{}:
+			for k, v := range e {
+				errs = append(errs, fmt.Sprintf("%s %s", k, v))
+			}
+		default:
+			errs = append(errs, fmt.Sprintf("%s", err))
+		}
 	}
 	return strings.Join(errs, ". ")
 }
@@ -106,12 +114,10 @@ func (v *VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
 	log.Printf("Post-Processor Vagrant Cloud API DELETE: %s", scrubbedUrl)
 
-	req, err := http.NewRequest("DELETE", reqUrl, nil)
+	req, err := v.newRequest("DELETE", reqUrl, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
@@ -196,6 +202,8 @@ func (v *VagrantCloudClient) newRequest(method, url string, body io.Reader) (*ht
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
+	if len(v.AccessToken) > 0 {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
+	}
 	return req, err
 }

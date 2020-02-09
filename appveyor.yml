@@ -20,8 +20,6 @@ install:
   - echo %Path%
   - go version
   - go env
-  - go get github.com/mitchellh/gox
-  - go get golang.org/x/tools/cmd/stringer
 
 build_script:
   - git rev-parse HEAD

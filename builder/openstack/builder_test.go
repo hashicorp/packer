@@ -6,18 +6,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"username":     "foo",
-		"password":     "bar",
-		"region":       "DFW",
-		"image_name":   "foo",
-		"source_image": "foo",
-		"flavor":       "foo",
-		"ssh_username": "root",
-	}
-}
-
 func TestBuilder_ImplementsBuilder(t *testing.T) {
 	var raw interface{}
 	raw = &Builder{}
@@ -32,7 +20,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"password": []string{},
 	}
 
-	warns, err := b.Prepare(c)
+	_, warns, err := b.Prepare(c)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}

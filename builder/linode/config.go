@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package linode
 
 import (
@@ -7,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -34,10 +35,7 @@ type Config struct {
 	ImageLabel   string   `mapstructure:"image_label"`
 	Description  string   `mapstructure:"image_description"`
 
-	RawStateTimeout string `mapstructure:"state_timeout"`
-
-	stateTimeout time.Duration
-	interCtx     interpolate.Context
+	interCtx interpolate.Context
 }
 
 func createRandomRootPassword() (string, error) {
@@ -50,8 +48,7 @@ func createRandomRootPassword() (string, error) {
 	return rootPass, nil
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
@@ -62,7 +59,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			},
 		},
 	}, raws...); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var errs *packer.MultiError
@@ -96,16 +93,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RootPass, err = createRandomRootPassword()
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
-		}
-	}
-
-	if c.RawStateTimeout == "" {
-		c.stateTimeout = 5 * time.Minute
-	} else {
-		if stateTimeout, err := time.ParseDuration(c.RawStateTimeout); err == nil {
-			c.stateTimeout = stateTimeout
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to parse state timeout: %s", err))
 		}
 	}
 
@@ -148,9 +135,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.PersonalAccessToken)
-	return c, nil, nil
+	return nil, nil
 }

@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,18 +20,19 @@ import (
 const BuilderId = "packer.file"
 
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
-	b.config = c
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	return warnings, nil
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
+
+	return nil, warnings, nil
 }
 
 // Run is where the actual build should take place. It takes a Build and a Ui.
@@ -39,17 +41,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Source != "" {
 		source, err := os.Open(b.config.Source)
-		defer source.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer source.Close()
 
 		// Create will truncate an existing file
 		target, err := os.Create(b.config.Target)
-		defer target.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer target.Close()
 
 		ui.Say(fmt.Sprintf("Copying %s to %s", source.Name(), target.Name()))
 		bytes, err := io.Copy(target, source)

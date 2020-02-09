@@ -1,0 +1,55 @@
+<!-- Code generated from the comments of the AccessConfig struct in builder/openstack/access_config.go; DO NOT EDIT MANUALLY -->
+
+-   `user_id` (string) - Sets username
+    
+-   `tenant_id` (string) - The tenant ID or name to boot the instance into. Some OpenStack
+    installations require this. If not specified, Packer will use the
+    environment variable OS_TENANT_NAME or OS_TENANT_ID, if set. Tenant is
+    also called Project in later versions of OpenStack.
+    
+-   `tenant_name` (string) - Tenant Name
+-   `domain_id` (string) - Domain ID
+-   `domain_name` (string) - The Domain name or ID you are authenticating with. OpenStack
+    installations require this if identity v3 is used. Packer will use the
+    environment variable OS_DOMAIN_NAME or OS_DOMAIN_ID, if set.
+    
+-   `insecure` (bool) - Whether or not the connection to OpenStack can be done over an insecure
+    connection. By default this is false.
+    
+-   `region` (string) - The name of the region, such as "DFW", in which to launch the server to
+    create the image. If not specified, Packer will use the environment
+    variable OS_REGION_NAME, if set.
+    
+-   `endpoint_type` (string) - The endpoint type to use. Can be any of "internal", "internalURL",
+    "admin", "adminURL", "public", and "publicURL". By default this is
+    "public".
+    
+-   `cacert` (string) - Custom CA certificate file path. If omitted the OS_CACERT environment
+    variable can be used.
+    
+-   `cert` (string) - Client certificate file path for SSL client authentication. If omitted
+    the OS_CERT environment variable can be used.
+    
+-   `key` (string) - Client private key file path for SSL client authentication. If omitted
+    the OS_KEY environment variable can be used.
+    
+-   `token` (string) - the token (id) to use with token based authorization. Packer will use
+    the environment variable OS_TOKEN, if set.
+    
+-   `application_credential_name` (string) - The application credential name to use with application credential based
+    authorization. Packer will use the environment variable
+    OS_APPLICATION_CREDENTIAL_NAME, if set.
+    
+-   `application_credential_id` (string) - The application credential id to use with application credential based
+    authorization. Packer will use the environment variable
+    OS_APPLICATION_CREDENTIAL_ID, if set.
+    
+-   `application_credential_secret` (string) - The application credential secret to use with application credential
+    based authorization. Packer will use the environment variable
+    OS_APPLICATION_CREDENTIAL_SECRET, if set.
+    
+-   `cloud` (string) - An entry in a `clouds.yaml` file. See the OpenStack os-client-config
+    [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+    for more information about `clouds.yaml` files. If omitted, the
+    `OS_CLOUD` environment variable is used.
+    

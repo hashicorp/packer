@@ -1,11 +1,289 @@
-## 1.4.4 (Upcoming)
+## 1.5.2 (Upcoming)
+** New Builder ** The vsphere-iso builder, previously maintained by JetBrains,
+has been merged with the Packer core. It will be officially supported by the
+Packer team at HashiCorp moving forward. [GH-8480]
 
 ### IMPROVEMENTS:
-* builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+* builder/alicloud: Add AlicloudProfile option. [GH-8560]
+* builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
+* builder/azure: Set expiry for image versions in SIG [GH-8561]
+* builder/proxmox: Add option to upload the boot ISO rather than pointing out a
+    previously manually uploaded one. [GH-8624]
+* builder/vagrant: Fix a crash in the Vagrant driver [GH-8607]
+* core: clean up messy log line in plugin execution. [GH-8542]
+* core: Fix loading external plugins defined in PACKER_CONFIG [GH-8582]
+* core: Log name of postprocessor running to disambiguate long chains of post-
+    processors. [GH-8613]
+* core: step_download: return without error if Urls is empty [GH-8579]
+* post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
+    (optionally) [GH-8511]
+* scripts: Fix some issues with mapstructure-to-hcl2 code generator. [GH-8574]
+* scripts: Update Vagrant bootstrapping scripts [GH-8604]
+
+### Bug Fixes:
+* builder/alicloud: Fix "security group doesn't exist" error when there are >10
+    security groups. [GH-8535]
+* builder/amazon: Allow AWS builder pre-validation to pass when subnet filters
+    are present [GH-8622]
+* builder/azure: Fix bug where deployments were not being cleaned up: [GH-8496]
+* builder/null: Fix crash when configuring builder using HCL2. [GH-8612]
+* builder/osc: Fix ssh host detection in Public Cloud and Nets [GH-8414]
+* builder/vagrant: Fix bug with reading key from a path with spaces [GH-8605]
+* builder/virtualbox-ovf: Remove config dependency from StepImport [GH-8509]
+* builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
+* core: Fix crash when build.sources is set to an invalid name [GH-8569]
+* core: Fix error loading .packerconfig [GH-8623]
+* core: Fix loading of external plugins. GH-8543]
+* post-processor/docker-tag: Fix regression if no tags were specified.
+    [GH-8593]
+* post-processor/vagrant-cloud: Update error handling for Vagrant Cloud API
+    [GH-8594]
+* post-processor/vagrant: correctly handle the diskSize property as a qemu size
+    string [GH-8567]
+* provisioner/ansible: Fix password sanitization to account for empty string
+    values. [GH-8570]
+* provisioner/shell: Fix bug with shell provisioner failing to clean up the
+    environment var file when env_var_file is true. [GH-8639]
+
+## 1.5.1 (December 20, 2019)
+This was a fast-follow release to fix a number of panics that we introduced when
+making changes for HCL2.
+
+### IMPROVEMENTS:
+* builder/alicloud: Add show_expired option for describing images [GH-8425]
+
+### Bug Fixes:
+* builder/cloudstack: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/iso: Fix panics associated with loading config [GH-8513]
+* builder/hyperv/vmcx: Fix panics associated with loading config [GH-8513]
+* builder/jdcloud: Update jdcloud statebag to use pointers for config [GH-8518]
+* builder/linode: Fix panics associated with loading config [GH-8513]
+* builder/lxc: Fix panics associated with loading config [GH-8513]
+* builder/lxd: Fix panics associated with loading config [GH-8513]
+* builder/oneandone: Fix panics associated with loading config [GH-8513]
+* builder/oracle/classic: Fix panics associated with loading config [GH-8513]
+* builder/oracle/oci: Fix panics associated with loading config [GH-8513]
+* builder/osc/bsuvolume: Fix panics associated with loading config [GH-8513]
+* builder/parallels/pvm: Fix panics associated with loading config [GH-8513]
+* builder/profitbricks: Fix panics associated with loading config [GH-8513]
+* builder/scaleway: Fix panics associated with loading config [GH-8513]
+* builder/vagrant: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox/ovf: Fix panics associated with loading config [GH-8513]
+* builder/virtualbox: Configure NAT interface before forwarded port mapping
+    #8514
+* post-processor/vagrant-cloud: Configure NAT interface before forwarded port
+    mapping [GH-8514]
+
+## 1.5.0 (December 18, 2019)
+
+### IMPROVEMENTS:
+* builder/amazon: Add no_ephemeral template option to remove ephemeral drives
+    from launch mappings. [GH-8393]
+* builder/amazon: Add validation for "subnet_id" when specifying "vpc_id"
+    [GH-8360] [GH-8387] [GH-8391]
+* builder/amazon: allow enabling ena/sr-iov on ebssurrogate spot instances
+    [GH-8397]
+* builder/amazon: Retry runinstances aws api call to mitigate throttling
+    [GH-8342]
+* builder/hyperone: Update builder schema and tags [GH-8444]
+* builder/qemu: Add display template option for qemu. [GH-7676]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
+* builder/qemu: Add fixer to convert disk size from int to string [GH-8390]
+* builder/qemu: Disk Size is now read as a string to support units. [GH-8320]
+    [GH-7546]
+* builder/qemu: When a user adds a new drive in qemuargs, process it to make
+    sure that necessary settings are applied to that drive. [GH-8380]
+* builder/vmware: Fix error message when ovftool is missing [GH-8371]
+* core: Cleanup logging for external plugins [GH-8471]
+* core: HCL2 template support is now in beta. [GH-8423]
+* core: Interpolation within provisioners can now access build-specific values
+    like Host IP, communicator password, and more. [GH-7866]
+* core: Various fixes to error handling. [GH-8343] [GH-8333] [GH-8316]
+    [GH-8354] [GH-8361] [GH-8363] [GH-8370]
+* post-processor/docker-tag: Add support for multiple tags. [GH-8392]
+* post-processor/shell-local: Add "valid_exit_codes" option to shell-local.
+    [GH-8401]
+* provisioner/chef-client: Add version selection option. [GH-8468]
+* provisioner/shell-local: Add "valid_exit_codes" option to shell-local.
+    [GH-8401]
+* provisioner/shell: Add support for the "env_var_format" parameter [GH-8319]
 
 ### BUG FIXES:
+* builder/amazon: Fix request retry mechanism to launch aws instance [GH-8430]
+* builder/azure: Fix PollDuration option which was overriden in some clients.
+    [GH-8490]
+* builder/hyperv: Fix bug in checking VM name that could cause flakiness if
+    many VMs are defined. [GH-8357]
+* builder/vagrant: Use absolute path for Vagrantfile [GH-8321]
+* builder/virtualbox: Fix panic in snapshot builder. [GH-8336] [GH-8329]
+* communicator/winrm: Resolve ntlm nil pointer bug by bumping go-ntlmssp
+    dependency [GH-8369]
+* communicator: Fix proxy connection settings to use "SSHProxyUsername" and
+    "SSHProxyPassword" where relevant instead of bastion username and password.
+    [GH-8375]
+* core: Fix bug where Packer froze if asked to log an extremely long line
+    [GH-8356]
+* core: Fix iso_target_path option; don't cache when target path is non-nil
+    [GH-8394]
+* core: Return exit code 1 when builder type is not found [GH-8474]
+* core: Return exit code 1 when builder type is not found [GH-8475]
+* core: Update to newest version of go-tty to re-enable CTRL-S and CTRL-Q usage
+    [GH-8364]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: Complete deprecation of clean_ami_name template func
+    [GH-8320] [GH-8193]
+* core: Changes have been made to both the Prepare() method signature on the
+    builder interface and on the Provision() method signature on the
+    provisioner interface. [GH-7866]
+* provisioner/ansible-local: The "galaxycommand" option has been renamed to
+    "galaxy_command". A fixer has been written for this, which can be invoked
+    with `packer fix`. [GH-8411]
+
+## 1.4.5 (November 4, 2019)
+
+### IMPROVEMENTS:
+* added ucloud-import post-processsor to import custom image for UCloud UHost
+    instance [GH-8261]
+* builder/amazon: New option to specify IAM policy for a temporary instance
+    profile [GH-8247]
+* builder/amazon: improved validation around encrypt_boot and kms_key_id for a
+    better experience [GH-8288]
+* builder/azure-arm: Allow specification of polling duration [GH-8226]
+* builder/azure-chroot: Add Azure chroot builder [GH-8185] & refactored some
+    common code together after it [GH-8269]
+* builder/azure: Deploy NSG if list of IP addresses is provided in config
+    [GH-8203]
+* builder/azure: Set correct user agent for Azure client set [GH-8259]
+* builder/cloudstack: Add instance_display_name for cloudstack builder
+    [GH-8280]
+* builder/hyperv: Add the additional_disk_size option tho the hyperv vmcx
+    builder. [GH-8246]
+* builder/openstack: Add option to discover provisioning network [GH-8279]
+* builder/oracle-oci: Support defined tags for oci builder [GH-8172]
+* builder/proxmox: Add ability to select CPU type [GH-8201]
+* builder/proxmox: Add support for SCSI controller selection [GH-8199]
+* builder/proxmoz: Bump Proxmox dependency: [GH-8241]
+* builder/tencent: Add retry on remote api call [GH-8250]
+* builder/vagrant: Pass through logs from vagrant in real time rather than
+    buffering until command is complete [GH-8274]
+* builder/vagrant: add insert_key option for toggling whether to add Vagrant's
+    insecure key [GH-8274]
+* builder/virtualbox: enabled pcie disks usage, but this feature is in beta and
+  won't work out of the box yet [GH-8305]
+* communicator/winrm: Prevent busy loop while waiting for WinRM connection
+    [GH-8213]
+* core: Add strftime function in templates [GH-8208]
+* core: Improve error message when comment is bad [GH-8267]
+* post-processor/amazon-import: delete intermediary snapshots [GH-8307]
+* Fix various dropped errors an removed unused code: [GH-8230] [GH-8265]
+    [GH-8276] [GH-8281] [GH-8309] [GH-8311] [GH-8304] [GH-8303] [GH-8293]
+
+### BUG FIXES:
+* builder/amazon: Fix region copy for non-ebs amazon builders [GH-8212]
+* builder/amazon: Fix spot instance bug where builder would fail if one
+    availability zone could not support the requested spot instance type, even
+    if another AZ could do so. [GH-8184]
+* builder/azure: Fix build failure after a retry config generation error.
+    [GH-8209]
+* builder/docker: Use a unique temp dir for each build to prevent concurrent
+    builds from stomping on each other [GH-8192]
+* builder/hyperv: Improve filter for determining which files to compact
+    [GH-8248]
+* builder/hyperv: Use first adapter, rather than failing, when multiple
+    adapters are attached to host OS's VM switch [GH-8234]
+* builder/openstack: Fix setting openstack metadata for use_blockstorage_volume
+    [GH-8186]
+* builder/openstack: Warn instead of failing on terminate if instance is
+    already shut down [GH-8176]
+* post-processor/digitalocean-import: Fix panic when 'image_regions' not set
+    [GH-8179]
+* provisioner/powershell: Fix powershell syntax error causing failed builds
+    [GH-8195]
+
+## 1.4.4 (October 1, 2019)
+
+### IMPROVEMENTS:
+** new core feature** Error cleanup provisioner [GH-8155]
+* builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
+* builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
+* builder/azure: Refactor client config [GH-8121]
+* builder/cloudstack: New step to detach iso. [GH-8106]
+* builder/googlecompute: Fail fast when image name is invalid. [GH-8112]
+* builder/googlecompute: Users can now query Vault for an Oauth token rather
+    than setting an account file [GH-8143]
+* builder/hcloud: Allow selecting image based on filters [GH-7945]
+* builder/hyper-v: Decrease the delay between Hyper-V VM startup and hyper-v
+    builder's ability to send keystrokes to the target VM. [GH-7970]
+* builder/openstack: Store WinRM password for provisioners to use [GH-7940]
+* builder/proxmox: Shorten default boot_key_interval to 5ms from 100ms
+    [GH-8088]
+* builder/proxmox: Allow running the template VM in a Proxmox resource pool
+    [GH-7862]
+* builder/ucloud: Make ucloud builder's base url configurable [GH-8095]
+* builder/virtualbox-vm: Make target snapshot optional [GH-8011] [GH-8004]
+* builder/vmware: Allow user to attach floppy files to remote vmx builds
+    [GH-8132]
+* builder/yandex: Add ability to retry API requests [GH-8142]
+* builder/yandex: Support GPU instances and set source image by name [GH-8091]
+* communicator/ssh: Support for SSH port tunneling [GH-7918]
+* core: Add a new `floppy_label` option [GH-8099]
+* core: Added version compatibility to console command [GH-8080]
+* post-processor/vagrant-cloud: Allow blank access_token for private vagrant
+    box hosting [GH-8097]
+* post-processor/vagrant-cloud: Allow use of the Artifice post-processor with
+    the Vagrant Cloud post-processor [GH-8018] [GH-8027]
+* post-processor/vsphere: Removed redundant whitelist check for builders,
+    allowing users to use post-processor withough the VMWare builder [GH-8064]
+
+### BUG FIXES:
+* builder/amazon: Fix FleetID crash. [GH-8013]
+* builder/amazon: Gracefully handle rate limiting when retrieving winrm
+    password. [GH-8087]
+* builder/amazon: Fix race condition in spot instance launching [GH-8165]
+* builder/amazon: Amazon builders now respect ssh_host option [GH-8162]
+* builder/amazon: Update the AWS sdk to resolve some credential handling issues
+    [GH-8131]
+* builder/azure: Avoid a panic in getObjectIdFromToken [GH-8047]
+* builder/googlecompute: Fix crash caused by nil account file. [GH-8102]
+* builder/hyper-v: Fix when management interface is not part of virtual switch
+    [GH-8017]
+* builder/openstack: Fix dropped error when creating image client. [GH-8110]
+* builder/openstack: Fix race condition created when adding metadata [GH-8016]
+* builder/outscale: Get SSH Host from VM.Nics instead of VM Root [GH-8077]
+* builder/proxmox: Bump proxmox api dep, fixing bug with checking http status
+    during boot command [GH-8083]
+* builder/proxmox: Check that disk format is set when pool type requires it
+    [GH-8084]
+* builder/proxmox: Fix panic caused by cancelling build [GH-8067] [GH-8072]
+* builder/qemu: Fix dropped error when retrieving version [GH-8050]
+* builder/vagrant: Fix dropped errors in code and tests. [GH-8118]
+* builder/vagrant: Fix provisioning boxes, define source and output boxes
+    [GH-7957]
+* builder/vagrant: Fix ssh and package steps to use source syntax. [GH-8125]
+* builder/vagrant: Use GlobalID when provided [GH-8092]
+* builder/virtualbox: Fix windows pathing problem for guest additions checksum
+    download. [GH-7996]
+* builder/virtualbox: LoadSnapshots succeeds even if machine has no snapshots
+    [GH-8096]
+* builder/vmware: fix dropped test errors [GH-8170]
 * core: Fix bug where sensitive variables contianing commas were not being
     properly sanitized in UI calls. [GH-7997]
+* core: Fix handling of booleans where "unset" is a value distinct from
+    "false". [GH-8021]
+* core: Fix tests that swallowed errors in goroutines [GH-8094]
+* core: Fix bug where Packer could no longer run as background process [GH-8101]
+* core: Fix zsh auto-completion [GH-8160]
+* communicator/ssh: Friendlier message warning user that their creds may be
+    wrong [GH-8167]
+* post-processor/amazon-import: Fix non-default encryption. [GH-8113]
+* post-processor/vagrant-cloud: Fix dropped errors [GH-8156]
+* provisioner/ansible: Fix provisioner dropped errors [GH-8045]
+
+### BACKWARDS INCOMPATIBILITIES:
+* core: "sed" template function has been deprecated in favor of "replace" and
+    "replace_all" functins [GH-8119]
 
 ## 1.4.3 (August 14, 2019)
 

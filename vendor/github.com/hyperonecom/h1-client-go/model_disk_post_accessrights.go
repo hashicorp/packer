@@ -9,6 +9,7 @@
 
 package openapi
 
+// DiskPostAccessrights struct for DiskPostAccessrights
 type DiskPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

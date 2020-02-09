@@ -31,7 +31,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"linode_token": []string{},
 	}
 
-	warnings, err := b.Prepare(c)
+	_, warnings, err := b.Prepare(c)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -46,7 +46,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -61,7 +61,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 
 	// Test default
 	delete(config, "region")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -74,7 +74,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 	// Test set
 	config["region"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -93,7 +93,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 
 	// Test default
 	delete(config, "instance_type")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -106,7 +106,7 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	// Test set
 	config["instance_type"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -125,7 +125,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 
 	// Test default
 	delete(config, "image")
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -138,7 +138,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	// Test set
 	config["image"] = expected
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -151,49 +151,12 @@ func TestBuilderPrepare_Image(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_StateTimeout(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test default
-	warnings, err := b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Test set
-	config["state_timeout"] = "5m"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	// Test bad
-	config["state_timeout"] = "tubes"
-	b = Builder{}
-	warnings, err = b.Prepare(config)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-}
-
 func TestBuilderPrepare_ImageLabel(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -208,7 +171,7 @@ func TestBuilderPrepare_ImageLabel(t *testing.T) {
 	// Test set
 	config["image_label"] = "foobarbaz"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -219,7 +182,7 @@ func TestBuilderPrepare_ImageLabel(t *testing.T) {
 	// Test set with template
 	config["image_label"] = "{{timestamp}}"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -239,7 +202,7 @@ func TestBuilderPrepare_Label(t *testing.T) {
 	config := testConfig()
 
 	// Test default
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -254,7 +217,7 @@ func TestBuilderPrepare_Label(t *testing.T) {
 	// Test normal set
 	config["instance_label"] = "foobar"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -265,7 +228,7 @@ func TestBuilderPrepare_Label(t *testing.T) {
 	// Test with template
 	config["instance_label"] = "foobar-{{timestamp}}"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -276,7 +239,7 @@ func TestBuilderPrepare_Label(t *testing.T) {
 	// Test with bad template
 	config["instance_label"] = "foobar-{{"
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

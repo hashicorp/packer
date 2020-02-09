@@ -30,7 +30,7 @@ func TestStepRegisterAmi_buildRegisterOpts_pv(t *testing.T) {
 
 	blockDevices := []*ec2.BlockDeviceMapping{}
 
-	opts := buildRegisterOptsFromExistingImage(&config, &image, blockDevices, rootDeviceName)
+	opts := buildRegisterOptsFromExistingImage(&config, &image, blockDevices, rootDeviceName, config.AMIName)
 
 	expected := config.AMIVirtType
 	if *opts.VirtualizationType != expected {
@@ -64,7 +64,7 @@ func TestStepRegisterAmi_buildRegisterOpts_hvm(t *testing.T) {
 
 	blockDevices := []*ec2.BlockDeviceMapping{}
 
-	opts := buildRegisterOptsFromExistingImage(&config, &image, blockDevices, rootDeviceName)
+	opts := buildRegisterOptsFromExistingImage(&config, &image, blockDevices, rootDeviceName, config.AMIName)
 
 	expected := config.AMIVirtType
 	if *opts.VirtualizationType != expected {
@@ -92,16 +92,14 @@ func TestStepRegisterAmi_buildRegisterOptsFromScratch(t *testing.T) {
 	config := Config{
 		FromScratch:  true,
 		PackerConfig: common.PackerConfig{},
-		AMIBlockDevices: amazon.AMIBlockDevices{
-			AMIMappings: []amazon.BlockDevice{
-				{
-					DeviceName: rootDeviceName,
-				},
+		AMIMappings: []amazon.BlockDevice{
+			{
+				DeviceName: rootDeviceName,
 			},
 		},
 		RootDeviceName: rootDeviceName,
 	}
-	registerOpts := buildBaseRegisterOpts(&config, nil, 10, snapshotID)
+	registerOpts := buildBaseRegisterOpts(&config, nil, 10, snapshotID, config.AMIName)
 
 	if len(registerOpts.BlockDeviceMappings) != 1 {
 		t.Fatal("Expected block device mapping of length 1")
@@ -140,7 +138,7 @@ func TestStepRegisterAmi_buildRegisterOptFromExistingImage(t *testing.T) {
 			},
 		},
 	}
-	registerOpts := buildBaseRegisterOpts(&config, &sourceImage, 15, snapshotID)
+	registerOpts := buildBaseRegisterOpts(&config, &sourceImage, 15, snapshotID, config.AMIName)
 
 	if len(registerOpts.BlockDeviceMappings) != 2 {
 		t.Fatal("Expected block device mapping of length 2")
@@ -169,11 +167,9 @@ func TestStepRegisterAmi_buildRegisterOptFromExistingImageWithBlockDeviceMapping
 	config := Config{
 		FromScratch:  false,
 		PackerConfig: common.PackerConfig{},
-		AMIBlockDevices: amazon.AMIBlockDevices{
-			AMIMappings: []amazon.BlockDevice{
-				{
-					DeviceName: rootDeviceName,
-				},
+		AMIMappings: []amazon.BlockDevice{
+			{
+				DeviceName: rootDeviceName,
 			},
 		},
 		RootDeviceName: rootDeviceName,
@@ -200,7 +196,7 @@ func TestStepRegisterAmi_buildRegisterOptFromExistingImageWithBlockDeviceMapping
 			},
 		},
 	}
-	registerOpts := buildBaseRegisterOpts(&config, &sourceImage, 15, snapshotId)
+	registerOpts := buildBaseRegisterOpts(&config, &sourceImage, 15, snapshotId, config.AMIName)
 
 	if len(registerOpts.BlockDeviceMappings) != 1 {
 		t.Fatal("Expected block device mapping of length 1")

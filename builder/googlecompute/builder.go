@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -18,32 +19,32 @@ const BuilderId = "packer.googlecompute"
 
 // Builder represents a Packer Builder.
 type Builder struct {
-	config *Config
+	config Config
 	runner multistep.Runner
 }
 
-// Prepare processes the build configuration parameters.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
-	b.config = c
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 // Run executes a googlecompute Packer build and returns a packer.Artifact
 // representing a GCE machine image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, b.config.Account)
+		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, err
 	}
 
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -67,7 +68,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
-			Host:        communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+			Host:        communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 			SSHConfig:   b.config.Comm.SSHConfigFunc(),
 			WinRMConfig: winrmConfig,
 		},
@@ -95,9 +96,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	artifact := &Artifact{
-		image:  state.Get("image").(*Image),
-		driver: driver,
-		config: b.config,
+		image:     state.Get("image").(*Image),
+		driver:    driver,
+		config:    &b.config,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

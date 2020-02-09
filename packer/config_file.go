@@ -24,12 +24,10 @@ func ConfigDir() (string, error) {
 func homeDir() (string, error) {
 	// Prefer $HOME over user.Current due to glibc bug: golang.org/issue/13470
 	if home := os.Getenv("HOME"); home != "" {
-		log.Printf("Detected home directory from env var: %s", home)
 		return home, nil
 	}
 
 	if home := os.Getenv("APPDATA"); home != "" {
-		log.Printf("Detected home directory from env var: %s", home)
 		return home, nil
 	}
 

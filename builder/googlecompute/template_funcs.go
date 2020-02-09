@@ -3,8 +3,6 @@ package googlecompute
 import (
 	"strings"
 	"text/template"
-
-	packertpl "github.com/hashicorp/packer/common/template"
 )
 
 func isalphanumeric(b byte) bool {
@@ -20,7 +18,7 @@ func isalphanumeric(b byte) bool {
 // Clean up image name by replacing invalid characters with "-"
 // and converting upper cases to lower cases
 func templateCleanImageName(s string) string {
-	if reImageFamily.MatchString(s) {
+	if validImageName.MatchString(s) {
 		return s
 	}
 	b := []byte(strings.ToLower(s))
@@ -37,5 +35,4 @@ func templateCleanImageName(s string) string {
 
 var TemplateFuncs = template.FuncMap{
 	"clean_resource_name": templateCleanImageName,
-	"clean_image_name":    packertpl.DeprecatedTemplateFunc("clean_image_name", "clean_resource_name", templateCleanImageName),
 }

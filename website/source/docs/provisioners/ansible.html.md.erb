@@ -25,6 +25,7 @@ provisioner.
 This is a fully functional template that will provision an image on
 DigitalOcean. Replace the mock `api_token` value with your own.
 
+Example Packer template:
 ``` json
 {
   "provisioners": [
@@ -43,6 +44,23 @@ DigitalOcean. Replace the mock `api_token` value with your own.
     }
   ]
 }
+```
+
+Example playbook:
+
+```
+---
+# playbook.yml
+- name: "Provision Image"
+  hosts: default
+  become: true
+
+  tasks:
+  - name: install Apache
+    package:
+      name: "httpd"
+      state: present
+
 ```
 
 ## Configuration Reference
@@ -104,8 +122,9 @@ Optional Parameters:
 -   `galaxy_command` (string) - The command to invoke ansible-galaxy. By
     default, this is `ansible-galaxy`.
 
--   `galaxy_force_install` (string) - Force overwriting an existing role.
-    Adds `--force` option to `ansible-galaxy` command. By default, this is empty.
+-   `galaxy_force_install` (bool) - Force overwriting an existing role.
+    Adds `--force` option to `ansible-galaxy` command. By default, this is
+    `false`.
 
 -   `groups` (array of strings) - The groups into which the Ansible host should
     be placed. When unspecified, the host is not associated with any groups.
@@ -401,3 +420,53 @@ all command line arguments through into this call; this is necessary for
 making sure that --extra-vars and other important ansible arguments get set.
 Note the quoting around the bash array, too; if you don't use quotes, any
 arguments with spaces will not be read properly.
+
+### Docker
+
+When trying to use Ansible with Docker, you need to tweak a few options.
+
+- Change the ansible_connection from "ssh" to "docker"
+- Set a Docker container name via the --name option.
+
+On a CI server you probably want to overwrite ansible_host with a random name.
+
+Example Packer template:
+
+```
+{
+  "variables": {
+    "ansible_host": "default",
+    "ansible_connection": "docker"
+  },
+  "builders":[
+    {
+      "type": "docker",
+      "image": "centos:7",
+      "commit": true,
+      "run_command": [ "-d", "-i", "-t", "--name", "{{user `ansible_host`}}", "{{.Image}}", "/bin/bash" ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "groups": [ "webserver" ],
+      "playbook_file": "./webserver.yml",
+      "extra_arguments": [
+        "--extra-vars",
+        "ansible_host={{user `ansible_host`}} ansible_connection={{user `ansible_connection`}}"
+      ]
+    }
+  ]
+}
+```
+
+Example playbook:
+
+```
+- name: configure webserver
+  hosts: webserver
+  tasks:
+    - name: install Apache
+      yum:
+        name: httpd
+```

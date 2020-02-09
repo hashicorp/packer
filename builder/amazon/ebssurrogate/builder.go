@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,RootBlockDevice,BlockDevice
+
 // The ebssurrogate package contains a packer.Builder implementation that
 // builds a new EBS-backed AMI using an ephemeral instance.
 package ebssurrogate
@@ -6,8 +9,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -23,12 +28,41 @@ type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 
-	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
+	// Add one or more block device mappings to the AMI. These will be attached
+	// when booting a new instance from your AMI. To add a block device during
+	// the Packer build see `launch_block_device_mappings` below. Your options
+	// here may vary depending on the type of VM you use. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	AMIMappings awscommon.BlockDevices `mapstructure:"ami_block_device_mappings" required:"false"`
+	// Add one or more block devices before the Packer build starts. If you add
+	// instance store volumes or EBS volumes in addition to the root device
+	// volume, the created AMI will contain block device mapping information
+	// for those volumes. Amazon creates snapshots of the source instance's
+	// root volume and any other EBS volumes described here. When you launch an
+	// instance from this new AMI, the instance automatically launches with
+	// these additional volumes, and will restore them from snapshots taken
+	// from the source instance. See the
+	// [BlockDevices](#block-devices-configuration) documentation for fields.
+	LaunchMappings BlockDevices `mapstructure:"launch_block_device_mappings" required:"false"`
+	// A block device mapping describing the root device of the AMI. This looks
+	// like the mappings in `ami_block_device_mapping`, except with an
+	// additional field:
+	//
+	// -   `source_device_name` (string) - The device name of the block device on
+	//     the source instance to be used as the root device for the AMI. This
+	//     must correspond to a block device in `launch_block_device_mapping`.
+	RootDevice RootBlockDevice `mapstructure:"ami_root_device" required:"true"`
+	// Tags to apply to the volumes that are *launched* to create the AMI.
+	// These tags are *not* applied to the resulting AMI unless they're
+	// duplicated in `tags`. This is a [template
+	// engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
-	Architecture  string           `mapstructure:"ami_architecture"`
+	// what architecture to use when registering the
+	// final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
+	Architecture string `mapstructure:"ami_architecture" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -38,7 +72,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -55,7 +91,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.PackerConfig.PackerForce {
@@ -69,7 +105,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
 
 	if b.config.AMIVirtType == "" {
@@ -77,7 +114,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	foundRootVolume := false
-	for _, launchDevice := range b.config.BlockDevices.LaunchMappings {
+	for _, launchDevice := range b.config.LaunchMappings {
 		if launchDevice.DeviceName == b.config.RootDevice.SourceDeviceName {
 			foundRootVolume = true
 			if launchDevice.OmitFromArtifact {
@@ -88,13 +125,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if !foundRootVolume {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
-	}
-
-	if b.config.IsSpotInstance() && ((b.config.AMIENASupport != nil && *b.config.AMIENASupport) || b.config.AMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Spot instances do not support modification, which is required "+
-				"when either `ena_support` or `sriov_support` are set. Please ensure "+
-				"you use an AMI that already has either SR-IOV or ENA enabled."))
 	}
 
 	if b.config.RunConfig.SpotPriceAutoProduct != "" {
@@ -119,12 +149,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 	if errs != nil && len(errs.Errors) > 0 {
-		return warns, errs
+		return nil, warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 
-	return warns, nil
+	generatedData := []string{"SourceAMIName"}
+	return generatedData, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -132,7 +163,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if err != nil {
 		return nil, err
 	}
+
 	ec2conn := ec2.New(session)
+	iam := iam.New(session)
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
@@ -140,23 +173,24 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("access_config", &b.config.AccessConfig)
 	state.Put("ami_config", &b.config.AMIConfig)
 	state.Put("ec2", ec2conn)
+	state.Put("iam", iam)
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.BlockDevices,
+			LaunchMappings:                    b.config.LaunchMappings,
 			BlockDurationMinutes:              b.config.BlockDurationMinutes,
 			Ctx:                               b.config.ctx,
 			Comm:                              &b.config.RunConfig.Comm,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
-			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			SourceAMI:                         b.config.SourceAmi,
@@ -171,14 +205,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			BlockDevices:                      b.config.BlockDevices,
+			LaunchMappings:                    b.config.LaunchMappings,
 			Comm:                              &b.config.RunConfig.Comm,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			EnableT2Unlimited:                 b.config.EnableT2Unlimited,
 			ExpectedRootDevice:                "ebs",
-			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
@@ -190,14 +223,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		}
 	}
 
-	amiDevices := b.config.BuildAMIDevices()
-	launchDevices := b.config.BuildLaunchDevices()
+	amiDevices := b.config.AMIMappings.BuildEC2BlockDeviceMappings()
+	launchDevices := b.config.LaunchMappings.BuildEC2BlockDeviceMappings()
 
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
 			DestAmiName:     b.config.AMIName,
 			ForceDeregister: b.config.AMIForceDeregister,
+			VpcId:           b.config.VpcId,
+			SubnetId:        b.config.SubnetId,
+			HasSubnetFilter: len(b.config.SubnetFilter.Filters) > 0,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,
@@ -226,8 +262,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
 		},
+		&awscommon.StepIamInstanceProfile{
+			IamInstanceProfile:                        b.config.IamInstanceProfile,
+			SkipProfileValidation:                     b.config.SkipProfileValidation,
+			TemporaryIamInstanceProfilePolicyDocument: b.config.TemporaryIamInstanceProfilePolicyDocument,
+		},
 		&awscommon.StepCleanupVolumes{
-			BlockDevices: b.config.BlockDevices,
+			LaunchMappings: b.config.LaunchMappings.Common(),
 		},
 		instanceStep,
 		&awscommon.StepGetPassword{
@@ -240,7 +281,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.SSHInterface),
+				b.config.SSHInterface,
+				b.config.Comm.Host(),
+			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -252,12 +295,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
+			Skip:                     b.config.IsSpotInstance(),
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&StepSnapshotVolumes{
 			LaunchDevices:   launchDevices,
-			SnapshotOmitMap: b.config.GetOmissions(),
+			SnapshotOmitMap: b.config.LaunchMappings.GetOmissions(),
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -273,7 +317,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			Architecture:             b.config.Architecture,
-			LaunchOmitMap:            b.config.GetOmissions(),
+			LaunchOmitMap:            b.config.LaunchMappings.GetOmissions(),
+			AMISkipBuildRegion:       b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
@@ -292,6 +337,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SnapshotUsers:  b.config.SnapshotUsers,
 			SnapshotGroups: b.config.SnapshotGroups,
 			Ctx:            b.config.ctx,
+			GeneratedData:  generatedData,
 		},
 		&awscommon.StepCreateTags{
 			Tags:         b.config.AMITags,
@@ -315,6 +361,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Amis:           amis.(map[string]string),
 			BuilderIdValue: BuilderId,
 			Session:        session,
+			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 
 		return artifact, nil

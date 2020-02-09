@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package restart
 
 import (
@@ -11,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/config"
@@ -61,6 +64,8 @@ type Provisioner struct {
 	cancelLock sync.Mutex
 }
 
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -94,7 +99,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	p.cancelLock.Lock()
 	p.cancel = make(chan struct{})
 	p.cancelLock.Unlock()
@@ -132,11 +137,6 @@ var waitForRestart = func(ctx context.Context, p *Provisioner, comm packer.Commu
 	var cmd *packer.RemoteCmd
 	trycommand := TryCheckReboot
 	abortcommand := AbortReboot
-
-	// This sleep works around an azure/winrm bug. For more info see
-	// https://github.com/hashicorp/packer/issues/5257; we can remove the
-	// sleep when the underlying bug has been resolved.
-	time.Sleep(1 * time.Second)
 
 	// Stolen from Vagrant reboot checker
 	for {

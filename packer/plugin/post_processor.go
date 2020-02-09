@@ -4,12 +4,22 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 )
 
 type cmdPostProcessor struct {
 	p      packer.PostProcessor
 	client *Client
+}
+
+func (b *cmdPostProcessor) ConfigSpec() hcldec.ObjectSpec {
+	defer func() {
+		r := recover()
+		b.checkExit(r, nil)
+	}()
+
+	return b.p.ConfigSpec()
 }
 
 func (c *cmdPostProcessor) Configure(config ...interface{}) error {

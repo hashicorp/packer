@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,SharedImageGallery,SharedImageGalleryDestination,PlanInformation
+
 package arm
 
 import (
@@ -10,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -18,10 +22,11 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
 
+	azcommon "github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -70,7 +75,12 @@ type SharedImageGallery struct {
 	ResourceGroup string `mapstructure:"resource_group"`
 	GalleryName   string `mapstructure:"gallery_name"`
 	ImageName     string `mapstructure:"image_name"`
-	ImageVersion  string `mapstructure:"image_version"`
+	// Specify a specific version of an OS to boot from.
+	// Defaults to latest. There may be a difference in versions available
+	// across regions due to image synchronization latency. To ensure a consistent
+	// version across regions set this value to one that is available in all
+	// regions where you are deploying.
+	ImageVersion string `mapstructure:"image_version" required:"false"`
 }
 
 type SharedImageGalleryDestination struct {
@@ -85,66 +95,277 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Authentication via OAUTH
-	ClientConfig `mapstructure:",squash"`
+	ClientConfig client.Config `mapstructure:",squash"`
 
 	// Capture
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
-
-	// Shared Gallery
-	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery"`
-
-	// Shared Gallery Destination
+	// Use a [Shared Gallery
+	// image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
+	// as the source for this build. *VHD targets are incompatible with this
+	// build type* - the target must be a *Managed Image*.
+	//
+	//     "shared_image_gallery": {
+	//         "subscription": "00000000-0000-0000-0000-00000000000",
+	//         "resource_group": "ResourceGroup",
+	//         "gallery_name": "GalleryName",
+	//         "image_name": "ImageName",
+	//         "image_version": "1.0.0"
+	//     }
+	//     "managed_image_name": "TargetImageName",
+	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery" required:"false"`
+	// The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
+	//
+	// Following is an example.
+	//
+	//     "shared_image_gallery_destination": {
+	//         "resource_group": "ResourceGroup",
+	//         "gallery_name": "GalleryName",
+	//         "image_name": "ImageName",
+	//         "image_version": "1.0.0",
+	//         "replication_regions": ["regionA", "regionB", "regionC"]
+	//     }
+	//     "managed_image_name": "TargetImageName",
+	//     "managed_image_resource_group_name": "TargetResourceGroup"
 	SharedGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination"`
-	SharedGalleryTimeout     time.Duration                 `mapstructure:"shared_image_gallery_timeout"`
-
-	// Compute
-	ImagePublisher string `mapstructure:"image_publisher"`
-	ImageOffer     string `mapstructure:"image_offer"`
-	ImageSku       string `mapstructure:"image_sku"`
-	ImageVersion   string `mapstructure:"image_version"`
-	ImageUrl       string `mapstructure:"image_url"`
-
-	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name"`
-	CustomManagedImageName              string `mapstructure:"custom_managed_image_name"`
-	customManagedImageID                string
+	// How long to wait for an image to be published to the shared image
+	// gallery before timing out. If your Packer build is failing on the
+	// Publishing to Shared Image Gallery step with the error `Original Error:
+	// context deadline exceeded`, but the image is present when you check your
+	// Azure dashboard, then you probably need to increase this timeout from
+	// its default of "60m" (valid time units include `s` for seconds, `m` for
+	// minutes, and `h` for hours.)
+	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
+	// The end of life date (2006-01-02T15:04:05.99Z) of the gallery Image Version. This property
+	// can be used for decommissioning purposes.
+	SharedGalleryImageVersionEndOfLifeDate string `mapstructure:"shared_gallery_image_version_end_of_life_date" required:"false"`
+	// The number of replicas of the Image Version to be created per region. This
+	// property would take effect for a region when regionalReplicaCount is not specified.
+	// Replica count must be between 1 and 10.
+	SharedGalleryImageVersionReplicaCount int32 `mapstructure:"shared_image_gallery_replica_count" required:"false"`
+	// If set to true, Virtual Machines deployed from the latest version of the
+	// Image Definition won't use this Image Version.
+	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
+	// PublisherName for your base image. See
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// for details.
+	//
+	// CLI example `az vm image list-publishers --location westus`
+	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
+	// Offer for your base image. See
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// for details.
+	//
+	// CLI example
+	// `az vm image list-offers --location westus --publisher Canonical`
+	ImageOffer string `mapstructure:"image_offer" required:"true"`
+	// SKU for your base image. See
+	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// for details.
+	//
+	// CLI example
+	// `az vm image list-skus --location westus --publisher Canonical --offer UbuntuServer`
+	ImageSku string `mapstructure:"image_sku" required:"true"`
+	// Specify a specific version of an OS to boot from.
+	// Defaults to `latest`. There may be a difference in versions available
+	// across regions due to image synchronization latency. To ensure a consistent
+	// version across regions set this value to one that is available in all
+	// regions where you are deploying.
+	//
+	// CLI example
+	// `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
+	ImageVersion string `mapstructure:"image_version" required:"false"`
+	// Specify a custom VHD to use. If this value is set, do
+	// not set image_publisher, image_offer, image_sku, or image_version.
+	ImageUrl string `mapstructure:"image_url" required:"false"`
+	// Specify the source managed image's resource group used to use. If this
+	// value is set, do not set image\_publisher, image\_offer, image\_sku, or
+	// image\_version. If this value is set, the value
+	// `custom_managed_image_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+	// to learn more about managed images.
+	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"false"`
+	// Specify the source managed image's name to use. If this value is set, do
+	// not set image\_publisher, image\_offer, image\_sku, or image\_version.
+	// If this value is set, the value
+	// `custom_managed_image_resource_group_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+	// to learn more about managed images.
+	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"false"`
+	customManagedImageID   string
 
 	Location string `mapstructure:"location"`
-	VMSize   string `mapstructure:"vm_size"`
+	// Size of the VM used for building. This can be changed when you deploy a
+	// VM from your VHD. See
+	// [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
+	// information. Defaults to `Standard_A1`.
+	//
+	// CLI example `az vm list-sizes --location westus`
+	VMSize string `mapstructure:"vm_size" required:"false"`
 
-	ManagedImageResourceGroupName      string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName                   string `mapstructure:"managed_image_name"`
-	ManagedImageStorageAccountType     string `mapstructure:"managed_image_storage_account_type"`
-	managedImageStorageAccountType     compute.StorageAccountTypes
-	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
-	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
+	// Specify the managed image resource group name where the result of the
+	// Packer build will be saved. The resource group must already exist. If
+	// this value is set, the value managed_image_name must also be set. See
+	// documentation to learn more about managed images.
+	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
+	// Specify the managed image name where the result of the Packer build will
+	// be saved. The image name must not exist ahead of time, and will not be
+	// overwritten. If this value is set, the value
+	// managed_image_resource_group_name must also be set. See documentation to
+	// learn more about managed images.
+	ManagedImageName string `mapstructure:"managed_image_name"`
+	// Specify the storage account
+	// type for a managed image. Valid values are Standard_LRS and Premium_LRS.
+	// The default is Standard_LRS.
+	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type" required:"false"`
+	managedImageStorageAccountType compute.StorageAccountTypes
+	// If
+	// managed_image_os_disk_snapshot_name is set, a snapshot of the OS disk
+	// is created with the same name as this value before the VM is captured.
+	ManagedImageOSDiskSnapshotName string `mapstructure:"managed_image_os_disk_snapshot_name" required:"false"`
+	// If
+	// managed_image_data_disk_snapshot_prefix is set, snapshot of the data
+	// disk(s) is created with the same prefix as this value before the VM is
+	// captured.
+	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
 	manageImageLocation                string
-	ManagedImageZoneResilient          bool `mapstructure:"managed_image_zone_resilient"`
-
-	// Deployment
-	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
-	ResourceGroupName                 string             `mapstructure:"resource_group_name"`
-	StorageAccount                    string             `mapstructure:"storage_account"`
-	TempComputeName                   string             `mapstructure:"temp_compute_name"`
-	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
-	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
-	storageAccountBlobEndpoint        string
-	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip"`
-	VirtualNetworkName                string `mapstructure:"virtual_network_name"`
-	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name"`
-	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
-	CustomDataFile                    string `mapstructure:"custom_data_file"`
-	customData                        string
-	PlanInfo                          PlanInformation `mapstructure:"plan_info"`
-
-	// OS
-	OSType       string `mapstructure:"os_type"`
-	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb"`
-
-	// Additional Disks
-	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
-	DiskCachingType    string  `mapstructure:"disk_caching_type"`
-	diskCachingType    compute.CachingTypes
+	// Store the image in zone-resilient storage. You need to create it in a
+	// region that supports [availability
+	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
+	ManagedImageZoneResilient bool `mapstructure:"managed_image_zone_resilient" required:"false"`
+	// the user can define up to 15
+	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
+	// 256 characters. Tags are applied to every resource deployed by a Packer
+	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
+	// Resource group under which the final artifact will be stored.
+	ResourceGroupName string `mapstructure:"resource_group_name"`
+	// Storage account under which the final artifact will be stored.
+	StorageAccount string `mapstructure:"storage_account"`
+	// temporary name assigned to the VM. If this
+	// value is not set, a random value will be assigned. Knowing the resource
+	// group and VM name allows one to execute commands to update the VM during a
+	// Packer build, e.g. attach a resource disk to the VM.
+	TempComputeName string `mapstructure:"temp_compute_name" required:"false"`
+	// name assigned to the temporary resource group created during the build.
+	// If this value is not set, a random value will be assigned. This resource
+	// group is deleted at the end of the build.
+	TempResourceGroupName string `mapstructure:"temp_resource_group_name"`
+	// Specify an existing resource group to run the build in.
+	BuildResourceGroupName     string `mapstructure:"build_resource_group_name"`
+	storageAccountBlobEndpoint string
+	// This value allows you to
+	// set a virtual_network_name and obtain a public IP. If this value is not
+	// set and virtual_network_name is defined Packer is only allowed to be
+	// executed from a host on the same subnet / virtual network.
+	PrivateVirtualNetworkWithPublicIp bool `mapstructure:"private_virtual_network_with_public_ip" required:"false"`
+	// Use a pre-existing virtual network for the
+	// VM. This option enables private communication with the VM, no public IP
+	// address is used or provisioned (unless you set
+	// private_virtual_network_with_public_ip).
+	VirtualNetworkName string `mapstructure:"virtual_network_name" required:"false"`
+	// If virtual_network_name is set,
+	// this value may also be set. If virtual_network_name is set, and this
+	// value is not set the builder attempts to determine the subnet to use with
+	// the virtual network. If the subnet cannot be found, or it cannot be
+	// disambiguated, this value should be set.
+	VirtualNetworkSubnetName string `mapstructure:"virtual_network_subnet_name" required:"false"`
+	// If virtual_network_name is
+	// set, this value may also be set. If virtual_network_name is set, and
+	// this value is not set the builder attempts to determine the resource group
+	// containing the virtual network. If the resource group cannot be found, or
+	// it cannot be disambiguated, this value should be set.
+	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name" required:"false"`
+	// Specify a file containing custom data to inject into the cloud-init
+	// process. The contents of the file are read and injected into the ARM
+	// template. The custom data will be passed to cloud-init for processing at
+	// the time of provisioning. See
+	// [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
+	// to learn more about custom data, and how it can be used to influence the
+	// provisioning process.
+	CustomDataFile string `mapstructure:"custom_data_file" required:"false"`
+	customData     string
+	// Used for creating images from Marketplace images. Please refer to
+	// [Deploy an image with Marketplace
+	// terms](https://aka.ms/azuremarketplaceapideployment) for more details.
+	// Not all Marketplace images support programmatic deployment, and support
+	// is controlled by the image publisher.
+	//
+	// An example plan\_info object is defined below.
+	//
+	// ``` json
+	// {
+	//   "plan_info": {
+	//       "plan_name": "rabbitmq",
+	//       "plan_product": "rabbitmq",
+	//       "plan_publisher": "bitnami"
+	//   }
+	// }
+	// ```
+	//
+	// `plan_name` (string) - The plan name, required. `plan_product` (string) -
+	// The plan product, required. `plan_publisher` (string) - The plan publisher,
+	// required. `plan_promotion_code` (string) - Some images accept a promotion
+	// code, optional.
+	//
+	// Images created from the Marketplace with `plan_info` **must** specify
+	// `plan_info` whenever the image is deployed. The builder automatically adds
+	// tags to the image to ensure this information is not lost. The following
+	// tags are added.
+	//
+	// 1.  PlanName
+	// 2.  PlanProduct
+	// 3.  PlanPublisher
+	// 4.  PlanPromotionCode
+	//
+	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
+	// The default PollingDuration for azure is 15mins, this property will override
+	// that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
+	// If your Packer build is failing on the
+	// ARM deployment step with the error `Original Error:
+	// context deadline exceeded`, then you probably need to increase this timeout from
+	// its default of "15m" (valid time units include `s` for seconds, `m` for
+	// minutes, and `h` for hours.)
+	PollingDurationTimeout time.Duration `mapstructure:"polling_duration_timeout" required:"false"`
+	// If either Linux or Windows is specified Packer will
+	// automatically configure authentication credentials for the provisioned
+	// machine. For Linux this configures an SSH authorized key. For Windows
+	// this configures a WinRM certificate.
+	OSType string `mapstructure:"os_type" required:"false"`
+	// Specify the size of the OS disk in GB
+	// (gigabytes). Values of zero or less than zero are ignored.
+	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
+	// The size(s) of any additional hard disks for the VM in gigabytes. If
+	// this is not specified then the VM will only contain an OS disk. The
+	// number of additional disks and maximum size of a disk depends on the
+	// configuration of your VM. See
+	// [Windows](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds)
+	// or
+	// [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds)
+	// for more information.
+	//
+	// For VHD builds the final artifacts will be named
+	// `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture
+	// container along side the OS disk. The additional disks are included in
+	// the deployment template `PREFIX-vmTemplate.UUID`.
+	//
+	// For Managed build the final artifacts are included in the managed image.
+	// The additional disk will have the same storage account type as the OS
+	// disk, as specified with the `managed_image_storage_account_type`
+	// setting.
+	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size" required:"false"`
+	// Specify the disk caching type. Valid values
+	// are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
+	DiskCachingType string `mapstructure:"disk_caching_type" required:"false"`
+	diskCachingType compute.CachingTypes
+	// Specify the list of IP addresses and CIDR blocks that should be
+	// allowed access to the VM. If provided, an Azure Network Security
+	// Group will be created with corresponding rules and be bound to
+	// the subnet of the VM.
+	// Providing `allowed_inbound_ip_addresses` in combination with
+	// `virtual_network_name` is not allowed.
+	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
 	// Runtime Values
 	UserName               string
@@ -160,6 +381,7 @@ type Config struct {
 	tmpOSDiskName          string
 	tmpSubnetName          string
 	tmpVirtualNetworkName  string
+	tmpNsgName             string
 	tmpWinRMCertificateUrl string
 
 	// Authentication with the VM via SSH
@@ -170,9 +392,11 @@ type Config struct {
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  interpolate.Context
-
-	//Cleanup
-	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
+	// If you want packer to delete the
+	// temporary resource group asynchronously set this value. It's a boolean
+	// value and defaults to false. Important Setting this true means that
+	// your builds are faster, however any failed deletes are not reported.
+	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete" required:"false"`
 }
 
 type keyVaultCertificate struct {
@@ -188,7 +412,7 @@ func (c *Config) toVMID() string {
 	} else {
 		resourceGroupName = c.BuildResourceGroupName
 	}
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, resourceGroupName, c.tmpComputeName)
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.ClientConfig.SubscriptionID, resourceGroupName, c.tmpComputeName)
 }
 
 func (c *Config) isManagedImage() bool {
@@ -278,58 +502,57 @@ func (c *Config) createCertificate() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func newConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
-	c.ctx.Funcs = TemplateFuncs
-	err := config.Decode(&c, &config.DecodeOpts{
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
+	c.ctx.Funcs = azcommon.TemplateFuncs
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 	}, raws...)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	provideDefaultValues(&c)
-	setRuntimeValues(&c)
-	setUserNamePassword(&c)
-	err = c.ClientConfig.setCloudEnvironment()
+	provideDefaultValues(c)
+	setRuntimeValues(c)
+	setUserNamePassword(c)
+	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	err = setCustomData(&c)
+	err = setCustomData(c)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// NOTE: if the user did not specify a communicator, then default to both
 	// SSH and WinRM.  This is for backwards compatibility because the code did
 	// not specifically force the user to set a communicator.
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "ssh") {
-		err = setSshValues(&c)
+		err = setSshValues(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "winrm") {
-		err = setWinRMCertificate(&c)
+		err = setWinRMCertificate(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
-	assertRequiredParametersSet(&c, errs)
-	assertTagProperties(&c, errs)
+	assertRequiredParametersSet(c, errs)
+	assertTagProperties(c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
-	return &c, nil, nil
+	return nil, nil
 }
 
 func setSshValues(c *Config) error {
@@ -384,7 +607,6 @@ func setRuntimeValues(c *Config) {
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
 	c.tmpCertificatePassword = tempName.CertificatePassword
@@ -405,6 +627,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpOSDiskName = tempName.OSDiskName
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
+	c.tmpNsgName = tempName.NsgName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
@@ -417,8 +640,13 @@ func setUserNamePassword(c *Config) {
 
 	if c.Comm.SSHPassword != "" {
 		c.Password = c.Comm.SSHPassword
-	} else {
-		c.Password = c.tmpAdminPassword
+		return
+	}
+
+	// Configure password settings using Azure generated credentials
+	c.Password = c.tmpAdminPassword
+	if c.Comm.WinRMPassword == "" {
+		c.Comm.WinRMPassword = c.Password
 	}
 }
 
@@ -453,7 +681,7 @@ func provideDefaultValues(c *Config) {
 		c.ImageVersion = DefaultImageVersion
 	}
 
-	c.provideDefaultValues()
+	c.ClientConfig.SetDefaultValues()
 }
 
 func assertTagProperties(c *Config, errs *packer.MultiError) {
@@ -472,7 +700,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 }
 
 func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
-	c.ClientConfig.assertRequiredParametersSet(errs)
+	c.ClientConfig.Validate(errs)
 
 	/////////////////////////////////////////////
 	// Capture
@@ -673,6 +901,16 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
 	}
 
+	if c.AllowedInboundIpAddresses != nil && len(c.AllowedInboundIpAddresses) >= 1 {
+		if c.VirtualNetworkName != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_name is specified, allowed_inbound_ip_addresses cannot be specified"))
+		} else {
+			if ok, err := assertAllowedInboundIpAddresses(c.AllowedInboundIpAddresses, "allowed_inbound_ip_addresses"); !ok {
+				errs = packer.MultiErrorAppend(errs, err)
+			}
+		}
+	}
+
 	/////////////////////////////////////////////
 	// Plan Info
 	if c.PlanInfo.PlanName != "" || c.PlanInfo.PlanProduct != "" || c.PlanInfo.PlanPublisher != "" || c.PlanInfo.PlanPromotionCode != "" {
@@ -688,6 +926,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			c.AzureTags["PlanPublisher"] = &c.PlanInfo.PlanPublisher
 			c.AzureTags["PlanPromotionCode"] = &c.PlanInfo.PlanPromotionCode
 		}
+	}
+
+	/////////////////////////////////////////////
+	// Polling Duration Timeout
+	if c.PollingDurationTimeout == 0 {
+		// In the sdk, the default is 15 m.
+		c.PollingDurationTimeout = 15 * time.Minute
 	}
 
 	/////////////////////////////////////////////
@@ -740,6 +985,17 @@ func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
 func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
 	if !isValidAzureName(reSnapshotPrefix, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
+	}
+	return true, nil
+}
+
+func assertAllowedInboundIpAddresses(ipAddresses []string, setting string) (bool, error) {
+	for _, ipAddress := range ipAddresses {
+		if net.ParseIP(ipAddress) == nil {
+			if _, _, err := net.ParseCIDR(ipAddress); err != nil {
+				return false, fmt.Errorf("The setting %s must only contain valid IP addresses or CIDR blocks", setting)
+			}
+		}
 	}
 	return true, nil
 }

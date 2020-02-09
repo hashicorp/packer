@@ -1,0 +1,56 @@
+{"variables": {
+  "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+  "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+  "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}",
+  "disk_size": "4096",
+  "iso_checksum": "0da4a1206e7642906e33c0f155d2f835",
+  "iso_checksum_type": "md5",
+  "iso_name": "CentOS-6.10-x86_64-minimal.iso",
+  "ks_path": "centos-6.10/ks.cfg",
+  "mirror": "http://mirrors.ustc.edu.cn/centos",
+  "mirror_directory": "6.10/isos/x86_64",
+  "template": "centos-6.10-x86_64"
+},
+  "builders":[
+    {
+      "type": "qemu",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `ks_path`}}<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": "{{user `disk_size`}}",
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_url": "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "output_directory": "packer-{{user `template`}}-qemu",
+      "shutdown_command": "echo 'packer'|sudo -S shutdown -P now",
+      "ssh_password": "ucloud_packer",
+      "ssh_port": 22,
+      "ssh_username": "root",
+      "ssh_timeout": "10000s",
+      "vm_name": "{{ user `template` }}.raw",
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "format": "raw",
+      "use_default_display": "false",
+      "qemuargs": [
+        ["-display", "cocoa"]
+      ]
+    }
+  ],
+  "post-processors":[
+    {
+      "type":"ucloud-import",
+      "public_key": "{{user `ucloud_public_key`}}",
+      "private_key": "{{user `ucloud_private_key`}}",
+      "project_id": "{{user `ucloud_project_id`}}",
+      "region":"cn-bj2",
+      "ufile_bucket_name": "packer-test",
+      "image_name": "packer_import_test",
+      "image_os_type": "CentOS",
+      "image_os_name": "CentOS 6.10 64位",
+      "format": "raw"
+    }
+  ]
+}

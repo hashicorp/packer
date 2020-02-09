@@ -67,6 +67,9 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	s.vmID = vm.Id
 	state.Put("vm_id", vm.Id)
+	// instance_id is the generic term used so that users can have access to the
+	// instance id inside of the provisioners, used in step_provision.
+	state.Put("instance_id", vm.Id)
 
 	hdds, _, err := client.VmApi.VmListHdd(ctx, vm.Id)
 	if err != nil {

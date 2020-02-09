@@ -9,6 +9,7 @@
 
 package openapi
 
+// VaultPostAccessrights struct for VaultPostAccessrights
 type VaultPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

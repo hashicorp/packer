@@ -7,13 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common/random"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepRegisterAMI struct {
-	EnableAMIENASupport      *bool
+	EnableAMIENASupport      confighelper.Trilean
 	EnableAMISriovNetSupport bool
+	AMISkipBuildRegion       bool
 }
 
 func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -23,10 +26,28 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
+
+	// Create the image
+	amiName := config.AMIName
+	state.Put("intermediary_image", false)
+	if config.AMIEncryptBootVolume.True() || s.AMISkipBuildRegion {
+		state.Put("intermediary_image", true)
+
+		// From AWS SDK docs: You can encrypt a copy of an unencrypted snapshot,
+		// but you cannot use it to create an unencrypted copy of an encrypted
+		// snapshot. Your default CMK for EBS is used unless you specify a
+		// non-default key using KmsKeyId.
+
+		// If encrypt_boot is nil or true, we need to create a temporary image
+		// so that in step_region_copy, we can copy it with the correct
+		// encryption
+		amiName = random.AlphaNum(7)
+	}
+
 	registerOpts := &ec2.RegisterImageInput{
 		ImageLocation:       &manifestPath,
-		Name:                aws.String(config.AMIName),
-		BlockDeviceMappings: config.BlockDevices.BuildAMIDevices(),
+		Name:                aws.String(amiName),
+		BlockDeviceMappings: config.AMIMappings.BuildEC2BlockDeviceMappings(),
 	}
 
 	if config.AMIVirtType != "" {
@@ -38,7 +59,7 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
 	}
-	if s.EnableAMIENASupport != nil && *s.EnableAMIENASupport {
+	if s.EnableAMIENASupport.True() {
 		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)

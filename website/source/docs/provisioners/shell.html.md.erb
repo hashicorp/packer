@@ -40,6 +40,11 @@ The example below is fully functional.
     Packer injects some environmental variables by default into the
     environment, as well, which are covered in the section below.
 
+-   `env_var_format` (string) - When we parse the environment\_vars that you
+    provide, this gives us a string template to use in order to make sure that
+    we are setting the environment vars correctly. By default it is `"%s='%s' "`.
+    When used in conjunction with `use_env_var_file` the default is `"export %s='%s'\n"`
+
 -   `use_env_var_file` (boolean) - If true, Packer will write your environment
     variables to a tempfile and source them from that file, rather than
     declaring them inline in our execute\_command. The default

@@ -45,30 +45,36 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	// Block Storage service volume or regular Compute service local volume.
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
 	var imageId string
+	var blockStorageClient *gophercloud.ServiceClient
 	if s.UseBlockStorageVolume {
 		// We need the v3 block storage client.
-		blockStorageClient, err := config.blockStorageV3Client()
+		blockStorageClient, err = config.blockStorageV3Client()
 		if err != nil {
 			err = fmt.Errorf("Error initializing block storage client: %s", err)
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 		volume := state.Get("volume_id").(string)
+
+		// set ImageMetadata before uploading to glance so the new image captured the desired values
+		if len(config.ImageMetadata) > 0 {
+			err = volumeactions.SetImageMetadata(blockStorageClient, volume, volumeactions.ImageMetadataOpts{
+				Metadata: config.ImageMetadata,
+			}).ExtractErr()
+			if err != nil {
+				err := fmt.Errorf("Error setting image metadata: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+
 		image, err := volumeactions.UploadImage(blockStorageClient, volume, volumeactions.UploadImageOpts{
 			DiskFormat: config.ImageDiskFormat,
 			ImageName:  config.ImageName,
 		}).Extract()
 		if err != nil {
 			err := fmt.Errorf("Error creating image: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		err = volumeactions.SetImageMetadata(blockStorageClient, volume, volumeactions.ImageMetadataOpts{
-			Metadata: config.ImageMetadata,
-		}).ExtractErr()
-		if err != nil {
-			err := fmt.Errorf("Error setting image metadata: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

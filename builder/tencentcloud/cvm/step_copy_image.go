@@ -2,10 +2,10 @@ package cvm
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -20,28 +20,32 @@ func (s *stepCopyImage) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	client := state.Get("cvm_client").(*cvm.Client)
-	ui := state.Get("ui").(packer.Ui)
+
 	imageId := state.Get("image").(*cvm.Image).ImageId
+
+	Say(state, strings.Join(s.DesinationRegions, ","), "Trying to copy image to")
 
 	req := cvm.NewSyncImagesRequest()
 	req.ImageIds = []*string{imageId}
 	copyRegions := make([]*string, 0, len(s.DesinationRegions))
 	for _, region := range s.DesinationRegions {
 		if region != s.SourceRegion {
-			copyRegions = append(copyRegions, &region)
+			copyRegions = append(copyRegions, common.StringPtr(region))
 		}
 	}
 	req.DestinationRegions = copyRegions
 
-	_, err := client.SyncImages(req)
+	err := Retry(ctx, func(ctx context.Context) error {
+		_, e := client.SyncImages(req)
+		return e
+	})
 	if err != nil {
-		state.Put("error", err)
-		ui.Error(fmt.Sprintf("copy image failed: %s", err.Error()))
-		return multistep.ActionHalt
+		return Halt(state, err, "Failed to copy image")
 	}
+
+	Message(state, "Image copied", "")
+
 	return multistep.ActionContinue
 }
 
-func (s *stepCopyImage) Cleanup(state multistep.StateBag) {
-	// just do nothing
-}
+func (s *stepCopyImage) Cleanup(state multistep.StateBag) {}

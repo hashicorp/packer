@@ -152,7 +152,7 @@ func CompleteCommonParams(request Request, region string) {
 	params["Action"] = request.GetAction()
 	params["Timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
 	params["Nonce"] = strconv.Itoa(rand.Int())
-	params["RequestClient"] = "SDK_GO_3.0.71"
+	params["RequestClient"] = "SDK_GO_3.0.97"
 }
 
 func ConstructParams(req Request) (err error) {
@@ -195,8 +195,9 @@ func flatStructure(value reflect.Value, request Request, prefix string) (err err
 		} else if kind == reflect.Float64 {
 			request.GetParams()[key] = strconv.FormatFloat(field.Float(), 'f', -1, 64)
 		} else if kind == reflect.Slice {
-			for j := 0; j < field.Len(); j++ {
-				vj := field.Index(j)
+			list := value.Field(i)
+			for j := 0; j < list.Len(); j++ {
+				vj := list.Index(j)
 				key := prefix + nameTag + "." + strconv.Itoa(j)
 				kind = vj.Kind()
 				if kind == reflect.Ptr && vj.IsNil() {
@@ -217,11 +218,15 @@ func flatStructure(value reflect.Value, request Request, prefix string) (err err
 				} else if kind == reflect.Float64 {
 					request.GetParams()[key] = strconv.FormatFloat(vj.Float(), 'f', -1, 64)
 				} else {
-					return flatStructure(vj, request, key+".")
+					if err = flatStructure(vj, request, key+"."); err != nil {
+						return
+					}
 				}
 			}
 		} else {
-			return flatStructure(reflect.ValueOf(field.Interface()), request, prefix+nameTag+".")
+			if err = flatStructure(reflect.ValueOf(field.Interface()), request, prefix+nameTag+"."); err != nil {
+				return
+			}
 		}
 	}
 	return

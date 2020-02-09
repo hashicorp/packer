@@ -9,7 +9,8 @@ import (
 )
 
 func TestRequiredParameters(t *testing.T) {
-	_, _, err := NewConfig(make(map[string]interface{}))
+	var c Config
+	_, err := c.Prepare(make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("Expected empty configuration to fail")
 	}
@@ -81,7 +82,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 
 	b := &Builder{}
-	warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
 	if err != nil {
 		t.Fatal(err, warn)
 	}
@@ -90,10 +91,12 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	// Memory 0 is too small, using default: 512
 	// Number of cores 0 is too small, using default: 1
 	// Number of sockets 0 is too small, using default: 1
+	// CPU type not set, using default 'kvm64'
 	// OS not set, using default 'other'
 	// NIC 0 model not set, using default 'e1000'
 	// Disk 0 cache mode not set, using default 'none'
 	// Agent not set, default is true
+	// SCSI controller not set, using default 'lsi'
 
 	if b.config.Memory != 512 {
 		t.Errorf("Expected Memory to be 512, got %d", b.config.Memory)
@@ -103,6 +106,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 	if b.config.Sockets != 1 {
 		t.Errorf("Expected Sockets to be 1, got %d", b.config.Sockets)
+	}
+	if b.config.CPUType != "kvm64" {
+		t.Errorf("Expected CPU type to be 'kvm64', got %s", b.config.CPUType)
 	}
 	if b.config.OS != "other" {
 		t.Errorf("Expected OS to be 'other', got %s", b.config.OS)
@@ -115,6 +121,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 	if b.config.Agent != true {
 		t.Errorf("Expected Agent to be true, got %t", b.config.Agent)
+	}
+	if b.config.SCSIController != "lsi" {
+		t.Errorf("Expected SCSI controller to be 'lsi', got %s", b.config.SCSIController)
 	}
 }
 
@@ -141,7 +150,7 @@ func TestAgentSetToFalse(t *testing.T) {
 	}
 
 	b := &Builder{}
-	warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
 	if err != nil {
 		t.Fatal(err, warn)
 	}

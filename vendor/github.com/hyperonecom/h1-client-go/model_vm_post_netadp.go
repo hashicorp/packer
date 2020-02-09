@@ -9,10 +9,11 @@
 
 package openapi
 
+// VmPostNetadp struct for VmPostNetadp
 type VmPostNetadp struct {
-	Service string `json:"service,omitempty"`
-	Network string `json:"network,omitempty"`
-	Ip string `json:"ip,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
-	VlanIds string `json:"vlanIds,omitempty"`
+	Service  string            `json:"service"`
+	Network  string            `json:"network,omitempty"`
+	Ip       string            `json:"ip,omitempty"`
+	Tag      map[string]string `json:"tag,omitempty"`
+	Firewall string            `json:"firewall,omitempty"`
 }

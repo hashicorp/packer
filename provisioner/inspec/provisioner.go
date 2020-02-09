@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 package inspec
 
 import (
@@ -25,6 +27,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/adapter"
 	"github.com/hashicorp/packer/helper/config"
@@ -65,6 +68,8 @@ type Provisioner struct {
 	inspecVersion    string
 	inspecMajVersion uint
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
@@ -184,7 +189,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
 
 	for i, envVar := range p.config.InspecEnvVars {
@@ -217,6 +222,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
+	if err != nil {
+		return fmt.Errorf("error creating host signer: %s", err)
+	}
+
 	// Remove the private key file
 	if len(k.privKeyFile) > 0 {
 		defer os.Remove(k.privKeyFile)

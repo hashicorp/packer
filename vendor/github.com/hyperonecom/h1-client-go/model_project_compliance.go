@@ -9,6 +9,7 @@
 
 package openapi
 
+// ProjectCompliance struct for ProjectCompliance
 type ProjectCompliance struct {
-	LogArchive string `json:"logArchive,omitempty"`
+	Journal string `json:"journal,omitempty"`
 }

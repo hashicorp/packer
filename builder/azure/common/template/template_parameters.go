@@ -31,6 +31,7 @@ type TemplateParameters struct {
 	SubnetName                 *TemplateParameter `json:"subnetName,omitempty"`
 	TenantId                   *TemplateParameter `json:"tenantId,omitempty"`
 	VirtualNetworkName         *TemplateParameter `json:"virtualNetworkName,omitempty"`
+	NsgName                    *TemplateParameter `json:"nsgName,omitempty"`
 	VMSize                     *TemplateParameter `json:"vmSize,omitempty"`
 	VMName                     *TemplateParameter `json:"vmName,omitempty"`
 }

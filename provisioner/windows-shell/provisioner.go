@@ -1,3 +1,5 @@
+//go:generate mapstructure-to-hcl2 -type Config
+
 // This package implements a provisioner for Packer that executes
 // shell scripts within the remote machine.
 package shell
@@ -13,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
@@ -30,19 +33,12 @@ var retryableSleep = 2 * time.Second
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
-	// The command used to execute the script. The '{{ .Path }}' variable
-	// should be used to specify where the script goes, {{ .Vars }}
-	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand string `mapstructure:"execute_command"`
+	shell.ProvisionerRemoteSpecific `mapstructure:",squash"`
 
 	// The timeout for retrying to start the process. Until this timeout
 	// is reached, if the provisioner can't start a process, it retries.
 	// This can be set high to allow for reboots.
 	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
-
-	// This is used in the template generation to format environment variables
-	// inside the `ExecuteCommand` template.
-	EnvVarFormat string `mapstructure:"env_var_format"`
 
 	ctx interpolate.Context
 }
@@ -55,6 +51,8 @@ type ExecuteCommandTemplate struct {
 	Vars string
 	Path string
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -161,7 +159,7 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with windows-shell..."))
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)

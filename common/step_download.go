@@ -53,12 +53,18 @@ type StepDownload struct {
 }
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if len(s.Url) == 0 {
+		log.Printf("No URLs were provided to Step Download. Continuing...")
+		return multistep.ActionContinue
+	}
+
 	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	var errs []error
+
 	for _, source := range s.Url {
 		if ctx.Err() != nil {
 			state.Put("error", fmt.Errorf("Download cancelled: %v", errs))
@@ -135,26 +141,41 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		u.RawQuery = q.Encode()
 	}
 
+	// store file under sha1(hash) if set
+	// hash can sometimes be a checksum url
+	// otherwise, use sha1(source_url)
+	var shaSum [20]byte
+	if s.Checksum != "" {
+		shaSum = sha1.Sum([]byte(s.Checksum))
+	} else {
+		shaSum = sha1.Sum([]byte(u.String()))
+	}
+	shaSumString := hex.EncodeToString(shaSum[:])
+
 	targetPath := s.TargetPath
 	if targetPath == "" {
-		// store file under sha1(hash) if set
-		// hash can sometimes be a checksum url
-		// otherwise, use sha1(source_url)
-		var shaSum [20]byte
-		if s.Checksum != "" {
-			shaSum = sha1.Sum([]byte(s.Checksum))
-		} else {
-			shaSum = sha1.Sum([]byte(u.String()))
-		}
-		targetPath = hex.EncodeToString(shaSum[:])
+		targetPath = shaSumString
 		if s.Extension != "" {
 			targetPath += "." + s.Extension
 		}
+		targetPath, err = packer.CachePath(targetPath)
+		if err != nil {
+			return "", fmt.Errorf("CachePath: %s", err)
+		}
+	} else if filepath.Ext(targetPath) == "" {
+		// When an absolute path is provided
+		// this adds the file to the targetPath
+		if !strings.HasSuffix(targetPath, "/") {
+			targetPath += "/"
+		}
+		targetPath += shaSumString
+		if s.Extension != "" {
+			targetPath += "." + s.Extension
+		} else {
+			targetPath += ".iso"
+		}
 	}
-	targetPath, err = packer.CachePath(targetPath)
-	if err != nil {
-		return "", fmt.Errorf("CachePath: %s", err)
-	}
+
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)

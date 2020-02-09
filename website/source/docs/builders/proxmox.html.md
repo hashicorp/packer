@@ -50,10 +50,26 @@ builder.
 
 -   `iso_file` (string) - Path to the ISO file to boot from, expressed as a
     proxmox datastore path, for example
-    `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`
+    `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`.
+    Either `iso_file` OR `iso_url` must be specifed.
+
+-   `iso_url` (string) - URL to an ISO file to upload to Proxmox, and then
+    boot from. Either `iso_file` OR `iso_url` must be specifed.
+
+-   `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
+    the ISO file.
+
+-   `iso_checksum` (string) - Checksum of the ISO file.
+
+-   `iso_checksum_type` (string) - Type of the checksum. Can be md5, sha1,
+    sha256, sha512 or none. Corruption of large files, such as ISOs, can occur
+    during transfer from time to time. As such, setting this to none is not
+    recommended.
 
 ### Optional:
 -   `insecure_skip_tls_verify` (bool) - Skip validating the certificate.
+
+-   `pool` (string) - Name of resource pool to create virtual machine in.
 
 -   `vm_name` (string) - Name of the virtual machine during creation. If not
     given, a random uuid will be used.
@@ -70,6 +86,10 @@ builder.
 
 -   `sockets` (int) - How many CPU sockets to give the virtual machine.
     Defaults to `1`
+
+-   `cpu_type` (string) - The CPU type to emulate. See the Proxmox API
+    documentation for the complete list of accepted values. For best
+    performance, set this to `host`. Defaults to `kvm64`.
 
 -   `os` (string) - The operating system. Can be `wxp`, `w2k`, `w2k3`, `w2k8`,
     `wvista`, `win7`, `win8`, `win10`, `l24` (Linux 2.4), `l26` (Linux 2.6+),
@@ -121,7 +141,7 @@ builder.
         by the installer, for example.
 
     -   `storage_pool_type` (string) - Required. The type of the pool, can
-        be `lvm`, `lvm-thin`, `zfs` or `directory`.
+        be `lvm`, `lvm-thin`, `zfspool` or `directory`.
 
     -   `type` (string) - The type of disk. Can be `scsi`, `sata`, `virtio` or
         `ide`. Defaults to `scsi`.
@@ -149,6 +169,10 @@ builder.
 -   `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
     then `qemu-guest-agent` must be installed on the guest. When disabled, then 
     `ssh_host` should be used. Defaults to `true`.
+
+-   `scsi_controller` (string) - The SCSI controller model to emulate. Can be `lsi`,
+    `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
+    Defaults to `lsi`.
 
 ## Example: Fedora with kickstart
 

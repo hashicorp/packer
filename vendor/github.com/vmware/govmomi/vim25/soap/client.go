@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,12 +28,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -53,14 +55,8 @@ type RoundTripper interface {
 }
 
 const (
-	DefaultVimNamespace  = "urn:vim25"
-	DefaultVimVersion    = "6.5"
-	DefaultMinVimVersion = "5.5"
+	SessionCookieName = "vmware_soap_session"
 )
-
-type header struct {
-	Cookie string `xml:"vcSessionCookie,omitempty"`
-}
 
 type Client struct {
 	http.Client
@@ -69,19 +65,30 @@ type Client struct {
 	k bool // Named after curl's -k flag
 	d *debugContainer
 	t *http.Transport
-	p *url.URL
 
 	hostsMu sync.Mutex
 	hosts   map[string]string
 
 	Namespace string // Vim namespace
 	Version   string // Vim version
+	Types     types.Func
 	UserAgent string
 
-	header *header
+	cookie string
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
+
+type errInvalidCACertificate struct {
+	File string
+}
+
+func (e errInvalidCACertificate) Error() string {
+	return fmt.Sprintf(
+		"invalid certificate '%s', cannot be used as a trusted CA certificate",
+		e.File,
+	)
+}
 
 // ParseURL is wrapper around url.Parse, where Scheme defaults to "https" and Path defaults to "/sdk"
 func ParseURL(s string) (*url.URL, error) {
@@ -117,6 +124,8 @@ func NewClient(u *url.URL, insecure bool) *Client {
 		u: u,
 		k: insecure,
 		d: newDebug(),
+
+		Types: types.TypeFunc(),
 	}
 
 	// Initialize http.RoundTripper on client, so we can customize it below
@@ -147,33 +156,60 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	c.u = c.URL()
 	c.u.User = nil
 
-	c.Namespace = DefaultVimNamespace
-	c.Version = DefaultVimVersion
-
 	return &c
 }
 
 // NewServiceClient creates a NewClient with the given URL.Path and namespace.
 func (c *Client) NewServiceClient(path string, namespace string) *Client {
-	u := c.URL()
-	u.Path = path
+	vc := c.URL()
+	u, err := url.Parse(path)
+	if err != nil {
+		log.Panicf("url.Parse(%q): %s", path, err)
+	}
+	if u.Host == "" {
+		u.Scheme = vc.Scheme
+		u.Host = vc.Host
+	}
 
 	client := NewClient(u, c.k)
+	client.Namespace = "urn:" + namespace
+	client.Transport.(*http.Transport).TLSClientConfig = c.Transport.(*http.Transport).TLSClientConfig
+	if cert := c.Certificate(); cert != nil {
+		client.SetCertificate(*cert)
+	}
 
-	client.Namespace = namespace
+	// Copy the trusted thumbprints
+	c.hostsMu.Lock()
+	for k, v := range c.hosts {
+		client.hosts[k] = v
+	}
+	c.hostsMu.Unlock()
 
 	// Copy the cookies
 	client.Client.Jar.SetCookies(u, c.Client.Jar.Cookies(u))
 
 	// Set SOAP Header cookie
 	for _, cookie := range client.Jar.Cookies(u) {
-		if cookie.Name == "vmware_soap_session" {
-			client.header = &header{
-				Cookie: cookie.Value,
-			}
-
+		if cookie.Name == SessionCookieName {
+			client.cookie = cookie.Value
 			break
 		}
+	}
+
+	// Copy any query params (e.g. GOVMOMI_TUNNEL_PROXY_PORT used in testing)
+	client.u.RawQuery = vc.RawQuery
+
+	client.UserAgent = c.UserAgent
+
+	vimTypes := c.Types
+	client.Types = func(name string) (reflect.Type, bool) {
+		kind, ok := vimTypes(name)
+		if ok {
+			return kind, ok
+		}
+		// vim25/xml typeToString() does not have an option to include namespace prefix.
+		// Workaround this by re-trying the lookup with the namespace prefix.
+		return vimTypes(namespace + ":" + name)
 	}
 
 	return client
@@ -188,12 +224,16 @@ func (c *Client) SetRootCAs(file string) error {
 	pool := x509.NewCertPool()
 
 	for _, name := range filepath.SplitList(file) {
-		pem, err := ioutil.ReadFile(name)
+		pem, err := ioutil.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
 		}
 
-		pool.AppendCertsFromPEM(pem)
+		if ok := pool.AppendCertsFromPEM(pem); !ok {
+			return errInvalidCACertificate{
+				File: name,
+			}
+		}
 	}
 
 	c.t.TLSClientConfig.RootCAs = pool
@@ -254,7 +294,7 @@ func (c *Client) LoadThumbprints(file string) error {
 }
 
 func (c *Client) loadThumbprints(name string) error {
-	f, err := os.Open(name)
+	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -323,7 +363,7 @@ func (c *Client) dialTLS(network string, addr string) (net.Conn, error) {
 	if thumbprint != peer {
 		_ = conn.Close()
 
-		return nil, fmt.Errorf("Host %q thumbprint does not match %q", addr, thumbprint)
+		return nil, fmt.Errorf("host %q thumbprint does not match %q", addr, thumbprint)
 	}
 
 	return conn, nil
@@ -347,19 +387,33 @@ func splitHostPort(host string) (string, string) {
 
 const sdkTunnel = "sdkTunnel:8089"
 
+func (c *Client) Certificate() *tls.Certificate {
+	certs := c.t.TLSClientConfig.Certificates
+	if len(certs) == 0 {
+		return nil
+	}
+	return &certs[0]
+}
+
 func (c *Client) SetCertificate(cert tls.Certificate) {
 	t := c.Client.Transport.(*http.Transport)
 
-	// Extension certificate
+	// Extension or HoK certificate
 	t.TLSClientConfig.Certificates = []tls.Certificate{cert}
+}
 
+// Tunnel returns a Client configured to proxy requests through vCenter's http port 80,
+// to the SDK tunnel virtual host.  Use of the SDK tunnel is required by LoginExtensionByCertificate()
+// and optional for other methods.
+func (c *Client) Tunnel() *Client {
+	tunnel := c.NewServiceClient(c.u.Path, c.Namespace)
+	t := tunnel.Client.Transport.(*http.Transport)
 	// Proxy to vCenter host on port 80
-	host, _ := splitHostPort(c.u.Host)
-
+	host := tunnel.u.Hostname()
 	// Should be no reason to change the default port other than testing
 	key := "GOVMOMI_TUNNEL_PROXY_PORT"
 
-	port := c.URL().Query().Get(key)
+	port := tunnel.URL().Query().Get(key)
 	if port == "" {
 		port = os.Getenv(key)
 	}
@@ -368,20 +422,14 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 		host += ":" + port
 	}
 
-	c.p = &url.URL{
+	t.Proxy = http.ProxyURL(&url.URL{
 		Scheme: "http",
 		Host:   host,
-	}
-	t.Proxy = func(r *http.Request) (*url.URL, error) {
-		// Only sdk requests should be proxied
-		if r.URL.Path == "/sdk" {
-			return c.p, nil
-		}
-		return http.ProxyFromEnvironment(r)
-	}
+	})
 
 	// Rewrite url Host to use the sdk tunnel, required for a certificate request.
-	c.u.Host = sdkTunnel
+	tunnel.u.Host = sdkTunnel
+	return tunnel
 }
 
 func (c *Client) URL() *url.URL {
@@ -393,6 +441,7 @@ type marshaledClient struct {
 	Cookies  []*http.Cookie
 	URL      *url.URL
 	Insecure bool
+	Version  string
 }
 
 func (c *Client) MarshalJSON() ([]byte, error) {
@@ -400,6 +449,7 @@ func (c *Client) MarshalJSON() ([]byte, error) {
 		Cookies:  c.Jar.Cookies(c.u),
 		URL:      c.u,
 		Insecure: c.k,
+		Version:  c.Version,
 	}
 
 	return json.Marshal(m)
@@ -414,36 +464,106 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	}
 
 	*c = *NewClient(m.URL, m.Insecure)
+	c.Version = m.Version
 	c.Jar.SetCookies(m.URL, m.Cookies)
 
 	return nil
 }
 
-func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
-	if nil == ctx || nil == ctx.Done() { // ctx.Done() is for ctx
-		return c.Client.Do(req)
+type kindContext struct{}
+
+func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Response) error) error {
+	if ctx == nil {
+		ctx = context.Background()
 	}
-
-	return c.Client.Do(req.WithContext(ctx))
-}
-
-func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error {
-	var err error
-
-	reqEnv := Envelope{Body: reqBody}
-	resEnv := Envelope{Body: resBody}
-
-	reqEnv.Header = c.header
-
 	// Create debugging context for this round trip
 	d := c.d.newRoundTrip()
 	if d.enabled() {
 		defer d.done()
 	}
 
-	b, err := xml.Marshal(reqEnv)
+	if c.UserAgent != "" {
+		req.Header.Set(`User-Agent`, c.UserAgent)
+	}
+
+	ext := ""
+	if d.enabled() {
+		ext = d.debugRequest(req)
+	}
+
+	tstart := time.Now()
+	res, err := c.Client.Do(req.WithContext(ctx))
+	tstop := time.Now()
+
+	if d.enabled() {
+		var name string
+		if kind, ok := ctx.Value(kindContext{}).(HasFault); ok {
+			name = fmt.Sprintf("%T", kind)
+		} else {
+			name = fmt.Sprintf("%s %s", req.Method, req.URL)
+		}
+		d.logf("%6dms (%s)", tstop.Sub(tstart)/time.Millisecond, name)
+	}
+
 	if err != nil {
-		panic(err)
+		return err
+	}
+
+	defer res.Body.Close()
+
+	if d.enabled() {
+		d.debugResponse(res, ext)
+	}
+
+	return f(res)
+}
+
+// Signer can be implemented by soap.Header.Security to sign requests.
+// If the soap.Header.Security field is set to an implementation of Signer via WithHeader(),
+// then Client.RoundTrip will call Sign() to marshal the SOAP request.
+type Signer interface {
+	Sign(Envelope) ([]byte, error)
+}
+
+type headerContext struct{}
+
+// WithHeader can be used to modify the outgoing request soap.Header fields.
+func (c *Client) WithHeader(ctx context.Context, header Header) context.Context {
+	return context.WithValue(ctx, headerContext{}, header)
+}
+
+func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error {
+	var err error
+	var b []byte
+
+	reqEnv := Envelope{Body: reqBody}
+	resEnv := Envelope{Body: resBody}
+
+	h, ok := ctx.Value(headerContext{}).(Header)
+	if !ok {
+		h = Header{}
+	}
+
+	// We added support for OperationID before soap.Header was exported.
+	if id, ok := ctx.Value(types.ID{}).(string); ok {
+		h.ID = id
+	}
+
+	h.Cookie = c.cookie
+	if h.Cookie != "" || h.ID != "" || h.Security != nil {
+		reqEnv.Header = &h // XML marshal header only if a field is set
+	}
+
+	if signer, ok := h.Security.(Signer); ok {
+		b, err = signer.Sign(reqEnv)
+		if err != nil {
+			return err
+		}
+	} else {
+		b, err = xml.Marshal(reqEnv)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	rawReqBody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
@@ -453,56 +573,36 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	}
 
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
-	req.Header.Set(`SOAPAction`, soapAction)
-	if c.UserAgent != "" {
-		req.Header.Set(`User-Agent`, c.UserAgent)
+
+	action := h.Action
+	if action == "" {
+		action = fmt.Sprintf("%s/%s", c.Namespace, c.Version)
 	}
+	req.Header.Set(`SOAPAction`, action)
 
-	if d.enabled() {
-		d.debugRequest(req)
-	}
+	return c.Do(context.WithValue(ctx, kindContext{}, resBody), req, func(res *http.Response) error {
+		switch res.StatusCode {
+		case http.StatusOK:
+			// OK
+		case http.StatusInternalServerError:
+			// Error, but typically includes a body explaining the error
+		default:
+			return errors.New(res.Status)
+		}
 
-	tstart := time.Now()
-	res, err := c.do(ctx, req)
-	tstop := time.Now()
+		dec := xml.NewDecoder(res.Body)
+		dec.TypeFunc = c.Types
+		err = dec.Decode(&resEnv)
+		if err != nil {
+			return err
+		}
 
-	if d.enabled() {
-		d.logf("%6dms (%T)", tstop.Sub(tstart)/time.Millisecond, resBody)
-	}
+		if f := resBody.Fault(); f != nil {
+			return WrapSoapFault(f)
+		}
 
-	if err != nil {
 		return err
-	}
-
-	if d.enabled() {
-		d.debugResponse(res)
-	}
-
-	// Close response regardless of what happens next
-	defer res.Body.Close()
-
-	switch res.StatusCode {
-	case http.StatusOK:
-		// OK
-	case http.StatusInternalServerError:
-		// Error, but typically includes a body explaining the error
-	default:
-		return errors.New(res.Status)
-	}
-
-	dec := xml.NewDecoder(res.Body)
-	dec.TypeFunc = types.TypeFunc()
-	err = dec.Decode(&resEnv)
-	if err != nil {
-		return err
-	}
-
-	if f := resBody.Fault(); f != nil {
-		return WrapSoapFault(f)
-	}
-
-	return err
+	})
 }
 
 func (c *Client) CloseIdleConnections() {
@@ -542,11 +642,11 @@ var DefaultUpload = Upload{
 }
 
 // Upload PUTs the local file to the given URL
-func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
+func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *Upload) error {
 	var err error
 
 	if param.Progress != nil {
-		pr := progress.NewReader(param.Progress, f, param.ContentLength)
+		pr := progress.NewReader(ctx, param.Progress, f, param.ContentLength)
 		f = pr
 
 		// Mark progress reader as done when returning from this function.
@@ -559,6 +659,8 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	if err != nil {
 		return err
 	}
+
+	req = req.WithContext(ctx)
 
 	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
@@ -576,6 +678,8 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 		return err
 	}
 
+	defer res.Body.Close()
+
 	switch res.StatusCode {
 	case http.StatusOK:
 	case http.StatusCreated:
@@ -587,7 +691,7 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 }
 
 // UploadFile PUTs the local file to the given URL
-func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+func (c *Client) UploadFile(ctx context.Context, file string, u *url.URL, param *Upload) error {
 	if param == nil {
 		p := DefaultUpload // Copy since we set ContentLength
 		param = &p
@@ -598,7 +702,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 		return err
 	}
 
-	f, err := os.Open(file)
+	f, err := os.Open(filepath.Clean(file))
 	if err != nil {
 		return err
 	}
@@ -606,7 +710,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 
 	param.ContentLength = s.Size()
 
-	return c.Upload(f, u, param)
+	return c.Upload(ctx, f, u, param)
 }
 
 type Download struct {
@@ -614,6 +718,7 @@ type Download struct {
 	Headers  map[string]string
 	Ticket   *http.Cookie
 	Progress progress.Sinker
+	Writer   io.Writer
 }
 
 var DefaultDownload = Download{
@@ -621,11 +726,13 @@ var DefaultDownload = Download{
 }
 
 // DownloadRequest wraps http.Client.Do, returning the http.Response without checking its StatusCode
-func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, error) {
+func (c *Client) DownloadRequest(ctx context.Context, u *url.URL, param *Download) (*http.Response, error) {
 	req, err := http.NewRequest(param.Method, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(ctx)
 
 	for k, v := range param.Headers {
 		req.Header.Add(k, v)
@@ -638,39 +745,9 @@ func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, e
 	return c.Client.Do(req)
 }
 
-// directoryReader wraps an io.ReadCloser to support streaming download
-// of a guest directory, stops reading once it sees the stream trailer.
-// This is only useful when guest tools is the Go toolbox.
-// The trailer is required since TransferFromGuest requires a Content-Length,
-// which toolbox doesn't know ahead of time as the gzip'd tarball never touches the disk.
-// We opted to wrap this here for now rather than guest.FileManager so
-// DownloadFile can be also be used as-is to handle this use case.
-type directoryReader struct {
-	io.ReadCloser
-}
-
-var (
-	gzipHeader    = []byte{0x1f, 0x8b, 0x08} // rfc1952 {ID1, ID2, CM}
-	gzipHeaderLen = len(gzipHeader)
-)
-
-func (r *directoryReader) Read(buf []byte) (int, error) {
-	nr, err := r.ReadCloser.Read(buf)
-
-	// Stop reading if the last N bytes are the gzipTrailer
-	if nr >= gzipHeaderLen {
-		if bytes.Equal(buf[nr-gzipHeaderLen:nr], gzipHeader) {
-			nr -= gzipHeaderLen
-			err = io.EOF
-		}
-	}
-
-	return nr, err
-}
-
 // Download GETs the remote file from the given URL
-func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, error) {
-	res, err := c.DownloadRequest(u, param)
+func (c *Client) Download(ctx context.Context, u *url.URL, param *Download) (io.ReadCloser, int64, error) {
+	res, err := c.DownloadRequest(ctx, u, param)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -687,37 +764,22 @@ func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, er
 
 	r := res.Body
 
-	if strings.HasSuffix(u.Path, "/") {
-		r = &directoryReader{ReadCloser: r}
-	}
-
 	return r, res.ContentLength, nil
 }
 
-// DownloadFile GETs the given URL to a local file
-func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
+func (c *Client) WriteFile(ctx context.Context, file string, src io.Reader, size int64, s progress.Sinker, w io.Writer) error {
 	var err error
-	if param == nil {
-		param = &DefaultDownload
-	}
 
-	rc, contentLength, err := c.Download(u, param)
-	if err != nil {
-		return err
-	}
-	defer rc.Close()
-
-	var r io.Reader = rc
+	r := src
 
 	fh, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	defer fh.Close()
 
-	if param.Progress != nil {
-		pr := progress.NewReader(param.Progress, r, contentLength)
-		r = pr
+	if s != nil {
+		pr := progress.NewReader(ctx, s, src, size)
+		src = pr
 
 		// Mark progress reader as done when returning from this function.
 		defer func() {
@@ -725,17 +787,34 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 		}()
 	}
 
-	_, err = io.Copy(fh, r)
+	if w == nil {
+		w = fh
+	} else {
+		w = io.MultiWriter(w, fh)
+	}
+
+	_, err = io.Copy(w, r)
+
+	cerr := fh.Close()
+
+	if err == nil {
+		err = cerr
+	}
+
+	return err
+}
+
+// DownloadFile GETs the given URL to a local file
+func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, param *Download) error {
+	var err error
+	if param == nil {
+		param = &DefaultDownload
+	}
+
+	rc, contentLength, err := c.Download(ctx, u, param)
 	if err != nil {
 		return err
 	}
 
-	// Assign error before returning so that it gets picked up by the deferred
-	// function marking the progress reader as done.
-	err = fh.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.WriteFile(ctx, file, rc, contentLength, param.Progress, param.Writer)
 }

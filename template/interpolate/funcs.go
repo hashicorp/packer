@@ -12,9 +12,10 @@ import (
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
-	"github.com/rwtodd/Go.Sed/sed"
+	strftime "github.com/jehiah/go-strftime"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -27,11 +28,12 @@ func init() {
 }
 
 // Funcs are the interpolation funcs that are available within interpolations.
-var FuncGens = map[string]FuncGenerator{
+var FuncGens = map[string]interface{}{
 	"build_name":     funcGenBuildName,
 	"build_type":     funcGenBuildType,
 	"env":            funcGenEnv,
 	"isotime":        funcGenIsotime,
+	"strftime":       funcGenStrftime,
 	"pwd":            funcGenPwd,
 	"split":          funcGenSplitter,
 	"template_dir":   funcGenTemplateDir,
@@ -42,9 +44,13 @@ var FuncGens = map[string]FuncGenerator{
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
 	"sed":            funcGenSed,
+	"build":          funcGenBuild,
 
-	"upper": funcGenPrimitive(strings.ToUpper),
-	"lower": funcGenPrimitive(strings.ToLower),
+	"replace":     replace,
+	"replace_all": replace_all,
+
+	"upper": strings.ToUpper,
+	"lower": strings.ToLower,
 }
 
 var ErrVariableNotSetString = "Error: variable not set:"
@@ -58,7 +64,12 @@ type FuncGenerator func(*Context) interface{}
 func Funcs(ctx *Context) template.FuncMap {
 	result := make(map[string]interface{})
 	for k, v := range FuncGens {
-		result[k] = v(ctx)
+		switch v := v.(type) {
+		case func(*Context) interface{}:
+			result[k] = v(ctx)
+		default:
+			result[k] = v
+		}
 	}
 	if ctx != nil {
 		for k, v := range ctx.Funcs {
@@ -126,9 +137,9 @@ func funcGenIsotime(ctx *Context) interface{} {
 	}
 }
 
-func funcGenPrimitive(value interface{}) FuncGenerator {
-	return func(ctx *Context) interface{} {
-		return value
+func funcGenStrftime(ctx *Context) interface{} {
+	return func(format string) string {
+		return strftime.Format(format, InitTime)
 	}
 }
 
@@ -150,6 +161,44 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 		}
 
 		return path, nil
+	}
+}
+
+func funcGenBuild(ctx *Context) interface{} {
+	return func(s string) (string, error) {
+		if data, ok := ctx.Data.(map[string]string); ok {
+			if heldPlace, ok := data[s]; ok {
+				// If we're in the first interpolation pass, the goal is to
+				// make sure that we pass the value through.
+				// TODO match against an actual string constant
+				if strings.Contains(heldPlace, common.PlaceholderMsg) {
+					return fmt.Sprintf("{{.%s}}", s), nil
+				} else {
+					return heldPlace, nil
+				}
+			}
+			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
+		}
+		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
+			// PlaceholderData has been passed into generator, so if the given
+			// key already exists in data, then we know it's an "allowed" key
+			if heldPlace, ok := data[s]; ok {
+				if hp, ok := heldPlace.(string); ok {
+					// If we're in the first interpolation pass, the goal is to
+					// make sure that we pass the value through.
+					// TODO match against an actual string constant
+					if strings.Contains(hp, common.PlaceholderMsg) {
+						return fmt.Sprintf("{{.%s}}", s), nil
+					} else {
+						return hp, nil
+					}
+				}
+			}
+			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
+		}
+
+		return "", fmt.Errorf("Error validating build variable: the given "+
+			"variable %s will not be passed into your plugin.", s)
 	}
 }
 
@@ -268,22 +317,16 @@ func funcGenVault(ctx *Context) interface{} {
 
 func funcGenSed(ctx *Context) interface{} {
 	return func(expression string, inputString string) (string, error) {
-		engine, err := sed.New(strings.NewReader(expression))
-
-		if err != nil {
-			return "", err
-		}
-
-		result, err := engine.RunString(inputString)
-
-		if err != nil {
-			return "", err
-		}
-
-		// The sed library adds a \n to all processed strings.
-		resultLength := len(result)
-		result = result[:resultLength-1]
-
-		return result, err
+		return "", errors.New("template function `sed` is deprecated " +
+			"use `replace` or `replace_all` instead." +
+			"Documentation: https://www.packer.io/docs/templates/engine.html")
 	}
+}
+
+func replace_all(old, new, src string) string {
+	return strings.ReplaceAll(src, old, new)
+}
+
+func replace(old, new string, n int, src string) string {
+	return strings.Replace(src, old, new, n)
 }

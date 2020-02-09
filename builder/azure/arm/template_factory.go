@@ -18,8 +18,8 @@ func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
 	params := &template.TemplateParameters{
 		KeyVaultName:        &template.TemplateParameter{Value: config.tmpKeyVaultName},
 		KeyVaultSecretValue: &template.TemplateParameter{Value: config.winrmCertificate},
-		ObjectId:            &template.TemplateParameter{Value: config.ObjectID},
-		TenantId:            &template.TemplateParameter{Value: config.TenantID},
+		ObjectId:            &template.TemplateParameter{Value: config.ClientConfig.ObjectID},
+		TenantId:            &template.TemplateParameter{Value: config.ClientConfig.TenantID},
 	}
 
 	builder, _ := template.NewTemplateBuilder(template.KeyVault)
@@ -40,6 +40,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
 		VirtualNetworkName:         &template.TemplateParameter{Value: config.tmpVirtualNetworkName},
+		NsgName:                    &template.TemplateParameter{Value: config.tmpNsgName},
 		VMSize:                     &template.TemplateParameter{Value: config.VMSize},
 		VMName:                     &template.TemplateParameter{Value: config.tmpComputeName},
 	}
@@ -64,7 +65,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType, config.diskCachingType)
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
-			config.SubscriptionID,
+			config.ClientConfig.SubscriptionID,
 			config.Location,
 			config.ImagePublisher,
 			config.ImageOffer,
@@ -115,6 +116,13 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)
+	}
+
+	if config.AllowedInboundIpAddresses != nil && len(config.AllowedInboundIpAddresses) >= 1 && config.Comm.Port() != 0 {
+		err = builder.SetNetworkSecurityGroup(config.AllowedInboundIpAddresses, config.Comm.Port())
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	builder.SetTags(&config.AzureTags)

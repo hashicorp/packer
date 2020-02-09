@@ -2,9 +2,12 @@ package uhost
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"testing"
+
+	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 )
@@ -19,7 +22,7 @@ func TestBuilderAcc_validateRegion(t *testing.T) {
 
 	testAccPreCheck(t)
 
-	access := &AccessConfig{Region: "cn-bj2"}
+	access := &ucloudcommon.AccessConfig{Region: "cn-bj2"}
 	err := access.Config()
 	if err != nil {
 		t.Fatalf("Error on initing UCloud AccessConfig, %s", err)
@@ -93,8 +96,8 @@ func TestBuilderAcc_regionCopy(t *testing.T) {
 		Template: testBuilderAccRegionCopy(projectId),
 		Check: checkRegionCopy(
 			projectId,
-			[]ImageDestination{
-				{projectId, "cn-sh2", "packer-test-regionCopy-sh", "test"},
+			[]ucloudcommon.ImageDestination{
+				{ProjectId: projectId, Region: "cn-sh2", Name: "packer-test-regionCopy-sh", Description: "test"},
 			}),
 	})
 }
@@ -120,21 +123,21 @@ func testBuilderAccRegionCopy(projectId string) string {
 }`, projectId)
 }
 
-func checkRegionCopy(projectId string, imageDst []ImageDestination) builderT.TestCheckFunc {
+func checkRegionCopy(projectId string, imageDst []ucloudcommon.ImageDestination) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
 
 		artifactSet := artifacts[0]
-		artifact, ok := artifactSet.(*Artifact)
+		artifact, ok := artifactSet.(*ucloudcommon.Artifact)
 		if !ok {
 			return fmt.Errorf("unknown artifact: %#v", artifactSet)
 		}
 
-		destSet := newImageInfoSet(nil)
+		destSet := ucloudcommon.NewImageInfoSet(nil)
 		for _, dest := range imageDst {
-			destSet.Set(imageInfo{
+			destSet.Set(ucloudcommon.ImageInfo{
 				Region:    dest.Region,
 				ProjectId: dest.ProjectId,
 			})
@@ -162,9 +165,9 @@ func checkRegionCopy(projectId string, imageDst []ImageDestination) builderT.Tes
 			if r.ProjectId == projectId && r.Region == "cn-bj2" {
 				continue
 			}
-			imageSet, err := client.describeImageByInfo(r.ProjectId, r.Region, r.ImageId)
+			imageSet, err := client.DescribeImageByInfo(r.ProjectId, r.Region, r.ImageId)
 			if err != nil {
-				if isNotFoundError(err) {
+				if ucloudcommon.IsNotFoundError(err) {
 					return fmt.Errorf("image %s in artifacts can not be found", r.ImageId)
 				}
 				return err
@@ -193,8 +196,19 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func testUCloudClient() (*UCloudClient, error) {
-	access := &AccessConfig{Region: "cn-bj2"}
+func TestUCloudClientBaseUrlConfigurable(t *testing.T) {
+	const url = "baseUrl"
+	access := &ucloudcommon.AccessConfig{BaseUrl: url}
+	client, err := access.Client()
+	assert.Nil(t, err)
+	assert.Equal(t, url, client.UAccountConn.Client.GetConfig().BaseUrl, "account conn's base url not configurable")
+	assert.Equal(t, url, client.UHostConn.Client.GetConfig().BaseUrl, "host conn's base url not configurable")
+	assert.Equal(t, url, client.UNetConn.Client.GetConfig().BaseUrl, "net conn's base url not configurable")
+	assert.Equal(t, url, client.VPCConn.Client.GetConfig().BaseUrl, "vpc conn's base url not configurable")
+}
+
+func testUCloudClient() (*ucloudcommon.UCloudClient, error) {
+	access := &ucloudcommon.AccessConfig{Region: "cn-bj2"}
 	err := access.Config()
 	if err != nil {
 		return nil, err

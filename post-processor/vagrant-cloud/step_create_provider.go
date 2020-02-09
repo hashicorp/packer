@@ -46,6 +46,9 @@ func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) 
 	if err != nil || (resp.StatusCode != 200) {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+		}
 		state.Put("error", fmt.Errorf("Error creating provider: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}

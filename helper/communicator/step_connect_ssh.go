@@ -106,8 +106,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		pAddr = fmt.Sprintf("%s:%d", s.Config.SSHProxyHost, s.Config.SSHProxyPort)
 		if s.Config.SSHProxyUsername != "" {
 			pAuth = new(proxy.Auth)
-			pAuth.User = s.Config.SSHBastionUsername
-			pAuth.Password = s.Config.SSHBastionPassword
+			pAuth.User = s.Config.SSHProxyUsername
+			pAuth.Password = s.Config.SSHProxyPassword
 		}
 
 	}
@@ -134,6 +134,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			log.Printf("[DEBUG] Error getting SSH address: %s", err)
 			continue
 		}
+		// store host and port in config so we can access them from provisioners
+		s.Config.SSHHost = host
 		port := s.Config.SSHPort
 		if s.SSHPort != nil {
 			port, err = s.SSHPort(state)
@@ -141,7 +143,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 				log.Printf("[DEBUG] Error getting SSH port: %s", err)
 				continue
 			}
+			s.Config.SSHPort = port
 		}
+		state.Put("communicator_config", s.Config)
 
 		// Retrieve the SSH configuration
 		sshConfig, err := s.SSHConfig(state)
@@ -172,6 +176,25 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		}
 		nc.Close()
 
+		// Parse out all the requested Port Tunnels that will go over our SSH connection
+		var tunnels []ssh.TunnelSpec
+		for _, v := range s.Config.SSHLocalTunnels {
+			t, err := helperssh.ParseTunnelArgument(v, ssh.LocalTunnel)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Error parsing port forwarding: %s", err)
+			}
+			tunnels = append(tunnels, t)
+		}
+		for _, v := range s.Config.SSHRemoteTunnels {
+			t, err := helperssh.ParseTunnelArgument(v, ssh.RemoteTunnel)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Error parsing port forwarding: %s", err)
+			}
+			tunnels = append(tunnels, t)
+		}
+
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
 			Connection:             connFunc,
@@ -181,10 +204,10 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
 			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
 			Timeout:                s.Config.SSHReadWriteTimeout,
+			Tunnels:                tunnels,
 		}
 
 		log.Printf("[INFO] Attempting SSH connection to %s...", address)
-		log.Printf("[DEBUG] Config to %#v...", config)
 		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)
@@ -195,6 +218,12 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			if strings.Contains(err.Error(), "authenticate") {
 				log.Printf(
 					"[DEBUG] Detected authentication error. Increasing handshake attempts.")
+				err = fmt.Errorf("Packer experienced an authentication error "+
+					"when trying to connect via SSH. This can happen if your "+
+					"username/password are wrong. You may want to double-check"+
+					" your credentials as part of your debugging process. "+
+					"original error: %s",
+					err)
 				handshakeAttempts += 1
 			}
 

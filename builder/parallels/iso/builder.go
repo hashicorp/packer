@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
+
 package iso
 
 import (
@@ -5,9 +8,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -33,22 +38,54 @@ type Config struct {
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
-	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
+	shutdowncommand.ShutdownConfig      `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
-
-	DiskSize           uint     `mapstructure:"disk_size"`
-	DiskType           string   `mapstructure:"disk_type"`
-	GuestOSType        string   `mapstructure:"guest_os_type"`
-	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
-	HostInterfaces     []string `mapstructure:"host_interfaces"`
-	SkipCompaction     bool     `mapstructure:"skip_compaction"`
-	VMName             string   `mapstructure:"vm_name"`
+	// The size, in megabytes, of the hard disk to create
+	// for the VM. By default, this is 40000 (about 40 GB).
+	DiskSize uint `mapstructure:"disk_size" required:"false"`
+	// The type for image file based virtual disk drives,
+	// defaults to expand. Valid options are expand (expanding disk) that the
+	// image file is small initially and grows in size as you add data to it, and
+	// plain (plain disk) that the image file has a fixed size from the moment it
+	// is created (i.e the space is allocated for the full drive). Plain disks
+	// perform faster than expanding disks. skip_compaction will be set to true
+	// automatically for plain disks.
+	DiskType string `mapstructure:"disk_type" required:"false"`
+	// The guest OS type being installed. By default
+	// this is "other", but you can get dramatic performance improvements by
+	// setting this to the proper value. To view all available values for this run
+	// prlctl create x --distribution list. Setting the correct value hints to
+	// Parallels Desktop how to optimize the virtual hardware to work best with
+	// that operating system.
+	GuestOSType string `mapstructure:"guest_os_type" required:"false"`
+	// The type of controller that the hard
+	// drives are attached to, defaults to "sata". Valid options are "sata", "ide",
+	// and "scsi".
+	HardDriveInterface string `mapstructure:"hard_drive_interface" required:"false"`
+	// A list of which interfaces on the
+	// host should be searched for a IP address. The first IP address found on one
+	// of these will be used as {{ .HTTPIP }} in the boot_command. Defaults to
+	// ["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8", "en9",
+	// "ppp0", "ppp1", "ppp2"].
+	HostInterfaces []string `mapstructure:"host_interfaces" required:"false"`
+	// Virtual disk image is compacted at the end of
+	// the build process using prl_disk_tool utility (except for the case that
+	// disk_type is set to plain). In certain rare cases, this might corrupt
+	// the resulting disk image. If you find this to be the case, you can disable
+	// compaction using this configuration value.
+	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`
+	// This is the name of the PVM directory for the new
+	// virtual machine, without the file extension. By default this is
+	// "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+	VMName string `mapstructure:"vm_name" required:"false"`
 
 	ctx interpolate.Context
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -62,7 +99,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Accumulate any errors and warnings
@@ -135,10 +172,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -169,6 +206,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
+			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -253,5 +291,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
-	return parallelscommon.NewArtifact(b.config.OutputDir)
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return parallelscommon.NewArtifact(b.config.OutputDir, generatedData)
 }

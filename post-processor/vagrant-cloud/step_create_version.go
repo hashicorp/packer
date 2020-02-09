@@ -19,7 +19,7 @@ type stepCreateVersion struct {
 func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	box := state.Get("box").(*Box)
 
 	ui.Say(fmt.Sprintf("Creating version: %s", config.Version))
@@ -43,6 +43,9 @@ func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) m
 	if err != nil || (resp.StatusCode != 200) {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error decoding error response: %s", err))
+		}
 		state.Put("error", fmt.Errorf("Error creating version: %s", cloudErrors.FormatErrors()))
 		return multistep.ActionHalt
 	}

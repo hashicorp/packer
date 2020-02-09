@@ -349,7 +349,7 @@ func TestAnsibleLongMessages(t *testing.T) {
 		Writer: new(bytes.Buffer),
 	}
 
-	err = p.Provision(context.Background(), ui, comm)
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

@@ -51,7 +51,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	// Wait the for the vm to boot.
 	if int64(config.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait.String()))
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait))
 		select {
 		case <-time.After(config.BootWait):
 			break
@@ -96,8 +96,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
-	hostIP := "10.0.2.2"
-	common.SetHTTPIP(hostIP)
+	hostIP := common.GetHTTPIP()
 	configCtx := config.ctx
 	configCtx.Data = &bootCommandTemplateData{
 		hostIP,

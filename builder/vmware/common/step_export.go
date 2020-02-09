@@ -73,7 +73,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 
 	ovftool := GetOVFTool()
 	if ovftool == "" {
-		err := fmt.Errorf("Error %s not found: ", ovftool)
+		err := fmt.Errorf("Error ovftool not found")
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

@@ -9,6 +9,7 @@
 
 package openapi
 
+// IpUpdate struct for IpUpdate
 type IpUpdate struct {
 	PtrRecord string `json:"ptrRecord,omitempty"`
 }
