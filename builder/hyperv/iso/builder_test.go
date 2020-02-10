@@ -317,7 +317,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	}
 
 	// Test unknown
-	config["iso_checksum"] = "fake"
+	config["iso_checksum"] = "fake:foo"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
