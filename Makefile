@@ -23,7 +23,7 @@ export GOLDFLAGS
 
 default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
-ci: testrace ci-lint ## Test in continuous integration
+ci: testrace ## Test in continuous integration
 
 release: install-build-deps test releasebin package ## Build a release build
 
