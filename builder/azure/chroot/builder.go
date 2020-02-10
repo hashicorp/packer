@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config
 
 // Package chroot is able to create an Azure managed image without requiring the
 // launch of a new virtual machine for every build. It does this by attaching and
@@ -14,6 +15,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/common"
@@ -116,7 +118,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = azcommon.TemplateFuncs
 	b.config.ctx.Funcs["vm"] = CreateVMMetadataTemplateFunc()
 	err := config.Decode(&b.config, &config.DecodeOpts{
@@ -134,7 +138,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var errs *packer.MultiError
@@ -143,7 +147,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Defaults
 	err = b.config.ClientConfig.SetDefaultValues()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.ChrootMounts == nil {
@@ -254,11 +258,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil {
-		return warns, errs
+		return nil, warns, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.ClientConfig.ClientSecret, b.config.ClientConfig.ClientJWT)
-	return warns, nil
+	return nil, warns, nil
 }
 
 func checkDiskCacheType(s string) interface{} {
@@ -444,6 +448,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &azcommon.Artifact{
 		Resources:      []string{b.config.ImageResourceID},
 		BuilderIdValue: BuilderId,
+		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

@@ -1,9 +1,33 @@
 <% wrap_layout :inner do %>
   <% content_for :sidebar do %>
     <ul class="nav docs-sidenav">
-      <li<%= sidebar_current("docs-install") %>>
-        <a href="/docs/install/index.html">Installing Packer</a>
+
+      <li<%= sidebar_current("configuration") %>>
+        <a href="/docs/configuration/from-1.5/index.html">v1.5 Configuration Language</a>
+        <ul class="nav">
+          <li<%= sidebar_current("configuration-variables") %>>
+            <a href="/docs/configuration/from-1.5/variables.html">Variables</a>
+          </li>
+          <li<%= sidebar_current("configuration-locals") %>>
+            <a href="/docs/configuration/from-1.5/locals.html">Locals</a>
+          </li>
+          <li<%= sidebar_current("configuration-syntax") %>>
+            <a href="/docs/configuration/from-1.5/syntax.html">Syntax</a>
+          </li>
+          <li<%= sidebar_current("configuration-expressions") %>>
+            <a href="/docs/configuration/from-1.5/expressions.html">Expressions</a>
+          </li>
+          <li<%= sidebar_current("configuration-json-syntax") %>>
+            <a href="/docs/configuration/from-1.5/syntax-json.html">JSON Syntax</a>
+          </li>
+
+          <%= partial "layouts/functions" %>
+
+        </ul>
       </li>
+
+      <hr>
+
       <li><a href="/docs/basics/terminology.html">Terminology</a></li>
 
       <li<%= sidebar_current("docs-commands") %>>
@@ -239,10 +263,16 @@
             <a href="/docs/builders/vmware.html">VMware</a>
             <ul class="nav">
               <li<%= sidebar_current("docs-builders-vmware-iso") %>>
-                <a href="/docs/builders/vmware-iso.html">ISO</a>
+                <a href="/docs/builders/vmware-iso.html">VMWare ISO</a>
               </li>
               <li<%= sidebar_current("docs-builders-vmware-vmx") %>>
-                <a href="/docs/builders/vmware-vmx.html">VMX</a>
+                <a href="/docs/builders/vmware-vmx.html">VMWare VMX</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-vsphere-iso") %>>
+                <a href="/docs/builders/vsphere-iso.html">VSphere ISO</a>
+              </li>
+              <li<%= sidebar_current("docs-builders-vsphere-clone") %>>
+                <a href="/docs/builders/vsphere-clone.html">VSphere Clone</a>
               </li>
             </ul>
           </li>
@@ -380,6 +410,12 @@
             <a href="/docs/post-processors/vsphere-template.html">vSphere Template</a>
           </li>
         </ul>
+      </li>
+
+      <hr>
+
+      <li<%= sidebar_current("docs-install") %>>
+        <a href="/docs/install/index.html">Installing Packer</a>
       </li>
 
       <hr>

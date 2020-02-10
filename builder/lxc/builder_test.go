@@ -25,7 +25,7 @@ func TestBuilderPrepare_ConfigFile(t *testing.T) {
 	var b Builder
 	// Good
 	config := testConfig()
-	warnings, err := b.Prepare(config)
+	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -37,7 +37,7 @@ func TestBuilderPrepare_ConfigFile(t *testing.T) {
 	config = testConfig()
 	delete(config, "config_file")
 	b = Builder{}
-	warnings, err = b.Prepare(config)
+	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

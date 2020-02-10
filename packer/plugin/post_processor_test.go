@@ -5,10 +5,13 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 )
 
 type helperPostProcessor byte
+
+func (helperPostProcessor) ConfigSpec() hcldec.ObjectSpec { return nil }
 
 func (helperPostProcessor) Configure(...interface{}) error {
 	return nil

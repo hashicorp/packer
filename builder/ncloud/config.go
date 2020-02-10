@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -60,8 +62,7 @@ type Config struct {
 }
 
 // NewConfig checks parameters
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := new(Config)
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := []string{}
 
 	err := config.Decode(c, &config.DecodeOpts{
@@ -71,7 +72,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, warnings, err
+		return warnings, err
 	}
 
 	var errs *packer.MultiError
@@ -115,7 +116,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if c.BlockStorageSize < 10 || c.BlockStorageSize > 2000 {
 			errs = packer.MultiErrorAppend(errs, errors.New("The size of BlockStorageSize is at least 10 GB and up to 2000GB"))
 		} else if int(c.BlockStorageSize/10)*10 != c.BlockStorageSize {
-			return nil, nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
+			return nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
 		}
 	}
 
@@ -136,8 +137,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return warnings, errs
 	}
 
-	return c, warnings, nil
+	return warnings, nil
+}
+
+type NcloudAPIClient struct {
+	server *server.APIClient
+}
+
+func (c *Config) Client() (*NcloudAPIClient, error) {
+	apiKey := &ncloud.APIKey{
+		AccessKey: c.AccessKey,
+		SecretKey: c.SecretKey,
+	}
+	return &NcloudAPIClient{
+		server: server.NewAPIClient(server.NewConfiguration(apiKey)),
+	}, nil
 }

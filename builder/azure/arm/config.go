@@ -27,7 +27,6 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -120,8 +119,6 @@ type Config struct {
 	//
 	// Following is an example.
 	//
-	// <!-- -->
-	//
 	//     "shared_image_gallery_destination": {
 	//         "resource_group": "ResourceGroup",
 	//         "gallery_name": "GalleryName",
@@ -140,6 +137,16 @@ type Config struct {
 	// its default of "60m" (valid time units include `s` for seconds, `m` for
 	// minutes, and `h` for hours.)
 	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
+	// The end of life date (2006-01-02T15:04:05.99Z) of the gallery Image Version. This property
+	// can be used for decommissioning purposes.
+	SharedGalleryImageVersionEndOfLifeDate string `mapstructure:"shared_gallery_image_version_end_of_life_date" required:"false"`
+	// The number of replicas of the Image Version to be created per region. This
+	// property would take effect for a region when regionalReplicaCount is not specified.
+	// Replica count must be between 1 and 10.
+	SharedGalleryImageVersionReplicaCount int32 `mapstructure:"shared_image_gallery_replica_count" required:"false"`
+	// If set to true, Virtual Machines deployed from the latest version of the
+	// Image Definition won't use this Image Version.
+	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
 	// PublisherName for your base image. See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
@@ -495,58 +502,57 @@ func (c *Config) createCertificate() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func newConfig(raws ...interface{}) (*Config, []string, error) {
-	var c Config
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	c.ctx.Funcs = azcommon.TemplateFuncs
-	err := config.Decode(&c, &config.DecodeOpts{
+	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 	}, raws...)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	provideDefaultValues(&c)
-	setRuntimeValues(&c)
-	setUserNamePassword(&c)
+	provideDefaultValues(c)
+	setRuntimeValues(c)
+	setUserNamePassword(c)
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	err = setCustomData(&c)
+	err = setCustomData(c)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// NOTE: if the user did not specify a communicator, then default to both
 	// SSH and WinRM.  This is for backwards compatibility because the code did
 	// not specifically force the user to set a communicator.
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "ssh") {
-		err = setSshValues(&c)
+		err = setSshValues(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	if c.Comm.Type == "" || strings.EqualFold(c.Comm.Type, "winrm") {
-		err = setWinRMCertificate(&c)
+		err = setWinRMCertificate(c)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
-	assertRequiredParametersSet(&c, errs)
-	assertTagProperties(&c, errs)
+	assertRequiredParametersSet(c, errs)
+	assertTagProperties(c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
-	return &c, nil, nil
+	return nil, nil
 }
 
 func setSshValues(c *Config) error {
@@ -601,7 +607,6 @@ func setRuntimeValues(c *Config) {
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
 	c.tmpCertificatePassword = tempName.CertificatePassword
@@ -635,8 +640,13 @@ func setUserNamePassword(c *Config) {
 
 	if c.Comm.SSHPassword != "" {
 		c.Password = c.Comm.SSHPassword
-	} else {
-		c.Password = c.tmpAdminPassword
+		return
+	}
+
+	// Configure password settings using Azure generated credentials
+	c.Password = c.tmpAdminPassword
+	if c.Comm.WinRMPassword == "" {
+		c.Comm.WinRMPassword = c.Password
 	}
 }
 

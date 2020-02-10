@@ -46,7 +46,7 @@ func TestPostProcessorPrepare_compressionLevel(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	config := p.configs[""]
+	config := p.config
 	if config.CompressionLevel != flate.DefaultCompression {
 		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
@@ -58,7 +58,7 @@ func TestPostProcessorPrepare_compressionLevel(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	config = p.configs[""]
+	config = p.config
 	if config.CompressionLevel != 7 {
 		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
@@ -83,43 +83,48 @@ func TestPostProcessorPrepare_outputPath(t *testing.T) {
 	}
 }
 
-func TestPostProcessorPrepare_subConfigs(t *testing.T) {
+func TestSpecificConfig(t *testing.T) {
 	var p PostProcessor
-
-	f, err := ioutil.TempFile("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(f.Name())
 
 	// Default
 	c := testConfig()
-	c["compression_level"] = 42
-	c["vagrantfile_template"] = f.Name()
+	c["compression_level"] = 1
+	c["output"] = "folder"
 	c["override"] = map[string]interface{}{
 		"aws": map[string]interface{}{
 			"compression_level": 7,
 		},
 	}
-	err = p.Configure(c)
+	if err := p.Configure(c); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// overrides config
+	config, err := p.specificConfig("aws")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.configs[""].CompressionLevel != 42 {
-		t.Fatalf("bad: %#v", p.configs[""].CompressionLevel)
+	if config.CompressionLevel != 7 {
+		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
 
-	if p.configs[""].VagrantfileTemplate != f.Name() {
-		t.Fatalf("bad: %#v", p.configs[""].VagrantfileTemplate)
+	if config.OutputPath != "folder" {
+		t.Fatalf("bad: %#v", config.OutputPath)
 	}
 
-	if p.configs["aws"].CompressionLevel != 7 {
-		t.Fatalf("bad: %#v", p.configs["aws"].CompressionLevel)
+	// does NOT overrides config
+	config, err = p.specificConfig("virtualbox")
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 
-	if p.configs["aws"].VagrantfileTemplate != f.Name() {
-		t.Fatalf("bad: %#v", p.configs["aws"].VagrantfileTemplate)
+	if config.CompressionLevel != 1 {
+		t.Fatalf("bad: %#v", config.CompressionLevel)
+	}
+
+	if config.OutputPath != "folder" {
+		t.Fatalf("bad: %#v", config.OutputPath)
 	}
 }
 

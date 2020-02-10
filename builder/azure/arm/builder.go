@@ -14,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
@@ -24,7 +25,7 @@ import (
 )
 
 type Builder struct {
-	config   *Config
+	config   Config
 	stateBag multistep.StateBag
 	runner   multistep.Runner
 }
@@ -34,20 +35,20 @@ const (
 	DefaultSecretName       = "packerKeyVaultSecret"
 )
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := newConfig(raws...)
-	if errs != nil {
-		return warnings, errs
-	}
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-	b.config = c
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
+	if errs != nil {
+		return nil, warnings, errs
+	}
 
 	b.stateBag = new(multistep.BasicStateBag)
 	b.configureStateBag(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
 	b.setImageParameters(b.stateBag)
 
-	return warnings, errs
+	return nil, warnings, errs
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -63,8 +64,14 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 
+	//When running Packer on an Azure instance using Managed Identity, FillParameters will update SubscriptionID from the instance
+	// so lets make sure to update our state bag with the valid subscriptionID.
+	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
+		b.stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
+	}
+
 	log.Print(":: Configuration")
-	packerAzureCommon.DumpConfig(b.config, func(s string) { log.Print(s) })
+	packerAzureCommon.DumpConfig(&b.config, func(s string) { log.Print(s) })
 
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put(constants.Ui, ui)
@@ -90,7 +97,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	resolver := newResourceResolver(azureClient)
-	if err := resolver.Resolve(b.config); err != nil {
+	if err := resolver.Resolve(&b.config); err != nil {
 		return nil, err
 	}
 	if b.config.ClientConfig.ObjectID == "" {
@@ -165,7 +172,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	b.setRuntimeParameters(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
 	b.setImageParameters(b.stateBag)
-	var steps []multistep.Step
 
 	deploymentName := b.stateBag.Get(constants.ArmDeploymentName).(string)
 
@@ -194,11 +200,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		b.stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, b.config.SharedGalleryDestination.SigDestinationReplicationRegions)
 	}
 
+	var steps []multistep.Step
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
@@ -212,10 +219,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
-			NewStepSnapshotOSDisk(azureClient, ui, b.config),
-			NewStepSnapshotDataDisks(azureClient, ui, b.config),
+			NewStepSnapshotOSDisk(azureClient, ui, &b.config),
+			NewStepSnapshotDataDisks(azureClient, ui, &b.config),
 			NewStepCaptureImage(azureClient, ui),
-			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
+			NewStepPublishToSharedImageGallery(azureClient, ui, &b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
@@ -224,17 +231,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
 			NewStepGetCertificate(azureClient, ui),
-			NewStepSetCertificate(b.config, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
+			NewStepSetCertificate(&b.config, ui),
+			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, &b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
-			&StepSaveWinRMPassword{
-				Password:  b.config.tmpAdminPassword,
-				BuildName: b.config.PackerBuildName,
-			},
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -243,7 +246,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.UserName,
-						Password: b.config.tmpAdminPassword,
+						Password: b.config.Comm.WinRMPassword,
 					}, nil
 				},
 			},
@@ -251,10 +254,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
-			NewStepSnapshotOSDisk(azureClient, ui, b.config),
-			NewStepSnapshotDataDisks(azureClient, ui, b.config),
+			NewStepSnapshotOSDisk(azureClient, ui, &b.config),
+			NewStepSnapshotDataDisks(azureClient, ui, &b.config),
 			NewStepCaptureImage(azureClient, ui),
-			NewStepPublishToSharedImageGallery(azureClient, ui, b.config),
+			NewStepPublishToSharedImageGallery(azureClient, ui, &b.config),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
@@ -292,13 +295,29 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
+	generatedData := map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")}
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s",
 			b.config.ClientConfig.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
 		if b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
-			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix, b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string))
+			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType,
+				b.config.ManagedImageResourceGroupName,
+				b.config.ManagedImageName,
+				b.config.manageImageLocation,
+				managedImageID,
+				b.config.ManagedImageOSDiskSnapshotName,
+				b.config.ManagedImageDataDiskSnapshotPrefix,
+				b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string),
+				generatedData)
 		}
-		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix)
+		return NewManagedImageArtifact(b.config.OSType,
+			b.config.ManagedImageResourceGroupName,
+			b.config.ManagedImageName,
+			b.config.manageImageLocation,
+			managedImageID,
+			b.config.ManagedImageOSDiskSnapshotName,
+			b.config.ManagedImageDataDiskSnapshotPrefix,
+			generatedData)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
@@ -310,10 +329,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				sasUrl, _ := blob.GetSASURI(options)
 				return sasUrl
 			},
-			b.config.OSType)
+			b.config.OSType,
+			generatedData)
 	}
 
-	return &Artifact{}, nil
+	return &Artifact{
+		StateData: generatedData,
+	}, nil
 }
 
 func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
@@ -368,36 +390,43 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmTags, b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
+
 	if b.config.OSType == constants.Target_Windows {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
+
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
-	if b.config.TempResourceGroupName != "" && b.config.BuildResourceGroupName != "" {
-		stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
-	}
+	stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+
 	if b.config.tmpResourceGroupName != "" {
 		stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 		stateBag.Put(constants.ArmIsExistingResourceGroup, false)
-	} else {
-		stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
-		stateBag.Put(constants.ArmIsExistingResourceGroup, true)
-	}
-	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 
+		if b.config.BuildResourceGroupName != "" {
+			stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
+		}
+	}
+
+	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
 	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
 	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
 	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
+
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		stateBag.Put(constants.ArmManagedImageSigPublishResourceGroup, b.config.SharedGalleryDestination.SigDestinationResourceGroup)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
 		stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate, b.config.SharedGalleryImageVersionEndOfLifeDate)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount, b.config.SharedGalleryImageVersionReplicaCount)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest, b.config.SharedGalleryImageVersionExcludeFromLatest)
 	}
 }
 

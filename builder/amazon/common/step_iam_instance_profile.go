@@ -2,12 +2,11 @@ package common
 
 import (
 	"context"
-	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"log"
-	"time"
-
 	"encoding/json"
+	"fmt"
+	"log"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -16,6 +15,7 @@ import (
 
 type StepIamInstanceProfile struct {
 	IamInstanceProfile                        string
+	SkipProfileValidation                     bool
 	TemporaryIamInstanceProfilePolicyDocument *PolicyDocument
 	createdInstanceProfileName                string
 	createdRoleName                           string
@@ -30,16 +30,18 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 	state.Put("iamInstanceProfile", "")
 
 	if len(s.IamInstanceProfile) > 0 {
-		_, err := iamsvc.GetInstanceProfile(
-			&iam.GetInstanceProfileInput{
-				InstanceProfileName: aws.String(s.IamInstanceProfile),
-			},
-		)
-		if err != nil {
-			err := fmt.Errorf("Couldn't find specified instance profile: %s", err)
-			log.Printf("[DEBUG] %s", err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
+		if !s.SkipProfileValidation {
+			_, err := iamsvc.GetInstanceProfile(
+				&iam.GetInstanceProfileInput{
+					InstanceProfileName: aws.String(s.IamInstanceProfile),
+				},
+			)
+			if err != nil {
+				err := fmt.Errorf("Couldn't find specified instance profile: %s", err)
+				log.Printf("[DEBUG] %s", err.Error())
+				state.Put("error", err)
+				return multistep.ActionHalt
+			}
 		}
 		log.Printf("Using specified instance profile: %v", s.IamInstanceProfile)
 		state.Put("iamInstanceProfile", s.IamInstanceProfile)
@@ -138,8 +140,6 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 
 		s.roleIsAttached = true
 		state.Put("iamInstanceProfile", aws.StringValue(profileResp.InstanceProfile.InstanceProfileName))
-
-		time.Sleep(5 * time.Second)
 	}
 
 	return multistep.ActionContinue

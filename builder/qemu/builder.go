@@ -11,9 +11,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/common/shutdowncommand"
@@ -147,10 +150,11 @@ type Config struct {
 	// one of the other listed interfaces. Using the `scsi` interface under
 	// these circumstances will cause the build to fail.
 	DiskInterface string `mapstructure:"disk_interface" required:"false"`
-	// The size in bytes, suffixes of the first letter of common byte types
-	// like "k" or "K", "M" for megabytes, G for gigabytes, T for terabytes.
-	// Will create the of the hard disk of the VM. By default, this is
-	// `40960M` (40 GB).
+	// The size in bytes of the hard disk of the VM. Suffix with the first
+	// letter of common byte types. Use "k" or "K" for kilobytes, "M" for
+	// megabytes, G for gigabytes, and T for terabytes. If no value is provided
+	// for disk_size, Packer uses a default of `40960M` (40 GB). If a disk_size
+	// number is provided with no units, Packer will default to Megabytes.
 	DiskSize string `mapstructure:"disk_size" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
@@ -323,8 +327,9 @@ type Config struct {
 	// "BUILDNAME" is the name of the build. Currently, no file extension will be
 	// used unless it is specified in this option.
 	VMName string `mapstructure:"vm_name" required:"false"`
+
 	// These are deprecated, but we keep them around for BC
-	// TODO(@mitchellh): remove
+	// TODO: remove later
 	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
 
 	// TODO(mitchellh): deprecate
@@ -333,7 +338,9 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -345,7 +352,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var errs *packer.MultiError
@@ -354,6 +361,23 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == "" || b.config.DiskSize == "0" {
 		b.config.DiskSize = "40960M"
+	} else {
+		// Make sure supplied disk size is valid
+		// (digits, plus an optional valid unit character). e.g. 5000, 40G, 1t
+		re := regexp.MustCompile(`^[\d]+(b|k|m|g|t){0,1}$`)
+		matched := re.MatchString(strings.ToLower(b.config.DiskSize))
+		if !matched {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid disk size."))
+		} else {
+			// Okay, it's valid -- if it doesn't alreay have a suffix, then
+			// append "M" as the default unit.
+			re = regexp.MustCompile(`^[\d]+$`)
+			matched = re.MatchString(strings.ToLower(b.config.DiskSize))
+			if matched {
+				// Needs M added.
+				b.config.DiskSize = fmt.Sprintf("%sM", b.config.DiskSize)
+			}
+		}
 	}
 
 	if b.config.DiskCache == "" {
@@ -449,7 +473,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskInterface = "virtio"
 	}
 
-	// TODO: backwards compatibility, write fixer instead
+	// Backwards compatibility
 	if b.config.SSHWaitTimeout != 0 {
 		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
@@ -457,7 +481,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.ISOSkipCache {
 		b.config.ISOChecksum = "none"
 	}
-
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
@@ -550,10 +573,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -600,6 +623,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepCreateDisk),
 		new(stepCopyDisk),
 		new(stepResizeDisk),
+		new(stepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
@@ -616,7 +640,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
-		new(stepConfigureQMP),
+		&stepConfigureQMP{
+			VNCUsePassword: b.config.VNCUsePassword,
+			QMPSocketPath:  b.config.QMPSocketPath,
+		},
 		&stepTypeBootCommand{},
 	)
 
@@ -624,7 +651,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		steps = append(steps,
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      commHost(b.config.Comm.SSHHost),
+				Host:      commHost(b.config.Comm.Host()),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
@@ -698,6 +725,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		state: make(map[string]interface{}),
 	}
 
+	artifact.state["generated_data"] = state.Get("generated_data")
 	artifact.state["diskName"] = b.config.VMName
 	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
 	if ok {

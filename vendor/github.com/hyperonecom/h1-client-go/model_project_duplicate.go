@@ -9,7 +9,8 @@
 
 package openapi
 
+// ProjectDuplicate struct for ProjectDuplicate
 type ProjectDuplicate struct {
 	CreatedOn string `json:"createdOn,omitempty"`
-	Id string `json:"_id,omitempty"`
+	Id        string `json:"id,omitempty"`
 }

@@ -9,19 +9,20 @@
 
 package openapi
 
+// VmCreate struct for VmCreate
 type VmCreate struct {
-	Name string `json:"name,omitempty"`
-	Image string `json:"image,omitempty"`
-	Iso string `json:"iso,omitempty"`
-	Service string `json:"service"`
-	Username string `json:"username,omitempty"`
+	Name     string           `json:"name,omitempty"`
+	Image    string           `json:"image,omitempty"`
+	Iso      string           `json:"iso,omitempty"`
+	Service  string           `json:"service"`
+	Username string           `json:"username,omitempty"`
 	Password VmCreatePassword `json:"password,omitempty"`
-	// - user credential (by id or name) - project credential (by id or name) - raw openssh public key (starting with `ssh-rsa `)
-	SshKeys []string `json:"sshKeys,omitempty"`
-	UserMetadata string `json:"userMetadata,omitempty"`
-	Disk []VmCreateDisk `json:"disk,omitempty"`
-	Netadp []VmCreateNetadp `json:"netadp,omitempty"`
-	Boot bool `json:"boot,omitempty"`
-	Cloud string `json:"cloud,omitempty"`
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	// - user credential (by id or name) - project credential (by id or name) - raw openssh public key (starting with `ssh-rsa/ssh-ed25519`) - defaults to user keys
+	SshKeys      []string          `json:"sshKeys,omitempty"`
+	UserMetadata string            `json:"userMetadata,omitempty"`
+	Disk         []VmCreateDisk    `json:"disk,omitempty"`
+	Netadp       []VmCreateNetadp  `json:"netadp,omitempty"`
+	Boot         bool              `json:"boot,omitempty"`
+	Cloud        string            `json:"cloud,omitempty"`
+	Tag          map[string]string `json:"tag,omitempty"`
 }

@@ -9,12 +9,13 @@
 
 package openapi
 
+// IpServices struct for IpServices
 type IpServices struct {
-	Type string `json:"type,omitempty"`
-	Name string `json:"name,omitempty"`
-	OneTime bool `json:"oneTime,omitempty"`
-	Billing string `json:"billing,omitempty"`
-	Data map[string]interface{} `json:"data,omitempty"`
-	SourceService string `json:"sourceService,omitempty"`
-	Quantity float32 `json:"quantity,omitempty"`
+	Type          string                 `json:"type,omitempty"`
+	Name          string                 `json:"name,omitempty"`
+	OneTime       bool                   `json:"oneTime,omitempty"`
+	Billing       string                 `json:"billing,omitempty"`
+	Data          map[string]interface{} `json:"data,omitempty"`
+	SourceService string                 `json:"sourceService,omitempty"`
+	Quantity      float32                `json:"quantity,omitempty"`
 }

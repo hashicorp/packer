@@ -308,7 +308,7 @@ credentials are missing, so those are not documented here.
 
 #### Debugging Plugins
 
-Each packer plugin runs in a separate process and communicates with RCP over a
+Each packer plugin runs in a separate process and communicates via RPC over a
 socket therefore using a debugger will not work (be complicated at least).
 
 But most of the Packer code is really simple and easy to follow with PACKER_LOG

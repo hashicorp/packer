@@ -9,7 +9,8 @@
 
 package openapi
 
+// ProjectLimitVm struct for ProjectLimitVm
 type ProjectLimitVm struct {
-	Count float32 `json:"count"`
+	Count  float32 `json:"count"`
 	Memory float32 `json:"memory"`
 }

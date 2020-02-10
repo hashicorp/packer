@@ -125,7 +125,7 @@ func main() {
 		newStructName := "Flat" + id.Name
 		structs = append(structs, StructDef{
 			OriginalStructName: id.Name,
-			StructName:         newStructName,
+			FlatStructName:     newStructName,
 			Struct:             flatenedStruct,
 		})
 
@@ -150,22 +150,23 @@ func main() {
 		return structs[i].OriginalStructName < structs[j].OriginalStructName
 	})
 	for _, flatenedStruct := range structs {
-		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.StructName, flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.FlatStructName, flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.")
-		fmt.Fprintf(out, "\ntype %s struct {\n", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\ntype %s struct {\n", flatenedStruct.FlatStructName)
 		outputStructFields(out, flatenedStruct.Struct)
 		fmt.Fprint(out, "}\n")
 
-		fmt.Fprintf(out, "\n// FlatMapstructure returns a new %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.StructName, flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// FlatMapstructure returns a new %s.", flatenedStruct.FlatStructName)
+		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.FlatStructName, flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.")
-		fmt.Fprintf(out, "\nfunc (*%s) FlatMapstructure() interface{} {", flatenedStruct.OriginalStructName)
-		fmt.Fprintf(out, "return new(%s)", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\nfunc (*%s) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "return new(%s)", flatenedStruct.FlatStructName)
 		fmt.Fprint(out, "}\n")
 
-		fmt.Fprintf(out, "\n// HCL2Spec returns the hcldec.Spec of a %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\n// This spec is used by HCL to read the fields of %s.", flatenedStruct.StructName)
-		fmt.Fprintf(out, "\nfunc (*%s) HCL2Spec() map[string]hcldec.Spec {\n", flatenedStruct.StructName)
+		fmt.Fprintf(out, "\n// HCL2Spec returns the hcl spec of a %s.", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// This spec is used by HCL to read the fields of %s.", flatenedStruct.OriginalStructName)
+		fmt.Fprintf(out, "\n// The decoded values from this spec will then be applied to a %s.", flatenedStruct.FlatStructName)
+		fmt.Fprintf(out, "\nfunc (*%s) HCL2Spec() map[string]hcldec.Spec {\n", flatenedStruct.FlatStructName)
 		outputStructHCL2SpecBody(out, flatenedStruct.Struct)
 		fmt.Fprint(out, "}\n")
 	}
@@ -196,10 +197,14 @@ func main() {
 
 type StructDef struct {
 	OriginalStructName string
-	StructName         string
+	FlatStructName     string
 	Struct             *types.Struct
 }
 
+// outputStructHCL2SpecBody writes the map[string]hcldec.Spec that defines the HCL spec of a
+// struct. Based on the layout of said struct.
+// If a field of s is a struct then the HCL2Spec() function of that struct will be called, otherwise a
+// cty.Type is outputed.
 func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintf(w, "s := map[string]hcldec.Spec{\n")
 
@@ -216,69 +221,99 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
+// outputHCL2SpecField is called on each field of a struct.
+// outputHCL2SpecField writes the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
 func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
 	}
+	spec, _ := goFieldToCtyType(accessor, fieldType)
+	switch spec := spec.(type) {
+	case string:
+		fmt.Fprintf(w, spec)
+	default:
+		fmt.Fprintf(w, `%#v`, spec)
+	}
+
+}
+
+// goFieldToCtyType is a recursive method that returns a cty.Type (or a string) based on the fieldType.
+// goFieldToCtyType returns the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
+// To allow it to be recursive, the method returns two values: an interface that can either be
+// a cty.Type or a string. The second argument is used for recursion and is the
+// type that will be used by the parent. For example when fieldType is a []string; a
+// recursive goFieldToCtyType call will return a cty.String.
+func goFieldToCtyType(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
-		outputHCL2SpecField(w, accessor, f.Elem(), tag)
+		return goFieldToCtyType(accessor, f.Elem())
 	case *types.Basic:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
+		ctyType := basicKindToCtyType(f.Kind())
+		return &hcldec.AttrSpec{
 			Name:     accessor,
-			Type:     basicKindToCtyType(f.Kind()),
+			Type:     ctyType,
 			Required: false,
-		})
+		}, ctyType
 	case *types.Map:
-		fmt.Fprintf(w, `%#v`, &hcldec.BlockAttrsSpec{
+		return &hcldec.BlockAttrsSpec{
 			TypeName:    accessor,
 			ElementType: cty.String, // for now everything can be simplified to a map[string]string
 			Required:    false,
-		})
+		}, cty.Map(cty.String)
+	case *types.Named:
+		// Named is the relative type when of a field with a struct.
+		// E.g. SourceAmiFilter    *common.FlatAmiFilterOptions
+		// SourceAmiFilter will become a block with nested elements from the struct itself.
+		underlyingType := f.Underlying()
+		switch underlyingType.(type) {
+		case *types.Struct:
+			// A struct returns NilType because its HCL2Spec is written in the related file
+			// and we don't need to write it again.
+			return fmt.Sprintf(`&hcldec.BlockSpec{TypeName: "%s",`+
+				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String()), cty.NilType
+		default:
+			return goFieldToCtyType(accessor, underlyingType)
+		}
 	case *types.Slice:
 		elem := f.Elem()
 		if ptr, isPtr := elem.(*types.Pointer); isPtr {
 			elem = ptr.Elem()
 		}
 		switch elem := elem.(type) {
-		case *types.Basic:
-			fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-				Name:     accessor,
-				Type:     cty.List(basicKindToCtyType(elem.Kind())),
-				Required: false,
-			})
 		case *types.Named:
+			// A Slice of Named is the relative type of a filed with a slice of structs.
+			// E.g. LaunchMappings []common.FlatBlockDevice
+			// LaunchMappings will validate more than one block with nested elements.
 			b := bytes.NewBuffer(nil)
-			outputHCL2SpecField(b, accessor, elem, tag)
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
-		case *types.Slice:
-			b := bytes.NewBuffer(nil)
-			outputHCL2SpecField(b, accessor, elem.Underlying(), tag)
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
+			underlyingType := elem.Underlying()
+			switch underlyingType.(type) {
+			case *types.Struct:
+				fmt.Fprintf(b, `hcldec.ObjectSpec((*%s)(nil).HCL2Spec())`, elem.String())
+			}
+			return fmt.Sprintf(`&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String()), cty.NilType
 		default:
-			outputHCL2SpecField(w, accessor, elem.Underlying(), tag)
+			_, specType := goFieldToCtyType(accessor, elem)
+			if specType == cty.NilType {
+				return goFieldToCtyType(accessor, elem.Underlying())
+			}
+			return &hcldec.AttrSpec{
+				Name:     accessor,
+				Type:     cty.List(specType),
+				Required: false,
+			}, cty.List(specType)
 		}
-	case *types.Named:
-		underlyingType := f.Underlying()
-		switch underlyingType.(type) {
-		case *types.Struct:
-			fmt.Fprintf(w, `&hcldec.BlockSpec{TypeName: "%s",`+
-				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String())
-		default:
-			outputHCL2SpecField(w, f.String(), underlyingType, tag)
-		}
-	case *types.Struct:
-		fmt.Fprintf(w, `&hcldec.BlockObjectSpec{TypeName: "%s",`+
-			` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, fieldType.String())
-	default:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-			Name:     accessor,
-			Type:     basicKindToCtyType(types.Bool),
-			Required: false,
-		})
-		fmt.Fprintf(w, `/* TODO(azr): could not find type */`)
 	}
+	b := bytes.NewBuffer(nil)
+	fmt.Fprintf(b, `%#v`, &hcldec.AttrSpec{
+		Name:     accessor,
+		Type:     basicKindToCtyType(types.Bool),
+		Required: false,
+	})
+	fmt.Fprintf(b, `/* TODO(azr): could not find type */`)
+	return b.String(), cty.NilType
 }
 
 func basicKindToCtyType(kind types.BasicKind) cty.Type {
@@ -303,7 +338,9 @@ func basicKindToCtyType(kind types.BasicKind) cty.Type {
 func outputStructFields(w io.Writer, s *types.Struct) {
 	for i := 0; i < s.NumFields(); i++ {
 		field, tag := s.Field(i), s.Tag(i)
-		fmt.Fprintf(w, "	%s `%s`\n", strings.Replace(field.String(), "field ", "", 1), tag)
+		fieldNameStr := field.String()
+		fieldNameStr = strings.Replace(fieldNameStr, "field ", "", 1)
+		fmt.Fprintf(w, "	%s `%s`\n", fieldNameStr, tag)
 	}
 }
 
@@ -350,6 +387,9 @@ func getUsedImports(s *types.Struct) map[NamePath]*types.Package {
 			continue
 		}
 		pkg := namedType.Obj().Pkg()
+		if pkg == nil {
+			continue
+		}
 		res[NamePath{pkg.Name(), pkg.Path()}] = pkg
 	}
 	return res
@@ -406,7 +446,11 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 		if _, ok := field.Type().(*types.Signature); ok {
 			continue // ignore funcs
 		}
-		structtag, _ := structtag.Parse(tag)
+		structtag, err := structtag.Parse(tag)
+		if err != nil {
+			log.Printf("could not parse field tag %s of : %v", tag, err)
+			continue
+		}
 		if ms, err := structtag.Get("mapstructure"); err != nil {
 			//no mapstructure tag
 		} else if ms.HasOption("squash") {
@@ -437,21 +481,25 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.Bool]), field.Embedded())
 			case "github.com/hashicorp/packer/provisioner/powershell.ExecutionPolicy": // TODO(azr): unhack this situation
 				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), types.NewPointer(types.Typ[types.String]), field.Embedded())
-			}
-			if str, isStruct := f.Underlying().(*types.Struct); isStruct {
-				obj := flattenNamed(f, str)
-				field = types.NewField(field.Pos(), field.Pkg(), field.Name(), obj, field.Embedded())
-				field = makePointer(field)
-			}
-			if slice, isSlice := f.Underlying().(*types.Slice); isSlice {
-				if f, fNamed := slice.Elem().(*types.Named); fNamed {
-					if str, isStruct := f.Underlying().(*types.Struct); isStruct {
-						// this is a slice of named structs; we want to change
-						// the struct ref to a 'FlatStruct'.
-						obj := flattenNamed(f, str)
-						slice := types.NewSlice(obj)
-						field = types.NewField(field.Pos(), field.Pkg(), field.Name(), slice, field.Embedded())
+			default:
+				if str, isStruct := f.Underlying().(*types.Struct); isStruct {
+					obj := flattenNamed(f, str)
+					field = types.NewField(field.Pos(), field.Pkg(), field.Name(), obj, field.Embedded())
+					field = makePointer(field)
+				}
+				if slice, isSlice := f.Underlying().(*types.Slice); isSlice {
+					if f, fNamed := slice.Elem().(*types.Named); fNamed {
+						if str, isStruct := f.Underlying().(*types.Struct); isStruct {
+							// this is a slice of named structs; we want to change
+							// the struct ref to a 'FlatStruct'.
+							obj := flattenNamed(f, str)
+							slice := types.NewSlice(obj)
+							field = types.NewField(field.Pos(), field.Pkg(), field.Name(), slice, field.Embedded())
+						}
 					}
+				}
+				if _, isBasic := f.Underlying().(*types.Basic); isBasic {
+					field = makePointer(field)
 				}
 			}
 		case *types.Slice:

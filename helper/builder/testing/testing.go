@@ -63,6 +63,13 @@ type TestT interface {
 	Skip(args ...interface{})
 }
 
+type TestBuilderStore struct {
+	packer.BuilderStore
+	StartFn func(name string) (packer.Builder, error)
+}
+
+func (tbs TestBuilderStore) Start(name string) (packer.Builder, error) { return tbs.StartFn(name) }
+
 // Test performs an acceptance test on a backend with the given test case.
 //
 // Tests are not run unless an environmental variable "PACKER_ACC" is
@@ -106,12 +113,14 @@ func Test(t TestT, c TestCase) {
 	log.Printf("[DEBUG] Initializing core...")
 	core, err := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
-			Builder: func(n string) (packer.Builder, error) {
-				if n == "test" {
-					return c.Builder, nil
-				}
+			BuilderStore: TestBuilderStore{
+				StartFn: func(n string) (packer.Builder, error) {
+					if n == "test" {
+						return c.Builder, nil
+					}
 
-				return nil, nil
+					return nil, nil
+				},
 			},
 		},
 		Template: tpl,

@@ -82,7 +82,7 @@ Block devices can be nested in the
 
 <%= partial "partials/builder/amazon/common/BlockDevice" %>
 
-#### Optional only for [launch_block_device_mappings](#launch_block_device_mappings) 
+#### Optional only for [launch_block_device_mappings](#launch_block_device_mappings)
 
 <%= partial "partials/builder/amazon/ebssurrogate/BlockDevice-not-required" %>
 
@@ -97,7 +97,6 @@ Block devices can be nested in the
 
 <%= partial "partials/helper/communicator/Config-not-required" %>
 <%= partial "partials/helper/communicator/SSH-not-required" %>
-<%= partial "partials/helper/communicator/SSHInterface-not-required" %>
 
 ## Basic Example
 
@@ -157,7 +156,18 @@ variables are available:
 -   `SourceAMIName` - The source AMI Name (for example
     `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
     build the AMI.
+-   `SourceAMIOwner` - The source AMI owner ID.
+-   `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
 -   `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
+## Build function template engine variables
+
+For the build function of [template engine](/docs/templates/engine.html), the following
+variables are available:
+
+-   `SourceAMIName` - The source AMI Name (for example
+    `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+    build the AMI.
 
 -&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on

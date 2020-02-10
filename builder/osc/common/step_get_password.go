@@ -11,7 +11,6 @@ import (
 	"log"
 	"time"
 
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -95,19 +94,12 @@ WaitLoop:
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
 	// store so that we can access this later during provisioning
-
-	err = commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
-	if err != nil {
-		log.Printf("[WARN] commonhelper.SetSharedState returned error: %s", err)
-	}
 	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepGetPassword) Cleanup(multistep.StateBag) {
-	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
-}
+func (s *StepGetPassword) Cleanup(multistep.StateBag) {}
 
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
 	oapiconn := state.Get("oapi").(*oapi.Client)

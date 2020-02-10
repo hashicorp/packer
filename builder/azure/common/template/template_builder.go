@@ -375,23 +375,8 @@ func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
 	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
 }
 
-func (s *TemplateBuilder) getResourceByType2(t string) (**Resource, error) {
-	for _, x := range *s.template.Resources {
-		if strings.EqualFold(*x.Type, t) {
-			p := &x
-			return &p, nil
-		}
-	}
-
-	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
-}
-
 func (s *TemplateBuilder) setVariable(name string, value string) {
 	(*s.template.Variables)[name] = value
-}
-
-func (s *TemplateBuilder) toKeyVaultID(name string) string {
-	return s.toResourceID(resourceKeyVaults, name)
 }
 
 func (s *TemplateBuilder) toResourceID(id, name string) string {

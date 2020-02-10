@@ -48,7 +48,7 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	defer os.RemoveAll(td)
 	config["clone_from_vmcx_path"] = td
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -75,7 +75,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -89,7 +89,7 @@ func TestBuilderPrepare_CloneFromExistingMachineOrImportFromExportedMachineSetti
 	config := testConfig()
 	delete(config, "clone_from_vmcx_path")
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -113,7 +113,7 @@ func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
 
 	config["clone_from_vmcx_path"] = td
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -137,7 +137,7 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 
 	config["clone_from_vmcx_path"] = td
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -153,7 +153,7 @@ func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmcxPathRequ
 
 	config["clone_from_vm_name"] = "test_machine_name_that_does_not_exist"
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -183,7 +183,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 
 	// Test bad
 	config["iso_checksum"] = ""
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -194,7 +194,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	// Test good
 	config["iso_checksum"] = "FOo"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -216,10 +216,20 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	defer os.RemoveAll(td)
 	config["clone_from_vmcx_path"] = td
 
+	// Test bad
+	config["iso_checksum_type"] = ""
+	_, warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
 	// Test none
 	config["iso_checksum"] = "none"
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) == 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -246,7 +256,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test both empty (should be allowed, as we cloning a vm so we probably don't need an ISO file)
 	config["iso_url"] = ""
 	b = Builder{}
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -257,7 +267,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	// Test iso_url set
 	config["iso_url"] = "http://www.packer.io"
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -274,7 +284,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	config["iso_url"] = "http://www.packer.io"
 	config["iso_urls"] = []string{"http://www.packer.io"}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -290,7 +300,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -320,7 +330,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config["clone_from_vmcx_path"] = td
 
 	delete(config, "floppy_files")
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -335,7 +345,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	floppies_path := "../../../common/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
-	warns, err = b.Prepare(config)
+	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
@@ -363,7 +373,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
-	_, errs := b.Prepare(config)
+	_, _, errs := b.Prepare(config)
 	if errs == nil {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
@@ -392,7 +402,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["winrm_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -429,7 +439,7 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config["ssh_host"] = "1.2.3.4"
 
 		var b Builder
-		warns, err := b.Prepare(config)
+		_, warns, err := b.Prepare(config)
 		if len(warns) > 0 {
 			t.Fatalf("bad: %#v", warns)
 		}
@@ -464,7 +474,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
 	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
 
-	warns, err := b.Prepare(config)
+	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}

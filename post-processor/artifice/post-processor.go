@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -32,6 +33,8 @@ type PostProcessor struct {
 	config Config
 }
 
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -53,7 +56,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if len(artifact.Files()) > 0 {
-		ui.Say(fmt.Sprintf("Discarding artifact files: %s", strings.Join(artifact.Files(), ", ")))
+		ui.Say(fmt.Sprintf("Discarding files from artifact: %s", strings.Join(artifact.Files(), ", ")))
 	}
 
 	artifact, err := NewArtifact(p.config.Files)

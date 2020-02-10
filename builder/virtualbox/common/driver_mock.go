@@ -34,8 +34,9 @@ type DriverMock struct {
 	IsRunningReturn bool
 	IsRunningErr    error
 
-	StopName string
-	StopErr  error
+	StopViaACPIName string
+	StopName        string
+	StopErr         error
 
 	SuppressMessagesCalled bool
 	SuppressMessagesErr    error
@@ -109,6 +110,11 @@ func (d *DriverMock) IsRunning(name string) (bool, error) {
 
 func (d *DriverMock) Stop(name string) error {
 	d.StopName = name
+	return d.StopErr
+}
+
+func (d *DriverMock) StopViaACPI(name string) error {
+	d.StopViaACPIName = name
 	return d.StopErr
 }
 

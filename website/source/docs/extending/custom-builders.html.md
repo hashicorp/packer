@@ -31,10 +31,17 @@ method should do.
 
 ``` go
 type Builder interface {
-  Prepare(...interface{}) error
+  ConfigSpec() hcldec.ObjectSpec
+  Prepare(...interface{}) ([]string, []string, error)
   Run(context.Context, ui Ui, hook Hook) (Artifact, error)
 }
 ```
+### The "ConfigSpec" Method
+
+This method returns a hcldec.ObjectSpec, which is a spec necessary for using
+HCL2 templates with Packer. For information on how to use and implement this
+function, check our
+[object spec docs](https://www.packer.io/guides/hcl/component-object-spec)
 
 ### The "Prepare" Method
 
@@ -152,3 +159,97 @@ necessary.
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 
+## Template Engine
+
+### Build variables
+
+Packer makes it possible to provide custom template engine variables to be shared with 
+provisioners and post-processors using the `build` function. 
+ 
+Part of the builder interface changes made in 1.5.0 was to make builder Prepare() methods 
+return a list of custom variables which we call `generated data`. 
+We use that list of variables to generate a custom placeholder map per builder that 
+combines custom variables with the placeholder map of default build variables created by Packer.   
+Here's an example snippet telling packer what will be made available by the builder:
+
+```
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+    // ...
+    
+    generatedData := []string{"SourceImageName"}
+    return generatedData, warns, nil
+}
+```
+Returning the custom variable name(s) within the `generated_data` placeholder is necessary 
+for the template containing the build variable(s) to validate.  
+    
+Once the placeholder is set, it's necessary to pass the variables' real values when calling 
+the provisioner. This can be done as the example below:   
+
+```
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+    // ...
+    
+    // Create map of custom variable
+    generatedData := map[string]interface{}{"SourceImageName": "the source image name value"}
+    // Pass map to provisioner
+    hook.Run(context.Context, packer.HookProvision, ui, comm, generatedData)
+    
+    // ...
+}
+```
+
+In order to make these same variables and the Packer default ones also available to post-processor, 
+it is necessary to add them to the Artifact returned by the builder. This can be done by adding an attribute of type
+`map[string]interface{}` to the Artifact and putting the generated data in it. The post-processor 
+will access this data later via the Artifact's `State` method.   
+
+The Artifact code should be implemented similar to the below:
+
+```
+type Artifact struct {
+	// ...
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
+}
+
+// ...
+
+func (a *Artifact) State(name string) interface{} {
+	return a.StateData[name]
+}
+
+// ...
+```    
+   
+The builder should return the above Artifact containing the generated data and the code should be similar
+to the example snippet below:
+
+```
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+    // ...
+    
+    return &Artifact{
+                // ...
+                StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
+            }, nil
+}
+```
+The code above assigns the `generated_data` state to the `StateData` map with the key `generated_data`.   
+
+Here some example of how this data will be used by post-processors: 
+
+```
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, bool, error) {
+    generatedData := source.State("generated_data")
+    
+    // generatedData will then be used for interpolation
+  
+    // ...
+}
+```
+
+
+To know more about the template engine build function, please refer to the [template engine docs](/docs/templates/engine.html).

@@ -9,7 +9,8 @@
 
 package openapi
 
+// ReplicaActionImage struct for ReplicaActionImage
 type ReplicaActionImage struct {
-	Service string `json:"service,omitempty"`
+	Service     string `json:"service,omitempty"`
 	Description string `json:"description,omitempty"`
 }

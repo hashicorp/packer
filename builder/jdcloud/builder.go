@@ -3,6 +3,8 @@ package jdcloud
 import (
 	"context"
 	"fmt"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -11,7 +13,9 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
@@ -22,19 +26,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, fmt.Errorf("[ERROR] Failed in decoding JSON->mapstructure")
+		return nil, nil, fmt.Errorf("[ERROR] Failed in decoding JSON->mapstructure")
 	}
 
 	errs := &packer.MultiError{}
 	errs = packer.MultiErrorAppend(errs, b.config.JDCloudCredentialConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.JDCloudInstanceSpecConfig.Prepare(&b.config.ctx)...)
 	if errs != nil && len(errs.Errors) != 0 {
-		return nil, errs
+		return nil, nil, errs
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey)
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -42,7 +46,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state := new(multistep.BasicStateBag)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 
 	steps := []multistep.Step{
 
@@ -84,8 +88,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	artifact := &Artifact{
-		ImageId:  b.config.ArtifactId,
-		RegionID: b.config.RegionId,
+		ImageId:   b.config.ArtifactId,
+		RegionID:  b.config.RegionId,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

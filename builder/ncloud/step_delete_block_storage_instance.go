@@ -7,20 +7,20 @@ import (
 	"log"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepDeleteBlockStorageInstance struct {
-	Conn                       *ncloud.Conn
+	Conn                       *NcloudAPIClient
 	DeleteBlockStorageInstance func(blockStorageInstanceNo string) error
 	Say                        func(message string)
 	Error                      func(e error)
 	Config                     *Config
 }
 
-func NewStepDeleteBlockStorageInstance(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepDeleteBlockStorageInstance {
+func NewStepDeleteBlockStorageInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepDeleteBlockStorageInstance {
 	var step = &StepDeleteBlockStorageInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },
@@ -33,24 +33,24 @@ func NewStepDeleteBlockStorageInstance(conn *ncloud.Conn, ui packer.Ui, config *
 	return step
 }
 
-func (s *StepDeleteBlockStorageInstance) getBlockInstanceList(serverInstanceNo string) []string {
-	reqParams := new(ncloud.RequestBlockStorageInstanceList)
-	reqParams.ServerInstanceNo = serverInstanceNo
+func (s *StepDeleteBlockStorageInstance) getBlockInstanceList(serverInstanceNo string) []*string {
+	reqParams := new(server.GetBlockStorageInstanceListRequest)
+	reqParams.ServerInstanceNo = &serverInstanceNo
 
-	blockStorageInstanceList, err := s.Conn.GetBlockStorageInstance(reqParams)
+	blockStorageInstanceList, err := s.Conn.server.V2Api.GetBlockStorageInstanceList(reqParams)
 	if err != nil {
 		return nil
 	}
 
-	if blockStorageInstanceList.TotalRows == 1 {
+	if *blockStorageInstanceList.TotalRows == 1 {
 		return nil
 	}
 
-	var instanceList []string
+	var instanceList []*string
 
-	for _, blockStorageInstance := range blockStorageInstanceList.BlockStorageInstance {
+	for _, blockStorageInstance := range blockStorageInstanceList.BlockStorageInstanceList {
 		log.Println(blockStorageInstance)
-		if blockStorageInstance.BlockStorageType.Code != "BASIC" {
+		if *blockStorageInstance.BlockStorageType.Code != "BASIC" {
 			instanceList = append(instanceList, blockStorageInstance.BlockStorageInstanceNo)
 		}
 	}
@@ -63,13 +63,15 @@ func (s *StepDeleteBlockStorageInstance) deleteBlockStorageInstance(serverInstan
 	if blockStorageInstanceList == nil || len(blockStorageInstanceList) == 0 {
 		return nil
 	}
-
-	_, err := s.Conn.DeleteBlockStorageInstances(blockStorageInstanceList)
+	reqParams := server.DeleteBlockStorageInstancesRequest{
+		BlockStorageInstanceNoList: blockStorageInstanceList,
+	}
+	_, err := s.Conn.server.V2Api.DeleteBlockStorageInstances(&reqParams)
 	if err != nil {
 		return err
 	}
 
-	s.Say(fmt.Sprintf("Block Storage Instance is deleted. Block Storage InstanceNo is %s", blockStorageInstanceList))
+	s.Say(fmt.Sprintf("Block Storage Instance is deleted. Block Storage Instance List is %v", blockStorageInstanceList))
 
 	if err := waiterDetachedBlockStorageInstance(s.Conn, serverInstanceNo, time.Minute); err != nil {
 		return errors.New("TIMEOUT : Block Storage instance status is not deattached")

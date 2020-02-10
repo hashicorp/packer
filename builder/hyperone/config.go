@@ -62,7 +62,7 @@ type Config struct {
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	// Key/value pair tags to
 	// add to the created image.
-	ImageTags map[string]interface{} `mapstructure:"image_tags" required:"false"`
+	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
@@ -71,7 +71,7 @@ type Config struct {
 	VmName string `mapstructure:"vm_name" required:"false"`
 	// Key/value pair tags to
 	// add to the created server.
-	VmTags map[string]interface{} `mapstructure:"vm_tags" required:"false"`
+	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
 	// The name of the created disk.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// The type of the created disk. Defaults to ssd.
@@ -114,8 +114,7 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
-	c := &Config{}
+func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
@@ -133,12 +132,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	cliConfig, err := loadCLIConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Defaults
@@ -165,7 +164,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if c.TokenLogin != "" && c.APIURL == "" {
 			c.Token, err = fetchTokenBySSH(c.TokenLogin)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 		}
 	}
@@ -181,7 +180,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageName == "" {
 		name, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		c.ImageName = name
 	}
@@ -217,7 +216,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ChrootMountPath == "" {
 		path, err := interpolate.Render("/mnt/packer-hyperone-volumes/{{timestamp}}", nil)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		c.ChrootMountPath = path
 	}
@@ -281,19 +280,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, nil, errs
+		return nil, errs
 	}
 
 	packer.LogSecretFilter.Set(c.Token)
 
-	return c, nil, nil
+	return nil, nil
 }
 
 type cliConfig struct {
 	Profile struct {
 		APIKey  string `json:"apiKey"`
 		Project struct {
-			ID string `json:"_id"`
+			ID string `json:"id"`
 		} `json:"project"`
 	} `json:"profile"`
 }

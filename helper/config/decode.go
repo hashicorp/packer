@@ -1,14 +1,20 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"sort"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
+	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 // DecodeOpts are the options for decoding configuration.
@@ -37,13 +43,45 @@ var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 // Decode decodes the configuration into the target and optionally
 // automatically interpolates all the configuration as it goes.
 func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
+	for i, raw := range raws {
+		// check for cty values and transform them to json then to a
+		// map[string]interface{} so that mapstructure can do its thing.
+		cval, ok := raw.(cty.Value)
+		if !ok {
+			continue
+		}
+		type flatConfigurer interface {
+			FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
+		}
+		ctarget := target.(flatConfigurer)
+		flatCfg := ctarget.FlatMapstructure()
+		err := gocty.FromCtyValue(cval, flatCfg)
+		if err != nil {
+			switch err := err.(type) {
+			case cty.PathError:
+				return fmt.Errorf("%v: %v", err, err.Path)
+			}
+			return err
+		}
+		b, err := ctyjson.SimpleJSONValue{Value: cval}.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		var raw map[string]interface{}
+		if err := json.Unmarshal(b, &raw); err != nil {
+			return err
+		}
+		raws[i] = raw
+	}
 	if config == nil {
 		config = &DecodeOpts{Interpolate: true}
 	}
 
+	// Detect user variables from the raws and merge them into our context
+	ctxData, raws := DetectContextData(raws...)
+
 	// Interpolate first
 	if config.Interpolate {
-		// Detect user variables from the raws and merge them into our context
 		ctx, err := DetectContext(raws...)
 		if err != nil {
 			return err
@@ -55,6 +93,9 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 			config.InterpolateContext.BuildType = ctx.BuildType
 			config.InterpolateContext.TemplatePath = ctx.TemplatePath
 			config.InterpolateContext.UserVariables = ctx.UserVariables
+			if config.InterpolateContext.Data == nil {
+				config.InterpolateContext.Data = ctxData
+			}
 		}
 		ctx = config.InterpolateContext
 
@@ -103,7 +144,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		for _, unused := range md.Unused {
 			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
 				err = multierror.Append(err, fmt.Errorf(
-					"unknown configuration key: %q", unused))
+					"unknown configuration key: %q; raws is %#v \n\n and ctx data is %#v", unused, raws, ctxData))
 			}
 		}
 		if err != nil {
@@ -112,6 +153,43 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 	}
 
 	return nil
+}
+
+func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []interface{}) {
+	// In provisioners, the last value pulled from raws is the placeholder data
+	// for build-specific variables. Pull these out to add to interpolation
+	// context.
+	if len(raws) == 0 {
+		return nil, raws
+	}
+
+	// Internally, our tests may cause this to be read as a map[string]string
+	placeholderData := raws[len(raws)-1]
+	if pd, ok := placeholderData.(map[string]string); ok {
+		if uuid, ok := pd["PackerRunUUID"]; ok {
+			if strings.Contains(uuid, "Build_PackerRunUUID.") {
+				cast := make(map[interface{}]interface{})
+				for k, v := range pd {
+					cast[k] = v
+				}
+				raws = raws[:len(raws)-1]
+				return cast, raws
+			}
+		}
+	}
+
+	// but with normal interface conversion across the rpc, it'll look like a
+	// map[interface]interface, not a map[string]string
+	if pd, ok := placeholderData.(map[interface{}]interface{}); ok {
+		if uuid, ok := pd["PackerRunUUID"]; ok {
+			if strings.Contains(uuid.(string), "Build_PackerRunUUID.") {
+				raws = raws[:len(raws)-1]
+				return pd, raws
+			}
+		}
+	}
+
+	return nil, raws
 }
 
 // DetectContext builds a base interpolate.Context, automatically
@@ -127,6 +205,7 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 
 	for _, r := range raws {
 		if err := mapstructure.Decode(r, &s); err != nil {
+			log.Printf("Error detecting context: %s", err)
 			return nil, err
 		}
 	}

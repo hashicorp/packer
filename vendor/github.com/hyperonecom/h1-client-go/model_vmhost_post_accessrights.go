@@ -9,6 +9,7 @@
 
 package openapi
 
+// VmhostPostAccessrights struct for VmhostPostAccessrights
 type VmhostPostAccessrights struct {
 	Identity string `json:"identity,omitempty"`
 }

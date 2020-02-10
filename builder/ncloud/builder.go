@@ -3,7 +3,8 @@ package ncloud
 import (
 	"context"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -12,26 +13,35 @@ import (
 
 // Builder assume this implements packer.Builder
 type Builder struct {
-	config   *Config
+	config   Config
 	stateBag multistep.StateBag
 	runner   multistep.Runner
 }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(raws...)
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
-	b.config = c
 
 	b.stateBag = new(multistep.BasicStateBag)
 
-	return warnings, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Message("Creating Naver Cloud Platform Connection ...")
-	conn := ncloud.NewConnection(b.config.AccessKey, b.config.SecretKey)
+	config := Config{
+		AccessKey: b.config.AccessKey,
+		SecretKey: b.config.SecretKey,
+	}
+
+	conn, err := config.Client()
+	if err != nil {
+		return nil, err
+	}
 
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put("ui", ui)
@@ -42,12 +52,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Comm.Type == "ssh" {
 		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, b.config),
+			NewStepValidateTemplate(conn, ui, &b.config),
 			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui, b.config),
-			NewStepCreatePublicIPInstance(conn, ui, b.config),
+			NewStepCreateServerInstance(conn, ui, &b.config),
+			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
+			NewStepGetRootPassword(conn, ui, &b.config),
+			NewStepCreatePublicIPInstance(conn, ui, &b.config),
 			&communicator.StepConnectSSH{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -60,18 +70,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Comm: &b.config.Comm,
 			},
 			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
+			NewStepCreateServerImage(conn, ui, &b.config),
+			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
 			NewStepTerminateServerInstance(conn, ui),
 		}
 	} else if b.config.Comm.Type == "winrm" {
 		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, b.config),
+			NewStepValidateTemplate(conn, ui, &b.config),
 			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, b.config),
-			NewStepGetRootPassword(conn, ui, b.config),
-			NewStepCreatePublicIPInstance(conn, ui, b.config),
+			NewStepCreateServerInstance(conn, ui, &b.config),
+			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
+			NewStepGetRootPassword(conn, ui, &b.config),
+			NewStepCreatePublicIPInstance(conn, ui, &b.config),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
@@ -86,8 +96,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 			&common.StepProvision{},
 			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
+			NewStepCreateServerImage(conn, ui, &b.config),
+			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
 			NewStepTerminateServerInstance(conn, ui),
 		}
 	}
@@ -102,10 +112,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Build the artifact and return it
-	artifact := &Artifact{}
+	artifact := &Artifact{
+		StateData: map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")},
+	}
 
 	if serverImage, ok := b.stateBag.GetOk("memberServerImage"); ok {
-		artifact.ServerImage = serverImage.(*ncloud.ServerImage)
+		artifact.MemberServerImage = serverImage.(*server.MemberServerImage)
 	}
 
 	return artifact, nil

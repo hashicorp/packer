@@ -16,6 +16,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	packerecs "github.com/hashicorp/packer/builder/alicloud/ecs"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -82,7 +83,8 @@ type PostProcessor struct {
 	ramClient *ram.Client
 }
 
-// Entry point for configuration parsing when we've defined
+func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -132,6 +134,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	var err error
+
+	generatedData := artifact.State("generated_data")
+	if generatedData == nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
 
 	// Render this key since we didn't in the configure phase
 	p.config.OSSKey, err = interpolate.Render(p.config.OSSKey, &p.config.ctx)

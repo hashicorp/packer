@@ -1,5 +1,3 @@
-//go:generate mapstructure-to-hcl2 -type Config
-
 package classic
 
 import (
@@ -57,8 +55,7 @@ func (c *Config) Identifier(s string) string {
 	return fmt.Sprintf("/Compute-%s/%s/%s", c.IdentityDomain, c.Username, s)
 }
 
-func NewConfig(raws ...interface{}) (*Config, error) {
-	c := &Config{}
+func (c *Config) Prepare(raws ...interface{}) error {
 
 	// Decode from template
 	err := config.Decode(c, &config.DecodeOpts{
@@ -66,12 +63,12 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		InterpolateContext: &c.ctx,
 	}, raws...)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to mapstructure Config: %+v", err)
+		return fmt.Errorf("Failed to mapstructure Config: %+v", err)
 	}
 
 	c.apiEndpointURL, err = url.Parse(c.APIEndpoint)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing API Endpoint: %s", err)
+		return fmt.Errorf("Error parsing API Endpoint: %s", err)
 	}
 	// Set default source list
 	if c.SSHSourceList == "" {
@@ -127,7 +124,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return errs
 	}
 
 	// unpack attributes from json into config
@@ -155,5 +152,5 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.attribs = data
 	}
 
-	return c, nil
+	return nil
 }

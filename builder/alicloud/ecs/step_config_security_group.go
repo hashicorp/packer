@@ -36,7 +36,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(ctx context.Context, state multist
 	if len(s.SecurityGroupId) != 0 {
 		describeSecurityGroupsRequest := ecs.CreateDescribeSecurityGroupsRequest()
 		describeSecurityGroupsRequest.RegionId = s.RegionId
-
+		describeSecurityGroupsRequest.SecurityGroupId = s.SecurityGroupId
 		if networkType == InstanceNetworkVpc {
 			vpcId := state.Get("vpcid").(string)
 			describeSecurityGroupsRequest.VpcId = vpcId

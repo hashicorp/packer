@@ -9,6 +9,7 @@
 
 package openapi
 
+// FirewallActionAttach struct for FirewallActionAttach
 type FirewallActionAttach struct {
 	Network string `json:"network"`
 }

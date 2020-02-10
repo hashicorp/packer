@@ -22,10 +22,13 @@ type FlatAlicloudDiskDevice struct {
 // FlatMapstructure returns a new FlatAlicloudDiskDevice.
 // FlatAlicloudDiskDevice is an auto-generated flat version of AlicloudDiskDevice.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*AlicloudDiskDevice) FlatMapstructure() interface{} { return new(FlatAlicloudDiskDevice) }
+func (*AlicloudDiskDevice) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatAlicloudDiskDevice)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatAlicloudDiskDevice.
-// This spec is used by HCL to read the fields of FlatAlicloudDiskDevice.
+// HCL2Spec returns the hcl spec of a AlicloudDiskDevice.
+// This spec is used by HCL to read the fields of AlicloudDiskDevice.
+// The decoded values from this spec will then be applied to a FlatAlicloudDiskDevice.
 func (*FlatAlicloudDiskDevice) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"disk_name":                 &hcldec.AttrSpec{Name: "disk_name", Type: cty.String, Required: false},
@@ -50,10 +53,13 @@ type FlatConfig struct {
 	PackerOnError                     *string                  `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars                    map[string]string        `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars               []string                 `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AlicloudAccessKey                 *string                  `mapstructure:"access_key" required:"true" cty:"access_key"`
-	AlicloudSecretKey                 *string                  `mapstructure:"secret_key" required:"true" cty:"secret_key"`
-	AlicloudRegion                    *string                  `mapstructure:"region" required:"true" cty:"region"`
+	AlicloudAccessKey                 *string                  `mapstructure:"access_key" required:"false" cty:"access_key"`
+	AlicloudSecretKey                 *string                  `mapstructure:"secret_key" required:"false" cty:"secret_key"`
+	AlicloudRegion                    *string                  `mapstructure:"region" required:"false" cty:"region"`
 	AlicloudSkipValidation            *bool                    `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
+	AlicloudSkipImageValidation       *bool                    `mapstructure:"skip_image_validation" required:"false" cty:"skip_image_validation"`
+	AlicloudProfile                   *string                  `mapstructure:"profile" required:"false" cty:"profile"`
+	AlicloudSharedCredentialsFile     *string                  `mapstructure:"shared_credentials_file" required:"false" cty:"shared_credentials_file"`
 	SecurityToken                     *string                  `mapstructure:"security_token" required:"false" cty:"security_token"`
 	AlicloudImageName                 *string                  `mapstructure:"image_name" required:"true" cty:"image_name"`
 	AlicloudImageVersion              *string                  `mapstructure:"image_version" required:"false" cty:"image_version"`
@@ -121,8 +127,8 @@ type FlatConfig struct {
 	SSHReadWriteTimeout               *string                  `mapstructure:"ssh_read_write_timeout" cty:"ssh_read_write_timeout"`
 	SSHRemoteTunnels                  []string                 `mapstructure:"ssh_remote_tunnels" cty:"ssh_remote_tunnels"`
 	SSHLocalTunnels                   []string                 `mapstructure:"ssh_local_tunnels" cty:"ssh_local_tunnels"`
-	SSHPublicKey                      []byte                   `cty:"ssh_public_key"`
-	SSHPrivateKey                     []byte                   `cty:"ssh_private_key"`
+	SSHPublicKey                      []byte                   `mapstructure:"ssh_public_key" cty:"ssh_public_key"`
+	SSHPrivateKey                     []byte                   `mapstructure:"ssh_private_key" cty:"ssh_private_key"`
 	WinRMUser                         *string                  `mapstructure:"winrm_username" cty:"winrm_username"`
 	WinRMPassword                     *string                  `mapstructure:"winrm_password" cty:"winrm_password"`
 	WinRMHost                         *string                  `mapstructure:"winrm_host" cty:"winrm_host"`
@@ -137,10 +143,13 @@ type FlatConfig struct {
 // FlatMapstructure returns a new FlatConfig.
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Config) FlatMapstructure() interface{} { return new(FlatConfig) }
+func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatConfig)
+}
 
-// HCL2Spec returns the hcldec.Spec of a FlatConfig.
-// This spec is used by HCL to read the fields of FlatConfig.
+// HCL2Spec returns the hcl spec of a Config.
+// This spec is used by HCL to read the fields of Config.
+// The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":            &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
@@ -154,6 +163,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"secret_key":                   &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"skip_region_validation":       &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
+		"skip_image_validation":        &hcldec.AttrSpec{Name: "skip_image_validation", Type: cty.Bool, Required: false},
+		"profile":                      &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
+		"shared_credentials_file":      &hcldec.AttrSpec{Name: "shared_credentials_file", Type: cty.String, Required: false},
 		"security_token":               &hcldec.AttrSpec{Name: "security_token", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_version":                &hcldec.AttrSpec{Name: "image_version", Type: cty.String, Required: false},
@@ -169,7 +181,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_ignore_data_disks":      &hcldec.AttrSpec{Name: "image_ignore_data_disks", Type: cty.Bool, Required: false},
 		"tags":                         &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
 		"system_disk_mapping":          &hcldec.BlockSpec{TypeName: "system_disk_mapping", Nested: hcldec.ObjectSpec((*FlatAlicloudDiskDevice)(nil).HCL2Spec())},
-		"image_disk_mappings":          &hcldec.BlockListSpec{TypeName: "image_disk_mappings", Nested: &hcldec.BlockSpec{TypeName: "image_disk_mappings", Nested: hcldec.ObjectSpec((*FlatAlicloudDiskDevice)(nil).HCL2Spec())}},
+		"image_disk_mappings":          &hcldec.BlockListSpec{TypeName: "image_disk_mappings", Nested: hcldec.ObjectSpec((*FlatAlicloudDiskDevice)(nil).HCL2Spec())},
 		"associate_public_ip_address":  &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
 		"zone_id":                      &hcldec.AttrSpec{Name: "zone_id", Type: cty.String, Required: false},
 		"io_optimized":                 &hcldec.AttrSpec{Name: "io_optimized", Type: cty.Bool, Required: false},

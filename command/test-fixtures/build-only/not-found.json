@@ -1,0 +1,41 @@
+{
+    "builders": [
+        {
+            "name": "chocolate",
+            "type": "file",
+            "content": "chocolate",
+            "target": "chocolate.txt"
+        },
+        {
+            "name": "vanilla",
+            "type": "non-existing",
+            "content": "vanilla",
+            "target": "vanilla.txt"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "only": [
+                    "vanilla"
+                ],
+                "name": "tomato",
+                "type": "shell-local",
+                "inline": [
+                    "echo tomato > tomato.txt"
+                ]
+            }
+        ],
+        [
+            {
+                "only": [
+                    "chocolate"
+                ],
+                "type": "shell-local",
+                "inline": [
+                    "echo unnamed > unnamed.txt"
+                ]
+            }
+        ]
+    ]
+}
