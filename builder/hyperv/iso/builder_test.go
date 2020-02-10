@@ -324,7 +324,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	}
 
 	// Test none
-	config["iso_checksum"] = "NONE"
+	config["iso_checksum"] = "none"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) == 0 {
