@@ -44,7 +44,7 @@ eHLc1nkCgYEApm/motCTPN32nINZ+Vvywbv64ZD+gtpeMNP3CLrbe1X9O+H52AXa
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_checksum":            "foo",
+		"iso_checksum":            "md5:foo",
 		"iso_url":                 "http://www.google.com/",
 		"ssh_username":            "foo",
 		packer.BuildNameConfigKey: "foo",
