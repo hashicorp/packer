@@ -62,14 +62,15 @@ import (
 // ```
 //
 type ISOConfig struct {
-	// The checksum for the ISO file or virtual hard drive file. The algorithm
-	// to use when computing the checksum will be determined automatically
-	// based on `iso_checksum` length. `iso_checksum` can be also be a file or
-	// an URL, in which case iso_checksum must be prefixed with `file:`; the
-	// go-getter will download it and use the first hash found.
-	//
-	// `iso_checksum` can be set to `"none"` if you want no checksumming
-	// operation to be run.
+	// The checksum for the ISO file or virtual hard drive file. The type of
+	// the checksum is specified within the checksum as a prefix, ex:
+	// "md5:{$checksum}". The type of the checksum can also be omitted and
+	// Packer will try to infer it based on string length. Valid values are
+	// "none", "{$checksum}", "{$path}" "md5:{$checksum}", "sha1:{$checksum}",
+	// "sha256:{$checksum}", "sha512:{$checksum}" or "file:{$checksum}".
+	// Although the checksum will not be verified when it is set to "none",
+	// this is not recommended since these files can be very large and
+	// corruption does happen from time to time.
 	ISOChecksum string `mapstructure:"iso_checksum" required:"true"`
 	// A URL to the ISO containing the installation image or virtual hard drive
 	// (VHD or VHDX) file to clone.
