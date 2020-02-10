@@ -253,7 +253,10 @@ type Config struct {
 	// group is deleted at the end of the build.
 	TempResourceGroupName string `mapstructure:"temp_resource_group_name"`
 	// Specify an existing resource group to run the build in.
-	BuildResourceGroupName     string `mapstructure:"build_resource_group_name"`
+	BuildResourceGroupName string `mapstructure:"build_resource_group_name"`
+	// Specify an existing key vault to use for uploading certificates to the
+	// instance to connect.
+	BuildKeyVaultName          string `mapstructure:"build_key_vault_name"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
 	// set a virtual_network_name and obtain a public IP. If this value is not

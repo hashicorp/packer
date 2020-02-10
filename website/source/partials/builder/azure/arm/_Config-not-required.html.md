@@ -132,6 +132,9 @@
     
 -   `build_resource_group_name` (string) - Specify an existing resource group to run the build in.
     
+-   `build_key_vault_name` (string) - Specify an existing key vault to use for uploading certificates to the
+    instance to connect.
+    
 -   `private_virtual_network_with_public_ip` (bool) - This value allows you to
     set a virtual_network_name and obtain a public IP. If this value is not
     set and virtual_network_name is defined Packer is only allowed to be
