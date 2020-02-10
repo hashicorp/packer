@@ -1,11 +1,5 @@
 <!-- Code generated from the comments of the Config struct in builder/virtualbox/ovf/config.go; DO NOT EDIT MANUALLY -->
 
--   `checksum_type` (string) - The type of the checksum specified in checksum.
-    Valid values are none, md5, sha1, sha256, or sha512. Although the
-    checksum will not be verified when checksum_type is set to "none", this is
-    not recommended since OVA files can be very large and corruption does happen
-    from time to time.
-    
 -   `guest_additions_mode` (string) - The method by which guest additions are
     made available to the guest for installation. Valid options are upload,
     attach, or disable. If the mode is attach the guest additions ISO will

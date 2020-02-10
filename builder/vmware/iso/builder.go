@@ -88,11 +88,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
 		&vmwcommon.StepRemoteUpload{
-			Key:          "floppy_path",
-			Message:      "Uploading Floppy to remote machine...",
-			DoCleanup:    true,
-			Checksum:     "",
-			ChecksumType: "none",
+			Key:       "floppy_path",
+			Message:   "Uploading Floppy to remote machine...",
+			DoCleanup: true,
+			Checksum:  "none",
 		},
 		&vmwcommon.StepRemoteUpload{
 			Key:      "iso_path",

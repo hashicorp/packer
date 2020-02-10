@@ -59,11 +59,6 @@ type Config struct {
 	// The checksum for the .box file. The type of the checksum is specified
 	// with checksum_type, documented below.
 	Checksum string `mapstructure:"checksum" required:"false"`
-	// The type of the checksum specified in checksum. Valid values are none,
-	// md5, sha1, sha256, or sha512. Although the checksum will not be verified
-	// when checksum_type is set to "none", this is not recommended since OVA
-	// files can be very large and corruption does happen from time to time.
-	ChecksumType string `mapstructure:"checksum_type" required:"false"`
 	// if your source_box is a boxfile that we need to add to Vagrant, this is
 	// the name to give it. If left blank, will default to "packer_" plus your
 	// buildname.

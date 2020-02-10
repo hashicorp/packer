@@ -217,7 +217,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	config["clone_from_vmcx_path"] = td
 
 	// Test bad
-	config["iso_checksum_type"] = ""
+	config["iso_checksum"] = "foo"
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)

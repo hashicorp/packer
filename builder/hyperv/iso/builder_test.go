@@ -292,7 +292,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	config := testConfig()
 
 	// Test bad
-	config["iso_checksum_type"] = ""
+	config["iso_checksum"] = "foo"
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -302,7 +302,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	}
 
 	// Test good
-	config["iso_checksum_type"] = "mD5"
+	config["iso_checksum"] = "mD5:foo"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -312,8 +312,8 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ISOChecksumType != "md5" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksumType)
+	if b.config.ISOChecksum != "md5:foo" {
+		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
 	}
 
 	// Test unknown

@@ -36,12 +36,6 @@ type Config struct {
 	// file or an URL, in which case checksum_type must be set to file; the
 	// go-getter will download it and use the first hash found.
 	Checksum string `mapstructure:"checksum" required:"true"`
-	// The type of the checksum specified in checksum.
-	// Valid values are none, md5, sha1, sha256, or sha512. Although the
-	// checksum will not be verified when checksum_type is set to "none", this is
-	// not recommended since OVA files can be very large and corruption does happen
-	// from time to time.
-	ChecksumType string `mapstructure:"checksum_type" required:"false"`
 	// The method by which guest additions are
 	// made available to the guest for installation. Valid options are upload,
 	// attach, or disable. If the mode is attach the guest additions ISO will
@@ -154,7 +148,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(&c.ctx)...)
 
-	c.ChecksumType = strings.ToLower(c.ChecksumType)
 	c.Checksum = strings.ToLower(c.Checksum)
 
 	if c.SourcePath == "" {

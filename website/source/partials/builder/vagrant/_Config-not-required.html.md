@@ -7,11 +7,6 @@
 -   `checksum` (string) - The checksum for the .box file. The type of the checksum is specified
     with checksum_type, documented below.
     
--   `checksum_type` (string) - The type of the checksum specified in checksum. Valid values are none,
-    md5, sha1, sha256, or sha512. Although the checksum will not be verified
-    when checksum_type is set to "none", this is not recommended since OVA
-    files can be very large and corruption does happen from time to time.
-    
 -   `box_name` (string) - if your source_box is a boxfile that we need to add to Vagrant, this is
     the name to give it. If left blank, will default to "packer_" plus your
     buildname.
