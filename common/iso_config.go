@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 
 	getter "github.com/hashicorp/go-getter/v2"
@@ -160,14 +159,13 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
 	}
 	if c.ISOChecksumType == "file" {
-		u, err := url.Parse(c.ISOUrls[0])
-		if err != nil {
-			errs = append(errs, fmt.Errorf("error parsing URL <%s>: %s",
-				c.ISOUrls[0], err))
+		url := c.ISOChecksum
+		if c.ISOChecksumURL != "" {
+			url = c.ISOChecksumURL
 		}
-		cksum, err := getter.DefaultClient.ChecksumFromFile(context.TODO(), c.ISOChecksumURL, u.Path)
-		if cksum == nil || err != nil {
-			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+		cksum, err := getter.DefaultClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
 		} else {
 			c.ISOChecksumType = cksum.Type
 			c.ISOChecksum = hex.EncodeToString(cksum.Value)
