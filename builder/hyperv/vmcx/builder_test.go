@@ -237,12 +237,8 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ISOChecksum != "md5:foo" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
-	}
-
 	// Test none
-	config["iso_checksum"] = "nOne"
+	config["iso_checksum"] = "None"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) == 0 {
@@ -252,9 +248,6 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.ISOChecksum != "none" {
-		t.Fatalf("should've lowercased: %s", b.config.ISOChecksum)
-	}
 }
 
 func TestBuilderPrepare_ISOUrl(t *testing.T) {
