@@ -140,7 +140,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	// hash can sometimes be a checksum url
 	// otherwise, use sha1(source_url)
 	var shaSum [20]byte
-	if s.Checksum != "" {
+	if s.Checksum != "" && s.Checksum != "none" {
 		shaSum = sha1.Sum([]byte(s.Checksum))
 	} else {
 		shaSum = sha1.Sum([]byte(u.String()))
