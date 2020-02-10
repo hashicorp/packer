@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"go/format"
 	"go/types"
 	"io"
 	"log"
@@ -39,6 +38,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/imports"
 )
 
 var (
@@ -189,7 +189,7 @@ func main() {
 		log.Fatalf("os.Create: %v", err)
 	}
 
-	_, err = outputFile.Write(goFmt(out.Bytes()))
+	_, err = outputFile.Write(goFmt(outputFile.Name(), out.Bytes()))
 	if err != nil {
 		log.Fatalf("failed to write file: %v", err)
 	}
@@ -575,8 +575,8 @@ func ToSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
-func goFmt(b []byte) []byte {
-	fb, err := format.Source(b)
+func goFmt(filename string, b []byte) []byte {
+	fb, err := imports.Process(filename, b, nil)
 	if err != nil {
 		log.Printf("formatting err: %v", err)
 		return b
