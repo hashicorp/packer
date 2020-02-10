@@ -147,19 +147,19 @@ func TestPostProcessor_IsValidToBuilder(t *testing.T) {
 	}
 
 	// valid builder vmware-iso
-	valid := pp.IsValidToBuilder("vmware-iso")
+	valid := pp.IsValidWithBuilder("vmware-iso")
 	if !valid {
 		t.Fatalf("vsphere post processor should be valid for vmware-iso builder")
 	}
 
 	// valid builder vmware-vmx
-	valid = pp.IsValidToBuilder("vmware-vmx")
+	valid = pp.IsValidWithBuilder("vmware-vmx")
 	if !valid {
 		t.Fatalf("vsphere post processor should be valid for vmware-vmx builder")
 	}
 
 	// invalid builder test
-	valid = pp.IsValidToBuilder("test")
+	valid = pp.IsValidWithBuilder("test")
 	if valid {
 		t.Fatalf("vsphere post processor should be valid for test builder")
 	}
@@ -168,7 +168,7 @@ func TestPostProcessor_IsValidToBuilder(t *testing.T) {
 	pp = &PostProcessor{
 		Name: "test",
 	}
-	valid = pp.IsValidToBuilder("test")
+	valid = pp.IsValidWithBuilder("test")
 	if !valid {
 		t.Fatalf("test post processor should be valid for test builder")
 	}

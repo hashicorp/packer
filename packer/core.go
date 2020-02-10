@@ -233,7 +233,7 @@ func (c *Core) Build(n string) (Build, error) {
 				continue
 			}
 			// Some Post Processors only works for specific builders
-			if !rawP.IsValidToBuilder(rawName) {
+			if !rawP.IsValidWithBuilder(rawName) {
 				return nil, fmt.Errorf(
 					"post processor '%s' cannot be used with builder %s",
 					rawP.Name, rawName)

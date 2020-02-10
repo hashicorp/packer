@@ -139,7 +139,7 @@ var validBuildersPerPostProcessor = map[string][]string{
 	"vsphere-template": {"vmware-iso", "vmware-vmx"},
 }
 
-func (p *PostProcessor) IsValidToBuilder(builder string) bool {
+func (p *PostProcessor) IsValidWithBuilder(builder string) bool {
 	builders, ok := validBuildersPerPostProcessor[p.Name]
 	if !ok {
 		return true
