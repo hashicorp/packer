@@ -11,7 +11,7 @@ import (
 
 func testISOConfig() ISOConfig {
 	return ISOConfig{
-		ISOChecksum:     "foo",
+		ISOChecksum:     "md5:foo",
 		RawSingleISOUrl: "http://www.packer.io/the-OS.iso",
 	}
 }
