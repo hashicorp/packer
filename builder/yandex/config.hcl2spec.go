@@ -59,6 +59,7 @@ type FlatConfig struct {
 	Endpoint                  *string           `mapstructure:"endpoint" required:"false" cty:"endpoint"`
 	FolderID                  *string           `mapstructure:"folder_id" required:"true" cty:"folder_id"`
 	ServiceAccountKeyFile     *string           `mapstructure:"service_account_key_file" required:"false" cty:"service_account_key_file"`
+	ServiceAccountID          *string           `mapstructure:"service_account_id" required:"false" cty:"service_account_id"`
 	Token                     *string           `mapstructure:"token" required:"true" cty:"token"`
 	DiskName                  *string           `mapstructure:"disk_name" required:"false" cty:"disk_name"`
 	DiskSizeGb                *int              `mapstructure:"disk_size_gb" required:"false" cty:"disk_size_gb"`
@@ -153,6 +154,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"endpoint":                     &hcldec.AttrSpec{Name: "endpoint", Type: cty.String, Required: false},
 		"folder_id":                    &hcldec.AttrSpec{Name: "folder_id", Type: cty.String, Required: false},
 		"service_account_key_file":     &hcldec.AttrSpec{Name: "service_account_key_file", Type: cty.String, Required: false},
+		"service_account_id":           &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"disk_name":                    &hcldec.AttrSpec{Name: "disk_name", Type: cty.String, Required: false},
 		"disk_size_gb":                 &hcldec.AttrSpec{Name: "disk_size_gb", Type: cty.Number, Required: false},
