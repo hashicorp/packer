@@ -23,7 +23,7 @@ import (
 var vmxTestBuilderConfig = map[string]string{
 	"type":             `"vmware-iso"`,
 	"iso_url":          `"https://archive.org/download/ut-ttylinux-i686-12.6/ut-ttylinux-i686-12.6.iso"`,
-	"iso_checksum":     `"43c1feeae55a44c6ef694b8eb18408a6"`,
+	"iso_checksum":     `"md5:43c1feeae55a44c6ef694b8eb18408a6"`,
 	"ssh_username":     `"root"`,
 	"ssh_password":     `"password"`,
 	"ssh_wait_timeout": `"45s"`,
