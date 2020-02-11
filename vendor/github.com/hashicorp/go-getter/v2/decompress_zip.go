@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// ZipDecompressor is an implementation of Decompressor that can
-// decompress zip files.
+// ZipDecompressor is an implementation of Decompressor that can decompress zip
+// files.
 type ZipDecompressor struct{}
 
 func (d *ZipDecompressor) Decompress(dst, src string, dir bool) error {

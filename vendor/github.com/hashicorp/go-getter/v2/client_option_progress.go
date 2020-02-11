@@ -4,18 +4,6 @@ import (
 	"io"
 )
 
-// WithProgress allows for a user to track
-// the progress of a download.
-// For example by displaying a progress bar with
-// current download.
-// Not all getters have progress support yet.
-func WithProgress(pl ProgressTracker) func(*Client) error {
-	return func(c *Client) error {
-		c.ProgressListener = pl
-		return nil
-	}
-}
-
 // ProgressTracker allows to track the progress of downloads.
 type ProgressTracker interface {
 	// TrackProgress should be called when
