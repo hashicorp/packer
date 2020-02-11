@@ -18,7 +18,7 @@ build {
             a = "b"
             c = "d"
         }
-        slice_string = var.availability_zone_names
+        slice_string = [for s in var.availability_zone_names : lower(s)]
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
@@ -35,7 +35,7 @@ build {
                 a = "b"
                 c = "d"
             }
-            slice_string = var.availability_zone_names
+            slice_string = [for s in var.availability_zone_names : lower(s)]
             slice_slice_string = [
                 ["a","b"],
                 ["c","d"]

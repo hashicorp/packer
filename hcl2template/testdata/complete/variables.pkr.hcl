@@ -17,7 +17,7 @@ variable "port" {
 
 variable "availability_zone_names" {
   type    = list(string)
-  default = ["a", "b", "c"]
+  default = ["A", "B", "C"]
 }
 
 locals {
