@@ -5,6 +5,7 @@ Packer team at HashiCorp moving forward. [GH-8480]
 
 ### IMPROVEMENTS:
 * builder/alicloud: Add AlicloudProfile option. [GH-8560]
+* builder/amazon: Add max_retries option to aws builders [GH-8709]
 * builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
 * builder/amazon: Update instance waiters to use global waiter settings set by
     `AWS_POLL_DELAY_SECONDS` and `AWS_TIMEOUT_SECONDS` [GH-8699]
@@ -15,6 +16,8 @@ Packer team at HashiCorp moving forward. [GH-8480]
     previously manually uploaded one. [GH-8624]
 * builder/vagrant: Fix a crash in the Vagrant driver [GH-8607]
 * builder/yandex: Add service account ID to config [GH-8717]
+* communicator/winrm: Users can now override winrm_host with a static IP even
+    when using cloud builders. [GH-8675]
 * core: Add `PACKER_PLUGIN_PATH` to list of supported paths for plugin
     discovery [GH-8616]
 * core: clean up messy log line in plugin execution. [GH-8542]
@@ -23,6 +26,8 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * core: Fix loading external plugins defined in PACKER_CONFIG [GH-8582]
 * core: Log name of postprocessor running to disambiguate long chains of post-
     processors. [GH-8613]
+* core: Packer can use isos in-place on Windows again, instead of copying them
+    into its cache. [GH-7627]
 * core: step_download: return without error if Urls is empty [GH-8579]
 * post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
     (optionally) [GH-8511]
