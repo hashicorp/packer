@@ -12,7 +12,8 @@ is_doc_pr(){
         return 1
     fi
     PR_NUM=$1
-    out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" | jq '[.labels[].name == "docs"] | any')
+    out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" \
+      | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt"] | any')
     exy="$?"
     if [ $exy -ne 0 ]; then
         echo "bad response from github"
