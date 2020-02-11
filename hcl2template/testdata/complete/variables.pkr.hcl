@@ -23,3 +23,11 @@ variable "availability_zone_names" {
 locals {
   feefoo = "${var.foo}_${var.image_id}"
 }
+
+
+locals {
+  standard_tags = {
+    Component   = "user-service"
+    Environment = "production"
+  }
+}

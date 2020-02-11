@@ -126,6 +126,7 @@ var (
 			{"a", "b"},
 			{"c", "d"},
 		},
+		Tags: []MockTag{},
 	}
 
 	basicMockBuilder = &MockBuilder{
@@ -145,7 +146,9 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: dynamicTagList,
+				},
 			},
 		},
 	}
@@ -154,7 +157,9 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: []MockTag{},
+				},
 			},
 		},
 	}
@@ -163,8 +168,25 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: []MockTag{},
+				},
 			},
+		},
+	}
+
+	dynamicTagList = []MockTag{
+		{
+			Key:   "first_tag_key",
+			Value: "first_tag_value",
+		},
+		{
+			Key:   "Component",
+			Value: "user-service",
+		},
+		{
+			Key:   "Environment",
+			Value: "production",
 		},
 	}
 )
