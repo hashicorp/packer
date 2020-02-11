@@ -9,17 +9,11 @@ sidebar_current: 'docs-builders-azure-arm'
 
 Type: `azure-arm`
 
-Packer supports building VHDs in [Azure Resource
+Packer supports building VHDs and Managed Images in [Azure Resource
 Manager](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/).
 Azure provides new users a [$200 credit for the first 30
 days](https://azure.microsoft.com/en-us/free/); after which you will incur
 costs for VMs built and stored using Packer.
-
-Unlike most Packer builders, the artifact produced by the ARM builder is a VHD
-(virtual hard disk), not a full virtual machine image. This means you will need
-to [perform some additional
-steps](https://github.com/Azure/packer-azure/issues/201) in order to launch a
-VM from your build artifact.
 
 Azure uses a combination of OAuth and Active Directory to authorize requests to
 the ARM API. Learn how to [authorize access to
@@ -30,18 +24,22 @@ CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/
 
 ## Configuration Reference
 
-The following configuration options are available for building Azure images. In
-addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+There are many configuration options available for the builder. We'll start
+with authentication parameters, then go over the Azure ARM builder specific
+options.  In addition to the options listed here, a [communicator](/docs/templates/communicator.html) can be configured for this builder.
 
-### Required options for authentication:
-If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure.html#azure-managed-identity)
-you don't need to specify any additional configuration options.
-If you would like to use interactive user authentication, you should specify
-`subscription_id` only. Packer will use cached credentials or redirect you
-to a website to log in.
-If you want to use a [service principal](/docs/builders/azure.html#azure-active-directory-service-principal)
+### Authentication options
+<%= partial "partials/builder/azure/common/client/_Config" %>
+
+#### Managed Identity
+If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure.html#azure-managed-identity) you don't need to specify any additional configuration options. As Packer will attempt to use the Managed Identity and subscription of the VM that Packer is running on.
+
+#### Interactive User Authentication
+To use interactive user authentication, you should specify `subscription_id` only.
+Packer will use cached credentials or redirect you to a website to log in.
+
+#### Service Principal
+To use a [service principal](/docs/builders/azure.html#azure-active-directory-service-principal)
 you should specify `subscription_id`, `client_id` and one of `client_secret`,
 `client_cert_path` or `client_jwt`.
 
@@ -64,16 +62,19 @@ you should specify `subscription_id`, `client_id` and one of `client_secret`,
     Directory docs](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)
     for more information.
 
+
+
+### Azure ARM builder specific options
+
+The Azure builder can create either a VHD, or a managed image. If you are
+creating a VHD, you **must** start with a VHD. Likewise, if you want to create
+a managed image you **must** start with a managed image.
+
 ### Required:
 
 <%= partial "partials/builder/azure/arm/Config-required" %>
 
-#### VHD or Managed Image
-
-The Azure builder can create either a VHD, or a managed image. If you are
-creating a VHD, you **must** start with a VHD. Likewise, if you want to create
-a managed image you **must** start with a managed image. When creating a VHD
-the following options are required.
+When creating a VHD the following additional options are required:
 
 -   `capture_container_name` (string) - Destination container name. Essentially
     the "directory" where your VHD will be organized in Azure. The captured
@@ -89,7 +90,7 @@ the following options are required.
 -   `storage_account` (string) - Storage account under which the final artifact
     will be stored.
 
-When creating a managed image the following options are required.
+When creating a managed image the following additional options are required:
 
 -   `managed_image_name` (string) - Specify the managed image name where the
     result of the Packer build will be saved. The image name must not exist
@@ -105,10 +106,13 @@ When creating a managed image the following options are required.
     [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
 
+#### Shared Image Gallery
 
 Managed images can optionally be published to [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
 as Shared Gallery Image version. Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
-a Shared Image Gallery**. When publishing to a Shared Image Gallery the following options are required.
+a Shared Image Gallery**.
+
+When publishing to a Shared Image Gallery the following options are required.
 
 - `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
 
@@ -155,12 +159,11 @@ To use an existing resource group you **must** provide:
 Providing `temp_resource_group_name` or `location` in combination with
 `build_resource_group_name` is not allowed.
 
-<%= partial "partials/builder/azure/common/client/_Config" %>
-
 ### Optional:
 
 <%= partial "partials/builder/azure/arm/Config-not-required" %>
 <%= partial "partials/builder/azure/common/client/_Config-not-required" %>
+
 
 ## Basic Example
 
