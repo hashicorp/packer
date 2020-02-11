@@ -48,8 +48,6 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * builder/vagrant: Fix bug with reading key from a path with spaces [GH-8605]
 * builder/virtualbox-ovf: Remove config dependency from StepImport [GH-8509]
 * builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
-* communicator/winrm: Fix issue where the value of `winrm_host` was being
-    ignored for some builders [GH-8615]
 * core: Fix crash when build.sources is set to an invalid name [GH-8569]
 * core: Fix error loading .packerconfig [GH-8623]
 * core: Fix loading local ISO files when using `iso_target_path` [GH-8689]
