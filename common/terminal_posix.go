@@ -4,8 +4,9 @@ package common
 
 // Imports for determining terminal information across platforms
 import (
-	"golang.org/x/sys/unix"
 	"os"
+
+	"golang.org/x/sys/unix"
 )
 
 // posix api

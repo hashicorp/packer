@@ -18,8 +18,7 @@ type GCSGetter struct {
 	getter
 }
 
-func (g *GCSGetter) ClientMode(u *url.URL) (ClientMode, error) {
-	ctx := g.Context()
+func (g *GCSGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 
 	// Parse URL
 	bucket, object, err := g.parseURL(u)
@@ -43,41 +42,39 @@ func (g *GCSGetter) ClientMode(u *url.URL) (ClientMode, error) {
 		}
 		if strings.HasSuffix(obj.Name, "/") {
 			// A directory matched the prefix search, so this must be a directory
-			return ClientModeDir, nil
+			return ModeDir, nil
 		} else if obj.Name != object {
 			// A file matched the prefix search and doesn't have the same name
 			// as the query, so this must be a directory
-			return ClientModeDir, nil
+			return ModeDir, nil
 		}
 	}
 	// There are no directories or subdirectories, and if a match was returned,
 	// it was exactly equal to the prefix search. So return File mode
-	return ClientModeFile, nil
+	return ModeFile, nil
 }
 
-func (g *GCSGetter) Get(dst string, u *url.URL) error {
-	ctx := g.Context()
-
+func (g *GCSGetter) Get(ctx context.Context, req *Request) error {
 	// Parse URL
-	bucket, object, err := g.parseURL(u)
+	bucket, object, err := g.parseURL(req.u)
 	if err != nil {
 		return err
 	}
 
 	// Remove destination if it already exists
-	_, err = os.Stat(dst)
+	_, err = os.Stat(req.Dst)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	if err == nil {
 		// Remove the destination
-		if err := os.RemoveAll(dst); err != nil {
+		if err := os.RemoveAll(req.Dst); err != nil {
 			return err
 		}
 	}
 
 	// Create all the parent directories
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(req.Dst), 0755); err != nil {
 		return err
 	}
 
@@ -103,7 +100,7 @@ func (g *GCSGetter) Get(dst string, u *url.URL) error {
 			if err != nil {
 				return err
 			}
-			objDst = filepath.Join(dst, objDst)
+			objDst = filepath.Join(req.Dst, objDst)
 			// Download the matching object.
 			err = g.getObject(ctx, client, objDst, bucket, obj.Name)
 			if err != nil {
@@ -114,11 +111,9 @@ func (g *GCSGetter) Get(dst string, u *url.URL) error {
 	return nil
 }
 
-func (g *GCSGetter) GetFile(dst string, u *url.URL) error {
-	ctx := g.Context()
-
+func (g *GCSGetter) GetFile(ctx context.Context, req *Request) error {
 	// Parse URL
-	bucket, object, err := g.parseURL(u)
+	bucket, object, err := g.parseURL(req.u)
 	if err != nil {
 		return err
 	}
@@ -127,7 +122,7 @@ func (g *GCSGetter) GetFile(dst string, u *url.URL) error {
 	if err != nil {
 		return err
 	}
-	return g.getObject(ctx, client, dst, bucket, object)
+	return g.getObject(ctx, client, req.Dst, bucket, object)
 }
 
 func (g *GCSGetter) getObject(ctx context.Context, client *storage.Client, dst, bucket, object string) error {

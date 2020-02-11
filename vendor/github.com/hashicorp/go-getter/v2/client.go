@@ -19,25 +19,6 @@ import (
 // Using a client directly allows more fine-grained control over how downloading
 // is done, as well as customizing the protocols supported.
 type Client struct {
- 	// Ctx for cancellation
-	Ctx context.Context
-
-	// Src is the source URL to get.
-	//
-	// Dst is the path to save the downloaded thing as. If Dir is set to
-	// true, then this should be a directory. If the directory doesn't exist,
-	// it will be created for you.
-	//
-	// Pwd is the working directory for detection. If this isn't set, some
-	// detection may fail. Client will not default pwd to the current
-	// working directory for security reasons.
-	Src string
-	Dst string
-	Pwd string
-
-	// Mode is the method of download the client will use. See ClientMode
-	// for documentation.
-	Mode ClientMode
 
 	// Detectors is the list of detectors that are tried on the source.
 	// If this is nil, then the default Detectors will be used.
@@ -50,78 +31,66 @@ type Client struct {
 	// Getters is the map of protocols supported by this client. If this
 	// is nil, then the default Getters variable will be used.
 	Getters map[string]Getter
+}
 
-	// Dir, if true, tells the Client it is downloading a directory (versus
-	// a single file). This distinction is necessary since filenames and
-	// directory names follow the same format so disambiguating is impossible
-	// without knowing ahead of time.
-	//
-	// WARNING: deprecated. If Mode is set, that will take precedence.
-	Dir bool
-
-	// ProgressListener allows to track file downloads.
-	// By default a no op progress listener is used.
-	ProgressListener ProgressTracker
-
-	Options []ClientOption
+// GetResult is the result of a Client.Get
+type GetResult struct {
+	// Local destination of the gotten object.
+	Dst string
 }
 
 // Get downloads the configured source to the destination.
-func (c *Client) Get() error {
-	if err := c.Configure(c.Options...); err != nil {
-		return err
+func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
+	if err := c.configure(); err != nil {
+		return nil, err
 	}
 
 	// Store this locally since there are cases we swap this
-	mode := c.Mode
-	if mode == ClientModeInvalid {
-		if c.Dir {
-			mode = ClientModeDir
-		} else {
-			mode = ClientModeFile
-		}
+	if req.Mode == ModeInvalid {
+		req.Mode = ModeAny
 	}
 
-	src, err := Detect(c.Src, c.Pwd, c.Detectors)
+	var err error
+	req.Src, err = Detect(req.Src, req.Pwd, c.Detectors)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	var force string
 	// Determine if we have a forced protocol, i.e. "git::http://..."
-	force, src := getForcedGetter(src)
+	force, req.Src = getForcedGetter(req.Src)
 
 	// If there is a subdir component, then we download the root separately
 	// and then copy over the proper subdir.
-	var realDst string
-	dst := c.Dst
-	src, subDir := SourceDirSubdir(src)
+	var realDst, subDir string
+	req.Src, subDir = SourceDirSubdir(req.Src)
 	if subDir != "" {
 		td, tdcloser, err := safetemp.Dir("", "getter")
 		if err != nil {
-			return err
+			return nil, err
 		}
 		defer tdcloser.Close()
 
-		realDst = dst
-		dst = td
+		realDst = req.Dst
+		req.Dst = td
 	}
 
-	u, err := urlhelper.Parse(src)
+	req.u, err = urlhelper.Parse(req.Src)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if force == "" {
-		force = u.Scheme
+		force = req.u.Scheme
 	}
 
 	g, ok := c.Getters[force]
 	if !ok {
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"download not supported for scheme '%s'", force)
 	}
 
 	// We have magic query parameters that we use to signal different features
-	q := u.Query()
+	q := req.u.Query()
 
 	// Determine if we have an archive type
 	archiveV := q.Get("archive")
@@ -129,7 +98,7 @@ func (c *Client) Get() error {
 		// Delete the paramter since it is a magic parameter we don't
 		// want to pass on to the Getter
 		q.Del("archive")
-		u.RawQuery = q.Encode()
+		req.u.RawQuery = q.Encode()
 
 		// If we can parse the value as a bool and it is false, then
 		// set the archive to "-" which should never map to a decompressor
@@ -141,7 +110,7 @@ func (c *Client) Get() error {
 		// We don't appear to... but is it part of the filename?
 		matchingLen := 0
 		for k := range c.Decompressors {
-			if strings.HasSuffix(u.Path, "."+k) && len(k) > matchingLen {
+			if strings.HasSuffix(req.u.Path, "."+k) && len(k) > matchingLen {
 				archiveV = k
 				matchingLen = len(k)
 			}
@@ -159,73 +128,73 @@ func (c *Client) Get() error {
 		// this at the end of everything.
 		td, err := ioutil.TempDir("", "getter")
 		if err != nil {
-			return fmt.Errorf(
+			return nil, fmt.Errorf(
 				"Error creating temporary directory for archive: %s", err)
 		}
 		defer os.RemoveAll(td)
 
 		// Swap the download directory to be our temporary path and
 		// store the old values.
-		decompressDst = dst
-		decompressDir = mode != ClientModeFile
-		dst = filepath.Join(td, "archive")
-		mode = ClientModeFile
+		decompressDst = req.Dst
+		decompressDir = req.Mode != ModeFile
+		req.Dst = filepath.Join(td, "archive")
+		req.Mode = ModeFile
 	}
 
 	// Determine checksum if we have one
-	checksum, err := c.extractChecksum(u)
+	checksum, err := c.extractChecksum(ctx, req.u)
 	if err != nil {
-		return fmt.Errorf("invalid checksum: %s", err)
+		return nil, fmt.Errorf("invalid checksum: %s", err)
 	}
 
 	// Delete the query parameter if we have it.
 	q.Del("checksum")
-	u.RawQuery = q.Encode()
+	req.u.RawQuery = q.Encode()
 
-	if mode == ClientModeAny {
+	if req.Mode == ModeAny {
 		// Ask the getter which client mode to use
-		mode, err = g.ClientMode(u)
+		req.Mode, err = g.Mode(ctx, req.u)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// Destination is the base name of the URL path in "any" mode when
 		// a file source is detected.
-		if mode == ClientModeFile {
-			filename := filepath.Base(u.Path)
+		if req.Mode == ModeFile {
+			filename := filepath.Base(req.u.Path)
 
 			// Determine if we have a custom file name
 			if v := q.Get("filename"); v != "" {
 				// Delete the query parameter if we have it.
 				q.Del("filename")
-				u.RawQuery = q.Encode()
+				req.u.RawQuery = q.Encode()
 
 				filename = v
 			}
 
-			dst = filepath.Join(dst, filename)
+			req.Dst = filepath.Join(req.Dst, filename)
 		}
 	}
 
 	// If we're not downloading a directory, then just download the file
 	// and return.
-	if mode == ClientModeFile {
+	if req.Mode == ModeFile {
 		getFile := true
 		if checksum != nil {
-			if err := checksum.checksum(dst); err == nil {
+			if err := checksum.checksum(req.Dst); err == nil {
 				// don't get the file if the checksum of dst is correct
 				getFile = false
 			}
 		}
 		if getFile {
-			err := g.GetFile(dst, u)
+			err := g.GetFile(ctx, req)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			if checksum != nil {
-				if err := checksum.checksum(dst); err != nil {
-					return err
+				if err := checksum.checksum(req.Dst); err != nil {
+					return nil, err
 				}
 			}
 		}
@@ -233,25 +202,25 @@ func (c *Client) Get() error {
 		if decompressor != nil {
 			// We have a decompressor, so decompress the current destination
 			// into the final destination with the proper mode.
-			err := decompressor.Decompress(decompressDst, dst, decompressDir)
+			err := decompressor.Decompress(decompressDst, req.Dst, decompressDir)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			// Swap the information back
-			dst = decompressDst
+			req.Dst = decompressDst
 			if decompressDir {
-				mode = ClientModeAny
+				req.Mode = ModeAny
 			} else {
-				mode = ClientModeFile
+				req.Mode = ModeFile
 			}
 		}
 
 		// We check the dir value again because it can be switched back
 		// if we were unarchiving. If we're still only Get-ing a file, then
 		// we're done.
-		if mode == ClientModeFile {
-			return nil
+		if req.Mode == ModeFile {
+			return &GetResult{req.Dst}, nil
 		}
 	}
 
@@ -263,36 +232,36 @@ func (c *Client) Get() error {
 		// If we're getting a directory, then this is an error. You cannot
 		// checksum a directory. TODO: test
 		if checksum != nil {
-			return fmt.Errorf(
+			return nil, fmt.Errorf(
 				"checksum cannot be specified for directory download")
 		}
 
 		// We're downloading a directory, which might require a bit more work
 		// if we're specifying a subdir.
-		err := g.Get(dst, u)
+		err := g.Get(ctx, req)
 		if err != nil {
-			err = fmt.Errorf("error downloading '%s': %s", src, err)
-			return err
+			err = fmt.Errorf("error downloading '%s': %s", req.Src, err)
+			return nil, err
 		}
 	}
 
 	// If we have a subdir, copy that over
 	if subDir != "" {
 		if err := os.RemoveAll(realDst); err != nil {
-			return err
+			return nil, err
 		}
 		if err := os.MkdirAll(realDst, 0755); err != nil {
-			return err
+			return nil, err
 		}
 
 		// Process any globs
-		subDir, err := SubdirGlob(dst, subDir)
+		subDir, err := SubdirGlob(req.Dst, subDir)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		return copyDir(c.Ctx, realDst, subDir, false)
+		return &GetResult{realDst}, copyDir(ctx, realDst, subDir, false)
 	}
 
-	return nil
+	return &GetResult{req.Dst}, nil
 }
