@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	getter "github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -163,7 +162,7 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		if c.ISOChecksumURL != "" {
 			url = c.ISOChecksumURL
 		}
-		cksum, err := getter.DefaultClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
+		cksum, err := defaultGetterClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
 		} else {
