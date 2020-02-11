@@ -30,4 +30,10 @@ locals {
     Component   = "user-service"
     Environment = "production"
   }
+
+  abc_map = [
+    {id = "a"},
+    {id = "b"},
+    {id = "c"},
+  ]
 }

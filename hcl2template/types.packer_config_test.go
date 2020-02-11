@@ -29,6 +29,7 @@ func TestParser_complete(t *testing.T) {
 				LocalVariables: Variables{
 					"feefoo":        &Variable{},
 					"standard_tags": &Variable{},
+					"abc_map":       &Variable{},
 				},
 				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},

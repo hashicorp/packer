@@ -69,11 +69,7 @@ build {
             a = "b"
             c = "d"
         }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
+        slice_string = local.abc_map[*].id
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
