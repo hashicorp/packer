@@ -147,20 +147,20 @@ type Config struct {
 	// If set to true, Virtual Machines deployed from the latest version of the
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
-	// PublisherName for your base image. See
+	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
-	// Offer for your base image. See
+	// Name of the publisher's offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
 	// CLI example
 	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer" required:"true"`
-	// SKU for your base image. See
+	// SKU of the image offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
@@ -176,24 +176,24 @@ type Config struct {
 	// CLI example
 	// `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 	ImageVersion string `mapstructure:"image_version" required:"false"`
-	// Specify a custom VHD to use. If this value is set, do
+	// URL to a custom VHD to use for your base image. If this value is set, do
 	// not set image_publisher, image_offer, image_sku, or image_version.
-	ImageUrl string `mapstructure:"image_url" required:"false"`
-	// Specify the source managed image's resource group used to use. If this
-	// value is set, do not set image\_publisher, image\_offer, image\_sku, or
-	// image\_version. If this value is set, the value
-	// `custom_managed_image_name` must also be set. See
-	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-	// to learn more about managed images.
-	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"false"`
-	// Specify the source managed image's name to use. If this value is set, do
-	// not set image\_publisher, image\_offer, image\_sku, or image\_version.
+	ImageUrl string `mapstructure:"image_url" required:"true"`
+	// Name of a custom managed image to use for your base image. If this value is set, do
+	// not set image_publisher, image_offer, image_sku, or image_version.
 	// If this value is set, the value
 	// `custom_managed_image_resource_group_name` must also be set. See
 	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.
-	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"false"`
-	customManagedImageID   string
+	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"true"`
+
+	// Name of a custom managed image's resource group to use for your base image. If this
+	// value is set, image_publisher, image_offer, image_sku, or image_version.
+	// `custom_managed_image_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+	// to learn more about managed images.
+	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"true"`
+	customManagedImageID                string
 
 	Location string `mapstructure:"location"`
 	// Size of the VM used for building. This can be changed when you deploy a
