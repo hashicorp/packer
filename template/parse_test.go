@@ -560,3 +560,22 @@ func TestParse_bad(t *testing.T) {
 		}
 	}
 }
+
+func TestParse_checkForDuplicateFields(t *testing.T) {
+	cases := []struct {
+		File     string
+		Expected string
+	}{
+		{"error-duplicate-variables.json", "template has duplicate field: variables"},
+		{"error-duplicate-config.json", "template has duplicate field: foo"},
+	}
+	for _, tc := range cases {
+		_, err := ParseFile(fixtureDir(tc.File))
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+		if !strings.Contains(err.Error(), tc.Expected) {
+			t.Fatalf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
+		}
+	}
+}
