@@ -5,7 +5,7 @@ DO_PR_CHECK=1
 
 set -o pipefail
 
-is_doc_pr(){
+is_doc_or_tech_debt_pr(){
     if ! (($+commands[jq])); then
         DO_PR_CHECK=0
         echo "jq not found"
@@ -39,16 +39,16 @@ get_prs(){
         fi
     done | while read PR_NUM
     do
-        if (($DO_PR_CHECK)) && is_doc_pr $PR_NUM; then
+        if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr $PR_NUM; then
             continue
         fi
         echo "https://github.com/hashicorp/packer/pull/${PR_NUM}"
     done
 }
 
-#is_doc_pr 52061111
-# is_doc_pr 5206 # non-doc pr
-#is_doc_pr 5434 # doc pr
+#is_doc_or_tech_debt_pr 52061111
+# is_doc_or_tech_debt_pr 5206 # non-doc pr
+#is_doc_or_tech_debt_pr 5434 # doc pr
 #echo $?
 #exit
 
