@@ -3,7 +3,7 @@
 has been merged with the Packer core. It will be officially supported by the
 Packer team at HashiCorp moving forward. [GH-8480]
 
-** HCL2 variables & functions ** HCL2 configurations can now use `variable`, 
+**HCL2 variables & functions** HCL2 configurations can now use `variable`, 
 `variables`, `locals`, and functions [GH-8588].
 
 ### IMPROVEMENTS:
