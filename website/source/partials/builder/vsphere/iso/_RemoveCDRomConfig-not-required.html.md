@@ -1,0 +1,4 @@
+<!-- Code generated from the comments of the RemoveCDRomConfig struct in builder/vsphere/iso/step_remove_cdrom.go; DO NOT EDIT MANUALLY -->
+
+-   `remove_cdrom` (bool) - Remove CD-ROM devices from template. Defaults to `false`.
+    
