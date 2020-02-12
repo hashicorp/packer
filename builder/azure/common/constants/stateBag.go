@@ -36,6 +36,7 @@ const (
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
 	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
+	ArmIsExistingKeyVault              string = "arm.IsExistingKeyVault"
 
 	ArmIsManagedImage                                         string = "arm.IsManagedImage"
 	ArmManagedImageResourceGroupName                          string = "arm.ManagedImageResourceGroupName"

@@ -231,8 +231,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
-			NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+		}
+		if b.config.BuildKeyVaultName == "" {
+			steps = append(steps,
+				NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
+				NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+			)
+		} else {
+			steps = append(steps, NewStepCertificateInKeyVault(&azureClient.VaultClient, ui, &b.config))
+		}
+		steps = append(steps,
 			NewStepGetCertificate(azureClient, ui),
 			NewStepSetCertificate(&b.config, ui),
 			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
@@ -261,7 +269,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
-		}
+		)
 	} else {
 		return nil, fmt.Errorf("Builder does not support the os_type '%s'", b.config.OSType)
 	}
@@ -396,6 +404,13 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	}
 
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
+	stateBag.Put(constants.ArmIsExistingKeyVault, false)
+	if b.config.BuildKeyVaultName != "" {
+		stateBag.Put(constants.ArmKeyVaultName, b.config.BuildKeyVaultName)
+		b.config.tmpKeyVaultName = b.config.BuildKeyVaultName
+		stateBag.Put(constants.ArmIsExistingKeyVault, true)
+	}
+
 	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)

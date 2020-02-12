@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
-	getter "github.com/hashicorp/go-getter"
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	getter "github.com/hashicorp/go-getter/v2"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -51,6 +51,8 @@ type StepDownload struct {
 	// on the downloaded file for every URL.
 	Extension string
 }
+
+var defaultGetterClient = getter.Client{}
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Url) == 0 {
@@ -94,24 +96,6 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 	state.Put("error", err)
 	ui.Error(err.Error())
 	return multistep.ActionHalt
-}
-
-var (
-	getters = getter.Getters
-)
-
-func init() {
-	if runtime.GOOS == "windows" {
-		getters["file"] = &getter.FileGetter{
-			// always copy local files instead of symlinking to fix GH-7534. The
-			// longer term fix for this would be to change the go-getter so that it
-			// can leave the source file where it is & tell us where it is.
-			Copy: true,
-		}
-		getters["smb"] = &getter.FileGetter{
-			Copy: true,
-		}
-	}
 }
 
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
@@ -208,20 +192,19 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	}
 
 	ui.Say(fmt.Sprintf("Trying %s", u.String()))
-	gc := getter.Client{
-		Ctx:              ctx,
+	req := &getter.Request{
 		Dst:              targetPath,
 		Src:              src,
 		ProgressListener: ui,
 		Pwd:              wd,
-		Dir:              false,
-		Getters:          getters,
+		Mode:             getter.ModeFile,
+		Inplace:          true,
 	}
 
-	switch err := gc.Get(); err.(type) {
+	switch op, err := defaultGetterClient.Get(ctx, req); err.(type) {
 	case nil: // success !
-		ui.Say(fmt.Sprintf("%s => %s", u.String(), targetPath))
-		return targetPath, nil
+		ui.Say(fmt.Sprintf("%s => %s", u.String(), op.Dst))
+		return op.Dst, nil
 	case *getter.ChecksumError:
 		ui.Say(fmt.Sprintf("Checksum did not match, removing %s", targetPath))
 		if err := os.Remove(targetPath); err != nil {

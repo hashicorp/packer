@@ -41,6 +41,8 @@ type Config struct {
 	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
 	// YC_SERVICE_ACCOUNT_KEY_FILE.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
+	// Service account identifier to assign to instance
+	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
 	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
 	// value by environment variable YC_TOKEN.
 	Token string `mapstructure:"token" required:"true"`
