@@ -1,9 +1,9 @@
-## 1.5.2 (Upcoming)
+## 1.5.2 (February 12, 2020)
 **New Builder** The vsphere-iso builder, previously maintained by JetBrains,
 has been merged with the Packer core. It will be officially supported by the
 Packer team at HashiCorp moving forward. [GH-8480]
 
-**HCL2 variables & functions** HCL2 configurations can now use `variable`, 
+**HCL2 variables & functions** HCL2 configurations can now use `variable`,
 `variables`, `locals`, and functions [GH-8588].
 
 ### IMPROVEMENTS:
