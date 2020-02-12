@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type RemoveCDRomConfig
+
 package iso
 
 import (
@@ -8,6 +11,7 @@ import (
 )
 
 type RemoveCDRomConfig struct {
+	// Remove CD-ROM devices from template. Defaults to `false`.
 	RemoveCdrom bool `mapstructure:"remove_cdrom"`
 }
 
