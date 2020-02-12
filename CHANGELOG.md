@@ -21,6 +21,9 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * builder/yandex: Add service account ID to config [GH-8717]
 * communicator/winrm: Users can now override winrm_host with a static IP even
     when using cloud builders. [GH-8675]
+* core/hcl2: Fix bug preventing reading slices within other slices [GH-8669]
+* core:  Interpolation within post-processors can now access build-specific
+    values like Host IP, communicator password, and more [GH-8632]
 * core: Add `PACKER_PLUGIN_PATH` to list of supported paths for plugin
     discovery [GH-8616]
 * core: clean up messy log line in plugin execution. [GH-8542]
@@ -32,7 +35,6 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * core: Packer can use isos in-place on Windows again, instead of copying them
     into its cache. [GH-7627]
 * core: step_download: return without error if Urls is empty [GH-8579]
-* core/hcl2: Fix bug preventing reading slices within other slices [GH-8669]
 * post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
     (optionally) [GH-8511]
 * scripts: Fix some issues with mapstructure-to-hcl2 code generator. [GH-8574]
