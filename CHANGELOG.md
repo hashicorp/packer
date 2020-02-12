@@ -32,6 +32,7 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * core: Packer can use isos in-place on Windows again, instead of copying them
     into its cache. [GH-7627]
 * core: step_download: return without error if Urls is empty [GH-8579]
+* core/hcl2: Fix bug preventing reading slices within other slices [GH-8669]
 * post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
     (optionally) [GH-8511]
 * scripts: Fix some issues with mapstructure-to-hcl2 code generator. [GH-8574]
