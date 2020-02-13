@@ -25,6 +25,11 @@ func (a *NullArtifact) String() string {
 }
 
 func (a *NullArtifact) State(name string) interface{} {
+	if name == "generated_data" {
+		return map[interface{}]interface{}{
+			"ID": "Null",
+		}
+	}
 	return nil
 }
 
