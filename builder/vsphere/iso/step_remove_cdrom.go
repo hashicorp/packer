@@ -1,3 +1,6 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type RemoveCDRomConfig
+
 package iso
 
 import (
@@ -7,7 +10,14 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type StepRemoveCDRom struct{}
+type RemoveCDRomConfig struct {
+	// Remove CD-ROM devices from template. Defaults to `false`.
+	RemoveCdrom bool `mapstructure:"remove_cdrom"`
+}
+
+type StepRemoveCDRom struct {
+	Config *RemoveCDRomConfig
+}
 
 func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
@@ -18,6 +28,15 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
+	}
+
+	if s.Config.RemoveCdrom == true {
+		ui.Say("Deleting CD-ROM drives...")
+		err := vm.RemoveCdroms()
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
