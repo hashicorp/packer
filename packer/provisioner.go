@@ -80,6 +80,13 @@ func BasicPlaceholderData() map[string]string {
 }
 
 func CastDataToMap(data interface{}) map[string]interface{} {
+
+	if interMap, ok := data.(map[string]interface{}); ok {
+		// null and file builder sometimes don't use a communicator and
+		// therefore don't go through RPC
+		return interMap
+	}
+
 	// Provisioners expect a map[string]interface{} in their data field, but
 	// it gets converted into a map[interface]interface on the way over the
 	// RPC. Check that data can be cast into such a form, and cast it.
