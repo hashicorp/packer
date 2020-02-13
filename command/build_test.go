@@ -111,6 +111,33 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 }
 
+func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	args := []string{
+		filepath.Join(testFixture("build-variable-sharing"), "template.json"),
+	}
+
+	files := []string{
+		"provisioner.Null.txt",
+		"post-processor.Null.txt",
+	}
+
+	defer cleanup(files...)
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	for _, f := range files {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+}
+
 func TestBuildEverything(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
@@ -231,7 +258,7 @@ func testMetaFile(t *testing.T) Meta {
 	}
 }
 
-func cleanup() {
+func cleanup(moreFiles ...string) {
 	os.RemoveAll("chocolate.txt")
 	os.RemoveAll("vanilla.txt")
 	os.RemoveAll("cherry.txt")
@@ -245,6 +272,9 @@ func cleanup() {
 	os.RemoveAll("lilas.txt")
 	os.RemoveAll("campanules.txt")
 	os.RemoveAll("ducky.txt")
+	for _, file := range moreFiles {
+		os.RemoveAll(file)
+	}
 }
 
 func TestBuildCommand_ParseArgs(t *testing.T) {
