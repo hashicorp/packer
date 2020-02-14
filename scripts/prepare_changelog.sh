@@ -29,8 +29,8 @@ if [ -z $LAST_RELEASE ]; then
 fi
 
 get_prs(){
-    # git log --merges v0.10.2...c3861d167533fb797b0fae0c380806625712e5f7 |
-    git log --merges HEAD...${LAST_RELEASE} |
+    # git log v0.10.2...c3861d167533fb797b0fae0c380806625712e5f7 |
+    git log HEAD...${LAST_RELEASE} |
     grep -o "#\([0-9]\+\)" | awk -F\# '{print $2}' | while read line
     do
         grep -q "GH-${line}" CHANGELOG.md
