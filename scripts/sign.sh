@@ -8,6 +8,13 @@
 # export PRODUCT_NAME="packer"
 # export ARTIFACTORY_TOKEN=$ARTIFACTORY_TOKEN
 
+ARTIFACTORY_TOKEN="${ARTIFACTORY_TOKEN:-""}"
+
+if [ -z "$ARTIFACTORY_TOKEN" ]; then
+  echo "Missing required Artifactory credentials"
+  exit 1
+fi
+
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
