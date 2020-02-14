@@ -1,8 +1,9 @@
 package clone
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestCloneBuilder_ImplementsBuilder(t *testing.T) {

@@ -259,6 +259,28 @@ localized code generation. Say you are working on the Amazon builder: running
 `go generate ./builder/amazon/...` will do that for you. Make sure that the
 latest code generation tool is installed by running `make install-gen-deps`.
 
+#### Code linting
+
+Packer relies on [golangci-lint](https://github.com/golangci/golangci-lint) for linting its Go code base, excluding any generated code created by `go generate`. Linting is executed on new files during Travis builds via `make ci`; the linting of existing code base is only executed when running `make lint`. Linting a large project like Packer is an iterative process so existing code base will have issues that are actively being fixed; pull-requests that fix existing linting issues are always welcomed :smile:.
+
+The main configuration for golangci-lint is the `.golangci.yml` in the project root. See `golangci-lint --help` for a list of flags that can be used to override the default configuration.
+
+Run golangci-lint on the entire Packer code base.
+```
+make lint
+```
+
+Run golangci-lint on a single pkg or directory; PKG_NAME expands to /builder/amazon/...
+```
+make lint PKG_NAME=builder/amazon
+```
+
+Note: linting on Travis uses the `--new-from-rev=origin/master` flag to only lint new files added within a branch or pull-request. To run this check locally you can use the `ci-lint` make target. See [golangci-lint in CI](https://github.com/golangci/golangci-lint#faq) for more information.
+
+```
+make ci-lint
+```
+
 #### Running Unit Tests
 
 You can run tests for individual packages using commands like this:
