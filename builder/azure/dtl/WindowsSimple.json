@@ -1,9 +1,9 @@
 {
   "variables": {
-    "client_id": "027c524c-856f-43f0-a2e8-de65fef416c1",
-    "client_secret": "99ebad9b-78e0-4c6e-a621-30751d35af85",
-    "tenant_id": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-    "subscription_id": "cba4e087-aceb-44f0-970e-65e96eff4081",
+    "client_id": "{{env `client_id`}}",
+    "client_secret": "{{env `client_secret`}}",
+    "tenant_id": "{{env `tenant_id`}}",
+    "subscription_id": "{{env `subscription_id`}}",
     "lab_name": "NewpackerRG",
     "resource_group_name": "NewPackerRG",
     "vm_name": "win18"
