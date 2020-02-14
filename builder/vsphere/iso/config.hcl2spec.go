@@ -32,6 +32,7 @@ type FlatConfig struct {
 	DiskThinProvisioned       *bool             `mapstructure:"disk_thin_provisioned" cty:"disk_thin_provisioned"`
 	Network                   *string           `mapstructure:"network" cty:"network"`
 	NetworkCard               *string           `mapstructure:"network_card" cty:"network_card"`
+	NICs                      []FlatNIC         `mapstructure:"network_adapters" cty:"network_adapters"`
 	USBController             *bool             `mapstructure:"usb_controller" cty:"usb_controller"`
 	Notes                     *string           `mapstructure:"notes" cty:"notes"`
 	VMName                    *string           `mapstructure:"vm_name" cty:"vm_name"`
@@ -152,6 +153,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_thin_provisioned":        &hcldec.AttrSpec{Name: "disk_thin_provisioned", Type: cty.Bool, Required: false},
 		"network":                      &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"network_card":                 &hcldec.AttrSpec{Name: "network_card", Type: cty.String, Required: false},
+		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":               &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
 		"notes":                        &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
