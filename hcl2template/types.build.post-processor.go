@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// PostProcessorBlock represents a parsed PostProcessorBlock
+// ProvisionerBlock references a detected but unparsed post processor
 type PostProcessorBlock struct {
 	PType string
 	PName string
@@ -49,7 +49,8 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	return postProcessor, diags
 }
 
-func (p *Parser) StartPostProcessor(pp *PostProcessorBlock) (packer.PostProcessor, hcl.Diagnostics) {
+func (p *Parser) startPostProcessor(pp *PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.PostProcessor, hcl.Diagnostics) {
+	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
 	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)
@@ -61,9 +62,9 @@ func (p *Parser) StartPostProcessor(pp *PostProcessorBlock) (packer.PostProcesso
 		})
 		return nil, diags
 	}
-	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.Rest, nil, postProcessor)
+	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.Rest, ectx, postProcessor)
 	diags = append(diags, moreDiags...)
-	err = postProcessor.Configure(flatProvisinerCfg)
+	err = postProcessor.Configure(flatProvisinerCfg, generatedVars)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,

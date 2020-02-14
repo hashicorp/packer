@@ -59,6 +59,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AttachSnapshot: b.config.AttachSnapshot,
 			KeepRegistered: b.config.KeepRegistered,
 		},
+		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
@@ -176,5 +177,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, nil
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return vboxcommon.NewArtifact(b.config.OutputDir, generatedData)
 }

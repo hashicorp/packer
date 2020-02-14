@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"go/format"
 	"go/types"
 	"io"
 	"log"
@@ -39,6 +38,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/imports"
 )
 
 var (
@@ -189,7 +189,7 @@ func main() {
 		log.Fatalf("os.Create: %v", err)
 	}
 
-	_, err = outputFile.Write(goFmt(out.Bytes()))
+	_, err = outputFile.Write(goFmt(outputFile.Name(), out.Bytes()))
 	if err != nil {
 		log.Fatalf("failed to write file: %v", err)
 	}
@@ -201,6 +201,10 @@ type StructDef struct {
 	Struct             *types.Struct
 }
 
+// outputStructHCL2SpecBody writes the map[string]hcldec.Spec that defines the HCL spec of a
+// struct. Based on the layout of said struct.
+// If a field of s is a struct then the HCL2Spec() function of that struct will be called, otherwise a
+// cty.Type is outputed.
 func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintf(w, "s := map[string]hcldec.Spec{\n")
 
@@ -217,72 +221,99 @@ func outputStructHCL2SpecBody(w io.Writer, s *types.Struct) {
 	fmt.Fprintln(w, `return s`)
 }
 
+// outputHCL2SpecField is called on each field of a struct.
+// outputHCL2SpecField writes the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
 func outputHCL2SpecField(w io.Writer, accessor string, fieldType types.Type, tag *structtag.Tags) {
 	if m2h, err := tag.Get(""); err == nil && m2h.HasOption("self-defined") {
 		fmt.Fprintf(w, `(&%s{}).HCL2Spec()`, fieldType.String())
 		return
 	}
+	spec, _ := goFieldToCtyType(accessor, fieldType)
+	switch spec := spec.(type) {
+	case string:
+		fmt.Fprintf(w, spec)
+	default:
+		fmt.Fprintf(w, `%#v`, spec)
+	}
+
+}
+
+// goFieldToCtyType is a recursive method that returns a cty.Type (or a string) based on the fieldType.
+// goFieldToCtyType returns the values of the `map[string]hcldec.Spec` map
+// supposed to define the HCL spec of a struct.
+// To allow it to be recursive, the method returns two values: an interface that can either be
+// a cty.Type or a string. The second argument is used for recursion and is the
+// type that will be used by the parent. For example when fieldType is a []string; a
+// recursive goFieldToCtyType call will return a cty.String.
+func goFieldToCtyType(accessor string, fieldType types.Type) (interface{}, cty.Type) {
 	switch f := fieldType.(type) {
 	case *types.Pointer:
-		outputHCL2SpecField(w, accessor, f.Elem(), tag)
+		return goFieldToCtyType(accessor, f.Elem())
 	case *types.Basic:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
+		ctyType := basicKindToCtyType(f.Kind())
+		return &hcldec.AttrSpec{
 			Name:     accessor,
-			Type:     basicKindToCtyType(f.Kind()),
+			Type:     ctyType,
 			Required: false,
-		})
+		}, ctyType
 	case *types.Map:
-		fmt.Fprintf(w, `%#v`, &hcldec.BlockAttrsSpec{
+		return &hcldec.BlockAttrsSpec{
 			TypeName:    accessor,
 			ElementType: cty.String, // for now everything can be simplified to a map[string]string
 			Required:    false,
-		})
+		}, cty.Map(cty.String)
+	case *types.Named:
+		// Named is the relative type when of a field with a struct.
+		// E.g. SourceAmiFilter    *common.FlatAmiFilterOptions
+		// SourceAmiFilter will become a block with nested elements from the struct itself.
+		underlyingType := f.Underlying()
+		switch underlyingType.(type) {
+		case *types.Struct:
+			// A struct returns NilType because its HCL2Spec is written in the related file
+			// and we don't need to write it again.
+			return fmt.Sprintf(`&hcldec.BlockSpec{TypeName: "%s",`+
+				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String()), cty.NilType
+		default:
+			return goFieldToCtyType(accessor, underlyingType)
+		}
 	case *types.Slice:
 		elem := f.Elem()
 		if ptr, isPtr := elem.(*types.Pointer); isPtr {
 			elem = ptr.Elem()
 		}
 		switch elem := elem.(type) {
-		case *types.Basic:
-			fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-				Name:     accessor,
-				Type:     cty.List(basicKindToCtyType(elem.Kind())),
-				Required: false,
-			})
 		case *types.Named:
+			// A Slice of Named is the relative type of a filed with a slice of structs.
+			// E.g. LaunchMappings []common.FlatBlockDevice
+			// LaunchMappings will validate more than one block with nested elements.
 			b := bytes.NewBuffer(nil)
 			underlyingType := elem.Underlying()
 			switch underlyingType.(type) {
 			case *types.Struct:
 				fmt.Fprintf(b, `hcldec.ObjectSpec((*%s)(nil).HCL2Spec())`, elem.String())
-			default:
-				outputHCL2SpecField(b, accessor, elem, tag)
 			}
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
-		case *types.Slice:
-			b := bytes.NewBuffer(nil)
-			outputHCL2SpecField(b, accessor, elem.Underlying(), tag)
-			fmt.Fprintf(w, `&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String())
+			return fmt.Sprintf(`&hcldec.BlockListSpec{TypeName: "%s", Nested: %s}`, accessor, b.String()), cty.NilType
 		default:
-			outputHCL2SpecField(w, accessor, elem.Underlying(), tag)
+			_, specType := goFieldToCtyType(accessor, elem)
+			if specType == cty.NilType {
+				return goFieldToCtyType(accessor, elem.Underlying())
+			}
+			return &hcldec.AttrSpec{
+				Name:     accessor,
+				Type:     cty.List(specType),
+				Required: false,
+			}, cty.List(specType)
 		}
-	case *types.Named:
-		underlyingType := f.Underlying()
-		switch underlyingType.(type) {
-		case *types.Struct:
-			fmt.Fprintf(w, `&hcldec.BlockSpec{TypeName: "%s",`+
-				` Nested: hcldec.ObjectSpec((*%s)(nil).HCL2Spec())}`, accessor, f.String())
-		default:
-			outputHCL2SpecField(w, accessor, underlyingType, tag)
-		}
-	default:
-		fmt.Fprintf(w, `%#v`, &hcldec.AttrSpec{
-			Name:     accessor,
-			Type:     basicKindToCtyType(types.Bool),
-			Required: false,
-		})
-		fmt.Fprintf(w, `/* TODO(azr): could not find type */`)
 	}
+	b := bytes.NewBuffer(nil)
+	fmt.Fprintf(b, `%#v`, &hcldec.AttrSpec{
+		Name:     accessor,
+		Type:     basicKindToCtyType(types.Bool),
+		Required: false,
+	})
+	fmt.Fprintf(b, `/* TODO(azr): could not find type */`)
+	return b.String(), cty.NilType
 }
 
 func basicKindToCtyType(kind types.BasicKind) cty.Type {
@@ -544,8 +575,8 @@ func ToSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
-func goFmt(b []byte) []byte {
-	fb, err := format.Source(b)
+func goFmt(filename string, b []byte) []byte {
+	fb, err := imports.Process(filename, b, nil)
 	if err != nil {
 		log.Printf("formatting err: %v", err)
 		return b

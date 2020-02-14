@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"testing"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCreateServerImageShouldFailIfOperationCreateServerImageFails(t *testing.T) {
 	var testSubject = &StepCreateServerImage{
-		CreateServerImage: func(serverInstanceNo string) (*ncloud.ServerImage, error) {
+		CreateServerImage: func(serverInstanceNo string) (*server.MemberServerImage, error) {
 			return nil, fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		Say:   func(message string) {},
@@ -33,7 +33,7 @@ func TestStepCreateServerImageShouldFailIfOperationCreateServerImageFails(t *tes
 }
 func TestStepCreateServerImageShouldPassIfOperationCreateServerImagePasses(t *testing.T) {
 	var testSubject = &StepCreateServerImage{
-		CreateServerImage: func(serverInstanceNo string) (*ncloud.ServerImage, error) { return nil, nil },
+		CreateServerImage: func(serverInstanceNo string) (*server.MemberServerImage, error) { return nil, nil },
 		Say:               func(message string) {},
 		Error:             func(e error) {},
 	}

@@ -174,7 +174,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"chroot_disk_size":             &hcldec.AttrSpec{Name: "chroot_disk_size", Type: cty.Number, Required: false},
 		"chroot_disk_type":             &hcldec.AttrSpec{Name: "chroot_disk_type", Type: cty.String, Required: false},
 		"chroot_mount_path":            &hcldec.AttrSpec{Name: "chroot_mount_path", Type: cty.String, Required: false},
-		"chroot_mounts":                &hcldec.BlockListSpec{TypeName: "chroot_mounts", Nested: &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.String), Required: false}},
+		"chroot_mounts":                &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.List(cty.String)), Required: false},
 		"chroot_copy_files":            &hcldec.AttrSpec{Name: "chroot_copy_files", Type: cty.List(cty.String), Required: false},
 		"chroot_command_wrapper":       &hcldec.AttrSpec{Name: "chroot_command_wrapper", Type: cty.String, Required: false},
 		"mount_options":                &hcldec.AttrSpec{Name: "mount_options", Type: cty.List(cty.String), Required: false},

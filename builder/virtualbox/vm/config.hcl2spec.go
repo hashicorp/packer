@@ -78,6 +78,7 @@ type FlatConfig struct {
 	SSHHostPortMin            *int              `mapstructure:"ssh_host_port_min" required:"false" cty:"ssh_host_port_min"`
 	SSHHostPortMax            *int              `mapstructure:"ssh_host_port_max" cty:"ssh_host_port_max"`
 	SSHSkipNatMapping         *bool             `mapstructure:"ssh_skip_nat_mapping" required:"false" cty:"ssh_skip_nat_mapping"`
+	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" required:"false" cty:"ssh_wait_timeout"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	PostShutdownDelay         *string           `mapstructure:"post_shutdown_delay" required:"false" cty:"post_shutdown_delay"`
@@ -179,13 +180,14 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_host_port_min":            &hcldec.AttrSpec{Name: "ssh_host_port_min", Type: cty.Number, Required: false},
 		"ssh_host_port_max":            &hcldec.AttrSpec{Name: "ssh_host_port_max", Type: cty.Number, Required: false},
 		"ssh_skip_nat_mapping":         &hcldec.AttrSpec{Name: "ssh_skip_nat_mapping", Type: cty.Bool, Required: false},
+		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"shutdown_command":             &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"post_shutdown_delay":          &hcldec.AttrSpec{Name: "post_shutdown_delay", Type: cty.String, Required: false},
 		"disable_shutdown":             &hcldec.AttrSpec{Name: "disable_shutdown", Type: cty.Bool, Required: false},
 		"acpi_shutdown":                &hcldec.AttrSpec{Name: "acpi_shutdown", Type: cty.Bool, Required: false},
-		"vboxmanage":                   &hcldec.BlockListSpec{TypeName: "vboxmanage", Nested: &hcldec.AttrSpec{Name: "vboxmanage", Type: cty.List(cty.String), Required: false}},
-		"vboxmanage_post":              &hcldec.BlockListSpec{TypeName: "vboxmanage_post", Nested: &hcldec.AttrSpec{Name: "vboxmanage_post", Type: cty.List(cty.String), Required: false}},
+		"vboxmanage":                   &hcldec.AttrSpec{Name: "vboxmanage", Type: cty.List(cty.List(cty.String)), Required: false},
+		"vboxmanage_post":              &hcldec.AttrSpec{Name: "vboxmanage_post", Type: cty.List(cty.List(cty.String)), Required: false},
 		"virtualbox_version_file":      &hcldec.AttrSpec{Name: "virtualbox_version_file", Type: cty.String, Required: false},
 		"guest_additions_mode":         &hcldec.AttrSpec{Name: "guest_additions_mode", Type: cty.String, Required: false},
 		"guest_additions_path":         &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},

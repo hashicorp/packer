@@ -3,15 +3,12 @@
 package common
 
 import (
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
-	"net/url"
-	"os"
 	"strings"
 
-	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -29,11 +26,9 @@ import (
 // * Amazon S3
 //
 //
-// \~&gt; On windows - when referencing a local iso - if packer is running
-// without symlinking rights, the iso will be copied to the cache folder. Read
-// [Symlinks in Windows 10
-// !](https://blogs.windows.com/buildingapps/2016/12/02/symlinks-windows-10/)
-// for more info.
+// \~&gt; On Windows, using a symlink to refer to local files is currently
+// unsupported. Packer will always copy a local iso into the Packer cache
+// directory.
 //
 // Examples:
 // go-getter can guess the checksum type based on `iso_checksum` len.
@@ -108,7 +103,7 @@ type ISOConfig struct {
 	TargetExtension string `mapstructure:"iso_target_extension"`
 }
 
-func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
+func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []error) {
 	if len(c.ISOUrls) != 0 && c.RawSingleISOUrl != "" {
 		errs = append(
 			errs, errors.New("Only one of iso_url or iso_urls must be specified"))
@@ -161,27 +156,13 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
 	}
 	if c.ISOChecksumType == "file" {
-		u, err := url.Parse(c.ISOUrls[0])
+		url := c.ISOChecksum
+		if c.ISOChecksumURL != "" {
+			url = c.ISOChecksumURL
+		}
+		cksum, err := defaultGetterClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
 		if err != nil {
-			errs = append(errs, fmt.Errorf("error parsing URL <%s>: %s",
-				c.ISOUrls[0], err))
-		}
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Printf("get working directory: %v", err)
-			// here we ignore the error in case the
-			// working directory is not needed.
-		}
-		gc := getter.Client{
-			Dst:     "no-op",
-			Src:     u.String(),
-			Pwd:     wd,
-			Dir:     false,
-			Getters: getter.Getters,
-		}
-		cksum, err := gc.ChecksumFromFile(c.ISOChecksumURL, u)
-		if cksum == nil || err != nil {
-			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file"))
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
 		} else {
 			c.ISOChecksumType = cksum.Type
 			c.ISOChecksum = hex.EncodeToString(cksum.Value)

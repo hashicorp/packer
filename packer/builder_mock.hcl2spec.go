@@ -2,9 +2,10 @@
 package packer
 
 import (
+	"io"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/zclconf/go-cty/cty"
-	"io"
 )
 
 // FlatMockBuilder is an auto-generated flat version of MockBuilder.

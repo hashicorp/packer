@@ -1,0 +1,25 @@
+{
+    "builders": [
+        {
+            "name": "chocolate",
+            "type": "null",
+            "communicator": "none"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell-local",
+            "inline": [
+                "echo hi > provisioner.{{ build `ID`}}.txt"
+            ]
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "shell-local",
+            "inline": [
+                "echo hi > post-processor.{{ build `ID`}}.txt"
+            ]
+        }
+    ]
+}

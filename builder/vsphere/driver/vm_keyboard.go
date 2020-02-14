@@ -1,11 +1,12 @@
 package driver
 
 import (
+	"strings"
+	"unicode"
+
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/mobile/event/key"
-	"strings"
-	"unicode"
 )
 
 type KeyInput struct {

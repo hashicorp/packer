@@ -103,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+				Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&common.StepProvision{},
@@ -133,7 +133,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
 				StepConnectSSH: &communicator.StepConnectSSH{
 					Config:    &b.config.BuilderComm,
-					Host:      communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+					Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 					SSHConfig: b.config.BuilderComm.SSHConfigFunc(),
 				},
 			},
@@ -166,7 +166,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			&stepCreateInstance{},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      communicator.CommHost(b.config.Comm.SSHHost, "instance_ip"),
+				Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&common.StepProvision{},
@@ -197,6 +197,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		ImageListVersion: state.Get("image_list_version").(int),
 		MachineImageName: state.Get("machine_image_name").(string),
 		MachineImageFile: state.Get("machine_image_file").(string),
+		StateData:        map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

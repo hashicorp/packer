@@ -17,14 +17,24 @@ func TestParser_complete(t *testing.T) {
 	tests := []parseTest{
 		{"working build",
 			defaultParser,
-			parseTestArgs{"testdata/complete"},
+			parseTestArgs{"testdata/complete", nil},
 			&PackerConfig{
-				Sources: map[SourceRef]*Source{
-					refVBIsoUbuntu1204: &Source{Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				Basedir: "testdata/complete",
+				InputVariables: Variables{
+					"foo":                     &Variable{},
+					"image_id":                &Variable{},
+					"port":                    &Variable{},
+					"availability_zone_names": &Variable{},
+				},
+				LocalVariables: Variables{
+					"feefoo": &Variable{},
+				},
+				Sources: map[SourceRef]*SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{refVBIsoUbuntu1204},
+						Sources: []SourceRef{refVBIsoUbuntu1204},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
 								PType: "shell",
@@ -47,8 +57,9 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:    "virtualbox-iso",
-					Builder: basicMockBuilder,
+					Type:     "virtualbox-iso",
+					Prepared: true,
+					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType:       "shell",
@@ -76,7 +87,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{"dir with no config files",
 			defaultParser,
-			parseTestArgs{"testdata/empty"},
+			parseTestArgs{"testdata/empty", nil},
 			nil,
 			true, true,
 			nil,
@@ -84,18 +95,19 @@ func TestParser_complete(t *testing.T) {
 		},
 		{name: "inexistent dir",
 			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/inexistent"},
+			args:                   parseTestArgs{"testdata/inexistent", nil},
 			parseWantCfg:           nil,
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
 		},
 		{name: "folder named build.pkr.hcl with an unknown src",
 			parser: defaultParser,
-			args:   parseTestArgs{"testdata/build.pkr.hcl"},
+			args:   parseTestArgs{"testdata/build.pkr.hcl", nil},
 			parseWantCfg: &PackerConfig{
+				Basedir: "testdata/build.pkr.hcl",
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
+						Sources: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{PType: "shell"},
 							{PType: "file"},
@@ -112,9 +124,11 @@ func TestParser_complete(t *testing.T) {
 			getBuildsWantDiags:     true,
 		},
 		{name: "unknown block type",
-			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/unknown"},
-			parseWantCfg:           &PackerConfig{},
+			parser: defaultParser,
+			args:   parseTestArgs{"testdata/unknown", nil},
+			parseWantCfg: &PackerConfig{
+				Basedir: "testdata/unknown",
+			},
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
 		},

@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -12,11 +13,12 @@ func TestParse_build(t *testing.T) {
 	tests := []parseTest{
 		{"basic build no src",
 			defaultParser,
-			parseTestArgs{"testdata/build/basic.pkr.hcl"},
+			parseTestArgs{"testdata/build/basic.pkr.hcl", nil},
 			&PackerConfig{
+				Basedir: filepath.Join("testdata", "build"),
 				Builds: Builds{
 					&BuildBlock{
-						Froms: []SourceRef{
+						Sources: []SourceRef{
 							{
 								Type: "amazon-ebs",
 								Name: "ubuntu-1604",
@@ -45,9 +47,10 @@ func TestParse_build(t *testing.T) {
 		},
 		{"untyped provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_untyped.pkr.hcl"},
+			parseTestArgs{"testdata/build/provisioner_untyped.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: filepath.Join("testdata", "build"),
+				Builds:  nil,
 			},
 			true, true,
 			nil,
@@ -55,9 +58,10 @@ func TestParse_build(t *testing.T) {
 		},
 		{"inexistent provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl"},
+			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: filepath.Join("testdata", "build"),
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{&packer.CoreBuild{}},
@@ -65,9 +69,10 @@ func TestParse_build(t *testing.T) {
 		},
 		{"untyped post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl"},
+			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: filepath.Join("testdata", "build"),
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{&packer.CoreBuild{}},
@@ -75,9 +80,10 @@ func TestParse_build(t *testing.T) {
 		},
 		{"inexistent post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl"},
+			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: filepath.Join("testdata", "build"),
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{},
@@ -85,9 +91,10 @@ func TestParse_build(t *testing.T) {
 		},
 		{"invalid source",
 			defaultParser,
-			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl"},
+			parseTestArgs{"testdata/build/invalid_source_reference.pkr.hcl", nil},
 			&PackerConfig{
-				Builds: nil,
+				Basedir: filepath.Join("testdata", "build"),
+				Builds:  nil,
 			},
 			true, true,
 			[]packer.Build{},

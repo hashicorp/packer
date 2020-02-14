@@ -108,6 +108,7 @@ type FlatConfig struct {
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min"`
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name"`
+	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" required:"false" cty:"ssh_wait_timeout"`
 	RunOnce                   *bool             `mapstructure:"run_once" cty:"run_once"`
 }
 
@@ -209,7 +210,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"net_device":                   &hcldec.AttrSpec{Name: "net_device", Type: cty.String, Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
-		"qemuargs":                     &hcldec.BlockListSpec{TypeName: "qemuargs", Nested: &hcldec.AttrSpec{Name: "qemuargs", Type: cty.List(cty.String), Required: false}},
+		"qemuargs":                     &hcldec.AttrSpec{Name: "qemuargs", Type: cty.List(cty.List(cty.String)), Required: false},
 		"qemu_binary":                  &hcldec.AttrSpec{Name: "qemu_binary", Type: cty.String, Required: false},
 		"qmp_enable":                   &hcldec.AttrSpec{Name: "qmp_enable", Type: cty.Bool, Required: false},
 		"qmp_socket_path":              &hcldec.AttrSpec{Name: "qmp_socket_path", Type: cty.String, Required: false},
@@ -222,6 +223,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vnc_port_min":                 &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},
 		"vnc_port_max":                 &hcldec.AttrSpec{Name: "vnc_port_max", Type: cty.Number, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
+		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"run_once":                     &hcldec.AttrSpec{Name: "run_once", Type: cty.Bool, Required: false},
 	}
 	return s

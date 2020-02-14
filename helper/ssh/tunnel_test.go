@@ -1,8 +1,9 @@
 package ssh
 
 import (
-	"github.com/hashicorp/packer/communicator/ssh"
 	"testing"
+
+	"github.com/hashicorp/packer/communicator/ssh"
 )
 
 const (

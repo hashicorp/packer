@@ -233,7 +233,8 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
+
+	if err := WaitUntilInstanceRunning(ctx, ec2conn, instanceId); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())

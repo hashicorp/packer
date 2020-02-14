@@ -33,6 +33,10 @@ stateless build environment for each build on the infrastructure of your
 choosing. You can use this to build just about anything: buildpacks,
 containers, jars, binaries, tarballs, msi installers, and more.
 
+Please note that the artifice post-processor will _not_ delete your old artifact
+files, even if it removes them from the artifact. If you want to delete the
+old artifact files, you can use the shell-local post-processor to do so.
+
 ## Workflow
 
 Artifice helps you tie together a few other packer features:

@@ -80,4 +80,11 @@ func TestArtifactState(t *testing.T) {
 	if result != nil {
 		t.Fatalf("Bad: State should be nil for invalid state data name")
 	}
+
+	// Nil StateData should not fail and should return nil
+	artifact = &Artifact{}
+	result = artifact.State("key")
+	if result != nil {
+		t.Fatalf("Bad: State should be nil for nil StateData")
+	}
 }

@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
@@ -327,6 +328,10 @@ type Config struct {
 	// used unless it is specified in this option.
 	VMName string `mapstructure:"vm_name" required:"false"`
 
+	// These are deprecated, but we keep them around for BC
+	// TODO: remove later
+	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
+
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
 
@@ -466,6 +471,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.DiskInterface == "" {
 		b.config.DiskInterface = "virtio"
+	}
+
+	// Backwards compatibility
+	if b.config.SSHWaitTimeout != 0 {
+		b.config.Comm.SSHTimeout = b.config.SSHWaitTimeout
 	}
 
 	if b.config.ISOSkipCache {
@@ -642,7 +652,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		steps = append(steps,
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      commHost(b.config.Comm.SSHHost),
+				Host:      commHost(b.config.Comm.Host()),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
@@ -716,6 +726,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		state: make(map[string]interface{}),
 	}
 
+	artifact.state["generated_data"] = state.Get("generated_data")
 	artifact.state["diskName"] = b.config.VMName
 	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
 	if ok {

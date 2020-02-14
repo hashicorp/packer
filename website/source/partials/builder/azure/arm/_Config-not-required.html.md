@@ -59,23 +59,6 @@
     CLI example
     `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
     
--   `image_url` (string) - Specify a custom VHD to use. If this value is set, do
-    not set image_publisher, image_offer, image_sku, or image_version.
-    
--   `custom_managed_image_resource_group_name` (string) - Specify the source managed image's resource group used to use. If this
-    value is set, do not set image\_publisher, image\_offer, image\_sku, or
-    image\_version. If this value is set, the value
-    `custom_managed_image_name` must also be set. See
-    [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-    to learn more about managed images.
-    
--   `custom_managed_image_name` (string) - Specify the source managed image's name to use. If this value is set, do
-    not set image\_publisher, image\_offer, image\_sku, or image\_version.
-    If this value is set, the value
-    `custom_managed_image_resource_group_name` must also be set. See
-    [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-    to learn more about managed images.
-    
 -   `location` (string) - Location
 -   `vm_size` (string) - Size of the VM used for building. This can be changed when you deploy a
     VM from your VHD. See
@@ -131,6 +114,9 @@
     group is deleted at the end of the build.
     
 -   `build_resource_group_name` (string) - Specify an existing resource group to run the build in.
+    
+-   `build_key_vault_name` (string) - Specify an existing key vault to use for uploading certificates to the
+    instance to connect.
     
 -   `private_virtual_network_with_public_ip` (bool) - This value allows you to
     set a virtual_network_name and obtain a public IP. If this value is not

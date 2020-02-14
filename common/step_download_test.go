@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
@@ -14,8 +15,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
 )
 
@@ -72,7 +74,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root/another.txt")),
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
 			},
 		},
@@ -80,7 +81,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root//another.txt")}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root//another.txt")),
 				toSha1(abs(t, "./test-fixtures/root//another.txt")) + ".lock",
 			},
 		},
@@ -88,7 +88,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}, ChecksumType: "none"},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root/another.txt")),
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
 			},
 		},
@@ -157,7 +156,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?checksum=" + cs["/root/another.txt"]}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -165,7 +163,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -173,7 +170,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, ChecksumType: "sha1", Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -181,7 +177,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?checksum=" + cs["/root/another.txt"]}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -189,7 +184,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -197,7 +191,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, ChecksumType: "sha1", Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -212,7 +205,6 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/basic.txt"]),
 				toSha1(cs["/root/basic.txt"]) + ".lock",
 			},
 		},
@@ -242,6 +234,58 @@ func TestStepDownload_Run(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStepDownload_download(t *testing.T) {
+	step := &StepDownload{
+		Checksum:     "f572d396fae9206628714fb2ce00f72e94f2258f",
+		ChecksumType: "sha1",
+		Description:  "ISO",
+		ResultKey:    "iso_path",
+		Url:          nil,
+	}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	dir := createTempDir(t)
+	defer os.RemoveAll(dir)
+
+	defer os.Setenv("PACKER_CACHE_DIR", os.Getenv("PACKER_CACHE_DIR"))
+	os.Setenv("PACKER_CACHE_DIR", dir)
+
+	// Abs path with extension provided
+	step.TargetPath = "./packer"
+	step.Extension = "ova"
+	_, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
+	os.RemoveAll(step.TargetPath)
+
+	// Abs path with no extension provided
+	step.TargetPath = "./packer"
+	step.Extension = ""
+	_, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
+	os.RemoveAll(step.TargetPath)
+
+	// Path with file
+	step.TargetPath = "./packer/file.iso"
+	_, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	if err != nil {
+		t.Fatalf("Bad: non expected error %s", err.Error())
+	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
+	os.RemoveAll(step.TargetPath)
 }
 
 func createTempDir(t *testing.T) string {

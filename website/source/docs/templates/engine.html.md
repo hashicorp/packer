@@ -62,10 +62,10 @@ Here is a full list of the available functions for reference.
     each function will behave.
 -   `env` - Returns environment variables. See example in [using home
     variable](/docs/templates/user-variables.html#using-home-variable)
--   `build` - This engine will allow you to access special variables that
+-   `build` - This engine will allow you to access, from provisioners and post-processors, special variables that
     provide connection information and basic instance state information.
-    Usage example:   
-    
+    Usage example:
+
     ```json
     {
       "type": "shell-local",
@@ -73,7 +73,7 @@ Here is a full list of the available functions for reference.
       "inline": ["echo $TESTVAR"]
     }
     ```
-    
+
     Valid variables to request are: "ID", "Host",
     "Port", "User", "Password", "ConnType",
     "PackerRunUUID", "PackerHTTPAddr", "SSHPublicKey", and "SSHPrivateKey".
@@ -91,7 +91,7 @@ Here is a full list of the available functions for reference.
     in the provisioner documentation. This feature does not yet work
     if the provisioners are being used in conjunction with our chroot builders
     or with lxc/lxd builders.
-    
+
     For builder-specific engine variables, please also refer to the builder docs.
 
     This engine is in beta; please report any issues or requests on the Packer
@@ -104,6 +104,14 @@ Here is a full list of the available functions for reference.
     `FORMAT`. See
     [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
     of available format specifier.
+
+    Please note that if you are using a large number of builders,
+    provisioners or post-processors, the isotime may be slightly
+    different for each one because it is from when the plugin is
+    launched not the initial Packer process. In order to avoid this and make
+    the timestamp consistent across all plugins, set it as a user variable
+    and then access the user variable within your plugins.
+
 -   `lower` - Lowercases the string.
 -   `packer_version` - Returns Packer version.
 -   `pwd` - The working directory while executing Packer.
@@ -114,7 +122,13 @@ Here is a full list of the available functions for reference.
 -   `split` - Split an input string using separator and return the requested
     substring.
 -   `template_dir` - The directory to the template for the build.
--   `timestamp` - The current Unix timestamp in UTC.
+-   `timestamp` - The Unix timestamp in UTC when the Packer process was
+      launched. Please note that if you are using a large number of builders,
+      provisioners or post-processors, the timestamp may be slightly
+      different for each one because it is from when the plugin is
+      launched not the initial Packer process. In order to avoid this and make
+      the timestamp consistent across all plugins, set it as a user variable
+      and then access the user variable within your plugins.
 -   `uuid` - Returns a random UUID.
 -   `upper` - Uppercases the string.
 -   `user` - Specifies a user variable.

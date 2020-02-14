@@ -40,9 +40,13 @@ type Artifact struct {
 
 	// Additional Disks
 	AdditionalDisks *[]AdditionalDiskArtifact
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
-func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string, generatedData map[string]interface{}) (*Artifact, error) {
 	return &Artifact{
 		ManagedImageResourceGroupName:      resourceGroup,
 		ManagedImageName:                   name,
@@ -51,10 +55,11 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		OSType:                             osType,
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
+		StateData:                          generatedData,
 	}, nil
 }
 
-func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix, destinationSharedImageGalleryId string) (*Artifact, error) {
+func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix, destinationSharedImageGalleryId string, generatedData map[string]interface{}) (*Artifact, error) {
 	return &Artifact{
 		ManagedImageResourceGroupName:      resourceGroup,
 		ManagedImageName:                   name,
@@ -64,10 +69,11 @@ func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, lo
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
 		ManagedImageSharedImageGalleryId:   destinationSharedImageGalleryId,
+		StateData:                          generatedData,
 	}, nil
 }
 
-func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string, osType string) (*Artifact, error) {
+func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string, osType string, generatedData map[string]interface{}) (*Artifact, error) {
 	if template == nil {
 		return nil, fmt.Errorf("nil capture template")
 	}
@@ -110,6 +116,8 @@ func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string, 
 		AdditionalDisks: additional_disks,
 
 		StorageAccountLocation: template.Resources[0].Location,
+
+		StateData: generatedData,
 	}, nil
 }
 
@@ -159,6 +167,10 @@ func (a *Artifact) Id() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
+
 	switch name {
 	case "atlas.artifact.metadata":
 		return a.stateAtlasMetadata()
