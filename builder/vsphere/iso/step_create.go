@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type CreateConfig
+//go:generate mapstructure-to-hcl2 -type NIC,CreateConfig
 
 package iso
 
@@ -12,6 +12,17 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
+
+type NIC struct {
+	// Set network VM will be connected to.
+	Network string `mapstructure:"network"`
+	// Set VM network card type. Example `vmxnet3`.
+	NetworkCard string `mapstructure:"network_card" required:"true"`
+	// Set network card MAC address
+	MacAddress string `mapstructure:"mac_address"`
+	// Enable DirectPath I/O passthrough
+	Passthrough *bool `mapstructure:"passthrough"`
+}
 
 type CreateConfig struct {
 	// Set VM hardware version. Defaults to the most current VM hardware
@@ -35,6 +46,8 @@ type CreateConfig struct {
 	Network string `mapstructure:"network"`
 	// Set VM network card type. Example `vmxnet3`.
 	NetworkCard string `mapstructure:"network_card"`
+	// Network adapters
+	NICs []NIC `mapstructure:"network_adapters"`
 	// Create USB controller for virtual machine. Defaults to `false`.
 	USBController bool `mapstructure:"usb_controller"`
 	// VM notes.
@@ -83,6 +96,23 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	ui.Say("Creating VM...")
+
+	// add network/network card an the first nic for backwards compatibility in the type is defined
+	var networkCards []driver.NIC
+	if s.Config.NetworkCard != "" {
+		networkCards = append(networkCards, driver.NIC{
+			NetworkCard: s.Config.NetworkCard,
+			Network:     s.Config.Network})
+	}
+	for _, nic := range s.Config.NICs {
+		networkCards = append(networkCards, driver.NIC{
+			Network:     nic.Network,
+			NetworkCard: nic.NetworkCard,
+			MacAddress:  nic.MacAddress,
+			Passthrough: nic.Passthrough,
+		})
+	}
+
 	vm, err = d.CreateVM(&driver.CreateConfig{
 		DiskThinProvisioned: s.Config.DiskThinProvisioned,
 		DiskControllerType:  s.Config.DiskControllerType,
@@ -94,8 +124,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		ResourcePool:        s.Location.ResourcePool,
 		Datastore:           s.Location.Datastore,
 		GuestOS:             s.Config.GuestOSType,
-		Network:             s.Config.Network,
-		NetworkCard:         s.Config.NetworkCard,
+		NICs:                networkCards,
 		USBController:       s.Config.USBController,
 		Version:             s.Config.Version,
 		Firmware:            s.Config.Firmware,
