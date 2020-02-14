@@ -29,7 +29,8 @@ func TestNewArtifact(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	a, err := NewArtifact(td)
+	generatedData := map[string]interface{}{"generated_data": "data"}
+	a, err := NewArtifact(td, generatedData)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -39,5 +40,8 @@ func TestNewArtifact(t *testing.T) {
 	}
 	if len(a.Files()) != 1 {
 		t.Fatalf("should length 1: %d", len(a.Files()))
+	}
+	if a.State("generated_data") != "data" {
+		t.Fatalf("bad: should length have generated_data: %s", a.State("generated_data"))
 	}
 }

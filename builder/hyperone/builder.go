@@ -108,6 +108,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		imageID:   state.Get("image_id").(string),
 		imageName: state.Get("image_name").(string),
 		client:    b.client,
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

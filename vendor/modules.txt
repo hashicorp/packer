@@ -61,11 +61,10 @@ github.com/ChrisTrenkamp/goxpath/tree/xmltree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
-# github.com/NaverCloudPlatform/ncloud-sdk-go v0.0.0-20180110055012-c2e73f942591
-github.com/NaverCloudPlatform/ncloud-sdk-go/common
-github.com/NaverCloudPlatform/ncloud-sdk-go/oauth
-github.com/NaverCloudPlatform/ncloud-sdk-go/request
-github.com/NaverCloudPlatform/ncloud-sdk-go/sdk
+# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
 # github.com/PuerkitoBio/goquery v1.5.0
 github.com/PuerkitoBio/goquery
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
@@ -101,6 +100,8 @@ github.com/antchfx/xpath
 github.com/antchfx/xquery/xml
 # github.com/antihax/optional v1.0.0
 github.com/antihax/optional
+# github.com/apparentlymart/go-cidr v1.0.1
+github.com/apparentlymart/go-cidr/cidr
 # github.com/apparentlymart/go-textseg v1.0.0
 github.com/apparentlymart/go-textseg/textseg
 # github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
@@ -163,6 +164,8 @@ github.com/bgentry/go-netrc/netrc
 github.com/bgentry/speakeasy
 # github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 github.com/biogo/hts/bgzf
+# github.com/bmatcuk/doublestar v1.1.5
+github.com/bmatcuk/doublestar
 # github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 github.com/c2h5oh/datasize
 # github.com/census-instrumentation/opencensus-proto v0.2.1
@@ -265,7 +268,7 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/go-querystring/query
 # github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 github.com/google/shlex
-# github.com/google/uuid v1.0.0
+# github.com/google/uuid v1.1.1
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
@@ -307,9 +310,21 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.0
 github.com/hashicorp/go-cleanhttp
+# github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
+github.com/hashicorp/go-cty-funcs/cidr
+# github.com/hashicorp/go-cty-funcs/crypto v0.0.0-20200124154056-476681ae9d62
+github.com/hashicorp/go-cty-funcs/crypto
+# github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
+github.com/hashicorp/go-cty-funcs/encoding
+# github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
+github.com/hashicorp/go-cty-funcs/filesystem
+# github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
+github.com/hashicorp/go-cty-funcs/uuid
 # github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
-github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
+# github.com/hashicorp/go-getter/v2 v2.0.0-20200206160058-e2a28063d6e7
+github.com/hashicorp/go-getter/v2
+github.com/hashicorp/go-getter/v2/helper/url
 # github.com/hashicorp/go-immutable-radix v1.0.0
 github.com/hashicorp/go-immutable-radix
 # github.com/hashicorp/go-multierror v1.0.0
@@ -326,7 +341,7 @@ github.com/hashicorp/go-rootcerts
 github.com/hashicorp/go-safetemp
 # github.com/hashicorp/go-sockaddr v1.0.0
 github.com/hashicorp/go-sockaddr
-# github.com/hashicorp/go-uuid v1.0.1
+# github.com/hashicorp/go-uuid v1.0.2
 github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.2.0
 github.com/hashicorp/go-version
@@ -342,8 +357,11 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/hashicorp/hcl/v2 v2.0.0
+# github.com/hashicorp/hcl/v2 v2.3.0
 github.com/hashicorp/hcl/v2
+github.com/hashicorp/hcl/v2/ext/customdecode
+github.com/hashicorp/hcl/v2/ext/tryfunc
+github.com/hashicorp/hcl/v2/ext/typeexpr
 github.com/hashicorp/hcl/v2/gohcl
 github.com/hashicorp/hcl/v2/hcldec
 github.com/hashicorp/hcl/v2/hclparse
@@ -622,7 +640,7 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
-# github.com/zclconf/go-cty v1.1.2-0.20191126233707-f0f7fd24c4af
+# github.com/zclconf/go-cty v1.2.1 => github.com/azr/go-cty v1.1.1-0.20200203143058-28fcda2fe0cc
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
@@ -630,6 +648,8 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
+# github.com/zclconf/go-cty-yaml v1.0.1
+github.com/zclconf/go-cty-yaml
 # go.opencensus.io v0.22.2
 go.opencensus.io
 go.opencensus.io/internal
@@ -647,8 +667,14 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
+<<<<<<< HEAD
 # golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 # golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
+=======
+# golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
+>>>>>>> 909b9fcfc7fadbb3c52ffd0651511f383745f5ff
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/ed25519
@@ -720,7 +746,7 @@ golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 golang.org/x/time/rate
-# golang.org/x/tools v0.0.0-20191203051722-db047d72ee39
+# golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa
 golang.org/x/tools/cmd/goimports
 golang.org/x/tools/go/analysis
 golang.org/x/tools/go/analysis/passes/inspect
@@ -733,12 +759,13 @@ golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/go/packages
 golang.org/x/tools/go/types/objectpath
 golang.org/x/tools/go/types/typeutil
+golang.org/x/tools/imports
 golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
 golang.org/x/tools/internal/module
+golang.org/x/tools/internal/packagesinternal
 golang.org/x/tools/internal/semver
-golang.org/x/tools/internal/span
 # google.golang.org/api v0.14.0
 google.golang.org/api/compute/v1
 google.golang.org/api/googleapi

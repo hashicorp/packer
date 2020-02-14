@@ -106,7 +106,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      common.CommHost(b.config.Comm.SSHHost),
+				Host:      common.CommHost(b.config.Comm.Host()),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&packerCommon.StepProvision{},
@@ -121,7 +121,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps,
-		&StepRemoveCDRom{},
+		&StepRemoveCDRom{
+			Config: &b.config.RemoveCDRomConfig,
+		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},
@@ -141,8 +143,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, nil
 	}
 	artifact := &common.Artifact{
-		Name: b.config.VMName,
-		VM:   state.Get("vm").(*driver.VirtualMachine),
+		Name:      b.config.VMName,
+		VM:        state.Get("vm").(*driver.VirtualMachine),
+		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

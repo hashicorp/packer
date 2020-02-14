@@ -10,6 +10,10 @@ type ImportArtifact struct {
 	BuilderIdValue string
 	Driver         Driver
 	IdValue        string
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (a *ImportArtifact) BuilderId() string {
@@ -28,8 +32,8 @@ func (a *ImportArtifact) String() string {
 	return fmt.Sprintf("Imported Docker image: %s", a.Id())
 }
 
-func (*ImportArtifact) State(name string) interface{} {
-	return nil
+func (a *ImportArtifact) State(name string) interface{} {
+	return a.StateData[name]
 }
 
 func (a *ImportArtifact) Destroy() error {

@@ -24,6 +24,7 @@ type Config struct {
 	packerCommon.ISOConfig `mapstructure:",squash"`
 
 	CDRomConfig         `mapstructure:",squash"`
+	RemoveCDRomConfig   `mapstructure:",squash"`
 	FloppyConfig        `mapstructure:",squash"`
 	common.RunConfig    `mapstructure:",squash"`
 	BootConfig          `mapstructure:",squash"`

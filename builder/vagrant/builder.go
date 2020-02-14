@@ -323,7 +323,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
-	return NewArtifact(b.config.Provider, b.config.OutputDir), nil
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return NewArtifact(b.config.Provider, b.config.OutputDir, generatedData), nil
 }
 
 // Cancel.

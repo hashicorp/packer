@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -139,4 +141,18 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	return warnings, nil
+}
+
+type NcloudAPIClient struct {
+	server *server.APIClient
+}
+
+func (c *Config) Client() (*NcloudAPIClient, error) {
+	apiKey := &ncloud.APIKey{
+		AccessKey: c.AccessKey,
+		SecretKey: c.SecretKey,
+	}
+	return &NcloudAPIClient{
+		server: server.NewAPIClient(server.NewConfiguration(apiKey)),
+	}, nil
 }

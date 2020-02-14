@@ -60,6 +60,10 @@ type AccessConfig struct {
 	// This allows skipping TLS
 	// verification of the AWS EC2 endpoint. The default is false.
 	InsecureSkipTLSVerify bool `mapstructure:"insecure_skip_tls_verify" required:"false"`
+	// This is the maximum number of times an API call is retried, in the case
+	// where requests are being throttled or experiencing transient failures.
+	// The delay between the subsequent API calls increases exponentially.
+	MaxRetries int `mapstructure:"max_retries" required:"false"`
 	// The MFA
 	// [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
 	// code. This should probably be a user variable since it changes all the
@@ -134,6 +138,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+	if c.MaxRetries > 0 {
+		config = config.WithMaxRetries(c.MaxRetries)
+	}
 
 	staticCreds := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token)
 	if _, err := staticCreds.Get(); err != credentials.ErrStaticCredentialsEmpty {

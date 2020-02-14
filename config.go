@@ -130,7 +130,7 @@ func (c *config) Discover() error {
 		return nil
 	}
 
-	// First, look in the same directory as the executable.
+	// Next, look in the same directory as the executable.
 	exePath, err := osext.Executable()
 	if err != nil {
 		log.Printf("[ERR] Error loading exe directory: %s", err)
@@ -140,7 +140,7 @@ func (c *config) Discover() error {
 		}
 	}
 
-	// Next, look in the plugins directory.
+	// Next, look in the default plugins directory inside the configdir/.packer.d/plugins.
 	dir, err := packer.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
@@ -153,6 +153,22 @@ func (c *config) Discover() error {
 	// Next, look in the CWD.
 	if err := c.discoverExternalComponents("."); err != nil {
 		return err
+	}
+
+	// Check whether there is a custom Plugin directory defined. This gets
+	// absolute preference.
+	if packerPluginPath := os.Getenv("PACKER_PLUGIN_PATH"); packerPluginPath != "" {
+		sep := ":"
+		if runtime.GOOS == "windows" {
+			// on windows, PATH is semicolon-separated
+			sep = ";"
+		}
+		plugPaths := strings.Split(packerPluginPath, sep)
+		for _, plugPath := range plugPaths {
+			if err := c.discoverExternalComponents(plugPath); err != nil {
+				return err
+			}
+		}
 	}
 
 	// Finally, try to use an internal plugin. Note that this will not override

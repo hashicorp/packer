@@ -44,9 +44,12 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state
 		}
 
 		if keyVaultDeploymentName, ok := state.GetOk(constants.ArmKeyVaultDeploymentName); ok {
-			err = s.deleteDeploymentResources(ctx, keyVaultDeploymentName.(string), resourceGroupName)
-			if err != nil {
-				return err
+			// Only delete if custom keyvault was not provided.
+			if exists := state.Get(constants.ArmIsExistingKeyVault).(bool); exists {
+				err = s.deleteDeploymentResources(ctx, keyVaultDeploymentName.(string), resourceGroupName)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

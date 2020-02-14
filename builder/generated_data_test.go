@@ -1,8 +1,9 @@
 package builder
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestGeneratedData_Put(t *testing.T) {

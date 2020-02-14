@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -282,7 +283,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
-				b.config.Comm.SSHHost,
+				b.config.Comm.Host(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},

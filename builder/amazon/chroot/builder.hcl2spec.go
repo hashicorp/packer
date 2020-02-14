@@ -41,6 +41,7 @@ type FlatConfig struct {
 	CustomEndpointEc2       *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
 	DecodeAuthZMessages     *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
 	InsecureSkipTLSVerify   *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
+	MaxRetries              *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries"`
 	MFACode                 *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
 	ProfileName             *string                           `mapstructure:"profile" required:"false" cty:"profile"`
 	RawRegion               *string                           `mapstructure:"region" required:"true" cty:"region"`
@@ -112,6 +113,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
 		"decode_authorization_messages": &hcldec.AttrSpec{Name: "decode_authorization_messages", Type: cty.Bool, Required: false},
 		"insecure_skip_tls_verify":      &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
+		"max_retries":                   &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"mfa_code":                      &hcldec.AttrSpec{Name: "mfa_code", Type: cty.String, Required: false},
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
@@ -120,7 +122,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
 		"ami_block_device_mappings":     &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
-		"chroot_mounts":                 &hcldec.BlockListSpec{TypeName: "chroot_mounts", Nested: &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.String), Required: false}},
+		"chroot_mounts":                 &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.List(cty.String)), Required: false},
 		"command_wrapper":               &hcldec.AttrSpec{Name: "command_wrapper", Type: cty.String, Required: false},
 		"copy_files":                    &hcldec.AttrSpec{Name: "copy_files", Type: cty.List(cty.String), Required: false},
 		"device_path":                   &hcldec.AttrSpec{Name: "device_path", Type: cty.String, Required: false},

@@ -50,7 +50,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRun{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.SSHHost),
+			Host:      commHost(b.config.Comm.Host()),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			CustomConnect: map[string]multistep.Step{
 				"docker":                 &StepConnectDocker{},
@@ -105,9 +105,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			IdValue:        state.Get("image_id").(string),
 			BuilderIdValue: BuilderIdImport,
 			Driver:         driver,
+			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 	} else {
-		artifact = &ExportArtifact{path: b.config.ExportPath}
+		artifact = &ExportArtifact{
+			path:      b.config.ExportPath,
+			StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
+		}
 	}
 
 	return artifact, nil

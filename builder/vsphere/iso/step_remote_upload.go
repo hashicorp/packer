@@ -3,10 +3,11 @@ package iso
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"path/filepath"
 )
 
 type StepRemoteUpload struct {

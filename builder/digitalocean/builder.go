@@ -88,7 +88,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepDropletInfo),
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      communicator.CommHost(b.config.Comm.SSHHost, "droplet_ip"),
+			Host:      communicator.CommHost(b.config.Comm.Host(), "droplet_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
@@ -121,6 +121,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		SnapshotId:   state.Get("snapshot_image_id").(int),
 		RegionNames:  state.Get("regions").([]string),
 		Client:       client,
+		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil

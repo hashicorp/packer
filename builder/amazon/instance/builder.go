@@ -9,13 +9,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/builder"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -342,7 +342,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
-				b.config.Comm.SSHHost,
+				b.config.Comm.Host(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},

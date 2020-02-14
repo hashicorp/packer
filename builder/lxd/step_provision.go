@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -23,9 +24,16 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 		CmdWrapper:    wrappedCommand,
 	}
 
+	// Loads hook data from builder's state, if it has been set.
+	hookData := common.PopulateProvisionHookData(state)
+
+	// Update state generated_data with complete hookData
+	// to make them accessible by post-processors
+	state.Put("generated_data", hookData)
+
 	// Provision
 	log.Println("Running the provision hook")
-	if err := hook.Run(ctx, packer.HookProvision, ui, comm, nil); err != nil {
+	if err := hook.Run(ctx, packer.HookProvision, ui, comm, hookData); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

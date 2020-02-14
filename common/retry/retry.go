@@ -20,7 +20,7 @@ type Config struct {
 	// Max number of retries, 0 means infinite
 	Tries int
 
-	// ShouldRetry tells wether error should be retried. Nil defaults to always
+	// ShouldRetry tells whether error should be retried. Nil defaults to always
 	// true.
 	ShouldRetry func(error) bool
 }

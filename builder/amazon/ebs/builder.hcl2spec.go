@@ -21,6 +21,7 @@ type FlatConfig struct {
 	CustomEndpointEc2                         *string                                `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
 	DecodeAuthZMessages                       *bool                                  `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
 	InsecureSkipTLSVerify                     *bool                                  `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
+	MaxRetries                                *int                                   `mapstructure:"max_retries" required:"false" cty:"max_retries"`
 	MFACode                                   *string                                `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
 	ProfileName                               *string                                `mapstructure:"profile" required:"false" cty:"profile"`
 	RawRegion                                 *string                                `mapstructure:"region" required:"true" cty:"region"`
@@ -147,6 +148,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
 		"decode_authorization_messages": &hcldec.AttrSpec{Name: "decode_authorization_messages", Type: cty.Bool, Required: false},
 		"insecure_skip_tls_verify":      &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
+		"max_retries":                   &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"mfa_code":                      &hcldec.AttrSpec{Name: "mfa_code", Type: cty.String, Required: false},
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},

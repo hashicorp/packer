@@ -32,7 +32,7 @@
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `ena_support` (config.Trilean) - Enable enhanced networking (ENA but not SriovNetSupport) on
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
     AWS IAM policy.
     
@@ -54,7 +54,7 @@
     associated with AMIs, which have been deregistered by force_deregister.
     Default false.
     
--   `encrypt_boot` (config.Trilean) - Whether or not to encrypt the resulting AMI when
+-   `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when
     copying a provisioned instance to an AMI. By default, Packer will keep the
     encryption setting to what it was in the source image. Setting false will
     result in an unencrypted image, and true will result in an encrypted one.

@@ -381,7 +381,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
-	return hypervcommon.NewArtifact(b.config.OutputDir)
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return hypervcommon.NewArtifact(b.config.OutputDir, generatedData)
 }
 
 // Cancel.

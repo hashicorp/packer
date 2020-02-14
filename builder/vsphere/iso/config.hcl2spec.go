@@ -32,6 +32,7 @@ type FlatConfig struct {
 	DiskThinProvisioned       *bool             `mapstructure:"disk_thin_provisioned" cty:"disk_thin_provisioned"`
 	Network                   *string           `mapstructure:"network" cty:"network"`
 	NetworkCard               *string           `mapstructure:"network_card" cty:"network_card"`
+	NICs                      []FlatNIC         `mapstructure:"network_adapters" cty:"network_adapters"`
 	USBController             *bool             `mapstructure:"usb_controller" cty:"usb_controller"`
 	Notes                     *string           `mapstructure:"notes" cty:"notes"`
 	VMName                    *string           `mapstructure:"vm_name" cty:"vm_name"`
@@ -61,6 +62,7 @@ type FlatConfig struct {
 	TargetExtension           *string           `mapstructure:"iso_target_extension" cty:"iso_target_extension"`
 	CdromType                 *string           `mapstructure:"cdrom_type" cty:"cdrom_type"`
 	ISOPaths                  []string          `mapstructure:"iso_paths" cty:"iso_paths"`
+	RemoveCdrom               *bool             `mapstructure:"remove_cdrom" cty:"remove_cdrom"`
 	FloppyIMGPath             *string           `mapstructure:"floppy_img_path" cty:"floppy_img_path"`
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
@@ -151,6 +153,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_thin_provisioned":        &hcldec.AttrSpec{Name: "disk_thin_provisioned", Type: cty.Bool, Required: false},
 		"network":                      &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"network_card":                 &hcldec.AttrSpec{Name: "network_card", Type: cty.String, Required: false},
+		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":               &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
 		"notes":                        &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
@@ -180,6 +183,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_target_extension":         &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
 		"cdrom_type":                   &hcldec.AttrSpec{Name: "cdrom_type", Type: cty.String, Required: false},
 		"iso_paths":                    &hcldec.AttrSpec{Name: "iso_paths", Type: cty.List(cty.String), Required: false},
+		"remove_cdrom":                 &hcldec.AttrSpec{Name: "remove_cdrom", Type: cty.Bool, Required: false},
 		"floppy_img_path":              &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                  &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},

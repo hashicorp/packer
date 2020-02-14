@@ -59,7 +59,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (ret 
 		&stepCreateLinode{client},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.SSHHost),
+			Host:      commHost(b.config.Comm.Host()),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
@@ -95,6 +95,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (ret 
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
 		Driver:     &client,
+		StateData:  map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 
 	return artifact, nil
@@ -103,7 +104,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (ret 
 func commHost(host string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		if host != "" {
-			log.Printf("Using ssh_host value: %s", host)
+			log.Printf("Using host value: %s", host)
 			return host, nil
 		}
 

@@ -60,19 +60,20 @@ func main() {
 		}
 
 		fields := structDecl.Fields.List
+		sourcePath := filepath.ToSlash(paths[1])
 		header := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
 			Filename:   "_" + typeSpec.Name.Name + ".html.md",
 			Header:     typeDecl.Doc.Text(),
 		}
 		required := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
 			Filename:   "_" + typeSpec.Name.Name + "-required.html.md",
 		}
 		notRequired := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
 			Filename:   "_" + typeSpec.Name.Name + "-not-required.html.md",
 		}
@@ -114,6 +115,8 @@ func main() {
 			switch fieldType {
 			case "time.Duration":
 				fieldType = `duration string | ex: "1h5m2s"`
+			case "config.Trilean":
+				fieldType = `boolean`
 			}
 
 			field := Field{

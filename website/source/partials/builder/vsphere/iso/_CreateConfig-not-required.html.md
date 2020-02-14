@@ -21,6 +21,8 @@
     
 -   `network_card` (string) - Set VM network card type. Example `vmxnet3`.
     
+-   `network_adapters` ([]NIC) - Network adapters
+    
 -   `usb_controller` (bool) - Create USB controller for virtual machine. Defaults to `false`.
     
 -   `notes` (string) - VM notes.

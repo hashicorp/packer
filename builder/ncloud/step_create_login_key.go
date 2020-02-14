@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -16,13 +16,13 @@ type LoginKey struct {
 }
 
 type StepCreateLoginKey struct {
-	Conn           *ncloud.Conn
+	Conn           *NcloudAPIClient
 	CreateLoginKey func() (*LoginKey, error)
 	Say            func(message string)
 	Error          func(e error)
 }
 
-func NewStepCreateLoginKey(conn *ncloud.Conn, ui packer.Ui) *StepCreateLoginKey {
+func NewStepCreateLoginKey(conn *NcloudAPIClient, ui packer.Ui) *StepCreateLoginKey {
 	var step = &StepCreateLoginKey{
 		Conn:  conn,
 		Say:   func(message string) { ui.Say(message) },
@@ -35,14 +35,15 @@ func NewStepCreateLoginKey(conn *ncloud.Conn, ui packer.Ui) *StepCreateLoginKey 
 }
 
 func (s *StepCreateLoginKey) createLoginKey() (*LoginKey, error) {
-	KeyName := fmt.Sprintf("packer-%d", time.Now().Unix())
+	keyName := fmt.Sprintf("packer-%d", time.Now().Unix())
+	reqParams := &server.CreateLoginKeyRequest{KeyName: &keyName}
 
-	privateKey, err := s.Conn.CreateLoginKey(KeyName)
+	privateKey, err := s.Conn.server.V2Api.CreateLoginKey(reqParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return &LoginKey{KeyName, privateKey.PrivateKey}, nil
+	return &LoginKey{keyName, *privateKey.PrivateKey}, nil
 }
 
 func (s *StepCreateLoginKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -60,6 +61,7 @@ func (s *StepCreateLoginKey) Run(ctx context.Context, state multistep.StateBag) 
 func (s *StepCreateLoginKey) Cleanup(state multistep.StateBag) {
 	if loginKey, ok := state.GetOk("LoginKey"); ok {
 		s.Say("Clean up login key")
-		s.Conn.DeleteLoginKey(loginKey.(*LoginKey).KeyName)
+		reqParams := &server.DeleteLoginKeyRequest{KeyName: &loginKey.(*LoginKey).KeyName}
+		s.Conn.server.V2Api.DeleteLoginKey(reqParams)
 	}
 }

@@ -54,7 +54,7 @@ func (s *StepAMIRegionCopy) DeduplicateRegions(intermediary bool) {
 	}
 
 	// Now print all those keys into the region slice again
-	for k, _ := range RegionMap {
+	for k := range RegionMap {
 		RegionSlice = append(RegionSlice, k)
 	}
 

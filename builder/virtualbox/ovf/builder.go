@@ -60,6 +60,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
@@ -181,7 +182,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vboxcommon.NewArtifact(b.config.OutputDir)
+	generatedData := map[string]interface{}{"generated_data": state.Get("generated_data")}
+	return vboxcommon.NewArtifact(b.config.OutputDir, generatedData)
 }
 
 // Cancel.
