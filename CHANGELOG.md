@@ -1,3 +1,7 @@
+## 1.5.4 (February 14, 2020)
+no-change release to fix code-signing on OSX binaries. Since checksums for these
+binaries has changed, we are releasing a second time to prevent confusion.
+
 ## 1.5.3 (February 14, 2020)
 
 ### IMPROVEMENTS:
