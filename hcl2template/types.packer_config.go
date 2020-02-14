@@ -124,6 +124,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
+				Prepared:       true,
 			}
 			res = append(res, pcb)
 		}
