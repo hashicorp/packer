@@ -14,6 +14,7 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
@@ -34,10 +35,12 @@ const (
 	DefaultSecretName       = "packerKeyVaultSecret"
 )
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	c, warnings, errs := newConfig(raws...)
 	if errs != nil {
-		return warnings, errs
+		return nil, warnings, errs
 	}
 
 	b.config = c
@@ -46,7 +49,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.configureStateBag(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
 
-	return warnings, errs
+	return nil, warnings, errs
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
