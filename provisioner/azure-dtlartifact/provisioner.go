@@ -1,4 +1,5 @@
-// This package implements a provisioner for Packer that uses
+//go:generate mapstructure-to-hcl2 -type Config,DtlArtifact,ArtifactParameter
+
 package devtestlabsartifacts
 
 import (
@@ -7,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	dtlBuilder "github.com/hashicorp/packer/builder/azure/dtl"
 
@@ -65,6 +67,8 @@ type Provisioner struct {
 	guestCommands *provisioner.GuestCommands
 }
 
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// // Create passthrough for winrm password so we can fill it in once we know
 	// // it
@@ -93,7 +97,7 @@ func (p *Provisioner) Communicator() packer.Communicator {
 	return p.communicator
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 
 	p.communicator = comm
 
