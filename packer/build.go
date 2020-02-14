@@ -97,6 +97,9 @@ type CoreBuild struct {
 	TemplatePath       string
 	Variables          map[string]string
 
+	// Indicates whether the build is already initialized before calling Prepare(..)
+	Prepared bool
+
 	debug         bool
 	force         bool
 	onError       string
@@ -132,6 +135,13 @@ func (b *CoreBuild) Name() string {
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
 func (b *CoreBuild) Prepare() (warn []string, err error) {
+	// For HCL2 templates, the builder and hooks are initialized when the template is parsed.
+	// Calling Prepare(...) is not necessary
+	if b.Prepared {
+		b.prepareCalled = true
+		return
+	}
+
 	b.l.Lock()
 	defer b.l.Unlock()
 
