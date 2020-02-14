@@ -157,8 +157,7 @@ signed_checksum=$(
 )
 
 echo "${signed_checksum}  signed_${SN_ID}.zip" | $SHASUM_PROG -c
-if [ $? -ne 0 ]
-then
+if [ $? -ne 0 ]; then
   exit 1
 fi
 

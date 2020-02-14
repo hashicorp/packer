@@ -33,6 +33,9 @@ for DARWIN_BIN in $(find ./pkg/dist/*darwin_*.zip); do
 
   echo $TARGET_ZIP
   ./scripts/codesign_example.sh
+  if [ $? -ne 0 ]; then
+  	exit 1
+  fi
 done
 
 exit 0
