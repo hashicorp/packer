@@ -10,6 +10,10 @@ variable "image_id" {
   default = "image-id-default"
 }
 
+variable "proxmox_username" {
+  type = string
+}
+
 variable "port" {
   type = number
   default = 42

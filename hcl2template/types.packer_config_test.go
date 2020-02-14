@@ -25,6 +25,7 @@ func TestParser_complete(t *testing.T) {
 					"image_id":                &Variable{},
 					"port":                    &Variable{},
 					"availability_zone_names": &Variable{},
+					"proxmox_username":        &Variable{},
 				},
 				LocalVariables: Variables{
 					"feefoo": &Variable{},
