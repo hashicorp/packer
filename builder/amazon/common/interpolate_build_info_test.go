@@ -1,12 +1,12 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/builder"
 	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 

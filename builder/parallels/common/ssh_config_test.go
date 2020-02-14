@@ -1,12 +1,13 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/template/interpolate"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func testSSHConfig() *SSHConfig {

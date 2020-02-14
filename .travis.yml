@@ -4,20 +4,21 @@ env:
 os:
   - osx
 
-sudo: false
-
 language: go
-
-go:
-  - 1.13.x
-
-script:
-  - df -h
-  - travis_wait make ci
 
 branches:
   only:
     - master
 
-matrix:
+jobs:
   fast_finish: true
+  include:
+    - go: "1.13.x"
+      name: "go test"
+      script:
+        - df -h
+        - travis_wait make ci
+    - go: "1.13.x"
+      name: "go lint"
+      script: travis_wait make ci-lint
+

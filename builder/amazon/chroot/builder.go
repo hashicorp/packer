@@ -10,11 +10,11 @@ package chroot
 import (
 	"context"
 	"errors"
-	"github.com/hashicorp/packer/builder"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
