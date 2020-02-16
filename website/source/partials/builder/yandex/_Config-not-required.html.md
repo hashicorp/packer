@@ -6,6 +6,8 @@
     is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
     YC_SERVICE_ACCOUNT_KEY_FILE.
     
+-   `service_account_id` (string) - Service account identifier to assign to instance
+    
 -   `disk_name` (string) - The name of the disk, if unset the instance name
     will be used.
     

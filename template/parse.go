@@ -327,17 +327,12 @@ func (r *rawTemplate) parsePostProcessor(
 
 // Parse takes the given io.Reader and parses a Template object out of it.
 func Parse(r io.Reader) (*Template, error) {
-	// Create a buffer to copy what we read
-	var buf bytes.Buffer
-	if _, err := buf.ReadFrom(r); err != nil {
-		return nil, err
-	}
-
-	// First, decode the object into an interface{}. We do this instead of
-	// the rawTemplate directly because we'd rather use mapstructure to
+	// First, decode the object into an interface{} and search for duplicate fields.
+	// We do this instead of the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json.Unmarshal(buf.Bytes(), &raw); err != nil {
+	buf, err := jsonUnmarshal(r, &raw)
+	if err != nil {
 		return nil, err
 	}
 
@@ -392,6 +387,79 @@ func Parse(r io.Reader) (*Template, error) {
 
 	// Return the template parsed from the raw structure
 	return rawTpl.Template()
+}
+
+func jsonUnmarshal(r io.Reader, raw *interface{}) (bytes.Buffer, error) {
+	// Create a buffer to copy what we read
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(r); err != nil {
+		return buf, err
+	}
+
+	// Decode the object into an interface{}
+	if err := json.Unmarshal(buf.Bytes(), raw); err != nil {
+		return buf, err
+	}
+
+	// If Json is valid, check for duplicate fields to avoid silent unwanted override
+	jsonDecoder := json.NewDecoder(strings.NewReader(buf.String()))
+	if err := checkForDuplicateFields(jsonDecoder); err != nil {
+		return buf, err
+	}
+
+	return buf, nil
+}
+
+func checkForDuplicateFields(d *json.Decoder) error {
+	// Get next token from JSON
+	t, err := d.Token()
+	if err != nil {
+		return err
+	}
+
+	delim, ok := t.(json.Delim)
+	// Do nothing if it's not a delimiter
+	if !ok {
+		return nil
+	}
+
+	// Check for duplicates inside of a delimiter {} or []
+	switch delim {
+	case '{':
+		keys := make(map[string]bool)
+		for d.More() {
+			// Get attribute key
+			t, err := d.Token()
+			if err != nil {
+				return err
+			}
+			key := t.(string)
+
+			// Check for duplicates
+			if keys[key] {
+				return fmt.Errorf("template has duplicate field: %s", key)
+			}
+			keys[key] = true
+
+			// Check value to find duplicates in nested blocks
+			if err := checkForDuplicateFields(d); err != nil {
+				return err
+			}
+		}
+	case '[':
+		for d.More() {
+			if err := checkForDuplicateFields(d); err != nil {
+				return err
+			}
+		}
+	}
+
+	// consume closing delimiter } or ]
+	if _, err := d.Token(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ParseFile is the same as Parse but is a helper to automatically open

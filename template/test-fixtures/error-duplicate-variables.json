@@ -1,0 +1,13 @@
+{
+  "variables": {
+    "var": "value"
+  },
+  "variables": {
+    "var": "value"
+  },
+  "builders": [
+    {
+      "foo": "something"
+    }
+  ]
+}

@@ -16,6 +16,15 @@ const (
 	AzureVaultApiVersion = "2016-10-01"
 )
 
+// Enables us to test steps that access this cli
+type AZVaultClientIface interface {
+	GetSecret(string, string) (*Secret, error)
+	SetSecret(string, string, string) error
+	DeletePreparer(string, string) (*http.Request, error)
+	DeleteResponder(*http.Response) (autorest.Response, error)
+	DeleteSender(*http.Request) (*http.Response, error)
+}
+
 type VaultClient struct {
 	autorest.Client
 	keyVaultEndpoint url.URL
@@ -54,7 +63,8 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 		autorest.AsGet(),
 		autorest.WithBaseURL(client.getVaultUrl(vaultName)),
 		autorest.WithPathParameters("/secrets/{secret-name}", p),
-		autorest.WithQueryParameters(q))
+		autorest.WithQueryParameters(q),
+	)
 
 	if err != nil {
 		return nil, err
@@ -84,6 +94,47 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 	}
 
 	return &secret, nil
+}
+
+func (client *VaultClient) SetSecret(vaultName, secretName string, secretValue string) error {
+	p := map[string]interface{}{
+		"secret-name": autorest.Encode("path", secretName),
+	}
+	q := map[string]interface{}{
+		"api-version": AzureVaultApiVersion,
+	}
+
+	jsonBody := fmt.Sprintf(`{"value": "%s"}`, secretValue)
+
+	req, err := autorest.Prepare(
+		&http.Request{},
+		autorest.AsPut(),
+		autorest.AsContentType("application/json; charset=utf-8"),
+		autorest.WithBaseURL(client.getVaultUrl(vaultName)),
+		autorest.WithPathParameters("/secrets/{secret-name}", p),
+		autorest.WithQueryParameters(q),
+		autorest.WithString(jsonBody),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := autorest.SendWithSender(client, req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf(
+			"Failed to set secret to %s/%s, HTTP status code=%d (%s)",
+			vaultName,
+			secretName,
+			resp.StatusCode,
+			http.StatusText(resp.StatusCode))
+	}
+
+	return nil
 }
 
 // Delete deletes the specified Azure key vault.

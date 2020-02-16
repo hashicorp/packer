@@ -72,7 +72,8 @@ require (
 	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
-	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
+	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da // indirect
+	github.com/hashicorp/go-getter/v2 v2.0.0-20200206160058-e2a28063d6e7
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
@@ -111,6 +112,7 @@ require (
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -163,7 +165,7 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20191203051722-db047d72ee39
+	golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa
 	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect

@@ -2,6 +2,7 @@ package qemu
 
 import (
 	"context"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 )

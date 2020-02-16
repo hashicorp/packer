@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 
 	"golang.org/x/sync/errgroup"
 
