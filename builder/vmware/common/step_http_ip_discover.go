@@ -3,10 +3,11 @@ package common
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 // Step to discover the http ip

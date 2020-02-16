@@ -57,8 +57,9 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:    "virtualbox-iso",
-					Builder: basicMockBuilder,
+					Type:     "virtualbox-iso",
+					Prepared: true,
+					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType:       "shell",

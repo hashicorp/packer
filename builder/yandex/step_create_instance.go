@@ -205,6 +205,10 @@ runcmd:
 		},
 	}
 
+	if config.ServiceAccountID != "" {
+		req.ServiceAccountId = config.ServiceAccountID
+	}
+
 	if config.UseIPv6 {
 		req.NetworkInterfaceSpecs[0].PrimaryV6AddressSpec = &compute.PrimaryAddressSpec{}
 	}

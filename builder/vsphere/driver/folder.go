@@ -2,6 +2,7 @@ package driver
 
 import (
 	"fmt"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"

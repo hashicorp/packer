@@ -8,6 +8,17 @@ if ! command -v jq > /dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v sha256sum > /dev/null 2>&1; then
+  if !command -v gsha256sum > /dev/null 2>&1; then
+    echo "This script requires sha256sum (linux) or gsha256sum (osx) to work properly."
+    exit 1
+  else
+    SHASUM_PROG=gsha256sum
+  fi
+else
+  SHASUM_PROG=sha256sum
+fi
+
 PRODUCT_NAME="${PRODUCT_NAME:-""}"
 if [ -z "$PRODUCT_NAME" ]; then
   echo "Missing required product name: ${PRODUCT_NAME}"
@@ -145,6 +156,9 @@ signed_checksum=$(
     | grep -i "x-checksum-sha256" | awk 'gsub("[\r\n]", "", $2) {print $2;}'
 )
 
-echo "${signed_checksum}  signed_${SN_ID}.zip" | gsha256sum -c
+echo "${signed_checksum}  signed_${SN_ID}.zip" | $SHASUM_PROG -c
+if [ $? -ne 0 ]; then
+  exit 1
+fi
 
 mv "signed_${SN_ID}.zip" "$TARGET_ZIP"

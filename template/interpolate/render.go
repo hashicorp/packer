@@ -57,7 +57,7 @@ func RenderMap(v interface{}, ctx *Context, f *RenderFilter) (map[string]interfa
 // RenderInterface renders any value and returns the resulting value.
 func RenderInterface(v interface{}, ctx *Context) (interface{}, error) {
 	f := func(v string) (string, error) {
-		return Render(v, ctx)
+		return RenderOnce(v, ctx)
 	}
 
 	walker := &renderWalker{
