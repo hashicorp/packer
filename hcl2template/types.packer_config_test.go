@@ -21,14 +21,23 @@ func TestParser_complete(t *testing.T) {
 			&PackerConfig{
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
-					"foo":                     &Variable{},
-					"image_id":                &Variable{},
-					"port":                    &Variable{},
-					"availability_zone_names": &Variable{},
-					"proxmox_username":        &Variable{},
+					"foo": &Variable{
+						Name: "foo",
+					},
+					"image_id": &Variable{
+						Name: "image_id",
+					},
+					"port": &Variable{
+						Name: "port",
+					},
+					"availability_zone_names": &Variable{
+						Name: "availability_zone_names",
+					},
 				},
 				LocalVariables: Variables{
-					"feefoo": &Variable{},
+					"feefoo": &Variable{
+						Name: "feefoo",
+					},
 				},
 				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},

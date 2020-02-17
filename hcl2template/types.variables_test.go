@@ -23,15 +23,17 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"image_name": &Variable{},
-					"key":        &Variable{},
-					"my_secret":  &Variable{},
-					"image_id":   &Variable{},
-					"port":       &Variable{},
+					"image_name": &Variable{Name: "image_name"},
+					"key":        &Variable{Name: "key"},
+					"my_secret":  &Variable{Name: "my_secret"},
+					"image_id":   &Variable{Name: "image_id"},
+					"port":       &Variable{Name: "port"},
 					"availability_zone_names": &Variable{
+						Name:        "availability_zone_names",
 						Description: fmt.Sprintln("Describing is awesome ;D"),
 					},
 					"super_secret_password": &Variable{
+						Name:        "super_secret_password",
 						Sensitive:   true,
 						Description: fmt.Sprintln("Handle with care plz"),
 					},
@@ -51,7 +53,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"boolean_value": &Variable{},
+					"boolean_value": &Variable{
+						Name: "boolean_value",
+					},
 				},
 			},
 			true, true,
@@ -64,7 +68,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"boolean_value": &Variable{},
+					"boolean_value": &Variable{
+						Name: "boolean_value",
+					},
 				},
 			},
 			true, true,
@@ -77,23 +83,27 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"broken_type": &Variable{},
+					"broken_type": &Variable{
+						Name: "broken_type",
+					},
 				},
 			},
 			true, true,
 			[]packer.Build{},
 			false,
 		},
-		{"invalid default type",
+		{"unknown key",
 			defaultParser,
 			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"broken_type": &Variable{},
+					"broken_type": &Variable{
+						Name: "broken_type",
+					},
 				},
 			},
-			true, false,
+			true, true,
 			[]packer.Build{},
 			false,
 		},
@@ -103,7 +113,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"foo": &Variable{},
+					"foo": &Variable{
+						Name: "foo",
+					},
 				},
 				Sources: map[SourceRef]*SourceBlock{
 					SourceRef{"null", "null-builder"}: &SourceBlock{
@@ -117,7 +129,7 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packer.Build{},
 			true,
 		},

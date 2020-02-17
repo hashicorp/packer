@@ -31,6 +31,8 @@ type Variable struct {
 	// declaration, the type of the default variable will be used. This will
 	// allow to ensure that users set this variable correctly.
 	Type cty.Type
+	// Common name of the variable
+	Name string
 	// Description of the variable
 	Description string
 	// When Sensitive is set to true Packer will try it best to hide/obfuscate
@@ -59,7 +61,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 
 	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
 		Severity: hcl.DiagError,
-		Summary:  "Unset variable",
+		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
 			"https://packer.io/docs/configuration/from-1.5/syntax.html for details.",
 		Context: v.block.DefRange.Ptr(),
@@ -74,7 +76,9 @@ func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	for k, v := range variables {
 		var diag *hcl.Diagnostic
 		res[k], diag = v.Value()
-		diags = append(diags, diag)
+		if diag != nil {
+			diags = append(diags, diag)
+		}
 	}
 	return res, diags
 }
@@ -107,8 +111,10 @@ func (variables *Variables) decodeConfigMap(block *hcl.Block, ectx *hcl.EvalCont
 			continue
 		}
 		(*variables)[key] = &Variable{
+			Name:         key,
 			DefaultValue: value,
 			Type:         value.Type(),
+			block:        block,
 		}
 	}
 
@@ -142,7 +148,10 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 		return diags
 	}
 
+	name := block.Labels[0]
+
 	res := &Variable{
+		Name:        name,
 		Description: b.Description,
 		Sensitive:   b.Sensitive,
 		block:       block,
@@ -200,7 +209,7 @@ func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext
 		})
 	}
 
-	(*variables)[block.Labels[0]] = res
+	(*variables)[name] = res
 
 	return diags
 }
