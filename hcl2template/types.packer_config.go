@@ -64,7 +64,6 @@ func (c *PackerConfig) decodeVariables(f *hcl.File) hcl.Diagnostics {
 			}
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
-			block.DefRange.Ptr()
 			diags = append(diags, moreDiags...)
 			for key, attr := range attrs {
 				moreDiags = c.LocalVariables.decodeVariable(key, attr, c.EvalContext())
