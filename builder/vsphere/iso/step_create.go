@@ -42,6 +42,8 @@ type CreateConfig struct {
 	DiskSize int64 `mapstructure:"disk_size"`
 	// Enable VMDK thin provisioning for VM. Defaults to `false`.
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
+	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
+	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
 	// Set network VM will be connected to.
 	Network string `mapstructure:"network"`
 	// Set VM network card type. Example `vmxnet3`.
@@ -115,6 +117,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	vm, err = d.CreateVM(&driver.CreateConfig{
 		DiskThinProvisioned: s.Config.DiskThinProvisioned,
+		DiskEagerlyScrub:    s.Config.DiskEagerlyScrub,
 		DiskControllerType:  s.Config.DiskControllerType,
 		DiskSize:            s.Config.DiskSize,
 		Name:                s.Location.VMName,
