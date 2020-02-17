@@ -17,6 +17,8 @@
     
 -   `disk_thin_provisioned` (bool) - Enable VMDK thin provisioning for VM. Defaults to `false`.
     
+-   `disk_eagerly_scrub` (bool) - Enable VMDK eager scrubbing for VM. Defaults to `false`.
+    
 -   `network` (string) - Set network VM will be connected to.
     
 -   `network_card` (string) - Set VM network card type. Example `vmxnet3`.
