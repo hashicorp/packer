@@ -42,6 +42,40 @@ func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	return ectx
 }
 
+// decodeVariables looks in the found blocks for 'locals', 'variables', and
+// 'variable' blocks.
+func (c *PackerConfig) decodeVariables(f *hcl.File) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case variableLabel:
+			moreDiags := c.InputVariables.decodeVariableBlock(block, nil)
+			diags = append(diags, moreDiags...)
+		case variablesLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			diags = append(diags, moreDiags...)
+			for key, attr := range attrs {
+				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
+				diags = append(diags, moreDiags...)
+			}
+		case localsLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			block.DefRange.Ptr()
+			diags = append(diags, moreDiags...)
+			for key, attr := range attrs {
+				moreDiags = c.LocalVariables.decodeVariable(key, attr, c.EvalContext())
+				diags = append(diags, moreDiags...)
+			}
+		}
+	}
+
+	return diags
+}
+
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
 func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {

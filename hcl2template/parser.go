@@ -93,13 +93,8 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
-	{
-		for _, file := range files {
-			diags = append(diags, p.decodeInputVariables(file, cfg)...)
-		}
-		for _, file := range files {
-			diags = append(diags, p.decodeLocalVariables(file, cfg)...)
-		}
+	for _, file := range files {
+		diags = append(diags, cfg.decodeVariables(file)...)
 	}
 
 	// parse var files
@@ -127,49 +122,6 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	}
 
 	return cfg, diags
-}
-
-// decodeLocalVariables looks in the found blocks for 'variables' and
-// 'variable' blocks. It should be called firsthand so that other blocks can
-// use the variables.
-func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case variableLabel:
-			moreDiags := cfg.InputVariables.decodeConfig(block, nil)
-			diags = append(diags, moreDiags...)
-		case variablesLabel:
-			moreDiags := cfg.InputVariables.decodeConfigMap(block, nil)
-			diags = append(diags, moreDiags...)
-		}
-	}
-
-	return diags
-}
-
-// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
-// should be called after parsing input variables so that they can be
-// referenced.
-func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case localsLabel:
-			moreDiags := cfg.LocalVariables.decodeConfigMap(block, cfg.EvalContext())
-			diags = append(diags, moreDiags...)
-		}
-	}
-
-	return diags
 }
 
 // decodeConfig looks in the found blocks for everything that is not a variable
