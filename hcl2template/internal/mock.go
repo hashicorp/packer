@@ -32,6 +32,12 @@ type MockConfig struct {
 	NestedSlice      []NestedMockConfig `mapstructure:"nested_slice"`
 }
 
+func (b *MockConfig) Prepare(raws ...interface{}) error {
+	return config.Decode(b, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
+}
+
 //////
 // MockBuilder
 //////
@@ -45,9 +51,7 @@ var _ packer.Builder = new(MockBuilder)
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
 func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	return nil, nil, config.Decode(&b.Config, &config.DecodeOpts{
-		Interpolate: true,
-	}, raws...)
+	return nil, nil, b.Config.Prepare(raws...)
 }
 
 func (b *MockBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -69,9 +73,7 @@ func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockProvisioner) Prepare(raws ...interface{}) error {
-	return config.Decode(&b.Config, &config.DecodeOpts{
-		Interpolate: true,
-	}, raws...)
+	return b.Config.Prepare(raws...)
 }
 
 func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
@@ -93,9 +95,7 @@ func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockPostProcessor) Configure(raws ...interface{}) error {
-	return config.Decode(&b.Config, &config.DecodeOpts{
-		Interpolate: true,
-	}, raws...)
+	return b.Config.Prepare(raws...)
 }
 
 func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
@@ -118,9 +118,7 @@ func (b *MockCommunicator) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockCommunicator) Configure(raws ...interface{}) ([]string, error) {
-	return nil, config.Decode(&b.Config, &config.DecodeOpts{
-		Interpolate: true,
-	}, raws...)
+	return nil, b.Config.Prepare(raws...)
 }
 
 //////
