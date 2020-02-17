@@ -10,6 +10,7 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -95,6 +96,34 @@ func TestParse_variables(t *testing.T) {
 			},
 			true, false,
 			[]packer.Build{},
+			false,
+		},
+		{"unset variable",
+			defaultParser,
+			parseTestArgs{"testdata/variables/unset_string_variable.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{},
+				},
+				Sources: map[SourceRef]*SourceBlock{
+					SourceRef{"null", "null-builder"}: &SourceBlock{
+						Name: "null-builder",
+						Type: "null",
+					},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{SourceRef{"null", "null-builder"}},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Builder: &null.Builder{},
+				},
+			},
 			false,
 		},
 	}

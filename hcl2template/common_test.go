@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -21,6 +22,7 @@ func getBasicParser() *Parser {
 		BuilderSchemas: packer.MapOfBuilder{
 			"amazon-ebs":     func() (packer.Builder, error) { return &MockBuilder{}, nil },
 			"virtualbox-iso": func() (packer.Builder, error) { return &MockBuilder{}, nil },
+			"null":           func() (packer.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionersSchemas: packer.MapOfProvisioner{
 			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
