@@ -6,9 +6,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/zclconf/go-cty/cty/json"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 type NestedMockConfig struct {
@@ -33,6 +36,21 @@ type MockConfig struct {
 }
 
 func (b *MockConfig) Prepare(raws ...interface{}) error {
+	for i, raw := range raws {
+		cval, ok := raw.(cty.Value)
+		if !ok {
+			continue
+		}
+		b, err := json.Marshal(cval, cty.DynamicPseudoType)
+		if err != nil {
+			return err
+		}
+		ccval, err := json.Unmarshal(b, cty.DynamicPseudoType)
+		if err != nil {
+			return err
+		}
+		raws[i] = ccval
+	}
 	return config.Decode(b, &config.DecodeOpts{
 		Interpolate: true,
 	}, raws...)
