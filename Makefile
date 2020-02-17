@@ -76,13 +76,13 @@ lint: install-lint-deps ## Lint Go code
 		echo "golangci-lint run ./$(PKG_NAME)/..."; \
 		golangci-lint run ./$(PKG_NAME)/...; \
 	else \
-		echo "golangci-lint run"; \
-		golangci-lint run; \
+		echo "golangci-lint run ./..."; \
+		golangci-lint run ./...; \
 	fi
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	GO111MODULE=on golangci-lint run --new-from-rev=origin/master
+	GO111MODULE=on golangci-lint run --new-from-rev=origin/master ./...
 
 
 fmt: ## Format Go code
