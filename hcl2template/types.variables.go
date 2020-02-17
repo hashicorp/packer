@@ -56,10 +56,11 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 			return value, nil
 		}
 	}
-	return cty.NilVal, &hcl.Diagnostic{
+
+	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  "Unset variable",
-		Detail: "A used variable must be set; see " +
+		Detail: "A used variable must be set or have a default value; see " +
 			"https://packer.io/docs/configuration/from-1.5/syntax.html for details.",
 		Context: v.block.DefRange.Ptr(),
 	}
@@ -67,12 +68,15 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 
 type Variables map[string]*Variable
 
-func (variables Variables) Values() map[string]cty.Value {
+func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
+	var diags hcl.Diagnostics
 	for k, v := range variables {
-		res[k], _ = v.Value()
+		var diag *hcl.Diagnostic
+		res[k], diag = v.Value()
+		diags = append(diags, diag)
 	}
-	return res
+	return res, diags
 }
 
 // decodeConfig decodes a "variables" section the way packer 1 used to
