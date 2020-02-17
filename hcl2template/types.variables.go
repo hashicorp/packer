@@ -106,6 +106,11 @@ func (variables *Variables) decodeConfigMap(block *hcl.Block, ectx *hcl.EvalCont
 			DefaultValue: value,
 			Type:         value.Type(),
 		}
+		if ectx != nil {
+			if _, ok := ectx.Variables["local"]; ok {
+				ectx.Variables["local"] = cty.ObjectVal(variables.Values())
+			}
+		}
 	}
 
 	return diags
