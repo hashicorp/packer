@@ -10,7 +10,6 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -119,12 +118,8 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{
-				&packer.CoreBuild{
-					Builder: &null.Builder{},
-				},
-			},
-			false,
+			[]packer.Build{},
+			true,
 		},
 	}
 	testParse(t, tests)
