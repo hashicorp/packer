@@ -122,7 +122,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 	for i, local := range locals {
 		for _, transversal := range local.Expr.Variables() {
 			if transversal.RootName() == "local" {
-				// Evaluate late locals that use another local variable as value
+				// Evaluate later the locals that use another local variable as value
 				continue
 			}
 			diags = append(diags, c.evaluateLocalVariable(local)...)
