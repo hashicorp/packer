@@ -127,6 +127,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},
+		&common.StepConvertToTemplate{
+			ConvertToTemplate: b.config.ConvertToTemplate,
+		},
 	)
 
 	if b.config.Export != nil {
@@ -138,10 +141,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			OutputDir: b.config.Export.OutputDir.OutputDir,
 		})
 	}
-
-	steps = append(steps, &common.StepConvertToTemplate{
-		ConvertToTemplate: b.config.ConvertToTemplate,
-	})
 
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
