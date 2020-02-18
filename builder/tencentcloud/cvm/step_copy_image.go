@@ -2,6 +2,7 @@ package cvm
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,6 +20,7 @@ func (s *stepCopyImage) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
+	config := state.Get("config").(*Config)
 	client := state.Get("cvm_client").(*cvm.Client)
 
 	imageId := state.Get("image").(*cvm.Image).ImageId
@@ -43,6 +45,34 @@ func (s *stepCopyImage) Run(ctx context.Context, state multistep.StateBag) multi
 		return Halt(state, err, "Failed to copy image")
 	}
 
+	Message(state, "Waiting for image ready", "")
+	tencentCloudImages := state.Get("tencentcloudimages").(map[string]string)
+
+	for _, region := range req.DestinationRegions {
+		rc, err := NewCvmClient(config.SecretId, config.SecretKey, *region)
+		if err != nil {
+			return Halt(state, err, "Failed to init client")
+		}
+
+		err = WaitForImageReady(ctx, rc, config.ImageName, "NORMAL", 1800)
+		if err != nil {
+			return Halt(state, err, "Failed to wait for image ready")
+		}
+
+		image, err := GetImageByName(ctx, rc, config.ImageName)
+		if err != nil {
+			return Halt(state, err, "Failed to get image")
+		}
+
+		if image == nil {
+			return Halt(state, err, "Failed to wait for image ready")
+		}
+
+		tencentCloudImages[*region] = *image.ImageId
+		Message(state, fmt.Sprintf("Copy image from %s(%s) to %s(%s)", s.SourceRegion, *imageId, *region, *image.ImageId), "")
+	}
+
+	state.Put("tencentcloudimages", tencentCloudImages)
 	Message(state, "Image copied", "")
 
 	return multistep.ActionContinue
