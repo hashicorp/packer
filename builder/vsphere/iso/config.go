@@ -40,7 +40,7 @@ type Config struct {
 	// Convert VM to a template. Defaults to `false`.
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`
 
-	common.ExportConfig `mapstructure:",squash"`
+	Export *common.ExportConfig `mapstructure:"export"`
 
 	ctx interpolate.Context
 }
