@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type ExportConfig
 
 package common
@@ -42,7 +43,6 @@ type ExportConfig struct {
 	OutputDir OutputConfig `mapstructure:",squash"`
 }
 
-// This step exports a VM built on ESXi
 type StepExport struct {
 	Name      string
 	Force     bool
