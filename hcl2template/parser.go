@@ -93,8 +93,13 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
-	for _, file := range files {
-		diags = append(diags, cfg.decodeVariables(file)...)
+	{
+		for _, file := range files {
+			diags = append(diags, cfg.decodeInputVariables(file)...)
+		}
+		for _, file := range files {
+			diags = append(diags, cfg.decodeLocalVariables(file)...)
+		}
 	}
 
 	// parse var files

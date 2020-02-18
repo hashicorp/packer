@@ -42,9 +42,10 @@ func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	return ectx
 }
 
-// decodeVariables looks in the found blocks for 'locals', 'variables', and
-// 'variable' blocks.
-func (c *PackerConfig) decodeVariables(f *hcl.File) hcl.Diagnostics {
+// decodeLocalVariables looks in the found blocks for 'variables' and
+// 'variable' blocks. It should be called firsthand so that other blocks can
+// use the variables.
+func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -62,6 +63,22 @@ func (c *PackerConfig) decodeVariables(f *hcl.File) hcl.Diagnostics {
 				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
 				diags = append(diags, moreDiags...)
 			}
+		}
+	}
+	return diags
+}
+
+// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
+// should be called after parsing input variables so that they can be
+// referenced.
+func (c *PackerConfig) decodeLocalVariables(f *hcl.File) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
@@ -71,7 +88,6 @@ func (c *PackerConfig) decodeVariables(f *hcl.File) hcl.Diagnostics {
 			}
 		}
 	}
-
 	return diags
 }
 
