@@ -6,12 +6,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/zclconf/go-cty/cty/json"
-
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/json"
 )
 
 type NestedMockConfig struct {
