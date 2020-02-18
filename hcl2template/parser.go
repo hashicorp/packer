@@ -97,9 +97,19 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)
 		}
+
+		var locals []*Local
 		for _, file := range files {
-			diags = append(diags, cfg.decodeLocalVariables(file)...)
+			moreLocals, morediags := cfg.parseLocalVariables(file)
+			diags = append(diags, morediags...)
+
+			if locals == nil {
+				locals = moreLocals
+			} else {
+				locals = append(locals, locals...)
+			}
 		}
+		diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 	}
 
 	// parse var files

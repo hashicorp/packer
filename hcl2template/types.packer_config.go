@@ -42,7 +42,7 @@ func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	return ectx
 }
 
-// decodeLocalVariables looks in the found blocks for 'variables' and
+// decodeInputVariables looks in the found blocks for 'variables' and
 // 'variable' blocks. It should be called firsthand so that other blocks can
 // use the variables.
 func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
@@ -68,26 +68,89 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	return diags
 }
 
-// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
+// parseLocalVariables looks in the found blocks for 'locals' blocks. It
 // should be called after parsing input variables so that they can be
 // referenced.
-func (c *PackerConfig) decodeLocalVariables(f *hcl.File) hcl.Diagnostics {
+func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
+	var allLocals []*Local
 
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
-			for key, attr := range attrs {
-				moreDiags = c.LocalVariables.decodeVariable(key, attr, c.EvalContext())
-				diags = append(diags, moreDiags...)
+			locals := make([]*Local, 0, len(attrs))
+			for name, attr := range attrs {
+				if _, found := c.LocalVariables[name]; found {
+					diags = append(diags, &hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Duplicate variable",
+						Detail:   "Duplicate " + name + " variable definition found.",
+						Subject:  attr.NameRange.Ptr(),
+						Context:  block.DefRange.Ptr(),
+					})
+					return nil, diags
+				}
+				locals = append(locals, &Local{
+					Name: name,
+					Expr: attr.Expr,
+				})
+			}
+
+			if allLocals == nil {
+				allLocals = locals
+			} else {
+				allLocals = append(allLocals, locals...)
 			}
 		}
 	}
+
+	return allLocals, diags
+}
+
+func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	if len(locals) > 0 && c.LocalVariables == nil {
+		c.LocalVariables = Variables{}
+	}
+
+	for i, local := range locals {
+		for _, transversal := range local.Expr.Variables() {
+			if transversal.RootName() == "local" {
+				// Evaluate late locals that use another local variable as value
+				continue
+			}
+			diags = append(diags, c.evaluateLocalVariable(local)...)
+			copy(locals[i:], locals[i+1:])
+		}
+	}
+
+	// Evaluate locals containing another local variable(s)
+	for _, local := range locals {
+		diags = append(diags, c.evaluateLocalVariable(local)...)
+	}
+
+	return diags
+}
+
+func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	value, moreDiags := local.Expr.Value(c.EvalContext())
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+	c.LocalVariables[local.Name] = &Variable{
+		DefaultValue: value,
+		Type:         value.Type(),
+	}
+
 	return diags
 }
 

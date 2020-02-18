@@ -97,6 +97,28 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+		{"variables in locals",
+			defaultParser,
+			parseTestArgs{"testdata/variables/variables_in_locals.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"name_prefix":  &Variable{},
+					"project_name": &Variable{},
+				},
+				LocalVariables: Variables{
+					"default_name_prefix": &Variable{},
+					"name_prefix":         &Variable{},
+					"foo":                 &Variable{},
+					"bar":                 &Variable{},
+					"for_var":             &Variable{},
+					"bar_var":             &Variable{},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }

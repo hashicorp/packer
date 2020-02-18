@@ -12,6 +12,14 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 )
 
+// Local represents a single entry from a "locals" block in a module or file.
+// The "locals" block itself is not represented, because it serves only to
+// provide context for us to interpret its contents.
+type Local struct {
+	Name string
+	Expr hcl.Expression
+}
+
 type Variable struct {
 	// CmdValue, VarfileValue, EnvValue, DefaultValue are possible values of
 	// the variable; The first value set from these will be the one used. If
