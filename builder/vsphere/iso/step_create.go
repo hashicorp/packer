@@ -144,11 +144,6 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// add network/network card an the first nic for backwards compatibility in the type is defined
 	var networkCards []driver.NIC
-	if s.Config.NetworkCard != "" {
-		networkCards = append(networkCards, driver.NIC{
-			NetworkCard: s.Config.NetworkCard,
-			Network:     s.Config.Network})
-	}
 	for _, nic := range s.Config.NICs {
 		networkCards = append(networkCards, driver.NIC{
 			Network:     nic.Network,
