@@ -59,7 +59,9 @@
     set in the VMware VMX. By default this is other. By specifying a more
     specific OS type, VMware may perform some optimizations or virtual hardware
     changes to better support the operating system running in the
-    virtual machine.
+    virtual machine. Valid values differ by platform and version numbers, and may
+    not match other VMware API's representation of the guest OS names. Consult your
+    platform for valid values.
     
 -   `version` (string) - The [vmx hardware
     version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)
