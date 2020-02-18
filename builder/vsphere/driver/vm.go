@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/ovf"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -686,6 +689,15 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func (vm *VirtualMachine) Export(ctx context.Context) (*nfc.Lease, error) {
+	return vm.vm.Export(ctx)
+}
+
+func (vm *VirtualMachine) CreateDescriptor(ctx context.Context, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+	m := ovf.NewManager(vm.vm.Client())
+	return m.CreateDescriptor(ctx, vm.vm, cdp)
 }
 
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {

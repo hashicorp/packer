@@ -119,6 +119,11 @@ type FlatConfig struct {
 	Timeout                   *string           `mapstructure:"shutdown_timeout" cty:"shutdown_timeout"`
 	CreateSnapshot            *bool             `mapstructure:"create_snapshot" cty:"create_snapshot"`
 	ConvertToTemplate         *bool             `mapstructure:"convert_to_template" cty:"convert_to_template"`
+	Name                      *string           `mapstructure:"name" cty:"name"`
+	Force                     *bool             `mapstructure:"force" cty:"force"`
+	Images                    *bool             `mapstructure:"images" cty:"images"`
+	Sha                       *int              `mapstructure:"sha" cty:"sha"`
+	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -243,6 +248,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"create_snapshot":              &hcldec.AttrSpec{Name: "create_snapshot", Type: cty.Bool, Required: false},
 		"convert_to_template":          &hcldec.AttrSpec{Name: "convert_to_template", Type: cty.Bool, Required: false},
+		"name":                         &hcldec.AttrSpec{Name: "name", Type: cty.String, Required: false},
+		"force":                        &hcldec.AttrSpec{Name: "force", Type: cty.Bool, Required: false},
+		"images":                       &hcldec.AttrSpec{Name: "images", Type: cty.Bool, Required: false},
+		"sha":                          &hcldec.AttrSpec{Name: "sha", Type: cty.Number, Required: false},
+		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
 	}
 	return s
 }

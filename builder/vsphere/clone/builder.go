@@ -80,6 +80,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConvertToTemplate{
 			ConvertToTemplate: b.config.ConvertToTemplate,
 		},
+		&common.StepExport{
+			Name:      b.config.ExportConfig.Name,
+			Force:     b.config.ExportConfig.Force,
+			Images:    b.config.ExportConfig.Images,
+			Sha:       b.config.ExportConfig.Sha,
+			OutputDir: b.config.ExportConfig.OutputDir.OutputDir,
+		},
 	)
 
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
