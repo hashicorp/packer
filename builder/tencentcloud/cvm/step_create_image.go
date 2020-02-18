@@ -58,36 +58,22 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	Message(state, "Waiting for image ready", "")
-	err = WaitForImageReady(client, config.ImageName, "NORMAL", 3600)
+	err = WaitForImageReady(ctx, client, config.ImageName, "NORMAL", 3600)
 	if err != nil {
 		return Halt(state, err, "Failed to wait for image ready")
 	}
 
-	describeReq := cvm.NewDescribeImagesRequest()
-	FILTER_IMAGE_NAME := "image-name"
-	describeReq.Filters = []*cvm.Filter{
-		{
-			Name:   &FILTER_IMAGE_NAME,
-			Values: []*string{&config.ImageName},
-		},
-	}
-
-	var describeResp *cvm.DescribeImagesResponse
-	err = Retry(ctx, func(ctx context.Context) error {
-		var e error
-		describeResp, e = client.DescribeImages(describeReq)
-		return e
-	})
+	image, err := GetImageByName(ctx, client, config.ImageName)
 	if err != nil {
-		return Halt(state, err, "Failed to wait for image ready")
+		return Halt(state, err, "Failed to get image")
 	}
 
-	if *describeResp.Response.TotalCount == 0 {
+	if image == nil {
 		return Halt(state, fmt.Errorf("No image return"), "Failed to crate image")
 	}
 
-	s.imageId = *describeResp.Response.ImageSet[0].ImageId
-	state.Put("image", describeResp.Response.ImageSet[0])
+	s.imageId = *image.ImageId
+	state.Put("image", image)
 	Message(state, s.imageId, "Image created")
 
 	tencentCloudImages := make(map[string]string)

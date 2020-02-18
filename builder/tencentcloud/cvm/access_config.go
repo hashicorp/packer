@@ -8,8 +8,6 @@ import (
 	"os"
 
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
@@ -81,17 +79,11 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 		return nil, nil, fmt.Errorf("parameter zone must be set")
 	}
 
-	credential := common.NewCredential(cf.SecretId, cf.SecretKey)
-	cpf := profile.NewClientProfile()
-	cpf.HttpProfile.ReqMethod = "POST"
-	cpf.HttpProfile.ReqTimeout = 300
-	cpf.Language = "en-US"
-
-	if cvm_client, err = cvm.NewClient(credential, cf.Region, cpf); err != nil {
+	if cvm_client, err = NewCvmClient(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
 		return nil, nil, err
 	}
 
-	if vpc_client, err = vpc.NewClient(credential, cf.Region, cpf); err != nil {
+	if vpc_client, err = NewVpcClient(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
 		return nil, nil, err
 	}
 

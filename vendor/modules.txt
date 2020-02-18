@@ -531,7 +531,7 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/temoto/robotstxt v1.1.1
 github.com/temoto/robotstxt
-# github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible
+# github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http
