@@ -48,6 +48,7 @@ func init() {
 		"galaxy-command":             new(FixerGalaxyCommand),
 		"comm-config":                new(FixerCommConfig),
 		"ssh-wait-timeout":           new(FixerSSHTimout),
+		"vsphere-iso-network":        new(FixerVSphereNetwork),
 	}
 
 	FixerOrder = []string{
@@ -79,5 +80,6 @@ func init() {
 		"galaxy-command",
 		"comm-config",
 		"ssh-wait-timeout",
+		"vsphere-iso-network",
 	}
 }

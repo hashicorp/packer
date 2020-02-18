@@ -42,10 +42,6 @@ type CreateConfig struct {
 	DiskSize int64 `mapstructure:"disk_size"`
 	// Enable VMDK thin provisioning for VM. Defaults to `false`.
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
-	// Set network VM will be connected to.
-	Network string `mapstructure:"network"`
-	// Set VM network card type. Example `vmxnet3`.
-	NetworkCard string `mapstructure:"network_card"`
 	// Network adapters
 	NICs []NIC `mapstructure:"network_adapters"`
 	// Create USB controller for virtual machine. Defaults to `false`.
@@ -99,11 +95,6 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// add network/network card an the first nic for backwards compatibility in the type is defined
 	var networkCards []driver.NIC
-	if s.Config.NetworkCard != "" {
-		networkCards = append(networkCards, driver.NIC{
-			NetworkCard: s.Config.NetworkCard,
-			Network:     s.Config.Network})
-	}
 	for _, nic := range s.Config.NICs {
 		networkCards = append(networkCards, driver.NIC{
 			Network:     nic.Network,
