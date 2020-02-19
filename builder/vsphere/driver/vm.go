@@ -53,6 +53,7 @@ type NIC struct {
 
 type CreateConfig struct {
 	DiskThinProvisioned bool
+	DiskEagerlyScrub    bool
 	DiskControllerType  string // example: "scsi", "pvscsi"
 	DiskSize            int64
 
@@ -503,6 +504,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 			Backing: &types.VirtualDiskFlatVer2BackingInfo{
 				DiskMode:        string(types.VirtualDiskModePersistent),
 				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
+				EagerlyScrub:    types.NewBool(config.DiskEagerlyScrub),
 			},
 		},
 		CapacityInKB: config.DiskSize * 1024,
