@@ -102,12 +102,7 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 		for _, file := range files {
 			moreLocals, morediags := cfg.parseLocalVariables(file)
 			diags = append(diags, morediags...)
-
-			if locals == nil {
-				locals = moreLocals
-			} else {
-				locals = append(locals, locals...)
-			}
+			locals = append(locals, moreLocals...)
 		}
 		diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 	}

@@ -100,12 +100,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 					Expr: attr.Expr,
 				})
 			}
-
-			if allLocals == nil {
-				allLocals = locals
-			} else {
-				allLocals = append(allLocals, locals...)
-			}
+			allLocals = append(allLocals, locals...)
 		}
 	}
 
@@ -119,20 +114,39 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 		c.LocalVariables = Variables{}
 	}
 
-	for i, local := range locals {
-		for _, transversal := range local.Expr.Variables() {
-			if transversal.RootName() == "local" {
-				// Evaluate later the locals that use another local variable as value
-				continue
+	var retry, previousL int
+	for len(locals) > 0 {
+		local := locals[0]
+		moreDiags := c.evaluateLocalVariable(local)
+		if moreDiags.HasErrors() {
+			if len(locals) == 1 {
+				// If this is the only local left there's no need
+				// to try evaluating again
+				return append(diags, moreDiags...)
 			}
-			diags = append(diags, c.evaluateLocalVariable(local)...)
-			copy(locals[i:], locals[i+1:])
-		}
-	}
+			if previousL == len(locals) {
+				if retry == 10 {
+					// To get to this point, locals must have a circle dependency
+					return append(diags, moreDiags...)
+				}
+				retry++
+			}
+			previousL = len(locals)
 
-	// Evaluate locals containing another local variable(s)
-	for _, local := range locals {
-		diags = append(diags, c.evaluateLocalVariable(local)...)
+			// Check if local uses another local that has not been evaluated yet
+			// because this could be the reason of errors
+			for _, traversal := range local.Expr.Variables() {
+				if traversal.RootName() == "local" {
+					// Push local to the end of slice to be evaluated later
+					locals = append(locals, local)
+					break
+				}
+			}
+		} else {
+			diags = append(diags, moreDiags...)
+		}
+		// Remove local from slice
+		locals = append(locals[:0], locals[1:]...)
 	}
 
 	return diags
