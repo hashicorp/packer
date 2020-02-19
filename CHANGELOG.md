@@ -1,3 +1,12 @@
+## 1.5.5 (Upcoming)
+
+### IMPROVEMENTS:
+- builder/tencentcloud: Show tencentcloud image id after copy to desination
+    region. [GH-8763]
+
+### Bug Fixes:
+- builder/vsphere: Fix network object interface panic. [GH-8753]
+
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
 binaries has changed, we are releasing a second time to prevent confusion.
