@@ -67,8 +67,8 @@ Optional parameters:
     is a [template engine](/docs/templates/engine.html). Therefore, you may use
     user variables and template functions in this field. The following extra
     variables are also avilable in this engine:
-        - `Version`: The version of Converge to use.
-        - `Sudo`: Boolean; intended to say whether to use sudo or not.
+     * `Version`: The version of Converge to use.
+     * `Sudo`: Boolean; intended to say whether to use sudo or not.
 
     By default, this is `"curl -s https://get.converge.sh | {{if .Sudo}}sudo {{end}}sh {{if ne .Version \"\"}}-s -- -v {{.Version}}{{end}}"`
 

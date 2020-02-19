@@ -105,8 +105,8 @@ on Vagrant Cloud, as well as authentication and version information.
     This is a [template engine](/docs/templates/engine.html). Therefore, you
     may use user variables and template functions in this field.
     The following extra variables are also avilable in this engine:
-        - `Provider`: The Vagrant provider the box is for
-        - `ArtifactId`: The ID of the input artifact.
+     * `Provider`: The Vagrant provider the box is for
+     * `ArtifactId`: The ID of the input artifact.
 
 ## Use with the Vagrant Post-Processor
 

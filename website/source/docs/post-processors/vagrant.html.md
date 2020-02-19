@@ -82,9 +82,9 @@ more details about certain options in following sections.
     [template engine](/docs/templates/engine.html). Therefore, you may use user
     variables and template functions in this field. The following extra
     variables are also avilable in this engine:
-        - `Provider`: The Vagrant provider the box is for
-        - `ArtifactId`: The ID of the input artifact.
-        - `BuildName`: The name of the build.
+     * `Provider`: The Vagrant provider the box is for
+     * `ArtifactId`: The ID of the input artifact.
+     * `BuildName`: The name of the build.
 
     By default, the value of this config is
     `packer_{{.BuildName}}_{{.Provider}}.box`.
