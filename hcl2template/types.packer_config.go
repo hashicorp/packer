@@ -107,6 +107,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 	return allLocals, diags
 }
 
+// evaluateLocalVariables evaluate locals and add them
 func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -125,7 +126,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 				return append(diags, moreDiags...)
 			}
 			if previousL == len(locals) {
-				if retry == 10 {
+				if retry == 100 {
 					// To get to this point, locals must have a circle dependency
 					return append(diags, moreDiags...)
 				}
@@ -142,8 +143,6 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 					break
 				}
 			}
-		} else {
-			diags = append(diags, moreDiags...)
 		}
 		// Remove local from slice
 		locals = append(locals[:0], locals[1:]...)
