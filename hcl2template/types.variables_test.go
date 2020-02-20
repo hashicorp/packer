@@ -118,7 +118,7 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/complicated", nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "variables/complicated"),
+				Basedir: "testdata/variables/complicated",
 				InputVariables: Variables{
 					"name_prefix": &Variable{
 						DefaultValue: cty.StringVal("foo"),
