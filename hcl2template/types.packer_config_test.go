@@ -1,10 +1,10 @@
 package hcl2template
 
 import (
-	"github.com/zclconf/go-cty/cty"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 var (
