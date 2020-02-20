@@ -47,11 +47,23 @@
 -   `chroot_mount_path` (string) - Chroot Mount Path
 -   `chroot_mounts` ([][]string) - Chroot Mounts
 -   `chroot_copy_files` ([]string) - Chroot Copy Files
--   `chroot_command_wrapper` (string) - Chroot Command Wrapper
+-   `chroot_command_wrapper` (string) - How to run shell commands. This defaults to {{.Command}}. This may be
+    useful to set if you want to set environmental variables or perhaps run
+    it with sudo or so on. This is a configuration template where the
+    .Command variable is replaced with the command to be run. Defaults to
+    {{.Command}}.
+    
 -   `mount_options` ([]string) - Mount Options
 -   `mount_partition` (string) - Mount Partition
--   `pre_mount_commands` ([]string) - Pre Mount Commands
--   `post_mount_commands` ([]string) - Post Mount Commands
+-   `pre_mount_commands` ([]string) - A series of commands to execute after attaching the root volume and
+    before mounting the chroot. This is not required unless using
+    from_scratch. If so, this should include any partitioning and filesystem
+    creation commands. The path to the device is provided by {{.Device}}.
+    
+-   `post_mount_commands` ([]string) - As pre_mount_commands, but the commands are executed after mounting the
+    root device and before the extra mount and copy steps. The device and
+    mount path are provided by {{.Device}} and {{.MountPath}}.
+    
 -   `ssh_keys` ([]string) - List of SSH keys by name or id to be added
     to the server on launch.
     

@@ -1,9 +1,9 @@
 <!-- Code generated from the comments of the AMIConfig struct in builder/amazon/common/ami_config.go; DO NOT EDIT MANUALLY -->
 
 -   `ami_description` (string) - The description to set for the resulting
-    AMI(s). By default this description is empty. This is a template
-    engine, see Build template
-    data for more information.
+    AMI(s). By default this description is empty.  This is a
+    [template engine](/docs/templates/engine.html), see [Build template
+    data](#build-template-data) for more information.
     
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
