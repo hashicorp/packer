@@ -108,8 +108,11 @@ type Config struct {
 
 	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
 	// Path to a [configuration template](/docs/templates/engine.html) that
-	// defines the contents of the virtual machine VMX file for VMware. This is
-	// for **advanced users only** as this can render the virtual machine
+	// defines the contents of the virtual machine VMX file for VMware. The
+	// engine has access to the template variables `{{ .DiskNumber }}` and
+	// `{{ .DiskName }}`.
+	//
+	// This is for **advanced users only** as this can render the virtual machine
 	// non-functional. See below for more information. For basic VMX
 	// modifications, try `vmx_data` first.
 	VMXTemplatePath string `mapstructure:"vmx_template_path" required:"false"`

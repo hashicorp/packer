@@ -76,7 +76,7 @@ import (
 //     `http_directory` configuration parameter. If `http_directory` isn't
 //     specified, these will be blank!
 //
-// -   `Name` - The name of the VM.
+// -   `{{ .Name }}` - The name of the VM.
 //
 // Example boot command. This is actually a working boot command used to start an
 // CentOS 6.4 installer:

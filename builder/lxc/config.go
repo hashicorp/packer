@@ -28,7 +28,7 @@ type Config struct {
 	ContainerName string `mapstructure:"container_name" required:"false"`
 	// Allows you to specify a wrapper command, such
 	// as ssh so you can execute packer builds on a remote host. Defaults to
-	// Empty.
+	// `{{.Command}}`; i.e. no wrapper.
 	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
 	// The timeout in seconds to wait for the the
 	// container to start. Defaults to 20 seconds.
