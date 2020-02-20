@@ -143,6 +143,8 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 					break
 				}
 			}
+		} else {
+			diags = append(diags, moreDiags...)
 		}
 		// Remove local from slice
 		locals = append(locals[:0], locals[1:]...)
