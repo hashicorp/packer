@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/packer"
 )
@@ -177,7 +178,8 @@ func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagno
 func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
+	body := dynblock.Expand(f.Body, cfg.EvalContext())
+	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
 	for _, block := range content.Blocks {
