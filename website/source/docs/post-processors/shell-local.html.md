@@ -81,9 +81,11 @@ Optional parameters:
     ```
 
     This is treated as a [template engine](/docs/templates/engine.html).
-    There are two available variables: `Script`, which is the path to the
+    There are several available variables: `Script`, which is the path to the
     script to run, and `Vars`, which is the list of `environment_vars`, if
-    configured. If you choose to set this option, make sure that the first
+    configured. In addition, you may access any of the variables stored in the
+    generated data using the [build](/docs/templates/engine.html) template
+    function. If you choose to set this option, make sure that the first
     element in the array is the shell program you want to use (for example,
     "sh" or "/usr/local/bin/zsh" or even "powershell.exe" although anything
     other than a flavor of the shell command language is not explicitly
