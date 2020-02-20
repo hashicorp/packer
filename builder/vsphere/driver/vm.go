@@ -700,20 +700,6 @@ func (vm *VirtualMachine) CreateDescriptor(cdp types.OvfCreateDescriptorParams) 
 	return m.CreateDescriptor(vm.driver.ctx, vm.vm, cdp)
 }
 
-func (vm *VirtualMachine) EjectFloppies() error {
-	devices, err := vm.Devices()
-	if err != nil {
-		return err
-	}
-	floppies := devices.SelectByType((*types.VirtualFloppy)(nil))
-	for _, cd := range floppies {
-		f := cd.(*types.VirtualFloppy)
-		vm.vm.EditDevice(vm.driver.ctx, floppies.EjectImg(f))
-	}
-
-	return nil
-}
-
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {
 	c := l.SelectByType((*types.VirtualEthernetCard)(nil))
 	if len(c) == 0 {
