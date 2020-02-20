@@ -149,7 +149,8 @@ type Config struct {
 	// family always returns its latest image that is not deprecated. Example:
 	// "debian-8".
 	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
-	// The project ID's of the project containing the source image.
+	// A list of project IDs to search for the source image. Packer will search the first
+	// project ID in the list first, and fall back to the next in the list, until it finds the source image.
 	SourceImageProjectId []string `mapstructure:"source_image_project_id" required:"false"`
 	// The path to a startup script to run on the VM from which the image will
 	// be made.
