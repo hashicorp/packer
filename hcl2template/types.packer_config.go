@@ -136,15 +136,8 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 
 			// Check if local uses another local that has not been evaluated yet
 			// because this could be the reason of errors
-			for _, traversal := range local.Expr.Variables() {
-				if traversal.RootName() == "local" {
-					// Push local to the end of slice to be evaluated later
-					locals = append(locals, local)
-					break
-				}
-			}
-		} else {
-			diags = append(diags, moreDiags...)
+			// Push local to the end of slice to be evaluated later
+			locals = append(locals, local)
 		}
 		// Remove local from slice
 		locals = append(locals[:0], locals[1:]...)
