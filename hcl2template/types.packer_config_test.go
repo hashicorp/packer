@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"github.com/zclconf/go-cty/cty"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -21,13 +22,27 @@ func TestParser_complete(t *testing.T) {
 			&PackerConfig{
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
-					"foo":                     &Variable{},
-					"image_id":                &Variable{},
-					"port":                    &Variable{},
-					"availability_zone_names": &Variable{},
+					"foo": &Variable{
+						DefaultValue: cty.StringVal("value"),
+					},
+					"image_id": &Variable{
+						DefaultValue: cty.StringVal("image-id-default"),
+					},
+					"port": &Variable{
+						DefaultValue: cty.NumberIntVal(42),
+					},
+					"availability_zone_names": &Variable{
+						DefaultValue: cty.ListVal([]cty.Value{
+							cty.StringVal("a"),
+							cty.StringVal("b"),
+							cty.StringVal("c"),
+						}),
+					},
 				},
 				LocalVariables: Variables{
-					"feefoo":        &Variable{},
+					"feefoo": &Variable{
+						DefaultValue: cty.StringVal("value_image-id-default"),
+					},
 					"standard_tags": &Variable{},
 					"abc_map":       &Variable{},
 				},
