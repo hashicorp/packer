@@ -26,6 +26,10 @@ func (s *StepRemoveFloppy) Run(_ context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 	floppies := devices.SelectByType((*types.VirtualFloppy)(nil))
+	if err = vm.EjectFloppies(); err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 	if err = vm.RemoveDevice(true, floppies...); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

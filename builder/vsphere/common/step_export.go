@@ -91,7 +91,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	lease, err := vm.Export(ctx)
+	lease, err := vm.Export()
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "error exporting vm"))
 		return multistep.ActionHalt
@@ -119,21 +119,22 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 			i.Path = s.Name + "-" + i.Path
 		}
 
-		err = s.Download(ctx, ui, lease, i)
+		err = s.Download(ctx, lease, i)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
+		ui.Message("exporting file: " + i.File().Path)
 		cdp.OvfFiles = append(cdp.OvfFiles, i.File())
 	}
 
 	if err = lease.Complete(ctx); err != nil {
-		state.Put("error", err)
+		state.Put("error", errors.Wrap(err, "unable to complete lease"))
 		return multistep.ActionHalt
 	}
 
-	desc, err := vm.CreateDescriptor(ctx, cdp)
+	desc, err := vm.CreateDescriptor(cdp)
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "unable to create descriptor"))
 		return multistep.ActionHalt
@@ -153,18 +154,17 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 
 	_, err = io.WriteString(w, desc.OvfDescriptor)
 	if err != nil {
-		state.Put("error", err)
+		state.Put("error", errors.Wrap(err, "unable to write descriptor"))
 		return multistep.ActionHalt
 	}
 
 	if err = file.Close(); err != nil {
-		state.Put("error", err)
+		state.Put("error", errors.Wrap(err, "unable to close descriptor"))
 		return multistep.ActionHalt
 	}
 
 	if s.Sha == 0 {
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return multistep.ActionContinue
 	}
 
 	s.addHash(filepath.Base(target), h)
@@ -210,15 +210,10 @@ func (s *StepExport) addHash(p string, h hash.Hash) {
 	_, _ = fmt.Fprintf(&s.mf, "SHA%d(%s)= %x\n", s.Sha, p, h.Sum(nil))
 }
 
-func (s *StepExport) Download(ctx context.Context, ui packer.Ui, lease *nfc.Lease, item nfc.FileItem) error {
+func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
 	path := filepath.Join(s.dest, item.Path)
 
-	logger := newProgressLogger(ui, fmt.Sprintf("Downloading %s... ", item.Path))
-	defer logger.Wait()
-
-	opts := soap.Download{
-		Progress: logger,
-	}
+	opts := soap.Download{}
 
 	if h, ok := s.newHash(); ok {
 		opts.Writer = h

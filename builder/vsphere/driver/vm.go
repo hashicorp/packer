@@ -691,13 +691,27 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 	return err
 }
 
-func (vm *VirtualMachine) Export(ctx context.Context) (*nfc.Lease, error) {
-	return vm.vm.Export(ctx)
+func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
+	return vm.vm.Export(vm.driver.ctx)
 }
 
-func (vm *VirtualMachine) CreateDescriptor(ctx context.Context, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+func (vm *VirtualMachine) CreateDescriptor(cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
 	m := ovf.NewManager(vm.vm.Client())
-	return m.CreateDescriptor(ctx, vm.vm, cdp)
+	return m.CreateDescriptor(vm.driver.ctx, vm.vm, cdp)
+}
+
+func (vm *VirtualMachine) EjectFloppies() error {
+	devices, err := vm.Devices()
+	if err != nil {
+		return err
+	}
+	floppies := devices.SelectByType((*types.VirtualFloppy)(nil))
+	for _, cd := range floppies {
+		f := cd.(*types.VirtualFloppy)
+		vm.vm.EditDevice(vm.driver.ctx, floppies.EjectImg(f))
+	}
+
+	return nil
 }
 
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {
