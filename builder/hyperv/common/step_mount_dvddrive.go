@@ -12,8 +12,8 @@ import (
 )
 
 type StepMountDvdDrive struct {
-	Generation          uint
-	FirstBootDevice     string
+	Generation      uint
+	FirstBootDevice string
 }
 
 func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
