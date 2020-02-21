@@ -574,7 +574,7 @@ func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber 
 }
 
 func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
-	generation uint, legacyGen1BootOrder bool) error {
+	generation uint) error {
 	d.SetBootDvdDrive_Called = true
 	d.SetBootDvdDrive_VmName = vmName
 	d.SetBootDvdDrive_ControllerNumber = controllerNumber
