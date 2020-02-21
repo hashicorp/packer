@@ -156,21 +156,13 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 	return err
 }
 
-func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint, legacyGen1BootOrder bool) error {
+func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
 
 	if generation < 2 {
-		var script string
-		if legacyGen1BootOrder {
-			script = `
-param([string]$vmName)
-Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD","IDE","LegacyNetworkAdapter","Floppy")
-`
-		} else {
-			script = `
+		script := `
 param([string]$vmName)
 Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("IDE","CD","LegacyNetworkAdapter","Floppy")
 `
-		}
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName)
 		return err
@@ -185,6 +177,56 @@ Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction
 		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
 			strconv.FormatInt(int64(controllerLocation), 10))
 		return err
+	}
+}
+
+func SetFirstBootDeviceGen1(vmName string, controllerType string) error {
+
+	// for Generation 1 VMs, we read the value of the VM's boot order, strip the value specified in
+	// controllerType and insert that value back at the beginning of the list.
+	//
+	// controllerType must be 'NET', 'DVD', 'IDE' or 'FLOPPY' (case sensitive)
+	// The 'NET' value is always replaced with 'LegacyNetworkAdapter'
+
+	if (controllerType == "NET") {
+		controllerType = "LegacyNetworkAdapter"
+	}
+
+	script := `
+param([string] $vmName, [string] $controllerType)
+	$vmBootOrder = Hyper-V\Get-VMBios -VMName $vmName | Select-Object -ExpandProperty StartupOrder | Where-Object { $_ -ne $controllerType } 
+	Hyper-V\Set-VMBios -VMName $vmName -StartupOrder (@($controllerType) + $vmBootOrder)
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, controllerType)
+	return err
+}
+
+func SetFirstBootDeviceGen2(vmName string, controllerType string, controllerNumber uint, controllerLocation uint) error {
+
+
+
+// 	script := `
+// param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
+// 	$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+// 	if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+// 	Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
+// 	`
+
+// 	script := `
+// param([string] $vmName, [string] $controllerType, )
+//`
+
+	return nil
+}
+
+func SetFirstBootDevice(vmName string, controllerType string, controllerNumber uint, controllerLocation uint, generation uint) error {
+
+	if generation == 1 {
+		return SetFirstBootDeviceGen1(vmName, controllerType)
+	} else {
+		return SetFirstBootDeviceGen2(vmName, controllerType, controllerNumber, controllerLocation)
 	}
 }
 
