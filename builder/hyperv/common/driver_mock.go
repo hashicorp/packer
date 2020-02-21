@@ -234,8 +234,15 @@ type DriverMock struct {
 	SetBootDvdDrive_ControllerNumber    uint
 	SetBootDvdDrive_ControllerLocation  uint
 	SetBootDvdDrive_Generation          uint
-	SetBootDvdDrive_LegacyGen1BootOrder bool
 	SetBootDvdDrive_Err                 error
+
+	SetFirstBootDevice_Called             bool
+	SetFirstBootDevice_VmName             string
+	SetFirstBootDevice_ControllerType     string
+	SetFirstBootDevice_ControllerNumber   uint
+	SetFirstBootDevice_ControllerLocation uint
+	SetFirstBootDevice_Generation         uint
+	SetFirstBootDevice_Err                error
 
 	UnmountDvdDrive_Called             bool
 	UnmountDvdDrive_VmName             string

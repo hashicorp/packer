@@ -205,18 +205,33 @@ param([string] $vmName, [string] $controllerType)
 
 func SetFirstBootDeviceGen2(vmName string, controllerType string, controllerNumber uint, controllerLocation uint) error {
 
-	// 	script := `
-	// param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
-	// 	$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
-	// 	if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-	// 	Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
-	// 	`
+	script := `
+param ([string] $vmName, [string] $controllerType, [int] $controllerNumber, [int] $controllerLocation)
+`
 
-	// 	script := `
-	// param([string] $vmName, [string] $controllerType, )
-	//`
+	switch {
 
-	return nil
+	case controllerType == "CD":
+		// for CDs we have to use Get-VMDvdDrive to find the device
+		script += `$bootDevice = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -ErrorAction SilentlyContinue`
+
+	case controllerType == "NET":
+		// for "NET" device, we select the first network adapter on the VM
+		script += `$bootDevice = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue | Select-Object -First 1`
+
+	default:
+		script += `$bootDevice = Hyper-V\Get-VMHardDiskDrive -VMName $vmName -ControllerType $controllerType -ControllerNumber $controllerNumber -ControllerLocation controllerLocation -ErrorAction SilentlyContinue`
+
+	}
+
+	script += `
+if ($bootDevice -ne $null) { throw 'unable to find boot device' }
+Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $bootDevice
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, controllerType, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	return err
 }
 
 func SetFirstBootDevice(vmName string, controllerType string, controllerNumber uint, controllerLocation uint, generation uint) error {
