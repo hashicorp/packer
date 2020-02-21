@@ -205,28 +205,34 @@ param([string] $vmName, [string] $controllerType)
 
 func SetFirstBootDeviceGen2(vmName string, controllerType string, controllerNumber uint, controllerLocation uint) error {
 
-	script := `
-param ([string] $vmName, [string] $controllerType, [int] $controllerNumber, [int] $controllerLocation)
-`
+	script := `param ([string] $vmName, [string] $controllerType, [int] $controllerNumber, [int] $controllerLocation)`
 
 	switch {
 
 	case controllerType == "CD":
 		// for CDs we have to use Get-VMDvdDrive to find the device
-		script += `$bootDevice = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -ErrorAction SilentlyContinue`
+		script += `
+$vmDevice = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -ErrorAction SilentlyContinue`
 
 	case controllerType == "NET":
 		// for "NET" device, we select the first network adapter on the VM
-		script += `$bootDevice = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue | Select-Object -First 1`
+		script += `
+$vmDevice = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue | Select-Object -First 1`
 
 	default:
-		script += `$bootDevice = Hyper-V\Get-VMHardDiskDrive -VMName $vmName -ControllerType $controllerType -ControllerNumber $controllerNumber -ControllerLocation controllerLocation -ErrorAction SilentlyContinue`
+		script += `
+$vmDevice = @(Hyper-V\Get-VMIdeController -VMName $vmName -ErrorAction SilentlyContinue) +
+	@(Hyper-V\Get-VMScsiController -VMName $vmName -ErrorAction SilentlyContinue) |
+	Select-Object -ExpandProperty Drives |
+	Where-Object { $_.ControllerType -eq $controllerType } |
+	Where-Object { ($_.ControllerNumber -eq $controllerNumber) -and ($_.ControllerLocation -eq $controllerLocation) }
+`
 
 	}
 
 	script += `
-if ($bootDevice -ne $null) { throw 'unable to find boot device' }
-Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $bootDevice
+if ($vmDevice -eq $null) { throw 'unable to find boot device' }
+Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDevice
 `
 
 	var ps powershell.PowerShellCmd
