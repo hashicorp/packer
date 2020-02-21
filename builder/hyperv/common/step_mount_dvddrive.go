@@ -13,7 +13,7 @@ import (
 
 type StepMountDvdDrive struct {
 	Generation          uint
-	LegacyGen1BootOrder bool
+	FirstBootDevice     string
 }
 
 func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -58,18 +58,24 @@ func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) m
 
 	state.Put("os.dvd.properties", dvdControllerProperties)
 
-	if (s.Generation == 1) && (!s.LegacyGen1BootOrder) {
-		ui.Say("Setting boot drive to IDE and then CD drive. Use legacy_gen1_boot_order to override.")
-	} else {
-		ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
-	}
+	// the "first_boot_device" setting has precedence over the legacy boot order
+	// configuration, but only if its been assigned a value.
 
-	err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, s.Generation, s.LegacyGen1BootOrder)
-	if err != nil {
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if s.FirstBootDevice == "" {
+
+		if s.Generation > 1 {
+			// only print this message for Gen2, it's not a true statement for Gen1 VMs
+			ui.Say(fmt.Sprintf("Setting boot drive to os dvd drive %s ...", isoPath))
+		}
+
+		err = driver.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, s.Generation)
+		if err != nil {
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
 	}
 
 	ui.Say(fmt.Sprintf("Mounting os dvd drive %s ...", isoPath))
