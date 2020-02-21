@@ -229,12 +229,12 @@ type DriverMock struct {
 	MountDvdDrive_ControllerLocation uint
 	MountDvdDrive_Err                error
 
-	SetBootDvdDrive_Called              bool
-	SetBootDvdDrive_VmName              string
-	SetBootDvdDrive_ControllerNumber    uint
-	SetBootDvdDrive_ControllerLocation  uint
-	SetBootDvdDrive_Generation          uint
-	SetBootDvdDrive_Err                 error
+	SetBootDvdDrive_Called             bool
+	SetBootDvdDrive_VmName             string
+	SetBootDvdDrive_ControllerNumber   uint
+	SetBootDvdDrive_ControllerLocation uint
+	SetBootDvdDrive_Generation         uint
+	SetBootDvdDrive_Err                error
 
 	SetFirstBootDevice_Called             bool
 	SetFirstBootDevice_VmName             string
