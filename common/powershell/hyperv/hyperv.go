@@ -188,7 +188,7 @@ func SetFirstBootDeviceGen1(vmName string, controllerType string) error {
 	// controllerType must be 'NET', 'DVD', 'IDE' or 'FLOPPY' (case sensitive)
 	// The 'NET' value is always replaced with 'LegacyNetworkAdapter'
 
-	if (controllerType == "NET") {
+	if controllerType == "NET" {
 		controllerType = "LegacyNetworkAdapter"
 	}
 
@@ -205,18 +205,16 @@ param([string] $vmName, [string] $controllerType)
 
 func SetFirstBootDeviceGen2(vmName string, controllerType string, controllerNumber uint, controllerLocation uint) error {
 
+	// 	script := `
+	// param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
+	// 	$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+	// 	if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
+	// 	Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
+	// 	`
 
-
-// 	script := `
-// param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
-// 	$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
-// 	if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-// 	Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
-// 	`
-
-// 	script := `
-// param([string] $vmName, [string] $controllerType, )
-//`
+	// 	script := `
+	// param([string] $vmName, [string] $controllerType, )
+	//`
 
 	return nil
 }

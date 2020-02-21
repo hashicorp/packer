@@ -150,9 +150,9 @@ type CommonConfig struct {
 	Headless bool `mapstructure:"headless" required:"false"`
 	// When configured, determines the device or device type that is given preferential
 	// treatment when choosing a boot device.
-	// 
+	//
 	// For Generation 1:
-	//   - `IDE` 
+	//   - `IDE`
 	//   - `CD` *or* `DVD`
 	//   - `Floppy`
 	//   - `NET`
