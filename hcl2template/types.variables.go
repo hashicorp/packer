@@ -12,6 +12,14 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 )
 
+// Local represents a single entry from a "locals" block in a module or file.
+// The "locals" block itself is not represented, because it serves only to
+// provide context for us to interpret its contents.
+type Local struct {
+	Name string
+	Expr hcl.Expression
+}
+
 type Variable struct {
 	// CmdValue, VarfileValue, EnvValue, DefaultValue are possible values of
 	// the variable; The first value set from these will be the one used. If
@@ -75,44 +83,40 @@ func (variables Variables) Values() map[string]cty.Value {
 	return res
 }
 
-// decodeConfig decodes a "variables" section the way packer 1 used to
-func (variables *Variables) decodeConfigMap(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
+// decodeVariable decodes a variable key and value into Variables
+func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx *hcl.EvalContext) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
 	if (*variables) == nil {
 		(*variables) = Variables{}
 	}
-	attrs, diags := block.Body.JustAttributes()
 
-	if diags.HasErrors() {
+	if _, found := (*variables)[key]; found {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Duplicate variable",
+			Detail:   "Duplicate " + key + " variable definition found.",
+			Subject:  attr.NameRange.Ptr(),
+		})
 		return diags
 	}
 
-	for key, attr := range attrs {
-		if _, found := (*variables)[key]; found {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Duplicate variable",
-				Detail:   "Duplicate " + key + " variable definition found.",
-				Subject:  attr.NameRange.Ptr(),
-				Context:  block.DefRange.Ptr(),
-			})
-			continue
-		}
-		value, moreDiags := attr.Expr.Value(ectx)
-		diags = append(diags, moreDiags...)
-		if moreDiags.HasErrors() {
-			continue
-		}
-		(*variables)[key] = &Variable{
-			DefaultValue: value,
-			Type:         value.Type(),
-		}
+	value, moreDiags := attr.Expr.Value(ectx)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+
+	(*variables)[key] = &Variable{
+		DefaultValue: value,
+		Type:         value.Type(),
 	}
 
 	return diags
 }
 
-// decodeConfig decodes a "variables" section the way packer 1 used to
-func (variables *Variables) decodeConfig(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
+// decodeVariableBlock decodes a "variables" section the way packer 1 used to
+func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
 	if (*variables) == nil {
 		(*variables) = Variables{}
 	}
