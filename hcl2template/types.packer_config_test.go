@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 var (
@@ -21,15 +22,46 @@ func TestParser_complete(t *testing.T) {
 			&PackerConfig{
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
-					"foo":                     &Variable{},
-					"image_id":                &Variable{},
-					"port":                    &Variable{},
-					"availability_zone_names": &Variable{},
+					"foo": &Variable{
+						DefaultValue: cty.StringVal("value"),
+					},
+					"image_id": &Variable{
+						DefaultValue: cty.StringVal("image-id-default"),
+					},
+					"port": &Variable{
+						DefaultValue: cty.NumberIntVal(42),
+					},
+					"availability_zone_names": &Variable{
+						DefaultValue: cty.ListVal([]cty.Value{
+							cty.StringVal("A"),
+							cty.StringVal("B"),
+							cty.StringVal("C"),
+						}),
+					},
 				},
 				LocalVariables: Variables{
-					"feefoo":        &Variable{},
-					"standard_tags": &Variable{},
-					"abc_map":       &Variable{},
+					"feefoo": &Variable{
+						DefaultValue: cty.StringVal("value_image-id-default"),
+					},
+					"standard_tags": &Variable{
+						DefaultValue: cty.ObjectVal(map[string]cty.Value{
+							"Component":   cty.StringVal("user-service"),
+							"Environment": cty.StringVal("production"),
+						}),
+					},
+					"abc_map": &Variable{
+						DefaultValue: cty.TupleVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("a"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("b"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("c"),
+							}),
+						}),
+					},
 				},
 				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
