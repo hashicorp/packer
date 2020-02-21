@@ -590,7 +590,7 @@ func (d *DriverMock) SetFirstBootDevice(vmName string, controllerType string, co
 	d.SetFirstBootDevice_ControllerType = controllerType
 	d.SetFirstBootDevice_ControllerNumber = controllerNumber
 	d.SetFirstBootDevice_ControllerLocation = controllerLocation
-	d.SetFirstBootDevice.Generation = generation
+	d.SetFirstBootDevice_Generation = generation
 	return d.SetFirstBootDevice_Err
 }
 
