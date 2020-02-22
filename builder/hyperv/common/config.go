@@ -283,6 +283,13 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 		}
 	}
 
+	if c.FirstBootDevice != "" {
+		_, _, _, err := ParseBootDeviceIdentifier(c.FirstBootDevice, c.Generation)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("first_boot_device: %s", err))
+		}
+	}
+
 	if c.EnableVirtualizationExtensions {
 		if c.EnableDynamicMemory {
 			warning := fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
