@@ -23,21 +23,21 @@ func ParseBootDeviceIdentifier(deviceIdentifier string, generation uint) (string
 
 	lookupDeviceIdentifier := strings.ToUpper(deviceIdentifier)
 
-	if (generation == 1) {
+	if generation == 1 {
 
 		// Gen1 values are a simple set of if/then/else values, which we coalesce into a map
 		// here for simplicity
 
-		lookupTable := map[string]string {
+		lookupTable := map[string]string{
 			"FLOPPY": "FLOPPY",
-			"IDE": "IDE",
-			"NET": "NET",
-			"CD": "CD",
-			"DVD": "CD",
+			"IDE":    "IDE",
+			"NET":    "NET",
+			"CD":     "CD",
+			"DVD":    "CD",
 		}
 
 		controllerType, isDefined := lookupTable[lookupDeviceIdentifier]
-		if (!isDefined) {
+		if !isDefined {
 
 			return "", 0, 0, fmt.Errorf("The value %q is not a properly formatted device group identifier.", deviceIdentifier)
 
@@ -50,14 +50,14 @@ func ParseBootDeviceIdentifier(deviceIdentifier string, generation uint) (string
 	// everything else is treated as generation 2... the first set of lookups covers
 	// the simple options..
 
-	lookupTable := map[string]string {
-		"CD": "CD",
+	lookupTable := map[string]string{
+		"CD":  "CD",
 		"DVD": "CD",
 		"NET": "NET",
 	}
 
 	controllerType, isDefined := lookupTable[lookupDeviceIdentifier]
-	if (isDefined) {
+	if isDefined {
 
 		// these types do not require controllerNumber or controllerLocation
 		return controllerType, 0, 0, nil
