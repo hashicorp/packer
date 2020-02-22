@@ -67,7 +67,7 @@ func ParseBootDeviceIdentifier(deviceIdentifier string, generation uint) (string
 	// not a simple option, check for a controllerType:controllerNumber:controllerLocation formatted
 	// device..
 
-	r, err := regexp.Compile(`^(IDE|SCSI):(\\d+):(\\d+)$`)
+	r, err := regexp.Compile(`^(IDE|SCSI):(\d+):(\d+)$`)
 	if err != nil {
 		return "", 0, 0, err
 	}
