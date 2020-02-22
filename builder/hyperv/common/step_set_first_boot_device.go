@@ -18,66 +18,86 @@ type StepSetFirstBootDevice struct {
 
 func ParseBootDeviceIdentifier(deviceIdentifier string, generation uint) (string, uint, uint, error) {
 
-	captureExpression := "^(FLOPPY|IDE|NET)|(CD|DVD)$"
-	if generation > 1 {
-		captureExpression = "^((IDE|SCSI):(\\d+):(\\d+))|(DVD|CD)|(NET)$"
+	// all input strings are forced to upperCase for comparison, I believe this is
+	// safe as all of our values are 7bit ASCII clean.
+
+	lookupDeviceIdentifier := strings.ToUpper(deviceIdentifier)
+
+	if (generation == 1) {
+
+		// Gen1 values are a simple set of if/then/else values, which we coalesce into a map
+		// here for simplicity
+
+		lookupTable := map[string]string {
+			"FLOPPY": "FLOPPY",
+			"IDE": "IDE",
+			"NET": "NET",
+			"CD": "CD",
+			"DVD": "CD",
+		}
+
+		controllerType, isDefined := lookupTable[lookupDeviceIdentifier]
+		if (!isDefined) {
+
+			return "", 0, 0, fmt.Errorf("The value %q is not a properly formatted device group identifier.", deviceIdentifier)
+
+		}
+
+		// success
+		return controllerType, 0, 0, nil
 	}
 
-	r, err := regexp.Compile(captureExpression)
+	// everything else is treated as generation 2... the first set of lookups covers
+	// the simple options..
+
+	lookupTable := map[string]string {
+		"CD": "CD",
+		"DVD": "CD",
+		"NET": "NET",
+	}
+
+	controllerType, isDefined := lookupTable[lookupDeviceIdentifier]
+	if (isDefined) {
+
+		// these types do not require controllerNumber or controllerLocation
+		return controllerType, 0, 0, nil
+
+	}
+
+	// not a simple option, check for a controllerType:controllerNumber:controllerLocation formatted
+	// device..
+
+	r, err := regexp.Compile("^(IDE|SCSI):(\\d+):(\\d+)$")
 	if err != nil {
 		return "", 0, 0, err
 	}
 
-	// match against the appropriate set of values.. we force to uppercase to ensure that
-	// all devices are always in the same case
+	controllerMatch := r.FindStringSubmatch(lookupDeviceIdentifier)
+	if controllerMatch != nil {
 
-	identifierMatches := r.FindStringSubmatch(strings.ToUpper(deviceIdentifier))
-	if identifierMatches == nil {
-		return "", 0, 0, fmt.Errorf("The value %q is not a properly formatted device or device group identifier.", deviceIdentifier)
-	}
+		var controllerLocation int64
+		var controllerNumber int64
 
-	switch {
+		// NOTE: controllerNumber and controllerLocation cannot be negative, the regex expression
+		// would not have matched if either number was signed
 
-	// CD or DVD are always returned as "CD"
-	case ((generation == 1) && (identifierMatches[2] != "")) || ((generation > 1) && (identifierMatches[5] != "")):
-		return "CD", 0, 0, nil
+		controllerNumber, err = strconv.ParseInt(controllerMatch[2], 10, 8)
+		if err == nil {
 
-	// generation 1 only has FLOPPY, IDE or NET remaining..
-	case (generation == 1):
-		return identifierMatches[0], 0, 0, nil
-
-	// generation 2, check for IDE or SCSI and parse location and number
-	case (identifierMatches[2] != ""):
-		{
-
-			var controllerLocation int64
-			var controllerNumber int64
-
-			// NOTE: controllerNumber and controllerLocation cannot be negative, the regex expression
-			// would not have matched if either number was signed
-
-			controllerNumber, err = strconv.ParseInt(identifierMatches[3], 10, 8)
+			controllerLocation, err = strconv.ParseInt(controllerMatch[3], 10, 8)
 			if err == nil {
 
-				controllerLocation, err = strconv.ParseInt(identifierMatches[4], 10, 8)
-				if err == nil {
-
-					return identifierMatches[2], uint(controllerNumber), uint(controllerLocation), nil
-
-				}
+				return controllerMatch[1], uint(controllerNumber), uint(controllerLocation), nil
 
 			}
 
-			return "", 0, 0, err
-
 		}
 
-	// only "NET" left on generation 2
-	default:
-		return "NET", 0, 0, nil
+		return "", 0, 0, err
 
 	}
 
+	return "", 0, 0, fmt.Errorf("The value %q is not a properly formatted device identifier.", deviceIdentifier)
 }
 
 func (s *StepSetFirstBootDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
