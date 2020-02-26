@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -212,6 +213,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	if c.Node == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("node must be specified"))
+	}
+	if strings.ContainsAny(c.TemplateName, " ") {
+		errs = packer.MultiErrorAppend(errs, errors.New("template_name must not contain spaces"))
 	}
 	for idx := range c.NICs {
 		if c.NICs[idx].Bridge == "" {
