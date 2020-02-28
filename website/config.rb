@@ -112,3 +112,4 @@ end
 
 # Netlify redirects/headers
 proxy '_redirects', 'netlify-redirects', ignore: true
+proxy '_headers', 'netlify-headers', ignore: true
