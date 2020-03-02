@@ -872,9 +872,9 @@ if ($disks.Length -eq 0) {
 foreach ($disk in $disks) {
     Write-Output "Compacting disk: $(Split-Path $disk -leaf)"
 
-    $sizeBefore = $disk.Length
+    $sizeBefore = (Get-Item -Path $disk).Length
     Optimize-VHD -Path $disk -Mode Full
-    $sizeAfter = $disk.Length
+    $sizeAfter = (Get-Item -Path $disk).Length
 
     # Calculate the percentage change in disk size
     if ($sizeAfter -gt 0) { # Protect against division by zero
