@@ -463,6 +463,8 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 
 			res = squashStructs(res, getMapstructureSquashedStruct(topPkg, utStruct))
 			continue
+		} else if ms.HasOption("exclude") {
+			continue
 		}
 		if field.Pkg() != topPkg {
 			field = types.NewField(field.Pos(), topPkg, field.Name(), field.Type(), field.Embedded())
