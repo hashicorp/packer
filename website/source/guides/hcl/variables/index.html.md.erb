@@ -9,6 +9,8 @@ description: |-
 
 # Input Variables and local variables
 
+<%= partial "partials/guides/hcl2-beta-note" %>
+
 This page introduces input variables and local variables as a way to
 parameterize a configuration. Once defined, input variables are settable from a
 default value, environment, special var files, and command line arguments.
@@ -19,7 +21,7 @@ Local variables can be a compound of input variables and local variables.
 Let's create a file `variables.pkr.hcl` with the following contents.
 
 -> **Note**: that the file can be named anything, since Packer loads all
-files ending in `.pkr.hcl` in a directory. If you split your configuration 
+files ending in `.pkr.hcl` in a directory. If you split your configuration
 across multiple files, use `packer build <source directory>` to initiate
 a build.
 
