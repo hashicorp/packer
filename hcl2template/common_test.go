@@ -60,7 +60,7 @@ func testParse(t *testing.T, tests []parseTest) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
-				t.Fatalf("Parser.parse() unexpected diagnostics. %s", gotDiags)
+				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
 			}
 			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
@@ -97,6 +97,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					packer.CoreBuild{},
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
+					null.Builder{},
 				),
 			); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)

@@ -10,6 +10,7 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -39,8 +40,8 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 				LocalVariables: Variables{
-					"owner":        &Variable{},
-					"service_name": &Variable{},
+					"owner":        &Variable{Name: "owner"},
+					"service_name": &Variable{Name: "service_name"},
 				},
 			},
 			false, false,
@@ -103,13 +104,13 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 			},
-			true, true,
+			true, false,
 			[]packer.Build{},
 			false,
 		},
-		{"unset variable",
+		{"unset used variable",
 			defaultParser,
-			parseTestArgs{"testdata/variables/unset_string_variable.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -131,7 +132,40 @@ func TestParse_variables(t *testing.T) {
 			},
 			true, true,
 			[]packer.Build{},
-			true,
+			false,
+		},
+		{"unset unused variable",
+			defaultParser,
+			parseTestArgs{"testdata/variables/unset_unused_string_variable.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{
+						Name: "foo",
+					},
+				},
+				Sources: map[SourceRef]*SourceBlock{
+					SourceRef{"null", "null-builder"}: &SourceBlock{
+						Name: "null-builder",
+						Type: "null",
+					},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{SourceRef{"null", "null-builder"}},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:           "null",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
 		},
 	}
 	testParse(t, tests)

@@ -59,7 +59,12 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		}
 	}
 
-	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
+	value := cty.NullVal(cty.DynamicPseudoType)
+	if v.Type != cty.NilType {
+		cty.NullVal(v.Type)
+	}
+
+	return value, &hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
@@ -248,6 +253,7 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		if moreDiags.HasErrors() {
 			continue
 		}
+
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
 
