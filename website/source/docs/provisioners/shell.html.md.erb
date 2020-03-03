@@ -65,9 +65,9 @@ The example below is fully functional.
     -   `Vars` is the list of `environment_vars`, if configured.
     -   `EnvVarFile` is the path to the file containing env vars, if
         `use_env_var_file` is true.
--   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if
-    the server disconnects us. A disconnect might happen if you restart the ssh
-    server or reboot the host.
+
+-   `expect_disconnect` (boolean) - Defaults to `false`. When `true`, allow the server to disconnect from Packer without throwing an error.
+    A disconnect might happen if you restart the ssh server or reboot the host.
 
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
