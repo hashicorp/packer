@@ -451,19 +451,31 @@ func getMapstructureSquashedStruct(topPkg *types.Package, utStruct *types.Struct
 			log.Printf("could not parse field tag %s of : %v", tag, err)
 			continue
 		}
-		if ms, err := structtag.Get("mapstructure"); err != nil {
-			//no mapstructure tag
-		} else if ms.HasOption("squash") {
-			ot := field.Type()
-			uot := ot.Underlying()
-			utStruct, utOk := uot.(*types.Struct)
-			if !utOk {
+
+		// Contains mapstructure-to-hcl2 tag
+		if ms, err := structtag.Get("mapstructure-to-hcl2"); err == nil {
+			// Stop if is telling to skip it
+			if ms.HasOption("skip") {
 				continue
 			}
-
-			res = squashStructs(res, getMapstructureSquashedStruct(topPkg, utStruct))
-			continue
 		}
+
+		// Contains mapstructure tag
+		if ms, err := structtag.Get("mapstructure"); err == nil {
+			// Squash structs
+			if ms.HasOption("squash") {
+				ot := field.Type()
+				uot := ot.Underlying()
+				utStruct, utOk := uot.(*types.Struct)
+				if !utOk {
+					continue
+				}
+
+				res = squashStructs(res, getMapstructureSquashedStruct(topPkg, utStruct))
+				continue
+			}
+		}
+
 		if field.Pkg() != topPkg {
 			field = types.NewField(field.Pos(), topPkg, field.Name(), field.Type(), field.Embedded())
 		}

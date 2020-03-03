@@ -16,8 +16,6 @@ type FlatConfig struct {
 	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Command              *string           `cty:"command"`
-	SubCommand           *string           `cty:"sub_command"`
 	ExtraArguments       []string          `mapstructure:"extra_arguments" cty:"extra_arguments"`
 	InspecEnvVars        []string          `mapstructure:"inspec_env_vars" cty:"inspec_env_vars"`
 	Profile              *string           `mapstructure:"profile" cty:"profile"`
@@ -50,8 +48,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"command":                    &hcldec.AttrSpec{Name: "command", Type: cty.String, Required: false},
-		"sub_command":                &hcldec.AttrSpec{Name: "sub_command", Type: cty.String, Required: false},
 		"extra_arguments":            &hcldec.AttrSpec{Name: "extra_arguments", Type: cty.List(cty.String), Required: false},
 		"inspec_env_vars":            &hcldec.AttrSpec{Name: "inspec_env_vars", Type: cty.List(cty.String), Required: false},
 		"profile":                    &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
