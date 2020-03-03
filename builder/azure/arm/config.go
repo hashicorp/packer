@@ -371,8 +371,8 @@ type Config struct {
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
 	// Runtime Values
-	UserName               string
-	Password               string
+	UserName               string `mapstructure-to-hcl2:",skip"`
+	Password               string `mapstructure-to-hcl2:",skip"`
 	tmpAdminPassword       string
 	tmpCertificatePassword string
 	tmpResourceGroupName   string
