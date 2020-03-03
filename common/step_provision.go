@@ -62,7 +62,9 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	hookData["Password"] = commConf.Password()
 	hookData["ConnType"] = commConf.Type
 	hookData["SSHPublicKey"] = commConf.SSHPublicKey
+	hookData["SSHPublicKeyString"] = string(commConf.SSHPublicKey)
 	hookData["SSHPrivateKey"] = commConf.SSHPrivateKey
+	hookData["SSHPrivateKeyString"] = string(commConf.SSHPrivateKey)
 
 	// Backwards compatibility; in practice, WinRMPassword is fulfilled by
 	// Password.
