@@ -101,10 +101,10 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 		}
 	}
 
-	_, moreDiags := cfg.InputVariables.Values()
-	diags = append(diags, moreDiags...)
-	_, moreDiags = cfg.LocalVariables.Values()
-	diags = append(diags, moreDiags...)
+	// _, moreDiags := cfg.InputVariables.Values()
+	// diags = append(diags, moreDiags...)
+	// _, moreDiags = cfg.LocalVariables.Values()
+	// diags = append(diags, moreDiags...)
 
 	// parse var files
 	{
