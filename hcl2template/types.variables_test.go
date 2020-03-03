@@ -288,7 +288,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - env",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.Bool,
 				},
 			},
 			args: args{
@@ -299,7 +299,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiags: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:     cty.String,
+					Type:     cty.Bool,
 					EnvValue: cty.DynamicVal,
 				},
 			},
@@ -311,7 +311,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - cfg file",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.Bool,
 				},
 			},
 			args: args{
@@ -322,7 +322,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiags: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:         cty.String,
+					Type:         cty.Bool,
 					VarfileValue: cty.DynamicVal,
 				},
 			},
@@ -334,7 +334,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - argv",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.Bool,
 				},
 			},
 			args: args{
@@ -347,7 +347,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiags: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:     cty.String,
+					Type:     cty.Bool,
 					CmdValue: cty.DynamicVal,
 				},
 			},
