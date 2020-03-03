@@ -53,7 +53,7 @@ type CreateConfig struct {
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
 	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
 	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
-	// Storage
+	// A collection of one or more disks to be provisioned along with the VM.
 	Storage []DiskConfig `mapstructure:"storage"`
 	// Set network VM will be connected to.
 	Network string `mapstructure:"network"`

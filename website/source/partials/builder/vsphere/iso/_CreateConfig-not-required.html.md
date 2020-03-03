@@ -19,7 +19,7 @@
     
 -   `disk_eagerly_scrub` (bool) - Enable VMDK eager scrubbing for VM. Defaults to `false`.
     
--   `storage` ([]DiskConfig) - Storage
+-   `storage` ([]DiskConfig) - A collection of one or more disks to be provisioned along with the VM.
     
 -   `network` (string) - Set network VM will be connected to.
     
