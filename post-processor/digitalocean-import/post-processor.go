@@ -198,7 +198,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			logger: log.New(os.Stderr, "", log.LstdFlags),
 		},
 	}
-	sess := session.New(spacesConfig)
+	sess, err := session.NewSession(spacesConfig)
+	if err != nil {
+		return nil, false, false, err
+	}
 
 	ui.Message(fmt.Sprintf("Uploading %s to spaces://%s/%s", source, p.config.SpaceName, p.config.ObjectName))
 	err = uploadImageToSpaces(source, p, sess)
