@@ -83,17 +83,11 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	if hookData["ConnType"] != commConfig.Type {
 		t.Fatalf("Bad: Expecting hookData[\"ConnType\"]  was %s but actual value was %s", commConfig.Type, hookData["ConnType"])
 	}
-	if string(hookData["SSHPublicKey"].([]byte)) != string(commConfig.SSHPublicKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPublicKey\"]  was %s but actual value was %s", string(commConfig.SSHPublicKey), string(hookData["SSHPublicKey"].([]byte)))
+	if hookData["SSHPublicKey"] != string(commConfig.SSHPublicKey) {
+		t.Fatalf("Bad: Expecting hookData[\"SSHPublicKey\"]  was %s but actual value was %s", string(commConfig.SSHPublicKey), hookData["SSHPublicKey"])
 	}
-	if hookData["SSHPublicKeyString"] != string(commConfig.SSHPublicKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPublicKeyString\"]  was %s but actual value was %s", string(commConfig.SSHPublicKey), hookData["SSHPublicKeyString"])
-	}
-	if string(hookData["SSHPrivateKey"].([]byte)) != string(commConfig.SSHPrivateKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPrivateKey\"]  was %s but actual value was %s", string(commConfig.SSHPrivateKey), string(hookData["SSHPrivateKey"].([]byte)))
-	}
-	if hookData["SSHPrivateKeyString"] != string(commConfig.SSHPrivateKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPrivateKeyString\"]  was %s but actual value was %s", string(commConfig.SSHPrivateKey), hookData["SSHPrivateKeyString"])
+	if hookData["SSHPrivateKey"] != string(commConfig.SSHPrivateKey) {
+		t.Fatalf("Bad: Expecting hookData[\"SSHPrivateKey\"]  was %s but actual value was %s", string(commConfig.SSHPrivateKey), hookData["SSHPrivateKey"])
 	}
 	if hookData["WinRMPassword"] != commConfig.WinRMPassword {
 		t.Fatalf("Bad: Expecting hookData[\"WinRMPassword\"]  was %s but actual value was %s", commConfig.WinRMPassword, hookData["WinRMPassword"])
