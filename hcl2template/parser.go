@@ -107,11 +107,6 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 		diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 	}
 
-	// _, moreDiags := cfg.InputVariables.Values()
-	// diags = append(diags, moreDiags...)
-	// _, moreDiags = cfg.LocalVariables.Values()
-	// diags = append(diags, moreDiags...)
-
 	// parse var files
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
