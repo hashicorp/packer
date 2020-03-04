@@ -300,7 +300,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		if len(createOutput.Errors) > 0 {
 			errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
 			for _, outErr := range createOutput.Errors {
-				errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
+				errString = errString + aws.StringValue(outErr.ErrorMessage)
 			}
 			err = fmt.Errorf(errString)
 			state.Put("error", err)
