@@ -33,13 +33,11 @@ type PackerConfig struct {
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
-	v, _ := cfg.InputVariables.Values()
-	l, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
-			"var":   cty.ObjectVal(v),
-			"local": cty.ObjectVal(l),
+			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
+			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
 		},
 	}
 	return ectx
