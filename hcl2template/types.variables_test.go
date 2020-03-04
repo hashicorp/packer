@@ -142,22 +142,12 @@ func TestParse_variables(t *testing.T) {
 						Name: "foo",
 					},
 				},
-				Sources: map[SourceRef]*SourceBlock{
-					SourceRef{"null", "null-builder"}: &SourceBlock{
-						Name: "null-builder",
-						Type: "null",
-					},
-				},
-				Builds: Builds{
-					&BuildBlock{
-						Sources: []SourceRef{SourceRef{"null", "null-builder"}},
-					},
-				},
 			},
 			true, true,
 			[]packer.Build{},
-			false,
+			true,
 		},
+
 		{"unset unused variable",
 			defaultParser,
 			parseTestArgs{"testdata/variables/unset_unused_string_variable.pkr.hcl", nil},
@@ -187,9 +177,12 @@ func TestParse_variables(t *testing.T) {
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
 				},
 			},
+			false,
 		},
+
 		{"locals within another locals usage in different files",
 			defaultParser,
 			parseTestArgs{"testdata/variables/complicated", nil},
@@ -197,23 +190,29 @@ func TestParse_variables(t *testing.T) {
 				Basedir: "testdata/variables/complicated",
 				InputVariables: Variables{
 					"name_prefix": &Variable{
+						Name:         "name_prefix",
 						DefaultValue: cty.StringVal("foo"),
 					},
 				},
 				LocalVariables: Variables{
 					"name_prefix": &Variable{
+						Name:         "name_prefix",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"foo": &Variable{
+						Name:         "foo",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"bar": &Variable{
+						Name:         "bar",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"for_var": &Variable{
+						Name:         "for_var",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"bar_var": &Variable{
+						Name: "bar_var",
 						DefaultValue: cty.TupleVal([]cty.Value{
 							cty.StringVal("foo"),
 							cty.StringVal("foo"),

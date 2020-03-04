@@ -23,7 +23,8 @@ func TestParser_complete(t *testing.T) {
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
 					"foo": &Variable{
-						Name: "foo",
+						Name:         "foo",
+						DefaultValue: cty.StringVal("value"),
 					},
 					"image_id": &Variable{
 						Name:         "image_id",
@@ -48,12 +49,14 @@ func TestParser_complete(t *testing.T) {
 						DefaultValue: cty.StringVal("value_image-id-default"),
 					},
 					"standard_tags": &Variable{
+						Name: "standard_tags",
 						DefaultValue: cty.ObjectVal(map[string]cty.Value{
 							"Component":   cty.StringVal("user-service"),
 							"Environment": cty.StringVal("production"),
 						}),
 					},
 					"abc_map": &Variable{
+						Name: "abc_map",
 						DefaultValue: cty.TupleVal([]cty.Value{
 							cty.ObjectVal(map[string]cty.Value{
 								"id": cty.StringVal("a"),
