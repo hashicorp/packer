@@ -299,7 +299,7 @@ var ContainsFunc = function.New(&function.Spec{
 		},
 	},
 	Type: function.StaticReturnType(cty.Bool),
-	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
+	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		arg := args[0]
 		ty := arg.Type()
 
@@ -307,12 +307,39 @@ var ContainsFunc = function.New(&function.Spec{
 			return cty.NilVal, errors.New("argument must be list, tuple, or set")
 		}
 
-		_, err = Index(cty.TupleVal(arg.AsValueSlice()), args[1])
-		if err != nil {
+		if args[0].IsNull() {
+			return cty.NilVal, errors.New("cannot search a nil list or set")
+		}
+
+		if args[0].LengthInt() == 0 {
 			return cty.False, nil
 		}
 
-		return cty.True, nil
+		if !args[0].IsKnown() || !args[1].IsKnown() {
+			return cty.UnknownVal(cty.Bool), nil
+		}
+
+		containsUnknown := false
+		for it := args[0].ElementIterator(); it.Next(); {
+			_, v := it.Element()
+			eq := args[1].Equals(v)
+			if !eq.IsKnown() {
+				// We may have an unknown value which could match later, but we
+				// first need to continue checking all values for an exact
+				// match.
+				containsUnknown = true
+				continue
+			}
+			if eq.True() {
+				return cty.True, nil
+			}
+		}
+
+		if containsUnknown {
+			return cty.UnknownVal(cty.Bool), nil
+		}
+
+		return cty.False, nil
 	},
 })
 
@@ -566,19 +593,12 @@ var LookupFunc = function.New(&function.Spec{
 			Name: "key",
 			Type: cty.String,
 		},
-	},
-	VarParam: &function.Parameter{
-		Name:             "default",
-		Type:             cty.DynamicPseudoType,
-		AllowUnknown:     true,
-		AllowDynamicType: true,
-		AllowNull:        true,
+		{
+			Name: "default",
+			Type: cty.DynamicPseudoType,
+		},
 	},
 	Type: func(args []cty.Value) (ret cty.Type, err error) {
-		if len(args) < 1 || len(args) > 3 {
-			return cty.NilType, fmt.Errorf("lookup() takes two or three arguments, got %d", len(args))
-		}
-
 		ty := args[0].Type()
 
 		switch {
@@ -609,13 +629,7 @@ var LookupFunc = function.New(&function.Spec{
 		}
 	},
 	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
-		var defaultVal cty.Value
-		defaultValueSet := false
-
-		if len(args) == 3 {
-			defaultVal = args[2]
-			defaultValueSet = true
-		}
+		defaultVal := args[2]
 
 		mapVar := args[0]
 		lookupKey := args[1].AsString()
@@ -632,48 +646,128 @@ var LookupFunc = function.New(&function.Spec{
 			return mapVar.Index(cty.StringVal(lookupKey)), nil
 		}
 
-		if defaultValueSet {
-			defaultVal, err = convert.Convert(defaultVal, retType)
-			if err != nil {
-				return cty.NilVal, err
-			}
-			return defaultVal, nil
+		defaultVal, err = convert.Convert(defaultVal, retType)
+		if err != nil {
+			return cty.NilVal, err
 		}
-
-		return cty.UnknownVal(cty.DynamicPseudoType), fmt.Errorf(
-			"lookup failed to find '%s'", lookupKey)
+		return defaultVal, nil
 	},
 })
 
-// MergeFunc is a function that takes an arbitrary number of maps and
-// returns a single map that contains a merged set of elements from all of the maps.
+// MergeFunc constructs a function that takes an arbitrary number of maps or
+// objects, and returns a single value that contains a merged set of keys and
+// values from all of the inputs.
 //
-// If more than one given map defines the same key then the one that is later in
-// the argument sequence takes precedence.
+// If more than one given map or object defines the same key then the one that
+// is later in the argument sequence takes precedence.
 var MergeFunc = function.New(&function.Spec{
 	Params: []function.Parameter{},
 	VarParam: &function.Parameter{
 		Name:             "maps",
 		Type:             cty.DynamicPseudoType,
 		AllowDynamicType: true,
+		AllowNull:        true,
 	},
-	Type: function.StaticReturnType(cty.DynamicPseudoType),
+	Type: func(args []cty.Value) (cty.Type, error) {
+		// empty args is accepted, so assume an empty object since we have no
+		// key-value types.
+		if len(args) == 0 {
+			return cty.EmptyObject, nil
+		}
+
+		// collect the possible object attrs
+		attrs := map[string]cty.Type{}
+
+		first := cty.NilType
+		matching := true
+		attrsKnown := true
+		for i, arg := range args {
+			ty := arg.Type()
+			// any dynamic args mean we can't compute a type
+			if ty.Equals(cty.DynamicPseudoType) {
+				return cty.DynamicPseudoType, nil
+			}
+
+			// check for invalid arguments
+			if !ty.IsMapType() && !ty.IsObjectType() {
+				return cty.NilType, fmt.Errorf("arguments must be maps or objects, got %#v", ty.FriendlyName())
+			}
+
+			switch {
+			case ty.IsObjectType() && !arg.IsNull():
+				for attr, aty := range ty.AttributeTypes() {
+					attrs[attr] = aty
+				}
+			case ty.IsMapType():
+				switch {
+				case arg.IsNull():
+					// pass, nothing to add
+				case arg.IsKnown():
+					ety := arg.Type().ElementType()
+					for it := arg.ElementIterator(); it.Next(); {
+						attr, _ := it.Element()
+						attrs[attr.AsString()] = ety
+					}
+				default:
+					// any unknown maps means we don't know all possible attrs
+					// for the return type
+					attrsKnown = false
+				}
+			}
+
+			// record the first argument type for comparison
+			if i == 0 {
+				first = arg.Type()
+				continue
+			}
+
+			if !ty.Equals(first) && matching {
+				matching = false
+			}
+		}
+
+		// the types all match, so use the first argument type
+		if matching {
+			return first, nil
+		}
+
+		// We had a mix of unknown maps and objects, so we can't predict the
+		// attributes
+		if !attrsKnown {
+			return cty.DynamicPseudoType, nil
+		}
+
+		return cty.Object(attrs), nil
+	},
 	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
 		outputMap := make(map[string]cty.Value)
 
+		// if all inputs are null, return a null value rather than an object
+		// with null attributes
+		allNull := true
 		for _, arg := range args {
-			if !arg.IsWhollyKnown() {
-				return cty.UnknownVal(retType), nil
+			if arg.IsNull() {
+				continue
+			} else {
+				allNull = false
 			}
-			if !arg.Type().IsObjectType() && !arg.Type().IsMapType() {
-				return cty.NilVal, fmt.Errorf("arguments must be maps or objects, got %#v", arg.Type().FriendlyName())
-			}
+
 			for it := arg.ElementIterator(); it.Next(); {
 				k, v := it.Element()
 				outputMap[k.AsString()] = v
 			}
 		}
-		return cty.ObjectVal(outputMap), nil
+
+		switch {
+		case allNull:
+			return cty.NullVal(retType), nil
+		case retType.IsMapType():
+			return cty.MapVal(outputMap), nil
+		case retType.IsObjectType(), retType.Equals(cty.DynamicPseudoType):
+			return cty.ObjectVal(outputMap), nil
+		default:
+			panic(fmt.Sprintf("unexpected return type: %#v", retType))
+		}
 	},
 })
 
@@ -1184,8 +1278,8 @@ func Keys(inputMap cty.Value) (cty.Value, error) {
 // Lookup performs a dynamic lookup into a map.
 // There are two required arguments, map and key, plus an optional default,
 // which is a value to return if no key is found in map.
-func Lookup(args ...cty.Value) (cty.Value, error) {
-	return LookupFunc.Call(args)
+func Lookup(inputMap, key, defaultValue cty.Value) (cty.Value, error) {
+	return LookupFunc.Call([]cty.Value{inputMap, key, defaultValue})
 }
 
 // Merge takes an arbitrary number of maps and returns a single map that contains
