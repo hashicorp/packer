@@ -47,7 +47,7 @@ type Variable struct {
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
 
-	block *hcl.Block
+	Range hcl.Range
 }
 
 func (v *Variable) GoString() string {
@@ -74,7 +74,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
 			"https://packer.io/docs/configuration/from-1.5/syntax.html for details.",
-		Context: v.block.DefRange.Ptr(),
+		Context: v.Range.Ptr(),
 	}
 }
 
@@ -120,7 +120,7 @@ func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx
 		Name:         key,
 		DefaultValue: value,
 		Type:         value.Type(),
-		// block:        attr,
+		Range:        attr.Range,
 	}
 
 	return diags
@@ -159,7 +159,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 		Name:        name,
 		Description: b.Description,
 		Sensitive:   b.Sensitive,
-		block:       block,
+		Range:       block.DefRange,
 	}
 
 	attrs, moreDiags := b.Rest.JustAttributes()
