@@ -77,20 +77,19 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
-	var allLocals []*Local
+	var locals []*Local
 
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
-			locals := make([]*Local, 0, len(attrs))
 			for name, attr := range attrs {
 				if _, found := c.LocalVariables[name]; found {
 					diags = append(diags, &hcl.Diagnostic{
 						Severity: hcl.DiagError,
-						Summary:  "Duplicate variable",
-						Detail:   "Duplicate " + name + " variable definition found.",
+						Summary:  "Duplicate value in " + localsLabel,
+						Detail:   "Duplicate " + name + " definition found.",
 						Subject:  attr.NameRange.Ptr(),
 						Context:  block.DefRange.Ptr(),
 					})
@@ -101,11 +100,10 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 					Expr: attr.Expr,
 				})
 			}
-			allLocals = append(allLocals, locals...)
 		}
 	}
 
-	return allLocals, diags
+	return locals, diags
 }
 
 func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
