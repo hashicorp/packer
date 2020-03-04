@@ -5,10 +5,6 @@ variable "foo" {
 
 build {
   sources = [
-    "source.null.null-builder",
+    "source.null.null-builder${var.foo}",
   ]
-}
-
-source "null" "null-builder" {
-  communicator = var.foo
 }
