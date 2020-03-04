@@ -29,13 +29,13 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	ui.Say("Creating required virtual machine disks")
 	// The 'main' or 'default' disk
 	diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, name))
-	diskSizes = append(diskSizes, fmt.Sprintf("%s", config.DiskSize))
+	diskSizes = append(diskSizes, config.DiskSize)
 	// Additional disks
 	if len(config.AdditionalDiskSize) > 0 {
 		for i, diskSize := range config.AdditionalDiskSize {
 			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d", name, i+1))
 			diskFullPaths = append(diskFullPaths, path)
-			size := fmt.Sprintf("%s", diskSize)
+			size := diskSize
 			diskSizes = append(diskSizes, size)
 		}
 	}

@@ -186,12 +186,9 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 	*/
 
-	var dockerSource string
-
+	dockerSource := src
 	if src[len(src)-1] == '/' {
 		dockerSource = fmt.Sprintf("%s.", src)
-	} else {
-		dockerSource = fmt.Sprintf("%s", src)
 	}
 
 	// Make the directory, then copy into it
