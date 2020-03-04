@@ -62,7 +62,7 @@ github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
 github.com/PuerkitoBio/goquery
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
-# github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340
+# github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
@@ -357,6 +357,7 @@ github.com/hashicorp/hcl/json/token
 # github.com/hashicorp/hcl/v2 v2.3.0
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
+github.com/hashicorp/hcl/v2/ext/dynblock
 github.com/hashicorp/hcl/v2/ext/tryfunc
 github.com/hashicorp/hcl/v2/ext/typeexpr
 github.com/hashicorp/hcl/v2/gohcl
@@ -531,7 +532,7 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/temoto/robotstxt v1.1.1
 github.com/temoto/robotstxt
-# github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible
+# github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http

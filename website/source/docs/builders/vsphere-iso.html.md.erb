@@ -67,6 +67,9 @@ necessary for this build to succeed and can be found further down the page.
 ### Create Configuration
 <%= partial "partials/builder/vsphere/iso/CreateConfig-not-required" %>
 
+### Network Adapter Configuration
+<%= partial "partials/builder/vsphere/iso/NIC-required" %>
+
 ### Floppy Configuration
 <%= partial "partials/builder/vsphere/iso/FloppyConfig-not-required" %>
 
@@ -78,6 +81,10 @@ necessary for this build to succeed and can be found further down the page.
 #### Optional common fields:
 
 <%= partial "partials/helper/communicator/Config-not-required" %>
+
+#### Optional Network Adapter fields:
+
+<%= partial "partials/builder/vsphere/iso/NIC-not-required" %>
 
 #### Optional SSH fields:
 

@@ -19,9 +19,9 @@ type AMIConfig struct {
 	// engine](../templates/engine.html) for more info).
 	AMIName string `mapstructure:"ami_name" required:"true"`
 	// The description to set for the resulting
-	// AMI(s). By default this description is empty. This is a template
-	// engine, see Build template
-	// data for more information.
+	// AMI(s). By default this description is empty.  This is a
+	// [template engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
 	AMIDescription string `mapstructure:"ami_description" required:"false"`
 	// The type of virtualization for the AMI
 	// you are building. This option is required to register HVM images. Can be

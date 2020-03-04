@@ -57,8 +57,8 @@ type Config struct {
 	// The path on the guest virtual machine where the VirtualBox guest
 	// additions ISO will be uploaded. By default this is
 	// VBoxGuestAdditions.iso which should upload into the login directory of
-	// the user. This is a configuration template where the Version variable is
-	// replaced with the VirtualBox version.
+	// the user. This is a configuration template where the `{{ .Version }}`
+	// variable is replaced with the VirtualBox version.
 	GuestAdditionsPath string `mapstructure:"guest_additions_path" required:"false"`
 	// The SHA256 checksum of the guest additions ISO that will be uploaded to
 	// the guest VM. By default the checksums will be downloaded from the
@@ -69,7 +69,8 @@ type Config struct {
 	// URL if the ISO is at a local path. By default, the VirtualBox builder
 	// will attempt to find the guest additions ISO on the local file system.
 	// If it is not available locally, the builder will download the proper
-	// guest additions ISO from the internet.
+	// guest additions ISO from the internet. This is a template engine, and you
+	// have access to the variable `{{ .Version }}`.
 	GuestAdditionsURL string `mapstructure:"guest_additions_url" required:"false"`
 	// The interface type to use to mount guest additions when
 	// guest_additions_mode is set to attach. Will default to the value set in

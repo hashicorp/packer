@@ -2,6 +2,7 @@ package clone
 
 import (
 	"context"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"

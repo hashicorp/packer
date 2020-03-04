@@ -5,7 +5,6 @@ import (
 	"compress/flate"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/packer/packer/tmp"
 	"io"
 	"log"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/klauspost/pgzip"
 )
 

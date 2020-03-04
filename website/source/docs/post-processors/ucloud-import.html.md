@@ -47,7 +47,10 @@ are two categories: required and optional parameters.
 
 -   `base_url` - (string) This is the base url. (Default: `https://api.ucloud.cn`).
 
--   `ufile_key_name` (string) - The name of the object key in `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied to import.
+-   `ufile_key_name` (string) - The name of the object key in
+    `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied
+    to import. This is a [template engine](/docs/templates/engine.html).
+    Therefore, you may use user variables and template functions in this field.
 
 -   `skip_clean` (boolean) - Whether we should skip removing the RAW, VHD, VMDK, or qcow2 file uploaded to UFile after the import process has completed. Possible values are: `true` to leave it in the UFile bucket, `false` to remove it. (Default: `false`).
 

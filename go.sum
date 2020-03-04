@@ -43,6 +43,8 @@ github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUW
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340 h1:bOjy6c07dpipWm11dL92FbtmXGnDywOm2uKzG4CePuY=
 github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
+github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd h1:Moss3RtB00h4omKW+leNGIGIfmHcnkZPTJ5d0A0fY14=
+github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af h1:DBNMBMuMiWYu0b+8KMJuWmfCkcxl09JwdlqwDZZ6U14=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
@@ -465,6 +467,8 @@ github.com/temoto/robotstxt v1.1.1 h1:Gh8RCs8ouX3hRSxxK7B1mO5RFByQ4CmJZDwgom++Ja
 github.com/temoto/robotstxt v1.1.1/go.mod h1:+1AmkuG3IYkh1kv0d2qEB9Le88ehNO0zwOr3ujewlOo=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible h1:y2gZtLpcWqFzSFbQSKwv1gL+NocPRM0ktGh7Dlb8U7s=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible h1:/5EEPgCRsWdGgZsM7YRLhYE9gpE9+kUGoIfGCrFYU0s=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/ucloud/ucloud-sdk-go v0.12.0 h1:VCFN3jWg/G4wvwjG6qG5AhFuAT1JdmGvY6+4WHbuJcw=
 github.com/ucloud/ucloud-sdk-go v0.12.0/go.mod h1:lM6fpI8y6iwACtlbHUav823/uKPdXsNBlnBpRF2fj3c=
 github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6 h1:FAWNiqocJ04wC4Znj7Ax4PGWstZijayO6ifuHHvb+vI=

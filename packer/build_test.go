@@ -88,6 +88,17 @@ func TestBuild_Prepare(t *testing.T) {
 	}
 }
 
+func TestBuild_Prepare_SkipWhenBuilderAlreadyInitialized(t *testing.T) {
+	build := testBuild()
+	builder := build.Builder.(*MockBuilder)
+
+	build.Prepared = true
+	build.Prepare()
+	if builder.PrepareCalled {
+		t.Fatal("should not be called")
+	}
+}
+
 func TestBuild_Prepare_Twice(t *testing.T) {
 	build := testBuild()
 	warn, err := build.Prepare()

@@ -3,13 +3,14 @@ package testing
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/packer/builder/vsphere/common"
-	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"math/rand"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/builder/vsphere/common"
+	"github.com/hashicorp/packer/builder/vsphere/driver"
+	"github.com/hashicorp/packer/packer"
 )
 
 func NewVMName() string {

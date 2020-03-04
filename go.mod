@@ -14,7 +14,7 @@ require (
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
-	github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340
+	github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
@@ -144,7 +144,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/temoto/robotstxt v1.1.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible
+	github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.12.0
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1

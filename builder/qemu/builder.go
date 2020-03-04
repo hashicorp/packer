@@ -281,6 +281,10 @@ type Config struct {
 	// This will also work with WinRM, just change the port forward in
 	// `qemuargs` to map to WinRM's default port of `5985` or whatever value
 	// you have the service set to listen on.
+	//
+	// This is a template engine and allows access to the following variables:
+	// `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
+	// `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 	QemuArgs [][]string `mapstructure:"qemuargs" required:"false"`
 	// The name of the Qemu binary to look for. This
 	// defaults to qemu-system-x86_64, but may need to be changed for

@@ -236,6 +236,14 @@ type DriverMock struct {
 	SetBootDvdDrive_Generation         uint
 	SetBootDvdDrive_Err                error
 
+	SetFirstBootDevice_Called             bool
+	SetFirstBootDevice_VmName             string
+	SetFirstBootDevice_ControllerType     string
+	SetFirstBootDevice_ControllerNumber   uint
+	SetFirstBootDevice_ControllerLocation uint
+	SetFirstBootDevice_Generation         uint
+	SetFirstBootDevice_Err                error
+
 	UnmountDvdDrive_Called             bool
 	UnmountDvdDrive_VmName             string
 	UnmountDvdDrive_ControllerNumber   uint
@@ -573,6 +581,17 @@ func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, contr
 	d.SetBootDvdDrive_ControllerLocation = controllerLocation
 	d.SetBootDvdDrive_Generation = generation
 	return d.SetBootDvdDrive_Err
+}
+
+func (d *DriverMock) SetFirstBootDevice(vmName string, controllerType string, controllerNumber uint,
+	controllerLocation uint, generation uint) error {
+	d.SetFirstBootDevice_Called = true
+	d.SetFirstBootDevice_VmName = vmName
+	d.SetFirstBootDevice_ControllerType = controllerType
+	d.SetFirstBootDevice_ControllerNumber = controllerNumber
+	d.SetFirstBootDevice_ControllerLocation = controllerLocation
+	d.SetFirstBootDevice_Generation = generation
+	return d.SetFirstBootDevice_Err
 }
 
 func (d *DriverMock) UnmountDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {

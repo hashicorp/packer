@@ -2,10 +2,11 @@ package interpolate
 
 import (
 	"bytes"
-	"github.com/google/uuid"
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/google/uuid"
 )
 
 // Context is the context that an interpolation is done in. This defines

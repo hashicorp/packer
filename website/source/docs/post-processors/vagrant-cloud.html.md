@@ -68,7 +68,7 @@ on Vagrant Cloud, as well as authentication and version information.
     can be generated on your [tokens
     page](https://app.vagrantup.com/settings/security). If not specified, the
     environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
-    if nothing is found, finally `ATLAS_TOKEN` will be used. This is required 
+    if nothing is found, finally `ATLAS_TOKEN` will be used. This is required
     unless you are using a private hosting solution (i.e. `vagrant_cloud_url`
     has been populated).
 
@@ -76,8 +76,8 @@ on Vagrant Cloud, as well as authentication and version information.
 
 -   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
     This is useful if you're using Vagrant Private Cloud in your own network.
-    Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something 
-    other than the default then `access_token` can be left blank and no 
+    Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something
+    other than the default then `access_token` can be left blank and no
     `Authorization` header will be added to requests sent by this post-processor.
 
 
@@ -102,6 +102,11 @@ on Vagrant Cloud, as well as authentication and version information.
 
 -   `box_download_url` (string) - Optional URL for a self-hosted box. If this
     is set the box will not be uploaded to the Vagrant Cloud.
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field.
+    The following extra variables are also avilable in this engine:
+     * `Provider`: The Vagrant provider the box is for
+     * `ArtifactId`: The ID of the input artifact.
 
 ## Use with the Vagrant Post-Processor
 

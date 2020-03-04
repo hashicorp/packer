@@ -176,7 +176,10 @@ If this is set, a few more options become available.
 -   `builder_upload_image_command` (string) - The command to run to upload the
     image to Object Storage Classic. This is for advanced users only, and you
     should consult the default in code to decide on the changes to make. For
-    most users the default should suffice.
+    most users the default should suffice. If you choose to write your own,
+    this command is a template engine and can make use of the following
+    variables: `{{ .Username }}`, `{{ .Password }}`, `{{ .AccountID }}`,
+    `{{ .ImageFile }}`, and `{{ .SegmentPath }}`.
 
 ## Basic Example
 

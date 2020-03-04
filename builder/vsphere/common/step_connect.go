@@ -6,6 +6,7 @@ package common
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 )

@@ -8,6 +8,13 @@
 # export PRODUCT_NAME="packer"
 # export ARTIFACTORY_TOKEN=$ARTIFACTORY_TOKEN
 
+ARTIFACTORY_TOKEN="${ARTIFACTORY_TOKEN:-""}"
+
+if [ -z "$ARTIFACTORY_TOKEN" ]; then
+  echo "Missing required Artifactory credentials"
+  exit 1
+fi
+
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
@@ -26,6 +33,9 @@ for DARWIN_BIN in $(find ./pkg/dist/*darwin_*.zip); do
 
   echo $TARGET_ZIP
   ./scripts/codesign_example.sh
+  if [ $? -ne 0 ]; then
+  	exit 1
+  fi
 done
 
 exit 0

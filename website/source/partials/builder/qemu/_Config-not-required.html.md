@@ -179,6 +179,10 @@
     `qemuargs` to map to WinRM's default port of `5985` or whatever value
     you have the service set to listen on.
     
+    This is a template engine and allows access to the following variables:
+    `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
+    `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
+    
 -   `qemu_binary` (string) - The name of the Qemu binary to look for. This
     defaults to qemu-system-x86_64, but may need to be changed for
     some platforms. For example qemu-kvm, or qemu-system-i386 may be a

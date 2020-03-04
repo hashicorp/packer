@@ -3,18 +3,19 @@ package iso
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/builder/vsphere/driver"
-	packerCommon "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
-	"golang.org/x/mobile/event/key"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/hashicorp/packer/builder/vsphere/driver"
+	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
+	"golang.org/x/mobile/event/key"
 )
 
 type BootConfig struct {

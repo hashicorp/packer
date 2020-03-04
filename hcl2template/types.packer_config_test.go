@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 var (
@@ -25,18 +26,45 @@ func TestParser_complete(t *testing.T) {
 						Name: "foo",
 					},
 					"image_id": &Variable{
-						Name: "image_id",
+						Name:         "image_id",
+						DefaultValue: cty.StringVal("image-id-default"),
 					},
 					"port": &Variable{
-						Name: "port",
+						Name:         "port",
+						DefaultValue: cty.NumberIntVal(42),
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
+						DefaultValue: cty.ListVal([]cty.Value{
+							cty.StringVal("A"),
+							cty.StringVal("B"),
+							cty.StringVal("C"),
+						}),
 					},
 				},
 				LocalVariables: Variables{
 					"feefoo": &Variable{
-						Name: "feefoo",
+						Name:         "feefoo",
+						DefaultValue: cty.StringVal("value_image-id-default"),
+					},
+					"standard_tags": &Variable{
+						DefaultValue: cty.ObjectVal(map[string]cty.Value{
+							"Component":   cty.StringVal("user-service"),
+							"Environment": cty.StringVal("production"),
+						}),
+					},
+					"abc_map": &Variable{
+						DefaultValue: cty.TupleVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("a"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("b"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"id": cty.StringVal("c"),
+							}),
+						}),
 					},
 				},
 				Sources: map[SourceRef]*SourceBlock{
@@ -67,8 +95,9 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:    "virtualbox-iso",
-					Builder: basicMockBuilder,
+					Type:     "virtualbox-iso",
+					Prepared: true,
+					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType:       "shell",
