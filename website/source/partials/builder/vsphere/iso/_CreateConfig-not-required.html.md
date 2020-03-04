@@ -6,7 +6,7 @@
     the full list of supported VM hardware versions.
     
 -   `guest_os_type` (string) - Set VM OS type. Defaults to `otherGuest`. See [
-    here](https://pubs.vmware.com/vsphere-6-5/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
+    here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
     for a full list of possible values.
     
 -   `firmware` (string) - Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
