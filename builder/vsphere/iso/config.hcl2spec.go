@@ -31,6 +31,7 @@ type FlatConfig struct {
 	DiskSize                  *int64            `mapstructure:"disk_size" cty:"disk_size"`
 	DiskThinProvisioned       *bool             `mapstructure:"disk_thin_provisioned" cty:"disk_thin_provisioned"`
 	DiskEagerlyScrub          *bool             `mapstructure:"disk_eagerly_scrub" cty:"disk_eagerly_scrub"`
+	Storage                   []FlatDiskConfig  `mapstructure:"storage" cty:"storage"`
 	Network                   *string           `mapstructure:"network" cty:"network"`
 	NetworkCard               *string           `mapstructure:"network_card" cty:"network_card"`
 	NICs                      []FlatNIC         `mapstructure:"network_adapters" cty:"network_adapters"`
@@ -153,6 +154,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"disk_thin_provisioned":        &hcldec.AttrSpec{Name: "disk_thin_provisioned", Type: cty.Bool, Required: false},
 		"disk_eagerly_scrub":           &hcldec.AttrSpec{Name: "disk_eagerly_scrub", Type: cty.Bool, Required: false},
+		"storage":                      &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
 		"network":                      &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"network_card":                 &hcldec.AttrSpec{Name: "network_card", Type: cty.String, Required: false},
 		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
