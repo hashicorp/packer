@@ -155,6 +155,7 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
+		Name:         local.Name,
 		DefaultValue: value,
 		Type:         value.Type(),
 	}
