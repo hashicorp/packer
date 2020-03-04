@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
