@@ -68,9 +68,6 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 	}
 
 	value := cty.NullVal(cty.DynamicPseudoType)
-	if v.Type != cty.NilType {
-		cty.NullVal(v.Type)
-	}
 
 	return value, &hcl.Diagnostic{
 		Severity: hcl.DiagError,
@@ -83,17 +80,16 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 
 type Variables map[string]*Variable
 
-func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
+func (variables Variables) Values() map[string]cty.Value {
 	res := map[string]cty.Value{}
-	var diags hcl.Diagnostics
 	for k, v := range variables {
-		var diag *hcl.Diagnostic
-		res[k], diag = v.Value()
-		if diag != nil {
-			diags = append(diags, diag)
-		}
+		res[k], _ = v.Value()
+		// here the value might not be used and in that case we don't want to
+		// force users to set it. So this error is ignored. we still set it as
+		// it can be a `cty.NullVal(cty.DynamicPseudoType)`, which is the go
+		// cty value for 'unknown value' and should error when used.
 	}
-	return res, diags
+	return res
 }
 
 // decodeVariable decodes a variable key and value into Variables
