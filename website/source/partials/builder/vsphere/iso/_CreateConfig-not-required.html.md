@@ -19,6 +19,8 @@
     
 -   `disk_eagerly_scrub` (bool) - Enable VMDK eager scrubbing for VM. Defaults to `false`.
     
+-   `storage` ([]DiskConfig) - A collection of one or more disks to be provisioned along with the VM.
+    
 -   `network` (string) - Set network VM will be connected to.
     
 -   `network_card` (string) - Set VM network card type. Example `vmxnet3`.

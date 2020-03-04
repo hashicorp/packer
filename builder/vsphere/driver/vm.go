@@ -52,10 +52,7 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskThinProvisioned bool
-	DiskEagerlyScrub    bool
-	DiskControllerType  string // example: "scsi", "pvscsi"
-	DiskSize            int64
+	DiskControllerType string // example: "scsi", "pvscsi"
 
 	Annotation    string
 	Name          string
@@ -69,6 +66,13 @@ type CreateConfig struct {
 	USBController bool
 	Version       uint   // example: 10
 	Firmware      string // efi or bios
+	Storage       []Disk
+}
+
+type Disk struct {
+	DiskSize            int64
+	DiskEagerlyScrub    bool
+	DiskThinProvisioned bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -488,6 +492,10 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 }
 
 func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	if len(config.Storage) == 0 {
+		return nil, errors.New("no storage devices have been defined")
+	}
+
 	device, err := devices.CreateSCSIController(config.DiskControllerType)
 	if err != nil {
 		return nil, err
@@ -498,20 +506,22 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 		return nil, err
 	}
 
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key: devices.NewKey(),
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
-				EagerlyScrub:    types.NewBool(config.DiskEagerlyScrub),
+	for _, dc := range config.Storage {
+		disk := &types.VirtualDisk{
+			VirtualDevice: types.VirtualDevice{
+				Key: devices.NewKey(),
+				Backing: &types.VirtualDiskFlatVer2BackingInfo{
+					DiskMode:        string(types.VirtualDiskModePersistent),
+					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
+					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
+				},
 			},
-		},
-		CapacityInKB: config.DiskSize * 1024,
-	}
+			CapacityInKB: dc.DiskSize * 1024,
+		}
 
-	devices.AssignController(disk, controller)
-	devices = append(devices, disk)
+		devices.AssignController(disk, controller)
+		devices = append(devices, disk)
+	}
 
 	return devices, nil
 }
