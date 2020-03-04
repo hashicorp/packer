@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type VirtualMachine struct {
@@ -43,8 +44,16 @@ type HardwareConfig struct {
 	VideoRAM            int64
 }
 
+type NIC struct {
+	Network     string // "" for default network
+	NetworkCard string // example: vmxnet3
+	MacAddress  string // set mac if want specific address
+	Passthrough *bool  // direct path i/o
+}
+
 type CreateConfig struct {
 	DiskThinProvisioned bool
+	DiskEagerlyScrub    bool
 	DiskControllerType  string // example: "scsi", "pvscsi"
 	DiskSize            int64
 
@@ -56,8 +65,7 @@ type CreateConfig struct {
 	ResourcePool  string
 	Datastore     string
 	GuestOS       string // example: otherGuest
-	Network       string // "" for default network
-	NetworkCard   string // example: vmxnet3
+	NICs          []NIC
 	USBController bool
 	Version       uint   // example: 10
 	Firmware      string // efi or bios
@@ -496,6 +504,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 			Backing: &types.VirtualDiskFlatVer2BackingInfo{
 				DiskMode:        string(types.VirtualDiskModePersistent),
 				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
+				EagerlyScrub:    types.NewBool(config.DiskEagerlyScrub),
 			},
 		},
 		CapacityInKB: config.DiskSize * 1024,
@@ -508,42 +517,56 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 }
 
 func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	if len(config.NICs) == 0 {
+		return nil, errors.New("no network adapters have been defined")
+	}
+
 	var network object.NetworkReference
-	if config.Network == "" {
-		h, err := d.FindHost(config.Host)
+	for _, nic := range config.NICs {
+		if nic.Network == "" {
+			h, err := d.FindHost(config.Host)
+			if err != nil {
+				return nil, err
+			}
+
+			i, err := h.Info("network")
+			if err != nil {
+				return nil, err
+			}
+
+			if len(i.Network) > 1 {
+				return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+			}
+
+			network = object.NewNetwork(d.client.Client, i.Network[0])
+		} else {
+			var err error
+			network, err = d.finder.Network(d.ctx, nic.Network)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		backing, err := network.EthernetCardBackingInfo(d.ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		i, err := h.Info("network")
+		device, err := object.EthernetCardTypes().CreateEthernetCard(nic.NetworkCard, backing)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(i.Network) > 1 {
-			return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+		card := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		if nic.MacAddress != "" {
+			card.AddressType = string(types.VirtualEthernetCardMacTypeManual)
+			card.MacAddress = nic.MacAddress
 		}
+		card.UptCompatibilityEnabled = nic.Passthrough
 
-		network = object.NewNetwork(d.client.Client, i.Network[0])
-	} else {
-		var err error
-		network, err = d.finder.Network(d.ctx, config.Network)
-		if err != nil {
-			return nil, err
-		}
+		devices = append(devices, device)
 	}
-
-	backing, err := network.EthernetCardBackingInfo(d.ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	device, err := object.EthernetCardTypes().CreateEthernetCard(config.NetworkCard, backing)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(devices, device), nil
+	return devices, nil
 }
 
 func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {

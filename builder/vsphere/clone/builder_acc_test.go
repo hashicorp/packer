@@ -1,13 +1,14 @@
 package clone
 
 import (
+	"os"
+	"testing"
+
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/vim25/types"
-	"os"
-	"testing"
 )
 
 func TestCloneBuilderAcc_default(t *testing.T) {

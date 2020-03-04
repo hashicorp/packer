@@ -78,12 +78,16 @@ more details about certain options in following sections.
     `"keep_input_artifact":false`
 
 -   `output` (string) - The full path to the box file that will be created by
-    this post-processor. This is a [configuration
-    template](/docs/templates/engine.html). The variable `Provider` is replaced
-    by the Vagrant provider the box is for. The variable `ArtifactId` is
-    replaced by the ID of the input artifact. The variable `BuildName` is
-    replaced with the name of the build. By default, the value of this config
-    is `packer_{{.BuildName}}_{{.Provider}}.box`.
+    this post-processor. This is a
+    [template engine](/docs/templates/engine.html). Therefore, you may use user
+    variables and template functions in this field. The following extra
+    variables are also avilable in this engine:
+     * `Provider`: The Vagrant provider the box is for
+     * `ArtifactId`: The ID of the input artifact.
+     * `BuildName`: The name of the build.
+
+    By default, the value of this config is
+    `packer_{{.BuildName}}_{{.Provider}}.box`.
 
 -   `vagrantfile_template` (string) - Path to a template to use for the
     Vagrantfile that is packaged with the box.

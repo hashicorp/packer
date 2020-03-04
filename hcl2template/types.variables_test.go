@@ -24,13 +24,31 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"image_name": &Variable{Name: "image_name"},
-					"key":        &Variable{Name: "key"},
-					"my_secret":  &Variable{Name: "my_secret"},
-					"image_id":   &Variable{Name: "image_id"},
-					"port":       &Variable{Name: "port"},
+					"image_name": &Variable{
+						Name:         "image_name",
+						DefaultValue: cty.StringVal("foo-image-{{user `my_secret`}}"),
+					},
+					"key": &Variable{
+						Name:         "key",
+						DefaultValue: cty.StringVal("value"),
+					},
+					"my_secret": &Variable{
+						Name:         "my_secret",
+						DefaultValue: cty.StringVal("foo"),
+					},
+					"image_id": &Variable{
+						Name:         "image_id",
+						DefaultValue: cty.StringVal("image-id-default"),
+					},
+					"port": &Variable{
+						Name:         "port",
+						DefaultValue: cty.NumberIntVal(42),
+					},
 					"availability_zone_names": &Variable{
-						Name:        "availability_zone_names",
+						Name: "availability_zone_names",
+						DefaultValue: cty.ListVal([]cty.Value{
+							cty.StringVal("us-west-1a"),
+						}),
 						Description: fmt.Sprintln("Describing is awesome ;D"),
 					},
 					"super_secret_password": &Variable{
@@ -40,8 +58,14 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 				LocalVariables: Variables{
-					"owner":        &Variable{Name: "owner"},
-					"service_name": &Variable{Name: "service_name"},
+					"owner": &Variable{
+						Name:         "owner",
+						DefaultValue: cty.StringVal("Community Team"),
+					},
+					"service_name": &Variable{
+						Name:         "service_name",
+						DefaultValue: cty.StringVal("forum"),
+					},
 				},
 			},
 			false, false,
@@ -165,6 +189,52 @@ func TestParse_variables(t *testing.T) {
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
+		},
+		{"locals within another locals usage in different files",
+			defaultParser,
+			parseTestArgs{"testdata/variables/complicated", nil},
+			&PackerConfig{
+				Basedir: "testdata/variables/complicated",
+				InputVariables: Variables{
+					"name_prefix": &Variable{
+						DefaultValue: cty.StringVal("foo"),
+					},
+				},
+				LocalVariables: Variables{
+					"name_prefix": &Variable{
+						DefaultValue: cty.StringVal("foo"),
+					},
+					"foo": &Variable{
+						DefaultValue: cty.StringVal("foo"),
+					},
+					"bar": &Variable{
+						DefaultValue: cty.StringVal("foo"),
+					},
+					"for_var": &Variable{
+						DefaultValue: cty.StringVal("foo"),
+					},
+					"bar_var": &Variable{
+						DefaultValue: cty.TupleVal([]cty.Value{
+							cty.StringVal("foo"),
+							cty.StringVal("foo"),
+							cty.StringVal("foo"),
+						}),
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			false,
+		},
+		{"recursive locals",
+			defaultParser,
+			parseTestArgs{"testdata/variables/recursive_locals.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir:        filepath.Join("testdata", "variables"),
+				LocalVariables: Variables{},
+			},
+			true, true,
+			[]packer.Build{},
 			false,
 		},
 	}

@@ -148,6 +148,21 @@ type CommonConfig struct {
 	// built. When this value is set to true, the machine will start without a
 	// console.
 	Headless bool `mapstructure:"headless" required:"false"`
+	// When configured, determines the device or device type that is given preferential
+	// treatment when choosing a boot device.
+	//
+	// For Generation 1:
+	//   - `IDE`
+	//   - `CD` *or* `DVD`
+	//   - `Floppy`
+	//   - `NET`
+	//
+	// For Generation 2:
+	//   - `IDE:x:y`
+	//   - `SCSI:x:y`
+	//   - `CD` *or* `DVD`
+	//   - `NET`
+	FirstBootDevice string `mapstructure:"first_boot_device" required:"false"`
 }
 
 func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) ([]error, []string) {
@@ -265,6 +280,13 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 					"virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 "+
 					"or newer."))
 			}
+		}
+	}
+
+	if c.FirstBootDevice != "" {
+		_, _, _, err := ParseBootDeviceIdentifier(c.FirstBootDevice, c.Generation)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("first_boot_device: %s", err))
 		}
 	}
 

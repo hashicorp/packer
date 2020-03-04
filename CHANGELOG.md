@@ -1,3 +1,29 @@
+## 1.5.5 (Upcoming)
+
+### IMPROVEMENTS:
+- builder/tencentcloud: Show tencentcloud image id after copy to desination
+    region. [GH-8763]
+
+### Bug Fixes:
+- builder/vsphere: Fix network object interface panic. [GH-8753]
+
+## 1.5.4 (February 14, 2020)
+no-change release to fix code-signing on OSX binaries. Since checksums for these
+binaries has changed, we are releasing a second time to prevent confusion.
+
+## 1.5.3 (February 14, 2020)
+
+### IMPROVEMENTS:
+* builder/vsphere: Add ability to define multiple NICs for vsphere-iso
+    [GH-8739]
+* builder/vsphere: Add option to remove CD-ROM drives. [GH-8690]
+* core: Add validation to catch when users accidentally add duplicate fields to
+    template [GH-8725]
+
+### Bug Fixes:
+* core/hcl2: Fix template prepare/validation for HCL2 templates [GH-8742]
+* core: Fix `build` template function interpolation [GH-8727]
+
 ## 1.5.2 (February 12, 2020)
 **New Builder** The vsphere-iso builder, previously maintained by JetBrains,
 has been merged with the Packer core. It will be officially supported by the

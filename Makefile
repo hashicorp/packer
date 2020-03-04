@@ -18,7 +18,8 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)
 
 export GOLDFLAGS
 
-.PHONY: bin checkversion ci default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace
+.PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
+	releasebin test testacc testrace
 
 default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
@@ -49,11 +50,15 @@ install-gen-deps: ## Install dependencies for code generation
 	# dir. `go get` will change our deps and the following deps are not part of
 	# out code dependencies; so a go mod tidy will remove them again. `go
 	# install` seems to install the last tagged version and we want to install
-	# master. 
+	# master.
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/mna/pigeon@master)
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/alvaroloes/enumer@master)
 	@go install ./cmd/struct-markdown
 	@go install ./cmd/mapstructure-to-hcl2
+
+install-lint-deps: ## Install linter dependencies
+	@echo "==> Updating linter dependencies..."
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.1
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -65,6 +70,20 @@ dev: ## Build and install a development build
 	@go install -ldflags '$(GOLDFLAGS)'
 	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
+
+lint: install-lint-deps ## Lint Go code
+	@if [ ! -z  $(PKG_NAME) ]; then \
+		echo "golangci-lint run ./$(PKG_NAME)/..."; \
+		golangci-lint run ./$(PKG_NAME)/...; \
+	else \
+		echo "golangci-lint run ./..."; \
+		golangci-lint run ./...; \
+	fi
+
+ci-lint: install-lint-deps ## On ci only lint newly added Go source files
+	@echo "==> Running linter on newly added Go source files..."
+	GO111MODULE=on golangci-lint run --new-from-rev=origin/master ./...
+
 
 fmt: ## Format Go code
 	@go fmt ./...

@@ -82,6 +82,31 @@ func testParse(t *testing.T, tests []parseTest) {
 			); diff != "" {
 				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
 			}
+
+			if gotCfg != nil && !tt.parseWantDiagHasErrors {
+				gotInputVar := gotCfg.InputVariables
+				for name, value := range tt.parseWantCfg.InputVariables {
+					if variable, ok := gotInputVar[name]; ok {
+						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
+							t.Fatalf("Parser.parse() input variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
+						}
+					} else {
+						t.Fatalf("Parser.parse() missing input variable. %s", name)
+					}
+				}
+
+				gotLocalVar := gotCfg.LocalVariables
+				for name, value := range tt.parseWantCfg.LocalVariables {
+					if variable, ok := gotLocalVar[name]; ok {
+						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
+							t.Fatalf("Parser.parse() local variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
+						}
+					} else {
+						t.Fatalf("Parser.parse() missing local variable. %s", name)
+					}
+				}
+			}
+
 			if gotDiags.HasErrors() {
 				return
 			}
@@ -129,6 +154,7 @@ var (
 			{"a", "b"},
 			{"c", "d"},
 		},
+		Tags: []MockTag{},
 	}
 
 	basicMockBuilder = &MockBuilder{
@@ -148,7 +174,9 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: dynamicTagList,
+				},
 			},
 		},
 	}
@@ -157,7 +185,9 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: []MockTag{},
+				},
 			},
 		},
 	}
@@ -166,8 +196,25 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{},
+				{
+					Tags: []MockTag{},
+				},
 			},
+		},
+	}
+
+	dynamicTagList = []MockTag{
+		{
+			Key:   "first_tag_key",
+			Value: "first_tag_value",
+		},
+		{
+			Key:   "Component",
+			Value: "user-service",
+		},
+		{
+			Key:   "Environment",
+			Value: "production",
 		},
 	}
 )

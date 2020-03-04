@@ -1,7 +1,9 @@
 package hcl2template
 
 import (
+	"fmt"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -42,9 +44,130 @@ func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
 	return ectx
 }
 
+// decodeInputVariables looks in the found blocks for 'variables' and
+// 'variable' blocks. It should be called firsthand so that other blocks can
+// use the variables.
+func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case variableLabel:
+			moreDiags := c.InputVariables.decodeVariableBlock(block, nil)
+			diags = append(diags, moreDiags...)
+		case variablesLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			diags = append(diags, moreDiags...)
+			for key, attr := range attrs {
+				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
+				diags = append(diags, moreDiags...)
+			}
+		}
+	}
+	return diags
+}
+
+// parseLocalVariables looks in the found blocks for 'locals' blocks. It
+// should be called after parsing input variables so that they can be
+// referenced.
+func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+	var allLocals []*Local
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case localsLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			diags = append(diags, moreDiags...)
+			locals := make([]*Local, 0, len(attrs))
+			for name, attr := range attrs {
+				if _, found := c.LocalVariables[name]; found {
+					diags = append(diags, &hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Duplicate variable",
+						Detail:   "Duplicate " + name + " variable definition found.",
+						Subject:  attr.NameRange.Ptr(),
+						Context:  block.DefRange.Ptr(),
+					})
+					return nil, diags
+				}
+				locals = append(locals, &Local{
+					Name: name,
+					Expr: attr.Expr,
+				})
+			}
+			allLocals = append(allLocals, locals...)
+		}
+	}
+
+	return allLocals, diags
+}
+
+func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	if len(locals) > 0 && c.LocalVariables == nil {
+		c.LocalVariables = Variables{}
+	}
+
+	var retry, previousL int
+	for len(locals) > 0 {
+		local := locals[0]
+		moreDiags := c.evaluateLocalVariable(local)
+		if moreDiags.HasErrors() {
+			if len(locals) == 1 {
+				// If this is the only local left there's no need
+				// to try evaluating again
+				return append(diags, moreDiags...)
+			}
+			if previousL == len(locals) {
+				if retry == 100 {
+					// To get to this point, locals must have a circle dependency
+					return append(diags, moreDiags...)
+				}
+				retry++
+			}
+			previousL = len(locals)
+
+			// If local uses another local that has not been evaluated yet this could be the reason of errors
+			// Push local to the end of slice to be evaluated later
+			locals = append(locals, local)
+		} else {
+			retry = 0
+			diags = append(diags, moreDiags...)
+		}
+		// Remove local from slice
+		locals = append(locals[:0], locals[1:]...)
+	}
+
+	return diags
+}
+
+func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	value, moreDiags := local.Expr.Value(c.EvalContext())
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+	c.LocalVariables[local.Name] = &Variable{
+		DefaultValue: value,
+		Type:         value.Type(),
+	}
+
+	return diags
+}
+
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
@@ -64,11 +187,11 @@ func (p *Parser) getCoreBuildProvisioners(blocks []*ProvisionerBlock, ectx *hcl.
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (p *Parser) getCoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (p *Parser) getCoreBuildPostProcessors(blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
-		postProcessor, moreDiags := p.startPostProcessor(ppb, ectx)
+		postProcessor, moreDiags := p.startPostProcessor(ppb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -106,12 +229,26 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 			if moreDiags.HasErrors() {
 				continue
 			}
-			provisioners, moreDiags := p.getCoreBuildProvisioners(build.ProvisionerBlocks, cfg.EvalContext(), generatedVars)
+
+			// If the builder has provided a list of to-be-generated variables that
+			// should be made accessible to provisioners, pass that list into
+			// the provisioner prepare() so that the provisioner can appropriately
+			// validate user input against what will become available. Otherwise,
+			// only pass the default variables, using the basic placeholder data.
+			generatedPlaceholderMap := packer.BasicPlaceholderData()
+			if generatedVars != nil {
+				for _, k := range generatedVars {
+					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
+						common.PlaceholderMsg, k)
+				}
+			}
+
+			provisioners, moreDiags := p.getCoreBuildProvisioners(build.ProvisionerBlocks, cfg.EvalContext(), generatedPlaceholderMap)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := p.getCoreBuildPostProcessors(build.PostProcessors, cfg.EvalContext())
+			postProcessors, moreDiags := p.getCoreBuildPostProcessors(build.PostProcessors, cfg.EvalContext(), generatedPlaceholderMap)
 			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
 				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
@@ -126,6 +263,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
+				Prepared:       true,
 			}
 			res = append(res, pcb)
 		}

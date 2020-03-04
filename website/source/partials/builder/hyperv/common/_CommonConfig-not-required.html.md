@@ -110,3 +110,18 @@
     built. When this value is set to true, the machine will start without a
     console.
     
+-   `first_boot_device` (string) - When configured, determines the device or device type that is given preferential
+    treatment when choosing a boot device.
+    
+    For Generation 1:
+      - `IDE`
+      - `CD` *or* `DVD`
+      - `Floppy`
+      - `NET`
+    
+    For Generation 2:
+      - `IDE:x:y`
+      - `SCSI:x:y`
+      - `CD` *or* `DVD`
+      - `NET`
+    

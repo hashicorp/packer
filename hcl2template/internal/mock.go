@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig
+//go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
 
 package hcl2template
 
@@ -25,6 +25,12 @@ type NestedMockConfig struct {
 	SliceSliceString     [][]string           `mapstructure:"slice_slice_string"`
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
 	NamedString          NamedString          `mapstructure:"named_string"`
+	Tags                 []MockTag            `mapstructure:"tag"`
+}
+
+type MockTag struct {
+	Key   string `mapstructure:"key"`
+	Value string `mapstructure:"value"`
 }
 
 type MockConfig struct {
