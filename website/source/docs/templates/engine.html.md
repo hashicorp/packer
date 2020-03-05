@@ -74,15 +74,35 @@ Here is a full list of the available functions for reference.
     }
     ```
 
-    Valid variables to request are: "ID", "Host",
-    "Port", "User", "Password", "ConnType",
-    "PackerRunUUID", "PackerHTTPAddr", "SSHPublicKey", and "SSHPrivateKey".
-    Depending on which communicator you are using, some of these values may be
-    empty -- for example, the public and private keys are unique to the SSH
-    communicator. InstanceID represents the vm being provisioned. For example,
-    in Amazon it is the instance id; in digitalocean, it is the droplet id; in
-    Vmware, it is the vm name.
-
+    Valid variables to request are: 
+    - __ID__: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean, 
+    it is the droplet id; in Vmware, it is the vm name.   
+     
+    - __Host__, __Port__, __User__ and __Password__: The host, port, user, and password used for access the machine.
+    
+    - __ConnType__: Type of the communicator being used. For example, for SSH communicator this will be "ssh".
+    
+    - __PackerRunUUID__: Current build unique id. Can be used to specify build artifacts.
+    
+    - __PackerHTTPAddr__: Host address `IP:PORT` for the machine.
+    
+    - __SSHPublicKey__ and __SSHPrivateKey__: These are unique to the SSH communicator and is empty when using other communicator. 
+    The values have scape lines and should be wrapped into single quotes to correct format. An example of proper usage:
+       
+        ```
+        {
+          ...
+          "provisioners": [
+            {
+              "type": "shell",
+              "inline": [
+                "echo '{{ build `SSHPrivateKey`}}'  > /tmp/packer-session.pem"
+              ]
+             }
+          ]
+        }
+        ```
+      
     For backwards compatability, `WinRMPassword` is also available through this
     engine, though it is no different than using the more general `Password`.
 
