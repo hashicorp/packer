@@ -6,5 +6,5 @@
     
 -   `images` (bool) - Include image files (*.{iso,img})
     
--   `sha` (int) - Generate manifest using SHA 1, 256, 512 or 0 to skip
+-   `sha` (int) - Generate manifest using SHA 1, 256, 512 or use 0 to skip
     

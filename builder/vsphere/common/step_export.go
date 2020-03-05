@@ -16,6 +16,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/template/interpolate"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -38,9 +41,43 @@ type ExportConfig struct {
 	Force bool `mapstructure:"force"`
 	// Include image files (*.{iso,img})
 	Images bool `mapstructure:"images"`
-	// Generate manifest using SHA 1, 256, 512 or 0 to skip
+	// Generate manifest using SHA 1, 256, 512 or use 0 to skip
 	Sha       int          `mapstructure:"sha"`
 	OutputDir OutputConfig `mapstructure:",squash"`
+}
+
+func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc *common.PackerConfig) []error {
+	var errs *packer.MultiError
+
+	errs = packer.MultiErrorAppend(errs, c.OutputDir.Prepare(ctx, pc)...)
+
+	if _, ok := sha[c.Sha]; !ok {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("unknown hash: sha%d", c.Sha))
+	}
+
+	if c.Name == "" {
+		c.Name = lc.VMName
+	}
+	target := getTarget(c.OutputDir.OutputDir, c.Name)
+	if !c.Force {
+		if _, err := os.Stat(target); err == nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("file already exists: %s", target))
+		}
+	}
+
+	if err := os.MkdirAll(c.OutputDir.OutputDir, 0750); err != nil {
+		errs = packer.MultiErrorAppend(errs, errors.Wrap(err, "unable to make directory for export"))
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs.Errors
+	}
+
+	return nil
+}
+
+func getTarget(dir string, name string) string {
+	return filepath.Join(dir, name+".ovf")
 }
 
 type StepExport struct {
@@ -49,7 +86,6 @@ type StepExport struct {
 	Images    bool
 	Sha       int
 	OutputDir string
-	dest      string
 	mf        bytes.Buffer
 }
 
@@ -59,37 +95,6 @@ func (s *StepExport) Cleanup(multistep.StateBag) {
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
-
-	if s.Sha != 0 {
-		if _, ok := sha[s.Sha]; !ok {
-			state.Put("error", fmt.Errorf("unknown hash: sha%d", s.Sha))
-			return multistep.ActionHalt
-		}
-	}
-
-	if s.Name == "" {
-		info, err := vm.Info("name")
-		if err != nil {
-			state.Put("error", fmt.Errorf("unable to look up vm name"))
-			return multistep.ActionHalt
-		}
-		s.Name = info.Name
-	}
-	s.dest = filepath.Join(s.OutputDir, s.Name)
-
-	target := filepath.Join(s.dest, s.Name+".ovf")
-
-	if !s.Force {
-		if _, err := os.Stat(target); err == nil {
-			state.Put("error", fmt.Errorf("file already exists: %s", target))
-			return multistep.ActionHalt
-		}
-	}
-
-	if err := os.MkdirAll(s.dest, 0750); err != nil {
-		state.Put("error", errors.Wrap(err, "unable to make directory"))
-		return multistep.ActionHalt
-	}
 
 	lease, err := vm.Export()
 	if err != nil {
@@ -140,6 +145,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
+	target := getTarget(s.OutputDir, s.Name)
 	file, err := os.Create(target)
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "unable to create file: "+target))
@@ -164,14 +170,15 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	}
 
 	if s.Sha == 0 {
+		// manifest does not need to be created, return
 		return multistep.ActionContinue
 	}
 
 	s.addHash(filepath.Base(target), h)
 
-	file, err = os.Create(filepath.Join(s.dest, s.Name+".mf"))
+	file, err = os.Create(filepath.Join(s.OutputDir, s.Name+".mf"))
 	if err != nil {
-		state.Put("error", err)
+		state.Put("error", errors.Wrap(err, "unable to create manifest"))
 		return multistep.ActionHalt
 	}
 
@@ -211,7 +218,7 @@ func (s *StepExport) addHash(p string, h hash.Hash) {
 }
 
 func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
-	path := filepath.Join(s.dest, item.Path)
+	path := filepath.Join(s.OutputDir, item.Path)
 
 	opts := soap.Download{}
 
