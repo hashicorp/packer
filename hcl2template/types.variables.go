@@ -160,7 +160,6 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 		}
 
 		res.Type = tp
-		delete(attrs, "type")
 	}
 
 	if def, ok := attrs["default"]; ok {

@@ -212,40 +212,38 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 		},
 
-		// Need to understand more why this is failing looks as if the values
-		// are espacing the double quotes which doesn't seem to happen at runtime.
-		//{name: "quoted string",
-		//variables: Variables{"quoted_string": &Variable{
-		//DefaultValue: cty.StringVal("default_value"),
-		//Type:         cty.String,
-		//}},
-		//args: args{
-		//env: []string{`PKR_VAR_quoted_string="env_value"`},
-		//hclFiles: []string{
-		//`quoted_string="xy"`,
-		//`quoted_string="varfile_value"`,
-		//},
-		//argv: map[string]string{
-		//"quoted_string": `"cmd_value"`,
-		//},
-		//},
-		//
-		//// output
-		//wantDiags: false,
-		//wantVariables: Variables{
-		//"quoted_string": &Variable{
-		//Type:         cty.String,
-		//CmdValue:     cty.StringVal("cmd_value"),
-		//VarfileValue: cty.StringVal("varfile_value"),
-		//EnvValue:     cty.StringVal("env_value"),
-		//DefaultValue: cty.StringVal("default_value"),
-		//},
-		//},
-		//wantValues: map[string]cty.Value{
-		//"quoted_string": cty.StringVal("cmd_value"),
-		//},
-		//},
-		//
+		{name: "quoted string",
+			variables: Variables{"quoted_string": &Variable{
+				DefaultValue: cty.StringVal(`"default_value"`),
+				Type:         cty.String,
+			}},
+			args: args{
+				env: []string{`PKR_VAR_quoted_string="env_value"`},
+				hclFiles: []string{
+					`quoted_string="\"xy\""`,
+					`quoted_string="\"varfile_value\""`,
+				},
+				argv: map[string]string{
+					"quoted_string": `"cmd_value"`,
+				},
+			},
+
+			// output
+			wantDiags: false,
+			wantVariables: Variables{
+				"quoted_string": &Variable{
+					Type:         cty.String,
+					CmdValue:     cty.StringVal(`"cmd_value"`),
+					VarfileValue: cty.StringVal(`"varfile_value"`),
+					EnvValue:     cty.StringVal(`"env_value"`),
+					DefaultValue: cty.StringVal(`"default_value"`),
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"quoted_string": cty.StringVal(`"cmd_value"`),
+			},
+		},
+
 		{name: "array of strings",
 			variables: Variables{"used_strings": &Variable{
 				DefaultValue: stringListVal("default_value_1"),
