@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
 package iso
@@ -33,7 +34,10 @@ type Config struct {
 
 	common.ShutdownConfig `mapstructure:",squash"`
 
-	CreateSnapshot    bool `mapstructure:"create_snapshot"`
+	// Create a snapshot when set to `true`, so the VM can be used as a base
+	// for linked clones. Defaults to `false`.
+	CreateSnapshot bool `mapstructure:"create_snapshot"`
+	// Convert VM to a template. Defaults to `false`.
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context
