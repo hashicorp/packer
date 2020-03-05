@@ -28,22 +28,39 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// You may optionally export an ovf from VSphere to the instance running Packer.
+//
+// Example usage:
+// ```json
+// ...
+//   "vm_name": "example-ubuntu",
+// ...
+//   "export": {
+//     "force": true,
+//     "output_directory": "./output_vsphere"
+//   },
+// ```
+// The above configuration would create the following files:
+// ```
+// ./output_vsphere/example-ubuntu-disk-0.vmdk
+// ./output_vsphere/example-ubuntu.ovf
+// ```
+type ExportConfig struct {
+	// name of the ovf. defaults to the name of the VM
+	Name string `mapstructure:"name"`
+	// overwrite ovf if it exists
+	Force bool `mapstructure:"force"`
+	// include iso and img image files that are attached to the VM
+	Images bool `mapstructure:"images"`
+	// generate manifest using SHA 1, 256, 512. use 0 (default) for no manifest
+	Sha       int          `mapstructure:"sha"`
+	OutputDir OutputConfig `mapstructure:",squash"`
+}
+
 var sha = map[int]func() hash.Hash{
 	1:   sha1.New,
 	256: sha256.New,
 	512: sha512.New,
-}
-
-type ExportConfig struct {
-	// name of the ovf. defaults to the name of the VM
-	Name string `mapstructure:"name"`
-	// overwrites existing ovf
-	Force bool `mapstructure:"force"`
-	// Include image files (*.{iso,img})
-	Images bool `mapstructure:"images"`
-	// Generate manifest using SHA 1, 256, 512 or use 0 to skip
-	Sha       int          `mapstructure:"sha"`
-	OutputDir OutputConfig `mapstructure:",squash"`
 }
 
 func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc *common.PackerConfig) []error {

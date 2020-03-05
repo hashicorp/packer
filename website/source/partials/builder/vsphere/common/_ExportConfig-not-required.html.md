@@ -2,9 +2,9 @@
 
 -   `name` (string) - name of the ovf. defaults to the name of the VM
     
--   `force` (bool) - overwrites existing ovf
+-   `force` (bool) - overwrite ovf if it exists
     
--   `images` (bool) - Include image files (*.{iso,img})
+-   `images` (bool) - include iso and img image files that are attached to the VM
     
--   `sha` (int) - Generate manifest using SHA 1, 256, 512 or use 0 to skip
+-   `sha` (int) - generate manifest using SHA 1, 256, 512. use 0 (default) for no manifest
     
