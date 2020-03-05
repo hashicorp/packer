@@ -48,6 +48,12 @@ func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	ui.Say("Deleting any current floppy disk...")
+	if err := driver.RemoveFloppyControllers(vmName); err != nil {
+		state.Put("error", fmt.Errorf("Error deleting existing floppy controllers: %s", err))
+		return multistep.ActionHalt
+	}
+
 	ui.Say("Attaching floppy disk...")
 
 	// Create the floppy disk controller

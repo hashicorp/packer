@@ -75,6 +75,55 @@ func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 	return d.VBoxManage(command...)
 }
 
+func (d *VBox42Driver) RemoveFloppyControllers(vmName string) error {
+	var stdout bytes.Buffer
+
+	cmd := exec.Command(d.VBoxManagePath, "showvminfo", vmName, "--machinereadable")
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	StorageControllerTypeRe := regexp.MustCompile("^storagecontrollertype([0-9]+)=\"(.+)\"$")
+	StorageControllerNameRe := regexp.MustCompile("^storagecontrollername([0-9]+)=\"(.+)\"$")
+
+	storageControllerNames := make(map[string]string)
+	storageControllerIdx := ""
+
+	for _, line := range strings.Split(stdout.String(), "\n") {
+		// Need to trim off CR character when running in windows
+		// Trimming whitespaces at this point helps to filter out empty value
+		line = strings.TrimRight(line, " \r")
+
+		matches := StorageControllerTypeRe.FindStringSubmatch(line)
+		if matches != nil {
+			// Floppy controllers are of a type I82078
+			if matches[2] == "I82078" {
+				// VirtualBox supports only one floppy controller per VM
+				storageControllerIdx = matches[1]
+			}
+			continue
+		}
+
+		matches = StorageControllerNameRe.FindStringSubmatch(line)
+		if matches != nil {
+			storageControllerNames[matches[1]] = matches[2]
+		}
+	}
+
+	if storageControllerIdx == "" {
+		return nil
+	}
+
+	command := []string{
+		"storagectl", vmName,
+		"--name", storageControllerNames[storageControllerIdx],
+		"--remove",
+	}
+
+	return d.VBoxManage(command...)
+}
+
 func (d *VBox42Driver) Delete(name string) error {
 	return d.VBoxManage("unregistervm", name, "--delete")
 }
