@@ -4,7 +4,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
-	"syscall"
+	"os"
 )
 
 func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
@@ -20,7 +20,7 @@ func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
 		}
 		answers := make([]string, len(questions))
 		for i := range questions {
-			s, err := terminal.ReadPassword(syscall.Stdin)
+			s, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 			if err != nil {
 				return nil, err
 			}
