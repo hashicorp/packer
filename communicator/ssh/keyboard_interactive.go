@@ -1,10 +1,11 @@
 package ssh
 
 import (
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
+
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
