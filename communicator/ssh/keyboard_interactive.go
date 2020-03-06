@@ -20,7 +20,7 @@ func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
 		}
 		answers := make([]string, len(questions))
 		for i := range questions {
-			s, err := terminal.ReadPassword(int(syscall.Stdin))
+			s, err := terminal.ReadPassword(syscall.Stdin)
 			if err != nil {
 				return nil, err
 			}
