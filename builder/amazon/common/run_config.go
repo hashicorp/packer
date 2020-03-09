@@ -265,13 +265,21 @@ type RunConfig struct {
 	// because a particular availability zone does not have capacity for the
 	// specific instance_type requested in instance_type.
 	SpotInstanceTypes []string `mapstructure:"spot_instance_types" required:"false"`
-	// The maximum hourly price to pay for a spot instance
-	// to create the AMI. Spot instances are a type of instance that EC2 starts
-	// when the current spot price is less than the maximum price you specify.
-	// Spot price will be updated based on available spot instance capacity and
-	// current spot instance requests. It may save you some costs. You can set
-	// this to auto for Packer to automatically discover the best spot price or
-	// to "0" to use an on demand instance (default).
+	// With Spot Instances, you pay the Spot price that's in effect for the
+	// time period your instances are running. Spot Instance prices are set by
+	// Amazon EC2 and adjust gradually based on long-term trends in supply and
+	// demand for Spot Instance capacity.
+	//
+	// When this field is set, it represents the maximum hourly price you are
+	// willing to pay for a spot instance. If you do not set this value, it
+	// defaults to a maximum price equal to the on demand price of the
+	// instance. In the situation where the current Amazon-set spot price
+	// exceeds the value set in this field, Packer will not launch an instance
+	// and the build will error. In the situation where the Amazon-set spot
+	// price is less than the value set in this field, Packer will launch and
+	// you will pay the Amazon-set spot price, not this maximum value.
+	// For more information, see the Amazon docs on
+	// [spot pricing](https://aws.amazon.com/ec2/spot/pricing/).
 	SpotPrice string `mapstructure:"spot_price" required:"false"`
 	// Required if spot_price is set to
 	// auto. This tells Packer what sort of AMI you're launching to find the
