@@ -247,12 +247,14 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		argv     map[string]string
 	}
 	tests := []struct {
-		name          string
-		variables     Variables
-		args          args
-		wantDiags     bool
-		wantVariables Variables
-		wantValues    map[string]cty.Value
+		name              string
+		variables         Variables
+		validationOptions ValidationOptions
+		args              args
+		wantDiags         bool
+		wantDiagsHasError bool
+		wantVariables     Variables
+		wantValues        map[string]cty.Value
 	}{
 
 		{name: "string",
@@ -333,11 +335,39 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 		},
 
-		{name: "undefined but set value",
+		{name: "undefined but set value - pkrvar file - normal mode",
 			variables: Variables{},
 			args: args{
-				env:      []string{`PKR_VAR_unused_string=value`},
-				hclFiles: []string{`unused_string="value"`},
+				hclFiles: []string{`undefined_string="value"`},
+			},
+
+			// output
+			wantDiags:         true,
+			wantDiagsHasError: false,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
+		},
+
+		{name: "undefined but set value - pkrvar file - strict mode",
+			variables: Variables{},
+			validationOptions: ValidationOptions{
+				Strict: true,
+			},
+			args: args{
+				hclFiles: []string{`undefined_string="value"`},
+			},
+
+			// output
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
+		},
+
+		{name: "undefined but set value - env",
+			variables: Variables{},
+			args: args{
+				env: []string{`PKR_VAR_undefined_string=value`},
 			},
 
 			// output
@@ -346,18 +376,19 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantValues:    map[string]cty.Value{},
 		},
 
-		{name: "undefined but set value - args",
+		{name: "undefined but set value - argv",
 			variables: Variables{},
 			args: args{
 				argv: map[string]string{
-					"unused_string": "value",
+					"undefined_string": "value",
 				},
 			},
 
 			// output
-			wantDiags:     true,
-			wantVariables: Variables{},
-			wantValues:    map[string]cty.Value{},
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
 		},
 
 		{name: "value not corresponding to type - env",
@@ -371,7 +402,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:     cty.String,
@@ -394,7 +426,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:         cty.String,
@@ -419,7 +452,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:     cty.String,
@@ -438,9 +472,10 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags:     true,
-			wantVariables: Variables{},
-			wantValues:    map[string]cty.Value{},
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
 		},
 	}
 	for _, tt := range tests {
@@ -454,8 +489,16 @@ func TestVariables_collectVariableValues(t *testing.T) {
 				}
 				files = append(files, file)
 			}
-			if gotDiags := tt.variables.collectVariableValues(tt.args.env, files, tt.args.argv); (gotDiags == nil) == tt.wantDiags {
+			cfg := &PackerConfig{
+				InputVariables:    tt.variables,
+				ValidationOptions: tt.validationOptions,
+			}
+			gotDiags := cfg.collectInputVariableValues(tt.args.env, files, tt.args.argv)
+			if (gotDiags == nil) == tt.wantDiags {
 				t.Fatalf("Variables.collectVariableValues() = %v, want %v", gotDiags, tt.wantDiags)
+			}
+			if tt.wantDiagsHasError != gotDiags.HasErrors() {
+				t.Fatalf("Variables.collectVariableValues() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
 			if diff := cmp.Diff(fmt.Sprintf("%#v", tt.wantVariables), fmt.Sprintf("%#v", tt.variables)); diff != "" {
 				t.Fatalf("didn't get expected variables: %s", diff)

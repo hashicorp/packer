@@ -25,8 +25,14 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
+	ValidationOptions
+
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+}
+
+type ValidationOptions struct {
+	Strict bool
 }
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl

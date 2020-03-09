@@ -123,7 +123,7 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 			varFiles = append(varFiles, f)
 		}
 
-		diags = append(diags, cfg.InputVariables.collectVariableValues(os.Environ(), varFiles, vars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, vars)...)
 	}
 
 	// decode the actual content
