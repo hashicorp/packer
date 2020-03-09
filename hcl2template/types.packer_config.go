@@ -39,11 +39,13 @@ type ValidationOptions struct {
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
+	inputVariables, _ := cfg.InputVariables.Values()
+	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
-			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
-			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
+			"var":   cty.ObjectVal(inputVariables),
+			"local": cty.ObjectVal(localVariables),
 		},
 	}
 	return ectx
