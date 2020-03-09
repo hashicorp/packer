@@ -223,8 +223,9 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 // them.
 const VarEnvPrefix = "PKR_VAR_"
 
-func (variables Variables) collectVariableValues(env []string, files []*hcl.File, argv map[string]string) hcl.Diagnostics {
+func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.File, argv map[string]string) hcl.Diagnostics {
 	var diags hcl.Diagnostics
+	variables := cfg.InputVariables
 
 	for _, raw := range env {
 		if !strings.HasPrefix(raw, VarEnvPrefix) {
@@ -321,7 +322,20 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		for name, attr := range attrs {
 			variable, found := variables[name]
 			if !found {
-				// No file defines this variable; let's skip it
+				sev := hcl.DiagWarning
+				if cfg.ValidationOptions.Strict {
+					sev = hcl.DiagError
+				}
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: sev,
+					Summary:  "Undefined variable",
+					Detail: fmt.Sprintf("A %q variable was set but was "+
+						"not found in known variables. To declare "+
+						"variable %q, place this block in one of your"+
+						".pkr files, such as variables.pkr.hcl",
+						name, name),
+					Context: attr.Range.Ptr(),
+				})
 				continue
 			}
 
@@ -351,8 +365,8 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		variable, found := variables[name]
 		if !found {
 			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagWarning,
-				Summary:  "Unknown -var variable",
+				Severity: hcl.DiagError,
+				Summary:  "Undefined -var variable",
 				Detail: fmt.Sprintf("A %q variable was passed in the command "+
 					"line but was not found in known variables."+
 					"To declare variable %q, place this block in one of your"+
