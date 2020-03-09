@@ -161,11 +161,7 @@ require (
 	github.com/zclconf/go-cty v1.2.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	go.opencensus.io v0.22.2 // indirect
-<<<<<<< HEAD
-	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
-=======
 	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
->>>>>>> 909b9fcfc7fadbb3c52ffd0651511f383745f5ff
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8

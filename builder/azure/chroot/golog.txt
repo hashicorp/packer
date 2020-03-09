@@ -1,22 +1,22 @@
-(2020-01-06T14:39:55.1079620-08:00) INFO: REQUEST: PUT https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
+(2020-03-09T10:37:08.0018450-07:00) INFO: REQUEST: PUT https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
 Content-Type: application/json; charset=utf-8
 User-Agent: Go/go1.13.1 (amd64-darwin) go-autorest/v13.3.0 Azure-SDK-For-Go/v30.0.0 compute/2019-03-01
 {"location":"westus","properties":{"osType":"Linux","hyperVGeneration":"V1","creationData":{"createOption":"Copy","sourceResourceId":"SourceDisk"},"diskSizeGB":42},"sku":{"name":"Premium_LRS"}}
-(2020-01-06T14:39:55.1210560-08:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
-(2020-01-06T14:39:55.1413810-08:00) INFO: REQUEST: PUT https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
+(2020-03-09T10:37:08.0349590-07:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
+(2020-03-09T10:37:08.0785080-07:00) INFO: REQUEST: PUT https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
 Content-Type: application/json; charset=utf-8
 User-Agent: Go/go1.13.1 (amd64-darwin) go-autorest/v13.3.0 Azure-SDK-For-Go/v30.0.0 compute/2019-03-01
 {"location":"westus","properties":{"osType":"Linux","hyperVGeneration":"V1","creationData":{"createOption":"FromImage","imageReference":{"id":"/subscriptions/SubscriptionID/providers/Microsoft.Compute/locations/westus/publishers/Microsoft/artifacttypes/vmimage/offers/Windows/skus/2016-DataCenter/versions/2016.1.4"}}},"sku":{"name":"Standard_LRS"}}
-(2020-01-06T14:39:55.2249670-08:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
-(2020-01-06T14:39:55.2373480-08:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.0887120-07:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName?api-version=2018-09-30
+(2020-03-09T10:37:08.1288520-07:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 User-Agent: Go/go1.13.1 (amd64-darwin) go-autorest/v13.3.0 Azure-SDK-For-Go/v30.0.0 compute/2019-03-01
-(2020-01-06T14:39:55.2511040-08:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.1648050-07:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 {"location":"westus2"}
-(2020-01-06T14:39:55.2619470-08:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.1810070-07:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 User-Agent: Go/go1.13.1 (amd64-darwin) go-autorest/v13.3.0 Azure-SDK-For-Go/v30.0.0 compute/2019-03-01
-(2020-01-06T14:39:55.3118830-08:00) INFO: RESPONSE: 404 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.1964060-07:00) INFO: RESPONSE: 404 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 {}
-(2020-01-06T14:39:55.3323320-08:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.2468960-07:00) INFO: REQUEST: GET https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 User-Agent: Go/go1.13.1 (amd64-darwin) go-autorest/v13.3.0 Azure-SDK-For-Go/v30.0.0 compute/2019-03-01
-(2020-01-06T14:39:55.3489790-08:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
+(2020-03-09T10:37:08.2586530-07:00) INFO: RESPONSE: 200 https://management.azure.com/subscriptions/subscriptionId/resourceGroups/rg1/providers/Microsoft.Compute/disks/disk1?api-version=2018-09-30
 {"location":"westus2"}
