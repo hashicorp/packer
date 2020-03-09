@@ -326,7 +326,7 @@ func (c *Config) Port() int {
 	}
 }
 
-// Host returns the port that will be used for access based on config.
+// Host returns the host that will be used for access based on config.
 func (c *Config) Host() string {
 	switch c.Type {
 	case "ssh":
@@ -338,7 +338,7 @@ func (c *Config) Host() string {
 	}
 }
 
-// User returns the port that will be used for access based on config.
+// User returns the user that will be used for access based on config.
 func (c *Config) User() string {
 	switch c.Type {
 	case "ssh":
@@ -350,7 +350,7 @@ func (c *Config) User() string {
 	}
 }
 
-// Password returns the port that will be used for access based on config.
+// Password returns the password that will be used for access based on config.
 func (c *Config) Password() string {
 	switch c.Type {
 	case "ssh":

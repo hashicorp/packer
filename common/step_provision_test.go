@@ -83,13 +83,11 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	if hookData["ConnType"] != commConfig.Type {
 		t.Fatalf("Bad: Expecting hookData[\"ConnType\"]  was %s but actual value was %s", commConfig.Type, hookData["ConnType"])
 	}
-	sshPublicKey := fmt.Sprintf("%v", hookData["SSHPublicKey"].(interface{}))
-	if sshPublicKey == string(commConfig.SSHPublicKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPublicKey\"]  was %s but actual value was %s", string(commConfig.SSHPublicKey), sshPublicKey)
+	if hookData["SSHPublicKey"] != string(commConfig.SSHPublicKey) {
+		t.Fatalf("Bad: Expecting hookData[\"SSHPublicKey\"]  was %s but actual value was %s", string(commConfig.SSHPublicKey), hookData["SSHPublicKey"])
 	}
-	sshPrivateKey := fmt.Sprintf("%v", hookData["SSHPrivateKey"].(interface{}))
-	if sshPrivateKey == string(commConfig.SSHPrivateKey) {
-		t.Fatalf("Bad: Expecting hookData[\"SSHPrivateKey\"]  was %s but actual value was %s", string(commConfig.SSHPrivateKey), sshPrivateKey)
+	if hookData["SSHPrivateKey"] != string(commConfig.SSHPrivateKey) {
+		t.Fatalf("Bad: Expecting hookData[\"SSHPrivateKey\"]  was %s but actual value was %s", string(commConfig.SSHPrivateKey), hookData["SSHPrivateKey"])
 	}
 	if hookData["WinRMPassword"] != commConfig.WinRMPassword {
 		t.Fatalf("Bad: Expecting hookData[\"WinRMPassword\"]  was %s but actual value was %s", commConfig.WinRMPassword, hookData["WinRMPassword"])
