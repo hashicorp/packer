@@ -262,15 +262,18 @@ func TestVariables_collectVariableValues(t *testing.T) {
 	}{
 
 		{name: "string",
-			variables: Variables{"used_string": &Variable{DefaultValue: cty.StringVal("default_value")}},
+			variables: Variables{"used_string": &Variable{
+				DefaultValue: cty.StringVal("default_value"),
+				Type:         cty.String,
+			}},
 			args: args{
-				env: []string{`PKR_VAR_used_string="env_value"`},
+				env: []string{`PKR_VAR_used_string=env_value`},
 				hclFiles: []string{
 					`used_string="xy"`,
 					`used_string="varfile_value"`,
 				},
 				argv: map[string]string{
-					"used_string": `"cmd_value"`,
+					"used_string": `cmd_value`,
 				},
 			},
 
@@ -278,6 +281,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiags: false,
 			wantVariables: Variables{
 				"used_string": &Variable{
+					Type:         cty.String,
 					CmdValue:     cty.StringVal("cmd_value"),
 					VarfileValue: cty.StringVal("varfile_value"),
 					EnvValue:     cty.StringVal("env_value"),
@@ -286,6 +290,38 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 			wantValues: map[string]cty.Value{
 				"used_string": cty.StringVal("cmd_value"),
+			},
+		},
+
+		{name: "quoted string",
+			variables: Variables{"quoted_string": &Variable{
+				DefaultValue: cty.StringVal(`"default_value"`),
+				Type:         cty.String,
+			}},
+			args: args{
+				env: []string{`PKR_VAR_quoted_string="env_value"`},
+				hclFiles: []string{
+					`quoted_string="\"xy\""`,
+					`quoted_string="\"varfile_value\""`,
+				},
+				argv: map[string]string{
+					"quoted_string": `"cmd_value"`,
+				},
+			},
+
+			// output
+			wantDiags: false,
+			wantVariables: Variables{
+				"quoted_string": &Variable{
+					Type:         cty.String,
+					CmdValue:     cty.StringVal(`"cmd_value"`),
+					VarfileValue: cty.StringVal(`"varfile_value"`),
+					EnvValue:     cty.StringVal(`"env_value"`),
+					DefaultValue: cty.StringVal(`"default_value"`),
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"quoted_string": cty.StringVal(`"cmd_value"`),
 			},
 		},
 
@@ -321,8 +357,42 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 		},
 
+		{name: "bool",
+			variables: Variables{"enabled": &Variable{
+				DefaultValue: cty.False,
+				Type:         cty.Bool,
+			}},
+			args: args{
+				env: []string{`PKR_VAR_enabled=true`},
+				hclFiles: []string{
+					`enabled="false"`,
+				},
+				argv: map[string]string{
+					"enabled": `true`,
+				},
+			},
+
+			// output
+			wantDiags: false,
+			wantVariables: Variables{
+				"enabled": &Variable{
+					Type:         cty.Bool,
+					CmdValue:     cty.True,
+					VarfileValue: cty.False,
+					EnvValue:     cty.True,
+					DefaultValue: cty.False,
+				},
+			},
+			wantValues: map[string]cty.Value{
+				"enabled": cty.True,
+			},
+		},
+
 		{name: "invalid env var",
-			variables: Variables{"used_string": &Variable{DefaultValue: cty.StringVal("default_value")}},
+			variables: Variables{"used_string": &Variable{
+				DefaultValue: cty.StringVal("default_value"),
+				Type:         cty.String,
+			}},
 			args: args{
 				env: []string{`PKR_VAR_used_string`},
 			},
@@ -331,6 +401,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiags: false,
 			wantVariables: Variables{
 				"used_string": &Variable{
+					Type:         cty.String,
 					DefaultValue: cty.StringVal("default_value"),
 				},
 			},
@@ -398,11 +469,11 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - env",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.List(cty.String),
 				},
 			},
 			args: args{
-				env: []string{`PKR_VAR_used_string=["string"]`},
+				env: []string{`PKR_VAR_used_string="string"`},
 			},
 
 			// output
@@ -410,7 +481,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:     cty.String,
+					Type:     cty.List(cty.String),
 					EnvValue: cty.DynamicVal,
 				},
 			},
@@ -422,7 +493,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - cfg file",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.Bool,
 				},
 			},
 			args: args{
@@ -434,7 +505,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:         cty.String,
+					Type:         cty.Bool,
 					VarfileValue: cty.DynamicVal,
 				},
 			},
@@ -446,12 +517,12 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "value not corresponding to type - argv",
 			variables: Variables{
 				"used_string": &Variable{
-					Type: cty.String,
+					Type: cty.Bool,
 				},
 			},
 			args: args{
 				argv: map[string]string{
-					"used_string": `["string"]`,
+					"used_string": `["true"]`,
 				},
 			},
 
@@ -460,7 +531,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
-					Type:     cty.String,
+					Type:     cty.Bool,
 					CmdValue: cty.DynamicVal,
 				},
 			},

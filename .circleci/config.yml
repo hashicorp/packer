@@ -36,7 +36,7 @@ commands:
         type: string
     steps:
       - checkout
-      - run: GOOS=<< parameters.GOOS >> go build -ldflags="-s -w" -o ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH) .
+      - run: GOOS=<< parameters.GOOS >> go build -ldflags="-s -w -X github.com/hashicorp/packer/version.GitCommit=${CIRCLE_SHA1}" -o ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH) .
       - run: zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH).zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
       - run: rm ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
       - persist_to_workspace:

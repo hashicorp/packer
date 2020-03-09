@@ -38,6 +38,10 @@ func TestStepAttachFloppy(t *testing.T) {
 		t.Fatal("should NOT have error")
 	}
 
+	if driver.RemoveFloppyControllersVM == "" {
+		t.Fatal("RemoveFloppyControllers was not called")
+	}
+
 	if len(driver.VBoxManageCalls) != 2 {
 		t.Fatal("not enough calls to VBoxManage")
 	}
