@@ -52,7 +52,7 @@ func (s *StepConfigureVRDP) Run(ctx context.Context, state multistep.StateBag) m
 
 	command := []string{
 		"modifyvm", vmName,
-		"--vrdeaddress", fmt.Sprintf("%s", s.VRDPBindAddress),
+		"--vrdeaddress", s.VRDPBindAddress,
 		"--vrdeauthtype", "null",
 		"--vrde", "on",
 		"--vrdeport",
