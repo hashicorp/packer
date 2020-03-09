@@ -78,16 +78,16 @@ Here is a full list of the available functions for reference.
     - __ID__: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean, 
     it is the droplet id; in Vmware, it is the vm name.   
      
-    - __Host__, __Port__, __User__ and __Password__: The host, port, user, and password used for access the machine.
+    - __Host__, __Port__, __User__ and __Password__: The host, port, user, and password used to access the machine.
     
-    - __ConnType__: Type of the communicator being used. For example, for SSH communicator this will be "ssh".
+    - __ConnType__: Type of communicator being used. For example, for SSH communicator this will be "ssh".
     
-    - __PackerRunUUID__: Current build unique id. Can be used to specify build artifacts.
+    - __PackerRunUUID__: Current build's unique id. Can be used to specify build artifacts.
     
-    - __PackerHTTPAddr__: Host address `IP:PORT` for the machine.
+    - __PackerHTTPAddr__: HTTP address `IP:PORT` to access the host from the VM. To get files for example.
     
-    - __SSHPublicKey__ and __SSHPrivateKey__: These are unique to the SSH communicator and is empty when using other communicator. 
-    The values have scape lines and should be wrapped into single quotes to correct format. An example of proper usage:
+    - __SSHPublicKey__ and __SSHPrivateKey__: These are unique to the SSH communicator and are unset when using other communicators. 
+    __SSHPublicKey__ and __SSHPrivateKey__ can have escape sequences and special characters so their output should be single quoted to avoid surprises.  For example:
        
         ```
         {
