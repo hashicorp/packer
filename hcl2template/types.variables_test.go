@@ -52,9 +52,10 @@ func TestParse_variables(t *testing.T) {
 						Description: fmt.Sprintln("Describing is awesome ;D"),
 					},
 					"super_secret_password": &Variable{
-						Name:        "super_secret_password",
-						Sensitive:   true,
-						Description: fmt.Sprintln("Handle with care plz"),
+						Name:         "super_secret_password",
+						Sensitive:    true,
+						DefaultValue: cty.NullVal(cty.String),
+						Description:  fmt.Sprintln("Handle with care plz"),
 					},
 				},
 				LocalVariables: Variables{
@@ -117,14 +118,16 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+
 		{"unknown key",
 			defaultParser,
 			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"broken_type": &Variable{
-						Name: "broken_type",
+					"broken_variable": &Variable{
+						Name:         "broken_variable",
+						DefaultValue: cty.BoolVal(true),
 					},
 				},
 			},
@@ -132,6 +135,7 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+
 		{"unset used variable",
 			defaultParser,
 			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil},
@@ -170,7 +174,7 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packer.Build{
 				&packer.CoreBuild{
 					Type:           "null",

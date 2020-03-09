@@ -62,7 +62,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		v.EnvValue,
 		v.DefaultValue,
 	} {
-		if !value.IsNull() {
+		if value != cty.NilVal {
 			return value, nil
 		}
 	}
@@ -73,23 +73,26 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
-			"https://packer.io/docs/configuration/from-1.5/syntax.html for details.",
+			"https://packer.io/docs/configuration/from-1.5/syntax.html for " +
+			"details.",
 		Context: v.Range.Ptr(),
 	}
 }
 
 type Variables map[string]*Variable
 
-func (variables Variables) Values() map[string]cty.Value {
+func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
+	var diags hcl.Diagnostics
 	for k, v := range variables {
-		res[k], _ = v.Value()
-		// here the value might not be used and in that case we don't want to
-		// force users to set it. So this error is ignored. we still set it as
-		// it can be a `cty.NullVal(cty.DynamicPseudoType)`, which is the go
-		// cty value for 'unknown value' and should error when used.
+		value, diag := v.Value()
+		if diag != nil {
+			diags = append(diags, diag)
+			continue
+		}
+		res[k] = value
 	}
-	return res
+	return res, diags
 }
 
 // decodeVariable decodes a variable key and value into Variables
