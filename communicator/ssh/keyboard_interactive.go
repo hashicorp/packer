@@ -13,10 +13,10 @@ func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
 			return []string{}, nil
 		}
 
-		log.Printf("-- User: %s", user)
-		log.Printf("-- Instructions: %s", instruction)
+		log.Printf("[INFO] -- User: %s", user)
+		log.Printf("[INFO] -- Instructions: %s", instruction)
 		for i, question := range questions {
-			log.Printf("-- Question %d: %s", i+1, question)
+			log.Printf("[INFO] -- Question %d: %s", i+1, question)
 		}
 		answers := make([]string, len(questions))
 		for i := range questions {
