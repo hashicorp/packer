@@ -217,7 +217,7 @@ var TimeAddFunc = function.New(&function.Spec{
 	},
 	Type: function.StaticReturnType(cty.String),
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
-		ts, err := time.Parse(time.RFC3339, args[0].AsString())
+		ts, err := parseTimestamp(args[0].AsString())
 		if err != nil {
 			return cty.UnknownVal(cty.String), err
 		}
