@@ -16,14 +16,12 @@ after_success:
 jobs:
   fast_finish: true
   include:
-    - go: "1.13.x"
-      name: "go test"
+    - go: tip
+      name: "go test coverage"
       script:
         - df -h
         - travis_wait make ci
-    - go: "1.13.x"
+        - travis_wait 20 bash scripts/travis.sh
+    - go: tip
       name: "go lint"
       script: travis_wait make ci-lint
-    - go: "1.13.x"
-      name: "code coverage"
-      script: travis_wait bash scripts/travis.sh

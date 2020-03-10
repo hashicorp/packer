@@ -23,7 +23,7 @@ export GOLDFLAGS
 
 default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
-ci: testrace ## Test in continuous integration
+ci: mode-check vet ## Test in continuous integration
 
 release: install-build-deps test releasebin package ## Build a release build
 
@@ -144,7 +144,7 @@ testrace: mode-check vet ## Test with race detection enabled
 
 # Runs code coverage and open a html page with report
 cover:
-	go test $(TEST) -coverprofile=coverage.out
+	go test $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
 	go tool cover -html=coverage.out
 	rm coverage.out
 
