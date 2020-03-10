@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -21,6 +22,7 @@ func getBasicParser() *Parser {
 		BuilderSchemas: packer.MapOfBuilder{
 			"amazon-ebs":     func() (packer.Builder, error) { return &MockBuilder{}, nil },
 			"virtualbox-iso": func() (packer.Builder, error) { return &MockBuilder{}, nil },
+			"null":           func() (packer.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionersSchemas: packer.MapOfProvisioner{
 			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
@@ -58,7 +60,7 @@ func testParse(t *testing.T, tests []parseTest) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
-				t.Fatalf("Parser.parse() unexpected diagnostics. %s", gotDiags)
+				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
 			}
 			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
@@ -120,6 +122,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					packer.CoreBuild{},
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
+					null.Builder{},
 				),
 			); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)

@@ -10,6 +10,7 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -24,36 +25,46 @@ func TestParse_variables(t *testing.T) {
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
 					"image_name": &Variable{
+						Name:         "image_name",
 						DefaultValue: cty.StringVal("foo-image-{{user `my_secret`}}"),
 					},
 					"key": &Variable{
+						Name:         "key",
 						DefaultValue: cty.StringVal("value"),
 					},
 					"my_secret": &Variable{
+						Name:         "my_secret",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"image_id": &Variable{
+						Name:         "image_id",
 						DefaultValue: cty.StringVal("image-id-default"),
 					},
 					"port": &Variable{
+						Name:         "port",
 						DefaultValue: cty.NumberIntVal(42),
 					},
 					"availability_zone_names": &Variable{
+						Name: "availability_zone_names",
 						DefaultValue: cty.ListVal([]cty.Value{
 							cty.StringVal("us-west-1a"),
 						}),
 						Description: fmt.Sprintln("Describing is awesome ;D"),
 					},
 					"super_secret_password": &Variable{
-						Sensitive:   true,
-						Description: fmt.Sprintln("Handle with care plz"),
+						Name:         "super_secret_password",
+						Sensitive:    true,
+						DefaultValue: cty.NullVal(cty.String),
+						Description:  fmt.Sprintln("Handle with care plz"),
 					},
 				},
 				LocalVariables: Variables{
 					"owner": &Variable{
+						Name:         "owner",
 						DefaultValue: cty.StringVal("Community Team"),
 					},
 					"service_name": &Variable{
+						Name:         "service_name",
 						DefaultValue: cty.StringVal("forum"),
 					},
 				},
@@ -68,7 +79,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"boolean_value": &Variable{},
+					"boolean_value": &Variable{
+						Name: "boolean_value",
+					},
 				},
 			},
 			true, true,
@@ -81,7 +94,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"boolean_value": &Variable{},
+					"boolean_value": &Variable{
+						Name: "boolean_value",
+					},
 				},
 			},
 			true, true,
@@ -94,26 +109,84 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"broken_type": &Variable{},
+					"broken_type": &Variable{
+						Name: "broken_type",
+					},
 				},
 			},
 			true, true,
 			[]packer.Build{},
 			false,
 		},
-		{"invalid default type",
+
+		{"unknown key",
 			defaultParser,
 			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
-					"broken_type": &Variable{},
+					"broken_variable": &Variable{
+						Name:         "broken_variable",
+						DefaultValue: cty.BoolVal(true),
+					},
 				},
 			},
 			true, false,
 			[]packer.Build{},
 			false,
 		},
+
+		{"unset used variable",
+			defaultParser,
+			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{
+						Name: "foo",
+					},
+				},
+			},
+			true, true,
+			[]packer.Build{},
+			true,
+		},
+
+		{"unset unused variable",
+			defaultParser,
+			parseTestArgs{"testdata/variables/unset_unused_string_variable.pkr.hcl", nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{
+						Name: "foo",
+					},
+				},
+				Sources: map[SourceRef]*SourceBlock{
+					SourceRef{"null", "null-builder"}: &SourceBlock{
+						Name: "null-builder",
+						Type: "null",
+					},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{SourceRef{"null", "null-builder"}},
+					},
+				},
+			},
+			true, true,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:           "null",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+				},
+			},
+			false,
+		},
+
 		{"locals within another locals usage in different files",
 			defaultParser,
 			parseTestArgs{"testdata/variables/complicated", nil},
@@ -121,23 +194,29 @@ func TestParse_variables(t *testing.T) {
 				Basedir: "testdata/variables/complicated",
 				InputVariables: Variables{
 					"name_prefix": &Variable{
+						Name:         "name_prefix",
 						DefaultValue: cty.StringVal("foo"),
 					},
 				},
 				LocalVariables: Variables{
 					"name_prefix": &Variable{
+						Name:         "name_prefix",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"foo": &Variable{
+						Name:         "foo",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"bar": &Variable{
+						Name:         "bar",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"for_var": &Variable{
+						Name:         "for_var",
 						DefaultValue: cty.StringVal("foo"),
 					},
 					"bar_var": &Variable{
+						Name: "bar_var",
 						DefaultValue: cty.TupleVal([]cty.Value{
 							cty.StringVal("foo"),
 							cty.StringVal("foo"),
@@ -172,12 +251,14 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		argv     map[string]string
 	}
 	tests := []struct {
-		name          string
-		variables     Variables
-		args          args
-		wantDiags     bool
-		wantVariables Variables
-		wantValues    map[string]cty.Value
+		name              string
+		variables         Variables
+		validationOptions ValidationOptions
+		args              args
+		wantDiags         bool
+		wantDiagsHasError bool
+		wantVariables     Variables
+		wantValues        map[string]cty.Value
 	}{
 
 		{name: "string",
@@ -329,11 +410,39 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 		},
 
-		{name: "undefined but set value",
+		{name: "undefined but set value - pkrvar file - normal mode",
 			variables: Variables{},
 			args: args{
-				env:      []string{`PKR_VAR_unused_string=value`},
-				hclFiles: []string{`unused_string="value"`},
+				hclFiles: []string{`undefined_string="value"`},
+			},
+
+			// output
+			wantDiags:         true,
+			wantDiagsHasError: false,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
+		},
+
+		{name: "undefined but set value - pkrvar file - strict mode",
+			variables: Variables{},
+			validationOptions: ValidationOptions{
+				Strict: true,
+			},
+			args: args{
+				hclFiles: []string{`undefined_string="value"`},
+			},
+
+			// output
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
+		},
+
+		{name: "undefined but set value - env",
+			variables: Variables{},
+			args: args{
+				env: []string{`PKR_VAR_undefined_string=value`},
 			},
 
 			// output
@@ -342,18 +451,19 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantValues:    map[string]cty.Value{},
 		},
 
-		{name: "undefined but set value - args",
+		{name: "undefined but set value - argv",
 			variables: Variables{},
 			args: args{
 				argv: map[string]string{
-					"unused_string": "value",
+					"undefined_string": "value",
 				},
 			},
 
 			// output
-			wantDiags:     true,
-			wantVariables: Variables{},
-			wantValues:    map[string]cty.Value{},
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
 		},
 
 		{name: "value not corresponding to type - env",
@@ -367,7 +477,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:     cty.List(cty.String),
@@ -390,7 +501,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:         cty.Bool,
@@ -415,7 +527,8 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags: true,
+			wantDiags:         true,
+			wantDiagsHasError: true,
 			wantVariables: Variables{
 				"used_string": &Variable{
 					Type:     cty.Bool,
@@ -434,9 +547,10 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags:     true,
-			wantVariables: Variables{},
-			wantValues:    map[string]cty.Value{},
+			wantDiags:         true,
+			wantDiagsHasError: true,
+			wantVariables:     Variables{},
+			wantValues:        map[string]cty.Value{},
 		},
 	}
 	for _, tt := range tests {
@@ -450,8 +564,16 @@ func TestVariables_collectVariableValues(t *testing.T) {
 				}
 				files = append(files, file)
 			}
-			if gotDiags := tt.variables.collectVariableValues(tt.args.env, files, tt.args.argv); (gotDiags == nil) == tt.wantDiags {
+			cfg := &PackerConfig{
+				InputVariables:    tt.variables,
+				ValidationOptions: tt.validationOptions,
+			}
+			gotDiags := cfg.collectInputVariableValues(tt.args.env, files, tt.args.argv)
+			if (gotDiags == nil) == tt.wantDiags {
 				t.Fatalf("Variables.collectVariableValues() = %v, want %v", gotDiags, tt.wantDiags)
+			}
+			if tt.wantDiagsHasError != gotDiags.HasErrors() {
+				t.Fatalf("Variables.collectVariableValues() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
 			if diff := cmp.Diff(fmt.Sprintf("%#v", tt.wantVariables), fmt.Sprintf("%#v", tt.variables)); diff != "" {
 				t.Fatalf("didn't get expected variables: %s", diff)

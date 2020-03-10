@@ -123,8 +123,13 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 			varFiles = append(varFiles, f)
 		}
 
-		diags = append(diags, cfg.InputVariables.collectVariableValues(os.Environ(), varFiles, vars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, vars)...)
 	}
+
+	_, moreDiags := cfg.InputVariables.Values()
+	diags = append(diags, moreDiags...)
+	_, moreDiags = cfg.LocalVariables.Values()
+	diags = append(diags, moreDiags...)
 
 	// decode the actual content
 	for _, file := range files {
