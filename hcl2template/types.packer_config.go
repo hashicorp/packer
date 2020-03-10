@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
@@ -24,19 +25,27 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
+	ValidationOptions
+
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+}
+
+type ValidationOptions struct {
+	Strict bool
 }
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
+	inputVariables, _ := cfg.InputVariables.Values()
+	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
-			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
-			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
+			"var":   cty.ObjectVal(inputVariables),
+			"local": cty.ObjectVal(localVariables),
 		},
 	}
 	return ectx
@@ -76,20 +85,19 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
-	var allLocals []*Local
+	var locals []*Local
 
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
-			locals := make([]*Local, 0, len(attrs))
 			for name, attr := range attrs {
 				if _, found := c.LocalVariables[name]; found {
 					diags = append(diags, &hcl.Diagnostic{
 						Severity: hcl.DiagError,
-						Summary:  "Duplicate variable",
-						Detail:   "Duplicate " + name + " variable definition found.",
+						Summary:  "Duplicate value in " + localsLabel,
+						Detail:   "Duplicate " + name + " definition found.",
 						Subject:  attr.NameRange.Ptr(),
 						Context:  block.DefRange.Ptr(),
 					})
@@ -100,11 +108,10 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 					Expr: attr.Expr,
 				})
 			}
-			allLocals = append(allLocals, locals...)
 		}
 	}
 
-	return allLocals, diags
+	return locals, diags
 }
 
 func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
@@ -156,6 +163,7 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
+		Name:         local.Name,
 		DefaultValue: value,
 		Type:         value.Type(),
 	}

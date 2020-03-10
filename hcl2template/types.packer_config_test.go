@@ -23,15 +23,19 @@ func TestParser_complete(t *testing.T) {
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
 					"foo": &Variable{
+						Name:         "foo",
 						DefaultValue: cty.StringVal("value"),
 					},
 					"image_id": &Variable{
+						Name:         "image_id",
 						DefaultValue: cty.StringVal("image-id-default"),
 					},
 					"port": &Variable{
+						Name:         "port",
 						DefaultValue: cty.NumberIntVal(42),
 					},
 					"availability_zone_names": &Variable{
+						Name: "availability_zone_names",
 						DefaultValue: cty.ListVal([]cty.Value{
 							cty.StringVal("A"),
 							cty.StringVal("B"),
@@ -41,15 +45,18 @@ func TestParser_complete(t *testing.T) {
 				},
 				LocalVariables: Variables{
 					"feefoo": &Variable{
+						Name:         "feefoo",
 						DefaultValue: cty.StringVal("value_image-id-default"),
 					},
 					"standard_tags": &Variable{
+						Name: "standard_tags",
 						DefaultValue: cty.ObjectVal(map[string]cty.Value{
 							"Component":   cty.StringVal("user-service"),
 							"Environment": cty.StringVal("production"),
 						}),
 					},
 					"abc_map": &Variable{
+						Name: "abc_map",
 						DefaultValue: cty.TupleVal([]cty.Value{
 							cty.ObjectVal(map[string]cty.Value{
 								"id": cty.StringVal("a"),
