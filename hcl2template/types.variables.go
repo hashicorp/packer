@@ -39,13 +39,15 @@ type Variable struct {
 	// declaration, the type of the default variable will be used. This will
 	// allow to ensure that users set this variable correctly.
 	Type cty.Type
+	// Common name of the variable
+	Name string
 	// Description of the variable
 	Description string
 	// When Sensitive is set to true Packer will try it best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
 
-	block *hcl.Block
+	Range hcl.Range
 }
 
 func (v *Variable) GoString() string {
@@ -60,27 +62,37 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		v.EnvValue,
 		v.DefaultValue,
 	} {
-		if !value.IsNull() {
+		if value != cty.NilVal {
 			return value, nil
 		}
 	}
-	return cty.NilVal, &hcl.Diagnostic{
+
+	value := cty.NullVal(cty.DynamicPseudoType)
+
+	return value, &hcl.Diagnostic{
 		Severity: hcl.DiagError,
-		Summary:  "Unset variable",
-		Detail: "A used variable must be set; see " +
-			"https://packer.io/docs/configuration/from-1.5/syntax.html for details.",
-		Context: v.block.DefRange.Ptr(),
+		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
+		Detail: "A used variable must be set or have a default value; see " +
+			"https://packer.io/docs/configuration/from-1.5/syntax.html for " +
+			"details.",
+		Context: v.Range.Ptr(),
 	}
 }
 
 type Variables map[string]*Variable
 
-func (variables Variables) Values() map[string]cty.Value {
+func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
+	var diags hcl.Diagnostics
 	for k, v := range variables {
-		res[k], _ = v.Value()
+		value, diag := v.Value()
+		if diag != nil {
+			diags = append(diags, diag)
+			continue
+		}
+		res[k] = value
 	}
-	return res
+	return res, diags
 }
 
 // decodeVariable decodes a variable key and value into Variables
@@ -108,8 +120,10 @@ func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx
 	}
 
 	(*variables)[key] = &Variable{
+		Name:         key,
 		DefaultValue: value,
 		Type:         value.Type(),
+		Range:        attr.Range,
 	}
 
 	return diags
@@ -142,10 +156,13 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 		return diags
 	}
 
+	name := block.Labels[0]
+
 	res := &Variable{
+		Name:        name,
 		Description: b.Description,
 		Sensitive:   b.Sensitive,
-		block:       block,
+		Range:       block.DefRange,
 	}
 
 	attrs, moreDiags := b.Rest.JustAttributes()
@@ -206,7 +223,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 		})
 	}
 
-	(*variables)[block.Labels[0]] = res
+	(*variables)[name] = res
 
 	return diags
 }
@@ -215,8 +232,9 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 // them.
 const VarEnvPrefix = "PKR_VAR_"
 
-func (variables Variables) collectVariableValues(env []string, files []*hcl.File, argv map[string]string) hcl.Diagnostics {
+func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.File, argv map[string]string) hcl.Diagnostics {
 	var diags hcl.Diagnostics
+	variables := cfg.InputVariables
 
 	for _, raw := range env {
 		if !strings.HasPrefix(raw, VarEnvPrefix) {
@@ -245,6 +263,7 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		if moreDiags.HasErrors() {
 			continue
 		}
+
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
 		if variable.Type != cty.NilType {
@@ -310,7 +329,20 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		for name, attr := range attrs {
 			variable, found := variables[name]
 			if !found {
-				// No file defines this variable; let's skip it
+				sev := hcl.DiagWarning
+				if cfg.ValidationOptions.Strict {
+					sev = hcl.DiagError
+				}
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: sev,
+					Summary:  "Undefined variable",
+					Detail: fmt.Sprintf("A %q variable was set but was "+
+						"not found in known variables. To declare "+
+						"variable %q, place this block in one of your"+
+						".pkr files, such as variables.pkr.hcl",
+						name, name),
+					Context: attr.Range.Ptr(),
+				})
 				continue
 			}
 
@@ -340,8 +372,8 @@ func (variables Variables) collectVariableValues(env []string, files []*hcl.File
 		variable, found := variables[name]
 		if !found {
 			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagWarning,
-				Summary:  "Unknown -var variable",
+				Severity: hcl.DiagError,
+				Summary:  "Undefined -var variable",
 				Detail: fmt.Sprintf("A %q variable was passed in the command "+
 					"line but was not found in known variables."+
 					"To declare variable %q, place this block in one of your"+
