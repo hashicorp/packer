@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	dtl "github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
-	armstorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/dgrijalva/jwt-go"
@@ -281,23 +280,6 @@ func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
 			ui.Say(fmt.Sprintf("Error setting permissions of debug key: %s", err))
 		}
 	}
-}
-
-func equalLocation(location1, location2 string) bool {
-	return strings.EqualFold(canonicalizeLocation(location1), canonicalizeLocation(location2))
-}
-
-func canonicalizeLocation(location string) string {
-	return strings.Replace(location, " ", "", -1)
-}
-
-func (b *Builder) getBlobAccount(ctx context.Context, client *AzureClient, resourceGroupName string, storageAccountName string) (*armstorage.Account, error) {
-	account, err := client.AccountsClient.GetProperties(ctx, resourceGroupName, storageAccountName)
-	if err != nil {
-		return nil, err
-	}
-
-	return &account, err
 }
 
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
