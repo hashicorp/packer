@@ -294,7 +294,7 @@ this behavior optional :
 |                             |          no default          | `default = null` | `default = "xy"` |
 |:---------------------------:|:----------------------------:|:----------------:|:----------------:|
 |          foo unused         | error, "foo needs to be set" |         -        |         -        |
-|           var.foo           | error, "foo needs to be set" |       null¹      |        yz        |
+|           var.foo           | error, "foo needs to be set" |       null¹      |        xy        |
 | `PKR_VAR_foo=yz`<br>var.foo |              yz              |        yz        |        yz        |
 |   `-var foo=yz`<br>var.foo  |              yz              |        yz        |        yz        |
 
