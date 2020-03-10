@@ -204,9 +204,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Build the steps
+	//for b.config.AMIUsers, we can pass ami_users from packer.json file in below format
+	//Since it is slice and can contain multiple account-id, for now picking first one to make
+	//owner of it
+	//example : `   "ami_users": [
+        //                "{{user `aws_account_id`}}"
+        //              ],`
+	//in this way if user does not pass any value,we have empty string on first index
+	//TODO: there can be a better way
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
 			DestAmiName:        b.config.AMIName,
+			DestAmiOwner:        b.config.AMIUsers[0],
 			ForceDeregister:    b.config.AMIForceDeregister,
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 			VpcId:              b.config.VpcId,

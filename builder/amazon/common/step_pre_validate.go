@@ -19,6 +19,7 @@ import (
 //
 type StepPreValidate struct {
 	DestAmiName        string
+	DestAmiOwner       string
 	ForceDeregister    bool
 	AMISkipBuildRegion bool
 	VpcId              string
@@ -95,13 +96,21 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s", s.DestAmiName))
+	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s ", s.DestAmiName))
+	filters := []*ec2.Filter{{
+		Name:   aws.String("name"),
+		Values: []*string{aws.String(s.DestAmiName)},
+	}}
+	if s.DestAmiOwner != "" {
+	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s for Account-id %s", s.DestAmiName, s.DestAmiOwner))
+		filters = append(filters, &ec2.Filter{
+			Name:   aws.String("owner-id"),
+			Values: []*string{aws.String(s.DestAmiOwner)},
+		})
+	}
 	req, resp := ec2conn.DescribeImagesRequest(&ec2.DescribeImagesInput{
-		Filters: []*ec2.Filter{{
-			Name:   aws.String("name"),
-			Values: []*string{aws.String(s.DestAmiName)},
-		}}})
+		Filters: filters,
+	})
 	req.RetryCount = 11
 
 	if err := req.Send(); err != nil {
