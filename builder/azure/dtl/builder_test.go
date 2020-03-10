@@ -8,7 +8,7 @@ import (
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 	var testSubject = &Builder{}
-	_, _, err := testSubject.Prepare(getArmBuilderConfiguration(), getPackerConfiguration())
+	_, _, err := testSubject.Prepare(getDtlBuilderConfiguration(), getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("failed to prepare: %s", err)
 	}

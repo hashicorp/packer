@@ -667,14 +667,9 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-<<<<<<< HEAD
-# golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
-# golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
-=======
 # golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
->>>>>>> 909b9fcfc7fadbb3c52ffd0651511f383745f5ff
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/ed25519

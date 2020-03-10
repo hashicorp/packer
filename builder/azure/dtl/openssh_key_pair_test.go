@@ -30,7 +30,7 @@ func TestPrivateKeyShouldParse(t *testing.T) {
 		t.Fatalf("Failed to create a new OpenSSH key pair, err=%s.", err)
 	}
 
-	_, err = ssh.ParsePrivateKey([]byte(testSubject.PrivateKey()))
+	_, err = ssh.ParsePrivateKey(testSubject.PrivateKey())
 	if err != nil {
 		t.Fatalf("Failed to parse the private key, err=%s\n", err)
 	}

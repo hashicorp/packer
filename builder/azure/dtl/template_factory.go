@@ -1,31 +1,13 @@
 package dtl
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
-	"github.com/hashicorp/packer/builder/azure/common/template"
 )
 
 type templateFactoryFuncDtl func(*Config) (*dtl.LabVirtualMachineCreationParameter, error)
-
-func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
-	params := &template.TemplateParameters{
-		KeyVaultName:        &template.TemplateParameter{Value: config.tmpKeyVaultName},
-		KeyVaultSecretValue: &template.TemplateParameter{Value: config.winrmCertificate},
-		ObjectId:            &template.TemplateParameter{Value: config.ClientConfig.ObjectID},
-		TenantId:            &template.TemplateParameter{Value: config.ClientConfig.TenantID},
-	}
-
-	builder, _ := template.NewTemplateBuilder(template.KeyVault)
-	builder.SetTags(&config.AzureTags)
-
-	doc, _ := builder.ToJSON()
-	return createDeploymentParameters(*doc, params)
-}
 
 func newBool(val bool) *bool {
 	b := true
@@ -151,31 +133,4 @@ func GetVirtualMachineDeployment(config *Config) (*dtl.LabVirtualMachineCreation
 	}
 
 	return labMachine, nil
-}
-
-func createDeploymentParameters(doc string, parameters *template.TemplateParameters) (*resources.Deployment, error) {
-	var template map[string]interface{}
-	err := json.Unmarshal(([]byte)(doc), &template)
-	if err != nil {
-		return nil, err
-	}
-
-	bs, err := json.Marshal(*parameters)
-	if err != nil {
-		return nil, err
-	}
-
-	var templateParameters map[string]interface{}
-	err = json.Unmarshal(bs, &templateParameters)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resources.Deployment{
-		Properties: &resources.DeploymentProperties{
-			Mode:       resources.Incremental,
-			Template:   &template,
-			Parameters: &templateParameters,
-		},
-	}, nil
 }

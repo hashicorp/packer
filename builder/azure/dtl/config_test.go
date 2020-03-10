@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 )
 
-// List of configuration parameters that are required by the ARM builder.
+// List of configuration parameters that are required by the DTL builder.
 var requiredConfigValues = []string{
 	"capture_name_prefix",
 	"capture_container_name",
@@ -20,10 +20,12 @@ var requiredConfigValues = []string{
 	"location",
 	"os_type",
 	"subscription_id",
+	"lab_resource_group_name",
+	"lab_virtual_network_name",
 }
 
 func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
-	c, _, err := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, err := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 
 	if err != nil {
 		t.Error("Expected configuration creation to succeed, but it failed!\n")
@@ -52,7 +54,7 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 }
 
 func TestConfigShouldDefaultVMSizeToStandardA1(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 
 	if c.VMSize != "Standard_A1" {
 		t.Errorf("Expected 'VMSize' to default to 'Standard_A1', but got '%s'.", c.VMSize)
@@ -60,27 +62,10 @@ func TestConfigShouldDefaultVMSizeToStandardA1(t *testing.T) {
 }
 
 func TestConfigShouldDefaultImageVersionToLatest(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 
 	if c.ImageVersion != "latest" {
 		t.Errorf("Expected 'ImageVersion' to default to 'latest', but got '%s'.", c.ImageVersion)
-	}
-}
-
-func TestConfigShouldNotDefaultImageVersionIfCustomImage(t *testing.T) {
-	config := map[string]string{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"location":               "ignore",
-		"image_url":              "ignore",
-		"subscription_id":        "ignore",
-		"os_type":                constants.Target_Linux,
-		"communicator":           "none",
-	}
-
-	c, _, _ := newConfig(config, getPackerConfiguration())
-	if c.ImageVersion != "" {
-		t.Errorf("Expected 'ImageVersion' to empty, but got '%s'.", c.ImageVersion)
 	}
 }
 
@@ -127,7 +112,7 @@ func TestConfigVirtualNetworkSubnetNameMustBeSetWithVirtualNetworkName(t *testin
 }
 
 func TestSystemShouldDefineRuntimeValues(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 
 	if c.Password == "" {
 		t.Errorf("Expected Password to not be empty, but it was '%s'!", c.Password)
@@ -151,7 +136,7 @@ func TestSystemShouldDefineRuntimeValues(t *testing.T) {
 }
 
 func TestConfigShouldTransformToVirtualMachineCaptureParameters(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 	parameters := c.toVirtualMachineCaptureParameters()
 
 	if *parameters.DestinationContainerName != c.CaptureContainerName {
@@ -169,7 +154,7 @@ func TestConfigShouldTransformToVirtualMachineCaptureParameters(t *testing.T) {
 
 func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
 	c, _, err := newConfig(
-		getArmBuilderConfiguration(),
+		getDtlBuilderConfiguration(),
 		getPackerConfiguration(),
 		getPackerCommunicatorConfiguration())
 
@@ -187,7 +172,7 @@ func TestConfigShouldSupportPackersConfigElements(t *testing.T) {
 }
 
 func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
-	config := getArmBuilderConfiguration()
+	config := getDtlBuilderConfiguration()
 	config["communicator"] = "winrm"
 	config["winrm_username"] = "username"
 	config["winrm_password"] = "password"
@@ -204,15 +189,17 @@ func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
 
 func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 	config := map[string]string{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"os_type":                constants.Target_Linux,
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"os_type":                  constants.Target_Linux,
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 	}
 
 	_, _, err := newConfig(config, getPackerConfiguration())
@@ -223,14 +210,16 @@ func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 
 func TestConfigShouldAcceptTags(t *testing.T) {
 	config := map[string]interface{}{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
 		"azure_tags": map[string]string{
@@ -274,14 +263,16 @@ func TestConfigShouldRejectTagsInExcessOf15AcceptTags(t *testing.T) {
 	}
 
 	config := map[string]interface{}{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type":    constants.Target_Linux,
 		"azure_tags": tooManyTags,
@@ -304,14 +295,16 @@ func TestConfigShouldRejectExcessiveTagNameLength(t *testing.T) {
 	tags[string(nameTooLong)] = "ignored"
 
 	config := map[string]interface{}{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type":    constants.Target_Linux,
 		"azure_tags": tags,
@@ -333,14 +326,16 @@ func TestConfigShouldRejectExcessiveTagValueLength(t *testing.T) {
 	tags["tag01"] = string(valueTooLong)
 
 	config := map[string]interface{}{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type":    constants.Target_Linux,
 		"azure_tags": tags,
@@ -362,6 +357,8 @@ func TestConfigShouldAcceptPlatformManagedImageBuild(t *testing.T) {
 		"communicator":                      "none",
 		"managed_image_resource_group_name": "ignore",
 		"managed_image_name":                "ignore",
+		"lab_resource_group_name":           "ignore",
+		"lab_virtual_network_name":          "ignore",
 
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -382,6 +379,8 @@ func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 		"communicator":                             "none",
 		"managed_image_resource_group_name":        "ignore",
 		"managed_image_name":                       "ignore",
+		"lab_resource_group_name":                  "ignore",
+		"lab_virtual_network_name":                 "ignore",
 
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -407,6 +406,8 @@ func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
 		"communicator":                             "none",
 		"managed_image_resource_group_name":        "ignore",
 		"managed_image_name":                       "ignore",
+		"lab_resource_group_name":                  "ignore",
+		"lab_virtual_network_name":                 "ignore",
 
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -425,14 +426,16 @@ func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
 
 func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 	config := map[string]interface{}{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"subscription_id":        "ignore",
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 
 		// custom may define one or the other, but not both
 		"temp_resource_group_name":  "rgn00",
@@ -446,7 +449,7 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 }
 
 func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
-	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 	if c.AdditionalDiskSize != nil {
 		t.Errorf("Expected Config to not have a set of additional disks, but got a non nil value")
 	}
@@ -454,13 +457,15 @@ func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
 
 func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
 	config := map[string]string{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"location":               "ignore",
-		"image_url":              "ignore",
-		"subscription_id":        "ignore",
-		"os_type":                constants.Target_Linux,
-		"communicator":           "none",
+		"capture_name_prefix":      "ignore",
+		"capture_container_name":   "ignore",
+		"location":                 "ignore",
+		"image_url":                "ignore",
+		"subscription_id":          "ignore",
+		"os_type":                  constants.Target_Linux,
+		"communicator":             "none",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 	}
 
 	diskconfig := map[string][]int32{
@@ -494,6 +499,8 @@ func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
 		"managed_image_name":                "ignore",
 		"managed_image_resource_group_name": "ignore",
 		"async_resourcegroup_delete":        "true",
+		"lab_resource_group_name":           "ignore",
+		"lab_virtual_network_name":          "ignore",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -516,6 +523,8 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
 		"os_type":                           "linux",
 		"managed_image_name":                "ignore",
 		"managed_image_resource_group_name": "ignore",
+		"lab_resource_group_name":           "ignore",
+		"lab_virtual_network_name":          "ignore",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -539,6 +548,8 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
 		"managed_image_name":                "ignore",
 		"managed_image_resource_group_name": "ignore",
 		"async_resourcegroup_delete":        "asdasda",
+		"lab_resource_group_name":           "ignore",
+		"lab_virtual_network_name":          "ignore",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -550,9 +561,11 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
 }
 func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 	config := map[string]interface{}{
-		"location":        "ignore",
-		"subscription_id": "ignore",
-		"os_type":         "linux",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"os_type":                  "linux",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 		"shared_image_gallery": map[string]string{
 			"subscription":   "ignore",
 			"resource_group": "ignore",
@@ -581,10 +594,12 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 			"image_name":     "ignore",
 			"image_version":  "ignore",
 		},
-		"resource_group_name":    "ignore",
-		"storage_account":        "ignore",
-		"capture_container_name": "ignore",
-		"capture_name_prefix":    "ignore",
+		"resource_group_name":      "ignore",
+		"storage_account":          "ignore",
+		"capture_container_name":   "ignore",
+		"capture_name_prefix":      "ignore",
+		"lab_resource_group_name":  "ignore",
+		"lab_virtual_network_name": "ignore",
 	}
 
 	_, _, err := newConfig(config, getPackerConfiguration())
@@ -593,7 +608,7 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 	}
 }
 
-func getArmBuilderConfiguration() map[string]string {
+func getDtlBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
 		m[v] = "ignored00"
@@ -601,20 +616,6 @@ func getArmBuilderConfiguration() map[string]string {
 
 	m["communicator"] = "none"
 	m["os_type"] = constants.Target_Linux
-	return m
-}
-
-func getArmBuilderConfigurationWithWindows() map[string]string {
-	m := make(map[string]string)
-	for _, v := range requiredConfigValues {
-		m[v] = "ignored00"
-	}
-
-	m["object_id"] = "ignored00"
-	m["tenant_id"] = "ignored00"
-	m["winrm_username"] = "ignored00"
-	m["communicator"] = "winrm"
-	m["os_type"] = constants.Target_Windows
 	return m
 }
 
