@@ -13,3 +13,6 @@ coverage:
       default:
         target: auto
         threshold: "0.5%"
+
+ignore:  # ignore hcl2spec generated code for coverage
+  - "**/*.hcl2spec.go"
