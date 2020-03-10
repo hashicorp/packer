@@ -29,5 +29,5 @@ hello everybody
 
 ## Related Functions
 
-- [`regexreplace`](./regexreplace.html) searches & replace a given string for a
-  substring matching a given regular expression pattern.
+- [`regexreplace`](./regexreplace.html) searches a given string for another given substring, 
+  and replaces each occurrence with a given replacement string.
