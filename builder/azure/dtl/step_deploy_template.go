@@ -193,5 +193,4 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 	//Only clean up if this was an existing resource group and the resource group
 	//is marked as created
 	// Just return now
-	return
 }

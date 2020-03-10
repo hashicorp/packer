@@ -683,12 +683,18 @@ go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
 <<<<<<< HEAD
+<<<<<<< HEAD
 # golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 =======
 # golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 >>>>>>> Updating the module dependencies
+=======
+# golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
+>>>>>>> Fixing the linting errors now required for merging
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/ed25519

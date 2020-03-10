@@ -25,7 +25,6 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -49,17 +48,15 @@ const (
 	//  -> ^[^_\W][\w-._]{0,79}(?<![-.])$
 	//
 	// This is not an exhaustive match, but it should be extremely close.
-	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,89}$"
-	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+	validResourceGroupNameRe = `^[^_\W][\w-._\(\)]{0,89}$`
+	validManagedDiskName     = `^[^_\W][\w-._)]{0,79}$`
 )
 
 var (
-	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
-	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
+	reCaptureContainerName = regexp.MustCompile(`^[a-z0-9][a-z0-9\-]{2,62}`)
+	reCaptureNamePrefix    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_\-\.]{0,23}$`)
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{1,79}$")
-	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{1,59}$")
 )
 
 type SharedImageGallery struct {
@@ -221,8 +218,7 @@ type Config struct {
 	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
 	// 256 characters. Tags are applied to every resource deployed by a Packer
 	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
-	AzureTags                  map[string]*string `mapstructure:"azure_tags" required:"false"`
-	storageAccountBlobEndpoint string
+	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
 
 	// Used for creating images from Marketplace images. Please refer to
 	// [Deploy an image with Marketplace
@@ -294,7 +290,6 @@ type Config struct {
 	tmpOSDiskName           string
 	tmpSubnetName           string
 	tmpVirtualNetworkName   string
-	tmpWinRMCertificateUrl  string
 	VMCreationResourceGroup string
 	tmpFQDN                 string
 
@@ -316,14 +311,6 @@ type keyVaultCertificate struct {
 	Data     string `json:"data"`
 	DataType string `json:"dataType"`
 	Password string `json:"password,omitempty"`
-}
-
-func (c *Config) toVMID() string {
-	var resourceGroupName string
-	if c.tmpResourceGroupName != "" {
-		resourceGroupName = c.tmpResourceGroupName
-	}
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.ClientConfig.SubscriptionID, resourceGroupName, c.tmpComputeName)
 }
 
 func (c *Config) isManagedImage() bool {
@@ -442,6 +429,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 
 	c.ClientConfig.Validate(errs)
 
+	assertRequiredParametersSet(&c, errs)
 	assertTagProperties(&c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
@@ -502,9 +490,13 @@ func setWinRMCertificate(c *Config) error {
 func setRuntimeValues(c *Config) {
 	var tempName = NewTempName(c)
 
+<<<<<<< HEAD
 	c.tmpAdminPassword = "Packer~1" //tempName.AdminPassword
 	// store so that we can access this later during provisioning
 	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
+=======
+	c.tmpAdminPassword = tempName.AdminPassword
+>>>>>>> Fixing the linting errors now required for merging
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
 	c.tmpCertificatePassword = "Packer~1" //tempName.CertificatePassword
@@ -554,8 +546,6 @@ func provideDefaultValues(c *Config) {
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
-
-	c.ClientConfig.SetDefaultValues()
 }
 
 func assertTagProperties(c *Config, errs *packer.MultiError) {
@@ -736,36 +726,11 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
-
-	switch c.DiskCachingType {
-	case string(compute.CachingTypesNone):
-		c.diskCachingType = compute.CachingTypesNone
-	case string(compute.CachingTypesReadOnly):
-		c.diskCachingType = compute.CachingTypesReadOnly
-	case "", string(compute.CachingTypesReadWrite):
-		c.diskCachingType = compute.CachingTypesReadWrite
-	default:
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The disk_caching_type %q is invalid", c.DiskCachingType))
-	}
 }
 
 func assertManagedImageName(name, setting string) (bool, error) {
 	if !isValidAzureName(reManagedDiskName, name) {
 		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validManagedDiskName)
-	}
-	return true, nil
-}
-
-func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
-	if !isValidAzureName(reSnapshotName, name) {
-		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 80 characters", setting)
-	}
-	return true, nil
-}
-
-func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
-	if !isValidAzureName(reSnapshotPrefix, name) {
-		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
 	}
 	return true, nil
 }

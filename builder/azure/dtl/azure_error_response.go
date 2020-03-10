@@ -30,10 +30,6 @@ func (e *azureErrorDetails) isEmpty() bool {
 	return e.Code == ""
 }
 
-func (e *azureErrorResponse) isEmpty() bool {
-	return e.ErrorDetails.isEmpty()
-}
-
 func (e *azureErrorResponse) Error() string {
 	var buf bytes.Buffer
 	//buf.WriteString("-=-=- ERROR -=-=-")
