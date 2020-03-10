@@ -21,6 +21,7 @@ type StepSecurityGroup struct {
 	SecurityGroupFilter    SecurityGroupFilterOptions
 	SecurityGroupIds       []string
 	TemporarySGSourceCidrs []string
+	SkipSSHGroupCreation   bool
 
 	createdGroupId string
 }
@@ -73,6 +74,10 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		ui.Message(fmt.Sprintf("Found Security Group(s): %s", strings.Join(securityGroupIds, ", ")))
 		state.Put("securityGroupIds", securityGroupIds)
 
+		return multistep.ActionContinue
+	}
+
+	if s.SkipSSHGroupCreation {
 		return multistep.ActionContinue
 	}
 
