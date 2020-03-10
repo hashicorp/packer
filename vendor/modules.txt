@@ -97,6 +97,8 @@ github.com/antihax/optional
 github.com/apparentlymart/go-cidr/cidr
 # github.com/apparentlymart/go-textseg v1.0.0
 github.com/apparentlymart/go-textseg/textseg
+# github.com/apparentlymart/go-textseg/v12 v12.0.0
+github.com/apparentlymart/go-textseg/v12/textseg
 # github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 github.com/approvals/go-approval-tests
 github.com/approvals/go-approval-tests/reporters
@@ -638,7 +640,7 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
-# github.com/zclconf/go-cty v1.2.1 => github.com/azr/go-cty v1.1.1-0.20200203143058-28fcda2fe0cc
+# github.com/zclconf/go-cty v1.3.2-0.20200309235747-0b5d9cf50df7
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
