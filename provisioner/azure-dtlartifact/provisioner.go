@@ -16,7 +16,6 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -62,9 +61,8 @@ type Config struct {
 }
 
 type Provisioner struct {
-	config        Config
-	communicator  packer.Communicator
-	guestCommands *provisioner.GuestCommands
+	config       Config
+	communicator packer.Communicator
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -120,6 +118,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	spnCloud, err := p.config.ClientConfig.GetServicePrincipalToken(ui.Say, p.config.ClientConfig.CloudEnvironment().ResourceManagerEndpoint)
+	if err != nil {
+		return err
+	}
 
 	ui.Message("Creating Azure Resource Manager (ARM) client ...")
 	azureClient, err := dtlBuilder.NewAzureClient(

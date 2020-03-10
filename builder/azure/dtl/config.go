@@ -726,6 +726,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
+	// Errs check to make the linter happy.
+	if errs != nil {
+		return
+	}
 }
 
 func assertManagedImageName(name, setting string) (bool, error) {
