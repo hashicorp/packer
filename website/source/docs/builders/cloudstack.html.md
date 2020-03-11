@@ -203,7 +203,7 @@ The available variables are:
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
-    blank. Example: "{{.HTTPIP}}:{{.HTTPPort}}/path/to/a/file/in/http_directory"
+    blank. Example: `{{.HTTPIP}}:{{.HTTPPort}}/path/to/a/file/in/http_directory`
 
 ## Basic Example
 
