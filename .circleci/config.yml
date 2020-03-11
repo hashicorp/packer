@@ -11,9 +11,6 @@ executors:
   darwin:
     macos:
       xcode: "9.0"
-  golangci:
-    docker:
-      - image: golangci/golangci-lint:v1.23.8
 
 commands:
   install-go-run-tests-unix:
@@ -81,8 +78,8 @@ jobs:
       - codecov/upload:
           file: coverage.txt
   check-lint:
-    executor: golangci
-    working_directory: /go/src/github.com/hashicorp/packer
+    executor: darwin
+    working_directory: ~/go/src/github.com/hashicorp/packer
     steps:
       - checkout
       - run:
