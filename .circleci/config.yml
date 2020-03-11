@@ -80,6 +80,8 @@ jobs:
   check-lint:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
+    environment:
+      GOMAXPROCS: 2
     steps:
       - checkout
       - run:
