@@ -78,8 +78,9 @@ jobs:
       - codecov/upload:
           file: coverage.txt
   check-lint:
-    executor: darwin
-    working_directory: ~/go/src/github.com/hashicorp/packer
+    executor: golang
+    resource_class: medium+
+    working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
       - run:
