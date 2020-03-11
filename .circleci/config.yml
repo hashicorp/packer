@@ -76,6 +76,12 @@ jobs:
           GOVERSION: "1.13"
       - codecov/upload:
           file: coverage.txt
+  go-lint:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - checkout
+      - run: make ci-lint
   check-vendor-vs-mod:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
