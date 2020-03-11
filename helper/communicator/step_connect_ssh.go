@@ -246,7 +246,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	auth := make([]gossh.AuthMethod, 0, 2)
 
-	auth = append(auth, gossh.KeyboardInteractive(ssh.KeyboardInteractive()))
+	if config.SSHBastionInteractive {
+		auth = append(auth, gossh.KeyboardInteractive(ssh.KeyboardInteractive()))
+	}
 
 	if config.SSHBastionPassword != "" {
 		auth = append(auth,
