@@ -463,37 +463,15 @@ func TestCoreValidate(t *testing.T) {
 		Vars map[string]string
 		Err  bool
 	}{
-		{
-			"validate-dup-builder.json",
-			nil,
-			true,
-		},
+		{"validate-dup-builder.json", nil, true},
 
 		// Required variable not set
-		{
-			"validate-req-variable.json",
-			nil,
-			true,
-		},
-
-		{
-			"validate-req-variable.json",
-			map[string]string{"foo": "bar"},
-			false,
-		},
+		{"validate-req-variable.json", nil, true},
+		{"validate-req-variable.json", map[string]string{"foo": "bar"}, false},
 
 		// Min version good
-		{
-			"validate-min-version.json",
-			map[string]string{"foo": "bar"},
-			false,
-		},
-
-		{
-			"validate-min-version-high.json",
-			map[string]string{"foo": "bar"},
-			true,
-		},
+		{"validate-min-version.json", map[string]string{"foo": "bar"}, false},
+		{"validate-min-version-high.json", map[string]string{"foo": "bar"}, true},
 	}
 
 	for _, tc := range cases {
@@ -699,6 +677,68 @@ func TestSensitiveVars(t *testing.T) {
 		LogSecretFilter.s = make(map[string]struct{})
 	}
 }
+
+// Normally I wouldn't test a little helper function, but it's regex.
+func testisDoneInterpolating(t *testing.T) {
+	cases := []struct {
+		inputString  string
+		expectedBool bool
+		expectedErr  bool
+	}{
+		// Many of these tests are just exercising the regex to make sure it
+		// doesnt get confused by different kinds of whitespace
+		{"charmander-{{ user `spacesaroundticks` }}", false, false},
+		{"pidgey-{{ user `partyparrot`}}", false, false},
+		{"jigglypuff-{{ user`notickspaaces`}}", false, false},
+		{"eevee-{{user`nospaces`}}", false, false},
+		{"staryu-{{  user  `somanyspaces`  }}", false, false},
+		{"{{  user  `somanyspaces`  }}-{{isotime}}", false, false},
+		// Make sure that we only flag on "user" when it's in the right set of
+		// brackets, in a properly declared template engine format
+		{"missingno-{{ user `missingbracket` }", true, false},
+		{"missing2-{user ``missingopenbrackets }}", true, false},
+		{"wat-userjustinname", true, false},
+		// Any functions that aren't "user" should have already been properly
+		// interpolated by the time this is called, so these cases aren't
+		// realistic. That said, this makes it clear that this function doesn't
+		// care about anything but the user function
+		{"pokemon-{{ isotime }}", true, false},
+		{"squirtle-{{ env `water`}}", true, false},
+		{"bulbasaur-notinterpolated", true, false},
+		{"extra-{{thisfunc `user`}}", true, false},
+	}
+	for _, tc := range cases {
+		done, err := isDoneInterpolating(tc.inputString)
+		if (err != nil) != tc.expectedErr {
+			t.Fatalf("Test case failed. Error: %s expected error: "+
+				"%t test string: %s", err, tc.expectedErr, tc.inputString)
+		}
+		if done != tc.expectedBool {
+			t.Fatalf("Test case failed. inputString: %s. "+
+				"Expected done = %t but got done = %t", tc.inputString,
+				tc.expectedBool, done)
+		}
+	}
+}
+
+// func testCoreBuildWithInterpolatedEnvVars(t *testing.T) {
+// 	// Not a fan of using env vars in tests but in this case we need to make
+// 	// sure they get interpolated properly.
+// 	os.Setenv("CI_COMMIT_REF_NAME", "working")
+// 	os.Setenv("OUTPUT_DIR", "/u01/artifacts")
+// 	os.Setenv("OS_VERSION", "6")
+// 	os.Setenv("OS", "rhel")
+// 	os.Setenv("BASE_POSTFIX", "base")
+// 	os.Setenv("RULE", "vbox")
+// 	os.Setenv("POSTFIX", "base")
+
+// packer build \
+//   -var-file=common/vsphere.variables.json \
+//   -var-file=common/variables.json \
+//   -only=vbox-rhel-base \
+//   common/linux/redhat/template.json
+
+// }
 
 func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {
 	tpl, err := template.ParseFile(p)
