@@ -284,7 +284,7 @@ Example of running a .cmd file on windows:
               "type": "shell-local",
               "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
               "scripts": ["./scripts/test_cmd.cmd"]
-          },
+          }
 
 Contents of "test\_cmd.cmd":
 
@@ -298,7 +298,7 @@ tempfile\_extension
               "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
               "tempfile_extension": ".cmd",
               "inline": ["echo %SHELLLOCALTEST%"]
-          },
+          }
 
 Example of running a bash command on windows using WSL: Required
 customizations: use\_linux\_pathing and execute\_command
