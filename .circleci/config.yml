@@ -79,7 +79,7 @@ jobs:
           file: coverage.txt
   check-lint:
     executor: golang
-    resource_class: medium+
+    resource_class: large
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
