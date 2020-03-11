@@ -58,7 +58,8 @@ install-gen-deps: ## Install dependencies for code generation
 
 install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.1
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
+	@golangci-lint --version
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \

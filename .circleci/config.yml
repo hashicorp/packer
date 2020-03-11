@@ -1,6 +1,7 @@
 orbs:
   win: circleci/windows@1.0.0
   codecov: codecov/codecov@1.0.5
+
 version: 2.1
 
 executors:
@@ -81,7 +82,6 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
-      - run: GO111MODULE=on go run . --help
       - run: make ci-lint
   check-vendor-vs-mod:
     executor: golang
