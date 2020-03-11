@@ -82,7 +82,9 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
-      - run: make ci-lint
+      - run:
+          command: make ci-lint
+          no_output_timeout: 30m
   check-vendor-vs-mod:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
