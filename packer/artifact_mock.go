@@ -44,7 +44,7 @@ func (a *MockArtifact) String() string {
 }
 
 func (a *MockArtifact) State(name string) interface{} {
-	value, _ := a.StateValues[name]
+	value := a.StateValues[name]
 	return value
 }
 
