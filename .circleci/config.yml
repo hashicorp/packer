@@ -76,7 +76,7 @@ jobs:
           GOVERSION: "1.13"
       - codecov/upload:
           file: coverage.txt
-  go-lint:
+  check-lint:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
@@ -163,6 +163,7 @@ workflows:
       - test-windows
   check-code:
     jobs:
+      - check-lint
       - check-vendor-vs-mod
       - check-fmt
       - check-generate
