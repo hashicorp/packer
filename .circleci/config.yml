@@ -1,5 +1,6 @@
 orbs:
   win: circleci/windows@1.0.0
+  codecov: codecov/codecov@1.0.5
 version: 2.1
 
 executors:
@@ -20,7 +21,7 @@ commands:
     steps:
       - checkout
       - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.<< parameters.GOOS >>-amd64.tar.gz | tar -C ~/ -xz
-      - run: ~/go/bin/go test ./...
+      - run: ~/go/bin/go test ./... -coverprofile=coverage.txt  -covermode=atomic
   install-go-run-tests-windows:
     parameters:
       GOVERSION:
@@ -29,7 +30,7 @@ commands:
       - checkout
       - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.windows-amd64.zip --output ~/go<< parameters.GOVERSION >>.windows-amd64.zip
       - run: unzip ~/go<< parameters.GOVERSION >>.windows-amd64.zip -d ~/
-      - run: ~/go/bin/go test ./...
+      - run: ~/go/bin/go test ./... -coverprofile=coverage.txt  -covermode=atomic
   build-and-persist-packer-binary:
     parameters:
       GOOS:
@@ -52,7 +53,9 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
-      - run: make ci
+      - run: TESTARGS="-coverprofile=coverage.txt  -covermode=atomic" make ci
+      - codecov/upload:
+          file: coverage.txt
   test-darwin:
     executor: darwin
     working_directory: ~/go/src/github.com/hashicorp/packer
@@ -62,6 +65,8 @@ jobs:
       - install-go-run-tests-unix:
           GOOS: darwin
           GOVERSION: "1.13"
+      - codecov/upload:
+          file: coverage.txt
   test-windows:
     executor:
       name: win/vs2019
@@ -69,6 +74,8 @@ jobs:
     steps:
       - install-go-run-tests-windows:
           GOVERSION: "1.13"
+      - codecov/upload:
+          file: coverage.txt
   check-vendor-vs-mod:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer

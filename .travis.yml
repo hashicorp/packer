@@ -9,25 +9,25 @@ branches:
   only:
     - master
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)
 
 jobs:
   fast_finish: true
   include:
     - os: osx
-      name: "go test coverage osx"
+      name: "go test"
       script:
         - df -h
         - travis_wait make ci
-        - travis_wait 20 bash scripts/travis.sh
-    - os: windows
-      name: "go test coverage windows"
-      script:
-        - travis_wait 20 bash scripts/travis.sh
-    - os: linux
-      name: "go test coverage linux"
-      script:
-        - travis_wait 20 bash scripts/travis.sh
+#        - travis_wait 20 bash scripts/travis.sh
+#    - os: windows
+#      name: "go test coverage windows"
+#      script:
+#        - travis_wait 20 bash scripts/travis.sh
+#    - os: linux
+#      name: "go test coverage linux"
+#      script:
+#        - travis_wait 20 bash scripts/travis.sh
     - name: "go lint"
       script: travis_wait make ci-lint
