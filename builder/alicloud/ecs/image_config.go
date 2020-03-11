@@ -205,7 +205,7 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		strings.HasPrefix(c.AlicloudImageName, "https://") {
 		errs = append(errs, fmt.Errorf("image_name can't start with 'http://' or 'https://'"))
 	}
-	reg := regexp.MustCompile("\\s+")
+	reg := regexp.MustCompile(`\s+`)
 	if reg.FindString(c.AlicloudImageName) != "" {
 		errs = append(errs, fmt.Errorf("image_name can't include spaces"))
 	}
