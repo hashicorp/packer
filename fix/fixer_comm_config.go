@@ -45,7 +45,7 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 		} else if _, ok := builders["ssh_host_port_min"]; ok {
 
 			// replace ssh_host_port_min with host_port_min
-			sshHostPortMinRaw, _ := builders["ssh_host_port_min"]
+			sshHostPortMinRaw := builders["ssh_host_port_min"]
 			delete(builders, "ssh_host_port_min")
 			builders["host_port_min"] = sshHostPortMinRaw
 		}
@@ -61,7 +61,7 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 		} else if _, ok := builders["ssh_host_port_max"]; ok {
 
 			// replace ssh_host_port_max with host_port_max
-			sshHostPortMaxRaw, _ := builders["ssh_host_port_max"]
+			sshHostPortMaxRaw := builders["ssh_host_port_max"]
 			delete(builders, "ssh_host_port_max")
 			builders["host_port_max"] = sshHostPortMaxRaw
 
@@ -78,7 +78,7 @@ func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}
 		} else if _, ok := builders["ssh_skip_nat_mapping"]; ok {
 
 			// replace ssh_skip_nat_mapping with skip_nat_mapping
-			sshSkipNatMappingRaw, _ := builders["ssh_skip_nat_mapping"]
+			sshSkipNatMappingRaw := builders["ssh_skip_nat_mapping"]
 			sshSkipNatMappingBool, ok := sshSkipNatMappingRaw.(bool)
 			if ok {
 				delete(builders, "ssh_skip_nat_mapping")
