@@ -2,6 +2,7 @@ package packer
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -346,13 +347,24 @@ func (c *Core) validate() error {
 	return err
 }
 
-func (c *Core) init() error {
-	if c.variables == nil {
-		c.variables = make(map[string]string)
+func isDoneInterpolating(v string) (bool, error) {
+	// Check for whether the var contains any more references to `user`, wrapped
+	// in interpolation syntax.
+	filter := "{{\\s*|user\\s*|\\x60?.*\\x60?}}"
+	matched, err := regexp.MatchString(filter, v)
+	if err != nil {
+		return false, fmt.Errorf("Can't tell if interpolation is done: %s", err)
 	}
-	// Go through the variables and interpolate the environment and
-	// user variables
+	if matched {
+		// not done interpolating; there's still a call to "user" in a template
+		// engine
+		return false, nil
+	}
+	// No more calls to "user" as a template engine, so we're done.
+	return true, nil
+}
 
+func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = make(map[string]string)
@@ -386,15 +398,15 @@ func (c *Core) init() error {
 	// We need to read the keys from both, then loop over all of them to figure
 	// out the appropriate interpolations.
 
-	allVariables := make(map[string]string)
+	repeatMap := make(map[string]string)
 	// load in template variables
 	for k, v := range c.Template.Variables {
-		allVariables[k] = v.Default
+		repeatMap[k] = v.Default
 	}
 
 	// overwrite template variables with command-line-read variables
 	for k, v := range c.variables {
-		allVariables[k] = v
+		repeatMap[k] = v
 	}
 
 	// Regex to exclude any build function variable or template variable
@@ -405,7 +417,7 @@ func (c *Core) init() error {
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
 		// First, loop over the variables in the template
-		for k, v := range allVariables {
+		for k, v := range repeatMap {
 			// Interpolate the default
 			renderedV, err := interpolate.RenderRegex(v, ctx, renderFilter)
 			switch err.(type) {
@@ -415,16 +427,27 @@ func (c *Core) init() error {
 				changed = true
 				c.variables[k] = renderedV
 				ctx.UserVariables = c.variables
+				// Remove fully-interpolated variables from the map, and flag
+				// variables that still need interpolating for a repeat.
+				done, err := isDoneInterpolating(v)
+				if err != nil {
+					return ctx, err
+				}
+				if done {
+					delete(repeatMap, k)
+				} else {
+					shouldRetry = true
+				}
 			case ttmp.ExecError:
 				castError := err.(ttmp.ExecError)
 				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
 					shouldRetry = true
 					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
 				} else {
-					return err
+					return ctx, err
 				}
 			default:
-				return fmt.Errorf(
+				return ctx, fmt.Errorf(
 					// unexpected interpolation error: abort the run
 					"error interpolating default value for '%s': %s",
 					k, err)
@@ -436,12 +459,25 @@ func (c *Core) init() error {
 	}
 
 	if !changed && shouldRetry {
-		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
+		return ctx, fmt.Errorf("Failed to interpolate %s: Please make sure that "+
 			"the variable you're referencing has been defined; Packer treats "+
 			"all variables used to interpolate other user varaibles as "+
 			"required.", failedInterpolation)
 	}
 
+	return ctx, nil
+}
+
+func (c *Core) init() error {
+	if c.variables == nil {
+		c.variables = make(map[string]string)
+	}
+	// Go through the variables and interpolate the environment and
+	// user variables
+	ctx, err := c.renderVarsRecursively()
+	if err != nil {
+		return err
+	}
 	for _, v := range c.Template.SensitiveVariables {
 		secret := ctx.UserVariables[v.Key]
 		c.secrets = append(c.secrets, secret)
