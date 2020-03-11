@@ -26,7 +26,7 @@ provisioner.
 
 Within a template, a section of provisioner definitions looks like this:
 
-``` json
+```json
 {
   "provisioners": [
     // ... one or more provisioner definitions here
@@ -52,7 +52,7 @@ created.
 An example provisioner definition is shown below, configuring the shell
 provisioner to run a local script within the machines:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh"
@@ -69,7 +69,7 @@ provisioner on anything other than the specified builds.
 An example of `only` being used is shown below, but the usage of `except` is
 effectively the same:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh",
@@ -136,7 +136,7 @@ images to be identical. However, they may initially need to be run differently.
 
 This example is shown below:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh",
@@ -166,7 +166,7 @@ Every provisioner definition in a Packer template can take a special
 configuration `pause_before` that is the amount of time to pause before running
 that provisioner. By default, there is no pause. An example is shown below:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh",
@@ -186,7 +186,7 @@ configuration `timeout` that is the amount of time to wait before
 considering that the provisioner failed. By default, there is no timeout. An
 example is shown below:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh",

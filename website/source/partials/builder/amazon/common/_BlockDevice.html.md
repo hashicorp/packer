@@ -7,7 +7,7 @@ Example use case:
 The following mapping will tell Packer to encrypt the root volume of the
 build instance at launch using a specific non-default kms key:
 
-``` json
+```json
 "[{
 		"device_name": "/dev/sda1",
 		"encrypted": true,

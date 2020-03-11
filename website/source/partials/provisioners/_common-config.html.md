@@ -9,7 +9,7 @@ Parameters common to all provisioners:
 -   `override`  (object) - Override the builder with different settings for a
     specific builder, eg :
 
-    ``` json
+    ```json
     {
       "type": "shell",
       "script": "script.sh",

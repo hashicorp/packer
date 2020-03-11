@@ -121,7 +121,7 @@ Failure to chain the post-processors together in this way will result in the
 wrong artifact being supplied to the Vagrant Cloud post-processor. This will
 likely cause the Vagrant Cloud post-processor to error and fail.
 
-``` json
+```json
 {
   "variables": {
     "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",

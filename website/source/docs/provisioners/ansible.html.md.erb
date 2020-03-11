@@ -75,7 +75,7 @@ Optional Parameters:
 -   `ansible_env_vars` (array of strings) - Environment variables to set before
     running Ansible. Usage example:
 
-    ``` json
+    ```json
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
     ```
     This is a [template engine](/docs/templates/engine.html). Therefore, you
@@ -86,7 +86,7 @@ Optional Parameters:
     password that Packer uses to connect to a Windows instance via WinRM, you
     can use the template variable {{.WinRMPassword}} in this option. Example:
 
-    ``` json
+    ```json
     "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
     ```
 
@@ -102,7 +102,7 @@ Optional Parameters:
     These arguments *will not* be passed through a shell and arguments should
     not be quoted. Usage example:
 
-    ``` json
+    ```json
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
     ```
 
@@ -111,7 +111,7 @@ Optional Parameters:
     connect to a Windows instance via WinRM, you can use the template variable
     {{.WinRMPassword}} in this option. For example:
 
-    ``` json
+    ```json
       "extra_arguments": [
         "--extra-vars", "winrm_password={{ .WinRMPassword }}"
       ]
@@ -212,7 +212,7 @@ commonly useful Ansible variables:
 To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"`
 to enable verbose logging.
 
-``` json
+```json
   "extra_arguments": [ "-vvvv" ]
 ```
 
@@ -233,7 +233,7 @@ Redhat / CentOS builds have been known to fail with the following error due to
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible
 connection to chroot and running Ansible as root/sudo.
 
-``` json
+```json
 {
   "builders": [
     {
@@ -329,7 +329,7 @@ class Connection(SSHConnection):
 This template should build a Windows Server 2012 image on Google Cloud
 Platform:
 
-``` json
+```json
 {
   "variables": {},
   "provisioners": [
@@ -410,7 +410,7 @@ source /tmp/venv/bin/activate && ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 /tmp/v
 
 The ansible provisioner template remains very simple. For example:
 
-``` json
+```json
   {
     "type":  "ansible",
     "command": "/Path/To/call_ansible.sh",

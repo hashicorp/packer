@@ -29,7 +29,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu
 to self-install. Still, the example serves to show the basic configuration:
 
-``` json
+```json
 {
   "type": "hyperv-iso",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
@@ -173,7 +173,7 @@ if (test-path $isoFolder){
 
 Packer config:
 
-``` json
+```json
 {
   "builders": [
     {
@@ -704,7 +704,7 @@ virtual switch with an `External` connection type.
 
 ### Packer config:
 
-``` json
+```json
 {
   "variables": {
     "vm_name": "ubuntu-xenial",

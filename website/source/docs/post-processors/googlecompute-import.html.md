@@ -82,7 +82,7 @@ Here is a basic example. This assumes that the builder has produced an
 compressed raw disk image artifact for us to work with, and that the GCS bucket
 has been created.
 
-``` json
+```json
 {
   "type": "googlecompute-import",
   "account_file": "account.json",
@@ -100,7 +100,7 @@ server was running in GCE with the nested hypervisor feature enabled.
 
     $ packer build -var serial=$(tty) build.json
 
-``` json
+```json
 {
   "variables": {
     "serial": ""

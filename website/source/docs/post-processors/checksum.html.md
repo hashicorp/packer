@@ -31,7 +31,7 @@ a third-party post-processor.
 
 The example below is fully functional.
 
-``` json
+```json
 {
   "type": "checksum"
 }

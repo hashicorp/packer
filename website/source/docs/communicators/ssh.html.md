@@ -56,7 +56,7 @@ build. If your template contains multiple builds, you can have a different
 communicator configured for each. Here's an extremely basic example of
 configuring the SSH communicator for an Amazon builder:
 
-``` json
+```json
 {
   "builders": [
     {

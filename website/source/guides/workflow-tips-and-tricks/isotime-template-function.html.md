@@ -37,7 +37,7 @@ However, the formatting basics are worth describing here. From the [golang docs]
 
 So what does that look like in a Packer template function?
 
-``` json
+```json
 {
 	"variables":
 	{

@@ -45,7 +45,7 @@ is optional.
 
 An example is shown below, showing only the post-processor configuration:
 
-``` json
+```json
 {
   "type": "docker-import",
   "repository": "hashicorp/packer",
@@ -71,7 +71,7 @@ Docker](https://docs.docker.com/engine/reference/commandline/import/).
 Example uses of all of the options, assuming one is building an NGINX image
 from ubuntu as an simple example:
 
-``` json
+```json
 {
   "type": "docker-import",
   "repository": "local/centos6",

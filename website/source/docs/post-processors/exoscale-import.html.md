@@ -76,7 +76,7 @@ Optional:
 
 Here is a basic example:
 
-``` json
+```json
 {
   "type": "exoscale-import",
   "api_key": "{{user `exoscale_api_key`}}",

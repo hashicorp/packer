@@ -297,7 +297,7 @@ type Config struct {
 	//
 	// An example plan\_info object is defined below.
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "plan_info": {
 	//       "plan_name": "rabbitmq",

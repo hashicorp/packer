@@ -19,7 +19,7 @@ some task with packer outputs and variables.
 
 The example below is fully functional.
 
-``` json
+```json
 {
   "type": "shell-local",
   "inline": ["echo foo"]
@@ -236,7 +236,7 @@ of files produced by a `builder` to a json file after each `builder` is run.
 For example, if you wanted to package a file from the file builder into a
 tarball, you might write this:
 
-``` json
+```json
 {
   "builders": [
     {

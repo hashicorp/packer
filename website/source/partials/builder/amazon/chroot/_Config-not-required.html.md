@@ -82,7 +82,7 @@
     
 -   `source_ami_filter` (awscommon.AmiFilterOptions) - Filters used to populate the source_ami field. Example:
     
-        ``` json
+        ```json
         {
           "source_ami_filter": {
           "filters": {

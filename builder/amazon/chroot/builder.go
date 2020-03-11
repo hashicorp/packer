@@ -121,7 +121,7 @@ type Config struct {
 	// Filters used to populate the source_ami field. Example:
 	//
 	//
-	//     ``` json
+	//     ```json
 	//     {
 	//       "source_ami_filter": {
 	//       "filters": {

@@ -234,7 +234,7 @@ type Config struct {
 	//
 	// The following shows a sample usage:
 	//
-	// ``` json {
+	// ```json {
 	//   "qemuargs": [
 	//     [ "-m", "1024M" ],
 	//     [ "--no-acpi", "" ],
@@ -269,7 +269,7 @@ type Config struct {
 	// You can also use the `SSHHostPort` template variable to produce a packer
 	// template that can be invoked by `make` in parallel:
 	//
-	// ``` json {
+	// ```json {
 	//   "qemuargs": [
 	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
 	//     [ "-device", "virtio-net,netdev=forward,id=net0"]

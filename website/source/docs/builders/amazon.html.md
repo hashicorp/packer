@@ -65,7 +65,7 @@ explained below:
 Static credentials can be provided in the form of an access key id and secret.
 These look like:
 
-``` json
+```json
 {
     "access_key": "AKIAIOSFODNN7EXAMPLE",
     "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
@@ -108,7 +108,7 @@ The format for the credentials file is like so
 You may also configure the profile to use by setting the `profile`
 configuration option, or setting the `AWS_PROFILE` environment variable:
 
-``` json
+```json
 {
     "profile": "customprofile",
     "region": "us-east-1",
@@ -128,7 +128,7 @@ which reduces the chance of leakage.
 The following policy document provides the minimal set permissions necessary
 for Packer to work:
 
-``` json
+```json
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -198,7 +198,7 @@ The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.
 
-``` json
+```json
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
@@ -215,7 +215,7 @@ work, but specifics will depend on your use-case.
 In case when you're creating a temporary instance profile you will require to have following
 IAM policies.
 
-``` json
+```json
 {
     "Sid": "PackerIAMCreateRole",
     "Effect": "Allow",
@@ -254,7 +254,7 @@ following policies at a minimum:
 If you are using a key provided by a different account than the one you are
 using to run the Packer build, your key will also need
 
-``` json
+```json
         "kms:CreateGrant",
         "kms:DescribeKey"
 ```

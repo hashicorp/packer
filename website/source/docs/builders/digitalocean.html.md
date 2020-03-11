@@ -101,7 +101,7 @@ builder.
 Here is a basic example. It is completely valid as soon as you enter your own
 access tokens:
 
-``` json
+```json
 {
   "type": "digitalocean",
   "api_token": "YOUR API KEY",

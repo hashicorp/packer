@@ -353,7 +353,7 @@ isotime = June 7, 7:22:43pm 2014
 Please note that double quote characters need escaping inside of templates (in
 this case, on the `ami_name` value):
 
-``` json
+```json
 {
   "builders": [
     {
@@ -396,7 +396,7 @@ build_name = foo-bar-provider
 Please note that double quote characters need escaping inside of templates (in
 this case, on the `fixed-string` value):
 
-``` json
+```json
 {
   "post-processors": [
     [

@@ -68,7 +68,7 @@ type Config struct {
 	//
 	// example:
 	//
-	//  ``` json
+	//  ```json
 	//  {
 	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
 	//  }
@@ -128,7 +128,7 @@ type Config struct {
 	// The service account scopes for launched
 	// instance. Defaults to:
 	//
-	// ``` json
+	// ```json
 	// [
 	//   "https://www.googleapis.com/auth/userinfo.email",
 	//   "https://www.googleapis.com/auth/compute",

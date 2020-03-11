@@ -37,7 +37,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` json
+```json
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
@@ -228,7 +228,7 @@ Depending on your network configuration, it may be difficult to use packer's
 built-in HTTP server with ESXi. Instead, you can provide a kickstart or preseed
 file by attaching a floppy disk. An example below, based on RHEL:
 
-``` json
+```json
 {
   "builders": [
     {
@@ -246,7 +246,7 @@ It's also worth noting that `ks=floppy` has been deprecated. Later versions of
 the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require
 a different syntax to source a kickstart file from a mounted floppy image.
 
-``` json
+```json
 {
   "builders": [
     {

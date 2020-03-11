@@ -209,7 +209,7 @@ The available variables are:
 
 Here is a basic example.
 
-``` json
+```json
 {
   "type": "cloudstack",
   "api_url": "https://cloudstack.company.com/client/api",

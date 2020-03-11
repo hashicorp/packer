@@ -41,7 +41,7 @@ are given below:
 
 Here is a basic example for JDCloud.
 
-``` json
+```json
 {
   "builders": [
     {
