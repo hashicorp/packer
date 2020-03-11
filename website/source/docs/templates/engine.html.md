@@ -91,7 +91,7 @@ Here is a full list of the available functions for reference.
     These are unique to the SSH communicator and are unset when using other communicators. 
     __SSHPublicKey__ and __SSHPrivateKey__ can have escape sequences and special characters so their output should be single quoted to avoid surprises.  For example:
        
-        ```
+        ```json
         {
           ...
           "provisioners": [
@@ -213,7 +213,7 @@ are available to customize the
 [`execute_command`](/docs/provisioners/shell.html#execute_command) parameter
 used to determine how Packer will run the shell command.
 
-``` liquid
+```json
 {
     "provisioners": [
         {

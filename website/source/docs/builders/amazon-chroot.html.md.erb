@@ -208,37 +208,39 @@ involving the `nvme_device_path` option above. Read that for more information.
 
 A working example for mounting an NVMe device is below:
 
+```json
+{
+  "variables": {
+    "region" : "us-east-2"
+  },
+  "builders": [
     {
-      "variables": {
-        "region" : "us-east-2"
+      "type": "amazon-chroot",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn-ami-hvm-*",
+        "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
       },
-      "builders": [
-        {
-          "type": "amazon-chroot",
-          "region": "{{user `region`}}",
-          "source_ami_filter": {
-            "filters": {
-            "virtualization-type": "hvm",
-            "name": "amzn-ami-hvm-*",
-            "root-device-type": "ebs"
-            },
-            "owners": ["137112412989"],
-            "most_recent": true
-          },
-          "ena_support": true,
-          "ami_name": "amazon-chroot-test-{{timestamp}}",
-          "nvme_device_path": "/dev/nvme1n1p",
-          "device_path": "/dev/sdf"
-        }
-      ],
-
-      "provisioners": [
-        {
-          "type": "shell",
-          "inline": ["echo Test > /tmp/test.txt"]
-        }
-      ]
+      "ena_support": true,
+      "ami_name": "amazon-chroot-test-{{timestamp}}",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf"
     }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo Test > /tmp/test.txt"]
+    }
+  ]
+}
+```
 
 Note that in the `nvme_device_path` you must end with the `p`; if you try to
 define the partition in this path (e.g. `nvme_device_path`: `/dev/nvme1n1p1`)

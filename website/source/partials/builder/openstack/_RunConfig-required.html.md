@@ -10,7 +10,8 @@
     
 -   `source_image_filter` (ImageFilter) - Filters used to populate filter options. Example:
     
-    ```json {
+    ```json
+    {
         "source_image_filter": {
             "filters": {
                 "name": "ubuntu-16.04",
