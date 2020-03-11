@@ -132,6 +132,8 @@ type SSH struct {
 	SSHBastionUsername string `mapstructure:"ssh_bastion_username"`
 	// The password to use to authenticate with the bastion host.
 	SSHBastionPassword string `mapstructure:"ssh_bastion_password"`
+	// If `true`, the keyboard-interactive used to authenticate with bastion host.
+	SSHBastionInteractive bool `mapstructure:"ssh_bastion_interactive"`
 	// Path to a PEM encoded private key file to use to authenticate with the
 	// bastion host. The `~` can be used in path and will be expanded to the
 	// home directory of current user.
