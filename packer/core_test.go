@@ -721,24 +721,63 @@ func testisDoneInterpolating(t *testing.T) {
 	}
 }
 
-// func testCoreBuildWithInterpolatedEnvVars(t *testing.T) {
-// 	// Not a fan of using env vars in tests but in this case we need to make
-// 	// sure they get interpolated properly.
-// 	os.Setenv("CI_COMMIT_REF_NAME", "working")
-// 	os.Setenv("OUTPUT_DIR", "/u01/artifacts")
-// 	os.Setenv("OS_VERSION", "6")
-// 	os.Setenv("OS", "rhel")
-// 	os.Setenv("BASE_POSTFIX", "base")
-// 	os.Setenv("RULE", "vbox")
-// 	os.Setenv("POSTFIX", "base")
+func TestEnvAndFileVars(t *testing.T) {
+	os.Setenv("INTERPOLATE_TEST_ENV_1", "bulbasaur")
+	os.Setenv("INTERPOLATE_TEST_ENV_3", "/path/to/nowhere")
+	os.Setenv("INTERPOLATE_TEST_ENV_2", "5")
+	os.Setenv("INTERPOLATE_TEST_ENV_4", "bananas")
 
-// packer build \
-//   -var-file=common/vsphere.variables.json \
-//   -var-file=common/variables.json \
-//   -only=vbox-rhel-base \
-//   common/linux/redhat/template.json
+	// run the interpolations a bunch of times, because we have had issues
+	// where the behavior is different based on the order in which the
+	// vars are interpolated
+	for i := 0; i < 100; i++ {
+		f, err := os.Open(fixtureDir("complex-recursed-env-user-var-file.json"))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-// }
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
+		}
+
+		ccf, err := NewCore(&CoreConfig{
+			Template: tpl,
+			Version:  "1.0.0",
+			Variables: map[string]string{
+				"var_1":     "partyparrot",
+				"var_2":     "{{user `env_1`}}-{{user `env_2`}}{{user `env_3`}}-{{user `var_1`}}",
+				"final_var": "{{user `env_1`}}/{{user `env_2`}}/{{user `env_4`}}{{user `env_3`}}-{{user `var_1`}}/vmware/{{user `var_2`}}.vmx",
+			},
+		})
+		expected := map[string]string{
+			"var_1":     "partyparrot",
+			"var_2":     "bulbasaur-5/path/to/nowhere-partyparrot",
+			"final_var": "bulbasaur/5/bananas/path/to/nowhere-partyparrot/vmware/bulbasaur-5/path/to/nowhere-partyparrot.vmx",
+			"env_1":     "bulbasaur",
+			"env_2":     "5",
+			"env_3":     "/path/to/nowhere",
+			"env_4":     "bananas",
+		}
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
+		}
+		for k, v := range ccf.variables {
+			if expected[k] != v {
+				t.Fatalf("Expected value %s for key %s but got %s",
+					expected[k], k, v)
+			}
+		}
+
+	}
+
+	// Clean up env vars
+	os.Unsetenv("INTERPOLATE_TEST_ENV_1")
+	os.Unsetenv("INTERPOLATE_TEST_ENV_3")
+	os.Unsetenv("INTERPOLATE_TEST_ENV_2")
+	os.Unsetenv("INTERPOLATE_TEST_ENV_4")
+}
 
 func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {
 	tpl, err := template.ParseFile(p)
