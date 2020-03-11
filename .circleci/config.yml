@@ -79,10 +79,9 @@ jobs:
   check-lint:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
-    environment:
-      GO111MODULE: "off"
     steps:
       - checkout
+      - run: GO111MODULE=on go run . --help
       - run: make ci-lint
   check-vendor-vs-mod:
     executor: golang
