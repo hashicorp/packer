@@ -5,6 +5,9 @@
     "keyVaultName": {
       "type": "string"
     },
+    "keyVaultSKU": {
+      "type": "string"
+    },
     "keyVaultSecretValue": {
       "type": "securestring"
     },
@@ -39,7 +42,7 @@
         "enabledForTemplateDeployment": "true",
         "sku": {
           "family": "A",
-          "name": "standard"
+          "name": "[parameters('keyVaultSKU')]"
         },
         "tenantId": "[parameters('tenantId')]"
       },
