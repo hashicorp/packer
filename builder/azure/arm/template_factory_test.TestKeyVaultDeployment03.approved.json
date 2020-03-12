@@ -39,7 +39,7 @@
         "enabledForTemplateDeployment": "true",
         "sku": {
           "family": "A",
-          "name": "standard"
+          "name": "[parameters('keyVaultSKU')]"
         },
         "tenantId": "[parameters('tenantId')]"
       },
