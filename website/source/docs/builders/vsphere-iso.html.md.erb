@@ -27,8 +27,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 
 There are many configuration options available for this builder. In addition to
 the items listed here, you will want to look at the general configuration
-references for [ISO](#iso-configuration),
-[HTTP](#http-directory-configuration),
+references for [HTTP](#http-directory-configuration),
 [Floppy](#floppy-configuration),
 [Boot](#boot-configuration),
 [Driver](#driver-configuration),
@@ -63,7 +62,35 @@ necessary for this build to succeed and can be found further down the page.
 ### Wait Configuration
 <%= partial "partials/builder/vsphere/common/WaitIpConfig-not-required" %>
 
+### ISO Configuration
+
+<%= partial "partials/common/ISOConfig" %>
+
+#### Required:
+
+<%= partial "partials/common/ISOConfig-required" %>
+
+#### Optional:
+
+<%= partial "partials/common/ISOConfig-not-required" %>
+
 ### CDRom Configuration
+
+Each iso defined in the CDRom Configuration adds a new drive. If the "iso_url" is defined in
+addition to the "iso_paths", the "iso_url" is added to the VM first. This keeps the "iso_url" first in
+the boot order by default allowing the boot iso being defined by the iso_url and the vmware tools iso added
+from the datastore. Example:
+
+```json
+"iso_urls": [
+  "win10.iso",
+  "http://example.org/isos/win10.iso"
+],
+"iso_paths": [
+    "[] /usr/lib/vmware/isoimages/windows.iso"
+],
+```
+
 <%= partial "partials/builder/vsphere/iso/CDRomConfig-not-required" %>
 
 ### Create Configuration
