@@ -482,6 +482,9 @@ const KeyVault = `{
     "keyVaultName": {
       "type": "string"
     },
+    "keyVaultSKU": {
+      "type": "string"
+    },
     "keyVaultSecretValue": {
       "type": "securestring"
     },
@@ -518,7 +521,7 @@ const KeyVault = `{
           }
         ],
         "sku": {
-          "name": "standard",
+          "name": "[parameters('keyVaultSKU')]",
           "family": "A"
         }
       },
