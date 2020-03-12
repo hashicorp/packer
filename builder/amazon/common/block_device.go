@@ -22,7 +22,7 @@ import (
 // build instance at launch using a specific non-default kms key:
 //
 // ```json
-// "[{
+// [{
 //		"device_name": "/dev/sda1",
 //		"encrypted": true,
 //		"kms_key_id": "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
