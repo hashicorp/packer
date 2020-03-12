@@ -88,11 +88,11 @@ func testParse(t *testing.T, tests []parseTest) {
 				gotInputVar := gotCfg.InputVariables
 				for name, value := range tt.parseWantCfg.InputVariables {
 					if variable, ok := gotInputVar[name]; ok {
-						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
-							t.Fatalf("Parser.parse() input variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
+						if diff := cmp.Diff(variable.DefaultValue.GoString(), value.DefaultValue.GoString()); diff != "" {
+							t.Fatalf("Parser.parse(): unexpected default value for %s: %s", name, diff)
 						}
 						if diff := cmp.Diff(variable.VarfileValue.GoString(), value.VarfileValue.GoString()); diff != "" {
-							t.Fatalf("Parser.parse(): varfile value differs: %s", diff)
+							t.Fatalf("Parser.parse(): varfile value differs for %s: %s", name, diff)
 						}
 					} else {
 						t.Fatalf("Parser.parse() missing input variable. %s", name)
