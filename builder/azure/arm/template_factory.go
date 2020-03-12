@@ -17,6 +17,7 @@ type templateFactoryFunc func(*Config) (*resources.Deployment, error)
 func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
 	params := &template.TemplateParameters{
 		KeyVaultName:        &template.TemplateParameter{Value: config.tmpKeyVaultName},
+		KeyVaultSKU:         &template.TemplateParameter{Value: config.BuildKeyVaultSKU},
 		KeyVaultSecretValue: &template.TemplateParameter{Value: config.winrmCertificate},
 		ObjectId:            &template.TemplateParameter{Value: config.ClientConfig.ObjectID},
 		TenantId:            &template.TemplateParameter{Value: config.ClientConfig.TenantID},

@@ -40,6 +40,7 @@ const (
 	DefaultUserName                          = "packer"
 	DefaultPrivateVirtualNetworkWithPublicIp = false
 	DefaultVMSize                            = "Standard_A1"
+	DefaultKeyVaultSKU                       = "standard"
 )
 
 const (
@@ -256,7 +257,10 @@ type Config struct {
 	BuildResourceGroupName string `mapstructure:"build_resource_group_name"`
 	// Specify an existing key vault to use for uploading certificates to the
 	// instance to connect.
-	BuildKeyVaultName          string `mapstructure:"build_key_vault_name"`
+	BuildKeyVaultName string `mapstructure:"build_key_vault_name"`
+	// Specify the KeyVault SKU to create during the build. Valid values are
+	// standard or premium. The default value is standard.
+	BuildKeyVaultSKU           string `mapstructure:"build_key_vault_sku"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
 	// set a virtual_network_name and obtain a public IP. If this value is not
@@ -682,6 +686,10 @@ func provideDefaultValues(c *Config) {
 
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
+	}
+
+	if c.BuildKeyVaultSKU == "" {
+		c.BuildKeyVaultSKU = DefaultKeyVaultSKU
 	}
 
 	c.ClientConfig.SetDefaultValues()
