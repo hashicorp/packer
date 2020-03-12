@@ -5,6 +5,9 @@
     "keyVaultName": {
       "type": "string"
     },
+    "keyVaultSKU": {
+      "type": "string"
+    },
     "keyVaultSecretValue": {
       "type": "securestring"
     },
