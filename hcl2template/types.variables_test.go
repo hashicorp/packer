@@ -240,6 +240,35 @@ func TestParse_variables(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+
+		{"set variable from var-file",
+			defaultParser,
+			parseTestArgs{"testdata/variables/foo-string.variable.pkr.hcl", nil, []string{"testdata/variables/set-foo-too-wee.hcl"}},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{
+						DefaultValue: cty.StringVal("bar"),
+						Name:         "foo",
+						VarfileValue: cty.StringVal("wee"),
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			false,
+		},
+
+		{"unknown variable from var-file",
+			defaultParser,
+			parseTestArgs{"testdata/variables/empty.pkr.hcl", nil, []string{"testdata/variables/set-foo-too-wee.hcl"}},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+			},
+			true, false,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }

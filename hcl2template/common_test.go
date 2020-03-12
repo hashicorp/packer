@@ -91,6 +91,9 @@ func testParse(t *testing.T, tests []parseTest) {
 						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
 							t.Fatalf("Parser.parse() input variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
 						}
+						if diff := cmp.Diff(variable.VarfileValue.GoString(), value.VarfileValue.GoString()); diff != "" {
+							t.Fatalf("Parser.parse(): varfile value differs: %s", diff)
+						}
 					} else {
 						t.Fatalf("Parser.parse() missing input variable. %s", name)
 					}
