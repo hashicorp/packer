@@ -70,12 +70,6 @@ type Provisioner struct {
 	config Config
 }
 
-type ExecuteCommandTemplate struct {
-	Vars       string
-	EnvVarFile string
-	Path       string
-}
-
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -181,7 +175,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	if generatedData == nil {
+		generatedData = make(map[string]interface{})
+	}
+
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -201,6 +199,11 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		writer := bufio.NewWriter(tf)
 		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
 		for _, command := range p.config.Inline {
+			p.config.ctx.Data = generatedData
+			command, err := interpolate.Render(command, &p.config.ctx);
+			if err != nil {
+				return fmt.Errorf("Error interpolating Inline: %s", err)
+			}
 			if _, err := writer.WriteString(command + "\n"); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
@@ -279,11 +282,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		defer f.Close()
 
 		// Compile the command
-		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars:       flattenedEnvVars,
-			EnvVarFile: p.config.envVarFile,
-			Path:       p.config.RemotePath,
-		}
+		// These are extra variables that will be made available for interpolation.
+		generatedData["Vars"] = flattenedEnvVars
+		generatedData["EnvVarFile"] = p.config.envVarFile
+		generatedData["Path"] = p.config.RemotePath
+		p.config.ctx.Data = generatedData
+
 		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error processing command: %s", err)

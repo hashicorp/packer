@@ -1,0 +1,29 @@
+{
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "ami_name": "moss-packer-whee",
+            "instance_type": "t2.micro",
+            "source_ami_filter": {
+              "filters": {
+                "virtualization-type": "hvm",
+                "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+                "root-device-type": "ebs"
+              },
+              "owners": ["099720109477"],
+              "most_recent": true
+            },
+            "ssh_username": "ubuntu"
+        }
+    ],
+  "provisioners": [
+    {
+        "type": "shell-local",
+        "inline": ["echo MOSS packer run uuid is '{{ build `PackerRunUUID`}}'"]
+    },
+    {
+        "type": "shell",
+        "inline": ["echo MOSS packer run uuid is '{{ build `PackerRunUUID`}}'"]
+    }
+  ]
+}
