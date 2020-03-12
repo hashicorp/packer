@@ -200,7 +200,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
 		for _, command := range p.config.Inline {
 			p.config.ctx.Data = generatedData
-			command, err := interpolate.Render(command, &p.config.ctx);
+			command, err := interpolate.Render(command, &p.config.ctx)
 			if err != nil {
 				return fmt.Errorf("Error interpolating Inline: %s", err)
 			}
