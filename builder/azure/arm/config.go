@@ -258,7 +258,8 @@ type Config struct {
 	// Specify an existing key vault to use for uploading certificates to the
 	// instance to connect.
 	BuildKeyVaultName string `mapstructure:"build_key_vault_name"`
-	// Specify the KeyVault SKU to use when building: standard or premium
+	// Specify the KeyVault SKU to create during the build. Valid values are
+	// standard or premium. The default value is standard.
 	BuildKeyVaultSKU           string `mapstructure:"build_key_vault_sku"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
