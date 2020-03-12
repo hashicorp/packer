@@ -89,6 +89,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Images:    b.config.Export.Images,
 			Sha:       b.config.Export.Sha,
 			OutputDir: b.config.Export.OutputDir.OutputDir,
+			Options:   b.config.Export.Options,
 		})
 	}
 

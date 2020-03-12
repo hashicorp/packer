@@ -55,6 +55,20 @@ type ExportConfig struct {
 	// generate manifest using SHA 1, 256, 512. use 0 (default) for no manifest
 	Sha       int          `mapstructure:"sha"`
 	OutputDir OutputConfig `mapstructure:",squash"`
+	// Advanced ovf export options. Options can include:
+	// * mac - MAC address is exported for all ethernet devices
+	// * uuid - UUID is exported for all virtual machines
+	// * extraconfig - all extra configuration options are exported for a virtual machine
+	// * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
+	//
+	// For example, this config would output the mac addresses for all ethernet devices in the ovf file:
+	// ```json
+	// ...
+	//   "export": {
+	//     "options": ["mac"]
+	//   },
+	// ```
+	Options []string `mapstructure:"options"`
 }
 
 var sha = map[int]func() hash.Hash{
@@ -103,6 +117,7 @@ type StepExport struct {
 	Images    bool
 	Sha       int
 	OutputDir string
+	Options   []string
 	mf        bytes.Buffer
 }
 
@@ -132,6 +147,35 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		Name: s.Name,
 	}
 
+	m := vm.NewOvfManager()
+
+	if len(s.Options) > 0 {
+		exportOptions, err := vm.GetOvfExportOptions(m)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		var unknown []string
+		for _, option := range s.Options {
+			found := false
+			for _, exportOpt := range exportOptions {
+				if exportOpt.Option == option {
+					found = true
+					break
+				}
+			}
+			if !found {
+				unknown = append(unknown, option)
+			}
+			cdp.ExportOption = append(cdp.ExportOption, option)
+		}
+
+		// only printing error message because the unknown options are just ignored by vcenter
+		if len(unknown) > 0 {
+			ui.Error(fmt.Sprintf("unknown export options %s", strings.Join(unknown, ",")))
+		}
+	}
+
 	for _, i := range info.Items {
 		if !s.include(&i) {
 			continue
@@ -156,7 +200,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	desc, err := vm.CreateDescriptor(cdp)
+	desc, err := vm.CreateDescriptor(m, cdp)
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "unable to create descriptor"))
 		return multistep.ActionHalt
