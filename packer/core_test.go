@@ -679,7 +679,7 @@ func TestSensitiveVars(t *testing.T) {
 }
 
 // Normally I wouldn't test a little helper function, but it's regex.
-func testisDoneInterpolating(t *testing.T) {
+func TestIsDoneInterpolating(t *testing.T) {
 	cases := []struct {
 		inputString  string
 		expectedBool bool
