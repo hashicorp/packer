@@ -177,7 +177,7 @@
         [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
         [ "-device", "virtio-net,netdev=forward,id=net0"]
       ]
-    } 
+    }
     ```
     
     `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
