@@ -54,6 +54,7 @@ type FlatConfig struct {
 	TempResourceGroupName                      *string                            `mapstructure:"temp_resource_group_name" cty:"temp_resource_group_name"`
 	BuildResourceGroupName                     *string                            `mapstructure:"build_resource_group_name" cty:"build_resource_group_name"`
 	BuildKeyVaultName                          *string                            `mapstructure:"build_key_vault_name" cty:"build_key_vault_name"`
+	BuildKeyVaultSKU                           *string                            `mapstructure:"build_key_vault_sku" cty:"build_key_vault_sku"`
 	PrivateVirtualNetworkWithPublicIp          *bool                              `mapstructure:"private_virtual_network_with_public_ip" required:"false" cty:"private_virtual_network_with_public_ip"`
 	VirtualNetworkName                         *string                            `mapstructure:"virtual_network_name" required:"false" cty:"virtual_network_name"`
 	VirtualNetworkSubnetName                   *string                            `mapstructure:"virtual_network_subnet_name" required:"false" cty:"virtual_network_subnet_name"`
@@ -166,6 +167,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"temp_resource_group_name":                &hcldec.AttrSpec{Name: "temp_resource_group_name", Type: cty.String, Required: false},
 		"build_resource_group_name":               &hcldec.AttrSpec{Name: "build_resource_group_name", Type: cty.String, Required: false},
 		"build_key_vault_name":                    &hcldec.AttrSpec{Name: "build_key_vault_name", Type: cty.String, Required: false},
+		"build_key_vault_sku":                     &hcldec.AttrSpec{Name: "build_key_vault_sku", Type: cty.String, Required: false},
 		"private_virtual_network_with_public_ip":  &hcldec.AttrSpec{Name: "private_virtual_network_with_public_ip", Type: cty.Bool, Required: false},
 		"virtual_network_name":                    &hcldec.AttrSpec{Name: "virtual_network_name", Type: cty.String, Required: false},
 		"virtual_network_subnet_name":             &hcldec.AttrSpec{Name: "virtual_network_subnet_name", Type: cty.String, Required: false},
