@@ -58,7 +58,7 @@ install-gen-deps: ## Install dependencies for code generation
 
 install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.1
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -141,6 +141,12 @@ testacc: install-build-deps generate ## Run acceptance tests
 
 testrace: mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
+
+# Runs code coverage and open a html page with report
+cover:
+	go test $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
+	go tool cover -html=coverage.out
+	rm coverage.out
 
 check-vendor-vs-mod: ## Check that go modules and vendored code are on par
 	@GO111MODULE=on go mod vendor
