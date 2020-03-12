@@ -180,7 +180,7 @@ Here is a basic example creating a Fedora 29 server image with a Kickstart
 file served with Packer's HTTP server. Note that the iso file needs to be
 manually downloaded.
 
-``` json
+```json
 {
   "variables": {
     "username": "apiuser@pve",

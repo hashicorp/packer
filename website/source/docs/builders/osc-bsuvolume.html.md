@@ -142,7 +142,7 @@ builder.
   
     Example:
 
-    ``` json
+    ```json
     {
       "source_omi_filter": {
         "filters": {
@@ -180,7 +180,7 @@ builder.
 - `net_filter` (object) - Filters used to populate the `net_id` field.
     Example:
 
-    ``` json
+    ```json
     {
       "net_filter": {
         "filters": {
@@ -201,7 +201,7 @@ builder.
 
 ## Basic Example
 
-``` json
+```json
 {
     "builders": [
         {

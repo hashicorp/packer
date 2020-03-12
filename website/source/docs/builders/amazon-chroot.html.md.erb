@@ -104,7 +104,7 @@ Block devices can be nested in the
 
 Here is a basic example. It is completely valid except for the access keys:
 
-``` json
+```json
 {
   "type": "amazon-chroot",
   "access_key": "YOUR KEY HERE",
@@ -131,7 +131,7 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/proc` and `/dev`:
 
-``` json
+```json
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
@@ -173,7 +173,7 @@ For debian based distributions you can setup a
 file which will prevent packages installed by your provisioners from starting
 services:
 
-``` json
+```json
 {
   "type": "shell",
   "inline": [
@@ -208,37 +208,39 @@ involving the `nvme_device_path` option above. Read that for more information.
 
 A working example for mounting an NVMe device is below:
 
+```json
+{
+  "variables": {
+    "region" : "us-east-2"
+  },
+  "builders": [
     {
-      "variables": {
-        "region" : "us-east-2"
+      "type": "amazon-chroot",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn-ami-hvm-*",
+        "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
       },
-      "builders": [
-        {
-          "type": "amazon-chroot",
-          "region": "{{user `region`}}",
-          "source_ami_filter": {
-            "filters": {
-            "virtualization-type": "hvm",
-            "name": "amzn-ami-hvm-*",
-            "root-device-type": "ebs"
-            },
-            "owners": ["137112412989"],
-            "most_recent": true
-          },
-          "ena_support": true,
-          "ami_name": "amazon-chroot-test-{{timestamp}}",
-          "nvme_device_path": "/dev/nvme1n1p",
-          "device_path": "/dev/sdf"
-        }
-      ],
-
-      "provisioners": [
-        {
-          "type": "shell",
-          "inline": ["echo Test > /tmp/test.txt"]
-        }
-      ]
+      "ena_support": true,
+      "ami_name": "amazon-chroot-test-{{timestamp}}",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf"
     }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo Test > /tmp/test.txt"]
+    }
+  ]
+}
+```
 
 Note that in the `nvme_device_path` you must end with the `p`; if you try to
 define the partition in this path (e.g. `nvme_device_path`: `/dev/nvme1n1p1`)
@@ -253,7 +255,7 @@ The device setup commands partition the device with one partition for use as an
 HVM image and format it ext4. This builder block should be followed by
 provisioning commands to install the os and bootloader.
 
-``` json
+```json
 {
   "type": "amazon-chroot",
   "ami_name": "packer-from-scratch {{timestamp}}",

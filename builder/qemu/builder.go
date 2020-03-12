@@ -234,7 +234,8 @@ type Config struct {
 	//
 	// The following shows a sample usage:
 	//
-	// ``` json {
+	// ```json
+	//{
 	//   "qemuargs": [
 	//     [ "-m", "1024M" ],
 	//     [ "--no-acpi", "" ],
@@ -252,9 +253,11 @@ type Config struct {
 	// would produce the following (not including other defaults supplied by
 	// the builder and not otherwise conflicting with the qemuargs):
 	//
-	// ``` text qemu-system-x86 -m 1024m --no-acpi -netdev
+	// ```text
+	// qemu-system-x86 -m 1024m --no-acpi -netdev
 	// user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device
-	// virtio-net,netdev=mynet0" ```
+	// virtio-net,netdev=mynet0"
+	// ```
 	//
 	// ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
 	// builds are available though an environmental variable does need to be
@@ -264,17 +267,21 @@ type Config struct {
 	// The following shows the environment variable that needs to be set for
 	// Windows QEMU support:
 	//
-	// ``` text setx SDL_STDIO_REDIRECT=0 ```
+	// ```text
+	// setx SDL_STDIO_REDIRECT=0
+	// ```
 	//
 	// You can also use the `SSHHostPort` template variable to produce a packer
 	// template that can be invoked by `make` in parallel:
 	//
-	// ``` json {
+	// ```json
+	//{
 	//   "qemuargs": [
 	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
 	//     [ "-device", "virtio-net,netdev=forward,id=net0"]
 	//   ]
-	// } ```
+	// }
+	// ```
 	//
 	// `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
 	// of which will bind to their own SSH port as determined by each process.

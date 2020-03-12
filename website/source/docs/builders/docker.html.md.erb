@@ -38,7 +38,7 @@ documentation.
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will effectively repackage an image.
 
-``` json
+```json
 {
   "type": "docker",
   "image": "ubuntu",
@@ -52,7 +52,7 @@ Below is another example, the same as above but instead of exporting the
 running container, this one commits the container to an image. The image can
 then be more easily tagged, pushed, etc.
 
-``` json
+```json
 {
   "type": "docker",
   "image": "ubuntu",
@@ -71,7 +71,7 @@ Docker](https://docs.docker.com/engine/reference/commandline/commit/).
 Example uses of all of the options, assuming one is building an NGINX image
 from ubuntu as an simple example:
 
-``` json
+```json
 {
   "type": "docker",
   "image": "ubuntu",
@@ -163,7 +163,7 @@ created image. This is accomplished using a sequence definition (a collection
 of post-processors that are treated as as single pipeline, see
 [Post-Processors](/docs/templates/post-processors.html) for more information):
 
-``` json
+```json
 {
   "post-processors": [
     [
@@ -203,7 +203,7 @@ definition (a collection of post-processors that are treated as as single
 pipeline, see [Post-Processors](/docs/templates/post-processors.html) for more
 information):
 
-``` json
+```json
 {
   "post-processors": [
     [
@@ -229,7 +229,7 @@ Going a step further, if you wanted to tag and push an image to multiple
 container repositories, this could be accomplished by defining two,
 nearly-identical sequence definitions, as demonstrated by the example below:
 
-``` json
+```json
 {
   "post-processors": [
     [
@@ -267,7 +267,7 @@ containers, so you must either commit or discard them.
 The following is a fully functional template for building a Windows
 container.
 
-``` json
+```json
 {
     "builders": [
     {
@@ -287,7 +287,7 @@ Packer can tag and push images for use in [Amazon EC2 Container
 Registry](https://aws.amazon.com/ecr/). The post processors work as described
 above and example configuration properties are shown below:
 
-``` json
+```json
 {
   "post-processors": [
     [

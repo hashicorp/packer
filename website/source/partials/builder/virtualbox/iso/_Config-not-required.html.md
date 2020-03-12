@@ -53,9 +53,12 @@
     Virtualbox 6, install an [extension
     pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
     and you will need to enable EFI mode for nvme to work, ex:
-      "vboxmanage": [
+    
+    ```json
+     "vboxmanage": [
           [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
-       ]
+     ]
+    ```
     
 -   `sata_port_count` (int) - The number of ports available on any SATA controller created, defaults
     to 1. VirtualBox supports up to 30 ports on a maximum of 1 SATA

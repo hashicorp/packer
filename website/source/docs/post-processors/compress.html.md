@@ -60,21 +60,21 @@ compress.
 Some minimal examples are shown below, showing only the post-processor
 configuration:
 
-``` json
+```json
 {
   "type": "compress",
   "output": "archive.tar.lz4"
 }
 ```
 
-``` json
+```json
 {
   "type": "compress",
   "output": "{{.BuildName}}_bundle.zip"
 }
 ```
 
-``` json
+```json
 {
   "type": "compress",
   "output": "log_{{.BuildName}}.gz",

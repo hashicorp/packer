@@ -107,7 +107,7 @@ type RunConfig struct {
 	// `true`, will cause a timeout.
 	// Example of a valid shutdown command:
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "type": "windows-shell",
 	//   "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -175,7 +175,7 @@ type RunConfig struct {
 	InstanceType string `mapstructure:"instance_type" required:"true"`
 	// Filters used to populate the `security_group_ids` field. Example:
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "security_group_filter": {
 	//     "filters": {
@@ -216,7 +216,7 @@ type RunConfig struct {
 	// Filters used to populate the `source_ami`
 	// field. Example:
 	//
-	//   ``` json
+	//   ```json
 	//   {
 	//     "source_ami_filter": {
 	//       "filters": {
@@ -293,7 +293,7 @@ type RunConfig struct {
 	// Filters used to populate the `subnet_id` field.
 	// Example:
 	//
-	//   ``` json
+	//   ```json
 	//   {
 	//     "subnet_filter": {
 	//       "filters": {
@@ -350,7 +350,7 @@ type RunConfig struct {
 	// Filters used to populate the `vpc_id` field.
 	// Example:
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "vpc_filter": {
 	//     "filters": {

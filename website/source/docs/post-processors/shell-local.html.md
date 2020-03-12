@@ -19,7 +19,7 @@ some task with packer outputs and variables.
 
 The example below is fully functional.
 
-``` json
+```json
 {
   "type": "shell-local",
   "inline": ["echo foo"]
@@ -173,6 +173,7 @@ still in beta. There will be some limitations as a result. For example, it will
 likely not work unless both Packer and the scripts you want to run are both on
 the C drive.
 
+```json
     {
         "builders": [
           {
@@ -197,6 +198,7 @@ the C drive.
           }
       ]
     }
+```
 
 ## Default Environmental Variables
 
@@ -236,7 +238,7 @@ of files produced by a `builder` to a json file after each `builder` is run.
 For example, if you wanted to package a file from the file builder into a
 tarball, you might write this:
 
-``` json
+```json
 {
   "builders": [
     {
@@ -280,11 +282,13 @@ For a shell script, that means the script **must** exit with a zero code. You
 
 Example of running a .cmd file on windows:
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
-              "scripts": ["./scripts/test_cmd.cmd"]
-          },
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
+      "scripts": ["./scripts/test_cmd.cmd"]
+    }
+```
 
 Contents of "test\_cmd.cmd":
 
@@ -293,23 +297,27 @@ Contents of "test\_cmd.cmd":
 Example of running an inline command on windows: Required customization:
 tempfile\_extension
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
-              "tempfile_extension": ".cmd",
-              "inline": ["echo %SHELLLOCALTEST%"]
-          },
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
+      "tempfile_extension": ".cmd",
+      "inline": ["echo %SHELLLOCALTEST%"]
+    }
+```
 
 Example of running a bash command on windows using WSL: Required
 customizations: use\_linux\_pathing and execute\_command
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
-              "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
-              "use_linux_pathing": true,
-              "script": "./scripts/example_bash.sh"
-          }
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
+      "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+      "use_linux_pathing": true,
+      "script": "./scripts/example_bash.sh"
+    }
+```
 
 Contents of "example\_bash.sh":
 
@@ -319,53 +327,63 @@ Contents of "example\_bash.sh":
 Example of running a powershell script on windows: Required customizations:
 env\_var\_format and execute\_command
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
-              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-              "env_var_format": "$env:%s=\"%s\"; ",
-              "script": "./scripts/example_ps.ps1"
-          }
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
+      "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+      "env_var_format": "$env:%s=\"%s\"; ",
+      "script": "./scripts/example_ps.ps1"
+    }
+```
 
 Example of running a powershell script on windows as "inline": Required
 customizations: env\_var\_format, tempfile\_extension, and execute\_command
 
-          {
-              "type": "shell-local",
-              "tempfile_extension": ".ps1",
-              "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
-              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-              "env_var_format": "$env:%s=\"%s\"; ",
-              "inline": ["write-output $env:SHELLLOCALTEST"]
-          }
+```json
+    {
+      "type": "shell-local",
+      "tempfile_extension": ".ps1",
+      "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
+      "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+      "env_var_format": "$env:%s=\"%s\"; ",
+      "inline": ["write-output $env:SHELLLOCALTEST"]
+    }
+```
 
 ### Unix Host
 
 Example of running a bash script on unix:
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-              "scripts": ["./scripts/example_bash.sh"]
-          }
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+      "scripts": ["./scripts/example_bash.sh"]
+    }
+```
 
 Example of running a bash "inline" on unix:
 
-          {
-              "type": "shell-local",
-              "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
-              "inline": ["echo hello",
-                         "echo $PROVISIONERTEST"]
-          }
+```json
+    {
+      "type": "shell-local",
+      "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+      "inline": ["echo hello",
+                 "echo $PROVISIONERTEST"]
+    }
+```
 
 Example of running a python script on unix:
 
-          {
-              "type": "shell-local",
-              "script": "hello.py",
-              "environment_vars": ["HELLO_USER=packeruser"],
-              "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
-          }
+```json
+    {
+      "type": "shell-local",
+      "script": "hello.py",
+      "environment_vars": ["HELLO_USER=packeruser"],
+      "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
+    }
+```
 
 Where "hello.py" contains:
 

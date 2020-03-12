@@ -53,7 +53,7 @@ post-processors such as Docker and Artifice.
 You can simply add `{"type":"manifest"}` to your post-processor section. Below
 is a more complete example:
 
-``` json
+```json
 {
   "post-processors": [
     {
@@ -70,7 +70,7 @@ is a more complete example:
 
 An example manifest file looks like:
 
-``` json
+```json
 {
   "builds": [
     {
@@ -100,7 +100,7 @@ artifacts from the manifest by using `packer_run_uuid`.
 
 The above manifest was generated with this packer.json:
 
-``` json
+```json
 {
   "builders": [
     {

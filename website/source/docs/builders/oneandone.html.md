@@ -50,7 +50,7 @@ builder.
 
 Here is a basic example:
 
-``` json
+```json
 {
   "builders":[
     {

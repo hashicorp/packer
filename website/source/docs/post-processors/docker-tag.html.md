@@ -49,7 +49,7 @@ settings are optional.
 
 An example is shown below, showing only the post-processor configuration:
 
-``` json
+```json
 {
   "type": "docker-tag",
   "repository": "hashicorp/packer",

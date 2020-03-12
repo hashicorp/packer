@@ -26,7 +26,7 @@
     `true`, will cause a timeout.
     Example of a valid shutdown command:
     
-    ``` json
+    ```json
     {
       "type": "windows-shell",
       "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -90,7 +90,7 @@
     
 -   `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. Example:
     
-    ``` json
+    ```json
     {
       "security_group_filter": {
         "filters": {
@@ -126,7 +126,7 @@
 -   `source_ami_filter` (AmiFilterOptions) - Filters used to populate the `source_ami`
     field. Example:
     
-      ``` json
+      ```json
       {
         "source_ami_filter": {
           "filters": {
@@ -203,7 +203,7 @@
 -   `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
     Example:
     
-      ``` json
+      ```json
       {
         "subnet_filter": {
           "filters": {
@@ -260,7 +260,7 @@
 -   `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
     Example:
     
-    ``` json
+    ```json
     {
       "vpc_filter": {
         "filters": {
