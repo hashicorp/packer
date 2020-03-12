@@ -144,7 +144,7 @@ the Compress post-processor will not work with this builder.
 
 Sample for `hashicorp/precise64` with virtualbox provider.
 
-```
+```json
 {
   "builders": [
     {
