@@ -88,7 +88,7 @@ Values within `except` could also be a *post-processor* name.
 You can optionally create a single specialized provisioner field called an
 `error-cleanup-provisioner`. This provisioner will not run unless the normal
 provisioning run fails. If the normal provisioning run does fail, this special
-error provisioner will run *before the instanace is shut down*. This allows you
+error provisioner will run *before the instance is shut down*. This allows you
 to make last minute changes and clean up behaviors that Packer may not be able
 to clean up on its own.
 
