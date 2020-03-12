@@ -2,6 +2,7 @@ package packer
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strings"
@@ -399,14 +400,29 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 	// out the appropriate interpolations.
 
 	repeatMap := make(map[string]string)
+	allKeys := make([]string, 0)
+
 	// load in template variables
 	for k, v := range c.Template.Variables {
 		repeatMap[k] = v.Default
+		allKeys = append(allKeys, k)
 	}
 
 	// overwrite template variables with command-line-read variables
 	for k, v := range c.variables {
 		repeatMap[k] = v
+		allKeys = append(allKeys, k)
+	}
+
+	// sort map to force the following loop to be deterministic.
+	sort.Strings(allKeys)
+	type keyValue struct {
+		Key   string
+		Value string
+	}
+	sortedMap := make([]keyValue, len(repeatMap))
+	for _, k := range allKeys {
+		sortedMap = append(sortedMap, keyValue{k, repeatMap[k]})
 	}
 
 	// Regex to exclude any build function variable or template variable
@@ -416,25 +432,27 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
+		changed = false
+		deleteKeys := []string{}
 		// First, loop over the variables in the template
-		for k, v := range repeatMap {
+		for _, kv := range sortedMap {
 			// Interpolate the default
-			renderedV, err := interpolate.RenderRegex(v, ctx, renderFilter)
+			renderedV, err := interpolate.RenderRegex(kv.Value, ctx, renderFilter)
 			switch err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
 				// different in this loop than in the last one.
 				changed = true
-				c.variables[k] = renderedV
+				c.variables[kv.Key] = renderedV
 				ctx.UserVariables = c.variables
 				// Remove fully-interpolated variables from the map, and flag
 				// variables that still need interpolating for a repeat.
-				done, err := isDoneInterpolating(v)
+				done, err := isDoneInterpolating(kv.Value)
 				if err != nil {
 					return ctx, err
 				}
 				if done {
-					delete(repeatMap, k)
+					deleteKeys = append(deleteKeys, kv.Key)
 				} else {
 					shouldRetry = true
 				}
@@ -442,7 +460,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 				castError := err.(ttmp.ExecError)
 				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
 					shouldRetry = true
-					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, kv.Key, kv.Value, err)
 				} else {
 					return ctx, err
 				}
@@ -450,12 +468,26 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 				return ctx, fmt.Errorf(
 					// unexpected interpolation error: abort the run
 					"error interpolating default value for '%s': %s",
-					k, err)
+					kv.Key, err)
 			}
 		}
 		if !shouldRetry {
 			break
 		}
+
+		// Clear completed vars from sortedMap before next loop. Do this one
+		// key at a time because the indices are gonna change ever time you
+		// delete from the map.
+		for _, k := range deleteKeys {
+			for ind, kv := range sortedMap {
+				if kv.Key == k {
+					log.Printf("Deleting kv.Value: %s", kv.Value)
+					sortedMap = append(sortedMap[:ind], sortedMap[ind+1:]...)
+					break
+				}
+			}
+		}
+		deleteKeys = []string{}
 	}
 
 	if !changed && shouldRetry {
