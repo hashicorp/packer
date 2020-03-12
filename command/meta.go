@@ -32,6 +32,7 @@ type Meta struct {
 	Version    string
 
 	// These are set by command-line flags
+	varFiles []string
 	flagVars map[string]string
 }
 
@@ -41,6 +42,17 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	// Copy the config so we don't modify it
 	config := *m.CoreConfig
 	config.Template = tpl
+
+	fj := &kvflag.FlagJSON{}
+	for _, file := range m.varFiles {
+		err := fj.Set(file)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for k, v := range *fj {
+		m.flagVars[k] = v
+	}
 	config.Variables = m.flagVars
 
 	// Init the core
@@ -117,7 +129,7 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	// FlagSetVars tells us what variables to use
 	if fs&FlagSetVars != 0 {
 		f.Var((*kvflag.Flag)(&m.flagVars), "var", "")
-		f.Var((*kvflag.FlagJSON)(&m.flagVars), "var-file", "")
+		f.Var((*kvflag.StringSlice)(&m.varFiles), "var-file", "")
 	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.

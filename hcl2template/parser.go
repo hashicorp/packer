@@ -52,7 +52,7 @@ const (
 	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, hcl.Diagnostics) {
+func (p *Parser) parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
 	var diags hcl.Diagnostics
@@ -60,6 +60,7 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	// parse config files
 	{
 		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
+		diags = append(diags, moreDiags...)
 		if len(hclFiles)+len(jsonFiles) == 0 {
 			diags = append(moreDiags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -111,6 +112,20 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
 		diags = append(diags, moreDiags...)
+		for _, file := range varFiles {
+			switch filepath.Ext(file) {
+			case ".hcl":
+				hclVarFiles = append(hclVarFiles, file)
+			case ".json":
+				jsonVarFiles = append(jsonVarFiles, file)
+			default:
+				diags = append(moreDiags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Could not guess format of " + file,
+					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+				})
+			}
+		}
 		var varFiles []*hcl.File
 		for _, filename := range hclVarFiles {
 			f, moreDiags := p.ParseHCLFile(filename)
@@ -123,7 +138,7 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 			varFiles = append(varFiles, f)
 		}
 
-		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, vars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
 
 	_, moreDiags := cfg.InputVariables.Values()
