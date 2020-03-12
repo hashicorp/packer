@@ -1,11 +1,41 @@
 ## 1.5.5 (Upcoming)
 
 ### IMPROVEMENTS:
-- builder/tencentcloud: Show tencentcloud image id after copy to desination
+* builder-vsphere-iso: Add the remote iso first so that it is first in boot
+    order, and clarify boot behavior. [GH-8732]
+* builder/azure: Add support for configurable KeyVault SKU [GH-8879]
+* builder/hyperv: Add `first_boot_device` setting to allow the selection of the
+    initial device or device class used for booting the VM. [GH-8714]
+* builder/hyperv: Fix Hyper-V compacted disk size comparison [GH-8811]
+* builder/tencentcloud: Show tencentcloud image id after copy to desination
     region. [GH-8763]
+* builder/vsphere-iso: Add ability to define multiple disks. [GH-8787]
+* builder/vsphere-iso: Add support for eagerly zeroed / scrubbed disks.
+    [GH-8756]
+* core/hcl2: Add support in HCL2 configs for dynamic blocks, document for loops
+    and splat expressions [GH-8720]
+* core/hcl2: Fix HCL2 local variables decoding to allow local usage within
+    another local in the same locals block [GH-8755]
+* core/hcl2: Import new replace and regex_replace funcs from go-cty +
+    documentation [GH-8863]
+* core: Make "build" engine template variables SSHPublicKey and SSHPrivateKey
+    strings [GH-8829]
 
 ### Bug Fixes:
-- builder/vsphere: Fix network object interface panic. [GH-8753]
+* bilder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
+    file limit. [GH-8800]
+* builder/azure: Fix HCL2 bug that prevented Azure and other builders from
+    loading properly. [GH-8785]
+* builder/proxmox: Add new validation to catch that template_name cannot
+    contain spaces. [GH-8799]
+* builder/vagrant: Fix path validation in ssh config step. [GH-8826]
+* builder/virtualbox: Remove all floppy controllers before adding a new one.
+    [GH-8828]
+* builder/vsphere: Fix network object interface panic. [GH-8753]
+* core/hcl2: Fix crash when an unset variable is used [GH-8837]
+* core/hcl2: Fix logic for parsing literal value variables [GH-8834]
+* core: Fix "build" template engine interpolation for certain fields in certain
+    provisioners. [GH-8771]
 
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
