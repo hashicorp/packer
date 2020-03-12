@@ -111,7 +111,7 @@ post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-``` json
+```json
 {
   "type": "vagrant",
   "compression_level": 1,

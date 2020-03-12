@@ -77,7 +77,7 @@ set up WinRM as part of the unattended installation so that Packer can connect
 using the winrm communicator:
 https://github.com/StefanScherer/packer-windows
 
-``` json
+```json
       {
         "type": "virtualbox-iso",
         "guest_os_type": "Windows2008_64",

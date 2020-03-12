@@ -21,7 +21,7 @@ wait times.
 Below is a fully functioning example. It create a file at `target` with the
 specified `content`.
 
-``` json
+```json
 {
   "type": "file",
   "content": "Lorem ipsum dolor sit amet",

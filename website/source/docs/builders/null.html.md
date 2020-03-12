@@ -23,7 +23,7 @@ artifact.
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will connect to the specified host via ssh.
 
-``` json
+```json
 {
   "type":         "null",
   "ssh_host":     "127.0.0.1",

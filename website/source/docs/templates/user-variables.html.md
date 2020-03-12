@@ -36,7 +36,7 @@ The `variables` section is a key/value mapping of the user variable name to a
 default value. A default value can be the empty string. An example is shown
 below:
 
-``` json
+```json
 {
   "variables": {
     "aws_access_key": "",
@@ -74,7 +74,7 @@ The `env` function is available *only* within the default value of a user
 variable, allowing you to default a user variable to an environment variable.
 An example is shown below:
 
-``` json
+```json
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
@@ -103,7 +103,7 @@ Consul keys can be used within your template using the `consul_key` function.
 This function is available *only* within the default value of a user variable,
 for reasons similar to environment variables above.
 
-``` json
+```json
 {
     "variables": {
         "soft_versions": "{{ consul_key `my_image/softs_versions/next` }}"
@@ -130,7 +130,7 @@ An example of using a v2 kv engine:
 If you store a value in vault using `vault kv put secret/hello foo=world`, you
 can access it using the following template engine:
 
-``` json
+```json
 {
   "variables": {
     "my_secret": "{{ vault `/secret/data/hello` `foo`}}"
@@ -196,7 +196,7 @@ too. For example, the `amazon-ebs` builder has a configuration parameter called
 You can parameterize this by using a variable that is a list of regions, joined
 by a `,`. For example:
 
-``` json
+```json
 {
  "variables": {
         "destination_regions": "us-west-1,us-west-2"
@@ -261,7 +261,7 @@ Variables can also be set from an external JSON file. The `-var-file` flag
 reads a file containing a key/value mapping of variables to values and sets
 those variables. An example JSON file may look like this:
 
-``` json
+```json
 {
   "aws_access_key": "foo",
   "aws_secret_key": "bar"
@@ -309,7 +309,7 @@ don't want that variable printed to the Packer logs. You can make sure that
 sensitive variables won't get printed to the logs by adding them to the
 "sensitive-variables" list within the Packer template:
 
-``` json
+```json
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
@@ -338,7 +338,7 @@ do this by referencing the variable within a command that you execute. For
 example, here is how to make a `shell-local` provisioner only run if the
 `do_nexpose_scan` variable is non-empty.
 
-``` json
+```json
 {
   "type": "shell-local",
   "command": "if [ ! -z \"{{user `do_nexpose_scan`}}\" ]; then python -u trigger_nexpose_scan.py; fi"
@@ -349,7 +349,7 @@ example, here is how to make a `shell-local` provisioner only run if the
 
 In order to use `$HOME` variable, you can create a `home` variable in Packer:
 
-``` json
+```json
 {
   "variables": {
     "home": "{{env `HOME`}}"
@@ -359,7 +359,7 @@ In order to use `$HOME` variable, you can create a `home` variable in Packer:
 
 And this will be available to be used in the rest of the template, i.e.:
 
-``` json
+```json
 {
   "builders": [
     {

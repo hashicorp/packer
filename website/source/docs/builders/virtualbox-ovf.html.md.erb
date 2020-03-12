@@ -38,7 +38,7 @@ build.
 Here is a basic example. This example is functional if you have an OVF matching
 the settings here.
 
-``` json
+```json
 {
   "type": "virtualbox-ovf",
   "source_path": "source.ovf",
@@ -146,7 +146,7 @@ delay of 100ms between groups. The delay alleviates issues with latency and CPU
 contention. If you notice missing keys, you can tune this delay by specifying
 "boot_keygroup_interval" in your Packer template, for example:
 
-```
+```json
 {
   "builders": [
     {
@@ -213,7 +213,7 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
-``` json
+```json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],

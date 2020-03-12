@@ -97,7 +97,7 @@ artifact. The user must have the role `AliyunECSImageImportDefaultRole` with
 role and policy for you if you have the privilege, otherwise, you have to ask
 the administrator configure for you in advance.
 
-``` json
+```json
 "post-processors":[
     {
       "access_key":"{{user `access_key`}}",

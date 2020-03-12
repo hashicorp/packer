@@ -39,7 +39,7 @@ The configuration for this post-processor only requires one option.
 
 An example is shown below, showing only the post-processor configuration:
 
-``` json
+```json
 {
   "type": "docker-save",
   "path": "foo.tar"

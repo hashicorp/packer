@@ -164,7 +164,7 @@ Here is a basic example. This assumes that the builder has produced an OVA
 artifact for us to work with, and IAM roles for import exist in the AWS account
 being imported into.
 
-``` json
+```json
 {
   "type": "amazon-import",
   "access_key": "YOUR KEY HERE",
@@ -183,7 +183,7 @@ being imported into.
 This is an example that uses `vmware-iso` builder and exports the `.ova` file
 using ovftool.
 
-``` json
+```json
 "post-processors" : [
      [
         {
@@ -215,7 +215,7 @@ using ovftool.
 
 You'll need at least the following permissions in the policy for your IAM user
 in order to successfully upload an image via the amazon-import post-processor.
-``` json
+```json
         "ec2:CancelImportTask",
         "ec2:CopyImage",
         "ec2:CreateTags",

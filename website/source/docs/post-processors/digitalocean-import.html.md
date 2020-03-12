@@ -90,7 +90,7 @@ Optional:
 
 Here is a basic example:
 
-``` json
+```json
 {
   "type": "digitalocean-import",
   "api_token": "{{user `token`}}",
