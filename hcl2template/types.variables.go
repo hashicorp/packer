@@ -308,7 +308,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 						"values to variables that have already been declared "+
 						"in .pkr files, not to declare new variables. To "+
 						"declare variable %q, place this block in one of your"+
-						" .pkr files,such as variables.pkr.hcl\n\nTo set a "+
+						" .pkr files, such as variables.pkr.hcl\n\nTo set a "+
 						"value for this variable in %s, use the definition "+
 						"syntax instead:\n    %s = <value>",
 						name, block.TypeRange.Filename, name),
@@ -338,7 +338,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 					Summary:  "Undefined variable",
 					Detail: fmt.Sprintf("A %q variable was set but was "+
 						"not found in known variables. To declare "+
-						"variable %q, place this block in one of your"+
+						"variable %q, place this block in one of your "+
 						".pkr files, such as variables.pkr.hcl",
 						name, name),
 					Context: attr.Range.Ptr(),
@@ -375,9 +375,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 				Severity: hcl.DiagError,
 				Summary:  "Undefined -var variable",
 				Detail: fmt.Sprintf("A %q variable was passed in the command "+
-					"line but was not found in known variables."+
+					"line but was not found in known variables. "+
 					"To declare variable %q, place this block in one of your"+
-					" .pkr files,such as variables.pkr.hcl",
+					" .pkr files, such as variables.pkr.hcl",
 					name, name),
 			})
 			continue
