@@ -350,7 +350,7 @@ func (c *Core) validate() error {
 func isDoneInterpolating(v string) (bool, error) {
 	// Check for whether the var contains any more references to `user`, wrapped
 	// in interpolation syntax.
-	filter := "{{\\s*|user\\s*|\\x60?.*\\x60?}}"
+	filter := `{{\s*|user\s*|\x60?.*\x60?}}`
 	matched, err := regexp.MatchString(filter, v)
 	if err != nil {
 		return false, fmt.Errorf("Can't tell if interpolation is done: %s", err)
