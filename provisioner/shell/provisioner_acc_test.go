@@ -36,4 +36,3 @@ func TestBuildShellProvisionerWithBuildVariablesSharing(t *testing.T) {
 		helper.CleanUpAmi(t)
 	}
 }
-
