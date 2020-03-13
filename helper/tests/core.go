@@ -2,13 +2,14 @@ package testshelper
 
 import (
 	"bytes"
+	"os"
+	"testing"
+
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
-	"os"
-	"testing"
 )
 
 // fileExists returns true if the filename is found
