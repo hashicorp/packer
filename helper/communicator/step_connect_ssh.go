@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -247,7 +249,18 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	auth := make([]gossh.AuthMethod, 0, 2)
 
 	if config.SSHBastionInteractive {
-		auth = append(auth, gossh.KeyboardInteractive(ssh.KeyboardInteractive()))
+		var c io.ReadWriteCloser
+		if terminal.IsTerminal(int(os.Stdin.Fd())) {
+			c = os.Stdin
+		} else {
+			tty, err := os.Open("/dev/tty")
+			if err != nil {
+				return nil, err
+			}
+			defer tty.Close()
+			c = tty
+		}
+		auth = append(auth, gossh.KeyboardInteractive(ssh.KeyboardInteractive(c)))
 	}
 
 	if config.SSHBastionPassword != "" {

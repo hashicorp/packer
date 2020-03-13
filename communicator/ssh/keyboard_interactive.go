@@ -1,14 +1,15 @@
 package ssh
 
 import (
+	"io"
 	"log"
-	"os"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
+func KeyboardInteractive(c io.ReadWriter) ssh.KeyboardInteractiveChallenge {
+	t := terminal.NewTerminal(c, "")
 	return func(user, instruction string, questions []string, echos []bool) ([]string, error) {
 		if len(questions) == 0 {
 			return []string{}, nil
@@ -21,18 +22,7 @@ func KeyboardInteractive() ssh.KeyboardInteractiveChallenge {
 		}
 		answers := make([]string, len(questions))
 		for i := range questions {
-			var fd int
-			if terminal.IsTerminal(int(os.Stdin.Fd())) {
-				fd = int(os.Stdin.Fd())
-			} else {
-				tty, err := os.Open("/dev/tty")
-				if err != nil {
-					return nil, err
-				}
-				defer tty.Close()
-				fd = int(tty.Fd())
-			}
-			s, err := terminal.ReadPassword(fd)
+			s, err := t.ReadPassword("")
 			if err != nil {
 				return nil, err
 			}
