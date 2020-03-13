@@ -11,6 +11,8 @@ import (
 )
 
 func TestBuildShellProvisionerWithBuildVariablesSharing(t *testing.T) {
+	testshelper.AccTestPreValidate(t)
+
 	UUID, _ := uuid.GenerateUUID()
 	os.Setenv("PACKER_RUN_UUID", UUID)
 	c := &command.BuildCommand{
