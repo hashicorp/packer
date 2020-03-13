@@ -37,6 +37,7 @@ func getBasicParser() *Parser {
 type parseTestArgs struct {
 	filename string
 	vars     map[string]string
+	varFiles []string
 }
 
 type parseTest struct {
@@ -58,7 +59,7 @@ func testParse(t *testing.T, tests []parseTest) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
+			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
 			}
@@ -87,8 +88,11 @@ func testParse(t *testing.T, tests []parseTest) {
 				gotInputVar := gotCfg.InputVariables
 				for name, value := range tt.parseWantCfg.InputVariables {
 					if variable, ok := gotInputVar[name]; ok {
-						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
-							t.Fatalf("Parser.parse() input variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
+						if diff := cmp.Diff(variable.DefaultValue.GoString(), value.DefaultValue.GoString()); diff != "" {
+							t.Fatalf("Parser.parse(): unexpected default value for %s: %s", name, diff)
+						}
+						if diff := cmp.Diff(variable.VarfileValue.GoString(), value.VarfileValue.GoString()); diff != "" {
+							t.Fatalf("Parser.parse(): varfile value differs for %s: %s", name, diff)
 						}
 					} else {
 						t.Fatalf("Parser.parse() missing input variable. %s", name)

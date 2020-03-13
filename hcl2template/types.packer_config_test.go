@@ -18,7 +18,7 @@ func TestParser_complete(t *testing.T) {
 	tests := []parseTest{
 		{"working build",
 			defaultParser,
-			parseTestArgs{"testdata/complete", nil},
+			parseTestArgs{"testdata/complete", nil, nil},
 			&PackerConfig{
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
@@ -128,7 +128,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{"dir with no config files",
 			defaultParser,
-			parseTestArgs{"testdata/empty", nil},
+			parseTestArgs{"testdata/empty", nil, nil},
 			nil,
 			true, true,
 			nil,
@@ -136,14 +136,14 @@ func TestParser_complete(t *testing.T) {
 		},
 		{name: "inexistent dir",
 			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/inexistent", nil},
+			args:                   parseTestArgs{"testdata/inexistent", nil, nil},
 			parseWantCfg:           nil,
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
 		},
 		{name: "folder named build.pkr.hcl with an unknown src",
 			parser: defaultParser,
-			args:   parseTestArgs{"testdata/build.pkr.hcl", nil},
+			args:   parseTestArgs{"testdata/build.pkr.hcl", nil, nil},
 			parseWantCfg: &PackerConfig{
 				Basedir: "testdata/build.pkr.hcl",
 				Builds: Builds{
@@ -166,7 +166,7 @@ func TestParser_complete(t *testing.T) {
 		},
 		{name: "unknown block type",
 			parser: defaultParser,
-			args:   parseTestArgs{"testdata/unknown", nil},
+			args:   parseTestArgs{"testdata/unknown", nil, nil},
 			parseWantCfg: &PackerConfig{
 				Basedir: "testdata/unknown",
 			},
