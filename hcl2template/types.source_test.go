@@ -13,7 +13,7 @@ func TestParse_source(t *testing.T) {
 	tests := []parseTest{
 		{"two basic sources",
 			defaultParser,
-			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil},
+			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]*SourceBlock{
@@ -32,7 +32,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"untyped source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil},
+			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "sources"),
 			},
@@ -42,7 +42,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"unnamed source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil},
+			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "sources"),
 			},
@@ -52,7 +52,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"inexistent source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil},
+			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "sources"),
 			},
@@ -62,7 +62,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"duplicate source",
 			defaultParser,
-			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil},
+			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]*SourceBlock{
