@@ -187,6 +187,11 @@ type RunConfig struct {
 	// EBS volumes. This is a [template engine](/docs/templates/engine.html),
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
+	// Same as [`run_tags`](#run_tags) but defined as a singular block
+	// containing a key and a value field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	RunTag []hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
 	// automatically create a new temporary security group to allow SSH access.
@@ -276,9 +281,14 @@ type RunConfig struct {
 	// Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
 	// Windows (Amazon VPC)
 	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false"`
-	// Requires spot_price to be
-	// set. This tells Packer to apply tags to the spot request that is issued.
+	// Requires spot_price to be set. This tells Packer to apply tags to the
+	// spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
+	// Same as [`spot_tags`](#spot_tags) but defined as a singular block
+	// containing a key and a value field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	SpotTag hcl2template.KeyValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
 	// Example:
 	//
@@ -412,15 +422,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
-	for _, preparer := range []interface{ Prepare() error }{
+	for _, preparer := range []interface{ Prepare() []error }{
 		&c.SourceAmiFilter,
 		&c.SecurityGroupFilter,
 		&c.SubnetFilter,
 		&c.VpcFilter,
 	} {
-		if err := preparer.Prepare(); err != nil {
-			errs = append(errs, err)
-		}
+		errs = append(errs, preparer.Prepare()...)
 	}
 
 	// Validating ssh_interface

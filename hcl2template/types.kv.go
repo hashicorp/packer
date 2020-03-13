@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type KeyValue
+//go:generate mapstructure-to-hcl2 -type KeyValue,KeyValues,KVFilter
 
 package hcl2template
 
@@ -7,15 +7,22 @@ type KeyValue struct {
 	Value string
 }
 
-type KVFilter struct {
-	Filters map[string]string
-	Filter  []KeyValue
+type KeyValues []KeyValue
+
+func (kvs KeyValues) CopyOn(to map[string]string) []error {
+	for _, kv := range kvs {
+		to[kv.Key] = kv.Value
+	}
+	return nil
 }
 
-func (kvf *KVFilter) Prepare() error {
-	for _, filter := range kvf.Filter {
-		kvf.Filters[filter.Key] = filter.Value
-	}
+type KVFilter struct {
+	Filters map[string]string
+	Filter  KeyValues
+}
+
+func (kvf *KVFilter) Prepare() []error {
+	kvf.Filter.CopyOn(kvf.Filters)
 	return nil
 }
 

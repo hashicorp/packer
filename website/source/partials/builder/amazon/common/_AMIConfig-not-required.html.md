@@ -32,6 +32,11 @@
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
+-   `tag` (hcl2template.KeyValues) - Same as [`tags`](#tags) but defined as a singular block containing a key
+    and a value field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
+    
 -   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
     AWS IAM policy.
@@ -97,6 +102,11 @@
     They will override AMI tags if already applied to snapshot. This is a
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
+    
+-   `snapshot_tag` ([]hcl2template.KeyValues) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
+    block containing a key and a value field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `snapshot_users` ([]string) - A list of account IDs that have
     access to create volumes from the snapshot(s). By default no additional
