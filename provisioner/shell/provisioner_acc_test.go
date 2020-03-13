@@ -1,11 +1,9 @@
-// +build integration
-
-package shell_integration
+package shell_test
 
 import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
-	testshelper "github.com/hashicorp/packer/test/helper"
+	"github.com/hashicorp/packer/helper/tests"
 	"os"
 	"path/filepath"
 	"testing"
