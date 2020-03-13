@@ -1,12 +1,13 @@
 package shell_test
 
 import (
-	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/helper/tests"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/hashicorp/go-uuid"
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/helper/tests"
 )
 
 func TestBuildShellProvisionerWithBuildVariablesSharing(t *testing.T) {
