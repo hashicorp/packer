@@ -11,6 +11,7 @@ package ebs
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -254,6 +255,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm:      &b.config.RunConfig.Comm,
 			Timeout:   b.config.WindowsPasswordTimeout,
 			BuildName: b.config.PackerBuildName,
+		},
+		&awscommon.StepCreateSSMTunnel{
+			AWSSession: session,
+			DstPort:    strconv.Itoa(22),
+			SrcPort:    "8081",
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
