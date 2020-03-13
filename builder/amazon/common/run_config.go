@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -19,9 +20,9 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type AmiFilterOptions struct {
-	Filters    map[string]string
-	Owners     []string
-	MostRecent bool `mapstructure:"most_recent"`
+	hcl2template.KVFilter `mapstructure:",squash"`
+	Owners                []string
+	MostRecent            bool `mapstructure:"most_recent"`
 }
 
 func (d *AmiFilterOptions) GetOwners() []*string {
@@ -34,7 +35,7 @@ func (d *AmiFilterOptions) GetOwners() []*string {
 }
 
 func (d *AmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && len(d.Filters) == 0
+	return len(d.Owners) == 0 && d.KVFilter.Empty()
 }
 
 func (d *AmiFilterOptions) NoOwner() bool {
@@ -42,17 +43,13 @@ func (d *AmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	Filters  map[string]string
-	MostFree bool `mapstructure:"most_free"`
-	Random   bool `mapstructure:"random"`
-}
-
-func (d *SubnetFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
+	hcl2template.KVFilter `mapstructure:",squash"`
+	MostFree              bool `mapstructure:"most_free"`
+	Random                bool `mapstructure:"random"`
 }
 
 type VpcFilterOptions struct {
-	Filters map[string]string
+	hcl2template.KVFilter `mapstructure:",squash"`
 }
 
 type Statement struct {
@@ -66,16 +63,8 @@ type PolicyDocument struct {
 	Statement []Statement
 }
 
-func (d *VpcFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
-}
-
 type SecurityGroupFilterOptions struct {
-	Filters map[string]string
-}
-
-func (d *SecurityGroupFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
+	hcl2template.KVFilter `mapstructure:",squash"`
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -422,6 +411,17 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	for _, preparer := range []interface{ Prepare() error }{
+		&c.SourceAmiFilter,
+		&c.SecurityGroupFilter,
+		&c.SubnetFilter,
+		&c.VpcFilter,
+	} {
+		if err := preparer.Prepare(); err != nil {
+			errs = append(errs, err)
+		}
+	}
 
 	// Validating ssh_interface
 	if c.SSHInterface != "public_ip" &&
