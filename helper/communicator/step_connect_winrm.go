@@ -131,6 +131,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 			}
 			if config.Password != "" {
 				password = config.Password
+				s.Config.WinRMPassword = password
 			}
 		}
 
