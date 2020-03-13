@@ -62,6 +62,8 @@
     
 -   `ssh_bastion_password` (string) - The password to use to authenticate with the bastion host.
     
+-   `ssh_bastion_interactive` (bool) - If `true`, the keyboard-interactive used to authenticate with bastion host.
+    
 -   `ssh_bastion_private_key_file` (string) - Path to a PEM encoded private key file to use to authenticate with the
     bastion host. The `~` can be used in path and will be expanded to the
     home directory of current user.
