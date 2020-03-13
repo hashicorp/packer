@@ -1,4 +1,4 @@
-package helper
+package testshelper
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
