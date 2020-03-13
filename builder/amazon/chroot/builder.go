@@ -259,7 +259,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packer.MultiError
 	var warns []string
 
-	errs = packer.MultiErrorAppend(errs, b.RootVolumeTag.CopyOn(b.RootVolumeTags)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(b.config.RootVolumeTags)...)
 
 	for _, preparer := range []interface{ Prepare() []error }{
 		&b.config.SourceAmiFilter,
