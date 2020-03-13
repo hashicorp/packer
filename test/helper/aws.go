@@ -8,7 +8,7 @@ import (
 )
 
 type AWSHelper struct {
-	Region string
+	Region  string
 	AMIName string
 }
 
@@ -30,7 +30,7 @@ func (a *AWSHelper) CleanUpAmi(t *testing.T) {
 			Values: aws.StringSlice([]string{a.AMIName}),
 		}}})
 	if err != nil {
-		t.Errorf("AWSAMICleanUp: Unable to find Image %s: %s",a.AMIName, err.Error())
+		t.Errorf("AWSAMICleanUp: Unable to find Image %s: %s", a.AMIName, err.Error())
 	}
 
 	_, err = regionconn.DeregisterImage(&ec2.DeregisterImageInput{
