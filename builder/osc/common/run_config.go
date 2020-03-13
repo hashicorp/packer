@@ -104,15 +104,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
-	for _, preparer := range []interface{ Prepare() error }{
+	for _, preparer := range []interface{ Prepare() []error }{
 		&c.SourceOmiFilter,
 		&c.SecurityGroupFilter,
 		&c.SubnetFilter,
 		&c.NetFilter,
 	} {
-		if err := preparer.Prepare(); err != nil {
-			errs = append(errs, err)
-		}
+		errs = append(errs, preparer.Prepare()...)
 	}
 
 	// Validating ssh_interface

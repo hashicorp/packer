@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/pkg/errors"
@@ -83,6 +84,11 @@ type TencentCloudRunConfig struct {
 	// Tags to apply to the instance that is *launched* to create the image.
 	// These tags are *not* applied to the resulting image.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
+	// Same as [`run_tags`](#run_tags) but defined as a singular block
+	// containing a key and a value field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	RunTag []hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`

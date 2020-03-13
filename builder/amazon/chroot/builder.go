@@ -18,6 +18,7 @@ import (
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -163,6 +164,11 @@ type Config struct {
 	// engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
 	RootVolumeTags awscommon.TagMap `mapstructure:"root_volume_tags" required:"false"`
+	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
+	// singular block containing a key and a value field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	RootVolumeTag hcl2template.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -253,10 +259,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packer.MultiError
 	var warns []string
 
-	for _, preparer := range []interface{ Prepare() error }{
+	errs = packer.MultiErrorAppend(errs, b.RootVolumeTag.CopyOn(b.RootVolumeTags)...)
+
+	for _, preparer := range []interface{ Prepare() []error }{
 		&b.config.SourceAmiFilter,
 	} {
-		errs = packer.MultiErrorAppend(errs, preparer.Prepare())
+		errs = packer.MultiErrorAppend(errs, preparer.Prepare()...)
 	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
