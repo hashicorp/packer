@@ -253,6 +253,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packer.MultiError
 	var warns []string
 
+	for _, preparer := range []interface{ Prepare() error }{
+		&b.config.SourceAmiFilter,
+	} {
+		errs = packer.MultiErrorAppend(errs, preparer.Prepare())
+	}
+
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
