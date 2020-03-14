@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig
 
 package proxmox
 
@@ -45,6 +45,7 @@ type Config struct {
 	CPUType        string       `mapstructure:"cpu_type"`
 	Sockets        int          `mapstructure:"sockets"`
 	OS             string       `mapstructure:"os"`
+	VGA            vgaConfig    `mapstructure:"vga"`
 	NICs           []nicConfig  `mapstructure:"network_adapters"`
 	Disks          []diskConfig `mapstructure:"disks"`
 	ISOFile        string       `mapstructure:"iso_file"`
@@ -74,6 +75,10 @@ type diskConfig struct {
 	Size            string `mapstructure:"disk_size"`
 	CacheMode       string `mapstructure:"cache_mode"`
 	DiskFormat      string `mapstructure:"format"`
+}
+type vgaConfig struct {
+	Type   string `mapstructure:"type"`
+	Memory int    `mapstructure:"memory"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
