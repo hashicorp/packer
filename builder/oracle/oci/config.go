@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	ocicommon "github.com/oracle/oci-go-sdk/common"
+	ociauth "github.com/oracle/oci-go-sdk/common/auth"
 )
 
 type Config struct {
@@ -26,6 +27,18 @@ type Config struct {
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	configProvider ocicommon.ConfigurationProvider
+
+	// Instance Principals (OPTIONAL)
+	// If set to true the following can't have non empty values
+	// - AccessCfgFile
+	// - AccessCfgFileAccount
+	// - UserID
+	// - TenancyID
+	// - Region
+	// - Fingerprint
+	// - KeyFile
+	// - PassPhrase
+	InstancePrincipals bool `mapstructure:"use_instance_principals"`
 
 	AccessCfgFile        string `mapstructure:"access_cfg_file"`
 	AccessCfgFileAccount string `mapstructure:"access_cfg_file_account"`
@@ -86,84 +99,134 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Failed to mapstructure Config: %+v", err)
 	}
 
-	// Determine where the SDK config is located
-	if c.AccessCfgFile == "" {
-		c.AccessCfgFile, err = getDefaultOCISettingsPath()
-		if err != nil {
-			log.Println("Default OCI settings file not found")
-		}
-	}
-
-	if c.AccessCfgFileAccount == "" {
-		c.AccessCfgFileAccount = "DEFAULT"
-	}
-
-	var keyContent []byte
-	if c.KeyFile != "" {
-		path, err := packer.ExpandUser(c.KeyFile)
-		if err != nil {
-			return err
-		}
-
-		// Read API signing key
-		keyContent, err = ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
-	}
-
-	fileProvider, _ := ocicommon.ConfigurationProviderFromFileWithProfile(c.AccessCfgFile, c.AccessCfgFileAccount, c.PassPhrase)
-	if c.Region == "" {
-		var region string
-		if fileProvider != nil {
-			region, _ = fileProvider.Region()
-		}
-		if region == "" {
-			c.Region = "us-phoenix-1"
-		}
-	}
-
-	providers := []ocicommon.ConfigurationProvider{
-		NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
-	}
-
-	if fileProvider != nil {
-		providers = append(providers, fileProvider)
-	}
-
-	// Load API access configuration from SDK
-	configProvider, err := ocicommon.ComposingConfigurationProvider(providers)
-	if err != nil {
-		return err
-	}
-
 	var errs *packer.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
 
-	if userOCID, _ := configProvider.UserOCID(); userOCID == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("'user_ocid' must be specified"))
-	}
+	var tenancyOCID string
 
-	tenancyOCID, _ := configProvider.TenancyOCID()
-	if tenancyOCID == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("'tenancy_ocid' must be specified"))
-	}
+	if c.InstancePrincipals {
+		// We could go through all keys in one go and report that the below set
+		// of keys cannot coexist with use_instance_principals but decided to
+		// split them and report them seperately so that the user sees the specific
+		// key involved.
+		var message string = " cannot be present when use_instance_principals is set to true."
+		if c.AccessCfgFile != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file"+message))
+		}
+		if c.AccessCfgFileAccount != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file_account"+message))
+		}
+		if c.UserID != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_ocid"+message))
+		}
+		if c.TenancyID != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("tenancy_ocid"+message))
+		}
+		if c.Region != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("region"+message))
+		}
+		if c.Fingerprint != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("fingerprint"+message))
+		}
+		if c.KeyFile != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("key_file"+message))
+		}
+		if c.PassPhrase != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("pass_phrase"+message))
+		}
+		// This check is used to facilitate testing. During testing a Mock struct
+		// is assigned to c.configProvider otherwise testing fails because Instance
+		// Principals cannot be obtained.
+		if c.configProvider == nil {
+			// Even though the previous configuraion checks might fail we don't want
+			// to skip this step. It seems that the logic behind the checks in this
+			// file is to check everything even getting the configProvider.
+			c.configProvider, err = ociauth.InstancePrincipalConfigurationProvider()
+			if err != nil {
+				return err
+			}
+		}
+		tenancyOCID, err = c.configProvider.TenancyOCID()
+		if err != nil {
+			return err
+		}
+	} else {
+		// Determine where the SDK config is located
+		if c.AccessCfgFile == "" {
+			c.AccessCfgFile, err = getDefaultOCISettingsPath()
+			if err != nil {
+				log.Println("Default OCI settings file not found")
+			}
+		}
 
-	if fingerprint, _ := configProvider.KeyFingerprint(); fingerprint == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("'fingerprint' must be specified"))
-	}
+		if c.AccessCfgFileAccount == "" {
+			c.AccessCfgFileAccount = "DEFAULT"
+		}
 
-	if _, err := configProvider.PrivateRSAKey(); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("'key_file' must be specified"))
-	}
+		var keyContent []byte
+		if c.KeyFile != "" {
+			path, err := packer.ExpandUser(c.KeyFile)
+			if err != nil {
+				return err
+			}
 
-	c.configProvider = configProvider
+			// Read API signing key
+			keyContent, err = ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+		}
+
+		fileProvider, _ := ocicommon.ConfigurationProviderFromFileWithProfile(c.AccessCfgFile, c.AccessCfgFileAccount, c.PassPhrase)
+		if c.Region == "" {
+			var region string
+			if fileProvider != nil {
+				region, _ = fileProvider.Region()
+			}
+			if region == "" {
+				c.Region = "us-phoenix-1"
+			}
+		}
+
+		providers := []ocicommon.ConfigurationProvider{
+			NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
+		}
+
+		if fileProvider != nil {
+			providers = append(providers, fileProvider)
+		}
+
+		// Load API access configuration from SDK
+		configProvider, err := ocicommon.ComposingConfigurationProvider(providers)
+		if err != nil {
+			return err
+		}
+
+		if userOCID, _ := configProvider.UserOCID(); userOCID == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("'user_ocid' must be specified"))
+		}
+
+		tenancyOCID, _ = configProvider.TenancyOCID()
+		if tenancyOCID == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("'tenancy_ocid' must be specified"))
+		}
+
+		if fingerprint, _ := configProvider.KeyFingerprint(); fingerprint == "" {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("'fingerprint' must be specified"))
+		}
+
+		if _, err := configProvider.PrivateRSAKey(); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("'key_file' must be specified"))
+		}
+
+		c.configProvider = configProvider
+	}
 
 	if c.AvailabilityDomain == "" {
 		errs = packer.MultiErrorAppend(

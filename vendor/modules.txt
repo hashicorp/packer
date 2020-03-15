@@ -484,6 +484,7 @@ github.com/nu7hatch/gouuid
 github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk v1.8.0
 github.com/oracle/oci-go-sdk/common
+github.com/oracle/oci-go-sdk/common/auth
 github.com/oracle/oci-go-sdk/core
 # github.com/outscale/osc-go v0.0.1
 github.com/outscale/osc-go/oapi
