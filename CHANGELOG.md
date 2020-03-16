@@ -1,23 +1,28 @@
 ## 1.5.5 (Upcoming)
 
 ### IMPROVEMENTS:
-* builder-vsphere-iso: Add the remote iso first so that it is first in boot
-    order, and clarify boot behavior. [GH-8732]
 * builder/azure: Add support for configurable KeyVault SKU [GH-8879]
 * builder/hyperv: Add `first_boot_device` setting to allow the selection of the
     initial device or device class used for booting the VM. [GH-8714]
 * builder/hyperv: Fix Hyper-V compacted disk size comparison [GH-8811]
 * builder/tencentcloud: Show tencentcloud image id after copy to desination
     region. [GH-8763]
+* builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
+    required [GH-8877]
 * builder/vsphere-iso: Add ability to define multiple disks. [GH-8787]
 * builder/vsphere-iso: Add support for eagerly zeroed / scrubbed disks.
     [GH-8756]
+* builder/vsphere-iso: Add the remote iso first so that it is first in boot
+    order, and clarify boot behavior. [GH-8732]
+* communicator/ssh: Add flag to enable support for keyboard-interactive auth to
+    connect bastion [GH-8847]
 * core/hcl2: Add support in HCL2 configs for dynamic blocks, document for loops
     and splat expressions [GH-8720]
 * core/hcl2: Fix HCL2 local variables decoding to allow local usage within
     another local in the same locals block [GH-8755]
 * core/hcl2: Import new replace and regex_replace funcs from go-cty +
     documentation [GH-8863]
+* core: Enable hcl files as var files in HCL mode [GH-8882]
 * core: Make "build" engine template variables SSHPublicKey and SSHPrivateKey
     strings [GH-8829]
 
@@ -26,6 +31,7 @@
     file limit. [GH-8800]
 * builder/azure: Fix HCL2 bug that prevented Azure and other builders from
     loading properly. [GH-8785]
+* builder/googlecompute: Fix WinRMPassword template engine. [GH-8890]
 * builder/proxmox: Add new validation to catch that template_name cannot
     contain spaces. [GH-8799]
 * builder/vagrant: Fix path validation in ssh config step. [GH-8826]
@@ -36,6 +42,12 @@
 * core/hcl2: Fix logic for parsing literal value variables [GH-8834]
 * core: Fix "build" template engine interpolation for certain fields in certain
     provisioners. [GH-8771]
+* core: Fix bug where user var recursion could fail intermittently when used
+    with env vars [GH-8875]
+* plugins: Make plugin discovery stricter with respect to periods so that users
+    can disable plugins by renaming the extension [GH-8735]
+* provisioner/shell: "inline" config option is now a template engine. [GH-8883]
+
 
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
