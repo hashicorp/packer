@@ -67,7 +67,7 @@ type Config struct {
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	ImageTag []hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
+	ImageTag hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
@@ -81,7 +81,7 @@ type Config struct {
 	// a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	VmTag []hcl2template.KeyValues `mapstructure:"vm_tag" required:"false"`
+	VmTag hcl2template.KeyValues `mapstructure:"vm_tag" required:"false"`
 	// The name of the created disk.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// The type of the created disk. Defaults to ssd.
