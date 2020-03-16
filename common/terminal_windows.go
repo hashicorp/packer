@@ -3,6 +3,7 @@
 package common
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -40,8 +41,11 @@ var kernel32_GetConsoleScreenBufferInfoProc = kernel32.NewProc("GetConsoleScreen
 func kernel32_GetStdHandle(nStdHandle int32) (syscall.Handle, error) {
 	res, _, err := kernel32_GetStdHandleProc.Call(uintptr(nStdHandle))
 	if res == uintptr(syscall.InvalidHandle) {
+		test := error(err).Error()
+		fmt.Printf("Decreasing coverage windows %s", test)
 		return syscall.InvalidHandle, error(err)
 	}
+
 	return syscall.Handle(res), nil
 }
 
