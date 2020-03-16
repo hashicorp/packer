@@ -21,7 +21,7 @@ type FlatBlockDevice struct {
 	VolumeType          *string                     `mapstructure:"volume_type" required:"false" cty:"volume_type"`
 	VolumeSize          *int64                      `mapstructure:"volume_size" required:"false" cty:"volume_size"`
 	KmsKeyId            *string                     `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
-	Tags                common.TagMap               `mapstructure:"tags" required:"false" cty:"tags"`
+	Tags                map[string]string           `mapstructure:"tags" required:"false" cty:"tags"`
 	Tag                 []hcl2template.FlatKeyValue `mapstructure:"tag" required:"false" cty:"tag"`
 }
 
@@ -151,7 +151,7 @@ type FlatConfig struct {
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
 	VolumeMappings                            []FlatBlockDevice                      `mapstructure:"ebs_volumes" required:"false" cty:"ebs_volumes"`
-	VolumeRunTags                             common.TagMap                          `mapstructure:"run_volume_tags" cty:"run_volume_tags"`
+	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

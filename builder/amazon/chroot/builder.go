@@ -163,7 +163,7 @@ type Config struct {
 	// Tags to apply to the volumes that are *launched*. This is a [template
 	// engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	RootVolumeTags awscommon.TagMap `mapstructure:"root_volume_tags" required:"false"`
+	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
 	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
 	// singular block containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)

@@ -64,7 +64,7 @@ type Config struct {
 	// created. Packer will replace all tags on the volume with the tags
 	// configured in the `ebs_volumes` section as soon as the instance is
 	// reported as 'ready'.
-	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 
 	launchBlockDevices BlockDevices
 

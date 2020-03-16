@@ -423,15 +423,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := c.Comm.Prepare(ctx)
 
 	// Copy singular tag maps
-	for _, s := range []struct {
-		tagMap TagMap
-		kvs    hcl2template.KeyValues
-	}{
-		{c.RunTags, c.RunTag},
-		{c.SpotTags, c.SpotTag},
-	} {
-		errs = append(errs, s.kvs.CopyOn(&s.tagMap)...)
-	}
+	errs = append(errs, c.RunTag.CopyOn(&c.RunTags)...)
+	errs = append(errs, c.SpotTag.CopyOn(&c.SpotTags)...)
 
 	for _, preparer := range []interface{ Prepare() []error }{
 		&c.SourceAmiFilter,

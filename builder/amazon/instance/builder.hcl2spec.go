@@ -38,7 +38,7 @@ type FlatConfig struct {
 	AMIGroups                                 []string                               `mapstructure:"ami_groups" required:"false" cty:"ami_groups"`
 	AMIProductCodes                           []string                               `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes"`
 	AMIRegions                                []string                               `mapstructure:"ami_regions" required:"false" cty:"ami_regions"`
-	AMITags                                   common.TagMap                          `mapstructure:"tags" required:"false" cty:"tags"`
+	AMITags                                   map[string]string                      `mapstructure:"tags" required:"false" cty:"tags"`
 	AMITag                                    []hcl2template.FlatKeyValue            `mapstructure:"tag" required:"false" cty:"tag"`
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
@@ -48,7 +48,7 @@ type FlatConfig struct {
 	AMIKmsKeyId                               *string                                `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
 	AMIRegionKMSKeyIDs                        map[string]string                      `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids"`
 	AMISkipBuildRegion                        *bool                                  `mapstructure:"skip_save_build_region" cty:"skip_save_build_region"`
-	SnapshotTags                              common.TagMap                          `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
+	SnapshotTags                              map[string]string                      `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
 	SnapshotTag                               []hcl2template.FlatKeyValue            `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag"`
 	SnapshotUsers                             []string                               `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users"`
 	SnapshotGroups                            []string                               `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups"`
