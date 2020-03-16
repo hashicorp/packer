@@ -422,6 +422,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
+	// Copy singular tag maps
 	for _, s := range []struct {
 		tagMap TagMap
 		kvs    hcl2template.KeyValues
