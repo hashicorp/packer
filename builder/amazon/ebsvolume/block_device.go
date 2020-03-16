@@ -34,10 +34,22 @@ func (bds BlockDevices) BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping 
 }
 
 func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
+
 	for _, block := range bds {
+
+		for _, s := range []struct {
+			tagMap awscommon.TagMap
+			kvs    hcl2template.KeyValues
+		}{
+			{block.Tags, block.Tag},
+		} {
+			errs = append(errs, s.kvs.CopyOn(s.tagMap)...)
+		}
+
 		if err := block.Prepare(ctx); err != nil {
 			errs = append(errs, err)
 		}
+
 	}
 	return errs
 }
