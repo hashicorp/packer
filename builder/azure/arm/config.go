@@ -241,7 +241,7 @@ type Config struct {
 	// 256 characters. Tags are applied to every resource deployed by a Packer
 	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
 	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
-	// Same as [`azure_tags`](#azure_tags) but defined as a singular block
+	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.

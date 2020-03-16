@@ -187,11 +187,11 @@ type RunConfig struct {
 	// EBS volumes. This is a [template engine](/docs/templates/engine.html),
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
-	// Same as [`run_tags`](#run_tags) but defined as a singular block
+	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable block
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag []hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
+	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
 	// automatically create a new temporary security group to allow SSH access.
@@ -284,7 +284,7 @@ type RunConfig struct {
 	// Requires spot_price to be set. This tells Packer to apply tags to the
 	// spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
-	// Same as [`spot_tags`](#spot_tags) but defined as a singular block
+	// Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
@@ -421,6 +421,16 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	for _, s := range []struct {
+		tagMap TagMap
+		kvs    hcl2template.KeyValues
+	}{
+		{c.RunTags, c.RunTag},
+		{c.SpotTags, c.SpotTag},
+	} {
+		errs = append(errs, s.kvs.CopyOn(s.tagMap)...)
+	}
 
 	for _, preparer := range []interface{ Prepare() []error }{
 		&c.SourceAmiFilter,
