@@ -260,12 +260,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var warns []string
 
 	errs = packer.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(b.config.RootVolumeTags)...)
-
-	for _, preparer := range []interface{ Prepare() []error }{
-		&b.config.SourceAmiFilter,
-	} {
-		errs = packer.MultiErrorAppend(errs, preparer.Prepare()...)
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.SourceAmiFilter.Prepare()...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
