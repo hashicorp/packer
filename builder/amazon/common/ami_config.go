@@ -151,15 +151,8 @@ func stringInSlice(s []string, searchstr string) bool {
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
 
-	for _, s := range []struct {
-		tagMap TagMap
-		kvs    hcl2template.KeyValues
-	}{
-		{c.SnapshotTags, c.SnapshotTag},
-		{c.AMITags, c.AMITag},
-	} {
-		errs = append(errs, s.kvs.CopyOn(s.tagMap)...)
-	}
+	errs = append(errs, c.SnapshotTag.CopyOn(c.SnapshotTags)...)
+	errs = append(errs, c.AMITag.CopyOn(c.AMITags)...)
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
