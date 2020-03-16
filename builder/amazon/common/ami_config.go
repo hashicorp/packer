@@ -51,8 +51,8 @@ type AMIConfig struct {
 	// [template engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
 	AMITags TagMap `mapstructure:"tags" required:"false"`
-	// Same as [`tags`](#tags) but defined as a singular repeatable block containing a key
-	// and a value field. In HCL2 mode the
+	// Same as [`tags`](#tags) but defined as a singular repeatable block
+	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
 	AMITag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
@@ -123,7 +123,7 @@ type AMIConfig struct {
 	// data](#build-template-data) for more information.
 	SnapshotTags TagMap `mapstructure:"snapshot_tags" required:"false"`
 	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
-	// block containing a key and a value field. In HCL2 mode the
+	// repeatable block containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
 	SnapshotTag hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`

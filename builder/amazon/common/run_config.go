@@ -187,8 +187,8 @@ type RunConfig struct {
 	// EBS volumes. This is a [template engine](/docs/templates/engine.html),
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
-	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable block
-	// containing a key and a value field. In HCL2 mode the
+	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
+	// block containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
 	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
