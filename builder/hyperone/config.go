@@ -267,8 +267,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Validation
 	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, c.ImageTag.CopyOn(c.ImageTags)...)
-	errs = packer.MultiErrorAppend(errs, c.VmTag.CopyOn(c.VmTags)...)
+	errs = packer.MultiErrorAppend(errs, c.ImageTag.CopyOn(&c.ImageTags)...)
+	errs = packer.MultiErrorAppend(errs, c.VmTag.CopyOn(&c.VmTags)...)
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)

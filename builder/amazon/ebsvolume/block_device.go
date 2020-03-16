@@ -37,7 +37,7 @@ func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 
 	for _, block := range bds {
 
-		errs = append(errs, block.Tag.CopyOn(block.Tags)...)
+		errs = append(errs, block.Tag.CopyOn(&block.Tags)...)
 
 		if err := block.Prepare(ctx); err != nil {
 			errs = append(errs, err)

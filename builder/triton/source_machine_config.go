@@ -112,7 +112,7 @@ func (c *SourceMachineConfig) Prepare(ctx *interpolate.Context) []error {
 		c.MachineTags = make(map[string]string)
 	}
 
-	errs = append(errs, c.MachineTag.CopyOn(c.MachineTags)...)
+	errs = append(errs, c.MachineTag.CopyOn(&c.MachineTags)...)
 
 	return errs
 }

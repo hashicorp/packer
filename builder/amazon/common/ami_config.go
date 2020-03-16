@@ -151,8 +151,8 @@ func stringInSlice(s []string, searchstr string) bool {
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
 
-	errs = append(errs, c.SnapshotTag.CopyOn(c.SnapshotTags)...)
-	errs = append(errs, c.AMITag.CopyOn(c.AMITags)...)
+	errs = append(errs, c.SnapshotTag.CopyOn(&c.SnapshotTags)...)
+	errs = append(errs, c.AMITag.CopyOn(&c.AMITags)...)
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
