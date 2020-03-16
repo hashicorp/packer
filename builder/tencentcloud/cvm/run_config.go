@@ -189,7 +189,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 		cf.RunTags = make(map[string]string)
 	}
 
-	errs = append(errs, cf.RunTag.CopyOn(cf.RunTags)...)
+	errs = append(errs, cf.RunTag.CopyOn(&cf.RunTags)...)
 
 	return errs
 }

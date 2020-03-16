@@ -202,7 +202,7 @@ type AlicloudImageConfig struct {
 
 func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
-	errs = append(errs, c.AlicloudImageTag.CopyOn(c.AlicloudImageTags)...)
+	errs = append(errs, c.AlicloudImageTag.CopyOn(&c.AlicloudImageTags)...)
 	if c.AlicloudImageName == "" {
 		errs = append(errs, fmt.Errorf("image_name must be specified"))
 	} else if len(c.AlicloudImageName) < 2 || len(c.AlicloudImageName) > 128 {

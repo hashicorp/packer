@@ -9,9 +9,12 @@ type KeyValue struct {
 
 type KeyValues []KeyValue
 
-func (kvs KeyValues) CopyOn(to map[string]string) []error {
+func (kvs KeyValues) CopyOn(to *map[string]string) []error {
+	if *to == nil {
+		*to = map[string]string{}
+	}
 	for _, kv := range kvs {
-		to[kv.Key] = kv.Value
+		(*to)[kv.Key] = kv.Value
 	}
 	return nil
 }
@@ -22,7 +25,7 @@ type KVFilter struct {
 }
 
 func (kvf *KVFilter) Prepare() []error {
-	kvf.Filter.CopyOn(kvf.Filters)
+	kvf.Filter.CopyOn(&kvf.Filters)
 	return nil
 }
 

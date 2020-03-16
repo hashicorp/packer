@@ -430,7 +430,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		{c.RunTags, c.RunTag},
 		{c.SpotTags, c.SpotTag},
 	} {
-		errs = append(errs, s.kvs.CopyOn(s.tagMap)...)
+		errs = append(errs, s.kvs.CopyOn(&s.tagMap)...)
 	}
 
 	for _, preparer := range []interface{ Prepare() []error }{
