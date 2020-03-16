@@ -126,7 +126,7 @@ type AMIConfig struct {
 	// block containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	SnapshotTag []hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`
+	SnapshotTag hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional
 	// users other than the user creating the AMI has permissions to create
@@ -150,6 +150,16 @@ func stringInSlice(s []string, searchstr string) bool {
 
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
+
+	for _, s := range []struct {
+		tagMap TagMap
+		kvs    hcl2template.KeyValues
+	}{
+		{c.SnapshotTags, c.SnapshotTag},
+		{c.AMITags, c.AMITag},
+	} {
+		errs = append(errs, s.kvs.CopyOn(s.tagMap)...)
+	}
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
