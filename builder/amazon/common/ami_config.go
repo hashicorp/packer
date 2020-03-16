@@ -50,7 +50,7 @@ type AMIConfig struct {
 	// Tags applied to the AMI. This is a
 	// [template engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	AMITags TagMap `mapstructure:"tags" required:"false"`
+	AMITags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
@@ -121,7 +121,7 @@ type AMIConfig struct {
 	// They will override AMI tags if already applied to snapshot. This is a
 	// [template engine](../templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	SnapshotTags TagMap `mapstructure:"snapshot_tags" required:"false"`
+	SnapshotTags map[string]string `mapstructure:"snapshot_tags" required:"false"`
 	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
 	// repeatable block containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)

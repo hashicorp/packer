@@ -23,7 +23,7 @@
     source instance. See the [BlockDevices](#block-devices-configuration)
     documentation for fields.
     
--   `run_volume_tags` (awscommon.TagMap) - Tags to apply to the volumes of the instance that is *launched* to
+-   `run_volume_tags` (map[string]string) - Tags to apply to the volumes of the instance that is *launched* to
     create EBS Volumes. These tags will *not* appear in the tags of the
     resulting EBS volumes unless they're duplicated under `tags` in the
     `ebs_volumes` setting. This is a [template

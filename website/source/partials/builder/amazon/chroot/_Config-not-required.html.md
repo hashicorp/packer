@@ -121,7 +121,7 @@
     criteria provided in `source_ami_filter`; this pins the AMI returned by the
     filter, but will cause Packer to fail if the `source_ami` does not exist.
     
--   `root_volume_tags` (awscommon.TagMap) - Tags to apply to the volumes that are *launched*. This is a [template
+-   `root_volume_tags` (map[string]string) - Tags to apply to the volumes that are *launched*. This is a [template
     engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
