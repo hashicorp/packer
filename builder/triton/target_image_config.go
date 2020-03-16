@@ -48,6 +48,8 @@ type TargetImageConfig struct {
 func (c *TargetImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 
+	errs = append(errs, c.ImageTag.CopyOn(c.ImageTags)...)
+
 	if c.ImageName == "" {
 		errs = append(errs, fmt.Errorf("An image_name must be specified"))
 	}
