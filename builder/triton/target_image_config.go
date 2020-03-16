@@ -41,7 +41,7 @@ type TargetImageConfig struct {
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	ImageTag []hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
+	ImageTag hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
 }
 
 // Prepare performs basic validation on a TargetImageConfig struct.

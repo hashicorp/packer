@@ -88,7 +88,7 @@ type TencentCloudRunConfig struct {
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag []hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
+	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`

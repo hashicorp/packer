@@ -245,7 +245,7 @@ type Config struct {
 	// containing a key and a value field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	AzureTag []hcl2template.KeyValues `mapstructure:"azure_tag" required:"false"`
+	AzureTag hcl2template.KeyValues `mapstructure:"azure_tag" required:"false"`
 	// Resource group under which the final artifact will be stored.
 	ResourceGroupName string `mapstructure:"resource_group_name"`
 	// Storage account under which the final artifact will be stored.
