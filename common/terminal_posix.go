@@ -4,7 +4,6 @@ package common
 
 // Imports for determining terminal information across platforms
 import (
-	"fmt"
 	"os"
 
 	"golang.org/x/sys/unix"
@@ -32,8 +31,6 @@ func platformGetTerminalDimensions() (width, height int, err error) {
 	// use it to make an Ioctl
 	ws, err := unix.IoctlGetWinsize(fd, unix.TIOCGWINSZ)
 	if err != nil {
-		test := err.Error()
-		fmt.Printf("Decreasing coverage windows %s", test)
 		return 0, 0, err
 	}
 
