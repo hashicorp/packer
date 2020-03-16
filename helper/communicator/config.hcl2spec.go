@@ -202,7 +202,9 @@ type FlatWinRM struct {
 // FlatMapstructure returns a new FlatWinRM.
 // FlatWinRM is an auto-generated flat version of WinRM.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*WinRM) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } { return new(FlatWinRM) }
+func (*WinRM) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatWinRM)
+}
 
 // HCL2Spec returns the hcl spec of a WinRM.
 // This spec is used by HCL to read the fields of WinRM.
