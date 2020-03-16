@@ -529,6 +529,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	provideDefaultValues(c)
 	setRuntimeValues(c)
 	setUserNamePassword(c)
+
+	// copy singular blocks
+	for _, kv := range c.AzureTag {
+		v := kv.Value
+		c.AzureTags[kv.Key] = &v
+	}
+
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
 		return nil, err
