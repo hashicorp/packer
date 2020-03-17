@@ -118,7 +118,7 @@ func main() {
 			case "config.Trilean":
 				fieldType = `boolean`
 			case "hcl2template.NameValues":
-				fieldType = `repeatable "name" & "value" object`
+				fieldType = `[]{name string, value string}`
 			}
 
 			field := Field{
