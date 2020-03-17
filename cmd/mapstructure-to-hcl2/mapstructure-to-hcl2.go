@@ -162,8 +162,8 @@ func main() {
 		fmt.Fprintf(out, "\n// %s is an auto-generated flat version of %s.", flatenedStruct.FlatStructName, flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.")
 		fmt.Fprintf(out, "\nfunc (*%s) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {", flatenedStruct.OriginalStructName)
-		fmt.Fprintf(out, "return new(%s)", flatenedStruct.FlatStructName)
-		fmt.Fprint(out, "}\n")
+		fmt.Fprintf(out, "\nreturn new(%s)", flatenedStruct.FlatStructName)
+		fmt.Fprint(out, "\n}\n")
 
 		fmt.Fprintf(out, "\n// HCL2Spec returns the hcl spec of a %s.", flatenedStruct.OriginalStructName)
 		fmt.Fprintf(out, "\n// This spec is used by HCL to read the fields of %s.", flatenedStruct.OriginalStructName)
