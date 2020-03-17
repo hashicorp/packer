@@ -107,6 +107,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs, fmt.Errorf("Error parsing oss_key_name template: %s", err))
 	}
 
+	errs = packer.MultiErrorAppend(errs, p.config.AlicloudImageTag.CopyOn(&p.config.AlicloudImageTags)...)
+
 	// Check we have alicloud access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AlicloudAccessConfig.Prepare(&p.config.ctx)...)
 

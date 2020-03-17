@@ -211,7 +211,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 			VpcId:              b.config.VpcId,
 			SubnetId:           b.config.SubnetId,
-			HasSubnetFilter:    len(b.config.SubnetFilter.Filters) > 0,
+			HasSubnetFilter:    !b.config.SubnetFilter.Empty(),
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,

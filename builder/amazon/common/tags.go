@@ -21,10 +21,6 @@ func (t EC2Tags) Report(ui packer.Ui) {
 	}
 }
 
-func (t TagMap) IsSet() bool {
-	return len(t) > 0
-}
-
 func (t TagMap) EC2Tags(ictx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
 	var ec2Tags []*ec2.Tag
 	generatedData := builder.GeneratedData{State: state}

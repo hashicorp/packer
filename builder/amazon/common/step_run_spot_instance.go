@@ -34,10 +34,10 @@ type StepRunSpotInstance struct {
 	InstanceType                      string
 	SourceAMI                         string
 	SpotPrice                         string
-	SpotTags                          TagMap
+	SpotTags                          map[string]string
 	SpotInstanceTypes                 []string
-	Tags                              TagMap
-	VolumeTags                        TagMap
+	Tags                              map[string]string
+	VolumeTags                        map[string]string
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
@@ -194,7 +194,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Convert tags from the tag map provided by the user into *ec2.Tag s
-	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	ec2Tags, err := TagMap(s.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error generating tags for source instance: %s", err)
 		state.Put("error", err)
@@ -336,7 +336,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	instance := describeOutput.Reservations[0].Instances[0]
 
 	// Tag the spot instance request (not the eventual spot instance)
-	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	spotTags, err := TagMap(s.SpotTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error generating tags for spot request: %s", err)
 		state.Put("error", err)
@@ -344,7 +344,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	if len(spotTags) > 0 && s.SpotTags.IsSet() {
+	if len(spotTags) > 0 && len(s.SpotTags) > 0 {
 		spotTags.Report(ui)
 		// Use the instance ID to find out the SIR, so that we can tag the spot
 		// request associated with this instance.
@@ -400,10 +400,10 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
+	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
 		ui.Say("Adding tags to source EBS Volumes")
 
-		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+		volumeTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)

@@ -28,9 +28,14 @@
 -   `skip_region_validation` (bool) - Set to true if you want to skip
     validation of the ami_regions configuration option. Default false.
     
--   `tags` (TagMap) - Tags applied to the AMI. This is a
+-   `tags` (map[string]string) - Tags applied to the AMI. This is a
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
+    
+-   `tag` ([]{name string, value string}) - Same as [`tags`](#tags) but defined as a singular repeatable block
+    containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
     HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
@@ -93,10 +98,15 @@
     the intermediary AMI into any regions provided in `ami_regions`, then
     delete the intermediary AMI. Default `false`.
     
--   `snapshot_tags` (TagMap) - Tags to apply to snapshot.
+-   `snapshot_tags` (map[string]string) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
+    
+-   `snapshot_tag` ([]{name string, value string}) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
+    repeatable block containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `snapshot_users` ([]string) - A list of account IDs that have
     access to create volumes from the snapshot(s). By default no additional
