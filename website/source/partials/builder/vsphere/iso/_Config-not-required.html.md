@@ -5,4 +5,6 @@
     
 -   `convert_to_template` (bool) - Convert VM to a template. Defaults to `false`.
     
--   `export` (\*common.ExportConfig) - Export
+-   `export` (\*common.ExportConfig) - Configuration for exporting VM to an ovf file.
+    The VM will not be exported if no [Export Configuration](#export-configuration) is specified.
+    

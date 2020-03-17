@@ -16,11 +16,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -30,6 +30,7 @@ import (
 // You may optionally export an ovf from VSphere to the instance running Packer.
 //
 // Example usage:
+//
 // ```json
 // ...
 //   "vm_name": "example-ubuntu",
@@ -62,7 +63,7 @@ type ExportConfig struct {
 	// * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
 	//
 	// For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
-	
+
 	// ```json
 	// ...
 	//   "export": {

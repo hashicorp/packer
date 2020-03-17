@@ -2,6 +2,7 @@
 You may optionally export an ovf from VSphere to the instance running Packer.
 
 Example usage:
+
 ```json
 ...
   "vm_name": "example-ubuntu",
@@ -12,6 +13,7 @@ Example usage:
   },
 ```
 The above configuration would create the following files:
+
 ```
 ./output_vsphere/example-ubuntu-disk-0.vmdk
 ./output_vsphere/example-ubuntu.ovf

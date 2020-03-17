@@ -39,7 +39,8 @@ type Config struct {
 	CreateSnapshot bool `mapstructure:"create_snapshot"`
 	// Convert VM to a template. Defaults to `false`.
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`
-
+	// Configuration for exporting VM to an ovf file.
+	// The VM will not be exported if no [Export Configuration](#export-configuration) is specified.
 	Export *common.ExportConfig `mapstructure:"export"`
 
 	ctx interpolate.Context
