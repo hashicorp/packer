@@ -203,7 +203,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 	for _, kmsKey := range kmsKeys {
 		if !validateKmsKey(kmsKey) {
-			errs = append(errs, fmt.Errorf("%s is not a valid KMS Key Id.", kmsKey))
+			errs = append(errs, fmt.Errorf("%q is not a valid KMS Key Id.", kmsKey))
 		}
 	}
 
