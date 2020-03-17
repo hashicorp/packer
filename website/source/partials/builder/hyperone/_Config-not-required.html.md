@@ -17,7 +17,7 @@
     
 -   `image_tags` (map[string]string) - Key/value pair tags to add to the created image.
     
--   `image_tag` (repeatable "name" & "value" object) - Same as [`image_tags`](#image_tags) but defined as a singular repeatable
+-   `image_tag` ([]{name string, value string}) - Same as [`image_tags`](#image_tags) but defined as a singular repeatable
     block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
@@ -29,7 +29,7 @@
 -   `vm_tags` (map[string]string) - Key/value pair tags to
     add to the created server.
     
--   `vm_tag` (repeatable "name" & "value" object) - Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
+-   `vm_tag` ([]{name string, value string}) - Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
     containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.

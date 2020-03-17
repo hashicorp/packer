@@ -32,7 +32,7 @@
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `tag` (repeatable "name" & "value" object) - Same as [`tags`](#tags) but defined as a singular repeatable block
+-   `tag` ([]{name string, value string}) - Same as [`tags`](#tags) but defined as a singular repeatable block
     containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
@@ -103,7 +103,7 @@
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `snapshot_tag` (repeatable "name" & "value" object) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
+-   `snapshot_tag` ([]{name string, value string}) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
     repeatable block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.

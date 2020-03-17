@@ -125,7 +125,7 @@
     engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `root_volume_tag` (repeatable "name" & "value" object) - Same as [`root_volume_tags`](#root_volume_tags) but defined as a
+-   `root_volume_tag` ([]{name string, value string}) - Same as [`root_volume_tags`](#root_volume_tags) but defined as a
     singular block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.

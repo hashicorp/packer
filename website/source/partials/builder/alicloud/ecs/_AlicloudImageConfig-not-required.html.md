@@ -51,7 +51,7 @@
     
 -   `tags` (map[string]string) - Tags applied to the destination image and relevant snapshots.
     
--   `tag` (repeatable "name" & "value" object) - Same as [`tags`](#tags) but defined as a singular repeatable block
+-   `tag` ([]{name string, value string}) - Same as [`tags`](#tags) but defined as a singular repeatable block
     containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.

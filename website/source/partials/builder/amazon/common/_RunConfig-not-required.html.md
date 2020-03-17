@@ -113,7 +113,7 @@
     EBS volumes. This is a [template engine](/docs/templates/engine.html),
     see [Build template data](#build-template-data) for more information.
     
--   `run_tag` (repeatable "name" & "value" object) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
+-   `run_tag` ([]{name string, value string}) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
     block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
@@ -205,7 +205,7 @@
 -   `spot_tags` (map[string]string) - Requires spot_price to be set. This tells Packer to apply tags to the
     spot request that is issued.
     
--   `spot_tag` (repeatable "name" & "value" object) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
+-   `spot_tag` ([]{name string, value string}) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
     containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
