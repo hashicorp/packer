@@ -100,8 +100,8 @@
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
     
--   `azure_tag` (hcl2template.KeyValues) - Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
-    containing a key and a value field. In HCL2 mode the
+-   `azure_tag` (hcl2template.NameValues) - Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
+    containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
     

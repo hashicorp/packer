@@ -47,8 +47,8 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 // FlatNetFilterOptions is an auto-generated flat version of NetFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatNetFilterOptions struct {
-	Filters map[string]string           `cty:"filters"`
-	Filter  []hcl2template.FlatKeyValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter"`
 }
 
 // FlatMapstructure returns a new FlatNetFilterOptions.
@@ -64,7 +64,7 @@ func (*NetFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 func (*FlatNetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
-		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -72,10 +72,10 @@ func (*FlatNetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatOmiFilterOptions is an auto-generated flat version of OmiFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatOmiFilterOptions struct {
-	Filters    map[string]string           `cty:"filters"`
-	Filter     []hcl2template.FlatKeyValue `cty:"filter"`
-	Owners     []string                    `cty:"owners"`
-	MostRecent *bool                       `mapstructure:"most_recent" cty:"most_recent"`
+	Filters    map[string]string            `cty:"filters"`
+	Filter     []hcl2template.FlatNameValue `cty:"filter"`
+	Owners     []string                     `cty:"owners"`
+	MostRecent *bool                        `mapstructure:"most_recent" cty:"most_recent"`
 }
 
 // FlatMapstructure returns a new FlatOmiFilterOptions.
@@ -91,7 +91,7 @@ func (*OmiFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 func (*FlatOmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters":     &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
-		"filter":      &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"filter":      &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"owners":      &hcldec.AttrSpec{Name: "owners", Type: cty.List(cty.String), Required: false},
 		"most_recent": &hcldec.AttrSpec{Name: "most_recent", Type: cty.Bool, Required: false},
 	}
@@ -101,8 +101,8 @@ func (*FlatOmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatSecurityGroupFilterOptions is an auto-generated flat version of SecurityGroupFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSecurityGroupFilterOptions struct {
-	Filters map[string]string           `cty:"filters"`
-	Filter  []hcl2template.FlatKeyValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter"`
 }
 
 // FlatMapstructure returns a new FlatSecurityGroupFilterOptions.
@@ -118,7 +118,7 @@ func (*SecurityGroupFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[
 func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
-		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -126,10 +126,10 @@ func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatSubnetFilterOptions is an auto-generated flat version of SubnetFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSubnetFilterOptions struct {
-	Filters  map[string]string           `cty:"filters"`
-	Filter   []hcl2template.FlatKeyValue `cty:"filter"`
-	MostFree *bool                       `mapstructure:"most_free" cty:"most_free"`
-	Random   *bool                       `mapstructure:"random" cty:"random"`
+	Filters  map[string]string            `cty:"filters"`
+	Filter   []hcl2template.FlatNameValue `cty:"filter"`
+	MostFree *bool                        `mapstructure:"most_free" cty:"most_free"`
+	Random   *bool                        `mapstructure:"random" cty:"random"`
 }
 
 // FlatMapstructure returns a new FlatSubnetFilterOptions.
@@ -145,7 +145,7 @@ func (*SubnetFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]
 func (*FlatSubnetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters":   &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
-		"filter":    &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"filter":    &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"most_free": &hcldec.AttrSpec{Name: "most_free", Type: cty.Bool, Required: false},
 		"random":    &hcldec.AttrSpec{Name: "random", Type: cty.Bool, Required: false},
 	}

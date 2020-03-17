@@ -55,8 +55,8 @@
 -   `run_tags` (map[string]string) - Tags to apply to the instance that is *launched* to create the image.
     These tags are *not* applied to the resulting image.
     
--   `run_tag` (hcl2template.KeyValues) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-    block containing a key and a value field. In HCL2 mode the
+-   `run_tag` (hcl2template.NameValues) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
+    block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
     

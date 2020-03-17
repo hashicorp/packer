@@ -52,10 +52,10 @@ type AMIConfig struct {
 	// data](#build-template-data) for more information.
 	AMITags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
-	// containing a key and a value field. In HCL2 mode the
+	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	AMITag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	AMITag hcl2template.NameValues `mapstructure:"tag" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy.
@@ -123,10 +123,10 @@ type AMIConfig struct {
 	// data](#build-template-data) for more information.
 	SnapshotTags map[string]string `mapstructure:"snapshot_tags" required:"false"`
 	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
-	// repeatable block containing a key and a value field. In HCL2 mode the
+	// repeatable block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	SnapshotTag hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`
+	SnapshotTag hcl2template.NameValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional
 	// users other than the user creating the AMI has permissions to create

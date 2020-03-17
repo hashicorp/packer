@@ -56,10 +56,10 @@ type SourceMachineConfig struct {
 	// Tags applied to the VM used to create the image.
 	MachineTags map[string]string `mapstructure:"source_machine_tags" required:"false"`
 	// Same as [`source_machine_tags`](#source_machine_tags) but defined as a
-	// singular block containing a key and a value field. In HCL2 mode the
+	// singular block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	MachineTag hcl2template.KeyValues `mapstructure:"source_machine_tag" required:"false"`
+	MachineTag hcl2template.NameValues `mapstructure:"source_machine_tag" required:"false"`
 	// Whether or not the firewall
 	// of the VM used to create an image of is enabled. The Triton firewall only
 	// filters inbound traffic to the VM. All outbound traffic is always allowed.

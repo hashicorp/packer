@@ -85,10 +85,10 @@ type TencentCloudRunConfig struct {
 	// These tags are *not* applied to the resulting image.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-	// block containing a key and a value field. In HCL2 mode the
+	// block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
+	RunTag hcl2template.NameValues `mapstructure:"run_tag" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`

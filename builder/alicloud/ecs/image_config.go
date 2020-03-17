@@ -193,10 +193,10 @@ type AlicloudImageConfig struct {
 	// Tags applied to the destination image and relevant snapshots.
 	AlicloudImageTags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
-	// containing a key and a value field. In HCL2 mode the
+	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	AlicloudImageTag    hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	AlicloudImageTag    hcl2template.NameValues `mapstructure:"tag" required:"false"`
 	AlicloudDiskDevices `mapstructure:",squash"`
 }
 

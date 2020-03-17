@@ -16,10 +16,10 @@ type BlockDevice struct {
 	// [Build template data](#build-template-data) for more information.
 	Tags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
-	// containing a key and a value field. In HCL2 mode the
+	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	Tag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	Tag hcl2template.NameValues `mapstructure:"tag" required:"false"`
 }
 
 type BlockDevices []BlockDevice
