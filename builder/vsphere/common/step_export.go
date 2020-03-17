@@ -18,7 +18,6 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/template/interpolate"
-
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
