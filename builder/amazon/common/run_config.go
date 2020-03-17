@@ -188,10 +188,10 @@ type RunConfig struct {
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-	// block containing a key and a value field. In HCL2 mode the
+	// block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
+	RunTag hcl2template.NameValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
 	// automatically create a new temporary security group to allow SSH access.
@@ -285,10 +285,10 @@ type RunConfig struct {
 	// spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
 	// Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
-	// containing a key and a value field. In HCL2 mode the
+	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	SpotTag hcl2template.KeyValues `mapstructure:"spot_tag" required:"false"`
+	SpotTag hcl2template.NameValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
 	// Example:
 	//

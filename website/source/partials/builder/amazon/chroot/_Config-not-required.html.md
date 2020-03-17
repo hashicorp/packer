@@ -125,8 +125,8 @@
     engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `root_volume_tag` (hcl2template.KeyValues) - Same as [`root_volume_tags`](#root_volume_tags) but defined as a
-    singular block containing a key and a value field. In HCL2 mode the
+-   `root_volume_tag` (hcl2template.NameValues) - Same as [`root_volume_tags`](#root_volume_tags) but defined as a
+    singular block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
     

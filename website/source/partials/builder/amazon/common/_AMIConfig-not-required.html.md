@@ -32,8 +32,8 @@
     [template engine](/docs/templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `tag` (hcl2template.KeyValues) - Same as [`tags`](#tags) but defined as a singular repeatable block
-    containing a key and a value field. In HCL2 mode the
+-   `tag` (hcl2template.NameValues) - Same as [`tags`](#tags) but defined as a singular repeatable block
+    containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
     
@@ -103,8 +103,8 @@
     [template engine](../templates/engine.html), see [Build template
     data](#build-template-data) for more information.
     
--   `snapshot_tag` (hcl2template.KeyValues) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
-    repeatable block containing a key and a value field. In HCL2 mode the
+-   `snapshot_tag` (hcl2template.NameValues) - Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
+    repeatable block containing a `name` and a `value` field. In HCL2 mode the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
     will allow you to create those programatically.
     
