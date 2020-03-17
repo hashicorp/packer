@@ -145,7 +145,9 @@ type FlatSSH struct {
 // FlatMapstructure returns a new FlatSSH.
 // FlatSSH is an auto-generated flat version of SSH.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*SSH) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } { return new(FlatSSH) }
+func (*SSH) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatSSH)
+}
 
 // HCL2Spec returns the hcl spec of a SSH.
 // This spec is used by HCL to read the fields of SSH.
