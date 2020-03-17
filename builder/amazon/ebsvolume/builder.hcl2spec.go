@@ -152,6 +152,7 @@ type FlatConfig struct {
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
 	VolumeMappings                            []FlatBlockDevice                      `mapstructure:"ebs_volumes" required:"false" cty:"ebs_volumes"`
 	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags"`
+	VolumeRunTag                              []hcl2template.FlatNameValue           `mapstructure:"run_volume_tag" cty:"run_volume_tag"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -262,6 +263,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"sriov_support":                         &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"ebs_volumes":                           &hcldec.BlockListSpec{TypeName: "ebs_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.BlockAttrsSpec{TypeName: "run_volume_tags", ElementType: cty.String, Required: false},
+		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
 }

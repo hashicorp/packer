@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -65,6 +66,12 @@ type Config struct {
 	// configured in the `ebs_volumes` section as soon as the instance is
 	// reported as 'ready'.
 	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
+	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+	// repeatable block containing a `name` and a `value` field. In HCL2 mode
+	// the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	VolumeRunTag hcl2template.NameValues `mapstructure:"run_volume_tag"`
 
 	launchBlockDevices BlockDevices
 
@@ -102,6 +109,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	var warns []string
+	errs = packer.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
