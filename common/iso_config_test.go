@@ -266,7 +266,7 @@ func TestISOConfigPrepare_ISOChecksumURLMyTest(t *testing.T) {
 	i := ISOConfig{
 		ISOChecksumURL:  httpChecksums.URL + "/subfolder.sum",
 		ISOChecksumType: "sha256",
-		ISOUrls: []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
+		ISOUrls:         []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
 	}
 
 	// Test ISOChecksum overrides url
