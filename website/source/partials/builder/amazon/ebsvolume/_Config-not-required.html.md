@@ -36,7 +36,7 @@
     configured in the `ebs_volumes` section as soon as the instance is
     reported as 'ready'.
     
--   `run_volume_tag` (hcl2template.NameValues) - Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+-   `run_volume_tag` (repeatable "name" & "value" object) - Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
     repeatable block containing a `name` and a `value` field. In HCL2 mode
     the
     [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
