@@ -1,5 +1,5 @@
 comment:
-  layout: "diff, flags, files"
+  layout: "flags, files"
   behavior: default
   require_changes: true   # only comment on changes in coverage
   require_base: yes       # [yes :: must have a base report to post]

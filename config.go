@@ -296,7 +296,7 @@ func (c *config) discoverSingle(glob string) (map[string]string, error) {
 		}
 
 		// If the filename has a ".", trim up to there
-		if idx := strings.Index(file, "."); idx >= 0 {
+		if idx := strings.Index(file, ".exe"); idx >= 0 {
 			file = file[:idx]
 		}
 

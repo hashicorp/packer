@@ -2,6 +2,8 @@ package packer
 
 import (
 	"fmt"
+	"log"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -346,13 +348,24 @@ func (c *Core) validate() error {
 	return err
 }
 
-func (c *Core) init() error {
-	if c.variables == nil {
-		c.variables = make(map[string]string)
+func isDoneInterpolating(v string) (bool, error) {
+	// Check for whether the var contains any more references to `user`, wrapped
+	// in interpolation syntax.
+	filter := `{{\s*user\s*\x60.*\x60\s*}}`
+	matched, err := regexp.MatchString(filter, v)
+	if err != nil {
+		return false, fmt.Errorf("Can't tell if interpolation is done: %s", err)
 	}
-	// Go through the variables and interpolate the environment and
-	// user variables
+	if matched {
+		// not done interpolating; there's still a call to "user" in a template
+		// engine
+		return false, nil
+	}
+	// No more calls to "user" as a template engine, so we're done.
+	return true, nil
+}
 
+func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 	ctx := c.Context()
 	ctx.EnableEnv = true
 	ctx.UserVariables = make(map[string]string)
@@ -386,15 +399,30 @@ func (c *Core) init() error {
 	// We need to read the keys from both, then loop over all of them to figure
 	// out the appropriate interpolations.
 
-	allVariables := make(map[string]string)
+	repeatMap := make(map[string]string)
+	allKeys := make([]string, 0)
+
 	// load in template variables
 	for k, v := range c.Template.Variables {
-		allVariables[k] = v.Default
+		repeatMap[k] = v.Default
+		allKeys = append(allKeys, k)
 	}
 
 	// overwrite template variables with command-line-read variables
 	for k, v := range c.variables {
-		allVariables[k] = v
+		repeatMap[k] = v
+		allKeys = append(allKeys, k)
+	}
+
+	// sort map to force the following loop to be deterministic.
+	sort.Strings(allKeys)
+	type keyValue struct {
+		Key   string
+		Value string
+	}
+	sortedMap := make([]keyValue, len(repeatMap))
+	for _, k := range allKeys {
+		sortedMap = append(sortedMap, keyValue{k, repeatMap[k]})
 	}
 
 	// Regex to exclude any build function variable or template variable
@@ -404,44 +432,84 @@ func (c *Core) init() error {
 
 	for i := 0; i < 100; i++ {
 		shouldRetry = false
+		changed = false
+		deleteKeys := []string{}
 		// First, loop over the variables in the template
-		for k, v := range allVariables {
+		for _, kv := range sortedMap {
 			// Interpolate the default
-			renderedV, err := interpolate.RenderRegex(v, ctx, renderFilter)
+			renderedV, err := interpolate.RenderRegex(kv.Value, ctx, renderFilter)
 			switch err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
 				// different in this loop than in the last one.
 				changed = true
-				c.variables[k] = renderedV
+				c.variables[kv.Key] = renderedV
 				ctx.UserVariables = c.variables
+				// Remove fully-interpolated variables from the map, and flag
+				// variables that still need interpolating for a repeat.
+				done, err := isDoneInterpolating(kv.Value)
+				if err != nil {
+					return ctx, err
+				}
+				if done {
+					deleteKeys = append(deleteKeys, kv.Key)
+				} else {
+					shouldRetry = true
+				}
 			case ttmp.ExecError:
 				castError := err.(ttmp.ExecError)
 				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
 					shouldRetry = true
-					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, k, v, err)
+					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, kv.Key, kv.Value, err)
 				} else {
-					return err
+					return ctx, err
 				}
 			default:
-				return fmt.Errorf(
+				return ctx, fmt.Errorf(
 					// unexpected interpolation error: abort the run
 					"error interpolating default value for '%s': %s",
-					k, err)
+					kv.Key, err)
 			}
 		}
 		if !shouldRetry {
 			break
 		}
+
+		// Clear completed vars from sortedMap before next loop. Do this one
+		// key at a time because the indices are gonna change ever time you
+		// delete from the map.
+		for _, k := range deleteKeys {
+			for ind, kv := range sortedMap {
+				if kv.Key == k {
+					log.Printf("Deleting kv.Value: %s", kv.Value)
+					sortedMap = append(sortedMap[:ind], sortedMap[ind+1:]...)
+					break
+				}
+			}
+		}
+		deleteKeys = []string{}
 	}
 
 	if !changed && shouldRetry {
-		return fmt.Errorf("Failed to interpolate %s: Please make sure that "+
+		return ctx, fmt.Errorf("Failed to interpolate %s: Please make sure that "+
 			"the variable you're referencing has been defined; Packer treats "+
 			"all variables used to interpolate other user varaibles as "+
 			"required.", failedInterpolation)
 	}
 
+	return ctx, nil
+}
+
+func (c *Core) init() error {
+	if c.variables == nil {
+		c.variables = make(map[string]string)
+	}
+	// Go through the variables and interpolate the environment and
+	// user variables
+	ctx, err := c.renderVarsRecursively()
+	if err != nil {
+		return err
+	}
 	for _, v := range c.Template.SensitiveVariables {
 		secret := ctx.UserVariables[v.Key]
 		c.secrets = append(c.secrets, secret)

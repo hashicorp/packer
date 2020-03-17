@@ -95,7 +95,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	if generatedData == nil {
+		generatedData = make(map[string]interface{})
+	}
+	p.config.ctx.Data = generatedData
+
 	if p.config.Direction == "download" {
 		return p.ProvisionDownload(ui, comm)
 	} else {
@@ -105,7 +110,15 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
 	for _, src := range p.config.Sources {
-		dst := p.config.Destination
+		src, err := interpolate.Render(src, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Error interpolating source: %s", err)
+		}
+		dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Error interpolating destination: %s", err)
+		}
+
 		ui.Say(fmt.Sprintf("Downloading %s => %s", src, dst))
 		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
 		dir := dst
@@ -146,7 +159,15 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 
 func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
 	for _, src := range p.config.Sources {
-		dst := p.config.Destination
+		src, err := interpolate.Render(src, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Error interpolating source: %s", err)
+		}
+
+		dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Error interpolating destination: %s", err)
+		}
 
 		ui.Say(fmt.Sprintf("Uploading %s => %s", src, dst))
 

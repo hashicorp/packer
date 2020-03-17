@@ -20,7 +20,7 @@ func TestParse_variables(t *testing.T) {
 	tests := []parseTest{
 		{"basic variables",
 			defaultParser,
-			parseTestArgs{"testdata/variables/basic.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -75,7 +75,7 @@ func TestParse_variables(t *testing.T) {
 		},
 		{"duplicate variable",
 			defaultParser,
-			parseTestArgs{"testdata/variables/duplicate_variable.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/duplicate_variable.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -90,7 +90,7 @@ func TestParse_variables(t *testing.T) {
 		},
 		{"duplicate variable in variables",
 			defaultParser,
-			parseTestArgs{"testdata/variables/duplicate_variables.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/duplicate_variables.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -105,7 +105,7 @@ func TestParse_variables(t *testing.T) {
 		},
 		{"invalid default type",
 			defaultParser,
-			parseTestArgs{"testdata/variables/invalid_default.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/invalid_default.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -121,7 +121,7 @@ func TestParse_variables(t *testing.T) {
 
 		{"unknown key",
 			defaultParser,
-			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/unknown_key.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -138,7 +138,7 @@ func TestParse_variables(t *testing.T) {
 
 		{"unset used variable",
 			defaultParser,
-			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -154,7 +154,7 @@ func TestParse_variables(t *testing.T) {
 
 		{"unset unused variable",
 			defaultParser,
-			parseTestArgs{"testdata/variables/unset_unused_string_variable.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/unset_unused_string_variable.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
@@ -189,7 +189,7 @@ func TestParse_variables(t *testing.T) {
 
 		{"locals within another locals usage in different files",
 			defaultParser,
-			parseTestArgs{"testdata/variables/complicated", nil},
+			parseTestArgs{"testdata/variables/complicated", nil, nil},
 			&PackerConfig{
 				Basedir: "testdata/variables/complicated",
 				InputVariables: Variables{
@@ -231,12 +231,41 @@ func TestParse_variables(t *testing.T) {
 		},
 		{"recursive locals",
 			defaultParser,
-			parseTestArgs{"testdata/variables/recursive_locals.pkr.hcl", nil},
+			parseTestArgs{"testdata/variables/recursive_locals.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir:        filepath.Join("testdata", "variables"),
 				LocalVariables: Variables{},
 			},
 			true, true,
+			[]packer.Build{},
+			false,
+		},
+
+		{"set variable from var-file",
+			defaultParser,
+			parseTestArgs{"testdata/variables/foo-string.variable.pkr.hcl", nil, []string{"testdata/variables/set-foo-too-wee.hcl"}},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"foo": &Variable{
+						DefaultValue: cty.StringVal("bar"),
+						Name:         "foo",
+						VarfileValue: cty.StringVal("wee"),
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			false,
+		},
+
+		{"unknown variable from var-file",
+			defaultParser,
+			parseTestArgs{"testdata/variables/empty.pkr.hcl", nil, []string{"testdata/variables/set-foo-too-wee.hcl"}},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+			},
+			true, false,
 			[]packer.Build{},
 			false,
 		},
