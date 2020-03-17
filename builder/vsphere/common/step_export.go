@@ -60,7 +60,8 @@ type ExportConfig struct {
 	// * extraconfig - all extra configuration options are exported for a virtual machine
 	// * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
 	//
-	// For example, this config would output the mac addresses for all ethernet devices in the ovf file:
+	// For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
+	
 	// ```json
 	// ...
 	//   "export": {
