@@ -121,7 +121,6 @@ generate: install-gen-deps ## Generate dynamically generated code
 	@find post-processor common helper template builder provisioner -type f | xargs grep -l '^// Code generated' | xargs rm
 	go generate ./...
 	go fmt common/bootcommand/boot_command.go
-	go fmt command/plugin.go
 
 generate-check: generate ## Check go code generation is on par
 	@echo "==> Checking that auto-generated code is not changed..."

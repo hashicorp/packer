@@ -44,9 +44,9 @@ func getBasicStep() *StepRunSpotInstance {
 		InstanceType:                      "t2.micro",
 		SourceAMI:                         "",
 		SpotPrice:                         "auto",
-		SpotTags:                          TagMap(nil),
-		Tags:                              TagMap{},
-		VolumeTags:                        TagMap(nil),
+		SpotTags:                          nil,
+		Tags:                              map[string]string{},
+		VolumeTags:                        nil,
 		UserData:                          "",
 		UserDataFile:                      "",
 	}

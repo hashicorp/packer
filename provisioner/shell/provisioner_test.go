@@ -491,14 +491,14 @@ func TestProvisioner_RemoteFileDefaultsToScriptnnnn(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	remoteFileRegex := regexp.MustCompile("script_[0-9]{4}.sh")
+	remoteFileRegex := regexp.MustCompile("script_[0-9]{1,4}.sh")
 
 	if !remoteFileRegex.MatchString(p.config.RemoteFile) {
-		t.Fatalf("remote_file did not default to script_nnnn.sh")
+		t.Fatalf("remote_file did not default to script_nnnn.sh: %q", p.config.RemoteFile)
 	}
 
 	if !remoteFileRegex.MatchString(p.config.RemotePath) {
-		t.Fatalf("remote_path did not match script_nnnn.sh")
+		t.Fatalf("remote_path did not match script_nnnn.sh: %q", p.config.RemotePath)
 	}
 }
 

@@ -15,8 +15,12 @@
     
 -   `image_description` (string) - The description of the resulting image.
     
--   `image_tags` (map[string]string) - Key/value pair tags to
-    add to the created image.
+-   `image_tags` (map[string]string) - Key/value pair tags to add to the created image.
+    
+-   `image_tag` ([]{name string, value string}) - Same as [`image_tags`](#image_tags) but defined as a singular repeatable
+    block containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `image_service` (string) - The service of the resulting image.
     
@@ -24,6 +28,11 @@
     
 -   `vm_tags` (map[string]string) - Key/value pair tags to
     add to the created server.
+    
+-   `vm_tag` ([]{name string, value string}) - Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
+    containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `disk_name` (string) - The name of the created disk.
     

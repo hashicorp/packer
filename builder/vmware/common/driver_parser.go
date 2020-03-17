@@ -437,7 +437,9 @@ type pParameterClientMatch struct {
 	data string
 }
 
-func (e pParameterClientMatch) repr() string { return fmt.Sprintf("match-client:%s=%s", e.name, e.data) }
+func (e pParameterClientMatch) repr() string {
+	return fmt.Sprintf("match-client:%s=%s", e.name, e.data)
+}
 
 // range 127.0.0.1 127.0.0.255
 type pParameterRange4 struct {

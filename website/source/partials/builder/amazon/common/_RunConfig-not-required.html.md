@@ -113,6 +113,11 @@
     EBS volumes. This is a [template engine](/docs/templates/engine.html),
     see [Build template data](#build-template-data) for more information.
     
+-   `run_tag` ([]{name string, value string}) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
+    block containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
+    
 -   `security_group_id` (string) - The ID (not the name) of the security
     group to assign to the instance. By default this is not set and Packer will
     automatically create a new temporary security group to allow SSH access.
@@ -197,8 +202,13 @@
     Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
     Windows (Amazon VPC)
     
--   `spot_tags` (map[string]string) - Requires spot_price to be
-    set. This tells Packer to apply tags to the spot request that is issued.
+-   `spot_tags` (map[string]string) - Requires spot_price to be set. This tells Packer to apply tags to the
+    spot request that is issued.
+    
+-   `spot_tag` ([]{name string, value string}) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
+    containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
     Example:

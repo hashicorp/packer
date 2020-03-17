@@ -4,6 +4,7 @@ package ebs
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -37,7 +38,8 @@ type FlatConfig struct {
 	AMIGroups                                 []string                               `mapstructure:"ami_groups" required:"false" cty:"ami_groups"`
 	AMIProductCodes                           []string                               `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes"`
 	AMIRegions                                []string                               `mapstructure:"ami_regions" required:"false" cty:"ami_regions"`
-	AMITags                                   common.TagMap                          `mapstructure:"tags" required:"false" cty:"tags"`
+	AMITags                                   map[string]string                      `mapstructure:"tags" required:"false" cty:"tags"`
+	AMITag                                    []hcl2template.FlatNameValue           `mapstructure:"tag" required:"false" cty:"tag"`
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
 	AMIForceDeregister                        *bool                                  `mapstructure:"force_deregister" required:"false" cty:"force_deregister"`
@@ -46,7 +48,8 @@ type FlatConfig struct {
 	AMIKmsKeyId                               *string                                `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
 	AMIRegionKMSKeyIDs                        map[string]string                      `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids"`
 	AMISkipBuildRegion                        *bool                                  `mapstructure:"skip_save_build_region" cty:"skip_save_build_region"`
-	SnapshotTags                              common.TagMap                          `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
+	SnapshotTags                              map[string]string                      `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
+	SnapshotTag                               []hcl2template.FlatNameValue           `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag"`
 	SnapshotUsers                             []string                               `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users"`
 	SnapshotGroups                            []string                               `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups"`
 	AssociatePublicIpAddress                  *bool                                  `mapstructure:"associate_public_ip_address" required:"false" cty:"associate_public_ip_address"`
@@ -62,6 +65,7 @@ type FlatConfig struct {
 	InstanceType                              *string                                `mapstructure:"instance_type" required:"true" cty:"instance_type"`
 	SecurityGroupFilter                       *common.FlatSecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false" cty:"security_group_filter"`
 	RunTags                                   map[string]string                      `mapstructure:"run_tags" required:"false" cty:"run_tags"`
+	RunTag                                    []hcl2template.FlatNameValue           `mapstructure:"run_tag" required:"false" cty:"run_tag"`
 	SecurityGroupId                           *string                                `mapstructure:"security_group_id" required:"false" cty:"security_group_id"`
 	SecurityGroupIds                          []string                               `mapstructure:"security_group_ids" required:"false" cty:"security_group_ids"`
 	SourceAmi                                 *string                                `mapstructure:"source_ami" required:"true" cty:"source_ami"`
@@ -70,6 +74,7 @@ type FlatConfig struct {
 	SpotPrice                                 *string                                `mapstructure:"spot_price" required:"false" cty:"spot_price"`
 	SpotPriceAutoProduct                      *string                                `mapstructure:"spot_price_auto_product" required:"false" cty:"spot_price_auto_product"`
 	SpotTags                                  map[string]string                      `mapstructure:"spot_tags" required:"false" cty:"spot_tags"`
+	SpotTag                                   []hcl2template.FlatNameValue           `mapstructure:"spot_tag" required:"false" cty:"spot_tag"`
 	SubnetFilter                              *common.FlatSubnetFilterOptions        `mapstructure:"subnet_filter" required:"false" cty:"subnet_filter"`
 	SubnetId                                  *string                                `mapstructure:"subnet_id" required:"false" cty:"subnet_id"`
 	TemporaryKeyPairName                      *string                                `mapstructure:"temporary_key_pair_name" required:"false" cty:"temporary_key_pair_name"`
@@ -166,6 +171,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ami_product_codes":             &hcldec.AttrSpec{Name: "ami_product_codes", Type: cty.List(cty.String), Required: false},
 		"ami_regions":                   &hcldec.AttrSpec{Name: "ami_regions", Type: cty.List(cty.String), Required: false},
 		"tags":                          &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tag":                           &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"ena_support":                   &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                 &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"force_deregister":              &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
@@ -175,6 +181,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"region_kms_key_ids":            &hcldec.BlockAttrsSpec{TypeName: "region_kms_key_ids", ElementType: cty.String, Required: false},
 		"skip_save_build_region":        &hcldec.AttrSpec{Name: "skip_save_build_region", Type: cty.Bool, Required: false},
 		"snapshot_tags":                 &hcldec.BlockAttrsSpec{TypeName: "snapshot_tags", ElementType: cty.String, Required: false},
+		"snapshot_tag":                  &hcldec.BlockListSpec{TypeName: "snapshot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"snapshot_users":                &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":               &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"associate_public_ip_address":   &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
@@ -190,6 +197,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"security_group_filter":                 &hcldec.BlockSpec{TypeName: "security_group_filter", Nested: hcldec.ObjectSpec((*common.FlatSecurityGroupFilterOptions)(nil).HCL2Spec())},
 		"run_tags":                              &hcldec.BlockAttrsSpec{TypeName: "run_tags", ElementType: cty.String, Required: false},
+		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"security_group_id":                     &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_ids":                    &hcldec.AttrSpec{Name: "security_group_ids", Type: cty.List(cty.String), Required: false},
 		"source_ami":                            &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
@@ -198,6 +206,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"spot_price":                            &hcldec.AttrSpec{Name: "spot_price", Type: cty.String, Required: false},
 		"spot_price_auto_product":               &hcldec.AttrSpec{Name: "spot_price_auto_product", Type: cty.String, Required: false},
 		"spot_tags":                             &hcldec.BlockAttrsSpec{TypeName: "spot_tags", ElementType: cty.String, Required: false},
+		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"subnet_filter":                         &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                             &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"temporary_key_pair_name":               &hcldec.AttrSpec{Name: "temporary_key_pair_name", Type: cty.String, Required: false},
