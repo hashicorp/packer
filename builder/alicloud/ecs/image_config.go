@@ -234,9 +234,5 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		c.AlicloudImageDestinationRegions = regions
 	}
 
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
+	return errs
 }
