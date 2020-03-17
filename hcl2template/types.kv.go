@@ -10,6 +10,9 @@ type NameValue struct {
 type NameValues []NameValue
 
 func (kvs NameValues) CopyOn(to *map[string]string) []error {
+	if len(kvs) == 0 {
+		return nil
+	}
 	if *to == nil {
 		*to = map[string]string{}
 	}
