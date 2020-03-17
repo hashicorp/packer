@@ -117,6 +117,8 @@ func main() {
 				fieldType = `duration string | ex: "1h5m2s"`
 			case "config.Trilean":
 				fieldType = `boolean`
+			case "hcl2template.NameValues":
+				fieldType = `repeatable "name" & "value" object`
 			}
 
 			field := Field{
