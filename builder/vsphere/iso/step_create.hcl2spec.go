@@ -92,7 +92,9 @@ type FlatNIC struct {
 // FlatMapstructure returns a new FlatNIC.
 // FlatNIC is an auto-generated flat version of NIC.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*NIC) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } { return new(FlatNIC) }
+func (*NIC) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatNIC)
+}
 
 // HCL2Spec returns the hcl spec of a NIC.
 // This spec is used by HCL to read the fields of NIC.
