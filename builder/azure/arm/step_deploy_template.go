@@ -117,8 +117,7 @@ func deleteResource(ctx context.Context, client *AzureClient, resourceType strin
 		}
 		return err
 	case "Microsoft.KeyVault/vaults":
-		// TODO(paulmey): not sure why VaultClient doesn't do cancellation
-		_, err := client.VaultClientDelete.Delete(resourceGroupName, resourceName)
+		_, err := client.VaultClientDelete.Delete(ctx, resourceGroupName, resourceName)
 		return err
 	case "Microsoft.Network/networkInterfaces":
 		f, err := client.InterfacesClient.Delete(ctx, resourceGroupName, resourceName)
