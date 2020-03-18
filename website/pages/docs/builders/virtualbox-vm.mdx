@@ -1,0 +1,377 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: >
+  The VirtualBox Packer builder is able to create VirtualBox virtual machines
+  snapshots
+
+  and export them in the OVF format, starting from an ISO image.
+layout: docs
+page_title: VirtualBox Snapshot - Builders
+sidebar_current: docs-builders-virtualbox-vm
+---
+
+# VirtualBox Builder (from an existing VM)
+
+Type: `virtualbox-vm`
+
+The VirtualBox Packer builder is able to create
+[VirtualBox](https://www.virtualbox.org/) virtual machines snapshots and
+(optionally) export them in the OVF format, starting from an **existing**
+virtual machine.
+
+The builder builds a virtual machine snapshot by using an existing virtual
+machine, booting it, provisioning software within the OS, then shutting it down.
+The result of the VirtualBox builder is a new snapshot persisting all changes
+from the applied provisioners.
+
+## Basic Example
+
+Here is a basic example. which serves to show the basic configuration:
+
+```json
+{
+  "type": "virtualbox-vm",
+  "communicator": "winrm",
+  "headless": "{{user `headless`}}",
+  "winrm_username": "vagrant",
+  "winrm_password": "vagrant",
+  "winrm_timeout": "2h",
+  "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+  "guest_additions_mode": "disable",
+  "output_directory": "./builds-vm",
+  "vm_name": "target-vm",
+  "attach_snapshot": "Snapshot",
+  "target_snapshot": "Target-Snapshot",
+  "force_delete_snapshot": "true",
+  "keep_registered": "false",
+  "skip_export": "false"
+}
+```
+
+It is important to add a `shutdown_command`. By default Packer halts the virtual
+machine and the file system may not be sync'd. Thus, changes made in a
+provisioner might not be saved.
+
+## Configuration Reference
+
+There are many configuration options available for the VirtualBox builder. They
+are organized below into two categories: required and optional. Within each
+category, the available options are alphabetized and described.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator.html) can be configured for this
+builder.
+
+### Required:
+
+- `vm_name` (string) - This is the name of the virtual machine to which the
+  builder shall attach.
+
+### Optional:
+
+- `attach_snapshot` (string) - Default to `null/empty`. The name of an
+  **existing** snapshot to which the builder shall attach the VM before
+  starting it. If no snapshot is specified the builder will simply start the
+  VM from it's current state i.e. snapshot.
+
+- `boot_command` (array of strings) - This is an array of commands to type
+  when the virtual machine is first booted. The goal of these commands should
+  be to type just enough to initialize the operating system installer. Special
+  keys can be typed as well, and are covered in the section below on the
+  boot command. If this is not specified, it is assumed the installer will
+  start itself.
+
+- `boot_wait` (string) - The time to wait after booting the initial virtual
+  machine before typing the `boot_command`. The value of this should be
+  a duration. Examples are `5s` and `1m30s` which will cause Packer to wait
+  five seconds and one minute 30 seconds, respectively. If this isn't
+  specified, the default is `10s` or 10 seconds.
+
+- `export_opts` (array of strings) - Additional options to pass to the
+  [VBoxManage
+  export](https://www.virtualbox.org/manual/ch09.html#vboxmanage-export). This
+  can be useful for passing product information to include in the resulting
+  appliance file. Packer JSON configuration file example:
+
+  ```json
+  {
+    "type": "virtualbox-vm",
+    "export_opts": [
+      "--manifest",
+      "--vsys",
+      "0",
+      "--description",
+      "{{user `vm_description`}}",
+      "--version",
+      "{{user `vm_version`}}"
+    ],
+    "format": "ova"
+  }
+  ```
+
+  A VirtualBox [VM
+  description](https://www.virtualbox.org/manual/ch09.html#vboxmanage-export-ovf)
+  may contain arbitrary strings; the GUI interprets HTML formatting. However,
+  the JSON format does not allow arbitrary newlines within a value. Add a
+  multi-line description by preparing the string in the shell before the
+  packer call like this (shell `>` continuation character snipped for easier
+  copy & paste):
+
+  ```{.shell}
+
+  vm_description='some
+  multiline
+  description'
+
+  vm_version='0.2.0'
+
+  packer build \
+      -var "vm_description=${vm_description}" \
+      -var "vm_version=${vm_version}"         \
+      "packer_conf.json"
+  ```
+
+- `floppy_dirs` (array of strings) - A list of directories to place onto
+  the floppy disk recursively. This is similar to the `floppy_files` option
+  except that the directory structure is preserved. This is useful for when
+  your floppy disk includes drivers or if you just want to organize it's
+  contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+
+- `floppy_files` (array of strings) - A list of files to place onto a floppy
+  disk that is attached when the VM is booted. This is most useful for
+  unattended Windows installs, which look for an `Autounattend.xml` file on
+  removable media. By default, no floppy will be attached. All files listed in
+  this setting get placed into the root directory of the floppy and the floppy
+  is attached as the first floppy device. Currently, no support exists for
+  creating sub-directories on the floppy. Wildcard characters (\*, ?,
+  and \[\]) are allowed. Directory names are also allowed, which will add all
+  the files found in the directory to the floppy.
+
+- `force_delete_snapshot` (boolean) - Defaults to `false`. If set to `true`,
+  overwrite an existing `target_snapshot`. Otherwise the builder will yield an
+  error if the specified target snapshot already exists.
+
+- `format` (string) - Either `ovf` or `ova`, this specifies the output format
+  of the exported virtual machine. This defaults to `ovf`.
+
+- `guest_additions_interface` (string) - The interface type to use to mount
+  guest additions when `guest_additions_mode` is set to `attach`. Will
+  default to the value set in `iso_interface`, if `iso_interface` is set.
+  Will default to "ide", if `iso_interface` is not set. Options are "ide" and
+  "sata".
+
+- `guest_additions_mode` (string) - The method by which guest additions are
+  made available to the guest for installation. Valid options are `upload`,
+  `attach`, or `disable`. If the mode is `attach` the guest additions ISO will
+  be attached as a CD device to the virtual machine. If the mode is `upload`
+  the guest additions ISO will be uploaded to the path specified by
+  `guest_additions_path`. The default value is `upload`. If `disable` is used,
+  guest additions won't be downloaded, either.
+
+- `guest_additions_path` (string) - The path on the guest virtual machine
+  where the VirtualBox guest additions ISO will be uploaded. By default this
+  is `VBoxGuestAdditions.iso` which should upload into the login directory of
+  the user. This is a [configuration
+  template](/docs/templates/engine.html) where the `Version`
+  variable is replaced with the VirtualBox version.
+
+- `guest_additions_sha256` (string) - The SHA256 checksum of the guest
+  additions ISO that will be uploaded to the guest VM. By default the
+  checksums will be downloaded from the VirtualBox website, so this only needs
+  to be set if you want to be explicit about the checksum.
+
+- `guest_additions_url` (string) - The URL to the guest additions ISO
+  to upload. This can also be a file URL if the ISO is at a local path. By
+  default, the VirtualBox builder will attempt to find the guest additions ISO
+  on the local file system. If it is not available locally, the builder will
+  download the proper guest additions ISO from the internet.
+
+- `guest_os_type` (string) - The guest OS type being installed. By default
+  this is `other`, but you can get _dramatic_ performance improvements by
+  setting this to the proper value. To view all available values for this run
+  `VBoxManage list ostypes`. Setting the correct value hints to VirtualBox how
+  to optimize the virtual hardware to work best with that operating system.
+
+- `headless` (boolean) - Packer defaults to building VirtualBox virtual
+  machines by launching a GUI that shows the console of the machine
+  being built. When this value is set to `true`, the machine will start
+  without a console.
+
+- `http_directory` (string) - Path to a directory to serve using an
+  HTTP server. The files in this directory will be available over HTTP that
+  will be requestable from the virtual machine. This is useful for hosting
+  kickstart files and so on. By default this is an empty string, which means
+  no HTTP server will be started. The address and port of the HTTP server will
+  be available as variables in `boot_command`. This is covered in more detail
+  below.
+
+- `http_port_min` and `http_port_max` (number) - These are the minimum and
+  maximum port to use for the HTTP server started to serve the
+  `http_directory`. Because Packer often runs in parallel, Packer will choose
+  a randomly available port in this range to run the HTTP server. If you want
+  to force the HTTP server to be on one port, make this minimum and maximum
+  port the same. By default the values are `8000` and `9000`, respectively.
+
+- `keep_registered` (boolean) - Set this to `true` if you would like to keep
+  the VM attached to the snapshot specified by `attach_snapshot`. Otherwise
+  the builder will reset the VM to the snapshot to which the VM was attached
+  before the builder started. Defaults to `false`.
+
+- `output_directory` (string) - This is the path to the directory where the
+  resulting virtual machine will be created. This may be relative or absolute.
+  If relative, the path is relative to the working directory when `packer`
+  is executed. This directory must not exist or be empty prior to running
+  the builder. By default this is `output-BUILDNAME` where "BUILDNAME" is the
+  name of the build.
+
+- `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
+  not export the VM. Useful if the builder should be applied again on the created
+  target snapshot.
+
+@include 'partials/builder/virtualbox/common/CommConfig-not-required.mdx'
+
+- `target_snapshot` (string) - Default to `null/empty`. The name of the
+  snapshot which shall be created after all provisioners has been run by the
+  builder. If no target snapshot is specified and `keep_registered` is set to
+  `false` the builder will revert to the snapshot to which the VM was attached
+  before the builder has been executed, which will revert all changes applied
+  by the provisioners. This is handy if only an export shall be created and no
+  further snapshot is required.
+
+- `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
+  execute in order to further customize the virtual machine being created. The
+  value of this is an array of commands to execute. The commands are executed
+  in the order defined in the template. For each command, the command is
+  defined itself as an array of strings, where each string represents a single
+  argument on the command-line to `VBoxManage` (but excluding
+  `VBoxManage` itself). Each arg is treated as a [configuration
+  template](/docs/templates/engine.html), where the `Name`
+  variable is replaced with the VM name. More details on how to use
+  `VBoxManage` are below.
+
+- `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
+- `virtualbox_version_file` (string) - The path within the virtual machine to
+  upload a file that contains the VirtualBox version that was used to create
+  the machine. This information can be useful for provisioning. By default
+  this is `.vbox_version`, which will generally be uploaded into the home
+  directory. Set to an empty string to skip uploading this file, which can be
+  useful when using the `none` communicator.
+
+- `vrdp_bind_address` (string / IP address) - The IP address that should be
+  binded to for VRDP. By default packer will use `127.0.0.1` for this. If you
+  wish to bind to all interfaces use `0.0.0.0`.
+
+- `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
+  to use for VRDP access to the virtual machine. Packer uses a randomly chosen
+  port in this range that appears available. By default this is `5900` to
+  `6000`. The minimum and maximum ports are inclusive.
+
+### Shutdown configuration
+
+#### Optional:
+
+@include 'partials/builder/virtualbox/common/ShutdownConfig-not-required.mdx'
+
+## Boot Command
+
+The `boot_command` configuration is very important: it specifies the keys to
+type when the virtual machine is first booted in order to start the OS
+installer. This command is typed after `boot_wait`, which gives the virtual
+machine some time to actually load the ISO.
+
+As documented above, the `boot_command` is an array of strings. The strings are
+all typed in sequence. It is an array only to improve readability within the
+template.
+
+The boot command is sent to the VM through the `VBoxManage` utility in as few
+invocations as possible. We send each character in groups of 25, with a default
+delay of 100ms between groups. The delay alleviates issues with latency and CPU
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+```json
+{
+  "builders": [
+    {
+      "type": "virtualbox",
+      "boot_keygroup_interval": "500ms"
+      ...
+    }
+  ]
+}
+```
+
+@include 'partials/builders/boot-command.mdx'
+
+@include 'partials/builders/virtualbox-ssh-key-pair.mdx'
+
+Example boot command. This is actually a working boot command used to start an
+Ubuntu 12.04 installer:
+
+```text
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+Please note that for the Virtuabox builder, the IP address of the HTTP server
+Packer launches for you to access files like the preseed file in the example
+above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
+of your VM you must guarantee that you can still access this HTTP server.
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
+## Guest Additions
+
+Packer will automatically download the proper guest additions for the version of
+VirtualBox that is running and upload those guest additions into the virtual
+machine so that provisioners can easily install them.
+
+Packer downloads the guest additions from the official VirtualBox website, and
+verifies the file with the official checksums released by VirtualBox.
+
+After the virtual machine is up and the operating system is installed, Packer
+uploads the guest additions into the virtual machine. The path where they are
+uploaded is controllable by `guest_additions_path`, and defaults to
+"VBoxGuestAdditions.iso". Without an absolute path, it is uploaded to the home
+directory of the SSH user.
+
+## VBoxManage Commands
+
+In order to perform extra customization of the virtual machine, a template can
+define extra calls to `VBoxManage` to perform.
+[VBoxManage](https://www.virtualbox.org/manual/ch09.html) is the command-line
+interface to VirtualBox where you can completely control VirtualBox. It can be
+used to do things such as set RAM, CPUs, etc.
+
+Extra VBoxManage commands are defined in the template in the `vboxmanage`
+section. An example is shown below that sets the VRAM within the virtual machine:
+
+```json
+{
+  "vboxmanage": [["modifyvm", "{{.Name}}", "--vram", "64"]]
+}
+```
+
+The value of `vboxmanage` is an array of commands to execute. These commands are
+executed in the order defined. So in the above example, the memory will be set
+followed by the CPUs.
+
+Each command itself is an array of strings, where each string is an argument to
+`VBoxManage`. Each argument is treated as a [configuration
+template](/docs/templates/engine.html). The only available
+variable is `Name` which is replaced with the unique name of the VM, which is
+required for many VBoxManage calls.

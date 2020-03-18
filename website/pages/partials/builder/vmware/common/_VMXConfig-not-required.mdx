@@ -1,0 +1,22 @@
+<!-- Code generated from the comments of the VMXConfig struct in builder/vmware/common/vmx_config.go; DO NOT EDIT MANUALLY -->
+
+- `vmx_data` (map[string]string) - Arbitrary key/values to enter
+  into the virtual machine VMX file. This is for advanced users who want to
+  set properties that aren't yet supported by the builder.
+
+- `vmx_data_post` (map[string]string) - Identical to vmx_data,
+  except that it is run after the virtual machine is shutdown, and before the
+  virtual machine is exported.
+
+- `vmx_remove_ethernet_interfaces` (bool) - Remove all ethernet interfaces
+  from the VMX file after building. This is for advanced users who understand
+  the ramifications, but is useful for building Vagrant boxes since Vagrant
+  will create ethernet interfaces when provisioning a box. Defaults to
+  false.
+
+- `display_name` (string) - The name that will appear in your vSphere client,
+  and will be used for the vmx basename. This will override the "displayname"
+  value in your vmx file. It will also override the "displayname" if you have
+  set it in the "vmx_data" Packer option. This option is useful if you are
+  chaining vmx builds and want to make sure that the display name of each step
+  in the chain is unique.

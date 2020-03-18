@@ -1,0 +1,11 @@
+<!-- Code generated from the comments of the TargetImageConfig struct in builder/triton/target_image_config.go; DO NOT EDIT MANUALLY -->
+
+- `image_name` (string) - The name the finished image in Triton will be
+  assigned. Maximum 512 characters but should in practice be much shorter
+  (think between 5 and 20 characters). For example postgresql-95-server for
+  an image used as a PostgreSQL 9.5 server.
+
+- `image_version` (string) - The version string for this image. Maximum 128
+  characters. Any string will do but a format of Major.Minor.Patch is
+  strongly advised by Joyent. See Semantic Versioning
+  for more information on the Major.Minor.Patch versioning format.
