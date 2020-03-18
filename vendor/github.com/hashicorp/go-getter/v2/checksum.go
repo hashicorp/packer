@@ -274,6 +274,13 @@ func (c *Client) ChecksumFromFile(ctx context.Context, checksumURL, checksummedP
 				return checksum, nil
 			}
 		}
+		// The checksum filename can contain a sub folder to differ versions.
+		// e.g. ./netboot/mini.iso and ./hwe-netboot/mini.iso
+		// In this case we remove root folder characters to compare with the checksummed path
+		fn := strings.TrimLeft(checksum.Filename, "./")
+		if strings.Contains(checksummedPath, fn) {
+			return checksum, nil
+		}
 	}
 	return nil, fmt.Errorf("no checksum found in: %s", checksumURL)
 }
