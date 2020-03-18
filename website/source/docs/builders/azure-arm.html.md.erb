@@ -244,6 +244,9 @@ default. To learn more about disabling the Windows Guest Agent please see
 [Install the VM
 Agent](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/agent-windows#install-the-vm-agent).
 
+Please note that sysprep can get stuck in infinite loops if it is not configured
+correctly -- for example, if it is waiting for a reboot that you never perform.
+
 ### Linux
 
 The following provisioner snippet shows how to deprovision a Linux VM.
