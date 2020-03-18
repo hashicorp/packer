@@ -275,7 +275,7 @@ func TestISOConfigPrepare_ISOChecksumURLMyTest(t *testing.T) {
 		t.Fatalf("Bad: should not have warnings")
 	}
 	if len(err) > 0 {
-		t.Fatalf("Bad; should have errored.")
+		t.Fatalf("Bad; should not have errored.")
 	}
 }
 
