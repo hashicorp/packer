@@ -13,6 +13,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	newCompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2018-02-14/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
@@ -50,7 +51,7 @@ type AzureClient struct {
 	InspectorMaxLength int
 	Template           *CaptureTemplate
 	LastError          azureErrorResponse
-	VaultClientDelete  common.VaultClient
+	VaultClientDelete  keyvault.VaultsClient
 }
 
 func getCaptureResponse(body string) *CaptureTemplate {
@@ -251,15 +252,9 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VaultClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VaultClient.UserAgent)
 	azureClient.VaultClient.Client.PollingDuration = PollingDuration
 
-	// TODO(boumenot) - SDK still does not have a full KeyVault client.
-	// There are two ways that KeyVault has to be accessed, and each one has their own SPN.  An authenticated SPN
-	// is tied to the URL, and the URL associated with getting the secret is different than the URL
-	// associated with deleting the KeyVault.  As a result, I need to have *two* different clients to
-	// access KeyVault.  I did not want to split it into two separate files, so I am starting with this.
-	//
-	// I do not like this implementation.  It is getting long in the tooth, and should be re-examined now
-	// that we have a "working" solution.
-	azureClient.VaultClientDelete = common.NewVaultClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	// This client is different than the above because it manages the vault
+	// itself rather than the contents of the vault.
+	azureClient.VaultClientDelete = keyvault.NewVaultsClient(subscriptionID)
 	azureClient.VaultClientDelete.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VaultClientDelete.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClientDelete.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
