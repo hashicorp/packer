@@ -10,11 +10,13 @@
     region. [GH-8763]
 * builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
     required [GH-8877]
+* builder/vsphere-clone: Add ability to export VM to OVF file [GH-8764]
 * builder/vsphere-iso: Add ability to define multiple disks. [GH-8787]
 * builder/vsphere-iso: Add support for eagerly zeroed / scrubbed disks.
     [GH-8756]
 * builder/vsphere-iso: Add the remote iso first so that it is first in boot
     order, and clarify boot behavior. [GH-8732]
+* builder/vsphere-iso: Add ability to export VM to OVF file [GH-8764]
 * communicator/ssh: Add flag to enable support for keyboard-interactive auth to
     connect bastion [GH-8847]
 * core/hcl2: Add support for singular blocks [GH-8889]
