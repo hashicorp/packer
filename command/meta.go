@@ -50,6 +50,9 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 			return nil, err
 		}
 	}
+	if m.flagVars == nil {
+		m.flagVars = map[string]string{}
+	}
 	for k, v := range *fj {
 		m.flagVars[k] = v
 	}

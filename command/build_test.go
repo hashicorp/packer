@@ -17,6 +17,106 @@ import (
 	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 )
 
+func TestBuild_VarArgs(t *testing.T) {
+	tc := []struct {
+		name         string
+		args         []string
+		expectedCode int
+		fileCheck
+	}{
+		{
+			name: "json - json varfile sets an apple env var",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.json"),
+				filepath.Join(testFixture("var-arg"), "fruit_builder.json"),
+			},
+			fileCheck: fileCheck{expected: []string{"apple.txt"}},
+		},
+
+		{
+			name: "json - arg sets a pear env var",
+			args: []string{
+				"-var=fruit=pear",
+				filepath.Join(testFixture("var-arg"), "fruit_builder.json"),
+			},
+			fileCheck: fileCheck{expected: []string{"pear.txt"}},
+		},
+
+		{
+			name: "json - inexistent var file errs",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.json"),
+				filepath.Join(testFixture("var-arg"), "fruit_builder.json"),
+			},
+			expectedCode: 1,
+			fileCheck:    fileCheck{notExpected: []string{"potato.txt"}},
+		},
+
+		{
+			name: "hcl - inexistent json var file errs",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.json"),
+				testFixture("var-arg"),
+			},
+			expectedCode: 1,
+			fileCheck:    fileCheck{notExpected: []string{"potato.txt"}},
+		},
+
+		{
+			name: "hcl - inexistent hcl var file errs",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.hcl"),
+				testFixture("var-arg"),
+			},
+			expectedCode: 1,
+			fileCheck:    fileCheck{notExpected: []string{"potato.hcl"}},
+		},
+
+		{
+			name: "hcl - auto varfile sets a chocolate env var",
+			args: []string{
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"chocolate.txt"}},
+		},
+
+		{
+			name: "hcl - hcl varfile sets a apple env var",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.hcl"),
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"apple.txt"}},
+		},
+
+		{
+			name: "hcl - json varfile sets a apple env var",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.json"),
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"apple.txt"}},
+		},
+
+		{
+			name: "hcl - arg sets a tomato env var",
+			args: []string{
+				"-var=fruit=tomato",
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"tomato.txt"}},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			run(t, tt.args, tt.expectedCode)
+			defer cleanup()
+			tt.fileCheck.verify(t)
+		})
+	}
+}
+
 func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
@@ -214,6 +314,35 @@ func TestBuildWithNonExistingBuilder(t *testing.T) {
 	}
 	if fileExists("vanilla.txt") {
 		t.Errorf("NOT expected to find vanilla.tx")
+	}
+}
+
+func run(t *testing.T, args []string, expectedCode int) {
+	t.Helper()
+
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	if code := c.Run(args); code != expectedCode {
+		fatalCommand(t, c.Meta)
+	}
+}
+
+type fileCheck struct {
+	expected, notExpected []string
+}
+
+func (fc fileCheck) verify(t *testing.T) {
+	for _, f := range fc.expected {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+	for _, f := range fc.notExpected {
+		if fileExists(f) {
+			t.Errorf("Expected to not find %s", f)
+		}
 	}
 }
 

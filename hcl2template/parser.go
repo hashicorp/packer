@@ -130,11 +130,17 @@ func (p *Parser) parse(filename string, varFiles []string, argVars map[string]st
 		for _, filename := range hclVarFiles {
 			f, moreDiags := p.ParseHCLFile(filename)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
 			varFiles = append(varFiles, f)
 		}
 		for _, filename := range jsonVarFiles {
 			f, moreDiags := p.ParseJSONFile(filename)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
 			varFiles = append(varFiles, f)
 		}
 
