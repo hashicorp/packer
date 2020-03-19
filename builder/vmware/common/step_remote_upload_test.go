@@ -1,8 +1,9 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepRemoteUpload_Cleanup(t *testing.T) {

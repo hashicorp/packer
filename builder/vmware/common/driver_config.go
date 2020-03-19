@@ -16,7 +16,7 @@ import (
 )
 
 type DriverConfig struct {
-	// When set to true will cleanup the ISO stored during the build on the remote machine.
+	// When set to true, Packer will cleanup the cache folder where the ISO file is stored during the build on the remote machine.
 	// By default, this is set to false.
 	CleanUpRemoteCache bool `mapstructure:"cleanup_remote_cache" required:"false"`
 	// Path to "VMware Fusion.app". By default this is
