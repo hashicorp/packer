@@ -94,18 +94,17 @@ func (p *Parser) parse(filename string, varFiles []string, argVars map[string]st
 
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
+	var locals []*Local
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)
 		}
 
-		var locals []*Local
 		for _, file := range files {
 			moreLocals, morediags := cfg.parseLocalVariables(file)
 			diags = append(diags, morediags...)
 			locals = append(locals, moreLocals...)
 		}
-		diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 	}
 
 	// parse var files
@@ -151,6 +150,7 @@ func (p *Parser) parse(filename string, varFiles []string, argVars map[string]st
 	diags = append(diags, moreDiags...)
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
+	diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 
 	// decode the actual content
 	for _, file := range files {
