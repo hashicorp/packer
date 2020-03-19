@@ -139,6 +139,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Images:    b.config.Export.Images,
 			Manifest:  b.config.Export.Manifest,
 			OutputDir: b.config.Export.OutputDir.OutputDir,
+			Options:   b.config.Export.Options,
 		})
 	}
 

@@ -64,7 +64,7 @@ type ExportConfig struct {
 	// * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
 	//
 	// For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
-
+	//
 	// ```json
 	// ...
 	//   "export": {
