@@ -5,6 +5,7 @@
 * builder/hyperv: Add `first_boot_device` setting to allow the selection of the
     initial device or device class used for booting the VM. [GH-8714]
 * builder/hyperv: Fix Hyper-V compacted disk size comparison [GH-8811]
+* builder/proxmox: Add ability to specify vga adapter [GH-8892]
 * builder/tencentcloud: Show tencentcloud image id after copy to desination
     region. [GH-8763]
 * builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
@@ -16,6 +17,7 @@
     order, and clarify boot behavior. [GH-8732]
 * communicator/ssh: Add flag to enable support for keyboard-interactive auth to
     connect bastion [GH-8847]
+* core/hcl2: Add support for singular blocks [GH-8889]
 * core/hcl2: Add support in HCL2 configs for dynamic blocks, document for loops
     and splat expressions [GH-8720]
 * core/hcl2: Fix HCL2 local variables decoding to allow local usage within
@@ -35,6 +37,7 @@
 * builder/proxmox: Add new validation to catch that template_name cannot
     contain spaces. [GH-8799]
 * builder/vagrant: Fix path validation in ssh config step. [GH-8826]
+* builder/virtualbox-vm: Fix crash when VM has no snapshots. [GH-8906]
 * builder/virtualbox: Remove all floppy controllers before adding a new one.
     [GH-8828]
 * builder/vsphere: Fix network object interface panic. [GH-8753]
@@ -47,7 +50,6 @@
 * plugins: Make plugin discovery stricter with respect to periods so that users
     can disable plugins by renaming the extension [GH-8735]
 * provisioner/shell: "inline" config option is now a template engine. [GH-8883]
-
 
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
