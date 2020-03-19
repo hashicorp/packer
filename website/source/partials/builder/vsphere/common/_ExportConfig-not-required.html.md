@@ -6,7 +6,7 @@
     
 -   `images` (bool) - include iso and img image files that are attached to the VM
     
--   `sha` (int) - generate manifest using SHA 1, 256, 512. use 0 (default) for no manifest
+-   `manifest` (string) - generate manifest using sha1, sha256, sha512. Defaults to 'sha256'. Use 'none' for no manifest.
     
 -   `options` ([]string) - ```json
     ...

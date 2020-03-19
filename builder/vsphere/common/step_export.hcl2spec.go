@@ -12,7 +12,7 @@ type FlatExportConfig struct {
 	Name      *string  `mapstructure:"name" cty:"name"`
 	Force     *bool    `mapstructure:"force" cty:"force"`
 	Images    *bool    `mapstructure:"images" cty:"images"`
-	Sha       *int     `mapstructure:"sha" cty:"sha"`
+	Manifest  *string  `mapstructure:"manifest" cty:"manifest"`
 	OutputDir *string  `mapstructure:"output_directory" required:"false" cty:"output_directory"`
 	Options   []string `mapstructure:"options" cty:"options"`
 }
@@ -32,7 +32,7 @@ func (*FlatExportConfig) HCL2Spec() map[string]hcldec.Spec {
 		"name":             &hcldec.AttrSpec{Name: "name", Type: cty.String, Required: false},
 		"force":            &hcldec.AttrSpec{Name: "force", Type: cty.Bool, Required: false},
 		"images":           &hcldec.AttrSpec{Name: "images", Type: cty.Bool, Required: false},
-		"sha":              &hcldec.AttrSpec{Name: "sha", Type: cty.Number, Required: false},
+		"manifest":         &hcldec.AttrSpec{Name: "manifest", Type: cty.String, Required: false},
 		"output_directory": &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
 		"options":          &hcldec.AttrSpec{Name: "options", Type: cty.List(cty.String), Required: false},
 	}

@@ -44,6 +44,7 @@ import (
 //
 // ```
 // ./output_vsphere/example-ubuntu-disk-0.vmdk
+// ./output_vsphere/example-ubuntu.mf
 // ./output_vsphere/example-ubuntu.ovf
 // ```
 type ExportConfig struct {
@@ -53,8 +54,8 @@ type ExportConfig struct {
 	Force bool `mapstructure:"force"`
 	// include iso and img image files that are attached to the VM
 	Images bool `mapstructure:"images"`
-	// generate manifest using SHA 1, 256, 512. use 0 (default) for no manifest
-	Sha       int          `mapstructure:"sha"`
+	// generate manifest using sha1, sha256, sha512. Defaults to 'sha256'. Use 'none' for no manifest.
+	Manifest  string       `mapstructure:"manifest"`
 	OutputDir OutputConfig `mapstructure:",squash"`
 	// Advanced ovf export options. Options can include:
 	// * mac - MAC address is exported for all ethernet devices
@@ -73,10 +74,11 @@ type ExportConfig struct {
 	Options []string `mapstructure:"options"`
 }
 
-var sha = map[int]func() hash.Hash{
-	1:   sha1.New,
-	256: sha256.New,
-	512: sha512.New,
+var sha = map[string]func() hash.Hash{
+	"none":   nil,
+	"sha1":   sha1.New,
+	"sha256": sha256.New,
+	"sha512": sha512.New,
 }
 
 func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc *common.PackerConfig) []error {
@@ -84,8 +86,12 @@ func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc 
 
 	errs = packer.MultiErrorAppend(errs, c.OutputDir.Prepare(ctx, pc)...)
 
-	if _, ok := sha[c.Sha]; !ok {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("unknown hash: sha%d", c.Sha))
+	// manifest should default to sha256
+	if c.Manifest == "" {
+		c.Manifest = "sha256"
+	}
+	if _, ok := sha[c.Manifest]; !ok {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("unknown hash: %s. available options include available options being 'none', 'sha1', 'sha256', 'sha512'", c.Manifest))
 	}
 
 	if c.Name == "" {
@@ -117,7 +123,7 @@ type StepExport struct {
 	Name      string
 	Force     bool
 	Images    bool
-	Sha       int
+	Manifest  string
 	OutputDir string
 	Options   []string
 	mf        bytes.Buffer
@@ -232,7 +238,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	if s.Sha == 0 {
+	if s.Manifest == "none" {
 		// manifest does not need to be created, return
 		return multistep.ActionContinue
 	}
@@ -269,7 +275,8 @@ func (s *StepExport) include(item *nfc.FileItem) bool {
 }
 
 func (s *StepExport) newHash() (hash.Hash, bool) {
-	if h, ok := sha[s.Sha]; ok {
+	// check if function is nil to handle the 'none' case
+	if h, ok := sha[s.Manifest]; ok && h != nil {
 		return h(), true
 	}
 
@@ -277,7 +284,7 @@ func (s *StepExport) newHash() (hash.Hash, bool) {
 }
 
 func (s *StepExport) addHash(p string, h hash.Hash) {
-	_, _ = fmt.Fprintf(&s.mf, "SHA%d(%s)= %x\n", s.Sha, p, h.Sum(nil))
+	_, _ = fmt.Fprintf(&s.mf, "%s(%s)= %x\n", strings.ToUpper(s.Manifest), p, h.Sum(nil))
 }
 
 func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
