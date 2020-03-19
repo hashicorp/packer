@@ -8,7 +8,15 @@
     
 -   `manifest` (string) - generate manifest using sha1, sha256, sha512. Defaults to 'sha256'. Use 'none' for no manifest.
     
--   `options` ([]string) - ```json
+-   `options` ([]string) - Advanced ovf export options. Options can include:
+    * mac - MAC address is exported for all ethernet devices
+    * uuid - UUID is exported for all virtual machines
+    * extraconfig - all extra configuration options are exported for a virtual machine
+    * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
+    
+    For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
+    
+    ```json
     ...
       "export": {
         "options": ["mac"]
