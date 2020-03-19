@@ -8,6 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/property"
+
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/ovf"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -686,6 +691,27 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
+	return vm.vm.Export(vm.driver.ctx)
+}
+
+func (vm *VirtualMachine) CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+	return m.CreateDescriptor(vm.driver.ctx, vm.vm, cdp)
+}
+
+func (vm *VirtualMachine) NewOvfManager() *ovf.Manager {
+	return ovf.NewManager(vm.vm.Client())
+}
+
+func (vm *VirtualMachine) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
+	var mgr mo.OvfManager
+	err := property.DefaultCollector(vm.vm.Client()).RetrieveOne(vm.driver.ctx, m.Reference(), nil, &mgr)
+	if err != nil {
+		return nil, err
+	}
+	return mgr.OvfExportOption, nil
 }
 
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {
