@@ -24,10 +24,10 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/mapstructure"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/mitchellh/mapstructure"
 )
 
 // BuilderID is the unique ID for this builder
@@ -246,8 +246,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		if _, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
 			log.Println("Source is platform image:", b.config.Source)
 			b.config.sourceType = sourcePlatformImage
-		} else if id, err := azure.ParseResourceID(b.config.Source); err == nil &&
-			strings.EqualFold(id.Provider, "Microsoft.Compute") && strings.EqualFold(id.ResourceType, "disks") {
+		} else if id, err := client.ParseResourceID(b.config.Source); err == nil &&
+			strings.EqualFold(id.Provider, "Microsoft.Compute") &&
+			strings.EqualFold(id.ResourceType.String(), "disks") {
 			log.Println("Source is a disk resource ID:", b.config.Source)
 			b.config.sourceType = sourceDisk
 		} else {
@@ -410,7 +411,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	// Build the steps
 	var steps []multistep.Step
-	addSteps := func(s ...multistep.Step) { // convenience
+	addSteps := func(s ...multistep.Step) { // convenience function
 		steps = append(steps, s...)
 	}
 
