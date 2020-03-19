@@ -27,7 +27,7 @@ func TestStepRemoteUpload_Cleanup(t *testing.T) {
 
 	// Should NOT clean up cache
 	s = &StepRemoteUpload{
-		Key:       "path_key",
+		Key: "path_key",
 	}
 	driver = new(RemoteDriverMock)
 	state.Put("driver", driver)

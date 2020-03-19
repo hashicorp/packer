@@ -27,7 +27,7 @@ type RemoteDriverMock struct {
 	DownloadErr error
 
 	RemovedCachePath string
-	CacheRemoved bool
+	CacheRemoved     bool
 
 	ReloadVMErr error
 }
