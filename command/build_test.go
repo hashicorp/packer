@@ -53,13 +53,23 @@ func TestBuild_VarArgs(t *testing.T) {
 		},
 
 		{
-			name: "hcl - inexistent var file errs",
+			name: "hcl - inexistent json var file errs",
 			args: []string{
 				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.json"),
 				testFixture("var-arg"),
 			},
 			expectedCode: 1,
 			fileCheck:    fileCheck{notExpected: []string{"potato.txt"}},
+		},
+
+		{
+			name: "hcl - inexistent hcl var file errs",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.hcl"),
+				testFixture("var-arg"),
+			},
+			expectedCode: 1,
+			fileCheck:    fileCheck{notExpected: []string{"potato.hcl"}},
 		},
 
 		{
