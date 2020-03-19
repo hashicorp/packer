@@ -82,7 +82,7 @@ lint: install-lint-deps ## Lint Go code
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	GO111MODULE=on golangci-lint run --new-from-rev=origin/master ./...
+	GO111MODULE=on golangci-lint run --new-from-rev=HEAD~1 ./...
 
 
 fmt: ## Format Go code
