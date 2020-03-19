@@ -136,6 +136,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
+	ui.Message("Starting export...")
 	lease, err := vm.Export()
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "error exporting vm"))
@@ -156,7 +157,6 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	}
 
 	m := vm.NewOvfManager()
-
 	if len(s.Options) > 0 {
 		exportOptions, err := vm.GetOvfExportOptions(m)
 		if err != nil {
@@ -193,13 +193,14 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 			i.Path = s.Name + "-" + i.Path
 		}
 
+		ui.Message("Downloading: " + i.File().Path)
 		err = s.Download(ctx, lease, i)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		ui.Message("exporting file: " + i.File().Path)
+		ui.Message("Exporting file: " + i.File().Path)
 		cdp.OvfFiles = append(cdp.OvfFiles, i.File())
 	}
 
@@ -227,6 +228,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		w = io.MultiWriter(file, h)
 	}
 
+	ui.Message("Writing ovf...")
 	_, err = io.WriteString(w, desc.OvfDescriptor)
 	if err != nil {
 		state.Put("error", errors.Wrap(err, "unable to write descriptor"))
@@ -243,6 +245,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
+	ui.Message("Creating manifest...")
 	s.addHash(filepath.Base(target), h)
 
 	file, err = os.Create(filepath.Join(s.OutputDir, s.Name+".mf"))
@@ -263,6 +266,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
+	ui.Message("Finished exporting...")
 	return multistep.ActionContinue
 }
 
@@ -289,12 +293,10 @@ func (s *StepExport) addHash(p string, h hash.Hash) {
 
 func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
 	path := filepath.Join(s.OutputDir, item.Path)
-
 	opts := soap.Download{}
 
 	if h, ok := s.newHash(); ok {
 		opts.Writer = h
-
 		defer s.addHash(item.Path, h)
 	}
 
