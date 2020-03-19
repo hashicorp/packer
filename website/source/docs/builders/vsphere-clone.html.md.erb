@@ -82,6 +82,17 @@ necessary for this build to succeed and can be found further down the page.
 
 <%= partial "partials/helper/communicator/WinRM-not-required" %>
 
+### Export Configuration
+<%= partial "partials/builder/vsphere/common/ExportConfig" %>
+
+### Optional:
+
+<%= partial "partials/builder/vsphere/common/ExportConfig-not-required" %>
+
+#### Output Configuration:
+
+<%= partial "partials/builder/vsphere/common/OutputConfig-not-required" %>
+
 ## Working with Clusters
 #### Standalone Hosts
 Only use the `host` option. Optionally specify a `resource_pool`:

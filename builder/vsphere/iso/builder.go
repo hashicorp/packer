@@ -132,6 +132,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	)
 
+	if b.config.Export != nil {
+		steps = append(steps, &common.StepExport{
+			Name:      b.config.Export.Name,
+			Force:     b.config.Export.Force,
+			Images:    b.config.Export.Images,
+			Manifest:  b.config.Export.Manifest,
+			OutputDir: b.config.Export.OutputDir.OutputDir,
+		})
+	}
+
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
