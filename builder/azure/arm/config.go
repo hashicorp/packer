@@ -652,10 +652,10 @@ func setRuntimeValues(c *Config) {
 }
 
 func setUserNamePassword(c *Config) {
+	// SSH comm
 	if c.Comm.SSHUsername == "" {
 		c.Comm.SSHUsername = DefaultUserName
 	}
-
 	c.UserName = c.Comm.SSHUsername
 
 	if c.Comm.SSHPassword != "" {
@@ -663,11 +663,17 @@ func setUserNamePassword(c *Config) {
 		return
 	}
 
-	// Configure password settings using Azure generated credentials
-	c.Password = c.tmpAdminPassword
-	if c.Comm.WinRMPassword == "" {
-		c.Comm.WinRMPassword = c.Password
+	// WinRM comm
+	if c.Comm.WinRMUser == "" {
+		c.Comm.WinRMUser = DefaultUserName
 	}
+	c.UserName = c.Comm.WinRMUser
+
+	if c.Comm.WinRMPassword == "" {
+		// Configure password settings using Azure generated credentials
+		c.Comm.WinRMPassword = c.tmpAdminPassword
+	}
+	c.Password = c.Comm.WinRMPassword
 }
 
 func setCustomData(c *Config) error {
