@@ -22,6 +22,9 @@ type ImageConfig struct {
 	// usually a project (also called the "tenant") with whom the image is
 	// shared.
 	ImageMembers []string `mapstructure:"image_members" required:"false"`
+	// True to perform the image accept so the member can see the image in his
+	// project.
+	ImageAutoAcceptMembers bool `mapstructure:"image_auto_accept_members" required:"false"`
 	// Disk format of the resulting image. This option works if
 	// use_blockstorage_volume is true.
 	ImageDiskFormat string `mapstructure:"image_disk_format" required:"false"`

@@ -8,6 +8,9 @@
     usually a project (also called the "tenant") with whom the image is
     shared.
     
+-   `image_auto_accept_members` (bool) - True to perform the image accept so the member can see the image in his
+    project.
+    
 -   `image_disk_format` (string) - Disk format of the resulting image. This option works if
     use_blockstorage_volume is true.
     
