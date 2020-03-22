@@ -29,7 +29,7 @@ import (
 )
 
 // The package's fully qualified name.
-const fqdn = "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
+const fqdn = "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 
 // AccessLevel enumerates the values for access level.
 type AccessLevel string
@@ -277,7 +277,8 @@ const (
 	Copy DiskCreateOption = "Copy"
 	// Empty Create an empty data disk of a size given by diskSizeGB.
 	Empty DiskCreateOption = "Empty"
-	// FromImage Create a new disk from a platform image specified by the given imageReference.
+	// FromImage Create a new disk from a platform image specified by the given imageReference or
+	// galleryImageReference.
 	FromImage DiskCreateOption = "FromImage"
 	// Import Create a disk by importing from a blob specified by a sourceUri in a storage account specified by
 	// storageAccountId.
@@ -1726,12 +1727,6 @@ type AvailabilitySetUpdate struct {
 	Sku *Sku `json:"sku,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for AvailabilitySetUpdate.
@@ -1784,33 +1779,6 @@ func (asu *AvailabilitySetUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				asu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				asu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				asu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				asu.Type = &typeVar
 			}
 		}
 	}
@@ -2265,6 +2233,8 @@ type CreationData struct {
 	StorageAccountID *string `json:"storageAccountId,omitempty"`
 	// ImageReference - Disk source information.
 	ImageReference *ImageDiskReference `json:"imageReference,omitempty"`
+	// GalleryImageReference - Required if creating from a Gallery Image. The id of the ImageDiskReference will be the ARM id of the shared galley image version from which to create a disk.
+	GalleryImageReference *ImageDiskReference `json:"galleryImageReference,omitempty"`
 	// SourceURI - If createOption is Import, this is the URI of a blob to be imported into a managed disk.
 	SourceURI *string `json:"sourceUri,omitempty"`
 	// SourceResourceID - If createOption is Copy, this is the ARM id of the source snapshot or disk.
@@ -2307,6 +2277,14 @@ type DataDisk struct {
 type DataDiskImage struct {
 	// Lun - READ-ONLY; Specifies the logical unit number of the data disk. This value is used to identify data disks within the VM and therefore must be unique for each data disk attached to a VM.
 	Lun *int32 `json:"lun,omitempty"`
+}
+
+// DataDiskImageEncryption contains encryption settings for a data disk image.
+type DataDiskImageEncryption struct {
+	// Lun - This property specifies the logical unit number of the data disk. This value is used to identify data disks within the Virtual Machine and therefore must be unique for each data disk attached to the Virtual Machine.
+	Lun *int32 `json:"lun,omitempty"`
+	// DiskEncryptionSetID - A relative URI containing the resource ID of the disk encryption set.
+	DiskEncryptionSetID *string `json:"diskEncryptionSetId,omitempty"`
 }
 
 // DedicatedHost specifies information about the Dedicated host.
@@ -2716,12 +2694,6 @@ type DedicatedHostGroupUpdate struct {
 	Zones *[]string `json:"zones,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for DedicatedHostGroupUpdate.
@@ -2774,33 +2746,6 @@ func (dhgu *DedicatedHostGroupUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				dhgu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				dhgu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				dhgu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				dhgu.Type = &typeVar
 			}
 		}
 	}
@@ -3071,12 +3016,6 @@ type DedicatedHostUpdate struct {
 	*DedicatedHostProperties `json:"properties,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for DedicatedHostUpdate.
@@ -3118,33 +3057,6 @@ func (dhu *DedicatedHostUpdate) UnmarshalJSON(body []byte) error {
 				}
 				dhu.Tags = tags
 			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				dhu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				dhu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				dhu.Type = &typeVar
-			}
 		}
 	}
 
@@ -3175,8 +3087,10 @@ type Disallowed struct {
 type Disk struct {
 	autorest.Response `json:"-"`
 	// ManagedBy - READ-ONLY; A relative URI containing the ID of the VM that has the disk attached.
-	ManagedBy *string  `json:"managedBy,omitempty"`
-	Sku       *DiskSku `json:"sku,omitempty"`
+	ManagedBy *string `json:"managedBy,omitempty"`
+	// ManagedByExtended - READ-ONLY; List of relative URIs containing the IDs of the VMs that have the disk attached. maxShares should be set to a value greater than one for disks to allow attaching them to multiple VMs.
+	ManagedByExtended *[]string `json:"managedByExtended,omitempty"`
+	Sku               *DiskSku  `json:"sku,omitempty"`
 	// Zones - The Logical zone list for Disk.
 	Zones           *[]string `json:"zones,omitempty"`
 	*DiskProperties `json:"properties,omitempty"`
@@ -3230,6 +3144,15 @@ func (d *Disk) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				d.ManagedBy = &managedBy
+			}
+		case "managedByExtended":
+			if v != nil {
+				var managedByExtended []string
+				err = json.Unmarshal(*v, &managedByExtended)
+				if err != nil {
+					return err
+				}
+				d.ManagedByExtended = &managedByExtended
 			}
 		case "sku":
 			if v != nil {
@@ -3724,6 +3647,12 @@ type DiskEncryptionSetUpdateProperties struct {
 	ActiveKey *KeyVaultAndKeyReference `json:"activeKey,omitempty"`
 }
 
+// DiskImageEncryption this is the disk image encryption base class.
+type DiskImageEncryption struct {
+	// DiskEncryptionSetID - A relative URI containing the resource ID of the disk encryption set.
+	DiskEncryptionSetID *string `json:"diskEncryptionSetId,omitempty"`
+}
+
 // DiskInstanceView the instance view of the disk.
 type DiskInstanceView struct {
 	// Name - The disk name.
@@ -3903,11 +3832,19 @@ type DiskProperties struct {
 	// DiskIOPSReadWrite - The number of IOPS allowed for this disk; only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes.
 	DiskIOPSReadWrite *int64 `json:"diskIOPSReadWrite,omitempty"`
 	// DiskMBpsReadWrite - The bandwidth allowed for this disk; only settable for UltraSSD disks. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.
-	DiskMBpsReadWrite *int32 `json:"diskMBpsReadWrite,omitempty"`
+	DiskMBpsReadWrite *int64 `json:"diskMBpsReadWrite,omitempty"`
+	// DiskIOPSReadOnly - The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes.
+	DiskIOPSReadOnly *int64 `json:"diskIOPSReadOnly,omitempty"`
+	// DiskMBpsReadOnly - The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.
+	DiskMBpsReadOnly *int64 `json:"diskMBpsReadOnly,omitempty"`
 	// DiskState - READ-ONLY; The state of the disk. Possible values include: 'Unattached', 'Attached', 'Reserved', 'ActiveSAS', 'ReadyToUpload', 'ActiveUpload'
 	DiskState DiskState `json:"diskState,omitempty"`
 	// Encryption - Encryption property can be used to encrypt data at rest with customer managed keys or platform managed keys.
 	Encryption *Encryption `json:"encryption,omitempty"`
+	// MaxShares - The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time.
+	MaxShares *int32 `json:"maxShares,omitempty"`
+	// ShareInfo - READ-ONLY; Details of the list of all VMs that have the disk attached. maxShares should be set to a value greater than one for disks to allow attaching them to multiple VMs.
+	ShareInfo *[]ShareInfoElement `json:"shareInfo,omitempty"`
 }
 
 // DisksCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a long-running
@@ -4125,7 +4062,13 @@ type DiskUpdateProperties struct {
 	// DiskIOPSReadWrite - The number of IOPS allowed for this disk; only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes.
 	DiskIOPSReadWrite *int64 `json:"diskIOPSReadWrite,omitempty"`
 	// DiskMBpsReadWrite - The bandwidth allowed for this disk; only settable for UltraSSD disks. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.
-	DiskMBpsReadWrite *int32 `json:"diskMBpsReadWrite,omitempty"`
+	DiskMBpsReadWrite *int64 `json:"diskMBpsReadWrite,omitempty"`
+	// DiskIOPSReadOnly - The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes.
+	DiskIOPSReadOnly *int64 `json:"diskIOPSReadOnly,omitempty"`
+	// DiskMBpsReadOnly - The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.
+	DiskMBpsReadOnly *int64 `json:"diskMBpsReadOnly,omitempty"`
+	// MaxShares - The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time.
+	MaxShares *int32 `json:"maxShares,omitempty"`
 	// Encryption - Encryption property can be used to encrypt data at rest with customer managed keys or platform managed keys.
 	Encryption *Encryption `json:"encryption,omitempty"`
 }
@@ -4136,6 +4079,14 @@ type Encryption struct {
 	DiskEncryptionSetID *string `json:"diskEncryptionSetId,omitempty"`
 	// Type - The type of key used to encrypt the data of the disk. Possible values include: 'EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey'
 	Type EncryptionType `json:"type,omitempty"`
+}
+
+// EncryptionImages optional. Allows users to provide customer managed keys for encrypting the OS and data
+// disks in the gallery artifact.
+type EncryptionImages struct {
+	OsDiskImage *OSDiskImageEncryption `json:"osDiskImage,omitempty"`
+	// DataDiskImages - A list of encryption specifications for data disk images.
+	DataDiskImages *[]DataDiskImageEncryption `json:"dataDiskImages,omitempty"`
 }
 
 // EncryptionSetIdentity the managed identity for the disk encryption set. It should be given permission on
@@ -4706,14 +4657,14 @@ func (future *GalleryApplicationsUpdateFuture) Result(client GalleryApplications
 // update.
 type GalleryApplicationUpdate struct {
 	*GalleryApplicationProperties `json:"properties,omitempty"`
-	// Tags - Resource tags
-	Tags map[string]*string `json:"tags"`
 	// ID - READ-ONLY; Resource Id
 	ID *string `json:"id,omitempty"`
 	// Name - READ-ONLY; Resource name
 	Name *string `json:"name,omitempty"`
 	// Type - READ-ONLY; Resource type
 	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for GalleryApplicationUpdate.
@@ -4746,15 +4697,6 @@ func (gau *GalleryApplicationUpdate) UnmarshalJSON(body []byte) error {
 				}
 				gau.GalleryApplicationProperties = &galleryApplicationProperties
 			}
-		case "tags":
-			if v != nil {
-				var tags map[string]*string
-				err = json.Unmarshal(*v, &tags)
-				if err != nil {
-					return err
-				}
-				gau.Tags = tags
-			}
 		case "id":
 			if v != nil {
 				var ID string
@@ -4781,6 +4723,15 @@ func (gau *GalleryApplicationUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				gau.Type = &typeVar
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				gau.Tags = tags
 			}
 		}
 	}
@@ -5151,14 +5102,14 @@ func (future *GalleryApplicationVersionsUpdateFuture) Result(client GalleryAppli
 // want to update.
 type GalleryApplicationVersionUpdate struct {
 	*GalleryApplicationVersionProperties `json:"properties,omitempty"`
-	// Tags - Resource tags
-	Tags map[string]*string `json:"tags"`
 	// ID - READ-ONLY; Resource Id
 	ID *string `json:"id,omitempty"`
 	// Name - READ-ONLY; Resource name
 	Name *string `json:"name,omitempty"`
 	// Type - READ-ONLY; Resource type
 	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for GalleryApplicationVersionUpdate.
@@ -5191,15 +5142,6 @@ func (gavu *GalleryApplicationVersionUpdate) UnmarshalJSON(body []byte) error {
 				}
 				gavu.GalleryApplicationVersionProperties = &galleryApplicationVersionProperties
 			}
-		case "tags":
-			if v != nil {
-				var tags map[string]*string
-				err = json.Unmarshal(*v, &tags)
-				if err != nil {
-					return err
-				}
-				gavu.Tags = tags
-			}
 		case "id":
 			if v != nil {
 				var ID string
@@ -5226,6 +5168,15 @@ func (gavu *GalleryApplicationVersionUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				gavu.Type = &typeVar
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				gavu.Tags = tags
 			}
 		}
 	}
@@ -5652,14 +5603,14 @@ func (future *GalleryImagesUpdateFuture) Result(client GalleryImagesClient) (gi 
 // GalleryImageUpdate specifies information about the gallery Image Definition that you want to update.
 type GalleryImageUpdate struct {
 	*GalleryImageProperties `json:"properties,omitempty"`
-	// Tags - Resource tags
-	Tags map[string]*string `json:"tags"`
 	// ID - READ-ONLY; Resource Id
 	ID *string `json:"id,omitempty"`
 	// Name - READ-ONLY; Resource name
 	Name *string `json:"name,omitempty"`
 	// Type - READ-ONLY; Resource type
 	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for GalleryImageUpdate.
@@ -5692,15 +5643,6 @@ func (giu *GalleryImageUpdate) UnmarshalJSON(body []byte) error {
 				}
 				giu.GalleryImageProperties = &galleryImageProperties
 			}
-		case "tags":
-			if v != nil {
-				var tags map[string]*string
-				err = json.Unmarshal(*v, &tags)
-				if err != nil {
-					return err
-				}
-				giu.Tags = tags
-			}
 		case "id":
 			if v != nil {
 				var ID string
@@ -5727,6 +5669,15 @@ func (giu *GalleryImageUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				giu.Type = &typeVar
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				giu.Tags = tags
 			}
 		}
 	}
@@ -6099,14 +6050,14 @@ func (future *GalleryImageVersionsUpdateFuture) Result(client GalleryImageVersio
 // GalleryImageVersionUpdate specifies information about the gallery Image Version that you want to update.
 type GalleryImageVersionUpdate struct {
 	*GalleryImageVersionProperties `json:"properties,omitempty"`
-	// Tags - Resource tags
-	Tags map[string]*string `json:"tags"`
 	// ID - READ-ONLY; Resource Id
 	ID *string `json:"id,omitempty"`
 	// Name - READ-ONLY; Resource name
 	Name *string `json:"name,omitempty"`
 	// Type - READ-ONLY; Resource type
 	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for GalleryImageVersionUpdate.
@@ -6139,15 +6090,6 @@ func (givu *GalleryImageVersionUpdate) UnmarshalJSON(body []byte) error {
 				}
 				givu.GalleryImageVersionProperties = &galleryImageVersionProperties
 			}
-		case "tags":
-			if v != nil {
-				var tags map[string]*string
-				err = json.Unmarshal(*v, &tags)
-				if err != nil {
-					return err
-				}
-				givu.Tags = tags
-			}
 		case "id":
 			if v != nil {
 				var ID string
@@ -6174,6 +6116,15 @@ func (givu *GalleryImageVersionUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				givu.Type = &typeVar
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				givu.Tags = tags
 			}
 		}
 	}
@@ -6348,14 +6299,14 @@ type GalleryProperties struct {
 // GalleryUpdate specifies information about the Shared Image Gallery that you want to update.
 type GalleryUpdate struct {
 	*GalleryProperties `json:"properties,omitempty"`
-	// Tags - Resource tags
-	Tags map[string]*string `json:"tags"`
 	// ID - READ-ONLY; Resource Id
 	ID *string `json:"id,omitempty"`
 	// Name - READ-ONLY; Resource name
 	Name *string `json:"name,omitempty"`
 	// Type - READ-ONLY; Resource type
 	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for GalleryUpdate.
@@ -6388,15 +6339,6 @@ func (gu *GalleryUpdate) UnmarshalJSON(body []byte) error {
 				}
 				gu.GalleryProperties = &galleryProperties
 			}
-		case "tags":
-			if v != nil {
-				var tags map[string]*string
-				err = json.Unmarshal(*v, &tags)
-				if err != nil {
-					return err
-				}
-				gu.Tags = tags
-			}
 		case "id":
 			if v != nil {
 				var ID string
@@ -6423,6 +6365,15 @@ func (gu *GalleryUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				gu.Type = &typeVar
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				gu.Tags = tags
 			}
 		}
 	}
@@ -6896,12 +6847,6 @@ type ImageUpdate struct {
 	*ImageProperties `json:"properties,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for ImageUpdate.
@@ -6942,33 +6887,6 @@ func (iu *ImageUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				iu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				iu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				iu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				iu.Type = &typeVar
 			}
 		}
 	}
@@ -7501,6 +7419,12 @@ type OSDiskImage struct {
 	OperatingSystem OperatingSystemTypes `json:"operatingSystem,omitempty"`
 }
 
+// OSDiskImageEncryption contains encryption settings for an OS disk image.
+type OSDiskImageEncryption struct {
+	// DiskEncryptionSetID - A relative URI containing the resource ID of the disk encryption set.
+	DiskEncryptionSetID *string `json:"diskEncryptionSetId,omitempty"`
+}
+
 // OSProfile specifies the operating system settings for the virtual machine. Some of the settings cannot
 // be changed once VM is provisioned.
 type OSProfile struct {
@@ -7806,12 +7730,6 @@ type ProximityPlacementGroupProperties struct {
 type ProximityPlacementGroupUpdate struct {
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for ProximityPlacementGroupUpdate.
@@ -8552,6 +8470,12 @@ type ScheduledEventsProfile struct {
 	TerminateNotificationProfile *TerminateNotificationProfile `json:"terminateNotificationProfile,omitempty"`
 }
 
+// ShareInfoElement ...
+type ShareInfoElement struct {
+	// VMURI - READ-ONLY; A relative URI containing the ID of the VM that has the disk attached.
+	VMURI *string `json:"vmUri,omitempty"`
+}
+
 // Sku describes a virtual machine scale set sku.
 type Sku struct {
 	// Name - The sku name.
@@ -9136,6 +9060,7 @@ type TargetRegion struct {
 	RegionalReplicaCount *int32 `json:"regionalReplicaCount,omitempty"`
 	// StorageAccountType - Specifies the storage account type to be used to store the image. This property is not updatable. Possible values include: 'StorageAccountTypeStandardLRS', 'StorageAccountTypeStandardZRS'
 	StorageAccountType StorageAccountType `json:"storageAccountType,omitempty"`
+	Encryption         *EncryptionImages  `json:"encryption,omitempty"`
 }
 
 // TerminateNotificationProfile ...
@@ -9166,12 +9091,6 @@ type ThrottledRequestsInput struct {
 type UpdateResource struct {
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for UpdateResource.
@@ -9179,6 +9098,27 @@ func (ur UpdateResource) MarshalJSON() ([]byte, error) {
 	objectMap := make(map[string]interface{})
 	if ur.Tags != nil {
 		objectMap["tags"] = ur.Tags
+	}
+	return json.Marshal(objectMap)
+}
+
+// UpdateResourceDefinition the Update Resource model definition.
+type UpdateResourceDefinition struct {
+	// ID - READ-ONLY; Resource Id
+	ID *string `json:"id,omitempty"`
+	// Name - READ-ONLY; Resource name
+	Name *string `json:"name,omitempty"`
+	// Type - READ-ONLY; Resource type
+	Type *string `json:"type,omitempty"`
+	// Tags - Resource tags
+	Tags map[string]*string `json:"tags"`
+}
+
+// MarshalJSON is the custom marshaler for UpdateResourceDefinition.
+func (urd UpdateResourceDefinition) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if urd.Tags != nil {
+		objectMap["tags"] = urd.Tags
 	}
 	return json.Marshal(objectMap)
 }
@@ -9822,12 +9762,6 @@ type VirtualMachineExtensionUpdate struct {
 	*VirtualMachineExtensionUpdateProperties `json:"properties,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for VirtualMachineExtensionUpdate.
@@ -9868,33 +9802,6 @@ func (vmeu *VirtualMachineExtensionUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				vmeu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				vmeu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				vmeu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				vmeu.Type = &typeVar
 			}
 		}
 	}
@@ -12317,12 +12224,6 @@ type VirtualMachineScaleSetUpdate struct {
 	Identity *VirtualMachineScaleSetIdentity `json:"identity,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for VirtualMachineScaleSetUpdate.
@@ -12399,33 +12300,6 @@ func (vmssu *VirtualMachineScaleSetUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				vmssu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				vmssu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				vmssu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				vmssu.Type = &typeVar
 			}
 		}
 	}
@@ -13927,12 +13801,6 @@ type VirtualMachineUpdate struct {
 	Zones *[]string `json:"zones,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
-	// ID - READ-ONLY; Resource Id
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; Resource name
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; Resource type
-	Type *string `json:"type,omitempty"`
 }
 
 // MarshalJSON is the custom marshaler for VirtualMachineUpdate.
@@ -14009,33 +13877,6 @@ func (vmu *VirtualMachineUpdate) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				vmu.Tags = tags
-			}
-		case "id":
-			if v != nil {
-				var ID string
-				err = json.Unmarshal(*v, &ID)
-				if err != nil {
-					return err
-				}
-				vmu.ID = &ID
-			}
-		case "name":
-			if v != nil {
-				var name string
-				err = json.Unmarshal(*v, &name)
-				if err != nil {
-					return err
-				}
-				vmu.Name = &name
-			}
-		case "type":
-			if v != nil {
-				var typeVar string
-				err = json.Unmarshal(*v, &typeVar)
-				if err != nil {
-					return err
-				}
-				vmu.Type = &typeVar
 			}
 		}
 	}
