@@ -4,6 +4,7 @@
 package arm
 
 import (
+
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -11,13 +12,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/packer/common/random"
 	"io/ioutil"
 	"math/big"
 	"net"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/common/random"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
