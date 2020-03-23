@@ -5,18 +5,20 @@
 * builder/hyperv: Add `first_boot_device` setting to allow the selection of the
     initial device or device class used for booting the VM. [GH-8714]
 * builder/hyperv: Fix Hyper-V compacted disk size comparison [GH-8811]
+* builder/openstack: Add new `image_auto_accept_members` option [GH-8931]
 * builder/proxmox: Add ability to specify vga adapter [GH-8892]
+* builder/proxmox: Add onboot directive support [GH-8935]
 * builder/tencentcloud: Show tencentcloud image id after copy to desination
     region. [GH-8763]
 * builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
     required [GH-8877]
 * builder/vsphere-clone: Add ability to export VM to OVF file [GH-8764]
 * builder/vsphere-iso: Add ability to define multiple disks. [GH-8787]
+* builder/vsphere-iso: Add ability to export VM to OVF file [GH-8764]
 * builder/vsphere-iso: Add support for eagerly zeroed / scrubbed disks.
     [GH-8756]
 * builder/vsphere-iso: Add the remote iso first so that it is first in boot
     order, and clarify boot behavior. [GH-8732]
-* builder/vsphere-iso: Add ability to export VM to OVF file [GH-8764]
 * communicator/ssh: Add flag to enable support for keyboard-interactive auth to
     connect bastion [GH-8847]
 * core/hcl2: Add support for singular blocks [GH-8889]
@@ -33,6 +35,7 @@
 ### Bug Fixes:
 * bilder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
     file limit. [GH-8800]
+* builder/azure: Fix azure key vault cleanup failure [GH-8905]
 * builder/azure: Fix HCL2 bug that prevented Azure and other builders from
     loading properly. [GH-8785]
 * builder/googlecompute: Fix WinRMPassword template engine. [GH-8890]
@@ -45,6 +48,7 @@
 * builder/vsphere: Fix network object interface panic. [GH-8753]
 * core/hcl2: Fix crash when an unset variable is used [GH-8837]
 * core/hcl2: Fix logic for parsing literal value variables [GH-8834]
+* core/hcl2: Make sure locals are evaluated only after variables are. [GH-8918]
 * core: Fix "build" template engine interpolation for certain fields in certain
     provisioners. [GH-8771]
 * core: Fix bug where user var recursion could fail intermittently when used
