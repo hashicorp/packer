@@ -52,6 +52,7 @@ type Config struct {
 	ISOStoragePool string       `mapstructure:"iso_storage_pool"`
 	Agent          bool         `mapstructure:"qemu_agent"`
 	SCSIController string       `mapstructure:"scsi_controller"`
+	Onboot         bool         `mapstructure:"onboot"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
