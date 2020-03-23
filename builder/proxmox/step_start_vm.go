@@ -44,6 +44,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
 		Scsihw:       c.SCSIController,
+		Onboot:       c.Onboot,
 	}
 
 	if c.VMID == 0 {

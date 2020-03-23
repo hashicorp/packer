@@ -91,6 +91,7 @@ type FlatConfig struct {
 	ISOStoragePool            *string           `mapstructure:"iso_storage_pool" cty:"iso_storage_pool"`
 	Agent                     *bool             `mapstructure:"qemu_agent" cty:"qemu_agent"`
 	SCSIController            *string           `mapstructure:"scsi_controller" cty:"scsi_controller"`
+	Onboot                    *bool             `mapstructure:"onboot" cty:"onboot"`
 	TemplateName              *string           `mapstructure:"template_name" cty:"template_name"`
 	TemplateDescription       *string           `mapstructure:"template_description" cty:"template_description"`
 	UnmountISO                *bool             `mapstructure:"unmount_iso" cty:"unmount_iso"`
@@ -190,6 +191,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_storage_pool":             &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
 		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
+		"onboot":                       &hcldec.AttrSpec{Name: "onboot", Type: cty.Bool, Required: false},
 		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
 		"template_description":         &hcldec.AttrSpec{Name: "template_description", Type: cty.String, Required: false},
 		"unmount_iso":                  &hcldec.AttrSpec{Name: "unmount_iso", Type: cty.Bool, Required: false},
