@@ -275,7 +275,7 @@ Run golangci-lint on a single pkg or directory; PKG_NAME expands to /builder/ama
 make lint PKG_NAME=builder/amazon
 ```
 
-Note: linting on Travis uses the `--new-from-rev=origin/master` flag to only lint new files added within a branch or pull-request. To run this check locally you can use the `ci-lint` make target. See [golangci-lint in CI](https://github.com/golangci/golangci-lint#faq) for more information.
+Note: linting on Travis uses the `--new-from-rev` flag to only lint new files added within a branch or pull-request. To run this check locally you can use the `ci-lint` make target. See [golangci-lint in CI](https://github.com/golangci/golangci-lint#faq) for more information.
 
 ```
 make ci-lint
