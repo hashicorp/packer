@@ -180,6 +180,9 @@ builder.
 
 -   `unmount_iso` (bool) - If true, remove the mounted ISO from the template
     after finishing. Defaults to `false`.
+    
+    `onboot` (boolean) - Specifies whether a VM will be started during system
+    bootup. Defaults to `false`.
 
 -   `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
     then `qemu-guest-agent` must be installed on the guest. When disabled, then 
