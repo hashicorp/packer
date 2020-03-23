@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/packer/common/random"
 	"io/ioutil"
 	"math/big"
 	"net"
@@ -528,7 +529,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	provideDefaultValues(c)
 	setRuntimeValues(c)
-	setUserNamePassword(c)
+	err = setUserNamePassword(c)
+	if err != nil {
+		return nil, err
+	}
 
 	// copy singular blocks
 	for _, kv := range c.AzureTag {
@@ -651,7 +655,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
-func setUserNamePassword(c *Config) {
+func setUserNamePassword(c *Config) error {
 	// SSH comm
 	if c.Comm.SSHUsername == "" {
 		c.Comm.SSHUsername = DefaultUserName
@@ -660,7 +664,7 @@ func setUserNamePassword(c *Config) {
 
 	if c.Comm.SSHPassword != "" {
 		c.Password = c.Comm.SSHPassword
-		return
+		return nil
 	}
 
 	// WinRM comm
@@ -673,7 +677,12 @@ func setUserNamePassword(c *Config) {
 		// Configure password settings using Azure generated credentials
 		c.Comm.WinRMPassword = c.tmpAdminPassword
 	}
+	if !isValidPassword(c.Comm.WinRMPassword) {
+		return fmt.Errorf("The supplied \"winrm_password\" must be between 8-123 characters long and must satisfy at least 3 from the following: \n1) Contains an uppercase character \n2) Contains a lowercase character\n3) Contains a numeric digit\n4) Contains a special character\n5) Control characters are not allowed")
+	}
 	c.Password = c.Comm.WinRMPassword
+
+	return nil
 }
 
 func setCustomData(c *Config) error {
@@ -1041,6 +1050,34 @@ func isValidAzureName(re *regexp.Regexp, rgn string) bool {
 	return re.Match([]byte(rgn)) &&
 		!strings.HasSuffix(rgn, ".") &&
 		!strings.HasSuffix(rgn, "-")
+}
+
+// The supplied password must be between 8-123 characters long and must satisfy at least 3 of password complexity requirements from the following:
+// 1) Contains an uppercase character
+// 2) Contains a lowercase character
+// 3) Contains a numeric digit
+// 4) Contains a special character
+// 5) Control characters are not allowed (a very specific case - not included in this validation)
+func isValidPassword(password string) bool {
+	if !(len(password) >= 8 && len(password) <= 123) {
+		return false
+	}
+
+	requirements := 0
+	if strings.ContainsAny(password, random.PossibleNumbers) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleLowerCase) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleUpperCase) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleSpecialCharacter) {
+		requirements++
+	}
+
+	return requirements >= 3
 }
 
 func (c *Config) validateLocationZoneResiliency(say func(s string)) {
