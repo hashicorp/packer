@@ -4,7 +4,6 @@
 package arm
 
 import (
-
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
