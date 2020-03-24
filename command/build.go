@@ -133,7 +133,44 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 		return nil, 1
 	}
 	if isHCLLoaded {
-		return c.GetBuildsFromHCL(path)
+		builds, ret := c.GetBuildsFromHCL(path)
+		if ret != 0 {
+			return nil, ret
+		}
+
+		if len(c.Meta.CoreConfig.Only) > 0 {
+			// Build a set of all the names to filter to
+			nameSet := make(map[string]struct{})
+			for _, buildName := range c.Meta.CoreConfig.Only {
+				nameSet[buildName] = struct{}{}
+			}
+
+			var filteredBuilds []packer.Build
+			for _, build := range builds {
+				if _, ok := nameSet[build.Name()]; ok {
+					filteredBuilds = append(filteredBuilds, build)
+				}
+			}
+			builds = filteredBuilds
+		}
+
+		if len(c.Meta.CoreConfig.Except) > 0 {
+			// Build a set of all the names to filter out
+			nameSet := make(map[string]struct{})
+			for _, buildName := range c.Meta.CoreConfig.Except {
+				nameSet[buildName] = struct{}{}
+			}
+
+			var filteredBuilds []packer.Build
+			for _, build := range builds {
+				if _, ok := nameSet[build.Name()]; !ok {
+					filteredBuilds = append(filteredBuilds, build)
+				}
+			}
+			builds = filteredBuilds
+		}
+
+		return builds, 0
 	}
 
 	// TODO: uncomment in v1.5.1 once we've polished HCL a bit more.
@@ -183,6 +220,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	}
 
 	builds, ret := c.GetBuilds(cfg.Path)
+	if ret != 0 {
+		return ret
+	}
 
 	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
