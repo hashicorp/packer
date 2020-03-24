@@ -26,6 +26,9 @@ type RemoteDriverMock struct {
 	UploadErr   error
 	DownloadErr error
 
+	RemovedCachePath string
+	CacheRemoved     bool
+
 	ReloadVMErr error
 }
 
@@ -66,6 +69,8 @@ func (d *RemoteDriverMock) Download(src, dst string) error {
 }
 
 func (d *RemoteDriverMock) RemoveCache(localPath string) error {
+	d.RemovedCachePath = localPath
+	d.CacheRemoved = true
 	return nil
 }
 
