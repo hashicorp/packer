@@ -254,7 +254,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.UserName,
-						Password: b.config.Comm.WinRMPassword,
+						Password: b.config.Password,
 					}, nil
 				},
 			},
