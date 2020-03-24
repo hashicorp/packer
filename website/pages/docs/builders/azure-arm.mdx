@@ -2,6 +2,7 @@
 description: Packer supports building VHDs in Azure Resource manager.
 layout: docs
 page_title: Azure arm - Builders
+sidebar_title: 'ARM'
 sidebar_current: docs-builders-azure-arm
 ---
 
@@ -30,7 +31,7 @@ options. In addition to the options listed here, a [communicator](/docs/template
 
 ### Authentication options
 
-@include 'builder/azure/common/client/\_Config.mdx'
+@include 'builder/azure/common/client/Config.mdx'
 
 #### Managed Identity
 
@@ -164,7 +165,8 @@ Providing `temp_resource_group_name` or `location` in combination with
 ### Optional:
 
 @include 'builder/azure/arm/Config-not-required.mdx'
-@include 'builder/azure/common/client/\_Config-not-required.mdx'
+
+@include 'builder/azure/common/client/Config-not-required.mdx'
 
 ## Basic Example
 

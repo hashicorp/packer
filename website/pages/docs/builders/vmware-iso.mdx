@@ -9,6 +9,7 @@ description: |
   Hypervisor using SSH as opposed to the vSphere API.
 layout: docs
 page_title: VMware ISO - Builders
+sidebar_title: 'VMWare ISO'
 sidebar_current: docs-builders-vmware-iso
 ---
 
@@ -166,6 +167,7 @@ necessary for this build to succeed and can be found further down the page.
 ## Boot Configuration
 
 @include 'common/bootcommand/BootConfig.mdx'
+
 @include 'common/bootcommand/VNCConfig.mdx'
 
 -> **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
@@ -177,6 +179,7 @@ to modify the network configuration after the VM is done building.
 #### Optional:
 
 @include 'common/bootcommand/VNCConfig-not-required.mdx'
+
 @include 'common/bootcommand/BootConfig-not-required.mdx'
 
 For more examples of various boot commands, see the sample projects from our

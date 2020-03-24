@@ -4,6 +4,7 @@ description: |
   multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
 page_title: Amazon AMI - Builders
+sidebar_title: 'Amazon EC2'
 sidebar_current: docs-builders-amazon
 ---
 
@@ -46,6 +47,8 @@ filesystem and data.
 - [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS
   volumes by launching a source AMI with block devices mapped. Provision the
   instance, then destroy it, retaining the EBS volumes.
+
+<!-- TODO: fix -->
 
 <span id="specifying-amazon-credentials"></span>
 
@@ -262,8 +265,7 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On
-Linux/OS X, you can run the `date` command to get the current time. If you're
+`http://www.time.gov/`. On Linux/OS X, you can run the `date` command to get the current time. If you're
 on Linux, you can try setting the time with ntp by running `sudo ntpd -q`.
 
 ### ResourceNotReady Error
