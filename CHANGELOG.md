@@ -10,6 +10,7 @@
 * builder/proxmox: Add onboot directive support [GH-8935]
 * builder/tencentcloud: Show tencentcloud image id after copy to desination
     region. [GH-8763]
+* builder/vmware-iso: Add `cleanup_remote_cache` config option to [GH-8917]
 * builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
     required [GH-8877]
 * builder/vsphere-clone: Add ability to export VM to OVF file [GH-8764]
@@ -35,6 +36,8 @@
 ### Bug Fixes:
 * bilder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
     file limit. [GH-8800]
+* builder/azure: Fix `winrm_password` attribution and allow users to set
+    `winrm_username` [GH-8928]
 * builder/azure: Fix azure key vault cleanup failure [GH-8905]
 * builder/azure: Fix HCL2 bug that prevented Azure and other builders from
     loading properly. [GH-8785]
@@ -45,6 +48,8 @@
 * builder/virtualbox-vm: Fix crash when VM has no snapshots. [GH-8906]
 * builder/virtualbox: Remove all floppy controllers before adding a new one.
     [GH-8828]
+* builder/vsphere-clone: Fix issue preventing the cloning of VMs with the same
+    name in different folders [GH-8938]
 * builder/vsphere: Fix network object interface panic. [GH-8753]
 * core/hcl2: Fix crash when an unset variable is used [GH-8837]
 * core/hcl2: Fix logic for parsing literal value variables [GH-8834]
