@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,8 +31,9 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	// supplied public key. This is possible if a private_key_file was
 	// specified.
 	if sshPublicKey != "" {
-		sshMetaKey := "sshKeys"
-		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
+		sshMetaKey := "ssh-keys"
+		sshPublicKey = strings.TrimSuffix(sshPublicKey, "\n")
+		sshKeys := fmt.Sprintf("%s:%s %s", c.Comm.SSHUsername, sshPublicKey, c.Comm.SSHUsername)
 		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 		}
