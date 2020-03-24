@@ -47,6 +47,7 @@ type HardwareConfig struct {
 	CpuHotAddEnabled    bool
 	MemoryHotAddEnabled bool
 	VideoRAM            int64
+	VGPUProfile         string
 }
 
 type NIC struct {
@@ -349,6 +350,31 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 		}
 		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
 	}
+	if config.VGPUProfile != "" {
+		devices, err := vm.vm.Device(vm.driver.ctx)
+		if err != nil {
+			return err
+		}
+
+		pciDevices := devices.SelectByType((*types.VirtualPCIPassthrough)(nil))
+		vGPUDevices := pciDevices.SelectByBackingInfo((*types.VirtualPCIPassthroughVmiopBackingInfo)(nil))
+		var operation types.VirtualDeviceConfigSpecOperation
+		if len(vGPUDevices) > 1 {
+			return err
+		} else if len(pciDevices) == 1 {
+			operation = types.VirtualDeviceConfigSpecOperationEdit
+		} else if len(pciDevices) == 0 {
+			operation = types.VirtualDeviceConfigSpecOperationAdd
+		}
+
+		vGPUProfile := newVGPUProfile(config.VGPUProfile)
+		spec := &types.VirtualDeviceConfigSpec{
+			Device:    &vGPUProfile,
+			Operation: operation,
+		}
+		log.Printf("Adding vGPU device with profile '%s'", config.VGPUProfile)
+		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
+	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {
@@ -582,6 +608,20 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 		devices = append(devices, device)
 	}
 	return devices, nil
+}
+
+func newVGPUProfile(vGPUProfile string) types.VirtualPCIPassthrough {
+	return types.VirtualPCIPassthrough{
+		VirtualDevice: types.VirtualDevice{
+			DeviceInfo: &types.Description{
+				Summary: "",
+				Label:   fmt.Sprintf("New vGPU %v PCI device", vGPUProfile),
+			},
+			Backing: &types.VirtualPCIPassthroughVmiopBackingInfo{
+				Vgpu: vGPUProfile,
+			},
+		},
+	}
 }
 
 func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {

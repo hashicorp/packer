@@ -9,17 +9,18 @@ import (
 // FlatHardwareConfig is an auto-generated flat version of HardwareConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatHardwareConfig struct {
-	CPUs                *int32 `mapstructure:"CPUs" cty:"CPUs"`
-	CpuCores            *int32 `mapstructure:"cpu_cores" cty:"cpu_cores"`
-	CPUReservation      *int64 `mapstructure:"CPU_reservation" cty:"CPU_reservation"`
-	CPULimit            *int64 `mapstructure:"CPU_limit" cty:"CPU_limit"`
-	CpuHotAddEnabled    *bool  `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug"`
-	RAM                 *int64 `mapstructure:"RAM" cty:"RAM"`
-	RAMReservation      *int64 `mapstructure:"RAM_reservation" cty:"RAM_reservation"`
-	RAMReserveAll       *bool  `mapstructure:"RAM_reserve_all" cty:"RAM_reserve_all"`
-	MemoryHotAddEnabled *bool  `mapstructure:"RAM_hot_plug" cty:"RAM_hot_plug"`
-	VideoRAM            *int64 `mapstructure:"video_ram" cty:"video_ram"`
-	NestedHV            *bool  `mapstructure:"NestedHV" cty:"NestedHV"`
+	CPUs                *int32  `mapstructure:"CPUs" cty:"CPUs"`
+	CpuCores            *int32  `mapstructure:"cpu_cores" cty:"cpu_cores"`
+	CPUReservation      *int64  `mapstructure:"CPU_reservation" cty:"CPU_reservation"`
+	CPULimit            *int64  `mapstructure:"CPU_limit" cty:"CPU_limit"`
+	CpuHotAddEnabled    *bool   `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug"`
+	RAM                 *int64  `mapstructure:"RAM" cty:"RAM"`
+	RAMReservation      *int64  `mapstructure:"RAM_reservation" cty:"RAM_reservation"`
+	RAMReserveAll       *bool   `mapstructure:"RAM_reserve_all" cty:"RAM_reserve_all"`
+	MemoryHotAddEnabled *bool   `mapstructure:"RAM_hot_plug" cty:"RAM_hot_plug"`
+	VideoRAM            *int64  `mapstructure:"video_ram" cty:"video_ram"`
+	VGPUProfile         *string `mapstructure:"vgpu_profile" cty:"vgpu_profile"`
+	NestedHV            *bool   `mapstructure:"NestedHV" cty:"NestedHV"`
 }
 
 // FlatMapstructure returns a new FlatHardwareConfig.
@@ -44,6 +45,7 @@ func (*FlatHardwareConfig) HCL2Spec() map[string]hcldec.Spec {
 		"RAM_reserve_all": &hcldec.AttrSpec{Name: "RAM_reserve_all", Type: cty.Bool, Required: false},
 		"RAM_hot_plug":    &hcldec.AttrSpec{Name: "RAM_hot_plug", Type: cty.Bool, Required: false},
 		"video_ram":       &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
+		"vgpu_profile":    &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":        &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
 	}
 	return s

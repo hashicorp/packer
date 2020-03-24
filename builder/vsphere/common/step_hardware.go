@@ -34,6 +34,9 @@ type HardwareConfig struct {
 	MemoryHotAddEnabled bool `mapstructure:"RAM_hot_plug"`
 	// Amount of video memory in MB.
 	VideoRAM int64 `mapstructure:"video_ram"`
+	// vGPU profile for accelerated graphics. See [NVIDIA GRID vGPU documentation](https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configure-vmware-vsphere-vm-with-vgpu)
+	// for examples of profile names. Defaults to none.
+	VGPUProfile string `mapstructure:"vgpu_profile"`
 	// Enable nested hardware virtualization for VM. Defaults to `false`.
 	NestedHV bool `mapstructure:"NestedHV"`
 }
@@ -71,6 +74,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 			CpuHotAddEnabled:    s.Config.CpuHotAddEnabled,
 			MemoryHotAddEnabled: s.Config.MemoryHotAddEnabled,
 			VideoRAM:            s.Config.VideoRAM,
+			VGPUProfile:         s.Config.VGPUProfile,
 		})
 		if err != nil {
 			state.Put("error", err)
