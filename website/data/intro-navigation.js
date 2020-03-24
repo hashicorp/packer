@@ -5,4 +5,11 @@
 // - All directories must have an "index.mdx" file to serve as
 //   the landing page for the category
 
-export default []
+export default [
+  'why',
+  'use-cases',
+  {
+    category: 'getting-started',
+    content: ['build-image', 'provision', 'parallel-builds', 'vagrant', 'next']
+  }
+]

@@ -2,6 +2,7 @@
 layout: intro
 sidebar_current: intro-getting-started-build-image
 page_title: Build an Image - Getting Started
+sidebar_title: 'Build an Image'
 description: |-
   With Packer installed, let's just dive right into it and build our first
   image. Our first image will be an Amazon EC2 AMI with Redis pre-installed.
@@ -197,7 +198,7 @@ how to validate and build templates into machine images.
 
 Create a file named `welcome.txt` and add the following:
 
-```
+```text
 WELCOME TO PACKER!
 ```
 
@@ -211,7 +212,7 @@ echo "hello"
 Set your access key and id as environment variables, so we don't need to pass
 them in through the command line:
 
-```
+```text
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
 ```
@@ -270,7 +271,7 @@ it might look something like this: `"source_ami": "ami-fce3c696"`.
 
 Your output will look like this:
 
-```
+```shell
 amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Prevalidating AMI Name: packer-linux-aws-demo-1507231105
@@ -407,29 +408,22 @@ https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-o
 
 Save the above code in a file named `bootstrap_win.txt`.
 
--> **A quick aside/warning:**<br />
-Windows administrators in the know might be wondering why we haven't simply
+-> **A quick aside/warning:** Windows administrators in the know might be wondering why we haven't simply
 used a `winrm quickconfig -q` command in the script above, as this would
 _automatically_ set up all of the required elements necessary for connecting
-over WinRM. Why all the extra effort to configure things manually?<br />
+over WinRM. Why all the extra effort to configure things manually?<br /><br />
 Well, long and short, use of the `winrm quickconfig -q` command can sometimes
 cause the Packer build to fail shortly after the WinRM connection is
-established. How?<br />
-
-1. Among other things, as well as setting up the listener for WinRM, the
-   quickconfig command also configures the firewall to allow management messages
-   to be sent over HTTP.<br />
-2. This undoes the previous command in the script that configured the
-   firewall to prevent this access.<br />
-3. The upshot is that the system is configured and ready to accept WinRM
-   connections earlier than intended.<br />
-4. If Packer establishes its WinRM connection immediately after execution of
-   the 'winrm quickconfig -q' command, the later commands within the script that
-   restart the WinRM service will unceremoniously pull the rug out from under
-   the connection.<br />
-5. While Packer does _a lot_ to ensure the stability of its connection in to
-   your instance, this sort of abuse can prove to be too much and _may_ cause
-   your Packer build to stall irrecoverably or fail!
+established. How?<br /><br />1. Among other things, as well as setting up the listener for WinRM, the
+quickconfig command also configures the firewall to allow management messages
+to be sent over HTTP.<br />2. This undoes the previous command in the script that configured the
+firewall to prevent this access.<br />3. The upshot is that the system is configured and ready to accept WinRM
+connections earlier than intended.<br />4. If Packer establishes its WinRM connection immediately after execution of
+the 'winrm quickconfig -q' command, the later commands within the script that
+restart the WinRM service will unceremoniously pull the rug out from under
+the connection.<br />5. While Packer does _a lot_ to ensure the stability of its connection in to
+your instance, this sort of abuse can prove to be too much and _may_ cause
+your Packer build to stall irrecoverably or fail!
 
 Now we've got the business of getting Packer connected to our instance
 taken care of, let's get on with the _real_ reason we're doing all this,
@@ -462,13 +456,13 @@ Write-Host "Finally, VAR4 is:" $Env:VAR4
 Write-Host "None of the special characters needed escaping in the template"
 ```
 
-Finally, we need to create the actual [build template](/docs/templates/index.html).
+Finally, we need to create the actual [build template](/docs/templates).
 Remember, this template is the core configuration file that Packer uses to
 understand what you want to build, and how you want to build it.
 
 As mentioned earlier, the specific builder we are using in this example
-is the [Amazon EBS builder](/docs/builders/amazon-ebs.html).
-The template below demonstrates use of the [`source_ami_filter`](/docs/builders/amazon-ebs.html#source_ami_filter) configuration option
+is the [Amazon EBS builder](/docs/builders/amazon-ebs).
+The template below demonstrates use of the [`source_ami_filter`](/docs/builders/amazon-ebs#source_ami_filter) configuration option
 available within the builder for automatically selecting the _latest_
 suitable source Windows AMI provided by Amazon.
 We also use the `user_data_file` configuration option provided by the builder
@@ -478,8 +472,8 @@ actually spinning up the instance, so that later on, our instance is
 configured to allow Packer to connect in to it.
 
 The `"provisioners"` section of the template demonstrates use of the
-[powershell](/docs/provisioners/powershell.html) and
-[windows-restart](/docs/provisioners/windows-restart.html) provisioners to
+[powershell](/docs/provisioners/powershell) and
+[windows-restart](/docs/provisioners/windows-restart) provisioners to
 customize and control the build process:
 
 ```json
@@ -555,7 +549,7 @@ Finally, we can create our new AMI by running `packer build firstrun.json`
 
 You should see output like this:
 
-```
+```shell
 amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Prevalidating AMI Name: packer-demo-1518111383
@@ -626,18 +620,18 @@ set the value for the name field within `source_ami_filter` as required:
 For Windows 2008 SP2:
 
 ```
-          "name": "*Windows_Server-2008-SP2*English-64Bit-Base*",
+"name": "*Windows_Server-2008-SP2*English-64Bit-Base*",
 ```
 
 For Windows 2016:
 
 ```
-          "name": "*Windows_Server-2016-English-Full-Base*",
+"name": "*Windows_Server-2016-English-Full-Base*",
 ```
 
 The bootstrapping and sample provisioning should work the same across all
 Windows server versions.
 
-[Continue to provisioning an image](./provision.html)
+[Continue to provisioning an image &raquo;](/intro/getting-started/provision)
 
-[platforms]: /docs/builders/index.html
+[platforms]: /docs/builders

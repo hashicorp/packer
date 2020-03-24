@@ -18,7 +18,7 @@ function IntroLayoutWrapper(pageMeta) {
         }}
         sidenav={{
           Link,
-          category: 'guides',
+          category: 'intro',
           currentPage: props.path,
           data,
           order

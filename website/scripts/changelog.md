@@ -1,0 +1,1 @@
+- `/intro/getting-started/install` redirects to `/intro/getting-started`

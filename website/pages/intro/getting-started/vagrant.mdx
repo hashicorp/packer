@@ -2,6 +2,7 @@
 layout: intro
 sidebar_current: intro-getting-started-vagrant
 page_title: Vagrant Boxes - Getting Started
+sidebar_title: 'Vagrant Boxes'
 description: |-
   Packer also has the ability to take the results of a builder (such as an AMI
   or plain VMware image) and turn it into a Vagrant box.
@@ -12,7 +13,7 @@ description: |-
 Packer also has the ability to take the results of a builder (such as an AMI or
 plain VMware image) and turn it into a [Vagrant](https://www.vagrantup.com) box.
 
-This is done using [post-processors](/docs/templates/post-processors.html).
+This is done using [post-processors](/docs/templates/post-processors).
 These take an artifact created by a previous builder or post-processor and
 transforms it into a new one. In the case of the Vagrant post-processor, it
 takes an artifact from a builder and transforms it into a Vagrant box file.
@@ -44,9 +45,9 @@ Your template should look like the following:
 
 In this case, we're enabling a single post-processor named "vagrant". This
 post-processor is built-in to Packer and will create Vagrant boxes. You can
-always create [new post-processors](/docs/extending/custom-post-processors.html), however.
+always create [new post-processors](/docs/extending/custom-post-processors), however.
 The details on configuring post-processors is covered in the
-[post-processors](/docs/templates/post-processors.html) documentation.
+[post-processors](/docs/templates/post-processors) documentation.
 
 Validate the configuration using `packer validate`.
 
@@ -77,4 +78,4 @@ image, if you turn it into a Vagrant box, the files of the VMware image will be
 deleted since they were compressed into the Vagrant box. With creating AWS
 images, however, the AMI is kept around, since Vagrant needs it to function.
 
-[Continue to Next Steps](./next.html)
+[Continue to Next Steps &raquo;](/intro/getting-started/next)
