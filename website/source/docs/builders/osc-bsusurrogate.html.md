@@ -3,7 +3,7 @@ description: |
     The osc-bsusurrogate Packer builder is like the chroot builder, but does not
     require running inside an Outscale virtual machine.
 layout: docs
-page_title: 'Outacale BSU Surrogate - Builders'
+page_title: 'Outscale BSU Surrogate - Builders'
 sidebar_current: 'docs-builders-osc-bsusurrogate'
 ---
 
