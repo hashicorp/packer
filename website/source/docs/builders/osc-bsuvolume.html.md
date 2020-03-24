@@ -3,7 +3,7 @@ description: |
     The osc-bsuvolume Packer builder is like the BSU builder, but is intended to
     create BSU volumes rather than a machine image.
 layout: docs
-page_title: 'Amazon BSU Volume - Builders'
+page_title: 'Outscale BSU Volume - Builders'
 sidebar_current: 'docs-builders-osc-bsuvolume'
 ---
 
