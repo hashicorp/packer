@@ -94,3 +94,42 @@ func TestCreateTemplateData(t *testing.T) {
 		t.Fatalf("Template shouldn't contain instance profile if iamInstanceProfile is unset.")
 	}
 }
+
+func TestCreateTemplateData_NoEphemeral(t *testing.T) {
+	state := tStateSpot()
+	stepRunSpotInstance := getBasicStep()
+	stepRunSpotInstance.NoEphemeral = true
+	template := stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
+		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
+	if len(template.BlockDeviceMappings) != 26 {
+		t.Fatalf("Should have created 26 mappings to keep ephemeral drives from appearing.")
+	}
+
+	// Now check that noEphemeral doesn't mess with the mappings in real life.
+	// state = tStateSpot()
+	// stepRunSpotInstance = getBasicStep()
+	// stepRunSpotInstance.NoEphemeral = true
+	// mappings := []*ec2.InstanceBlockDeviceMapping{
+	// 	&ec2.InstanceBlockDeviceMapping{
+	// 		DeviceName: "xvda",
+	// 		Ebs: {
+	// 			DeleteOnTermination: true,
+	// 			Status:              "attaching",
+	// 			VolumeId:            "vol-044cd49c330f21c05",
+	// 		},
+	// 	},
+	// 	&ec2.InstanceBlockDeviceMapping{
+	// 		DeviceName: "/dev/xvdf",
+	// 		Ebs: {
+	// 			DeleteOnTermination: false,
+	// 			Status:              "attaching",
+	// 			VolumeId:            "vol-0eefaf2d6ae35827e",
+	// 		},
+	// 	},
+	// }
+	// template = stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
+	// 	&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
+	// if len(*template.BlockDeviceMappings) != 26 {
+	// 	t.Fatalf("Should have created 26 mappings to keep ephemeral drives from appearing.")
+	// }
+}
