@@ -6,6 +6,11 @@ export default [
     type: 'inbound'
   },
   {
+    text: 'Guides',
+    url: '/guides',
+    type: 'inbound'
+  },
+  {
     text: 'Docs',
     url: '/docs',
     type: 'inbound'

@@ -1,7 +1,7 @@
 ---
 layout: guides
 page_title: Transforming Packer v1 files for Packer v1.5.0
-sidebar_current: hcl-from-json-v1
+sidebar_title: 'From JSON v1'
 description: |-
   Learn how to manually move from a Packer v1 working JSON build file to a
   working v1.5.0 HCL file.
@@ -101,22 +101,24 @@ All fields of builders, provisioners and post-processors have a 1:1
 correspondance except for the following:
 
 - builders:
-- aws ami_block_device_mappings
-- aws launch_block_device_mappings
-- aws run_volume_tags
-- alicloud image_disk_mappings
-- osc omi_block_device_mappings
-- osc launch_block_device_mappings
-- proxmox network_adapters
-- proxmox disks
-- tencentcloud data_disks
-- ucloud image_copy_to_mappings
 
-* provisioner:
-* converge module_dirs
+  - aws ami_block_device_mappings
+  - aws launch_block_device_mappings
+  - aws run_volume_tags
+  - alicloud image_disk_mappings
+  - osc omi_block_device_mappings
+  - osc launch_block_device_mappings
+  - proxmox network_adapters
+  - proxmox disks
+  - tencentcloud data_disks
+  - ucloud image_copy_to_mappings
 
-* post-processor:
-* alicloud-import image_disk_mappings
+- provisioner:
+
+  - converge module_dirs
+
+- post-processor:
+  - alicloud-import image_disk_mappings
 
 One could think that these are defined as "arrays of blocks" - they are in fact
 repeatable blocks with the same identifier. For example:

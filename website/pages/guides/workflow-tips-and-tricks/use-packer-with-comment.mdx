@@ -2,16 +2,17 @@
 layout: guides
 sidebar_current: workflow-tips-and-tricks-use-packer-with-comment
 page_title: Use jq and Packer to comment your templates - Guides
+sidebar_title: 'Use jq to strip comments from a Packer template'
 description: |-
   You can add detailed comments beyond the root-level underscore-prefixed field
   supported by Packer, and remove them using jq.
 ---
 
-#How to use jq to strip unsupported comments from a Packer template
+# How to use jq to strip unsupported comments from a Packer template
 
 One of the biggest complaints we get about packer is that json doesn't use comments. We're in the process of moving to HCL2, the same config language used by Terraform, which does allow comments. But in the meantime, you can add detailed comments beyond the root-level underscore-prefixed field supported by Packer, and remove them using jq.
 
-Let's say we have a file named commented_template.json
+Let's say we have a file named `commented_template.json`
 
 ```json
 {
@@ -65,7 +66,7 @@ you normally would.
 
 If your install of jq does not have the walk function and you get an error like
 
-```
+```shell
 jq: error: walk/1 is not defined at <top-level>,
 ```
 

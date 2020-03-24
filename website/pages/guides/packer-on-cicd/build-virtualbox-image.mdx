@@ -1,7 +1,7 @@
 ---
 layout: guides
-sidebar_current: guides-packer-on-cicd-build-virtualbox
 page_title: Build a VirtualBox Image with Packer in TeamCity
+sidebar_title: 'Build a VirtualBox Image with Packer in TeamCity'
 ---
 
 # Build a VirtualBox Image with Packer in TeamCity
@@ -109,11 +109,11 @@ In TeamCity Server, create a new build. To use the upstream Bento repository,
 we'll choose _From a repository URL_, and enter
 `https://github.com/chef/bento.git` as the **Repository URL**.
 
-![TeamCity screenshot: New Build](/assets/images/guides/teamcity_create_project_from_url-1.png)
+![TeamCity screenshot: New Build](/img/guides/teamcity_create_project_from_url-1.png)
 
 Click **Proceed**.
 
-![TeamCity screenshot: New Build](/assets/images/guides/teamcity_create_project_from_url-2.png)
+![TeamCity screenshot: New Build](/img/guides/teamcity_create_project_from_url-2.png)
 
 And **Proceed** again.
 
@@ -122,7 +122,7 @@ steps manually_. For the _runner type_, pick **Command Line**, and enter the
 following values. Make sure to click _Show advanced options_, as we need to set
 the working directory.
 
-![TeamCity screenshot: Build Step](/assets/images/guides/teamcity_build_configuration.png)
+![TeamCity screenshot: Build Step](/img/guides/teamcity_build_configuration.png)
 
 This will use the `build` command in Packer to build the image defined in
 `ubuntu/ubuntu-16.04-amd64.json`. It assumes that the VCS repository you're
@@ -142,8 +142,8 @@ by pressing “Run”.
 
 The new run should be triggered and the virtual box image will be built.
 
-![TeamCity screenshot: Build log](/assets/images/guides/teamcity_build_log.png)
+![TeamCity screenshot: Build log](/img/guides/teamcity_build_log.png)
 
 Once complete, the build status should be updated to complete and successful.
 
-![TeamCity screenshot: Build log complete](/assets/images/guides/teamcity_build_log_complete.png)
+![TeamCity screenshot: Build log complete](/img/guides/teamcity_build_log_complete.png)

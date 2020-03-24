@@ -1,7 +1,7 @@
 ---
 layout: guides
 page_title: Generating code for config spec.
-sidebar_current: hcl-component-object-spec
+sidebar_title: 'Making a plugin HCL2 enabled'
 description: Learn how to generate the HCL2 configuration of your component easily.
 ---
 
@@ -33,11 +33,11 @@ follow to make it HCL2 enabled:
 - Now we only need to make Builder implement the interface by adding the
   following snippet:
 
-      ```go
-      func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
-      ```
+  ```go
+  func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+  ```
 
-      From now on every time you add or change a field of Config you will need to
-      run the `go generate` command again.
+  From now on every time you add or change a field of Config you will need to
+  run the `go generate` command again.
 
 A good example of this is the [Config struct of the amazon-ebs builder](https://github.com/hashicorp/packer/blob/master/builder/amazon/ebs/builder.go)

@@ -1,1 +1,2 @@
 - `/intro/getting-started/install` redirects to `/intro/getting-started`
+- `/guides/hcl` folders with only index changed to named individual files
