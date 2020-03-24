@@ -42,6 +42,8 @@
 * builder/azure: Fix HCL2 bug that prevented Azure and other builders from
     loading properly. [GH-8785]
 * builder/googlecompute: Fix WinRMPassword template engine. [GH-8890]
+* builder/googlecompute: Replace deprecated "sshKeys" metadata with "ssh-keys"
+    to fix SSH authentication issue [GH-8942]
 * builder/proxmox: Add new validation to catch that template_name cannot
     contain spaces. [GH-8799]
 * builder/vagrant: Fix path validation in ssh config step. [GH-8826]
