@@ -14,9 +14,8 @@ Type: `googlecompute-import`
 The Google Compute Image Import post-processor takes a compressed raw disk
 image and imports it to a GCE image available to Google Compute Engine.
 
-\~&gt; This post-processor is for advanced users. Please ensure you read the
-[GCE import
-documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
+~> This post-processor is for advanced users. Please ensure you read the
+[GCE import documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
 before using this post-processor.
 
 ## How Does it Work?
@@ -24,12 +23,10 @@ before using this post-processor.
 The import process operates by uploading a temporary copy of the compressed raw
 disk image to a GCS bucket, and calling an import task in GCP on the raw disk
 file. Once completed, a GCE image is created containing the converted virtual
-machine. The temporary raw disk image copy in GCS can be discarded after the
-import is complete.
+machine. The temporary raw disk image copy in GCS can be discarded after the import is complete.
 
 Google Cloud has very specific requirements for images being imported. Please
-see the [GCE import
-documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
+see the [GCE import documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
 for details.
 
 ## Configuration
@@ -53,7 +50,7 @@ for details.
   the RAW disk image will be copied for import. This is treated as a
   [template engine](/docs/templates/engine.html). Therefore, you
   may use user variables and template functions in this field. Defaults to
-  "packer-import-{{timestamp}}.tar.gz".
+  `packer-import-{{timestamp}}.tar.gz`.
 
 - `image_description` (string) - The description of the resulting image.
 

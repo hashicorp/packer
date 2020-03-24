@@ -31,7 +31,7 @@ a bit.
 The builder does _not_ manage OMIs. Once it creates an OMI and stores it in
 your account, it is up to you to use, delete, etc. the OMI.
 
--&gt; **Note:** Temporary resources are, by default, all created with the
+-> **Note:** Temporary resources are, by default, all created with the
 prefix `packer`. This can be useful if you want to restrict the security groups
 and key pairs Packer is able to operate on.
 
@@ -266,7 +266,7 @@ Here is a basic example. You will need to provide access keys, and may need to c
 }
 ```
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
@@ -350,7 +350,7 @@ Here is an example using the optional OMIS tags. This will add the tags `OS_Vers
 }
 ```
 
--&gt; **Note:** Packer uses pre-built OMIs as the source for building images.
+-> **Note:** Packer uses pre-built OMIs as the source for building images.
 These source OMIs may include volumes that are not flagged to be destroyed on
 termination of the VM building the new image. Packer will attempt to
 clean up all residual volumes that are not designated by the user to remain

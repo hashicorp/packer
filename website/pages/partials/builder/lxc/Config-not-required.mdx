@@ -1,11 +1,11 @@
 <!-- Code generated from the comments of the Config struct in builder/lxc/config.go; DO NOT EDIT MANUALLY -->
 
 - `output_directory` (string) - The directory in which to save the exported
-  tar.gz. Defaults to output-<BuildName> in the current directory.
+  tar.gz. Defaults to `output-<BuildName>` in the current directory.
 
 - `container_name` (string) - The name of the LXC container. Usually stored
-  in /var/lib/lxc/containers/<container_name>. Defaults to
-  packer-<BuildName>.
+  in `/var/lib/lxc/containers/<container_name>`. Defaults to
+  `packer-<BuildName>`.
 
 - `command_wrapper` (string) - Allows you to specify a wrapper command, such
   as ssh so you can execute packer builds on a remote host. Defaults to
@@ -31,7 +31,7 @@
 
 - `template_parameters` ([]string) - Options to pass to the given
   lxc-template command, usually located in
-  /usr/share/lxc/templates/lxc-<template_name>. Note: This gets passed as
+  `/usr/share/lxc/templates/lxc-<template_name>`. Note: This gets passed as
   ARGV to the template command. Ensure you have an array of strings, as a
   single string with spaces probably won't work. Defaults to [].
 

@@ -33,16 +33,16 @@ being created. This simplifies configuration quite a bit.
 This builder does _not_ manage AMIs. Once it creates an AMI and stores it in
 your account, it is up to you to use, delete, etc. the AMI.
 
--&gt; **Note:** Temporary resources are, by default, all created with the
+-> **Note:** Temporary resources are, by default, all created with the
 prefix `packer`. This can be useful if you want to restrict the security groups
 and key pairs packer is able to operate on.
 
--&gt; **Note:** This builder requires that the [Amazon EC2 AMI
+-> **Note:** This builder requires that the [Amazon EC2 AMI
 Tools](https://aws.amazon.com/developertools/368) are installed onto the
 machine. This can be done within a provisioner, but must be done before the
 builder finishes running.
 
-\~&gt; Instance builds are not supported for Windows. Use
+~> Instance builds are not supported for Windows. Use
 [`amazon-ebs`](amazon-ebs.html) instead.
 
 ## Configuration Reference
@@ -59,41 +59,41 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Required:
 
-@include 'partials/builder/amazon/instance/Config-required.mdx'
+@include 'builder/amazon/instance/Config-required.mdx'
 
 ### Optional:
 
-@include 'partials/builder/amazon/instance/Config-not-required.mdx'
+@include 'builder/amazon/instance/Config-not-required.mdx'
 
 ### AMI Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/AMIConfig-required.mdx'
+@include 'builder/amazon/common/AMIConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/AMIConfig-not-required.mdx'
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
 
 ### Access Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/AccessConfig-required.mdx'
+@include 'builder/amazon/common/AccessConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/AccessConfig-not-required.mdx'
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
 
 ### Run Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/RunConfig-required.mdx'
+@include 'builder/amazon/common/RunConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/RunConfig-not-required.mdx'
+@include 'builder/amazon/common/RunConfig-not-required.mdx'
 
 ### Block Devices Configuration
 
@@ -101,18 +101,18 @@ Block devices can be nested in the
 [ami_block_device_mappings](#ami_block_device_mappings) or the
 [launch_block_device_mappings](#launch_block_device_mappings) array.
 
-@include 'partials/builder/amazon/common/BlockDevice.mdx'
+@include 'builder/amazon/common/BlockDevice.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/BlockDevice-not-required.mdx'
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
 
 ### Communicator Configuration
 
 #### Optional:
 
-@include 'partials/helper/communicator/Config-not-required.mdx'
-@include 'partials/helper/communicator/SSH-not-required.mdx'
+@include 'helper/communicator/Config-not-required.mdx'
+@include 'helper/communicator/SSH-not-required.mdx'
 
 ## Basic Example
 
@@ -138,7 +138,7 @@ Here is a basic example. It is completely valid except for the access keys:
 }
 ```
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
@@ -214,7 +214,7 @@ sudo -i -n ec2-bundle-vol \
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-bundle-vol` command.
 
-\~&gt; **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem
+~> **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem
 and .gpg files during the bundling of the AMI, which can cause problems on some
 systems, such as Ubuntu. You may want to customize the bundle volume command to
 include those files (see the `--no-filter` option of `ec2-bundle-vol`).
@@ -270,4 +270,4 @@ this:
 
 You may wish to constrain the resource to a specific bucket.
 
-@include 'partials/builders/aws-ssh-differentiation-table.mdx'
+@include 'builders/aws-ssh-differentiation-table.mdx'

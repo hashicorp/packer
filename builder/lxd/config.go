@@ -20,7 +20,7 @@ type Config struct {
 	OutputImage   string `mapstructure:"output_image" required:"false"`
 	ContainerName string `mapstructure:"container_name"`
 	// Lets you prefix all builder commands, such as
-	// with ssh for a remote build host. Defaults to "{{.Command}}"; i.e. no
+	// with ssh for a remote build host. Defaults to `{{.Command}}`; i.e. no
 	// wrapper.
 	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
 	// The source image to use when creating the build

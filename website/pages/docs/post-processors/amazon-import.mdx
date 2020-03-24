@@ -14,11 +14,10 @@ Type: `amazon-import`
 The Packer Amazon Import post-processor takes an OVA artifact from various
 builders and imports it to an AMI available to Amazon Web Services EC2.
 
-\~&gt; This post-processor is for advanced users. It depends on specific IAM
+~> This post-processor is for advanced users. It depends on specific IAM
 roles inside AWS and is best used with images that operate with the EC2
 configuration model (eg, cloud-init for Linux systems). Please ensure you read
-the [prerequisites for
-import](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html)
+the [prerequisites for import](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html)
 before using this post-processor.
 
 ## How Does it Work?
@@ -241,7 +240,7 @@ second delay in between retries.
 This is dramatically higher than many of our other waiters, to account for how
 long this process can take.
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 

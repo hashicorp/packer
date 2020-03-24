@@ -30,7 +30,7 @@ options. In addition to the options listed here, a [communicator](/docs/template
 
 ### Authentication options
 
-@include 'partials/builder/azure/common/client/\_Config.mdx'
+@include 'builder/azure/common/client/\_Config.mdx'
 
 #### Managed Identity
 
@@ -74,7 +74,7 @@ a managed image you **must** start with a managed image.
 
 ### Required:
 
-@include 'partials/builder/azure/arm/Config-required.mdx'
+@include 'builder/azure/arm/Config-required.mdx'
 
 When creating a VHD the following additional options are required:
 
@@ -163,8 +163,8 @@ Providing `temp_resource_group_name` or `location` in combination with
 
 ### Optional:
 
-@include 'partials/builder/azure/arm/Config-not-required.mdx'
-@include 'partials/builder/azure/common/client/\_Config-not-required.mdx'
+@include 'builder/azure/arm/Config-not-required.mdx'
+@include 'builder/azure/common/client/\_Config-not-required.mdx'
 
 ## Basic Example
 
@@ -300,7 +300,7 @@ experience. These values can be changed by the user to more suitable values.
 
 ## Implementation
 
-\~&gt; **Warning!** This is an advanced topic. You do not need to understand
+~> **Warning!** This is an advanced topic. You do not need to understand
 the implementation to use the Azure builder.
 
 The Azure builder uses ARM

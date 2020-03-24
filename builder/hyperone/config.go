@@ -56,7 +56,7 @@ type Config struct {
 	// ID or name of the image to launch server from.
 	SourceImage string `mapstructure:"source_image" required:"true"`
 	// The name of the resulting image. Defaults to
-	// "packer-{{timestamp}}"
+	// `packer-{{timestamp}}`
 	// (see configuration templates for more info).
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the resulting image.
@@ -107,11 +107,11 @@ type Config struct {
 	ChrootMountPath string     `mapstructure:"chroot_mount_path"`
 	ChrootMounts    [][]string `mapstructure:"chroot_mounts"`
 	ChrootCopyFiles []string   `mapstructure:"chroot_copy_files"`
-	// How to run shell commands. This defaults to {{.Command}}. This may be
+	// How to run shell commands. This defaults to `{{.Command}}`. This may be
 	// useful to set if you want to set environmental variables or perhaps run
 	// it with sudo or so on. This is a configuration template where the
 	// .Command variable is replaced with the command to be run. Defaults to
-	// {{.Command}}.
+	// `{{.Command}}`.
 	ChrootCommandWrapper string `mapstructure:"chroot_command_wrapper"`
 
 	MountOptions   []string `mapstructure:"mount_options"`
@@ -119,11 +119,11 @@ type Config struct {
 	// A series of commands to execute after attaching the root volume and
 	// before mounting the chroot. This is not required unless using
 	// from_scratch. If so, this should include any partitioning and filesystem
-	// creation commands. The path to the device is provided by {{.Device}}.
+	// creation commands. The path to the device is provided by `{{.Device}}`.
 	PreMountCommands []string `mapstructure:"pre_mount_commands"`
 	// As pre_mount_commands, but the commands are executed after mounting the
 	// root device and before the extra mount and copy steps. The device and
-	// mount path are provided by {{.Device}} and {{.MountPath}}.
+	// mount path are provided by `{{.Device}}` and `{{.MountPath}}`.
 	PostMountCommands []string `mapstructure:"post_mount_commands"`
 	// List of SSH keys by name or id to be added
 	// to the server on launch.

@@ -22,10 +22,8 @@
   used. This defaults to true if not set.
 
 - `run_command` ([]string) - An array of arguments to pass to docker run in order to run the
-  container. By default this is set to ["-d", "-i", "-t",
-  "--entrypoint=/bin/sh", "--", "{{.Image}}"] if you are using a linux
-  container, and ["-d", "-i", "-t", "--entrypoint=powershell", "--",
-  "{{.Image}}"] if you are running a windows container. {{.Image}} is a
+  container. By default this is set to `["-d", "-i", "-t", "--entrypoint=/bin/sh", "--", "{{.Image}}"]` if you are using a linux
+  container, and `["-d", "-i", "-t", "--entrypoint=powershell", "--", "{{.Image}}"]` if you are running a windows container. `{{.Image}}` is a
   template variable that corresponds to the image template option. Passing
   the entrypoint option this way will make it the default entrypoint of
   the resulting image, so running docker run -it --rm will start the

@@ -229,7 +229,7 @@ builder.
   not export the VM. Useful if the builder should be applied again on the created
   target snapshot.
 
-@include 'partials/builder/virtualbox/common/CommConfig-not-required.mdx'
+@include 'builder/virtualbox/common/CommConfig-not-required.mdx'
 
 - `target_snapshot` (string) - Default to `null/empty`. The name of the
   snapshot which shall be created after all provisioners has been run by the
@@ -274,7 +274,7 @@ builder.
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/ShutdownConfig-not-required.mdx'
+@include 'builder/virtualbox/common/ShutdownConfig-not-required.mdx'
 
 ## Boot Command
 
@@ -305,9 +305,9 @@ contention. If you notice missing keys, you can tune this delay by specifying
 }
 ```
 
-@include 'partials/builders/boot-command.mdx'
+@include 'builders/boot-command.mdx'
 
-@include 'partials/builders/virtualbox-ssh-key-pair.mdx'
+@include 'builders/virtualbox-ssh-key-pair.mdx'
 
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:

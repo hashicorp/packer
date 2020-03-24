@@ -27,7 +27,7 @@ remote paths (perhaps obtained using something like the shell provisioner).
 Puppet is run in masterless mode, meaning it never communicates to a Puppet
 master.
 
--&gt; **Note:** Puppet will _not_ be installed automatically by this
+-> **Note:** Puppet will _not_ be installed automatically by this
 provisioner. This provisioner expects that Puppet is already installed on the
 machine. It is common practice to use the [shell
 provisioner](/docs/provisioners/shell.html) before the Puppet provisioner to do
@@ -109,7 +109,7 @@ Optional parameters:
   This is useful if your main manifest uses imports, but the directory might
   not contain the `manifest_file` itself.
 
-\~&gt; `manifest_dir` is passed to Puppet as `--manifestdir` option. This
+~> `manifest_dir` is passed to Puppet as `--manifestdir` option. This
 option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
@@ -144,7 +144,7 @@ multiple manifests you should use `manifest_file` instead.
   field, including `` {{ build `Password`}} `` to use the password being used
   by the communicator to connect to your instance.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Execute Command
 

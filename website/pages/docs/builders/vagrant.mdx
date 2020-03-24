@@ -83,8 +83,8 @@ the Compress post-processor will not work with this builder.
 
 - `template` (string) - a path to a golang template for a
   vagrantfile. Our default template can be found
-  [here](https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L23-L37). So far the only template variables available to you are {{ .BoxName }} and
-  {{ .SyncedFolder }}, which correspond to the Packer options `box_name` and
+  [here](https://github.com/hashicorp/packer/blob/master/builder/vagrant/step_create_vagrantfile.go#L23-L37). So far the only template variables available to you are `{{ .BoxName }}` and
+  `{{ .SyncedFolder }}`, which correspond to the Packer options `box_name` and
   `synced_folder`.
 
   You must provide a template if your default vagrant provider is Hyper-V.

@@ -71,104 +71,104 @@ necessary for this build to succeed and can be found further down the page.
 
 #### Optional:
 
-@include 'partials/builder/vmware/iso/Config-not-required.mdx'
+@include 'builder/vmware/iso/Config-not-required.mdx'
 
 ### ISO Configuration
 
-@include 'partials/common/ISOConfig.mdx'
+@include 'common/ISOConfig.mdx'
 
 #### Required:
 
-@include 'partials/common/ISOConfig-required.mdx'
+@include 'common/ISOConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/common/ISOConfig-not-required.mdx'
+@include 'common/ISOConfig-not-required.mdx'
 
 ### Http directory configuration
 
-@include 'partials/common/HTTPConfig.mdx'
+@include 'common/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/HTTPConfig-not-required.mdx'
+@include 'common/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
-@include 'partials/common/FloppyConfig.mdx'
+@include 'common/FloppyConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/FloppyConfig-not-required.mdx'
+@include 'common/FloppyConfig-not-required.mdx'
 
 ### Shutdown configuration
 
 #### Optional:
 
-@include 'partials/common/shutdowncommand/ShutdownConfig-not-required.mdx'
+@include 'common/shutdowncommand/ShutdownConfig-not-required.mdx'
 
 ### Driver configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/DriverConfig-not-required.mdx'
+@include 'builder/vmware/common/DriverConfig-not-required.mdx'
 
 ### Hardware configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/HWConfig-not-required.mdx'
+@include 'builder/vmware/common/HWConfig-not-required.mdx'
 
 ### Output configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/OutputConfig-not-required.mdx'
+@include 'builder/vmware/common/OutputConfig-not-required.mdx'
 
 ### Run configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/RunConfig-not-required.mdx'
+@include 'builder/vmware/common/RunConfig-not-required.mdx'
 
 ### Tools configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/ToolsConfig-not-required.mdx'
+@include 'builder/vmware/common/ToolsConfig-not-required.mdx'
 
 ### VMX configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/VMXConfig-not-required.mdx'
+@include 'builder/vmware/common/VMXConfig-not-required.mdx'
 
 ### Export configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/ExportConfig-not-required.mdx'
+@include 'builder/vmware/common/ExportConfig-not-required.mdx'
 
 ### Communicator configuration
 
 #### Optional common fields:
 
-@include 'partials/helper/communicator/Config-not-required.mdx'
+@include 'helper/communicator/Config-not-required.mdx'
 
 #### Optional SSH fields:
 
-@include 'partials/helper/communicator/SSH-not-required.mdx'
+@include 'helper/communicator/SSH-not-required.mdx'
 
 #### Optional WinRM fields:
 
-@include 'partials/helper/communicator/WinRM-not-required.mdx'
+@include 'helper/communicator/WinRM-not-required.mdx'
 
 ## Boot Configuration
 
-@include 'partials/common/bootcommand/BootConfig.mdx'
-@include 'partials/common/bootcommand/VNCConfig.mdx'
+@include 'common/bootcommand/BootConfig.mdx'
+@include 'common/bootcommand/VNCConfig.mdx'
 
--&gt; **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
+-> **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
 configuration has to include a `hostonly` or `nat` type network interface.
 If you are using this feature, it is recommended to leave the default network
 configuration while you are building the VM, and use the `vmx_data_post` hook
@@ -176,8 +176,8 @@ to modify the network configuration after the VM is done building.
 
 #### Optional:
 
-@include 'partials/common/bootcommand/VNCConfig-not-required.mdx'
-@include 'partials/common/bootcommand/BootConfig-not-required.mdx'
+@include 'common/bootcommand/VNCConfig-not-required.mdx'
+@include 'common/bootcommand/BootConfig-not-required.mdx'
 
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools.html#templates).
@@ -191,7 +191,7 @@ file](https://github.com/hashicorp/packer/blob/20541a7eda085aa5cf35bfed5069592ca
 But for advanced users, this template can be customized. This allows Packer to
 build virtual machines of effectively any guest operating system type.
 
-~&gt; **This is an advanced feature.** Modifying the VMX template can easily
+~> **This is an advanced feature.** Modifying the VMX template can easily
 cause your virtual machine to not boot properly. Please only modify the template
 if you know what you're doing.
 
@@ -206,7 +206,7 @@ variables isn't required, however.
 - `Version` - The Hardware version VMWare will execute this vm under. Also
   known as the `virtualhw.version`.
 
-@include 'partials/builders/building_on_remote_vsphere_hypervisor.mdx'
+@include 'builders/building_on_remote_vsphere_hypervisor.mdx'
 
 ### VNC port discovery
 

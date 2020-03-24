@@ -6,7 +6,6 @@ import Link from 'next/link'
 
 function DocsLayoutWrapper(pageMeta) {
   function DocsLayout(props) {
-    console.log(props)
     return (
       <DocsPage
         {...props}

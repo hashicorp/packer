@@ -40,25 +40,23 @@ Here is a full list of the available functions for reference.
   will convert upper cases to lower cases and replace illegal characters with
   a "-" character. Example:
 
-`"mybuild-{{isotime | clean_resource_name}}"` will become
-`mybuild-2017-10-18t02-06-30z`.
+  `"mybuild-{{isotime | clean_resource_name}}"` will become `mybuild-2017-10-18t02-06-30z`.
 
-    Note: Valid Azure image names must match the regex
-    `^[^_\\W][\\w-._)]{0,79}$`
+  Note: Valid Azure image names must match the regex
+  `^[^_\\W][\\w-._)]{0,79}$`
 
-    Note: Valid GCE image names must match the regex
-    `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+  Note: Valid GCE image names must match the regex
+  `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
 
-    This engine does not guarantee that the final image name will match the
-    regex; it will not truncate your name if it exceeds the maximum number of
-    allowed characters, and it will not validate that the beginning and end of
-    the engine's output are valid. For example, `"image_name": {{isotime |
-    clean_resource_name}}"` will cause your build to fail because the image
-    name will start with a number, which is why in the above example we prepend
-    the isotime with "mybuild".
-    Exact behavior of `clean_resource_name` will depend on which builder it is
-    being applied to; refer to build-specific docs below for more detail on how
-    each function will behave.
+  This engine does not guarantee that the final image name will match the
+  regex; it will not truncate your name if it exceeds the maximum number of
+  allowed characters, and it will not validate that the beginning and end of
+  the engine's output are valid. For example, `"image_name": {{isotime | clean_resource_name}}"` will cause your build to fail because the image
+  name will start with a number, which is why in the above example we prepend
+  the isotime with "mybuild".
+  Exact behavior of `clean_resource_name` will depend on which builder it is
+  being applied to; refer to build-specific docs below for more detail on how
+  each function will behave.
 
 - `env` - Returns environment variables. See example in [using home
   variable](/docs/templates/user-variables.html#using-home-variable)
@@ -91,19 +89,7 @@ Here is a full list of the available functions for reference.
   - **SSHPublicKey** and **SSHPrivateKey**: The public and private key that Packer uses to connect to the instance.
     These are unique to the SSH communicator and are unset when using other communicators.
     **SSHPublicKey** and **SSHPrivateKey** can have escape sequences and special characters so their output should be single quoted to avoid surprises. For example:
-        ```json
-        {
-          ...
-          "provisioners": [
-            {
-              "type": "shell",
-              "inline": [
-                "echo '{{ build `SSHPrivateKey`}}'  > /tmp/packer-session.pem"
-              ]
-             }
-          ]
-        }
-        ```
+    `` json { ... "provisioners": [ { "type": "shell", "inline": [ "echo '{{ build `SSHPrivateKey`}}' > /tmp/packer-session.pem" ] } ] } ``
 
   For backwards compatability, `WinRMPassword` is also available through this
   engine, though it is no different than using the more general `Password`.
@@ -230,7 +216,7 @@ The `{{ .Vars }}` and `{{ .Path }}` template variables will be replaced with
 the list of the environment variables and the path to the script to be executed
 respectively.
 
--&gt; **Note:** In addition to template variables, you can specify your own
+-> **Note:** In addition to template variables, you can specify your own
 user variables. See the [user variable](/docs/templates/user-variables.html)
 documentation for more information on user variables.
 
@@ -316,7 +302,7 @@ this case, on the `ami_name` value):
 }
 ```
 
--&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html)
+-> **Note:** See the [Amazon builder](/docs/builders/amazon.html)
 documentation for more information on how to correctly configure the Amazon
 builder in this example.
 

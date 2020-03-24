@@ -66,7 +66,7 @@
 
 - `temporary_keypair_name` (string) - The name of the temporary SSH key pair
   to generate. By default, Packer generates a name that looks like
-  packer\_<UUID>, where <UUID> is a 36 character unique identifier.
+  `packer_<UUID>`, where `<UUID>` is a 36 character unique identifier.
 
 - `use_local_ip_address` (bool) - Set to true to indicate that the
   provisioners should connect to the local IP address of the instance.
@@ -83,7 +83,7 @@
   details.
 
 - `template_name` (string) - The name of the new template. Defaults to
-  "packer-{{timestamp}}" where timestamp will be the current time.
+  `packer-{{timestamp}}` where timestamp will be the current time.
 
 - `template_display_text` (string) - The display text of the new template.
   Defaults to the template_name.

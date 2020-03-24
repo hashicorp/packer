@@ -98,8 +98,8 @@ Optional parameters:
   these commands are not officially supported and things like environment
   variables may not work if you use a different shell than the default.
 
-  For backwards compatibility, you may also use {{.Command}}, but it is
-  decoded the same way as {{.Script}}. We recommend using {{.Script}} for the
+  For backwards compatibility, you may also use `{{.Command}}`, but it is
+  decoded the same way as `{{.Script}}`. We recommend using `{{.Script}}` for the
   sake of clarity, as even when you set only a single `command` to run,
   Packer writes it to a temporary file and then runs it as a script.
 
@@ -136,7 +136,7 @@ Optional parameters:
 - `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
   default this is just 0.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Execute Command
 

@@ -16,7 +16,7 @@ an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
 machine being provisioned by Packer.
 
--&gt; **Note:**: Any `remote_user` defined in tasks will be ignored. Packer
+-> **Note:**: Any `remote_user` defined in tasks will be ignored. Packer
 will always connect with the user given in the json config for this
 provisioner.
 
@@ -85,7 +85,7 @@ Optional Parameters:
   For example, if you are running a Windows build on AWS, Azure,
   Google Compute, or OpenStack and would like to access the auto-generated
   password that Packer uses to connect to a Windows instance via WinRM, you
-  can use the template variable {{.WinRMPassword}} in this option. Example:
+  can use the template variable `{{.WinRMPassword}}` in this option. Example:
 
   ```json
   "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
@@ -110,7 +110,7 @@ Optional Parameters:
   If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
   and would like to access the auto-generated password that Packer uses to
   connect to a Windows instance via WinRM, you can use the template variable
-  {{.WinRMPassword}} in this option. For example:
+  `{{.WinRMPassword}}` in this option. For example:
 
   ```json
     "extra_arguments": [
@@ -212,7 +212,7 @@ Optional Parameters:
   this option will be changed to default to `false` for SSH and WinRM
   connections where the provisioner has access to a host IP.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Default Extra Variables
 

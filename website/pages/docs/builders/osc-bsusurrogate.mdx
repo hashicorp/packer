@@ -280,7 +280,7 @@ builder.
 }
 ```
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
@@ -303,7 +303,7 @@ In configuration directives marked as a template engine above, the following var
 - `SourceOMIName` - The source OMIS Name (for example `ubutu-390`) used to build the OMI.
 - `SourceOMITags` - The source OMIS Tags, as a `map[string]string` object.
 
--&gt; **Note:** Packer uses pre-built OMIs as the source for building images.
+-> **Note:** Packer uses pre-built OMIs as the source for building images.
 These source OMIs may include volumes that are not flagged to be destroyed on
 termination of the virtual machine building the new image. In addition to those
 volumes created by this builder, any volumes inn the source OMI which are not

@@ -59,15 +59,15 @@ builder.
 
 ## ISO Configuration Reference
 
-@include 'partials/common/ISOConfig.mdx'
+@include 'common/ISOConfig.mdx'
 
 ### Required:
 
-@include 'partials/common/ISOConfig-required.mdx'
+@include 'common/ISOConfig-required.mdx'
 
 ### Optional:
 
-@include 'partials/common/ISOConfig-not-required.mdx'
+@include 'common/ISOConfig-not-required.mdx'
 
 ### Required:
 
@@ -172,7 +172,7 @@ builder.
   is "upload". This is a [configuration
   template](/docs/templates/engine.html) that has a single
   valid variable: `Flavor`, which will be the value of
-  `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
+  `parallels_tools_flavor`. By default this is `prl-tools-{{.Flavor}}.iso`
   which should upload into the login directory of the user.
 
 - `parallels_tools_mode` (string) - The method by which Parallels Tools are
@@ -243,7 +243,7 @@ The boot command is "typed" character for character (using the Parallels
 Virtualization SDK, see [Parallels Builder](/docs/builders/parallels.html))
 simulating a human actually typing the keyboard.
 
-@include 'partials/builders/boot-command.mdx'
+@include 'builders/boot-command.mdx'
 
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:

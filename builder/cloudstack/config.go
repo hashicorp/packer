@@ -134,7 +134,7 @@ type Config struct {
 	// created.
 	Zone string `mapstructure:"zone" required:"true"`
 	// The name of the new template. Defaults to
-	// "packer-{{timestamp}}" where timestamp will be the current time.
+	// `packer-{{timestamp}}` where timestamp will be the current time.
 	TemplateName string `mapstructure:"template_name" required:"false"`
 	// The display text of the new template.
 	// Defaults to the template_name.

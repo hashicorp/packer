@@ -19,7 +19,7 @@ plugin interface, and this page documents how to do that.
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins.html).
 
-\~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
@@ -157,7 +157,7 @@ hook.Run(context.Context, packer.HookProvision, ui, comm, nil)
 At this point, Packer will run the provisioners and no additional work is
 necessary.
 
--&gt; **Note:** Hooks are still undergoing thought around their general design
+-> **Note:** Hooks are still undergoing thought around their general design
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 
@@ -171,7 +171,7 @@ provisioners and post-processors using the `build` function.
 Part of the builder interface changes made in 1.5.0 was to make builder Prepare() methods
 return a list of custom variables which we call `generated data`.
 We use that list of variables to generate a custom placeholder map per builder that
-combines custom variables with the placeholder map of default build variables created by Packer.  
+combines custom variables with the placeholder map of default build variables created by Packer.
 Here's an example snippet telling packer what will be made available by the builder:
 
 ```
@@ -184,8 +184,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 ```
 
 Returning the custom variable name(s) within the `generated_data` placeholder is necessary
-for the template containing the build variable(s) to validate.  
-  
+for the template containing the build variable(s) to validate.
+
 Once the placeholder is set, it's necessary to pass the variables' real values when calling
 the provisioner. This can be done as the example below:
 

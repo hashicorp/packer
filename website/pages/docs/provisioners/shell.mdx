@@ -16,7 +16,7 @@ The shell Packer provisioner provisions machines built by Packer using shell
 scripts. Shell provisioning is the easiest way to get software installed and
 configured on a machine.
 
--&gt; **Building Windows images?** You probably want to use the
+-> **Building Windows images?** You probably want to use the
 [PowerShell](/docs/provisioners/powershell.html) or [Windows
 Shell](/docs/provisioners/windows-shell.html) provisioners.
 
@@ -33,7 +33,7 @@ The example below is fully functional.
 
 ## Configuration Reference
 
-@include 'partials/provisioners/shell-config.mdx'
+@include 'provisioners/shell-config.mdx'
 
 - `environment_vars` (array of strings) - An array of key/value pairs to
   inject prior to the execute_command. The format should be `key=value`.
@@ -100,7 +100,7 @@ The example below is fully functional.
 - `pause_after` (string) - Wait the amount of time after provisioning a shell
   script, this pause be taken if all previous steps were successful.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Execute Command Example
 

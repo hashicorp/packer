@@ -62,93 +62,93 @@ necessary for this build to succeed and can be found further down the page.
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/iso/Config-not-required.mdx'
-@include 'partials/builder/virtualbox/common/VBoxVersionConfig-not-required.mdx'
-@include 'partials/builder/virtualbox/common/VBoxBundleConfig-not-required.mdx'
-@include 'partials/builder/virtualbox/common/GuestAdditionsConfig-not-required.mdx'
+@include 'builder/virtualbox/iso/Config-not-required.mdx'
+@include 'builder/virtualbox/common/VBoxVersionConfig-not-required.mdx'
+@include 'builder/virtualbox/common/VBoxBundleConfig-not-required.mdx'
+@include 'builder/virtualbox/common/GuestAdditionsConfig-not-required.mdx'
 
 ### ISO Configuration
 
-@include 'partials/common/ISOConfig.mdx'
+@include 'common/ISOConfig.mdx'
 
 #### Required:
 
-@include 'partials/common/ISOConfig-required.mdx'
+@include 'common/ISOConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/common/ISOConfig-not-required.mdx'
+@include 'common/ISOConfig-not-required.mdx'
 
 ### Http directory configuration
 
-@include 'partials/common/HTTPConfig.mdx'
+@include 'common/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/HTTPConfig-not-required.mdx'
+@include 'common/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
-@include 'partials/common/FloppyConfig.mdx'
+@include 'common/FloppyConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/FloppyConfig-not-required.mdx'
+@include 'common/FloppyConfig-not-required.mdx'
 
 ### Export configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/ExportConfig-not-required.mdx'
+@include 'builder/virtualbox/common/ExportConfig-not-required.mdx'
 
 ### Output configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/OutputConfig-not-required.mdx'
+@include 'builder/virtualbox/common/OutputConfig-not-required.mdx'
 
 ### Run configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/RunConfig-not-required.mdx'
+@include 'builder/virtualbox/common/RunConfig-not-required.mdx'
 
 ### Shutdown configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/ShutdownConfig-not-required.mdx'
+@include 'builder/virtualbox/common/ShutdownConfig-not-required.mdx'
 
 ### Hardware configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/HWConfig-not-required.mdx'
+@include 'builder/virtualbox/common/HWConfig-not-required.mdx'
 
 ### VBox Manage configuration
 
 #### Optional:
 
-@include 'partials/builder/virtualbox/common/VBoxManageConfig-not-required.mdx'
+@include 'builder/virtualbox/common/VBoxManageConfig-not-required.mdx'
 
 ### Communicator configuration
 
 #### Optional common fields:
 
-@include 'partials/helper/communicator/Config-not-required.mdx'
-@include 'partials/builder/virtualbox/common/CommConfig-not-required.mdx'
+@include 'helper/communicator/Config-not-required.mdx'
+@include 'builder/virtualbox/common/CommConfig-not-required.mdx'
 
 #### Optional SSH fields:
 
-@include 'partials/helper/communicator/SSH-not-required.mdx'
+@include 'helper/communicator/SSH-not-required.mdx'
 
 #### Optional WinRM fields:
 
-@include 'partials/helper/communicator/WinRM-not-required.mdx'
+@include 'helper/communicator/WinRM-not-required.mdx'
 
 ### Boot Configuration
 
-@include 'partials/common/bootcommand/BootConfig.mdx'
+@include 'common/bootcommand/BootConfig.mdx'
 
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
@@ -170,11 +170,11 @@ contention. If you notice missing keys, you can tune this delay by specifying
 
 #### Optional:
 
-@include 'partials/common/bootcommand/BootConfig-not-required.mdx'
+@include 'common/bootcommand/BootConfig-not-required.mdx'
 
-@include 'partials/builders/boot-command.mdx'
+@include 'builders/boot-command.mdx'
 
-@include 'partials/builders/virtualbox-ssh-key-pair.mdx'
+@include 'builders/virtualbox-ssh-key-pair.mdx'
 
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:

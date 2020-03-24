@@ -14,7 +14,7 @@ Type: `puppet-server`
 The `puppet-server` Packer provisioner provisions Packer machines with Puppet
 by connecting to a Puppet master.
 
--&gt; **Note:** Puppet will _not_ be installed automatically by this
+-> **Note:** Puppet will _not_ be installed automatically by this
 provisioner. This provisioner expects that Puppet is already installed on the
 machine. It is common practice to use the [shell
 provisioner](/docs/provisioners/shell.html) before the Puppet provisioner to do
@@ -122,7 +122,7 @@ listed below:
   field, including `` {{ build `Password`}} `` to use the password being used
   by the communicator to connect to your instance.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Execute Command
 

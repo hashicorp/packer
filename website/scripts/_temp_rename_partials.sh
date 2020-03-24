@@ -7,4 +7,7 @@ find $1 -name "*.html.md" -exec rename 's/\.html.md$/.mdx/' '{}' \;
 find $1 -name "*.html.markdown" -exec rename 's/\.html.markdown$/.mdx/' '{}' \;
 find $1 -name "*.html.md.erb" -exec rename 's/\.html.md.erb$/.mdx/' '{}' \;
 find $1 -name "*.md" -exec rename 's/\.md$/.mdx/' '{}' \;
-find $1 -name '_*' | while read f; do mv "$f" "${f//^\_/}"; done
+find $1 -name "_" -exec echo 'foo' \;
+rename -v 's/\/_(.*)/\/$1/' pages/partials/*/*.mdx
+rename -v 's/\/_(.*)/\/$1/' pages/partials/*/*/*.mdx
+rename -v 's/\/_(.*)/\/$1/' pages/partials/*/*/*/*.mdx

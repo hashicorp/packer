@@ -94,7 +94,7 @@ configuration is actually required.
   information.
 
 - `node_name` (string) - The name of the node to register with the Chef
-  Server. This is optional and by default is packer-{{uuid}}.
+  Server. This is optional and by default is `packer-{{uuid}}`.
 
 - `policy_group` (string) - The name of a policy group that exists on the
   Chef server. `policy_name` must also be specified.
@@ -159,7 +159,7 @@ configuration is actually required.
 - `version` (string) - The version of Chef to be installed. By default this
   is empty which will install the latest version of Chef.
 
-@include 'partials/provisioners/common-config.mdx'
+@include 'provisioners/common-config.mdx'
 
 ## Chef Configuration
 
@@ -304,7 +304,7 @@ contain various template variables, defined below:
 
 ## Folder Permissions
 
-!&gt; The `chef-client` provisioner will chmod the directory with your Chef
+!> The `chef-client` provisioner will chmod the directory with your Chef
 keys to 777. This is to ensure that Packer can upload and make use of that
 directory. However, once the machine is created, you usually don't want to keep
 these directories with those permissions. To change the permissions on the

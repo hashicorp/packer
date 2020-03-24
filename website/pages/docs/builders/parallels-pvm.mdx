@@ -112,7 +112,7 @@ builder.
   is "upload". This is a [configuration
   template](/docs/templates/engine.html) that has a single
   valid variable: `Flavor`, which will be the value of
-  `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
+  `parallels_tools_flavor`. By default this is `prl-tools-{{.Flavor}}.iso`
   which should upload into the login directory of the user.
 
 - `parallels_tools_mode` (string) - The method by which Parallels Tools are
@@ -188,7 +188,7 @@ The boot command is "typed" character for character (using the Parallels
 Virtualization SDK, see [Parallels Builder](/docs/builders/parallels.html))
 simulating a human actually typing the keyboard.
 
-@include 'partials/builders/boot-command.mdx'
+@include 'builders/boot-command.mdx'
 
 ## prlctl Commands
 

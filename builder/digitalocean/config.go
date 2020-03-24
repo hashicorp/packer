@@ -55,7 +55,7 @@ type Config struct {
 	// created. This defaults to false, or not enabled.
 	IPv6 bool `mapstructure:"ipv6" required:"false"`
 	// The name of the resulting snapshot that will
-	// appear in your account. Defaults to "packer-{{timestamp}}" (see
+	// appear in your account. Defaults to `packer-{{timestamp}}` (see
 	// configuration templates for more info).
 	SnapshotName string `mapstructure:"snapshot_name" required:"false"`
 	// The regions of the resulting

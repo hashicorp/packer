@@ -75,88 +75,88 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Required:
 
-@include 'partials/builder/vmware/vmx/Config-required.mdx'
+@include 'builder/vmware/vmx/Config-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/vmware/vmx/Config-not-required.mdx'
+@include 'builder/vmware/vmx/Config-not-required.mdx'
 
 ### Http directory configuration
 
-@include 'partials/common/HTTPConfig.mdx'
+@include 'common/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/HTTPConfig-not-required.mdx'
+@include 'common/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
-@include 'partials/common/FloppyConfig.mdx'
+@include 'common/FloppyConfig.mdx'
 
 #### Optional:
 
-@include 'partials/common/FloppyConfig-not-required.mdx'
+@include 'common/FloppyConfig-not-required.mdx'
 
 ### Export configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/ExportConfig-not-required.mdx'
+@include 'builder/vmware/common/ExportConfig-not-required.mdx'
 
 ### Output configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/OutputConfig-not-required.mdx'
+@include 'builder/vmware/common/OutputConfig-not-required.mdx'
 
 ### Run configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/RunConfig-not-required.mdx'
+@include 'builder/vmware/common/RunConfig-not-required.mdx'
 
 ### Driver configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/DriverConfig-not-required.mdx'
+@include 'builder/vmware/common/DriverConfig-not-required.mdx'
 
 ### Tools configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/ToolsConfig-not-required.mdx'
+@include 'builder/vmware/common/ToolsConfig-not-required.mdx'
 
 ### VMX configuration
 
 #### Optional:
 
-@include 'partials/builder/vmware/common/VMXConfig-not-required.mdx'
+@include 'builder/vmware/common/VMXConfig-not-required.mdx'
 
 ### Communicator configuration
 
 #### Optional common fields:
 
-@include 'partials/helper/communicator/Config-not-required.mdx'
+@include 'helper/communicator/Config-not-required.mdx'
 
 #### Optional SSH fields:
 
-@include 'partials/helper/communicator/SSH-not-required.mdx'
+@include 'helper/communicator/SSH-not-required.mdx'
 
 #### Optional WinRM fields:
 
-@include 'partials/helper/communicator/WinRM-not-required.mdx'
+@include 'helper/communicator/WinRM-not-required.mdx'
 
 ## Shutdown Configuration
 
-@include 'partials/common/shutdowncommand/ShutdownConfig-not-required.mdx'
+@include 'common/shutdowncommand/ShutdownConfig-not-required.mdx'
 
 ## Boot Configuration
 
-@include 'partials/common/bootcommand/BootConfig.mdx'
-@include 'partials/common/bootcommand/VNCConfig.mdx'
+@include 'common/bootcommand/BootConfig.mdx'
+@include 'common/bootcommand/VNCConfig.mdx'
 
--&gt; **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
+-> **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
 configuration has to include a `hostonly` or `nat` type network interface.
 If you are using this feature, it is recommended to leave the default network
 configuration while you are building the VM, and use the `vmx_data_post` hook
@@ -164,8 +164,8 @@ to modify the network configuration after the VM is done building.
 
 #### Optional:
 
-@include 'partials/common/bootcommand/VNCConfig-not-required.mdx'
-@include 'partials/common/bootcommand/BootConfig-not-required.mdx'
+@include 'common/bootcommand/VNCConfig-not-required.mdx'
+@include 'common/bootcommand/BootConfig-not-required.mdx'
 
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools.html#templates).
@@ -202,4 +202,4 @@ Ubuntu 12.04 installer:
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools.html#templates).
 
-@include 'partials/builders/building_on_remote_vsphere_hypervisor.mdx'
+@include 'builders/building_on_remote_vsphere_hypervisor.mdx'

@@ -26,7 +26,7 @@ In addition to the options listed here, a
 [communicator](../templates/communicator.html) can be configured for this
 builder.
 
-\~&gt; **Note:** The builder doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH authentication with `ssh_username` (Required) and `ssh_password` (Optional). The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#\$%^&\*-+=\_|{}\[]:;'<>,.?/</code>.
+~> **Note:** The builder doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH authentication with `ssh_username` (Required) and `ssh_password` (Optional). The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include `()~!@#\$%^&\*-+=\_|{}\[]:;'<>,.?/`.
 
 ### Required:
 
@@ -52,7 +52,7 @@ builder.
 
 - `use_ssh_private_ip` - (boolean) - If this value is true, packer will connect to the created UHost instance via a private ip instead of allocating an EIP (elastic public ip).(Default: `false`).
 
-\~&gt; **Note:** By default (`use_ssh_private_ip` is `false`), the launched uhost instance will be connecting with extranet by bounding with an EIP (elastic public ip) automatically, which bandwidth is 30 Mb by default and paid by traffic.
+~> **Note:** By default (`use_ssh_private_ip` is `false`), the launched uhost instance will be connecting with extranet by bounding with an EIP (elastic public ip) automatically, which bandwidth is 30 Mb by default and paid by traffic.
 
 - `vpc_id` - (string) The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 
@@ -70,7 +70,7 @@ builder.
   Possible values are: `cloud_ssd` for cloud boot disk, `local_normal` and `local_ssd` for local boot disk. (Default: `cloud_ssd`).
   The `cloud_ssd` and `local_ssd` are not fully supported by all regions as boot disk type, please proceed to UCloud console for more details.
 
-\~&gt; **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
+~> **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
 
 - `image_copy_to_mappings` (array of copied image mappings) - The array of mappings regarding the copied images to the destination regions and projects.
 
@@ -150,8 +150,8 @@ Here is a example for build UCloud Ubuntu image:
 }
 ```
 
--&gt; **Note:** Packer can also read the public key and private key from
+-> **Note:** Packer can also read the public key and private key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-\~&gt; **Note:** Source image may be deprecated after a while, you can use the tools like `UCloud CLI` to run `ucloud image list` to find one that exists.
+~> **Note:** Source image may be deprecated after a while, you can use the tools like `UCloud CLI` to run `ucloud image list` to find one that exists.

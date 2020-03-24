@@ -39,63 +39,63 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Required:
 
-@include 'partials/builder/amazon/ebssurrogate/Config-required.mdx'
+@include 'builder/amazon/ebssurrogate/Config-required.mdx'
 
 ### Optional:
 
-@include 'partials/builder/amazon/ebssurrogate/Config-not-required.mdx'
+@include 'builder/amazon/ebssurrogate/Config-not-required.mdx'
 
 ### AMI Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/AMIConfig-required.mdx'
+@include 'builder/amazon/common/AMIConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/AMIConfig-not-required.mdx'
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
 
 ### Access Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/AccessConfig-required.mdx'
+@include 'builder/amazon/common/AccessConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/AccessConfig-not-required.mdx'
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
 
 ### Run Configuration
 
 #### Required:
 
-@include 'partials/builder/amazon/common/RunConfig-required.mdx'
+@include 'builder/amazon/common/RunConfig-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/RunConfig-not-required.mdx'
+@include 'builder/amazon/common/RunConfig-not-required.mdx'
 
 ### Block Devices Configuration
 
 Block devices can be nested in the
 [ami_block_device_mappings](#ami_block_device_mappings) array.
 
-@include 'partials/builder/amazon/common/BlockDevice.mdx'
+@include 'builder/amazon/common/BlockDevice.mdx'
 
 #### Optional only for [launch_block_device_mappings](#launch_block_device_mappings)
 
-@include 'partials/builder/amazon/ebssurrogate/BlockDevice-not-required.mdx'
+@include 'builder/amazon/ebssurrogate/BlockDevice-not-required.mdx'
 
 #### Optional:
 
-@include 'partials/builder/amazon/common/BlockDevice-not-required.mdx'
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
 
 ### Communicator Configuration
 
 #### Optional:
 
-@include 'partials/helper/communicator/Config-not-required.mdx'
-@include 'partials/helper/communicator/SSH-not-required.mdx'
+@include 'helper/communicator/Config-not-required.mdx'
+@include 'helper/communicator/SSH-not-required.mdx'
 
 ## Basic Example
 
@@ -126,7 +126,7 @@ Block devices can be nested in the
 }
 ```
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
@@ -168,10 +168,10 @@ variables are available:
   `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
   build the AMI.
 
--&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on
 termination of the instance building the new image. In addition to those
 volumes created by this builder, any volumes in the source AMI which are not
 marked for deletion on termination will remain in your account.
 
-@include 'partials/builders/aws-ssh-differentiation-table.mdx'
+@include 'builders/aws-ssh-differentiation-table.mdx'

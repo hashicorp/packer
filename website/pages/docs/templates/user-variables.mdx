@@ -64,11 +64,9 @@ means that the user must specify a value for this variable or template
 validation will fail.
 
 User variables are used by calling the `{{user}}` function in the form of
-
-<code>{{user \`variable\`}}</code>. This function can be used in \*any value\*
-but `type` within the template: in builders, provisioners, \*anywhere outside
-the `variables` section\*. User variables are available globally within the rest
-of the template.
+`{{user 'variable'}}`. This function can be used in _any value_ but `type`
+within the template: in builders, provisioners, _anywhere outside the `variables` section_.
+User variables are available globally within the rest of the template.
 
 ## Environment Variables
 
@@ -88,7 +86,7 @@ An example is shown below:
 This will default "my_secret" to be the value of the "MY_SECRET" environment
 variable (or an empty string if it does not exist).
 
--&gt; **Why can't I use environment variables elsewhere?** User variables are
+-> **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
 environment variables used _anywhere_ in a template would confuse the user
 about the possible inputs to a template. By allowing environment variables only
@@ -96,7 +94,7 @@ within default values for user variables, user variables remain as the single
 source of input to a template that a user can easily discover using
 `packer inspect`.
 
--&gt; **Why can't I use `~` for home variable?** `~` is an special variable
+-> **Why can't I use `~` for home variable?** `~` is an special variable
 that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
