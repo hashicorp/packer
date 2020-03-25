@@ -1,4 +1,4 @@
-## 1.5.5 (Upcoming)
+## 1.5.5 (March 25,2020)
 
 ### IMPROVEMENTS:
 * builder/azure: Add support for configurable KeyVault SKU [GH-8879]
