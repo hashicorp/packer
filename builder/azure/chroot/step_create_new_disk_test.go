@@ -17,8 +17,7 @@ import (
 
 func TestStepCreateNewDisk_Run(t *testing.T) {
 	type fields struct {
-		ResourceGroup          string
-		DiskName               string
+		ResourceID             string
 		DiskSizeGB             int32
 		DiskStorageAccountType string
 		HyperVGeneration       string
@@ -36,8 +35,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 		{
 			name: "HappyPathDiskSource",
 			fields: fields{
-				ResourceGroup:          "ResourceGroupName",
-				DiskName:               "TemporaryOSDiskName",
+				ResourceID:             "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName",
 				DiskSizeGB:             42,
 				DiskStorageAccountType: string(compute.PremiumLRS),
 				HyperVGeneration:       string(compute.V1),
@@ -66,8 +64,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 		{
 			name: "HappyPathDiskSource",
 			fields: fields{
-				ResourceGroup:          "ResourceGroupName",
-				DiskName:               "TemporaryOSDiskName",
+				ResourceID:             "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName",
 				DiskStorageAccountType: string(compute.StandardLRS),
 				HyperVGeneration:       string(compute.V1),
 				Location:               "westus",
@@ -102,8 +99,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := StepCreateNewDisk{
-				ResourceGroup:          tt.fields.ResourceGroup,
-				DiskName:               tt.fields.DiskName,
+				ResourceID:             tt.fields.ResourceID,
 				DiskSizeGB:             tt.fields.DiskSizeGB,
 				DiskStorageAccountType: tt.fields.DiskStorageAccountType,
 				HyperVGeneration:       tt.fields.HyperVGeneration,
@@ -131,8 +127,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{
-				DisksClientMock:    m,
-				SubscriptionIDMock: "SubscriptionID",
+				DisksClientMock: m,
 			})
 			state.Put("ui", packer.TestUi(t))
 

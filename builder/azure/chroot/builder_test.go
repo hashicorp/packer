@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
@@ -19,13 +20,13 @@ func TestBuilder_Prepare(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "HappyPathFromPlatformImage",
+			name: "platform image to managed disk",
 			config: config{
 				"client_id":         "123",
 				"client_secret":     "456",
 				"subscription_id":   "789",
-				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 				"source":            "credativ:Debian:9:latest",
+				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 			},
 			validate: func(c Config) {
 				if c.OSDiskSizeGB != 0 {
@@ -46,11 +47,50 @@ func TestBuilder_Prepare(t *testing.T) {
 			},
 		},
 		{
-			name: "HappyPathFromPlatformImage",
+			name: "disk to managed image, validate temp disk id expansion",
 			config: config{
-				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 				"source":            "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
+				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
 			},
+			validate: func(c Config) {
+				prefix := "/subscriptions/testSubscriptionID/resourceGroups/testResourceGroup/providers/Microsoft.Compute/disks/PackerTemp-osdisk-"
+				if !strings.HasPrefix(c.TemporaryOSDiskID, prefix) {
+					t.Errorf("Expected TemporaryOSDiskID to start with %q, but got %q", prefix, c.TemporaryOSDiskID)
+				}
+			},
+		},
+		{
+			name: "disk to both managed image and shared image",
+			config: config{
+				"source":            "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
+				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+				"shared_image_destination": config{
+					"resource_group": "rg",
+					"gallery_name":   "galleryName",
+					"image_name":     "imageName",
+					"image_version":  "0.1.0",
+				},
+			},
+		},
+		{
+			name: "disk to both managed image and shared image with missing property",
+			config: config{
+				"source":            "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
+				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+				"shared_image_destination": config{
+					"resource_group": "rg",
+					"gallery_name":   "galleryName",
+					"image_version":  "0.1.0",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "err: no output",
+			config: config{
+				"source": "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
