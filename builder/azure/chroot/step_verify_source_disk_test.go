@@ -129,12 +129,7 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 				}, nil
 			})
 
-			errorBuffer := &strings.Builder{}
-			ui := &packer.BasicUi{
-				Reader:      strings.NewReader(""),
-				Writer:      ioutil.Discard,
-				ErrorWriter: errorBuffer,
-			}
+			ui, getErr := testUI()
 
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{
@@ -148,8 +143,9 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 			}
 
 			if tt.errormatch != "" {
-				if !regexp.MustCompile(tt.errormatch).MatchString(errorBuffer.String()) {
-					t.Errorf("Expected the error output (%q) to match %q", errorBuffer.String(), tt.errormatch)
+				errs := getErr()
+				if !regexp.MustCompile(tt.errormatch).MatchString(errs) {
+					t.Errorf("Expected the error output (%q) to match %q", errs, tt.errormatch)
 				}
 			}
 
