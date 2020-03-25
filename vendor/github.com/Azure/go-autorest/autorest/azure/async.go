@@ -258,7 +258,17 @@ func (f Future) GetResult(sender autorest.Sender) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sender.Do(req)
+	resp, err := sender.Do(req)
+	if err == nil && resp.Body != nil {
+		// copy the body and close it so callers don't have to
+		defer resp.Body.Close()
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return resp, err
+		}
+		resp.Body = ioutil.NopCloser(bytes.NewReader(b))
+	}
+	return resp, err
 }
 
 type pollingTracker interface {
@@ -417,6 +427,11 @@ func (pt *pollingTrackerBase) pollForStatus(ctx context.Context, sender autorest
 	}
 
 	req = req.WithContext(ctx)
+	preparer := autorest.CreatePreparer(autorest.GetPrepareDecorators(ctx)...)
+	req, err = preparer.Prepare(req)
+	if err != nil {
+		return autorest.NewErrorWithError(err, "pollingTrackerBase", "pollForStatus", nil, "failed preparing HTTP request")
+	}
 	pt.resp, err = sender.Do(req)
 	if err != nil {
 		return autorest.NewErrorWithError(err, "pollingTrackerBase", "pollForStatus", nil, "failed to send HTTP request")

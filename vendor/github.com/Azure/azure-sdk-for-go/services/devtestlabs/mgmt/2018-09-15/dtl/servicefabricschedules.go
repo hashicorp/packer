@@ -36,7 +36,9 @@ func NewServiceFabricSchedulesClient(subscriptionID string) ServiceFabricSchedul
 	return NewServiceFabricSchedulesClientWithBaseURI(DefaultBaseURI, subscriptionID)
 }
 
-// NewServiceFabricSchedulesClientWithBaseURI creates an instance of the ServiceFabricSchedulesClient client.
+// NewServiceFabricSchedulesClientWithBaseURI creates an instance of the ServiceFabricSchedulesClient client using a
+// custom endpoint.  Use this when interacting with an Azure cloud that uses a non-standard base URI (sovereign clouds,
+// Azure stack).
 func NewServiceFabricSchedulesClientWithBaseURI(baseURI string, subscriptionID string) ServiceFabricSchedulesClient {
 	return ServiceFabricSchedulesClient{NewWithBaseURI(baseURI, subscriptionID)}
 }
@@ -46,7 +48,7 @@ func NewServiceFabricSchedulesClientWithBaseURI(baseURI string, subscriptionID s
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // name - the name of the schedule.
 // schedule - a schedule.
 func (client ServiceFabricSchedulesClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, labName string, userName string, serviceFabricName string, name string, schedule Schedule) (result Schedule, err error) {
@@ -116,8 +118,7 @@ func (client ServiceFabricSchedulesClient) CreateOrUpdatePreparer(ctx context.Co
 // CreateOrUpdateSender sends the CreateOrUpdate request. The method will close the
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) CreateOrUpdateSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // CreateOrUpdateResponder handles the response to the CreateOrUpdate request. The method always
@@ -138,7 +139,7 @@ func (client ServiceFabricSchedulesClient) CreateOrUpdateResponder(resp *http.Re
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // name - the name of the schedule.
 func (client ServiceFabricSchedulesClient) Delete(ctx context.Context, resourceGroupName string, labName string, userName string, serviceFabricName string, name string) (result autorest.Response, err error) {
 	if tracing.IsEnabled() {
@@ -199,8 +200,7 @@ func (client ServiceFabricSchedulesClient) DeletePreparer(ctx context.Context, r
 // DeleteSender sends the Delete request. The method will close the
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) DeleteSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // DeleteResponder handles the response to the Delete request. The method always
@@ -220,7 +220,7 @@ func (client ServiceFabricSchedulesClient) DeleteResponder(resp *http.Response) 
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // name - the name of the schedule.
 func (client ServiceFabricSchedulesClient) Execute(ctx context.Context, resourceGroupName string, labName string, userName string, serviceFabricName string, name string) (result ServiceFabricSchedulesExecuteFuture, err error) {
 	if tracing.IsEnabled() {
@@ -276,8 +276,7 @@ func (client ServiceFabricSchedulesClient) ExecutePreparer(ctx context.Context, 
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) ExecuteSender(req *http.Request) (future ServiceFabricSchedulesExecuteFuture, err error) {
 	var resp *http.Response
-	resp, err = autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
@@ -302,7 +301,7 @@ func (client ServiceFabricSchedulesClient) ExecuteResponder(resp *http.Response)
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // name - the name of the schedule.
 // expand - specify the $expand query. Example: 'properties($select=status)'
 func (client ServiceFabricSchedulesClient) Get(ctx context.Context, resourceGroupName string, labName string, userName string, serviceFabricName string, name string, expand string) (result Schedule, err error) {
@@ -367,8 +366,7 @@ func (client ServiceFabricSchedulesClient) GetPreparer(ctx context.Context, reso
 // GetSender sends the Get request. The method will close the
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) GetSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // GetResponder handles the response to the Get request. The method always
@@ -389,7 +387,7 @@ func (client ServiceFabricSchedulesClient) GetResponder(resp *http.Response) (re
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // expand - specify the $expand query. Example: 'properties($select=status)'
 // filter - the filter to apply to the operation. Example: '$filter=contains(name,'myName')
 // top - the maximum number of resources to return from the operation. Example: '$top=10'
@@ -465,8 +463,7 @@ func (client ServiceFabricSchedulesClient) ListPreparer(ctx context.Context, res
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) ListSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -519,12 +516,12 @@ func (client ServiceFabricSchedulesClient) ListComplete(ctx context.Context, res
 	return
 }
 
-// Update modify properties of schedules.
+// Update allows modifying tags of schedules. All other properties will be ignored.
 // Parameters:
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // userName - the name of the user profile.
-// serviceFabricName - the name of the service Fabric.
+// serviceFabricName - the name of the service fabric.
 // name - the name of the schedule.
 // schedule - a schedule.
 func (client ServiceFabricSchedulesClient) Update(ctx context.Context, resourceGroupName string, labName string, userName string, serviceFabricName string, name string, schedule ScheduleFragment) (result Schedule, err error) {
@@ -588,8 +585,7 @@ func (client ServiceFabricSchedulesClient) UpdatePreparer(ctx context.Context, r
 // UpdateSender sends the Update request. The method will close the
 // http.Response Body if it receives an error.
 func (client ServiceFabricSchedulesClient) UpdateSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // UpdateResponder handles the response to the Update request. The method always

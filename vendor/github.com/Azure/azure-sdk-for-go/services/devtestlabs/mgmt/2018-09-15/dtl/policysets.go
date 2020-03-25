@@ -35,7 +35,8 @@ func NewPolicySetsClient(subscriptionID string) PolicySetsClient {
 	return NewPolicySetsClientWithBaseURI(DefaultBaseURI, subscriptionID)
 }
 
-// NewPolicySetsClientWithBaseURI creates an instance of the PolicySetsClient client.
+// NewPolicySetsClientWithBaseURI creates an instance of the PolicySetsClient client using a custom endpoint.  Use this
+// when interacting with an Azure cloud that uses a non-standard base URI (sovereign clouds, Azure stack).
 func NewPolicySetsClientWithBaseURI(baseURI string, subscriptionID string) PolicySetsClient {
 	return PolicySetsClient{NewWithBaseURI(baseURI, subscriptionID)}
 }
@@ -105,8 +106,7 @@ func (client PolicySetsClient) EvaluatePoliciesPreparer(ctx context.Context, res
 // EvaluatePoliciesSender sends the EvaluatePolicies request. The method will close the
 // http.Response Body if it receives an error.
 func (client PolicySetsClient) EvaluatePoliciesSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // EvaluatePoliciesResponder handles the response to the EvaluatePolicies request. The method always
