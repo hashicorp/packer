@@ -27,7 +27,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 // BuilderId is the unique ID for this builder
@@ -356,13 +355,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 			if pi, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
 				if strings.EqualFold(pi.Version, "latest") {
-
-					vmi, err := azcli.VirtualMachineImagesClient().GetLatest(ctx, pi.Publisher, pi.Offer, pi.Sku, info.Location)
-					if err != nil {
-						return nil, fmt.Errorf("error retieving latest version of %q: %v", b.config.Source, err)
-					}
-					pi.Version = to.String(vmi.Name)
-					log.Println("Resolved latest version of source image:", pi.Version)
+					steps = append(steps, &StepResolvePlatformImageVersion{
+						PlatformImage: pi,
+						Location:      info.Location,
+					})
 				}
 				steps = append(steps,
 
