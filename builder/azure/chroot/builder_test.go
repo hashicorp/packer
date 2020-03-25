@@ -53,18 +53,20 @@ func TestBuilder_Prepare(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &Builder{}
+			withMetadataStub(func() {
+				b := &Builder{}
 
-			_, _, err := b.Prepare(tt.config)
+				_, _, err := b.Prepare(tt.config)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Builder.Prepare() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+				if (err != nil) != tt.wantErr {
+					t.Errorf("Builder.Prepare() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
 
-			if tt.validate != nil {
-				tt.validate(b.config)
-			}
+				if tt.validate != nil {
+					tt.validate(b.config)
+				}
+			})
 		})
 	}
 }
