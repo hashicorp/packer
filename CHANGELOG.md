@@ -52,6 +52,8 @@
     [GH-8828]
 * builder/vsphere-clone: Fix issue preventing the cloning of VMs with the same
     name in different folders [GH-8938]
+* builder/vsphere-iso: Fix issue preventing the creation of VMs with the same
+    name in different folders [GH-8938]
 * builder/vsphere: Fix network object interface panic. [GH-8753]
 * core/hcl2: Fix crash when an unset variable is used [GH-8837]
 * core/hcl2: Fix logic for parsing literal value variables [GH-8834]
