@@ -154,8 +154,7 @@ func Test_buildsteps(t *testing.T) {
 				for _, s := range steps {
 					if s, ok := s.(*StepVerifySourceDisk); ok {
 						if s.SourceDiskResourceID == "diskresourceid" &&
-							s.Location == info.Location &&
-							s.SubscriptionID == info.SubscriptionID {
+							s.Location == info.Location {
 							return
 						}
 						t.Errorf("found misconfigured StepVerifySourceDisk: %+v", s)

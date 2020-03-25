@@ -20,6 +20,9 @@ type AzureClientSet interface {
 	VirtualMachineImagesClient() VirtualMachineImagesClientAPI
 
 	PollClient() autorest.Client
+
+	// SubscriptionID returns the subscription ID that this client set was created for
+	SubscriptionID() string
 }
 
 var subscriptionPathRegex = regexp.MustCompile(`/subscriptions/([[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})`)
@@ -48,6 +51,10 @@ func new(c Config, say func(string)) (*azureClientSet, error) {
 		sender:         http.DefaultClient,
 		PollingDelay:   time.Second,
 	}, nil
+}
+
+func (s azureClientSet) SubscriptionID() string {
+	return s.subscriptionID
 }
 
 func (s azureClientSet) configureAutorestClient(c *autorest.Client) {

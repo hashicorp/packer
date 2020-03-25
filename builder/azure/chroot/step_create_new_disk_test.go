@@ -17,7 +17,6 @@ import (
 
 func TestStepCreateNewDisk_Run(t *testing.T) {
 	type fields struct {
-		SubscriptionID         string
 		ResourceGroup          string
 		DiskName               string
 		DiskSizeGB             int32
@@ -37,7 +36,6 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 		{
 			name: "HappyPathDiskSource",
 			fields: fields{
-				SubscriptionID:         "SubscriptionID",
 				ResourceGroup:          "ResourceGroupName",
 				DiskName:               "TemporaryOSDiskName",
 				DiskSizeGB:             42,
@@ -68,7 +66,6 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 		{
 			name: "HappyPathDiskSource",
 			fields: fields{
-				SubscriptionID:         "SubscriptionID",
 				ResourceGroup:          "ResourceGroupName",
 				DiskName:               "TemporaryOSDiskName",
 				DiskStorageAccountType: string(compute.StandardLRS),
@@ -105,7 +102,6 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := StepCreateNewDisk{
-				SubscriptionID:         tt.fields.SubscriptionID,
 				ResourceGroup:          tt.fields.ResourceGroup,
 				DiskName:               tt.fields.DiskName,
 				DiskSizeGB:             tt.fields.DiskSizeGB,
@@ -135,7 +131,8 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{
-				DisksClientMock: m,
+				DisksClientMock:    m,
+				SubscriptionIDMock: "SubscriptionID",
 			})
 			state.Put("ui", packer.TestUi(t))
 

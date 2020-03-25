@@ -5,6 +5,8 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 )
 
+var _ AzureClientSet = &AzureClientSetMock{}
+
 // AzureClientSetMock provides a generic mock for AzureClientSet
 type AzureClientSetMock struct {
 	DisksClientMock                computeapi.DisksClientAPI
@@ -13,6 +15,7 @@ type AzureClientSetMock struct {
 	VirtualMachinesClientMock      computeapi.VirtualMachinesClientAPI
 	PollClientMock                 autorest.Client
 	MetadataClientMock             MetadataClientAPI
+	SubscriptionIDMock             string
 }
 
 // DisksClient returns a DisksClientAPI
@@ -43,4 +46,9 @@ func (m *AzureClientSetMock) PollClient() autorest.Client {
 // MetadataClient returns a MetadataClientAPI
 func (m *AzureClientSetMock) MetadataClient() MetadataClientAPI {
 	return m.MetadataClientMock
+}
+
+// SubscriptionID returns SubscriptionIDMock
+func (m *AzureClientSetMock) SubscriptionID() string {
+	return m.SubscriptionIDMock
 }

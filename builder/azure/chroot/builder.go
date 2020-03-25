@@ -367,7 +367,6 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	if config.FromScratch {
 		steps = append(steps,
 			&StepCreateNewDisk{
-				SubscriptionID:         info.SubscriptionID,
 				ResourceGroup:          info.ResourceGroupName,
 				DiskName:               config.TemporaryOSDiskName,
 				DiskSizeGB:             config.OSDiskSizeGB,
@@ -388,7 +387,6 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 				}
 				steps = append(steps,
 					&StepCreateNewDisk{
-						SubscriptionID:         info.SubscriptionID,
 						ResourceGroup:          info.ResourceGroupName,
 						DiskName:               config.TemporaryOSDiskName,
 						DiskSizeGB:             config.OSDiskSizeGB,
@@ -406,11 +404,9 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 			steps = append(steps,
 				&StepVerifySourceDisk{
 					SourceDiskResourceID: config.Source,
-					SubscriptionID:       info.SubscriptionID,
 					Location:             info.Location,
 				},
 				&StepCreateNewDisk{
-					SubscriptionID:         info.SubscriptionID,
 					ResourceGroup:          info.ResourceGroupName,
 					DiskName:               config.TemporaryOSDiskName,
 					DiskSizeGB:             config.OSDiskSizeGB,

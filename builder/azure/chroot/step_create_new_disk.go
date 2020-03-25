@@ -15,10 +15,10 @@ import (
 var _ multistep.Step = &StepCreateNewDisk{}
 
 type StepCreateNewDisk struct {
-	SubscriptionID, ResourceGroup, DiskName string
-	DiskSizeGB                              int32  // optional, ignored if 0
-	DiskStorageAccountType                  string // from compute.DiskStorageAccountTypes
-	HyperVGeneration                        string
+	ResourceGroup, DiskName string
+	DiskSizeGB              int32  // optional, ignored if 0
+	DiskStorageAccountType  string // from compute.DiskStorageAccountTypes
+	HyperVGeneration        string
 
 	Location      string
 	PlatformImage *client.PlatformImage
@@ -33,7 +33,7 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 	ui := state.Get("ui").(packer.Ui)
 
 	diskResourceID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s",
-		s.SubscriptionID,
+		azcli.SubscriptionID(),
 		s.ResourceGroup,
 		s.DiskName)
 	state.Put("os_disk_resource_id", diskResourceID)
@@ -67,7 +67,7 @@ func (s StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) mu
 		disk.CreationData.ImageReference = &compute.ImageDiskReference{
 			ID: to.StringPtr(fmt.Sprintf(
 				"/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/artifacttypes/vmimage/offers/%s/skus/%s/versions/%s",
-				s.SubscriptionID, s.Location, s.PlatformImage.Publisher, s.PlatformImage.Offer, s.PlatformImage.Sku, s.PlatformImage.Version)),
+				azcli.SubscriptionID(), s.Location, s.PlatformImage.Publisher, s.PlatformImage.Offer, s.PlatformImage.Sku, s.PlatformImage.Version)),
 		}
 	}
 
