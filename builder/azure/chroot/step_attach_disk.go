@@ -20,7 +20,7 @@ type StepAttachDisk struct {
 func (s *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get("os_disk_resource_id").(string)
+	diskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
 
 	ui.Say(fmt.Sprintf("Attaching disk '%s'", diskResourceID))
 
@@ -67,7 +67,7 @@ func (s *StepAttachDisk) CleanupFunc(state multistep.StateBag) error {
 	if s.attached {
 		azcli := state.Get("azureclient").(client.AzureClientSet)
 		ui := state.Get("ui").(packer.Ui)
-		diskResourceID := state.Get("os_disk_resource_id").(string)
+		diskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
 
 		ui.Say(fmt.Sprintf("Detaching disk '%s'", diskResourceID))
 

@@ -78,7 +78,7 @@ func TestStepAttachDisk_Run(t *testing.T) {
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{})
 			state.Put("ui", ui)
-			state.Put("os_disk_resource_id", "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1")
+			state.Put(stateBagKey_OSDiskResourceID, "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1")
 
 			got := s.Run(context.TODO(), state)
 			if !reflect.DeepEqual(got, tt.want) {
