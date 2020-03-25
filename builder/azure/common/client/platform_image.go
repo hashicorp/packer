@@ -19,9 +19,9 @@ type VirtualMachineImagesClientAPI interface {
 	GetLatest(ctx context.Context, publisher, offer, sku, location string) (*compute.VirtualMachineImageResource, error)
 }
 
-var _ VirtualMachineImagesClientAPI = virtualMachineImagesClientAPI{}
+var _ VirtualMachineImagesClientAPI = VirtualMachineImagesClient{}
 
-type virtualMachineImagesClientAPI struct {
+type VirtualMachineImagesClient struct {
 	computeapi.VirtualMachineImagesClientAPI
 }
 
@@ -33,7 +33,7 @@ func ParsePlatformImageURN(urn string) (image *PlatformImage, err error) {
 	return &PlatformImage{parts[0], parts[1], parts[2], parts[3]}, nil
 }
 
-func (c virtualMachineImagesClientAPI) GetLatest(ctx context.Context, publisher, offer, sku, location string) (*compute.VirtualMachineImageResource, error) {
+func (c VirtualMachineImagesClient) GetLatest(ctx context.Context, publisher, offer, sku, location string) (*compute.VirtualMachineImageResource, error) {
 	result, err := c.List(ctx, location, publisher, offer, sku, "", to.Int32Ptr(1), "name desc")
 	if err != nil {
 		return nil, err

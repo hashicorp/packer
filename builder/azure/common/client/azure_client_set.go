@@ -88,7 +88,7 @@ func (s azureClientSet) VirtualMachineImagesClient() VirtualMachineImagesClientA
 	c := compute.NewVirtualMachineImagesClient(s.subscriptionID)
 	s.configureAutorestClient(&c.Client)
 	c.PollingDelay = s.PollingDelay
-	return virtualMachineImagesClientAPI{c}
+	return VirtualMachineImagesClient{c}
 }
 
 func (s azureClientSet) PollClient() autorest.Client {
