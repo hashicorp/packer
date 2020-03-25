@@ -87,14 +87,15 @@ type Config struct {
 	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
 	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
 	OSDiskCacheType string `mapstructure:"os_disk_cache_type"`
-	// If set to `true`, leaves the temporary disk behind in the Packer VM resource group. Defaults to `false`
-	OSDiskSkipCleanup bool `mapstructure:"os_disk_skip_cleanup"`
 
 	// The image to create using this build.
 	ImageResourceID string `mapstructure:"image_resource_id" required:"true"`
 	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
 	// Defaults to `V1`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
+
+	// If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
+	SkipCleanup bool `mapstructure:"skip_cleanup"`
 
 	ctx interpolate.Context
 }
@@ -395,7 +396,7 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 						Location:               info.Location,
 						PlatformImage:          pi,
 
-						SkipCleanup: config.OSDiskSkipCleanup,
+						SkipCleanup: config.SkipCleanup,
 					})
 			} else {
 				panic("Unknown image source: " + config.Source + " err: " + err.Error())
@@ -415,7 +416,7 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					SourceDiskResourceID:   config.Source,
 					Location:               info.Location,
 
-					SkipCleanup: config.OSDiskSkipCleanup,
+					SkipCleanup: config.SkipCleanup,
 				})
 		default:
 			panic(fmt.Errorf("Unknown source type: %+q", config.sourceType))
