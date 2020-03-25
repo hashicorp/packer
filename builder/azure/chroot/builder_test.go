@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	"github.com/hashicorp/packer/builder/azure/common/client"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestBuilder_Prepare(t *testing.T) {
@@ -66,6 +68,107 @@ func TestBuilder_Prepare(t *testing.T) {
 				if tt.validate != nil {
 					tt.validate(b.config)
 				}
+			})
+		})
+	}
+}
+
+func Test_buildsteps(t *testing.T) {
+	info := &client.ComputeInfo{
+		Location:          "northpole",
+		Name:              "unittestVM",
+		ResourceGroupName: "unittestResourceGroup",
+		SubscriptionID:    "96854241-60c7-426d-9a27-3fdeec8957f4",
+	}
+
+	tests := []struct {
+		name   string
+		config Config
+		verify func([]multistep.Step, *testing.T)
+	}{
+		{
+			name:   "Source FromScrath creates empty disk",
+			config: Config{FromScratch: true},
+			verify: func(steps []multistep.Step, _ *testing.T) {
+				for _, s := range steps {
+					if s, ok := s.(*StepCreateNewDisk); ok {
+						if s.SourceDiskResourceID == "" &&
+							s.PlatformImage == nil {
+							return
+						}
+						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
+					}
+				}
+				t.Error("did not find a StepCreateNewDisk")
+			}},
+		{
+			name:   "Source Platform image disk creation",
+			config: Config{Source: "publisher:offer:sku:version", sourceType: sourcePlatformImage},
+			verify: func(steps []multistep.Step, _ *testing.T) {
+				for _, s := range steps {
+					if s, ok := s.(*StepCreateNewDisk); ok {
+						if s.SourceDiskResourceID == "" &&
+							s.PlatformImage != nil &&
+							s.PlatformImage.Publisher == "publisher" {
+							return
+						}
+						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
+					}
+				}
+				t.Error("did not find a StepCreateNewDisk")
+			}},
+		{
+			name:   "Source Platform image with version latest adds StepResolvePlatformImageVersion",
+			config: Config{Source: "publisher:offer:sku:latest", sourceType: sourcePlatformImage},
+			verify: func(steps []multistep.Step, _ *testing.T) {
+				for _, s := range steps {
+					if s, ok := s.(*StepResolvePlatformImageVersion); ok {
+						if s.PlatformImage != nil &&
+							s.Location == info.Location {
+							return
+						}
+						t.Errorf("found misconfigured StepResolvePlatformImageVersion: %+v", s)
+					}
+				}
+				t.Error("did not find a StepResolvePlatformImageVersion")
+			}},
+		{
+			name:   "Source Disk adds correct disk creation",
+			config: Config{Source: "diskresourceid", sourceType: sourceDisk},
+			verify: func(steps []multistep.Step, _ *testing.T) {
+				for _, s := range steps {
+					if s, ok := s.(*StepCreateNewDisk); ok {
+						if s.SourceDiskResourceID == "diskresourceid" &&
+							s.PlatformImage == nil {
+							return
+						}
+						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
+					}
+				}
+				t.Error("did not find a StepCreateNewDisk")
+			}},
+		{
+			name:   "Source disk adds StepVerifySourceDisk",
+			config: Config{Source: "diskresourceid", sourceType: sourceDisk},
+			verify: func(steps []multistep.Step, _ *testing.T) {
+				for _, s := range steps {
+					if s, ok := s.(*StepVerifySourceDisk); ok {
+						if s.SourceDiskResourceID == "diskresourceid" &&
+							s.Location == info.Location &&
+							s.SubscriptionID == info.SubscriptionID {
+							return
+						}
+						t.Errorf("found misconfigured StepVerifySourceDisk: %+v", s)
+					}
+				}
+				t.Error("did not find a StepVerifySourceDisk")
+			}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			withMetadataStub(func() { // ensure that values are taken from info, instead of retrieved again
+				got := buildsteps(tt.config, info)
+				tt.verify(got, t)
 			})
 		})
 	}

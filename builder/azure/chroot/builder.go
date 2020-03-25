@@ -117,6 +117,9 @@ type Builder struct {
 	runner multistep.Runner
 }
 
+// verify interface implementation
+var _ packer.Builder = &Builder{}
+
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
@@ -335,101 +338,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	state.Put("instance", info)
 
-	// Build the steps
-	var steps []multistep.Step
-
-	if b.config.FromScratch {
-		steps = append(steps,
-			&StepCreateNewDisk{
-				SubscriptionID:         info.SubscriptionID,
-				ResourceGroup:          info.ResourceGroupName,
-				DiskName:               b.config.TemporaryOSDiskName,
-				DiskSizeGB:             b.config.OSDiskSizeGB,
-				DiskStorageAccountType: b.config.OSDiskStorageAccountType,
-				HyperVGeneration:       b.config.ImageHyperVGeneration,
-				Location:               info.Location,
-			})
-	} else {
-		switch b.config.sourceType {
-		case sourcePlatformImage:
-
-			if pi, err := client.ParsePlatformImageURN(b.config.Source); err == nil {
-				if strings.EqualFold(pi.Version, "latest") {
-					steps = append(steps, &StepResolvePlatformImageVersion{
-						PlatformImage: pi,
-						Location:      info.Location,
-					})
-				}
-				steps = append(steps,
-
-					&StepCreateNewDisk{
-						SubscriptionID:         info.SubscriptionID,
-						ResourceGroup:          info.ResourceGroupName,
-						DiskName:               b.config.TemporaryOSDiskName,
-						DiskSizeGB:             b.config.OSDiskSizeGB,
-						DiskStorageAccountType: b.config.OSDiskStorageAccountType,
-						HyperVGeneration:       b.config.ImageHyperVGeneration,
-						Location:               info.Location,
-						PlatformImage:          pi,
-
-						SkipCleanup: b.config.OSDiskSkipCleanup,
-					})
-			} else {
-				panic("Unknown image source: " + b.config.Source)
-			}
-		case sourceDisk:
-			steps = append(steps,
-				&StepVerifySourceDisk{
-					SourceDiskResourceID: b.config.Source,
-					SubscriptionID:       info.SubscriptionID,
-					Location:             info.Location,
-				},
-				&StepCreateNewDisk{
-					SubscriptionID:         info.SubscriptionID,
-					ResourceGroup:          info.ResourceGroupName,
-					DiskName:               b.config.TemporaryOSDiskName,
-					DiskSizeGB:             b.config.OSDiskSizeGB,
-					DiskStorageAccountType: b.config.OSDiskStorageAccountType,
-					HyperVGeneration:       b.config.ImageHyperVGeneration,
-					SourceDiskResourceID:   b.config.Source,
-					Location:               info.Location,
-
-					SkipCleanup: b.config.OSDiskSkipCleanup,
-				})
-		default:
-			panic(fmt.Errorf("Unknown source type: %+q", b.config.sourceType))
-		}
-	}
-
-	steps = append(steps,
-		&StepAttachDisk{}, // uses os_disk_resource_id and sets 'device' in stateBag
-		&chroot.StepPreMountCommands{
-			Commands: b.config.PreMountCommands,
-		},
-		&StepMountDevice{
-			MountOptions:   b.config.MountOptions,
-			MountPartition: b.config.MountPartition,
-			MountPath:      b.config.MountPath,
-		},
-		&chroot.StepPostMountCommands{
-			Commands: b.config.PostMountCommands,
-		},
-		&chroot.StepMountExtra{
-			ChrootMounts: b.config.ChrootMounts,
-		},
-		&chroot.StepCopyFiles{
-			Files: b.config.CopyFiles,
-		},
-		&chroot.StepChrootProvision{},
-		&chroot.StepEarlyCleanup{},
-		&StepCreateImage{
-			ImageResourceID:          b.config.ImageResourceID,
-			ImageOSState:             string(compute.Generalized),
-			OSDiskCacheType:          b.config.OSDiskCacheType,
-			OSDiskStorageAccountType: b.config.OSDiskStorageAccountType,
-			Location:                 info.Location,
-		},
-	)
+	// Build the step array from the config
+	steps := buildsteps(b.config, info)
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
@@ -450,4 +360,101 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	return artifact, nil
 }
 
-var _ packer.Builder = &Builder{}
+func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
+	// Build the steps
+	var steps []multistep.Step
+
+	if config.FromScratch {
+		steps = append(steps,
+			&StepCreateNewDisk{
+				SubscriptionID:         info.SubscriptionID,
+				ResourceGroup:          info.ResourceGroupName,
+				DiskName:               config.TemporaryOSDiskName,
+				DiskSizeGB:             config.OSDiskSizeGB,
+				DiskStorageAccountType: config.OSDiskStorageAccountType,
+				HyperVGeneration:       config.ImageHyperVGeneration,
+				Location:               info.Location,
+			})
+	} else {
+		switch config.sourceType {
+		case sourcePlatformImage:
+
+			if pi, err := client.ParsePlatformImageURN(config.Source); err == nil {
+				if strings.EqualFold(pi.Version, "latest") {
+					steps = append(steps, &StepResolvePlatformImageVersion{
+						PlatformImage: pi,
+						Location:      info.Location,
+					})
+				}
+				steps = append(steps,
+					&StepCreateNewDisk{
+						SubscriptionID:         info.SubscriptionID,
+						ResourceGroup:          info.ResourceGroupName,
+						DiskName:               config.TemporaryOSDiskName,
+						DiskSizeGB:             config.OSDiskSizeGB,
+						DiskStorageAccountType: config.OSDiskStorageAccountType,
+						HyperVGeneration:       config.ImageHyperVGeneration,
+						Location:               info.Location,
+						PlatformImage:          pi,
+
+						SkipCleanup: config.OSDiskSkipCleanup,
+					})
+			} else {
+				panic("Unknown image source: " + config.Source + " err: " + err.Error())
+			}
+		case sourceDisk:
+			steps = append(steps,
+				&StepVerifySourceDisk{
+					SourceDiskResourceID: config.Source,
+					SubscriptionID:       info.SubscriptionID,
+					Location:             info.Location,
+				},
+				&StepCreateNewDisk{
+					SubscriptionID:         info.SubscriptionID,
+					ResourceGroup:          info.ResourceGroupName,
+					DiskName:               config.TemporaryOSDiskName,
+					DiskSizeGB:             config.OSDiskSizeGB,
+					DiskStorageAccountType: config.OSDiskStorageAccountType,
+					HyperVGeneration:       config.ImageHyperVGeneration,
+					SourceDiskResourceID:   config.Source,
+					Location:               info.Location,
+
+					SkipCleanup: config.OSDiskSkipCleanup,
+				})
+		default:
+			panic(fmt.Errorf("Unknown source type: %+q", config.sourceType))
+		}
+	}
+
+	steps = append(steps,
+		&StepAttachDisk{}, // uses os_disk_resource_id and sets 'device' in stateBag
+		&chroot.StepPreMountCommands{
+			Commands: config.PreMountCommands,
+		},
+		&StepMountDevice{
+			MountOptions:   config.MountOptions,
+			MountPartition: config.MountPartition,
+			MountPath:      config.MountPath,
+		},
+		&chroot.StepPostMountCommands{
+			Commands: config.PostMountCommands,
+		},
+		&chroot.StepMountExtra{
+			ChrootMounts: config.ChrootMounts,
+		},
+		&chroot.StepCopyFiles{
+			Files: config.CopyFiles,
+		},
+		&chroot.StepChrootProvision{},
+		&chroot.StepEarlyCleanup{},
+		&StepCreateImage{
+			ImageResourceID:          config.ImageResourceID,
+			ImageOSState:             string(compute.Generalized),
+			OSDiskCacheType:          config.OSDiskCacheType,
+			OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+			Location:                 info.Location,
+		},
+	)
+
+	return steps
+}
