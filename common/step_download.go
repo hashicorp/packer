@@ -116,11 +116,6 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		}
 	}
 
-	if strings.HasPrefix(source, "file://") {
-		source = filepath.ToSlash(source[7:])
-		source = fmt.Sprintf("smb://%s", source)
-	}
-
 	u, err := urlhelper.Parse(source)
 	if err != nil {
 		return "", fmt.Errorf("url parse: %s", err)
