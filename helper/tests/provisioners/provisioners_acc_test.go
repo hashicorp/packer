@@ -3,15 +3,16 @@ package acceptance
 import (
 	"bytes"
 	"fmt"
-	amazon_acceptance "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
-	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/helper/tests"
-	"github.com/hashicorp/packer/packer"
-	shell "github.com/hashicorp/packer/provisioner/shell/acceptance"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	amazonEbs "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
+	"github.com/hashicorp/packer/command"
+	testshelper "github.com/hashicorp/packer/helper/tests"
+	"github.com/hashicorp/packer/packer"
+	shell "github.com/hashicorp/packer/provisioner/shell/acceptance"
 )
 
 func TestProvisionersAgainstBuilders(t *testing.T) {
@@ -77,7 +78,7 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 			outputFile.Sync()
 
 			// Run test
-			args := []string {
+			args := []string{
 				filePath,
 			}
 			err = provicionerAcc.RunTest(c, args)
@@ -97,12 +98,12 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 
 // List of all provisioners available for acceptance test
 var ProvisionersAccTest = map[string]ProvisionerAcceptance{
-	"shell":             	new(shell.ShellProvisionerAccTest),
+	"shell": new(shell.ShellProvisionerAccTest),
 }
 
 // List of all builders available for acceptance test
 var BuildersAccTest = map[string]BuilderAcceptance{
-	"amazon-ebs":          new(amazon_acceptance.AmazonEBSAccTest),
+	"amazon-ebs": new(amazonEbs.AmazonEBSAccTest),
 }
 
 type ProvisionerAcceptance interface {
@@ -114,4 +115,3 @@ type BuilderAcceptance interface {
 	GetConfig() (string, error)
 	CleanUp() error
 }
-
