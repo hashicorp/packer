@@ -3,20 +3,21 @@ package shell_acceptance
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
-type ShellProvisionerAccTest struct {}
+type ShellProvisionerAccTest struct{}
 
 func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
-	filePath :=  filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
+	filePath := filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Expected to find %s", filePath)

@@ -2,13 +2,14 @@ package amazon_acceptance
 
 import (
 	"fmt"
-	testshelper "github.com/hashicorp/packer/helper/tests"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
-type AmazonEBSAccTest struct {}
+type AmazonEBSAccTest struct{}
 
 func (s *AmazonEBSAccTest) GetConfig() (string, error) {
 	filePath := filepath.Join("../../../builder/amazon/ebs/acceptance/test-fixtures/", "amazon-ebs.txt")
