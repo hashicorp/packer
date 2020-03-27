@@ -304,17 +304,40 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	return k.privKeyFile, nil
 }
 
-func (p *Provisioner) createInventoryFile(hostIP string, hostPort int) error {
+const DefaultSSHInventoryFilev2 = `{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}`
+const DefaultSSHInventoryFilev1 = `{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}`
+const DefaultWinRMInventoryFilev2 = `{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_password={{ .Password }} ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}`
+
+func (p *Provisioner) createInventoryFile() error {
 	log.Printf("Creating inventory file for Ansible run...")
 	tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 	if err != nil {
 		return fmt.Errorf("Error preparing inventory file: %s", err)
 	}
-	host := fmt.Sprintf("%s ansible_host=%s ansible_user=%s ansible_port=%d\n",
-		p.config.HostAlias, hostIP, p.config.User, hostPort)
+
+	// figure out which inventory line template to use
+	hostTemplate := DefaultSSHInventoryFilev2
 	if p.ansibleMajVersion < 2 {
-		host = fmt.Sprintf("%s ansible_ssh_host=%s ansible_ssh_user=%s ansible_ssh_port=%d\n",
-			p.config.HostAlias, hostIP, p.config.User, hostPort)
+		hostTemplate = DefaultSSHInventoryFilev1
+	}
+	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+		hostTemplate = DefaultWinRMInventoryFilev2
+	}
+
+	// interpolate template to generate host with necessary vars.
+	ctxData := p.generatedData
+	ctxData["HostAlias"] = p.config.HostAlias
+	ctxData["User"] = p.config.User
+	if !p.config.UseProxy.False() {
+		ctxData["Host"] = "127.0.0.1"
+		ctxData["Port"] = p.config.LocalPort
+	}
+	p.config.ctx.Data = ctxData
+
+	host, err := interpolate.Render(hostTemplate, &p.config.ctx)
+
+	if err != nil {
+		return fmt.Errorf("Error generating inventory file from template: %s", err)
 	}
 
 	w := bufio.NewWriter(tf)
@@ -360,14 +383,22 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		p.config.ExtraArguments[i] = arg
 	}
 
-	// Set up proxy if there's no host IP to access, regardless of user config.
-	hostIP := generatedData["Host"].(string)
-
-	if hostIP == "" && p.config.UseProxy.False() {
-		ui.Error("Warning: use_proxy is false, but instance does" +
-			" not have an IP address to give to Ansible. Falling back" +
-			" to use localhost proxy.")
-		p.config.UseProxy = config.TriTrue
+	// Set up proxy if host IP is missing or communicator type is wrong.
+	if p.config.UseProxy.False() {
+		hostIP := generatedData["Host"].(string)
+		if hostIP == "" {
+			ui.Error("Warning: use_proxy is false, but instance does" +
+				" not have an IP address to give to Ansible. Falling back" +
+				" to use localhost proxy.")
+			p.config.UseProxy = config.TriTrue
+		}
+		connType := generatedData["ConnType"]
+		if connType != "ssh" && connType != "winrm" {
+			ui.Error("Warning: use_proxy is false, but communicator is " +
+				"neither ssh nor winrm, so without the proxy ansible will not" +
+				" function. Falling back to localhost proxy.")
+			p.config.UseProxy = config.TriTrue
+		}
 	}
 
 	privKeyFile := ""
@@ -394,50 +425,48 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			defer os.Remove(privKeyFile)
 		}
 	} else {
-		ui.Message("Not using Proxy adapter for Ansible run:\n" +
-			"\tUsing ssh keys from Packer communicator...")
-		// In this situation, we need to make sure we have the
-		// private key we actually use to access the instance.
-		SSHPrivateKeyFile := generatedData["SSHPrivateKeyFile"].(string)
-		if SSHPrivateKeyFile != "" {
-			privKeyFile = SSHPrivateKeyFile
-		} else {
-			// See if we can get a private key and write that to a tmpfile
-			SSHPrivateKey := generatedData["SSHPrivateKey"].([]byte)
-			tmpSSHPrivateKey, err := tmp.File("ansible-key")
-			if err != nil {
-				return fmt.Errorf("Error writing private key to temp file for"+
-					"ansible connection: %v", err)
+		connType := generatedData["ConnType"].(string)
+		switch connType {
+		case "ssh":
+			ui.Message("Not using Proxy adapter for Ansible run:\n" +
+				"\tUsing ssh keys from Packer communicator...")
+			// In this situation, we need to make sure we have the
+			// private key we actually use to access the instance.
+			SSHPrivateKeyFile := generatedData["SSHPrivateKeyFile"].(string)
+			if SSHPrivateKeyFile != "" {
+				privKeyFile = SSHPrivateKeyFile
+			} else {
+				// See if we can get a private key and write that to a tmpfile
+				SSHPrivateKey := generatedData["SSHPrivateKey"].([]byte)
+				tmpSSHPrivateKey, err := tmp.File("ansible-key")
+				if err != nil {
+					return fmt.Errorf("Error writing private key to temp file for"+
+						"ansible connection: %v", err)
+				}
+				_, err = tmpSSHPrivateKey.Write(SSHPrivateKey)
+				if err != nil {
+					return errors.New("failed to write private key to temp file")
+				}
+				err = tmpSSHPrivateKey.Close()
+				if err != nil {
+					return errors.New("failed to close private key temp file")
+				}
+				privKeyFile = tmpSSHPrivateKey.Name()
 			}
-			_, err = tmpSSHPrivateKey.Write(SSHPrivateKey)
-			if err != nil {
-				return errors.New("failed to write private key to temp file")
-			}
-			err = tmpSSHPrivateKey.Close()
-			if err != nil {
-				return errors.New("failed to close private key temp file")
-			}
-			privKeyFile = tmpSSHPrivateKey.Name()
-		}
 
-		// Also make sure that the username matches the SSH keys given.
-		if p.config.userWasEmpty {
-			p.config.User = generatedData["User"].(string)
+			// Also make sure that the username matches the SSH keys given.
+			if p.config.userWasEmpty {
+				p.config.User = generatedData["User"].(string)
+			}
+		case "winrm":
+			ui.Message("Not using Proxy adapter for Ansible run:\n" +
+				"\tUsing WinRM Password from Packer communicator...")
 		}
 	}
 
 	if len(p.config.InventoryFile) == 0 {
-		hostIP = "127.0.0.1"
-		hostPort := p.config.LocalPort
-		if p.config.UseProxy.False() {
-			// We aren't using a proxy, so we need to retrieve the
-			// host IP and port from generated data.
-			hostIP = generatedData["Host"].(string)
-			hostPort = int(generatedData["Port"].(int64))
-		}
-
 		// Create the inventory file
-		err := p.createInventoryFile(hostIP, hostPort)
+		err := p.createInventoryFile()
 		if err != nil {
 			return err
 		}
