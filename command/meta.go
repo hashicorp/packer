@@ -44,17 +44,23 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	config.Template = tpl
 
 	fj := &kvflag.FlagJSON{}
+	// First populate fj with contents from var files
 	for _, file := range m.varFiles {
 		err := fj.Set(file)
 		if err != nil {
 			return nil, err
 		}
 	}
+	// Now read fj values back into flagvars and set as config.Variables. Only
+	// add to flagVars if the key doesn't already exist, because flagVars comes
+	// from the command line and should not be overridden by variable files.
 	if m.flagVars == nil {
 		m.flagVars = map[string]string{}
 	}
 	for k, v := range *fj {
-		m.flagVars[k] = v
+		if _, exists := m.flagVars[k]; !exists {
+			m.flagVars[k] = v
+		}
 	}
 	config.Variables = m.flagVars
 

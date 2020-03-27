@@ -32,7 +32,16 @@ func TestBuild_VarArgs(t *testing.T) {
 			},
 			fileCheck: fileCheck{expected: []string{"apple.txt"}},
 		},
-
+		{
+			name: "json - json varfile sets an apple env var, " +
+				"override with banana cli var",
+			args: []string{
+				"-var", "fruit=banana",
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.json"),
+				filepath.Join(testFixture("var-arg"), "fruit_builder.json"),
+			},
+			fileCheck: fileCheck{expected: []string{"banana.txt"}},
+		},
 		{
 			name: "json - arg sets a pear env var",
 			args: []string{
@@ -401,6 +410,7 @@ func cleanup(moreFiles ...string) {
 	os.RemoveAll("lilas.txt")
 	os.RemoveAll("campanules.txt")
 	os.RemoveAll("ducky.txt")
+	os.RemoveAll("banana.txt")
 	for _, file := range moreFiles {
 		os.RemoveAll(file)
 	}
