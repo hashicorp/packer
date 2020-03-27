@@ -25,11 +25,6 @@ import (
 // * HTTP
 // * Amazon S3
 //
-//
-// \~&gt; On Windows, using a symlink to refer to local files is currently
-// unsupported. Packer will always copy a local iso into the Packer cache
-// directory.
-//
 // Examples:
 // go-getter can guess the checksum type based on `iso_checksum` len.
 //
