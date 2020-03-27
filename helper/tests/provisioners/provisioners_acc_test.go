@@ -46,7 +46,7 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 	c.CoreConfig.Components.BuilderStore = mapOfBuilders
 	c.CoreConfig.Components.ProvisionerStore = mapOfProvisioner
 
-	// build file
+	// build template file and run build
 	for _, builder := range builders {
 		builderAcc := BuildersAccTest[builder]
 		builderConfig, err := builderAcc.GetConfig()
