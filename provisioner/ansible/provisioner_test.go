@@ -18,28 +18,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type provisionLogicTracker struct {
-	setupAdapterCalled   bool
-	executeAnsibleCalled bool
-	happyPath            bool
-}
-
-func (l *provisionLogicTracker) setupAdapter(ui packer.Ui, comm packer.Communicator) (string, error) {
-	l.setupAdapterCalled = true
-	if l.happyPath {
-		return "fakeKeyString", nil
-	}
-	return "", fmt.Errorf("chose sadpath")
-}
-
-func (l *provisionLogicTracker) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
-	l.executeAnsibleCalled = true
-	if l.happyPath {
-		return fmt.Errorf("Chose sadpath")
-	}
-	return nil
-}
-
 // Be sure to remove the Ansible stub file in each test with:
 //   defer os.Remove(config["command"].(string))
 func testConfig(t *testing.T) map[string]interface{} {
@@ -384,8 +362,13 @@ func TestCreateInventoryFile_vers1(t *testing.T) {
 	defer os.Remove(p.config.Command)
 	p.ansibleMajVersion = 1
 	p.config.User = "testuser"
+	p.config.UseProxy = confighelper.TriFalse
+	p.generatedData = map[string]interface{}{
+		"Host": "123.45.67.89",
+		"Port": "2222",
+	}
 
-	err := p.createInventoryFile("123.45.67.89", 2222)
+	err := p.createInventoryFile()
 	if err != nil {
 		t.Fatalf("error creating config using localhost and local port proxy")
 	}
@@ -410,8 +393,13 @@ func TestCreateInventoryFile_vers2(t *testing.T) {
 	defer os.Remove(p.config.Command)
 	p.ansibleMajVersion = 2
 	p.config.User = "testuser"
+	p.config.UseProxy = confighelper.TriFalse
+	p.generatedData = map[string]interface{}{
+		"Host": "123.45.67.89",
+		"Port": "1234",
+	}
 
-	err := p.createInventoryFile("123.45.67.89", 1234)
+	err := p.createInventoryFile()
 	if err != nil {
 		t.Fatalf("error creating config using localhost and local port proxy")
 	}
@@ -436,8 +424,13 @@ func TestCreateInventoryFile_Groups(t *testing.T) {
 	p.ansibleMajVersion = 1
 	p.config.User = "testuser"
 	p.config.Groups = []string{"Group1", "Group2"}
+	p.config.UseProxy = confighelper.TriFalse
+	p.generatedData = map[string]interface{}{
+		"Host": "123.45.67.89",
+		"Port": "1234",
+	}
 
-	err := p.createInventoryFile("123.45.67.89", 1234)
+	err := p.createInventoryFile()
 	if err != nil {
 		t.Fatalf("error creating config using localhost and local port proxy")
 	}
@@ -467,8 +460,13 @@ func TestCreateInventoryFile_EmptyGroups(t *testing.T) {
 	p.ansibleMajVersion = 1
 	p.config.User = "testuser"
 	p.config.EmptyGroups = []string{"Group1", "Group2"}
+	p.config.UseProxy = confighelper.TriFalse
+	p.generatedData = map[string]interface{}{
+		"Host": "123.45.67.89",
+		"Port": "1234",
+	}
 
-	err := p.createInventoryFile("123.45.67.89", 1234)
+	err := p.createInventoryFile()
 	if err != nil {
 		t.Fatalf("error creating config using localhost and local port proxy")
 	}
@@ -497,8 +495,13 @@ func TestCreateInventoryFile_GroupsAndEmptyGroups(t *testing.T) {
 	p.config.User = "testuser"
 	p.config.Groups = []string{"Group1", "Group2"}
 	p.config.EmptyGroups = []string{"Group3"}
+	p.config.UseProxy = confighelper.TriFalse
+	p.generatedData = map[string]interface{}{
+		"Host": "123.45.67.89",
+		"Port": "1234",
+	}
 
-	err := p.createInventoryFile("123.45.67.89", 1234)
+	err := p.createInventoryFile()
 	if err != nil {
 		t.Fatalf("error creating config using localhost and local port proxy")
 	}
@@ -535,8 +538,12 @@ func TestUseProxy(t *testing.T) {
 			explanation: "use_proxy is true; we should set up adapter",
 			UseProxy:    confighelper.TriTrue,
 			generatedData: map[string]interface{}{
-				"Host": "123.45.67.8",
-				"Port": int64(1234),
+				"Host":              "123.45.67.8",
+				"Port":              int64(1234),
+				"ConnType":          "ssh",
+				"SSHPrivateKeyFile": "",
+				"SSHPrivateKey":     "asdf",
+				"User":              "PartyPacker",
 			},
 			expectedSetupAdapterCalled: true,
 		},
@@ -544,8 +551,12 @@ func TestUseProxy(t *testing.T) {
 			explanation: "use_proxy is false but no IP addr is available; we should set up adapter anyway.",
 			UseProxy:    confighelper.TriFalse,
 			generatedData: map[string]interface{}{
-				"Host": "",
-				"Port": nil,
+				"Host":              "",
+				"Port":              nil,
+				"ConnType":          "ssh",
+				"SSHPrivateKeyFile": "",
+				"SSHPrivateKey":     "asdf",
+				"User":              "PartyPacker",
 			},
 			expectedSetupAdapterCalled: true,
 		},
@@ -553,17 +564,38 @@ func TestUseProxy(t *testing.T) {
 			explanation: "use_proxy is false; we shouldn't set up adapter.",
 			UseProxy:    confighelper.TriFalse,
 			generatedData: map[string]interface{}{
-				"Host": "123.45.67.8",
-				"Port": int64(1234),
+				"Host":              "123.45.67.8",
+				"Port":              int64(1234),
+				"ConnType":          "ssh",
+				"SSHPrivateKeyFile": "",
+				"SSHPrivateKey":     "asdf",
+				"User":              "PartyPacker",
 			},
 			expectedSetupAdapterCalled: false,
+		},
+		{
+			explanation: "use_proxy is false but connType isn't ssh or winrm.",
+			UseProxy:    confighelper.TriFalse,
+			generatedData: map[string]interface{}{
+				"Host":              "123.45.67.8",
+				"Port":              int64(1234),
+				"ConnType":          "docker",
+				"SSHPrivateKeyFile": "",
+				"SSHPrivateKey":     "asdf",
+				"User":              "PartyPacker",
+			},
+			expectedSetupAdapterCalled: true,
 		},
 		{
 			explanation: "use_proxy is unset; we should default to setting up the adapter (for now).",
 			UseProxy:    confighelper.TriUnset,
 			generatedData: map[string]interface{}{
-				"Host": "123.45.67.8",
-				"Port": int64(1234),
+				"Host":              "123.45.67.8",
+				"Port":              int64(1234),
+				"ConnType":          "ssh",
+				"SSHPrivateKeyFile": "",
+				"SSHPrivateKey":     "asdf",
+				"User":              "PartyPacker",
 			},
 			expectedSetupAdapterCalled: true,
 		},

@@ -304,9 +304,9 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	return k.privKeyFile, nil
 }
 
-const DefaultSSHInventoryFilev2 = `{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}`
-const DefaultSSHInventoryFilev1 = `{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}`
-const DefaultWinRMInventoryFilev2 = `{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_password={{ .Password }} ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}`
+const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
+const DefaultSSHInventoryFilev1 = "{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}\n"
+const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_password={{ .Password }} ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
 
 func (p *Provisioner) createInventoryFile() error {
 	log.Printf("Creating inventory file for Ansible run...")
@@ -437,13 +437,13 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				privKeyFile = SSHPrivateKeyFile
 			} else {
 				// See if we can get a private key and write that to a tmpfile
-				SSHPrivateKey := generatedData["SSHPrivateKey"].([]byte)
+				SSHPrivateKey := generatedData["SSHPrivateKey"].(string)
 				tmpSSHPrivateKey, err := tmp.File("ansible-key")
 				if err != nil {
 					return fmt.Errorf("Error writing private key to temp file for"+
 						"ansible connection: %v", err)
 				}
-				_, err = tmpSSHPrivateKey.Write(SSHPrivateKey)
+				_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
 				if err != nil {
 					return errors.New("failed to write private key to temp file")
 				}
