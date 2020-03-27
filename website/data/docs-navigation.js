@@ -28,8 +28,8 @@ export default [
               'min',
               'parseint',
               'pow',
-              'signum'
-            ]
+              'signum',
+            ],
           },
           {
             category: 'string',
@@ -50,8 +50,8 @@ export default [
               'trimprefix',
               'trimsuffix',
               'trimspace',
-              'upper'
-            ]
+              'upper',
+            ],
           },
           {
             category: 'collection',
@@ -77,8 +77,8 @@ export default [
               'slice',
               'sort',
               'values',
-              'zipmap'
-            ]
+              'zipmap',
+            ],
           },
           {
             category: 'encoding',
@@ -90,8 +90,8 @@ export default [
               'jsonencode',
               'urlencode',
               'yamldecode',
-              'yamlencode'
-            ]
+              'yamlencode',
+            ],
           },
           {
             category: 'file',
@@ -102,38 +102,45 @@ export default [
               'file',
               'fileexists',
               'fileset',
-              'pathexpand'
-            ]
+              'pathexpand',
+            ],
           },
           {
             category: 'datetime',
-            content: ['formatdate', 'timeadd', 'timestamp']
+            content: ['formatdate', 'timeadd', 'timestamp'],
           },
           {
             category: 'crypto',
-            content: ['bcrypt', 'md5', 'rsadecrypt', 'sha1', 'sha256', 'sha512']
+            content: [
+              'bcrypt',
+              'md5',
+              'rsadecrypt',
+              'sha1',
+              'sha256',
+              'sha512',
+            ],
           },
           {
             category: 'uuid',
-            content: ['uuidv4', 'uuidv5']
+            content: ['uuidv4', 'uuidv5'],
           },
           {
             category: 'ipnet',
-            content: ['cidrhost', 'cidrnetmask', 'cidrsubnet']
+            content: ['cidrhost', 'cidrnetmask', 'cidrsubnet'],
           },
           {
             category: 'conversion',
-            content: ['can', 'convert', 'try']
-          }
-        ]
-      }
-    ]
+            content: ['can', 'convert', 'try'],
+          },
+        ],
+      },
+    ],
   },
   '--------',
   'terminology',
   {
     category: 'commands',
-    content: ['build', 'console', 'fix', 'inspect', 'validate']
+    content: ['build', 'console', 'fix', 'inspect', 'validate'],
   },
   {
     category: 'templates',
@@ -143,8 +150,8 @@ export default [
       'engine',
       'post-processors',
       'provisioners',
-      'user-variables'
-    ]
+      'user-variables',
+    ],
   },
   '----------',
   { category: 'communicators', content: ['ssh', 'winrm'] },
@@ -152,15 +159,14 @@ export default [
     category: 'builders',
     content: [
       'alicloud-ecs',
-      'amazon',
-      'amazon-chroot',
-      'amazon-ebs',
-      'amazon-ebssurrogate',
-      'amazon-ebsvolume',
-      'amazon-instance',
-      'azure',
-      'azure-arm',
-      'azure-chroot',
+      {
+        category: 'amazon',
+        content: ['chroot', 'ebs', 'ebssurrogate', 'ebsvolume', 'instance'],
+      },
+      {
+        category: 'azure',
+        content: ['arm', 'chroot'],
+      },
       'cloudstack',
       'digitalocean',
       'docker',
@@ -168,9 +174,7 @@ export default [
       'googlecompute',
       'hetzner-cloud',
       'hyperone',
-      'hyperv',
-      'hyperv-iso',
-      'hyperv-vmcx',
+      { category: 'hyperv', content: ['iso', 'vmcx'] },
       'linode',
       'lxc',
       'lxd',
@@ -178,17 +182,12 @@ export default [
       'null',
       'oneandone',
       'openstack',
-      'oracle',
-      'oracle-classic',
-      'oracle-oci',
-      'outscale',
-      'osc-chroot',
-      'osc-bsu',
-      'osc-bsusurrogate',
-      'osc-bsuvolume',
-      'parallels',
-      'parallels-iso',
-      'parallels-pvm',
+      { category: 'oracle', content: ['classic', 'oci'] },
+      {
+        category: 'outscale',
+        content: ['chroot', 'bsu', 'bsusurrogate', 'bsuvolume'],
+      },
+      { category: 'parallels', content: ['iso', 'pvm'] },
       'profitbricks',
       'proxmox',
       'qemu',
@@ -198,19 +197,18 @@ export default [
       'triton',
       'ucloud-uhost',
       'vagrant',
-      'virtualbox',
-      'virtualbox-iso',
-      'virtualbox-ovf',
-      'virtualbox-vm',
-      'vmware',
-      'vmware-iso',
-      'vmware-vmx',
-      'vsphere-iso',
-      'vsphere-clone',
+      {
+        category: 'virtualbox',
+        content: ['iso', 'ovf', 'vm'],
+      },
+      {
+        category: 'vmware',
+        content: ['iso', 'vmx', 'vsphere-iso', 'vsphere-clone'],
+      },
       'yandex',
       'custom',
-      'community-supported'
-    ]
+      'community-supported',
+    ],
   },
   {
     category: 'provisioners',
@@ -232,8 +230,8 @@ export default [
       'windows-shell',
       'windows-restart',
       'custom',
-      'community-supported'
-    ]
+      'community-supported',
+    ],
   },
   {
     category: 'post-processors',
@@ -257,8 +255,8 @@ export default [
       'vagrant',
       'vagrant-cloud',
       'vsphere',
-      'vsphere-template'
-    ]
+      'vsphere-template',
+    ],
   },
   '----------',
   'install',
@@ -269,11 +267,11 @@ export default [
       'plugins',
       'custom-builders',
       'custom-post-processors',
-      'custom-provisioners'
-    ]
+      'custom-provisioners',
+    ],
   },
   '---------',
   'environment-variables',
   'core-configuration',
-  'debugging'
+  'debugging',
 ]

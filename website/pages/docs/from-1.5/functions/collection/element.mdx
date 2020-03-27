@@ -22,7 +22,7 @@ only for the special additional "wrap-around" behavior described below.
 
 ## Examples
 
-```
+```shell
 > element(["a", "b", "c"], 1)
 b
 ```
@@ -30,7 +30,7 @@ b
 If the given index is greater than the length of the list then the index is
 "wrapped around" by taking the index modulo the length of the list:
 
-```
+```shell
 > element(["a", "b", "c"], 3)
 a
 ```

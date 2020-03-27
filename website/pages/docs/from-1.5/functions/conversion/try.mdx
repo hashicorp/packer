@@ -85,7 +85,7 @@ to understand and maintain.
 
 ## Examples
 
-```
+```shell
 > local.foo
 {
   "bar" = "baz"
@@ -100,7 +100,7 @@ The `try` function will _not_ catch errors relating to constructs that are
 provably invalid even before dynamic expression evaluation, such as a malformed
 reference or a reference to a top-level object that has not been declared:
 
-```
+```shell
 > try(local.nonexist, "fallback")
 
 Error: Reference to undeclared local value

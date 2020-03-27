@@ -59,7 +59,7 @@ Taking our example above of `cidrsubnet("10.1.2.0/24", 4, 15)`, the function
 will first convert the given IP address string into an equivalent binary
 representation:
 
-```
+```text
       10 .        1 .        2 .        0
 00001010   00000001   00000010 | 00000000
          network               |   host
@@ -74,7 +74,7 @@ The CLI tool [`ipcalc`](https://gitlab.com/ipcalc/ipcalc) is useful for
 visualizing CIDR prefixes as binary numbers. We can confirm the conversion
 above by providing the same prefix string to `ipcalc`:
 
-```
+```shell
 $ ipcalc 10.1.2.0/24
 Address:   10.1.2.0             00001010.00000001.00000010. 00000000
 Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
@@ -101,7 +101,7 @@ bits; in our example here we specified `4`, which means that the resulting
 subnet will have a prefix length of 24 + 4 = 28 bits. We can imagine these
 bits breaking down as follows:
 
-```
+```text
       10 .        1 .        2 .    ?        0
 00001010   00000001   00000010 |   XXXX | 0000
          parent network        | netnum | host
@@ -118,7 +118,7 @@ four new subnet bits. In our current example we passed `15`, which is
 represented in binary as `1111`, allowing us to fill in the `XXXX` segment
 in the above:
 
-```
+```text
       10 .        1 .        2 .    15       0
 00001010   00000001   00000010 |   1111 | 0000
          parent network        | netnum | host
@@ -130,7 +130,7 @@ gives 240, which can then be combined with our new prefix length of 28 to
 produce the result `10.1.2.240/28`. Again we can pass this prefix string to
 `ipcalc` to visualize it:
 
-```
+```shell
 $ ipcalc 10.1.2.240/28
 Address:   10.1.2.240           00001010.00000001.00000010.1111 0000
 Netmask:   255.255.255.240 = 28 11111111.11111111.11111111.1111 0000
@@ -149,7 +149,7 @@ the network's own address and the broadcast address. You can thus use
 [`cidrhost`](./cidrhost.html) function to calculate those host addresses by
 providing it a value between 1 and 14:
 
-```
+```shell
 > cidrhost("10.1.2.240/28", 1)
 10.1.2.241
 > cidrhost("10.1.2.240/28", 14)

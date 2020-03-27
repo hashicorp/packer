@@ -126,24 +126,24 @@ You'll see these data types when you run `packer build`:
   `timestamp, buildname, artifact, artifact_number, key, value` where `key`
   and `value` contain information about the artifact.
 
-      For example:
+  For example:
 
-      ```
-        1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
-        1539967803,amazon-ebs,artifact-count,2
-        1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
-        1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
-        1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
-        1539967803,amazon-ebs,artifact,0,files-count,0
-        1539967803,amazon-ebs,artifact,0,end
-        1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
-        1539967803,amazon-ebs,artifact,1,builder-id,
-        1539967803,amazon-ebs,artifact,1,id,
-        1539967803,amazon-ebs,artifact,1,string,
-        1539967803,amazon-ebs,artifact,1,files-count,0
-        2018/10/19 09:50:03 waiting for all plugin processes to complete...
-        1539967803,amazon-ebs,artifact,1,end
-      ```
+  ```shell
+    1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
+    1539967803,amazon-ebs,artifact-count,2
+    1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
+    1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
+    1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+    1539967803,amazon-ebs,artifact,0,files-count,0
+    1539967803,amazon-ebs,artifact,0,end
+    1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+    1539967803,amazon-ebs,artifact,1,builder-id,
+    1539967803,amazon-ebs,artifact,1,id,
+    1539967803,amazon-ebs,artifact,1,string,
+    1539967803,amazon-ebs,artifact,1,files-count,0
+    2018/10/19 09:50:03 waiting for all plugin processes to complete...
+    1539967803,amazon-ebs,artifact,1,end
+  ```
 
 You'll see these data types when you run `packer version`:
 
@@ -163,7 +163,9 @@ can invoke a new shell and use the feature.
 
 For example, assume a tab is typed at the end of each prompt line:
 
-    $ packer p
-    plugin  build
-    $ packer build -
-    -color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -timestamp          -var               -var-file
+```shell
+$ packer p
+plugin  build
+$ packer build -
+-color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -timestamp          -var               -var-file
+```

@@ -31,7 +31,7 @@ prefer to use [`try`](./try.html).
 
 ## Examples
 
-```
+```shell
 > local.foo
 {
   "bar" = "baz"
@@ -46,7 +46,7 @@ The `can` function will _not_ catch errors relating to constructs that are
 provably invalid even before dynamic expression evaluation, such as a malformed
 reference or a reference to a top-level object that has not been declared:
 
-```
+```shell
 > can(local.nonexist)
 
 Error: Reference to undeclared local value

@@ -41,7 +41,7 @@ namespace ID directly in the first argument in the usual UUID string format.
 Use the namespace keywords where possible, to make the intent more obvious to
 a future reader:
 
-```
+```shell
 > uuidv5("dns", "www.packer.io")
 a5008fae-b28c-5ba5-96cd-82b4c53552d6
 
@@ -59,7 +59,7 @@ The namespace keywords treated as equivalent to their corresponding namespace
 UUIDs, and in some special cases it may be more appropriate to use the
 UUID form:
 
-```
+```shell
 > uuidv5("6ba7b810-9dad-11d1-80b4-00c04fd430c8", "www.packer.io")
 a5008fae-b28c-5ba5-96cd-82b4c53552d6
 ```
@@ -67,7 +67,7 @@ a5008fae-b28c-5ba5-96cd-82b4c53552d6
 If you wish to use a namespace defined outside of RFC 4122, using the namespace
 UUID is required because no corresponding keyword is available:
 
-```
+```shell
 > uuidv5("743ac3c0-3bf7-4a5b-9e6c-59360447c757", "LIBS:diskfont.library")
 ede1a974-df7e-5f17-84b9-76208818b2c8
 ```

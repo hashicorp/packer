@@ -24,10 +24,47 @@
 /docs/machine-readable/*                          /docs/commands/index.html                   301!
 /docs/command-line/*                              /docs/commands/:splat                       200
 /docs/extend/*                                    /docs/extending/:splat                      200
+
 /intro/getting-started/install                    /intro/getting-started                      301!
 /intro/getting-started/install.html               /intro/getting-started                      301!
+
 /docs/basics/terminology                          /docs/terminology                           301!
 /docs/basics/terminology.html                     /docs/terminology                           301!
+
 /docs/configuration/from-1.5/:path                /docs/from-1.5/:path                        200
 /docs/configuration/from-1.5/:path/overview       /docs/from-1.5/:path                        200
 /docs/configuration/from-1.5/:path/overview.html  /docs/from-1.5/:path                        200
+
+/docs/builders/amazon.html                        /docs/builders/amazon                       301!
+/docs/builders/amazon-:path.html                  /docs/builders/amazon/:path                 200
+/docs/builders/amazon-:path                       /docs/builders/amazon/:path                 200
+
+/docs/builders/azure.html                         /docs/builders/azure                        301!
+/docs/builders/azure-:path.html                   /docs/builders/azure/:path                  200
+/docs/builders/azure-:path                        /docs/builders/azure/:path                  200
+
+/docs/builders/hyperv.html                        /docs/builders/hyperv                       301!
+/docs/builders/hyperv-:path.html                  /docs/builders/hyperv/:path                 200
+/docs/builders/hyperv-:path                       /docs/builders/hyperv/:path                 200
+
+/docs/builders/oracle.html                        /docs/builders/oracle                       301!
+/docs/builders/oracle-:path.html                  /docs/builders/oracle/:path                 200
+/docs/builders/oracle-:path                       /docs/builders/oracle/:path                 200
+
+/docs/builders/outscale.html                      /docs/builders/outscale                     301!
+/docs/builders/osc-:path.html                     /docs/builders/outscale/:path               200
+/docs/builders/osc-:path                          /docs/builders/outscale/:path               200
+
+/docs/builders/parallels.html                     /docs/builders/parallels                    301!
+/docs/builders/parallels-:path.html               /docs/builders/parallels/:path              200
+/docs/builders/parallels-:path                    /docs/builders/parallels/:path              200
+
+/docs/builders/virtualbox.html                    /docs/builders/virtualbox                   301!
+/docs/builders/virtualbox-:path.html              /docs/builders/virtualbox/:path             200
+/docs/builders/virtualbox-:path                   /docs/builders/virtualbox/:path             200
+
+/docs/builders/vmware.html                        /docs/builders/vmware                       301!
+/docs/builders/vmware-:path.html                  /docs/builders/vmware/:path                 200
+/docs/builders/vmware-:path                       /docs/builders/vmware/:path                 200
+/docs/builders/vsphere-:path.html                 /docs/builders/vmware/vsphere-:path         200
+/docs/builders/vsphere-:path                      /docs/builders/vmware/vsphere-:path         200
