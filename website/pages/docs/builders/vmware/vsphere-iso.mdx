@@ -183,7 +183,7 @@ Only use the `cluster` option. Optionally specify a `resource_pool`:
 ## Required vSphere Permissions
 
 - VM folder (this object and children):
-  ```
+  ```text
   Virtual machine -> Inventory
   Virtual machine -> Configuration
   Virtual machine -> Interaction
@@ -192,35 +192,35 @@ Only use the `cluster` option. Optionally specify a `resource_pool`:
   ```
   Individual privileges are listed in https://github.com/jetbrains-infra/packer-builder-vsphere/issues/97#issuecomment-436063235.
 - Resource pool, host, or cluster (this object):
-  ```
+  ```text
   Resource -> Assign virtual machine to resource pool
   ```
 - Host in clusters without DRS (this object):
-  ```
+  ```text
   Read-only
   ```
 - Datastore (this object):
-  ```
+  ```text
   Datastore -> Allocate space
   Datastore -> Browse datastore
   Datastore -> Low level file operations
   ```
 - Network (this object):
-  ```
+  ```text
   Network -> Assign network
   ```
 - Distributed switch (this object):
-  ```
+  ```text
   Read-only
   ```
 
 For floppy image upload:
 
 - Datacenter (this object):
-  ```
+  ```text
   Datastore -> Low level file operations
   ```
 - Host (this object):
-  ```
+  ```text
   Host -> Configuration -> System Management
   ```

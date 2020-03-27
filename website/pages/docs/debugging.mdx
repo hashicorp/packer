@@ -101,8 +101,10 @@ Issues may arise using and building Ubuntu AMIs where common packages that
 _should_ be installed from Ubuntu's Main repository are not found during a
 provisioner step:
 
-    amazon-ebs: No candidate version found for build-essential
-    amazon-ebs: No candidate version found for build-essential
+```text
+amazon-ebs: No candidate version found for build-essential
+amazon-ebs: No candidate version found for build-essential
+```
 
 This, obviously can cause problems where a build is unable to finish
 successfully as the proper packages cannot be provisioned correctly. The

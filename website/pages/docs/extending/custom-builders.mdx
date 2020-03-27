@@ -175,7 +175,7 @@ We use that list of variables to generate a custom placeholder map per builder t
 combines custom variables with the placeholder map of default build variables created by Packer.
 Here's an example snippet telling packer what will be made available by the builder:
 
-```
+```go
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
     // ...
 
@@ -190,7 +190,7 @@ for the template containing the build variable(s) to validate.
 Once the placeholder is set, it's necessary to pass the variables' real values when calling
 the provisioner. This can be done as the example below:
 
-```
+```go
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
     // ...
 
@@ -210,7 +210,7 @@ will access this data later via the Artifact's `State` method.
 
 The Artifact code should be implemented similar to the below:
 
-```
+```go
 type Artifact struct {
 	// ...
 
@@ -231,7 +231,7 @@ func (a *Artifact) State(name string) interface{} {
 The builder should return the above Artifact containing the generated data and the code should be similar
 to the example snippet below:
 
-```
+```go
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
     // ...
 
@@ -246,7 +246,7 @@ The code above assigns the `generated_data` state to the `StateData` map with th
 
 Here some example of how this data will be used by post-processors:
 
-```
+```go
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, bool, error) {
     generatedData := source.State("generated_data")
 

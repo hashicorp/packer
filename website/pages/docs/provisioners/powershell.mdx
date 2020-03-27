@@ -234,13 +234,15 @@ required for the JSON template to be parsed correctly.
 
 The above snippet should result in the following output on the Packer console:
 
-    ==> amazon-ebs: Provisioning with Powershell...
-    ==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
-        amazon-ebs: A literal dollar $ must be escaped
-        amazon-ebs: A literal backtick ` must be escaped
-        amazon-ebs: Here "double quotes" must be escaped
-        amazon-ebs: Here 'single quotes' don't really need to be
-        amazon-ebs: escaped... but it doesn't hurt to do so.
+```shell
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
+    amazon-ebs: A literal dollar $ must be escaped
+    amazon-ebs: A literal backtick ` must be escaped
+    amazon-ebs: Here "double quotes" must be escaped
+    amazon-ebs: Here 'single quotes' don't really need to be
+    amazon-ebs: escaped... but it doesn't hurt to do so.
+```
 
 ### When Not To Escape...
 
@@ -286,14 +288,16 @@ for the user. There is no need to use escapes in these instances.
 
 The above snippet should result in the following output on the Packer console:
 
-    ==> amazon-ebs: Provisioning with Powershell...
-    ==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
-        amazon-ebs: The dollar in the elevated_password is interpreted correctly
-    ==> amazon-ebs: Provisioning with Powershell...
-    ==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
-        amazon-ebs: In the following examples the special character is interpreted correctly:
-        amazon-ebs: The dollar in VAR1:                            A$Dollar
-        amazon-ebs: The backtick in VAR2:                          A`Backtick
-        amazon-ebs: The single quote in VAR3:                      A'SingleQuote
-        amazon-ebs: The double quote in VAR4:                      A"DoubleQuote
-        amazon-ebs: The dollar in VAR5 (expanded from a user var): My$tring
+```shell
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
+    amazon-ebs: The dollar in the elevated_password is interpreted correctly
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
+    amazon-ebs: In the following examples the special character is interpreted correctly:
+    amazon-ebs: The dollar in VAR1:                            A$Dollar
+    amazon-ebs: The backtick in VAR2:                          A`Backtick
+    amazon-ebs: The single quote in VAR3:                      A'SingleQuote
+    amazon-ebs: The double quote in VAR4:                      A"DoubleQuote
+    amazon-ebs: The dollar in VAR5 (expanded from a user var): My$tring
+```

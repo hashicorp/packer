@@ -77,9 +77,11 @@ listed below:
   template variables as well as private elements of ExecuteTemplate (see
   source: provisioner/puppet-server/provisioner.go).
 
-      [
-        {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}}
-      ]
+  ```text
+  [
+    {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}}
+  ]
+  ```
 
 * `facter` (object of key/value strings) - Additional
   [facts](https://puppetlabs.com/facter) to make available to the Puppet run.
@@ -130,30 +132,34 @@ listed below:
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Puppet:
 
-    cd {{.WorkingDir}} &&
-        {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
-        {{if .Sudo}}sudo -E {{end}}
-        {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-      puppet agent --onetime --no-daemonize --detailed-exitcodes
-        {{if .Debug}}--debug {{end}}
-        {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
-        {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
-        {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
-        {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
-        {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+    {{if .Sudo}}sudo -E {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+    {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+    {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+    {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```
 
 The following command is used if guest OS type is windows:
 
-    cd {{.WorkingDir}} &&
-        {{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
-        {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-      puppet agent --onetime --no-daemonize --detailed-exitcodes
-        {{if .Debug}}--debug {{end}}
-        {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
-        {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
-        {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
-        {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
-        {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+    {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+    {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+    {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```
 
 ## Default Facts
 

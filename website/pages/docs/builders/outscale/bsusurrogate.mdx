@@ -126,17 +126,17 @@ builder.
   new OMI, the VM automatically launches with these additional volumes,
   and will restore them from snapshots taken from the source VM.
 
-      - `delete_on_vm_deletion` (boolean) - Indicates whether the BSU volume is deleted on VM termination. Default `false`. **NOTE**: If this value is not explicitly set to `true` and volumes are not cleaned up by an alternative method, additional volumes will accumulate after every build.
+  - `delete_on_vm_deletion` (boolean) - Indicates whether the BSU volume is deleted on VM termination. Default `false`. **NOTE**: If this value is not explicitly set to `true` and volumes are not cleaned up by an alternative method, additional volumes will accumulate after every build.
 
-      - `device_name` (string) - The device name exposed to the VM (for example, `/dev/sdh` or `xvdh`). Required for every device in the block device mapping.
+  - `device_name` (string) - The device name exposed to the VM (for example, `/dev/sdh` or `xvdh`). Required for every device in the block device mapping.
 
-      - `iops` (number) - The number of I/O operations per second (IOPS) that the volume supports. See the documentation on
-        [IOPs](https://wiki.outscale.net/display/EN/About+Volumes#AboutVolumes-VolumeTypesVolumeTypesandIOPS)
-        for more information.
+  - `iops` (number) - The number of I/O operations per second (IOPS) that the volume supports. See the documentation on
+    [IOPs](https://wiki.outscale.net/display/EN/About+Volumes#AboutVolumes-VolumeTypesVolumeTypesandIOPS)
+    for more information.
 
-      - `volume_size` (number) - The size of the volume, in GiB. Required if not specifying a `snapshot_id`
+  - `volume_size` (number) - The size of the volume, in GiB. Required if not specifying a `snapshot_id`
 
-      - `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD) volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic volumes
+  - `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD) volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic volumes
 
 - `run_tags` (object of key/value strings) - Tags to apply to the VM
   that is _launched_ to create the OMI. These tags are _not_ applied to the

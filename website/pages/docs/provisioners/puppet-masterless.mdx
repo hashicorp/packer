@@ -88,10 +88,12 @@ Optional parameters:
   template variables as well as private elements of ExecuteTemplate (see
   source: provisioner/puppet-masterless/provisioner.go).
 
-      [
-        {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}},
-        {{if ne ".ModulePath" ""}}--modulepath="{{.ModulePath}}{{.ModulePathJoiner}}$(puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)"{{end}}
-      ]
+  ```text
+  [
+    {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}},
+    {{if ne ".ModulePath" ""}}--modulepath="{{.ModulePath}}{{.ModulePathJoiner}}$(puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)"{{end}}
+  ]
+  ```
 
 * `facter` (object of key:value strings) - Additional
   [facts](https://docs.puppet.com/facter/) to make available to the Puppet
@@ -152,30 +154,34 @@ multiple manifests you should use `manifest_file` instead.
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Puppet:
 
-    cd {{.WorkingDir}} &&
-        {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
-        {{if .Sudo}}sudo -E {{end}}
-        {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-      puppet apply --detailed-exitcodes
-        {{if .Debug}}--debug {{end}}
-        {{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
-        {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
-        {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
-        {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
-        {{.ManifestFile}}
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+    {{if .Sudo}}sudo -E {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet apply --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
+    {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+    {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+    {{.ManifestFile}}
+```
 
 The following command is used if guest OS type is windows:
 
-    cd {{.WorkingDir}} &&
-        {{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
-        {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-      puppet apply --detailed-exitcodes
-        {{if .Debug}}--debug {{end}}
-        {{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
-        {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
-        {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
-        {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
-        {{.ManifestFile}}
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet apply --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
+    {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+    {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+    {{.ManifestFile}}
+```
 
 ## Default Facts
 
