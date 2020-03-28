@@ -356,178 +356,117 @@ func TestAnsibleLongMessages(t *testing.T) {
 	}
 }
 
-func TestCreateInventoryFile_vers1(t *testing.T) {
-	var p Provisioner
-	p.Prepare(testConfig(t))
-	defer os.Remove(p.config.Command)
-	p.ansibleMajVersion = 1
-	p.config.User = "testuser"
-	p.config.UseProxy = confighelper.TriFalse
-	p.generatedData = map[string]interface{}{
-		"Host": "123.45.67.89",
-		"Port": "2222",
+func TestCreateInventoryFile(t *testing.T) {
+	type inventoryFileTestCases struct {
+		AnsibleVersion uint
+		User           string
+		Groups         []string
+		EmptyGroups    []string
+		UseProxy       confighelper.Trilean
+		GeneratedData  map[string]interface{}
+		Expected       string
 	}
 
-	err := p.createInventoryFile()
-	if err != nil {
-		t.Fatalf("error creating config using localhost and local port proxy")
-	}
-	if p.config.InventoryFile == "" {
-		t.Fatalf("No inventory file was created")
-	}
-	defer os.Remove(p.config.InventoryFile)
-	f, err := ioutil.ReadFile(p.config.InventoryFile)
-	if err != nil {
-		t.Fatalf("couldn't read created inventoryfile: %s", err)
-	}
-
-	expected := "default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=2222\n"
-	if fmt.Sprintf("%s", f) != expected {
-		t.Fatalf("File didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
-	}
-}
-
-func TestCreateInventoryFile_vers2(t *testing.T) {
-	var p Provisioner
-	p.Prepare(testConfig(t))
-	defer os.Remove(p.config.Command)
-	p.ansibleMajVersion = 2
-	p.config.User = "testuser"
-	p.config.UseProxy = confighelper.TriFalse
-	p.generatedData = map[string]interface{}{
-		"Host": "123.45.67.89",
-		"Port": "1234",
-	}
-
-	err := p.createInventoryFile()
-	if err != nil {
-		t.Fatalf("error creating config using localhost and local port proxy")
-	}
-	if p.config.InventoryFile == "" {
-		t.Fatalf("No inventory file was created")
-	}
-	defer os.Remove(p.config.InventoryFile)
-	f, err := ioutil.ReadFile(p.config.InventoryFile)
-	if err != nil {
-		t.Fatalf("couldn't read created inventoryfile: %s", err)
-	}
-	expected := "default ansible_host=123.45.67.89 ansible_user=testuser ansible_port=1234\n"
-	if fmt.Sprintf("%s", f) != expected {
-		t.Fatalf("File didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
-	}
-}
-
-func TestCreateInventoryFile_Groups(t *testing.T) {
-	var p Provisioner
-	p.Prepare(testConfig(t))
-	defer os.Remove(p.config.Command)
-	p.ansibleMajVersion = 1
-	p.config.User = "testuser"
-	p.config.Groups = []string{"Group1", "Group2"}
-	p.config.UseProxy = confighelper.TriFalse
-	p.generatedData = map[string]interface{}{
-		"Host": "123.45.67.89",
-		"Port": "1234",
-	}
-
-	err := p.createInventoryFile()
-	if err != nil {
-		t.Fatalf("error creating config using localhost and local port proxy")
-	}
-	if p.config.InventoryFile == "" {
-		t.Fatalf("No inventory file was created")
-	}
-	defer os.Remove(p.config.InventoryFile)
-	f, err := ioutil.ReadFile(p.config.InventoryFile)
-	if err != nil {
-		t.Fatalf("couldn't read created inventoryfile: %s", err)
-	}
-	expected := `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
+	TestCases := []inventoryFileTestCases{
+		{
+			AnsibleVersion: 1,
+			User:           "testuser",
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData:  basicGenData(nil),
+			Expected:       "default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234\n",
+		},
+		{
+			AnsibleVersion: 2,
+			User:           "testuser",
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData:  basicGenData(nil),
+			Expected:       "default ansible_host=123.45.67.89 ansible_user=testuser ansible_port=1234\n",
+		},
+		{
+			AnsibleVersion: 1,
+			User:           "testuser",
+			Groups:         []string{"Group1", "Group2"},
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData:  basicGenData(nil),
+			Expected: `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group1]
 default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group2]
 default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
-`
-	if fmt.Sprintf("%s", f) != expected {
-		t.Fatalf("File didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
-	}
-}
-
-func TestCreateInventoryFile_EmptyGroups(t *testing.T) {
-	var p Provisioner
-	p.Prepare(testConfig(t))
-	defer os.Remove(p.config.Command)
-	p.ansibleMajVersion = 1
-	p.config.User = "testuser"
-	p.config.EmptyGroups = []string{"Group1", "Group2"}
-	p.config.UseProxy = confighelper.TriFalse
-	p.generatedData = map[string]interface{}{
-		"Host": "123.45.67.89",
-		"Port": "1234",
-	}
-
-	err := p.createInventoryFile()
-	if err != nil {
-		t.Fatalf("error creating config using localhost and local port proxy")
-	}
-	if p.config.InventoryFile == "" {
-		t.Fatalf("No inventory file was created")
-	}
-	defer os.Remove(p.config.InventoryFile)
-	f, err := ioutil.ReadFile(p.config.InventoryFile)
-	if err != nil {
-		t.Fatalf("couldn't read created inventoryfile: %s", err)
-	}
-	expected := `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
+`,
+		},
+		{
+			AnsibleVersion: 1,
+			User:           "testuser",
+			EmptyGroups:    []string{"Group1", "Group2"},
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData:  basicGenData(nil),
+			Expected: `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group1]
 [Group2]
-`
-	if fmt.Sprintf("%s", f) != expected {
-		t.Fatalf("File didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
-	}
-}
-
-func TestCreateInventoryFile_GroupsAndEmptyGroups(t *testing.T) {
-	var p Provisioner
-	p.Prepare(testConfig(t))
-	defer os.Remove(p.config.Command)
-	p.ansibleMajVersion = 1
-	p.config.User = "testuser"
-	p.config.Groups = []string{"Group1", "Group2"}
-	p.config.EmptyGroups = []string{"Group3"}
-	p.config.UseProxy = confighelper.TriFalse
-	p.generatedData = map[string]interface{}{
-		"Host": "123.45.67.89",
-		"Port": "1234",
-	}
-
-	err := p.createInventoryFile()
-	if err != nil {
-		t.Fatalf("error creating config using localhost and local port proxy")
-	}
-	if p.config.InventoryFile == "" {
-		t.Fatalf("No inventory file was created")
-	}
-	defer os.Remove(p.config.InventoryFile)
-	f, err := ioutil.ReadFile(p.config.InventoryFile)
-	if err != nil {
-		t.Fatalf("couldn't read created inventoryfile: %s", err)
-	}
-	expected := `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
+`,
+		},
+		{
+			AnsibleVersion: 1,
+			User:           "testuser",
+			Groups:         []string{"Group1", "Group2"},
+			EmptyGroups:    []string{"Group3"},
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData:  basicGenData(nil),
+			Expected: `default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group1]
 default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group2]
 default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port=1234
 [Group3]
-`
-	if fmt.Sprintf("%s", f) != expected {
-		t.Fatalf("File didn't match expected:\n\n file is \n\n %s", f)
+`,
+		},
+		{
+			AnsibleVersion: 2,
+			User:           "testuser",
+			UseProxy:       confighelper.TriFalse,
+			GeneratedData: basicGenData(map[string]interface{}{
+				"ConnType": "winrm",
+				"Password": "12345",
+			}),
+			Expected: "default ansible_host=123.45.67.89 ansible_connection=winrm ansible_password=12345 ansible_shell_type=powershell ansible_user=testuser ansible_port=1234\n",
+		},
+	}
+
+	for _, tc := range TestCases {
+		var p Provisioner
+		p.Prepare(testConfig(t))
+		defer os.Remove(p.config.Command)
+		p.ansibleMajVersion = tc.AnsibleVersion
+		p.config.User = tc.User
+		p.config.Groups = tc.Groups
+		p.config.EmptyGroups = tc.EmptyGroups
+		p.config.UseProxy = tc.UseProxy
+		p.generatedData = tc.GeneratedData
+
+		err := p.createInventoryFile()
+		if err != nil {
+			t.Fatalf("error creating config using localhost and local port proxy")
+		}
+		if p.config.InventoryFile == "" {
+			t.Fatalf("No inventory file was created")
+		}
+		defer os.Remove(p.config.InventoryFile)
+		f, err := ioutil.ReadFile(p.config.InventoryFile)
+		if err != nil {
+			t.Fatalf("couldn't read created inventoryfile: %s", err)
+		}
+
+		expected := tc.Expected
+		if fmt.Sprintf("%s", f) != expected {
+			t.Fatalf("File didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
+		}
 	}
 }
 
 func basicGenData(input map[string]interface{}) map[string]interface{} {
 	gd := map[string]interface{}{
-		"Host":              "123.45.67.8",
+		"Host":              "123.45.67.89",
 		"Port":              int64(1234),
 		"ConnType":          "ssh",
 		"SSHPrivateKeyFile": "",
@@ -587,6 +526,22 @@ func TestUseProxy(t *testing.T) {
 			generatedData:              basicGenData(nil),
 			expectedSetupAdapterCalled: true,
 		},
+		{
+			explanation: "use_proxy is false and connType is winRM. we should not set up the adapter.",
+			UseProxy:    confighelper.TriFalse,
+			generatedData: basicGenData(map[string]interface{}{
+				"ConnType": "winrm",
+			}),
+			expectedSetupAdapterCalled: false,
+		},
+		{
+			explanation: "use_proxy is unset and connType is winRM. we should set up the adapter.",
+			UseProxy:    confighelper.TriUnset,
+			generatedData: basicGenData(map[string]interface{}{
+				"ConnType": "winrm",
+			}),
+			expectedSetupAdapterCalled: true,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -609,7 +564,7 @@ func TestUseProxy(t *testing.T) {
 		p.Provision(ctx, ui, comm, tc.generatedData)
 
 		if l.setupAdapterCalled != tc.expectedSetupAdapterCalled {
-			t.Fatalf("Should have called set up adapter: %s", tc.explanation)
+			t.Fatalf("%s", tc.explanation)
 		}
 		os.Remove(p.config.Command)
 	}
