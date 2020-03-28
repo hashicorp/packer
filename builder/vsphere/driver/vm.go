@@ -70,7 +70,7 @@ type CreateConfig struct {
 	NICs          []NIC
 	USBController bool
 	Version       uint   // example: 10
-	Firmware      string // efi or bios
+	Firmware      string // efi-secure, efi or bios
 	Storage       []Disk
 }
 
@@ -107,7 +107,12 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
 	}
-	if config.Firmware != "" {
+	if config.Firmware == "efi-secure" {
+		createSpec.Firmware = "efi"
+		createSpec.BootOptions = &types.VirtualMachineBootOptions{
+			EfiSecureBootEnabled: types.NewBool(true),
+		}
+	} else if config.Firmware != "" {
 		createSpec.Firmware = config.Firmware
 	}
 
