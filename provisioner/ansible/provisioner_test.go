@@ -525,6 +525,24 @@ default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port
 	}
 }
 
+func basicGenData(input map[string]interface{}) map[string]interface{} {
+	gd := map[string]interface{}{
+		"Host":              "123.45.67.8",
+		"Port":              int64(1234),
+		"ConnType":          "ssh",
+		"SSHPrivateKeyFile": "",
+		"SSHPrivateKey":     "asdf",
+		"User":              "PartyPacker",
+	}
+	if input == nil {
+		return gd
+	}
+	for k, v := range input {
+		gd[k] = v
+	}
+	return gd
+}
+
 func TestUseProxy(t *testing.T) {
 	type testcase struct {
 		UseProxy                   confighelper.Trilean
@@ -535,68 +553,38 @@ func TestUseProxy(t *testing.T) {
 
 	tcs := []testcase{
 		{
-			explanation: "use_proxy is true; we should set up adapter",
-			UseProxy:    confighelper.TriTrue,
-			generatedData: map[string]interface{}{
-				"Host":              "123.45.67.8",
-				"Port":              int64(1234),
-				"ConnType":          "ssh",
-				"SSHPrivateKeyFile": "",
-				"SSHPrivateKey":     "asdf",
-				"User":              "PartyPacker",
-			},
+			explanation:                "use_proxy is true; we should set up adapter",
+			UseProxy:                   confighelper.TriTrue,
+			generatedData:              basicGenData(nil),
 			expectedSetupAdapterCalled: true,
 		},
 		{
 			explanation: "use_proxy is false but no IP addr is available; we should set up adapter anyway.",
 			UseProxy:    confighelper.TriFalse,
-			generatedData: map[string]interface{}{
-				"Host":              "",
-				"Port":              nil,
-				"ConnType":          "ssh",
-				"SSHPrivateKeyFile": "",
-				"SSHPrivateKey":     "asdf",
-				"User":              "PartyPacker",
-			},
+			generatedData: basicGenData(map[string]interface{}{
+				"Host": "",
+				"Port": nil,
+			}),
 			expectedSetupAdapterCalled: true,
 		},
 		{
-			explanation: "use_proxy is false; we shouldn't set up adapter.",
-			UseProxy:    confighelper.TriFalse,
-			generatedData: map[string]interface{}{
-				"Host":              "123.45.67.8",
-				"Port":              int64(1234),
-				"ConnType":          "ssh",
-				"SSHPrivateKeyFile": "",
-				"SSHPrivateKey":     "asdf",
-				"User":              "PartyPacker",
-			},
+			explanation:                "use_proxy is false; we shouldn't set up adapter.",
+			UseProxy:                   confighelper.TriFalse,
+			generatedData:              basicGenData(nil),
 			expectedSetupAdapterCalled: false,
 		},
 		{
 			explanation: "use_proxy is false but connType isn't ssh or winrm.",
 			UseProxy:    confighelper.TriFalse,
-			generatedData: map[string]interface{}{
-				"Host":              "123.45.67.8",
-				"Port":              int64(1234),
-				"ConnType":          "docker",
-				"SSHPrivateKeyFile": "",
-				"SSHPrivateKey":     "asdf",
-				"User":              "PartyPacker",
-			},
+			generatedData: basicGenData(map[string]interface{}{
+				"ConnType": "docker",
+			}),
 			expectedSetupAdapterCalled: true,
 		},
 		{
-			explanation: "use_proxy is unset; we should default to setting up the adapter (for now).",
-			UseProxy:    confighelper.TriUnset,
-			generatedData: map[string]interface{}{
-				"Host":              "123.45.67.8",
-				"Port":              int64(1234),
-				"ConnType":          "ssh",
-				"SSHPrivateKeyFile": "",
-				"SSHPrivateKey":     "asdf",
-				"User":              "PartyPacker",
-			},
+			explanation:                "use_proxy is unset; we should default to setting up the adapter (for now).",
+			UseProxy:                   confighelper.TriUnset,
+			generatedData:              basicGenData(nil),
 			expectedSetupAdapterCalled: true,
 		},
 	}
