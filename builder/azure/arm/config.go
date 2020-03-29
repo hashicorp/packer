@@ -463,8 +463,8 @@ func (c *Config) createCertificate() (string, error) {
 		err = fmt.Errorf("Failed to Generate Private Key: %s", err)
 		return "", err
 	}
-
-	host := fmt.Sprintf("%s.cloudapp.net", c.tmpComputeName)
+	normalizedLocation := strings.ToLower(strings.ReplaceAll(c.Location, " ", ""))
+	host := fmt.Sprintf("%s.%s.cloudapp.azure.com", c.tmpComputeName, normalizedLocation)
 	notBefore := time.Now()
 	notAfter := notBefore.Add(24 * time.Hour)
 
