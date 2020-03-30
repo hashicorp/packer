@@ -23,18 +23,36 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 		t.Skip("Provisioners Acceptance tests skipped unless env 'ACC_TEST_BUILDERS' and 'ACC_TEST_PROVISIONERS' are set")
 	}
 
+	// Get builders and provisioners type to be tested
+	var builders []string
+	if b == "all" {
+		// test all available builders
+		for k := range BuildersAccTest {
+			builders = append(builders, k)
+		}
+	} else {
+		builders = strings.Split(b, ",")
+	}
+	var provisioners []string
+	if p == "all" {
+		// test all available provisioners
+		for k := range ProvisionersAccTest {
+			provisioners = append(provisioners, k)
+		}
+	} else {
+		provisioners = strings.Split(p, ",")
+	}
+
 	// set pre-config with necessary builders and provisioners
 	c := &command.BuildCommand{
 		Meta: testshelper.TestMetaFile(t),
 	}
 
-	builders := strings.Split(b, ",")
 	mapOfBuilders := packer.MapOfBuilder{}
 	for _, builder := range builders {
 		mapOfBuilders[builder] = func() (packer.Builder, error) { return command.Builders[builder], nil }
-	}
 
-	provisioners := strings.Split(p, ",")
+	}
 	mapOfProvisioner := packer.MapOfProvisioner{}
 	for _, provisioner := range provisioners {
 		mapOfProvisioner[provisioner] = func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil }
