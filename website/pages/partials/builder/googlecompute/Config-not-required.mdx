@@ -25,19 +25,6 @@
 -   `disk_type` (string) - Type of disk used to back your instance, like pd-ssd or pd-standard.
     Defaults to pd-standard.
     
--   `enable_secure_boot` (bool) - Enable Secure Boot on a Shielded VM instance. Secure Boot helps ensure that the system
-    only runs authentic software by verifying the digital signature of all boot components, and halting the boot process
-    if signature verification fails.
-    [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm#secure-boot)
-
--   `enable_vtpm` (bool) - Enable virtualized trusted platform module on a Shielded VM instance.
-    [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm#vtpm)
-
--   `enable_integrity_monitoring` (bool) - Enable integrity monitoring on a Shielded VM instance. Integrity
-    monitoring helps you understand and make decisions about the state of your VM instances. Note: requires
-    enable_vtpm to be set to true.
-    [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm#integrity-monitoring)
-
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `packer-{{timestamp}}`.
     
@@ -150,4 +137,4 @@
     instance. For more information, see the Vault docs:
     https://www.vaultproject.io/docs/commands/#environment-variables
     Example:`"vault_gcp_oauth_engine": "gcp/token/my-project-editor",`
-
+    
