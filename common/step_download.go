@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -108,15 +109,7 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 }
 
 func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
-	if runtime.GOOS == "windows" {
-		// Check that the user specified a UNC path, and promote it to an smb:// uri.
-		if strings.HasPrefix(source, "\\\\") && len(source) > 2 && source[2] != '?' {
-			source = filepath.ToSlash(source[2:])
-			source = fmt.Sprintf("smb://%s", source)
-		}
-	}
-
-	u, err := urlhelper.Parse(source)
+	u, err := parseSourceURL(source)
 	if err != nil {
 		return "", fmt.Errorf("url parse: %s", err)
 	}
@@ -220,6 +213,19 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		ui.Say(fmt.Sprintf("Download failed %s", err))
 		return "", err
 	}
+}
+
+func parseSourceURL(source string) (*url.URL, error) {
+	if runtime.GOOS == "windows" {
+		// Check that the user specified a UNC path, and promote it to an smb:// uri.
+		if strings.HasPrefix(source, "\\\\") && len(source) > 2 && source[2] != '?' {
+			source = filepath.ToSlash(source[2:])
+			source = fmt.Sprintf("smb://%s", source)
+		}
+	}
+
+	u, err := urlhelper.Parse(source)
+	return u, err
 }
 
 func (s *StepDownload) Cleanup(multistep.StateBag) {}
