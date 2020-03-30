@@ -81,17 +81,20 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 			args := []string{
 				filePath,
 			}
-			err = provicionerAcc.RunTest(c, args)
-			if err != nil {
-				t.Fatalf("bad: failed to to run build: %s", err.Error())
-			}
+			testName := fmt.Sprintf("testing %s agaist %s", builder, provisioner)
+			t.Run(testName, func(t *testing.T) {
+				err = provicionerAcc.RunTest(c, args)
+				if err != nil {
+					t.Fatalf("bad: failed to to run build: %s", err.Error())
+				}
 
-			// Cleanup created resources
-			testshelper.CleanupFiles(fileName)
-			err = builderAcc.CleanUp()
-			if err != nil {
-				t.Fatalf("bad: failed to clean up resources: %s", err.Error())
-			}
+				// Cleanup created resources
+				testshelper.CleanupFiles(fileName)
+				err = builderAcc.CleanUp()
+				if err != nil {
+					t.Fatalf("bad: failed to clean up resources: %s", err.Error())
+				}
+			})
 		}
 	}
 }
