@@ -11,7 +11,6 @@ package ebs
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -240,6 +239,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
+			SkipSSHRuleCreation:    b.config.SSHInterface == "session_manager",
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
@@ -258,8 +258,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&awscommon.StepCreateSSMTunnel{
 			AWSSession: session,
-			DstPort:    strconv.Itoa(22),
-			SrcPort:    "8081",
+			DstPort:    b.config.Comm.SSHPort,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
@@ -267,6 +266,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				ec2conn,
 				b.config.SSHInterface,
 				b.config.Comm.Host(),
+			),
+			SSHPort: awscommon.SSHPort(
+				b.config.SSHInterface,
+				b.config.Comm.Port(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},

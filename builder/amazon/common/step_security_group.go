@@ -21,7 +21,7 @@ type StepSecurityGroup struct {
 	SecurityGroupFilter    SecurityGroupFilterOptions
 	SecurityGroupIds       []string
 	TemporarySGSourceCidrs []string
-	SkipSSHGroupCreation   bool
+	SkipSSHRuleCreation    bool
 
 	createdGroupId string
 }
@@ -77,10 +77,7 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	if s.SkipSSHGroupCreation {
-		return multistep.ActionContinue
-	}
-
+	// TODO move to some prevalidation step for
 	port := s.CommConfig.Port()
 	if port == 0 {
 		if s.CommConfig.Type != "none" {
@@ -115,14 +112,14 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 			GroupIds: []*string{aws.String(s.createdGroupId)},
 		},
 	)
-	if err == nil {
-		log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
-	} else {
+	if err != nil {
 		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, err)
 		log.Printf("[DEBUG] %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
 
 	// map the list of temporary security group CIDRs bundled with config to
 	// types expected by EC2.
@@ -132,6 +129,13 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 			CidrIp: aws.String(cidr),
 		}
 		groupIpRanges = append(groupIpRanges, &ipRange)
+	}
+
+	// Set some state data for use in future steps
+	state.Put("securityGroupIds", []string{s.createdGroupId})
+
+	if s.SkipSSHRuleCreation {
+		return multistep.ActionContinue
 	}
 
 	// Authorize the SSH access for the security group
@@ -158,9 +162,6 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	// Set some state data for use in future steps
-	state.Put("securityGroupIds", []string{s.createdGroupId})
 
 	return multistep.ActionContinue
 }

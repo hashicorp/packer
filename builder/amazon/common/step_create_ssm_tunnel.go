@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net"
 	"strconv"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -22,37 +22,34 @@ type StepCreateSSMTunnel struct {
 	CommConfig *communicator.Config
 	AWSSession *session.Session
 	InstanceID string
-	DstPort    string
-	SrcPort    string
+	DstPort    int
 
 	ssmSession *ssm.StartSessionOutput
-	tunnel     net.Listener
 }
 
 func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	/*
-		p, _ := strconv.Atoi(s.SrcPort)
-		//TODO dynamically setup local port
-		// Find an available TCP port for our HTTP server
-		l, err := packernet.ListenRangeConfig{
-			Min:     p,
-			Max:     p,
-			Addr:    "0.0.0.0",
-			Network: "tcp",
-		}.Listen(ctx)
-
-		if err != nil {
-			err := fmt.Errorf("Error finding port: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	*/
-	params := map[string][]*string{
-		"portNumber":      []*string{aws.String(s.DstPort)},
-		"localPortNumber": []*string{aws.String(strconv.Itoa(8081))},
+	// Find an available TCP port for our HTTP server
+	l, err := net.ListenRangeConfig{
+		Min:     8000,
+		Max:     9000,
+		Addr:    "0.0.0.0",
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		err := fmt.Errorf("error finding an available port to initiate a session tunnel: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
+
+	dst, src := strconv.Itoa(s.DstPort), strconv.Itoa(l.Port)
+	params := map[string][]*string{
+		"portNumber":      []*string{aws.String(dst)},
+		"localPortNumber": []*string{aws.String(src)},
+	}
+	l.Close()
+
 	instance, ok := state.Get("instance").(*ec2.Instance)
 	if !ok {
 		err := fmt.Errorf("error encountered in obtaining target instance id for SSM tunnel")
@@ -62,15 +59,14 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	s.InstanceID = aws.StringValue(instance.InstanceId)
-
 	ssmconn := ssm.New(s.AWSSession)
 	input := ssm.StartSessionInput{
 		DocumentName: aws.String("AWS-StartPortForwardingSession"),
 		Parameters:   params,
 		Target:       aws.String(s.InstanceID),
 	}
+
 	var output *ssm.StartSessionOutput
-	var err error
 	err = retry.Config{
 		Tries:       11,
 		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
@@ -81,35 +77,40 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	})
 
 	if err != nil {
-		err = fmt.Errorf("error encountered in starting session: %s", err)
+		err = fmt.Errorf("error encountered in starting session for instance %q: %s", s.InstanceID, err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 	s.ssmSession = output
 
-	sessJson, err := json.Marshal(s.ssmSession)
+	// AWS session-manager-plugin requires a valid session be passed in JSON
+	sessionDetails, err := json.Marshal(s.ssmSession)
 	if err != nil {
 		ui.Error(err.Error())
-		state.Put("error", err)
+		state.Put("error encountered in reading session details", err)
 		return multistep.ActionHalt
 	}
 
-	paramsJson, err := json.Marshal(input)
+	sessionParameters, err := json.Marshal(input)
 	if err != nil {
 		ui.Error(err.Error())
-		state.Put("error", err)
+		state.Put("error encountered in reading session parameter details", err)
 		return multistep.ActionHalt
 	}
 
 	driver := SSMDriver{Ui: ui}
-	// sessJson, region, "StartSession", profile, paramJson, endpoint
-	if err := driver.StartSession(string(sessJson), "us-east-1", "packer", string(paramsJson), ssmconn.Endpoint); err != nil {
-		err = fmt.Errorf("error encountered in creating a connection to the SSM agent: %s", err)
+	// sessionDetails, region, "StartSession", profile, paramJson, endpoint
+	region := aws.StringValue(s.AWSSession.Config.Region)
+	// how to best get Profile name
+	if err := driver.StartSession(string(sessionDetails), region, "default", string(sessionParameters), ssmconn.Endpoint); err != nil {
+		err = fmt.Errorf("error encountered in establishing a tunnel with the session-manager-plugin: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	state.Put("sessionPort", l.Port)
 
 	return multistep.ActionContinue
 }

@@ -28,6 +28,10 @@ func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.St
 			return host, nil
 		}
 
+		if sshInterface == "session_manager" {
+			return "127.0.0.1", nil
+		}
+
 		const tries = 2
 		// <= with current structure to check result of describing `tries` times
 		for j := 0; j <= tries; j++ {
@@ -83,5 +87,22 @@ func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.St
 		}
 
 		return "", errors.New("couldn't determine address for instance")
+	}
+}
+
+// SSHPort returns a function that can be given to the SSH communicator
+// for determining the SSH port to use when connecting to an instance.
+func SSHPort(sshInterface string, port int) func(multistep.StateBag) (int, error) {
+	return func(state multistep.StateBag) (int, error) {
+		if sshInterface != "session_manager" {
+			return port, nil
+		}
+
+		port, ok := state.GetOk("sessionPort")
+		if !ok {
+			return 0, fmt.Errorf("no local port defined for session-manager")
+		}
+		return port.(int), nil
+
 	}
 }
