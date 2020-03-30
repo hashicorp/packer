@@ -44,25 +44,7 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 	}
 
 	// set pre-config with necessary builders and provisioners
-	c := &command.BuildCommand{
-		Meta: testshelper.TestMetaFile(t),
-	}
-
-	mapOfBuilders := packer.MapOfBuilder{}
-	for _, builder := range builders {
-		mapOfBuilders[builder] = func() (packer.Builder, error) { return command.Builders[builder], nil }
-
-	}
-	mapOfProvisioner := packer.MapOfProvisioner{}
-	for _, provisioner := range provisioners {
-		mapOfProvisioner[provisioner] = func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil }
-	}
-
-	// Add basic provisioner used for testing others provisioners
-	mapOfProvisioner["file"] = func() (packer.Provisioner, error) { return command.Provisioners["file"], nil }
-
-	c.CoreConfig.Components.BuilderStore = mapOfBuilders
-	c.CoreConfig.Components.ProvisionerStore = mapOfProvisioner
+	c := testBuildCommand(t, builders, provisioners)
 
 	// build template file and run build
 	for _, builder := range builders {
@@ -85,21 +67,13 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 			fmt.Fprintf(out, `{"builders": [%s],"provisioners": [%s]}`, builderConfig, provisionerConfig)
 			fileName := fmt.Sprintf("%s_%s.json", builder, provisioner)
 			filePath := filepath.Join("./", fileName)
-			outputFile, err := os.Create(filePath)
-			if err != nil {
-				t.Fatalf("bad: failed to create template file: %s", err.Error())
-			}
-			_, err = outputFile.Write(out.Bytes())
-			if err != nil {
-				t.Fatalf("bad: failed to write template file: %s", err.Error())
-			}
-			outputFile.Sync()
+			writeJsonTemplate(out, filePath, t)
 
 			// Run test
 			args := []string{
 				filePath,
 			}
-			testName := fmt.Sprintf("testing %s agaist %s", builder, provisioner)
+			testName := fmt.Sprintf("testing %s builder against %s provisioner", builder, provisioner)
 			t.Run(testName, func(t *testing.T) {
 				err = provicionerAcc.RunTest(c, args)
 				if err != nil {
@@ -115,6 +89,41 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 			})
 		}
 	}
+}
+
+func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
+	outputFile, err := os.Create(filePath)
+	if err != nil {
+		t.Fatalf("bad: failed to create template file: %s", err.Error())
+	}
+	_, err = outputFile.Write(out.Bytes())
+	if err != nil {
+		t.Fatalf("bad: failed to write template file: %s", err.Error())
+	}
+	outputFile.Sync()
+}
+
+func testBuildCommand(t *testing.T, builders []string, provisioners []string) *command.BuildCommand {
+	c := &command.BuildCommand{
+		Meta: testshelper.TestMetaFile(t),
+	}
+
+	mapOfBuilders := packer.MapOfBuilder{}
+	for _, builder := range builders {
+		mapOfBuilders[builder] = func() (packer.Builder, error) { return command.Builders[builder], nil }
+
+	}
+	mapOfProvisioner := packer.MapOfProvisioner{}
+	for _, provisioner := range provisioners {
+		mapOfProvisioner[provisioner] = func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil }
+	}
+
+	// Add basic provisioner used for testing others provisioners
+	mapOfProvisioner["file"] = func() (packer.Provisioner, error) { return command.Provisioners["file"], nil }
+
+	c.CoreConfig.Components.BuilderStore = mapOfBuilders
+	c.CoreConfig.Components.ProvisionerStore = mapOfProvisioner
+	return c
 }
 
 // List of all provisioners available for acceptance test
