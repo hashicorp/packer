@@ -57,21 +57,20 @@ type Config struct {
 	// Type of disk used to back your instance, like pd-ssd or pd-standard.
 	// Defaults to pd-standard.
 	DiskType string `mapstructure:"disk_type" required:"false"`
-	// Shielded VM offers verifiable integrity of your Compute Engine VM instances,
-	// so you can be confident your instances haven't been compromised by boot-
-	// or kernel-level malware or rootkits. Shielded VM's verifiable integrity
-	// is achieved through the use of:
-	// * Secure Boot - helps ensure that the system only runs authentic software
-	//   by verifying the digital signature of all boot components, and halting
-	//   the boot process if signature verification fails.
+	// Create a Shielded VM image with Secure Boot enabled. It helps ensure that
+	// the system only runs authentic software by verifying the digital signature
+	// of all boot components, and halting the boot process if signature verification
+	// fails. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
 	EnableSecureBoot bool `mapstructure:"enable_secure_boot" required:"false"`
-	// * virtual trusted platform module (vTPM)-enabled Measured Boot - A vTPM
-	//   is a virtualized trusted platform module, which is a specialized computer
-	//   chip you can use to protect objects, like keys and certificates, that
-	//   you use to authenticate access to your system.
+	// Create a Shielded VM image with virtual trusted platform module
+	// Measured Boot enabled. A vTPM is a virtualized trusted platform module,
+	// which is a specialized computer chip you can use to protect objects,
+	// like keys and certificates, that you use to authenticate access to your
+	// system. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
 	EnableVtpm bool `mapstructure:"enable_vtpm" required:"false"`
-	// * Integrity monitoring - Integrity monitoring helps you understand and
-	//   make decisions about the state of your VM instances.
+	// Integrity monitoring helps you understand and make decisions about the
+	// state of your VM instances. Note: integrity monitoring relies on having
+	// vTPM enabled. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
 	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.

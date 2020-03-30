@@ -25,6 +25,21 @@
 -   `disk_type` (string) - Type of disk used to back your instance, like pd-ssd or pd-standard.
     Defaults to pd-standard.
     
+-   `enable_secure_boot` (bool) - Create a Shielded VM image with Secure Boot enabled. It helps ensure that
+    the system only runs authentic software by verifying the digital signature
+    of all boot components, and halting the boot process if signature verification
+    fails. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+    
+-   `enable_vtpm` (bool) - Create a Shielded VM image with virtual trusted platform module
+    Measured Boot enabled. A vTPM is a virtualized trusted platform module,
+    which is a specialized computer chip you can use to protect objects,
+    like keys and certificates, that you use to authenticate access to your
+    system. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+    
+-   `enable_integrity_monitoring` (bool) - Integrity monitoring helps you understand and make decisions about the
+    state of your VM instances. Note: integrity monitoring relies on having
+    vTPM enabled. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+    
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `packer-{{timestamp}}`.
     
