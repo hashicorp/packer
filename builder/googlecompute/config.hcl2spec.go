@@ -66,6 +66,9 @@ type FlatConfig struct {
 	DiskName                     *string                    `mapstructure:"disk_name" required:"false" cty:"disk_name"`
 	DiskSizeGb                   *int64                     `mapstructure:"disk_size" required:"false" cty:"disk_size"`
 	DiskType                     *string                    `mapstructure:"disk_type" required:"false" cty:"disk_type"`
+	EnableSecureBoot             *bool                      `mapstructure:"enable_secure_boot" required:"false" cty:"enable_secure_boot"`
+	EnableVtpm                   *bool                      `mapstructure:"enable_vtpm" required:"false" cty:"enable_vtpm"`
+	EnableIntegrityMonitoring    *bool                      `mapstructure:"enable_integrity_monitoring" required:"false" cty:"enable_integrity_monitoring"`
 	ImageName                    *string                    `mapstructure:"image_name" required:"false" cty:"image_name"`
 	ImageDescription             *string                    `mapstructure:"image_description" required:"false" cty:"image_description"`
 	ImageEncryptionKey           *FlatCustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false" cty:"image_encryption_key"`
@@ -167,6 +170,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_name":                       &hcldec.AttrSpec{Name: "disk_name", Type: cty.String, Required: false},
 		"disk_size":                       &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"disk_type":                       &hcldec.AttrSpec{Name: "disk_type", Type: cty.String, Required: false},
+		"enable_secure_boot":              &hcldec.AttrSpec{Name: "enable_secure_boot", Type: cty.Bool, Required: false},
+		"enable_vtpm":                     &hcldec.AttrSpec{Name: "enable_vtpm", Type: cty.Bool, Required: false},
+		"enable_integrity_monitoring":     &hcldec.AttrSpec{Name: "enable_integrity_monitoring", Type: cty.Bool, Required: false},
 		"image_name":                      &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":               &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_encryption_key":            &hcldec.BlockSpec{TypeName: "image_encryption_key", Nested: hcldec.ObjectSpec((*FlatCustomerEncryptionKey)(nil).HCL2Spec())},
