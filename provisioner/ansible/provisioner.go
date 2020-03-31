@@ -305,11 +305,6 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	return k.privKeyFile, nil
 }
 
-// ansible_user: LocalUsername
-// ansible_password: Password
-// ansible_connection: winrm
-// ansible_winrm_transport: basic
-
 const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
 const DefaultSSHInventoryFilev1 = "{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}\n"
 const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_winrm_transport=basic ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
@@ -641,11 +636,11 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	// remove winrm password from command, if it's been added
 	flattenedCmd := strings.Join(cmd.Args, " ")
 	sanitized := flattenedCmd
-	// winRMPass, ok := p.generatedData["WinRMPassword"]
-	// if ok && winRMPass != "" {
-	// 	sanitized = strings.Replace(sanitized,
-	// 		winRMPass.(string), "*****", -1)
-	// }
+	winRMPass, ok := p.generatedData["WinRMPassword"]
+	if ok && winRMPass != "" {
+		sanitized = strings.Replace(sanitized,
+			winRMPass.(string), "*****", -1)
+	}
 	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
 
 	if err := cmd.Start(); err != nil {
