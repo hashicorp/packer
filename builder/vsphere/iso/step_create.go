@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type NIC,CreateConfig
+//go:generate mapstructure-to-hcl2 -type NIC,CreateConfig,DiskConfig
 
 package iso
 
@@ -24,6 +24,15 @@ type NIC struct {
 	Passthrough *bool `mapstructure:"passthrough"`
 }
 
+type DiskConfig struct {
+	// Set the size of the disk
+	DiskSize int64 `mapstructure:"disk_size" required:"true"`
+	// Enable VMDK thin provisioning for VM. Defaults to `false`.
+	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
+	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
+	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
+}
+
 type CreateConfig struct {
 	// Set VM hardware version. Defaults to the most current VM hardware
 	// version supported by vCenter. See
@@ -31,7 +40,7 @@ type CreateConfig struct {
 	// the full list of supported VM hardware versions.
 	Version uint `mapstructure:"vm_version"`
 	// Set VM OS type. Defaults to `otherGuest`. See [
-	// here](https://pubs.vmware.com/vsphere-6-5/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
+	// here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
 	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
 	// Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
@@ -42,6 +51,10 @@ type CreateConfig struct {
 	DiskSize int64 `mapstructure:"disk_size"`
 	// Enable VMDK thin provisioning for VM. Defaults to `false`.
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
+	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
+	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
+	// A collection of one or more disks to be provisioned along with the VM.
+	Storage []DiskConfig `mapstructure:"storage"`
 	// Set network VM will be connected to.
 	Network string `mapstructure:"network"`
 	// Set VM network card type. Example `vmxnet3`.
@@ -81,17 +94,18 @@ type StepCreateVM struct {
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
+	vmPath := fmt.Sprintf("%s/%s", s.Location.Folder, s.Location.VMName)
 
-	vm, err := d.FindVM(s.Location.VMName)
+	vm, err := d.FindVM(vmPath)
 
 	if s.Force == false && err == nil {
-		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", s.Location.VMName, err))
+		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err))
 		return multistep.ActionHalt
 	} else if s.Force == true && err == nil {
-		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", s.Location.VMName))
+		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
 		err := vm.Destroy()
 		if err != nil {
-			state.Put("error", fmt.Errorf("error destroying %s: %v", s.Location.VMName, err))
+			state.Put("error", fmt.Errorf("error destroying %s: %v", vmPath, err))
 		}
 	}
 
@@ -113,22 +127,38 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		})
 	}
 
+	// add disk as the first drive for backwards compatibility if the type is defined
+	var disks []driver.Disk
+	if s.Config.DiskSize != 0 {
+		disks = append(disks, driver.Disk{
+			DiskSize:            s.Config.DiskSize,
+			DiskEagerlyScrub:    s.Config.DiskEagerlyScrub,
+			DiskThinProvisioned: s.Config.DiskThinProvisioned,
+		})
+	}
+	for _, disk := range s.Config.Storage {
+		disks = append(disks, driver.Disk{
+			DiskSize:            disk.DiskSize,
+			DiskEagerlyScrub:    disk.DiskEagerlyScrub,
+			DiskThinProvisioned: disk.DiskThinProvisioned,
+		})
+	}
+
 	vm, err = d.CreateVM(&driver.CreateConfig{
-		DiskThinProvisioned: s.Config.DiskThinProvisioned,
-		DiskControllerType:  s.Config.DiskControllerType,
-		DiskSize:            s.Config.DiskSize,
-		Name:                s.Location.VMName,
-		Folder:              s.Location.Folder,
-		Cluster:             s.Location.Cluster,
-		Host:                s.Location.Host,
-		ResourcePool:        s.Location.ResourcePool,
-		Datastore:           s.Location.Datastore,
-		GuestOS:             s.Config.GuestOSType,
-		NICs:                networkCards,
-		USBController:       s.Config.USBController,
-		Version:             s.Config.Version,
-		Firmware:            s.Config.Firmware,
-		Annotation:          s.Config.Notes,
+		DiskControllerType: s.Config.DiskControllerType,
+		Storage:            disks,
+		Annotation:         s.Config.Notes,
+		Name:               s.Location.VMName,
+		Folder:             s.Location.Folder,
+		Cluster:            s.Location.Cluster,
+		Host:               s.Location.Host,
+		ResourcePool:       s.Location.ResourcePool,
+		Datastore:          s.Location.Datastore,
+		GuestOS:            s.Config.GuestOSType,
+		NICs:               networkCards,
+		USBController:      s.Config.USBController,
+		Version:            s.Config.Version,
+		Firmware:           s.Config.Firmware,
 	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("error creating vm: %v", err))

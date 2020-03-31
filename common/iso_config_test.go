@@ -5,6 +5,7 @@ package common
 import (
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -158,7 +159,7 @@ func TestISOConfigPrepare_ISOUrl(t *testing.T) {
 	}
 
 	// Test iso_url not set but checksum url is
-	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	ts := httpTestModule("root")
 	defer ts.Close()
 	i = testISOConfig()
 	i.RawSingleISOUrl = ""
@@ -257,4 +258,35 @@ func TestISOConfigPrepare_TargetExtension(t *testing.T) {
 	if i.TargetExtension != "dmg" {
 		t.Fatalf("should've lowercased: %s", i.TargetExtension)
 	}
+}
+
+func TestISOConfigPrepare_ISOChecksumURLMyTest(t *testing.T) {
+	httpChecksums := httpTestModule("root")
+	defer httpChecksums.Close()
+	i := ISOConfig{
+		ISOChecksumURL:  httpChecksums.URL + "/subfolder.sum",
+		ISOChecksumType: "sha256",
+		ISOUrls:         []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
+	}
+
+	// Test ISOChecksum overrides url
+	warns, err := i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("Bad: should not have warnings")
+	}
+	if len(err) > 0 {
+		t.Fatalf("Bad; should not have errored.")
+	}
+}
+
+const fixtureDir = "./test-fixtures"
+
+func httpTestModule(n string) *httptest.Server {
+	p := filepath.Join(fixtureDir, n)
+	p, err := filepath.Abs(p)
+	if err != nil {
+		panic(err)
+	}
+
+	return httptest.NewServer(http.FileServer(http.Dir(p)))
 }

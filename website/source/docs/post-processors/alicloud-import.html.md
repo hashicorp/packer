@@ -64,7 +64,10 @@ are two categories: required and optional parameters.
     disk image after importing it to the cloud. Defaults to false.
 
 -   `oss_key_name` (string) - The name of the object key in `oss_bucket_name`
-    where the RAW or VHD file will be copied to for import.
+    where the RAW or VHD file will be copied to for import. This is treated as
+    a [template engine](/docs/templates/engine.html), and you may access any of
+    the variables stored in the generated data using the
+    [build](/docs/templates/engine.html) template function.
 
 -   `skip_clean` (boolean) - Whether we should skip removing the RAW or VHD
     file uploaded to OSS after the import process has completed. `true` means
@@ -94,7 +97,7 @@ artifact. The user must have the role `AliyunECSImageImportDefaultRole` with
 role and policy for you if you have the privilege, otherwise, you have to ask
 the administrator configure for you in advance.
 
-``` json
+```json
 "post-processors":[
     {
       "access_key":"{{user `access_key`}}",

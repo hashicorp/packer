@@ -169,7 +169,7 @@ Providing `temp_resource_group_name` or `location` in combination with
 
 Here is a basic example for Azure.
 
-``` json
+```json
 {
     "type": "azure-arm",
 
@@ -216,7 +216,7 @@ after that. The possible states, in case you want to wait for another state,
 [are documented
 here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 
-``` json
+```json
 {
     "provisioners": [
     {
@@ -244,12 +244,15 @@ default. To learn more about disabling the Windows Guest Agent please see
 [Install the VM
 Agent](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/agent-windows#install-the-vm-agent).
 
+Please note that sysprep can get stuck in infinite loops if it is not configured
+correctly -- for example, if it is waiting for a reboot that you never perform.
+
 ### Linux
 
 The following provisioner snippet shows how to deprovision a Linux VM.
 Deprovision should be the last operation executed by a build.
 
-``` json
+```json
 {
  "provisioners": [
    {

@@ -23,8 +23,12 @@
     set the user-script metadata key to have Triton start a user supplied
     script after the VM has booted.
     
--   `source_machine_tags` (map[string]string) - Tags applied to the
-    VM used to create the image.
+-   `source_machine_tags` (map[string]string) - Tags applied to the VM used to create the image.
+    
+-   `source_machine_tag` ([]{name string, value string}) - Same as [`source_machine_tags`](#source_machine_tags) but defined as a
+    singular block containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `source_machine_firewall_enabled` (bool) - Whether or not the firewall
     of the VM used to create an image of is enabled. The Triton firewall only

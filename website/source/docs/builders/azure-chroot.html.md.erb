@@ -83,7 +83,7 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/prod` and `/dev`:
 
-``` json
+```json
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
@@ -134,7 +134,7 @@ On a VM with a system-assigned managed identity that has the contributor role
 on its own resource group, the following config can be used to create an
 updated Debian image:
 
-``` json
+```json
 {
   "builders": [{
     "type": "azure-chroot",
@@ -162,7 +162,7 @@ to update your VM.
 Set the `ARM_IMAGE_RESOURCEGROUP_ID` variable to an existing resource group in the
 subscription where the resulting image will be created.
 
-``` json
+```json
 {
   "variables": {
     "client_id": "{{env `ARM_CLIENT_ID`}}",

@@ -278,3 +278,48 @@ precedence over earlier ones:
 
 ~> **Important:** Variables with map and object values behave the same way as
 other variables: the last value found overrides the previous values.
+
+### A variable value must be known :
+
+Take the following variable for example:
+
+``` hcl 
+variable "foo" {
+  type = string
+```
+
+Here `foo` must have a known value but you can default it to `null` to make
+this behavior optional :
+
+|                             |          no default          | `default = null` | `default = "xy"` |
+|:---------------------------:|:----------------------------:|:----------------:|:----------------:|
+|          foo unused         | error, "foo needs to be set" |         -        |         -        |
+|           var.foo           | error, "foo needs to be set" |       null¹      |        xy        |
+| `PKR_VAR_foo=yz`<br>var.foo |              yz              |        yz        |        yz        |
+|   `-var foo=yz`<br>var.foo  |              yz              |        yz        |        yz        |
+
+1: Null is a valid value. Packer will only error when the receiving field needs
+a value, example:
+
+``` hcl
+variable "example" {
+  type = string
+  default = null
+}
+
+source "example" "foo" {
+  arg = var.example
+}
+```
+
+In the above case, as long as "arg" is optional for an "example" source, there is no error and arg won’t be set.
+
+
+### Setting an unknown variable will not always fail :
+
+|              Usage             |     packer validate     |  any other packer command |
+|:------------------------------:|:-----------------------:|:-------------------------:|
+| `bar=yz` in .pkrvars.hcl file. | error, "bar undeclared" | warning, "bar undeclared" |
+|   `var.bar` in .pkr.hcl file   | error, "bar undeclared" |  error, "bar undeclared"  |
+|     `-var bar=yz` argument     | error, "bar undeclared" |  error, "bar undeclared"  |
+|     `export PKR_VAR_bar=yz`    |            -            |             -             |

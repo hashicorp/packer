@@ -37,7 +37,7 @@ However, the formatting basics are worth describing here. From the [golang docs]
 
 So what does that look like in a Packer template function?
 
-``` json
+```json
 {
 	"variables":
 	{
@@ -67,7 +67,7 @@ Date only, not time:
 	"variables":
 	{
 		"myvar": "packer-{{isotime \"2006-01-02\"}}"
-	},
+	}
 ```
 
 A timestamp down to the millisecond:
@@ -76,7 +76,7 @@ A timestamp down to the millisecond:
 	"variables":
 	{
 		"myvar": "packer-{{isotime \"Jan-_2-15:04:05.000\"}}"
-	},
+	}
 ```
 
 Or just the time as it would appear on a digital clock:
@@ -85,5 +85,5 @@ Or just the time as it would appear on a digital clock:
 	"variables":
 	{
 		"myvar": "packer-{{isotime \"3:04PM\"}}"
-	},
+	}
 ```

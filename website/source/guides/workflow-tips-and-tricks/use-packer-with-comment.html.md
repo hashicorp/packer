@@ -13,7 +13,7 @@ One of the biggest complaints we get about packer is that json doesn't use comme
 
 Let's say we have a file named commented_template.json
 
-``` json
+```json
 {
   	"_comment": [
 	    "this is",

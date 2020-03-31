@@ -38,9 +38,9 @@ post-processors such as Docker and Artifice.
     to `packer-manifest.json`.
 -   `strip_path` (boolean) Write only filename without the path to the manifest
     file. This defaults to false.
--   `custom_data` (map of strings) Arbitrary data to add to the manifest. This
-    is a [template engine](/docs/templates/engine.html); see
-    [Build template data](#build-template-data) for more information.
+-   `custom_data` (map of strings) Arbitrary data to add to the manifest.
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field.
 -   `keep_input_artifact` (boolean) - Unlike most other post-processors, the
     keep_input_artifact option will have no effect for the manifest
     post-processor. We will always retain the input artifact for manifest,
@@ -53,7 +53,7 @@ post-processors such as Docker and Artifice.
 You can simply add `{"type":"manifest"}` to your post-processor section. Below
 is a more complete example:
 
-``` json
+```json
 {
   "post-processors": [
     {
@@ -70,7 +70,7 @@ is a more complete example:
 
 An example manifest file looks like:
 
-``` json
+```json
 {
   "builds": [
     {
@@ -100,7 +100,7 @@ artifacts from the manifest by using `packer_run_uuid`.
 
 The above manifest was generated with this packer.json:
 
-``` json
+```json
 {
   "builders": [
     {

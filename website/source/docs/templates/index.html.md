@@ -70,7 +70,7 @@ JSON doesn't support comments and Packer reports unknown keys as validation
 errors. If you'd like to comment your template, you can prefix a *root level*
 key with an underscore. Example:
 
-``` json
+```json
 {
   "_comment": "This is a comment",
   "builders": [
@@ -93,7 +93,7 @@ There are a number of parameters which need to be provided for a functional
 build to take place. See the [Amazon builder](/docs/builders/amazon.html)
 documentation for more information.
 
-``` json
+```json
 {
   "builders": [
     {

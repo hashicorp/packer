@@ -217,8 +217,8 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 		args = append(args, p.config.Options...)
 	}
 
-	args = append(args, fmt.Sprintf(`%s`, source))
-	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
+	args = append(args, source)
+	args = append(args, ovftool_uri)
 
 	return args, nil
 }

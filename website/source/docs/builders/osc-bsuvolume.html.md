@@ -3,7 +3,7 @@ description: |
     The osc-bsuvolume Packer builder is like the BSU builder, but is intended to
     create BSU volumes rather than a machine image.
 layout: docs
-page_title: 'Amazon BSU Volume - Builders'
+page_title: 'Outscale BSU Volume - Builders'
 sidebar_current: 'docs-builders-osc-bsuvolume'
 ---
 
@@ -11,7 +11,7 @@ sidebar_current: 'docs-builders-osc-bsuvolume'
 
 Type: `osc-bsuvolume`
 
-The `osc-bsuvolume` Packer builder is able to create Ouscale Block Stogate Unit
+The `osc-bsuvolume` Packer builder is able to create Outscale Block Stogate Unit
  volumes which are prepopulated with filesystems or data.
 
 This builder builds BSU volumes by launching an Outscale VM from a source OMI,
@@ -133,7 +133,7 @@ builder.
 
 - `snapshot_users` (array of strings) - A list of account IDs that have
     access to create volumes from the snapshot(s). By default no additional
-    users other than the user creating the OMIS has permissions to create
+    users other than the user creating the OMI has permissions to create
     volumes from the backing snapshot(s).
 
 - `source_omi_filter` (object) - Filters used to populate the `source_omi` field.
@@ -142,7 +142,7 @@ builder.
   
     Example:
 
-    ``` json
+    ```json
     {
       "source_omi_filter": {
         "filters": {
@@ -155,8 +155,8 @@ builder.
     }
     ```
 
-    This selects an Ubuntu 16.04 HVM BSU OMIS from Canonical. NOTE:
-    This will fail unless *exactly* one OMIS is returned. In the above example,
+    This selects an Ubuntu 16.04 HVM BSU OMI from Canonical. NOTE:
+    This will fail unless *exactly* one OMI is returned. In the above example,
     `most_recent` will cause this to succeed by selecting the newest image.
 
 - `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](../templates/communicator.html#ssh_password) is used. [`ssh_private_key_file`](../templates/communicator.html#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
@@ -180,7 +180,7 @@ builder.
 - `net_filter` (object) - Filters used to populate the `net_id` field.
     Example:
 
-    ``` json
+    ```json
     {
       "net_filter": {
         "filters": {
@@ -201,7 +201,7 @@ builder.
 
 ## Basic Example
 
-``` json
+```json
 {
     "builders": [
         {
@@ -251,7 +251,7 @@ builder.
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-Further information on locating OMIS IDs and their relationship to VM
+Further information on locating OMI's IDs and their relationship to VM
 types and regions can be found in the Outscale Documentation [reference](https://wiki.outscale.net/display/EN/Official+OMIs+Reference).
 
 ## Accessing the Instance to Debug
@@ -278,5 +278,5 @@ variables are available:
 -&gt; **Note:** Packer uses pre-built OMIs as the source for building images.
 These source OMIs may include volumes that are not flagged to be destroyed on
 termination of the instance building the new image. In addition to those
-volumes created by this builder, any volumes inn the source OMI which are not
+volumes created by this builder, any volumes in the source OMI which are not
 marked for deletion on termination will remain in your account.

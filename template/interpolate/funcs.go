@@ -164,41 +164,50 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 	}
 }
 
-func funcGenBuild(ctx *Context) interface{} {
-	return func(s string) (string, error) {
-		if data, ok := ctx.Data.(map[string]string); ok {
-			if heldPlace, ok := data[s]; ok {
-				// If we're in the first interpolation pass, the goal is to
-				// make sure that we pass the value through.
-				// TODO match against an actual string constant
-				if strings.Contains(heldPlace, common.PlaceholderMsg) {
-					return fmt.Sprintf("{{.%s}}", s), nil
-				} else {
-					return heldPlace, nil
-				}
+func passthroughOrInterpolate(data map[interface{}]interface{}, s string) (string, error) {
+	if heldPlace, ok := data[s]; ok {
+		if hp, ok := heldPlace.(string); ok {
+			// If we're in the first interpolation pass, the goal is to
+			// make sure that we pass the value through.
+			// TODO match against an actual string constant
+			if strings.Contains(hp, common.PlaceholderMsg) {
+				return fmt.Sprintf("{{.%s}}", s), nil
+			} else {
+				return hp, nil
 			}
-			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 		}
-		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
-			// PlaceholderData has been passed into generator, so if the given
-			// key already exists in data, then we know it's an "allowed" key
-			if heldPlace, ok := data[s]; ok {
-				if hp, ok := heldPlace.(string); ok {
-					// If we're in the first interpolation pass, the goal is to
-					// make sure that we pass the value through.
-					// TODO match against an actual string constant
-					if strings.Contains(hp, common.PlaceholderMsg) {
-						return fmt.Sprintf("{{.%s}}", s), nil
-					} else {
-						return hp, nil
-					}
-				}
-			}
-			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
-		}
+	}
+	return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 
-		return "", fmt.Errorf("Error validating build variable: the given "+
-			"variable %s will not be passed into your plugin.", s)
+}
+func funcGenBuild(ctx *Context) interface{} {
+	// Depending on where the context data is coming from, it could take a few
+	// different map types. The following switch standardizes the map types
+	// so we can act on them correctly.
+	return func(s string) (string, error) {
+		switch data := ctx.Data.(type) {
+		case map[interface{}]interface{}:
+			return passthroughOrInterpolate(data, s)
+		case map[string]interface{}:
+			// convert to a map[interface{}]interface{} so we can use same
+			// parsing on it
+			passed := make(map[interface{}]interface{}, len(data))
+			for k, v := range data {
+				passed[k] = v
+			}
+			return passthroughOrInterpolate(passed, s)
+		case map[string]string:
+			// convert to a map[interface{}]interface{} so we can use same
+			// parsing on it
+			passed := make(map[interface{}]interface{}, len(data))
+			for k, v := range data {
+				passed[k] = v
+			}
+			return passthroughOrInterpolate(passed, s)
+		default:
+			return "", fmt.Errorf("Error validating build variable: the given "+
+				"variable %s will not be passed into your plugin.", s)
+		}
 	}
 }
 

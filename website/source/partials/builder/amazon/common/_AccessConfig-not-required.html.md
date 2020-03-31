@@ -59,7 +59,7 @@
         credential types) and GetFederationToken (for federation\_token
         credential types) for more details.
     
-    ``` json
+    ```json
     {
         "vault_aws_engine": {
             "name": "myrole",

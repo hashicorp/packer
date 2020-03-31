@@ -8,6 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/property"
+
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/ovf"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -52,9 +57,7 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskThinProvisioned bool
-	DiskControllerType  string // example: "scsi", "pvscsi"
-	DiskSize            int64
+	DiskControllerType string // example: "scsi", "pvscsi"
 
 	Annotation    string
 	Name          string
@@ -68,6 +71,13 @@ type CreateConfig struct {
 	USBController bool
 	Version       uint   // example: 10
 	Firmware      string // efi or bios
+	Storage       []Disk
+}
+
+type Disk struct {
+	DiskSize            int64
+	DiskEagerlyScrub    bool
+	DiskThinProvisioned bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -487,6 +497,10 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 }
 
 func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	if len(config.Storage) == 0 {
+		return nil, errors.New("no storage devices have been defined")
+	}
+
 	device, err := devices.CreateSCSIController(config.DiskControllerType)
 	if err != nil {
 		return nil, err
@@ -497,19 +511,22 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 		return nil, err
 	}
 
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key: devices.NewKey(),
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
+	for _, dc := range config.Storage {
+		disk := &types.VirtualDisk{
+			VirtualDevice: types.VirtualDevice{
+				Key: devices.NewKey(),
+				Backing: &types.VirtualDiskFlatVer2BackingInfo{
+					DiskMode:        string(types.VirtualDiskModePersistent),
+					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
+					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
+				},
 			},
-		},
-		CapacityInKB: config.DiskSize * 1024,
-	}
+			CapacityInKB: dc.DiskSize * 1024,
+		}
 
-	devices.AssignController(disk, controller)
-	devices = append(devices, disk)
+		devices.AssignController(disk, controller)
+		devices = append(devices, disk)
+	}
 
 	return devices, nil
 }
@@ -674,6 +691,27 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
+	return vm.vm.Export(vm.driver.ctx)
+}
+
+func (vm *VirtualMachine) CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+	return m.CreateDescriptor(vm.driver.ctx, vm.vm, cdp)
+}
+
+func (vm *VirtualMachine) NewOvfManager() *ovf.Manager {
+	return ovf.NewManager(vm.vm.Client())
+}
+
+func (vm *VirtualMachine) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
+	var mgr mo.OvfManager
+	err := property.DefaultCollector(vm.vm.Client()).RetrieveOne(vm.driver.ctx, m.Reference(), nil, &mgr)
+	if err != nil {
+		return nil, err
+	}
+	return mgr.OvfExportOption, nil
 }
 
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {

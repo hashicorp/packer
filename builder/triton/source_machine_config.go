@@ -6,6 +6,7 @@ package triton
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -52,9 +53,13 @@ type SourceMachineConfig struct {
 	// set the user-script metadata key to have Triton start a user supplied
 	// script after the VM has booted.
 	MachineMetadata map[string]string `mapstructure:"source_machine_metadata" required:"false"`
-	// Tags applied to the
-	// VM used to create the image.
+	// Tags applied to the VM used to create the image.
 	MachineTags map[string]string `mapstructure:"source_machine_tags" required:"false"`
+	// Same as [`source_machine_tags`](#source_machine_tags) but defined as a
+	// singular block containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	MachineTag hcl2template.NameValues `mapstructure:"source_machine_tag" required:"false"`
 	// Whether or not the firewall
 	// of the VM used to create an image of is enabled. The Triton firewall only
 	// filters inbound traffic to the VM. All outbound traffic is always allowed.
@@ -107,9 +112,7 @@ func (c *SourceMachineConfig) Prepare(ctx *interpolate.Context) []error {
 		c.MachineTags = make(map[string]string)
 	}
 
-	if len(errs) > 0 {
-		return errs
-	}
+	errs = append(errs, c.MachineTag.CopyOn(&c.MachineTags)...)
 
-	return nil
+	return errs
 }

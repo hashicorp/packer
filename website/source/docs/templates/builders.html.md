@@ -23,7 +23,7 @@ referenced from the documentation for that specific builder.
 
 Within a template, a section of builder definitions looks like this:
 
-``` json
+```json
 {
   "builders": [
     // ... one or more builder definitions here
@@ -45,7 +45,7 @@ settings. These are placed directly within the builder definition.
 An example builder definition is shown below, in this case configuring the AWS
 builder:
 
-``` json
+```json
 {
   "type": "amazon-ebs",
   "access_key": "...",

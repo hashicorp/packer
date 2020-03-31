@@ -1,5 +1,8 @@
 <!-- Code generated from the comments of the DriverConfig struct in builder/vmware/common/driver_config.go; DO NOT EDIT MANUALLY -->
 
+-   `cleanup_remote_cache` (bool) - When set to true, Packer will cleanup the cache folder where the ISO file is stored during the build on the remote machine.
+    By default, this is set to false.
+    
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
     /Applications/VMware Fusion.app but this setting allows you to
     customize this.

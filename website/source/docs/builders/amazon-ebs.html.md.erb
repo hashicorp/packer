@@ -105,7 +105,7 @@ Here is a basic example. You will need to provide access keys, and may need to
 change the AMI IDs according to what images exist at the time the template is
 run:
 
-``` json
+```json
 {
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
@@ -151,7 +151,7 @@ configuration of `launch_block_device_mappings` will expand the root volume
 `ami_block_device_mappings` AWS will attach additional volumes `/dev/sdb` and
 `/dev/sdc` when we boot a new instance of our AMI.
 
-``` json
+```json
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -214,7 +214,7 @@ Here is an example using the optional AMI tags. This will add the tags
 provide your access keys, and may need to change the source AMI ID based on
 what images exist when this template is run:
 
-``` json
+```json
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -246,7 +246,7 @@ in the `launch_block_device_mappings` block for the device.
 For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can
 be easily added to the provisioner section.
 
-``` json
+```json
 {
     "type": "powershell",
     "inline": [

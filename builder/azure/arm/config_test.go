@@ -71,22 +71,6 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 		t.Fatalf("newConfig failed: %s", err)
 	}
 
-	if c.Password != "override_password" {
-		t.Errorf("Expected 'Password' to be set to 'override_password', but found %q!", c.Password)
-	}
-
-	if c.Comm.SSHPassword != "override_password" {
-		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to 'override_password', but found %q!", c.Comm.SSHPassword)
-	}
-
-	if c.UserName != "override_username" {
-		t.Errorf("Expected 'UserName' to be set to 'override_username', but found %q!", c.UserName)
-	}
-
-	if c.Comm.SSHUsername != "override_username" {
-		t.Errorf("Expected 'c.Comm.SSHUsername' to be set to 'override_username', but found %q!", c.Comm.SSHUsername)
-	}
-
 	if c.VMSize != "override_vm_size" {
 		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found %q!", c.VMSize)
 	}
@@ -97,6 +81,43 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 
 	if c.diskCachingType != compute.CachingTypesNone {
 		t.Errorf("Expected 'disk_caching_type' to be set to 'None', but found %q!", c.diskCachingType)
+	}
+
+	// SSH comm
+	if c.Password != "override_password" {
+		t.Errorf("Expected 'Password' to be set to 'override_password', but found %q!", c.Password)
+	}
+	if c.Comm.SSHPassword != "override_password" {
+		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to 'override_password', but found %q!", c.Comm.SSHPassword)
+	}
+	if c.UserName != "override_username" {
+		t.Errorf("Expected 'UserName' to be set to 'override_username', but found %q!", c.UserName)
+	}
+	if c.Comm.SSHUsername != "override_username" {
+		t.Errorf("Expected 'c.Comm.SSHUsername' to be set to 'override_username', but found %q!", c.Comm.SSHUsername)
+	}
+
+	// Winrm comm
+	c = Config{}
+	builderValues = getArmBuilderConfiguration()
+	builderValues["communicator"] = "winrm"
+	builderValues["winrm_password"] = "Override_winrm_password1"
+	builderValues["winrm_username"] = "override_winrm_username"
+	_, err = c.Prepare(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("newConfig failed: %s", err)
+	}
+	if c.Password != "Override_winrm_password1" {
+		t.Errorf("Expected 'Password' to be set to 'Override_winrm_password1', but found %q!", c.Password)
+	}
+	if c.Comm.WinRMPassword != "Override_winrm_password1" {
+		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to 'Override_winrm_password1', but found %q!", c.Comm.SSHPassword)
+	}
+	if c.UserName != "override_winrm_username" {
+		t.Errorf("Expected 'UserName' to be set to 'override_winrm_username', but found %q!", c.UserName)
+	}
+	if c.Comm.WinRMUser != "override_winrm_username" {
+		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.SSHUsername)
 	}
 }
 
@@ -574,7 +595,7 @@ func TestWinRMConfigShouldSetRoundTripDecorator(t *testing.T) {
 	config := getArmBuilderConfiguration()
 	config["communicator"] = "winrm"
 	config["winrm_username"] = "username"
-	config["winrm_password"] = "password"
+	config["winrm_password"] = "Password123"
 
 	var c Config
 	_, err := c.Prepare(config, getPackerConfiguration())
@@ -1917,6 +1938,60 @@ func Test_GivenZoneSupportingResiliency_ConfigValidate_ShouldNotWarn(t *testing.
 
 	if m != "" {
 		t.Errorf("warning message not as expected: %s", m)
+	}
+}
+
+func TestConfig_PrepareProvidedWinRMPassword(t *testing.T) {
+	config := getArmBuilderConfiguration()
+	config["communicator"] = "winrm"
+
+	var c Config
+	tc := []struct {
+		name       string
+		password   string
+		shouldFail bool
+	}{
+		{
+			name:       "password should be longer than 8 characters",
+			password:   "packer",
+			shouldFail: true,
+		},
+		{
+			name:       "password should be shorter than 123 characters",
+			password:   "1Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			shouldFail: true,
+		},
+		{
+			name:       "password should have valid size but only lower and upper case letters",
+			password:   "AAAbbbCCC",
+			shouldFail: true,
+		},
+		{
+			name:       "password should have valid size but only digits and upper case letters",
+			password:   "AAA12345",
+			shouldFail: true,
+		},
+		{
+			name:       "password should have valid size, digits, upper and lower case letters",
+			password:   "AAA12345bbb",
+			shouldFail: false,
+		},
+		{
+			name:       "password should have valid size, digits, special characters and lower case letters",
+			password:   "//12345bbb",
+			shouldFail: false,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			config["winrm_password"] = tt.password
+			_, err := c.Prepare(config)
+			fail := err != nil
+			if tt.shouldFail != fail {
+				t.Fatalf("bad: %s. Expected fail is: %t but it was %t", tt.name, tt.shouldFail, fail)
+			}
+		})
 	}
 }
 

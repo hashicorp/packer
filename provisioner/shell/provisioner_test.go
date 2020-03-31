@@ -491,14 +491,14 @@ func TestProvisioner_RemoteFileDefaultsToScriptnnnn(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	remoteFileRegex := regexp.MustCompile("script_[0-9]{4}.sh")
+	remoteFileRegex := regexp.MustCompile("script_[0-9]{1,4}.sh")
 
 	if !remoteFileRegex.MatchString(p.config.RemoteFile) {
-		t.Fatalf("remote_file did not default to script_nnnn.sh")
+		t.Fatalf("remote_file did not default to script_nnnn.sh: %q", p.config.RemoteFile)
 	}
 
 	if !remoteFileRegex.MatchString(p.config.RemotePath) {
-		t.Fatalf("remote_path did not match script_nnnn.sh")
+		t.Fatalf("remote_path did not match script_nnnn.sh: %q", p.config.RemotePath)
 	}
 }
 
@@ -517,7 +517,7 @@ func TestProvisioner_RemotePathSetViaRemotePathAndRemoteFile(t *testing.T) {
 	}
 
 	if p.config.RemotePath != expectedRemoteFolder+"/"+expectedRemoteFile {
-		t.Fatalf("remote path does not contain remote_file")
+		t.Fatalf("remote path does not contain remote_file: %q", p.config.RemotePath)
 	}
 }
 
@@ -538,7 +538,7 @@ func TestProvisioner_RemotePathOverridesRemotePathAndRemoteFile(t *testing.T) {
 	}
 
 	if p.config.RemotePath != expectedRemotePath {
-		t.Fatalf("remote path does not contain remote_path")
+		t.Fatalf("remote path does not contain remote_path: %q", p.config.RemotePath)
 	}
 }
 
@@ -551,9 +551,9 @@ func TestProvisionerRemotePathDefaultsSuccessfully(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	remotePathRegex := regexp.MustCompile("/tmp/script_[0-9]{4}.sh")
+	remotePathRegex := regexp.MustCompile("/tmp/script_[0-9]{1,4}.sh")
 
 	if !remotePathRegex.MatchString(p.config.RemotePath) {
-		t.Fatalf("remote path does not match the expected default regex")
+		t.Fatalf("remote path does not match the expected default regex: %q", p.config.RemotePath)
 	}
 }

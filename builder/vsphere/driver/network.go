@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -8,7 +10,7 @@ import (
 
 type Network struct {
 	driver  *Driver
-	network *object.Network
+	network object.NetworkReference
 }
 
 func (d *Driver) NewNetwork(ref *types.ManagedObjectReference) *Network {
@@ -24,7 +26,7 @@ func (d *Driver) FindNetwork(name string) (*Network, error) {
 		return nil, err
 	}
 	return &Network{
-		network: n.(*object.Network),
+		network: n,
 		driver:  d,
 	}, nil
 }
@@ -37,7 +39,13 @@ func (n *Network) Info(params ...string) (*mo.Network, error) {
 		p = params
 	}
 	var info mo.Network
-	err := n.network.Properties(n.driver.ctx, n.network.Reference(), p, &info)
+
+	network, ok := n.network.(*object.Network)
+	if !ok {
+		return nil, fmt.Errorf("unexpected %t network object type", n.network)
+	}
+
+	err := network.Properties(n.driver.ctx, network.Reference(), p, &info)
 	if err != nil {
 		return nil, err
 	}

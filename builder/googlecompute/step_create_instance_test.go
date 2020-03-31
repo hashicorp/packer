@@ -308,14 +308,14 @@ func TestCreateInstanceMetadata(t *testing.T) {
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
 	// ensure our key is listed
-	assert.True(t, strings.Contains(metadata["sshKeys"], key), "Instance metadata should contain provided key")
+	assert.True(t, strings.Contains(metadata["ssh-keys"], key), "Instance metadata should contain provided key")
 }
 
 func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	state := testState(t)
 	c := state.Get("config").(*Config)
 	image := StubImage("test-image", "test-project", []string{}, 100)
-	sshKeys := c.Metadata["sshKeys"]
+	sshKeys := c.Metadata["ssh-keys"]
 
 	// create our metadata
 	metadata, err := c.createInstanceMetadata(image, "")
@@ -323,7 +323,7 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
 	// ensure the ssh metadata hasn't changed
-	assert.Equal(t, metadata["sshKeys"], sshKeys, "Instance metadata should not have been modified")
+	assert.Equal(t, metadata["ssh-keys"], sshKeys, "Instance metadata should not have been modified")
 }
 
 func TestCreateInstanceMetadata_metadataFile(t *testing.T) {

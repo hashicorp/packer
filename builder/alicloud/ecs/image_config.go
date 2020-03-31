@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -189,14 +190,19 @@ type AlicloudImageConfig struct {
 	// The region validation can be skipped
 	// if this value is true, the default value is false.
 	AlicloudImageSkipRegionValidation bool `mapstructure:"skip_region_validation" required:"false"`
-	// Tags applied to the destination
-	// image and relevant snapshots.
-	AlicloudImageTags   map[string]string `mapstructure:"tags" required:"false"`
+	// Tags applied to the destination image and relevant snapshots.
+	AlicloudImageTags map[string]string `mapstructure:"tags" required:"false"`
+	// Same as [`tags`](#tags) but defined as a singular repeatable block
+	// containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	AlicloudImageTag    hcl2template.NameValues `mapstructure:"tag" required:"false"`
 	AlicloudDiskDevices `mapstructure:",squash"`
 }
 
 func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+	errs = append(errs, c.AlicloudImageTag.CopyOn(&c.AlicloudImageTags)...)
 	if c.AlicloudImageName == "" {
 		errs = append(errs, fmt.Errorf("image_name must be specified"))
 	} else if len(c.AlicloudImageName) < 2 || len(c.AlicloudImageName) > 128 {
@@ -205,7 +211,7 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		strings.HasPrefix(c.AlicloudImageName, "https://") {
 		errs = append(errs, fmt.Errorf("image_name can't start with 'http://' or 'https://'"))
 	}
-	reg := regexp.MustCompile("\\s+")
+	reg := regexp.MustCompile(`\s+`)
 	if reg.FindString(c.AlicloudImageName) != "" {
 		errs = append(errs, fmt.Errorf("image_name can't include spaces"))
 	}
@@ -228,9 +234,5 @@ func (c *AlicloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		c.AlicloudImageDestinationRegions = regions
 	}
 
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
+	return errs
 }

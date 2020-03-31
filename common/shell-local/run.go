@@ -165,8 +165,8 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	envVars := make(map[string]string)
 
 	// Always available Packer provided env vars
-	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", config.PackerBuildName)
-	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", config.PackerBuilderType)
+	envVars["PACKER_BUILD_NAME"] = config.PackerBuildName
+	envVars["PACKER_BUILDER_TYPE"] = config.PackerBuilderType
 
 	// expose ip address variables
 	httpAddr := common.GetHTTPAddr()
