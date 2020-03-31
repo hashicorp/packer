@@ -180,6 +180,75 @@ Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction
 	}
 }
 
+func SetFirstBootDeviceGen1(vmName string, controllerType string) error {
+
+	// for Generation 1 VMs, we read the value of the VM's boot order, strip the value specified in
+	// controllerType and insert that value back at the beginning of the list.
+	//
+	// controllerType must be 'NET', 'DVD', 'IDE' or 'FLOPPY' (case sensitive)
+	// The 'NET' value is always replaced with 'LegacyNetworkAdapter'
+
+	if controllerType == "NET" {
+		controllerType = "LegacyNetworkAdapter"
+	}
+
+	script := `
+param([string] $vmName, [string] $controllerType)
+	$vmBootOrder = Hyper-V\Get-VMBios -VMName $vmName | Select-Object -ExpandProperty StartupOrder | Where-Object { $_ -ne $controllerType } 
+	Hyper-V\Set-VMBios -VMName $vmName -StartupOrder (@($controllerType) + $vmBootOrder)
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, controllerType)
+	return err
+}
+
+func SetFirstBootDeviceGen2(vmName string, controllerType string, controllerNumber uint, controllerLocation uint) error {
+
+	script := `param ([string] $vmName, [string] $controllerType, [int] $controllerNumber, [int] $controllerLocation)`
+
+	switch {
+
+	case controllerType == "CD":
+		// for CDs we have to use Get-VMDvdDrive to find the device
+		script += `
+$vmDevice = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -ErrorAction SilentlyContinue`
+
+	case controllerType == "NET":
+		// for "NET" device, we select the first network adapter on the VM
+		script += `
+$vmDevice = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue | Select-Object -First 1`
+
+	default:
+		script += `
+$vmDevice = @(Hyper-V\Get-VMIdeController -VMName $vmName -ErrorAction SilentlyContinue) +
+	@(Hyper-V\Get-VMScsiController -VMName $vmName -ErrorAction SilentlyContinue) |
+	Select-Object -ExpandProperty Drives |
+	Where-Object { $_.ControllerType -eq $controllerType } |
+	Where-Object { ($_.ControllerNumber -eq $controllerNumber) -and ($_.ControllerLocation -eq $controllerLocation) }
+`
+
+	}
+
+	script += `
+if ($vmDevice -eq $null) { throw 'unable to find boot device' }
+Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDevice
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, controllerType, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	return err
+}
+
+func SetFirstBootDevice(vmName string, controllerType string, controllerNumber uint, controllerLocation uint, generation uint) error {
+
+	if generation == 1 {
+		return SetFirstBootDeviceGen1(vmName, controllerType)
+	} else {
+		return SetFirstBootDeviceGen2(vmName, controllerType, controllerNumber, controllerLocation)
+	}
+}
+
 func DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
@@ -872,9 +941,9 @@ if ($disks.Length -eq 0) {
 foreach ($disk in $disks) {
     Write-Output "Compacting disk: $(Split-Path $disk -leaf)"
 
-    $sizeBefore = $disk.Length
+    $sizeBefore = (Get-Item -Path $disk).Length
     Optimize-VHD -Path $disk -Mode Full
-    $sizeAfter = $disk.Length
+    $sizeAfter = (Get-Item -Path $disk).Length
 
     # Calculate the percentage change in disk size
     if ($sizeAfter -gt 0) { # Protect against division by zero

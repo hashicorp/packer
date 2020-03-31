@@ -5,6 +5,7 @@ package triton
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -36,11 +37,18 @@ type TargetImageConfig struct {
 	ImageACL []string `mapstructure:"image_acls" required:"false"`
 	// Tag applied to the image.
 	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
+	// Same as [`image_tags`](#image_tags) but defined as a singular repeatable
+	// block containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	ImageTag hcl2template.NameValues `mapstructure:"image_tag" required:"false"`
 }
 
 // Prepare performs basic validation on a TargetImageConfig struct.
 func (c *TargetImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+
+	errs = append(errs, c.ImageTag.CopyOn(&c.ImageTags)...)
 
 	if c.ImageName == "" {
 		errs = append(errs, fmt.Errorf("An image_name must be specified"))

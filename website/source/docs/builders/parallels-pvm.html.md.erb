@@ -28,7 +28,7 @@ create the image. The imported machine is deleted prior to finishing the build.
 Here is a basic example. This example is functional if you have an PVM matching
 the settings here.
 
-``` json
+```json
 {
   "type": "parallels-pvm",
   "parallels_tools_flavor": "lin",
@@ -202,7 +202,7 @@ Extra `prlctl` commands are defined in the template in the `prlctl` section. An
 example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-``` json
+```json
 {
   "prlctl": [
     ["set", "{{.Name}}", "--memsize", "1024"],

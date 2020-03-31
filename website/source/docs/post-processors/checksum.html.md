@@ -31,7 +31,7 @@ a third-party post-processor.
 
 The example below is fully functional.
 
-``` json
+```json
 {
   "type": "checksum"
 }
@@ -51,8 +51,11 @@ Optional parameters:
 -   `output` (string) - Specify filename to store checksums. This defaults to
     `packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum`. For
     example, if you had a builder named `database`, you might see the file
-    written as `packer_database_docker_md5.checksum`. The following variables
-    are available to use in the output template:
+    written as `packer_database_docker_md5.checksum`. This is treated as a
+    [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field.
+    The following special variables are also available to use in the output
+    template:
 
     -   `BuildName`: The name of the builder that produced the artifact.
     -   `BuilderType`: The type of builder used to produce the artifact.

@@ -32,7 +32,7 @@ this.
 The example below is fully functional and expects the configured manifest file
 to exist relative to your working directory.
 
-``` json
+```json
 {
   "type": "puppet-masterless",
   "manifest_file": "site.pp"
@@ -54,12 +54,27 @@ Required parameters:
 
 Optional parameters:
 
--   `execute_command` (string) - The command-line to execute Puppet. This also
-    has various [configuration template variables](/docs/templates/engine.html)
-    available.
+-   `execute_command` (string) - The command-line to execute Puppet. This is a
+    [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. In addition,
+    you may use the following extra variables:
+     * FacterVars: Additional facts to set when executing Puppet, joined for
+          use in a command. This is internal and not settable by the user.
+     * HieraConfigPath: Path to a hiera configuration file to upload and use;
+          set in the template option hiera_config_path
+     * ManifestDir: The directory of the manifest file on the remote machine.
+     * ManifestFile: The manifest file on the remote machine.
+     * ModulePath: The module_paths, combined into one path variable.
+     * ModulePathJoiner: A colon `:` on posix systems and a semicolon `;` on
+          Windows.
+     * PuppetBinDir: The directory that the Puppet binary is in.
+     * Sudo: Returns false when PreventSudo is set, and true when it is not.
+     * WorkingDir: The value provided in the `working_directory` option.
+    See below for `execute_command`'s  default value.
+
 
 -   `extra_arguments` (array of strings) - Additional options to pass to the
-    Puppet command. This allows for customization of  
+    Puppet command. This allows for customization of
     `execute_command` without having to completely replace or subsume its
     contents, making forward-compatible customizations much easier to maintain.
 
@@ -119,7 +134,10 @@ multiple manifests you should use `manifest_file` instead.
 -   `elevated_user` and `elevated_password` (string) - If specified, Puppet
     will be run with elevated privileges using the given Windows user. See the
     [powershell](/docs/provisioners/powershell.html) provisioner for the full
-    details.
+    details. This is a [template engine](/docs/templates/engine.html).
+    Therefore, you may use user variables and template functions in this
+    field, including ```{{ build `Password`}}``` to use the password being used
+    by the communicator to connect to your instance.
 
 <%= partial "partials/provisioners/common-config" %>
 

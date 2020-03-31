@@ -28,7 +28,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` json
+```json
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
@@ -156,7 +156,7 @@ delay of 100ms between groups. The delay alleviates issues with latency and CPU
 contention. If you notice missing keys, you can tune this delay by specifying
 "boot_keygroup_interval" in your Packer template, for example:
 
-```
+```json
 {
   "builders": [
     {
@@ -227,7 +227,7 @@ used to do things such as set RAM, CPUs, etc.
 Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the VRAM within the virtual machine:
 
-``` json
+```json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--vram", "64"]
@@ -250,7 +250,7 @@ required for many VBoxManage calls.
 If you want to create an EFI enabled VM, make sure you set the `iso_interface`
 to "sata". Otherwise your attached drive will not be bootable. Example:
 
-``` json
+```json
       "iso_interface": "sata",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ]

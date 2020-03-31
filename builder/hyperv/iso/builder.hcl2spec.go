@@ -50,6 +50,7 @@ type FlatConfig struct {
 	SSHBastionAgentAuth            *bool             `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername             *string           `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword             *string           `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive          *bool             `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile       *string           `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod          *string           `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost                   *string           `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -97,6 +98,7 @@ type FlatConfig struct {
 	SkipCompaction                 *bool             `mapstructure:"skip_compaction" required:"false" cty:"skip_compaction"`
 	SkipExport                     *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
 	Headless                       *bool             `mapstructure:"headless" required:"false" cty:"headless"`
+	FirstBootDevice                *string           `mapstructure:"first_boot_device" required:"false" cty:"first_boot_device"`
 	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
 	ShutdownTimeout                *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size"`
@@ -158,6 +160,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":           &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":             &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":             &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":          &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file":     &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":         &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":                   &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},
@@ -205,6 +208,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_compaction":                  &hcldec.AttrSpec{Name: "skip_compaction", Type: cty.Bool, Required: false},
 		"skip_export":                      &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"headless":                         &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
+		"first_boot_device":                &hcldec.AttrSpec{Name: "first_boot_device", Type: cty.String, Required: false},
 		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},

@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig
 
 package proxmox
 
@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -44,12 +45,14 @@ type Config struct {
 	CPUType        string       `mapstructure:"cpu_type"`
 	Sockets        int          `mapstructure:"sockets"`
 	OS             string       `mapstructure:"os"`
+	VGA            vgaConfig    `mapstructure:"vga"`
 	NICs           []nicConfig  `mapstructure:"network_adapters"`
 	Disks          []diskConfig `mapstructure:"disks"`
 	ISOFile        string       `mapstructure:"iso_file"`
 	ISOStoragePool string       `mapstructure:"iso_storage_pool"`
 	Agent          bool         `mapstructure:"qemu_agent"`
 	SCSIController string       `mapstructure:"scsi_controller"`
+	Onboot         bool         `mapstructure:"onboot"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
@@ -73,6 +76,10 @@ type diskConfig struct {
 	Size            string `mapstructure:"disk_size"`
 	CacheMode       string `mapstructure:"cache_mode"`
 	DiskFormat      string `mapstructure:"format"`
+}
+type vgaConfig struct {
+	Type   string `mapstructure:"type"`
+	Memory int    `mapstructure:"memory"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -212,6 +219,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	if c.Node == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("node must be specified"))
+	}
+	if strings.ContainsAny(c.TemplateName, " ") {
+		errs = packer.MultiErrorAppend(errs, errors.New("template_name must not contain spaces"))
 	}
 	for idx := range c.NICs {
 		if c.NICs[idx].Bridge == "" {

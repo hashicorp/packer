@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/packer"
 )
@@ -51,7 +52,7 @@ const (
 	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, hcl.Diagnostics) {
+func (p *Parser) parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
 	var diags hcl.Diagnostics
@@ -59,6 +60,7 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	// parse config files
 	{
 		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
+		diags = append(diags, moreDiags...)
 		if len(hclFiles)+len(jsonFiles) == 0 {
 			diags = append(moreDiags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -92,12 +94,16 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
+	var locals []*Local
 	{
 		for _, file := range files {
-			diags = append(diags, p.decodeInputVariables(file, cfg)...)
+			diags = append(diags, cfg.decodeInputVariables(file)...)
 		}
+
 		for _, file := range files {
-			diags = append(diags, p.decodeLocalVariables(file, cfg)...)
+			moreLocals, morediags := cfg.parseLocalVariables(file)
+			diags = append(diags, morediags...)
+			locals = append(locals, moreLocals...)
 		}
 	}
 
@@ -105,20 +111,46 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
 		diags = append(diags, moreDiags...)
+		for _, file := range varFiles {
+			switch filepath.Ext(file) {
+			case ".hcl":
+				hclVarFiles = append(hclVarFiles, file)
+			case ".json":
+				jsonVarFiles = append(jsonVarFiles, file)
+			default:
+				diags = append(moreDiags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Could not guess format of " + file,
+					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+				})
+			}
+		}
 		var varFiles []*hcl.File
 		for _, filename := range hclVarFiles {
 			f, moreDiags := p.ParseHCLFile(filename)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
 			varFiles = append(varFiles, f)
 		}
 		for _, filename := range jsonVarFiles {
 			f, moreDiags := p.ParseJSONFile(filename)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
 			varFiles = append(varFiles, f)
 		}
 
-		diags = append(diags, cfg.InputVariables.collectVariableValues(os.Environ(), varFiles, vars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
+
+	_, moreDiags := cfg.InputVariables.Values()
+	diags = append(diags, moreDiags...)
+	_, moreDiags = cfg.LocalVariables.Values()
+	diags = append(diags, moreDiags...)
+	diags = append(diags, cfg.evaluateLocalVariables(locals)...)
 
 	// decode the actual content
 	for _, file := range files {
@@ -128,56 +160,14 @@ func (p *Parser) parse(filename string, vars map[string]string) (*PackerConfig, 
 	return cfg, diags
 }
 
-// decodeLocalVariables looks in the found blocks for 'variables' and
-// 'variable' blocks. It should be called firsthand so that other blocks can
-// use the variables.
-func (p *Parser) decodeInputVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case variableLabel:
-			moreDiags := cfg.InputVariables.decodeConfig(block, nil)
-			diags = append(diags, moreDiags...)
-		case variablesLabel:
-			moreDiags := cfg.InputVariables.decodeConfigMap(block, nil)
-			diags = append(diags, moreDiags...)
-		}
-	}
-
-	return diags
-}
-
-// decodeLocalVariables looks in the found blocks for 'locals' blocks. It
-// should be called after parsing input variables so that they can be
-// referenced.
-func (p *Parser) decodeLocalVariables(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case localsLabel:
-			moreDiags := cfg.LocalVariables.decodeConfigMap(block, cfg.EvalContext())
-			diags = append(diags, moreDiags...)
-		}
-	}
-
-	return diags
-}
-
 // decodeConfig looks in the found blocks for everything that is not a variable
 // block. It should be called after parsing input variables and locals so that
 // they can be referenced.
 func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
+	body := dynblock.Expand(f.Body, cfg.EvalContext())
+	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
 	for _, block := range content.Blocks {

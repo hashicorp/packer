@@ -146,7 +146,7 @@ If this is set, a few more options become available.
     may need to change the `ssh_username`, for example. That might look like
     this:
 
-    ``` json
+    ```json
     {
         "builders": [
             {
@@ -176,7 +176,10 @@ If this is set, a few more options become available.
 -   `builder_upload_image_command` (string) - The command to run to upload the
     image to Object Storage Classic. This is for advanced users only, and you
     should consult the default in code to decide on the changes to make. For
-    most users the default should suffice.
+    most users the default should suffice. If you choose to write your own,
+    this command is a template engine and can make use of the following
+    variables: `{{ .Username }}`, `{{ .Password }}`, `{{ .AccountID }}`,
+    `{{ .ImageFile }}`, and `{{ .SegmentPath }}`.
 
 ## Basic Example
 
@@ -184,7 +187,7 @@ Here is a basic example. Note that account specific configuration has been
 obfuscated; you will need to add a working `username`, `password`,
 `identity_domain`, and `api_endpoint` in order for the example to work.
 
-``` json
+```json
 {
     "builders": [
         {
@@ -224,7 +227,7 @@ for more details on how to define a trusted host.
 
 Save this file as `windows_attributes.json`:
 
-``` json
+```json
 {
     "userdata": {
         "administrator_password": "password",
@@ -236,7 +239,7 @@ Save this file as `windows_attributes.json`:
 Following is a minimal but working Packer config that references this
 attributes file:
 
-``` json
+```json
 {
     "variables": {
         "opc_username": "{{ env `OPC_USERNAME`}}",
@@ -275,7 +278,7 @@ attributes file:
 Here is an example using a persistent volume. Note the `persistent_volume_size`
 setting.
 
-``` json
+```json
 {
     "variables": {
         "opc_username": "{{ env `OPC_USERNAME`}}",

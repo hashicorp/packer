@@ -138,7 +138,9 @@ Optional:
 -   `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the
     OVA file will be copied to for import. If not specified, this will default
     to "packer-import-{{timestamp}}.ova". This key (i.e., the uploaded OVA)
-    will be removed after import, unless `skip_clean` is `true`.
+    will be removed after import, unless `skip_clean` is `true`. This is
+    treated as a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field.
 
 -   `skip_clean` (boolean) - Whether we should skip removing the OVA file
     uploaded to S3 after the import process has completed. "true" means that we
@@ -162,7 +164,7 @@ Here is a basic example. This assumes that the builder has produced an OVA
 artifact for us to work with, and IAM roles for import exist in the AWS account
 being imported into.
 
-``` json
+```json
 {
   "type": "amazon-import",
   "access_key": "YOUR KEY HERE",
@@ -181,7 +183,7 @@ being imported into.
 This is an example that uses `vmware-iso` builder and exports the `.ova` file
 using ovftool.
 
-``` json
+```json
 "post-processors" : [
      [
         {
@@ -213,7 +215,7 @@ using ovftool.
 
 You'll need at least the following permissions in the policy for your IAM user
 in order to successfully upload an image via the amazon-import post-processor.
-``` json
+```json
         "ec2:CancelImportTask",
         "ec2:CopyImage",
         "ec2:CreateTags",

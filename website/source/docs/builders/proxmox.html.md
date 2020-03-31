@@ -95,6 +95,21 @@ builder.
     `wvista`, `win7`, `win8`, `win10`, `l24` (Linux 2.4), `l26` (Linux 2.6+),
     `solaris` or `other`. Defaults to `other`.
 
+-   `vga` (object) - The graphics adapter to use. Example:
+    
+    ```json
+    {
+      "type": "vmware",
+      "memory": 32
+    }
+    ```
+    
+    -   `type` (string) - Can be `cirrus`, `none`, `qxl`,`qxl2`, `qxl3`,
+    `qxl4`, `serial0`, `serial1`, `serial2`, `serial3`, `std`, `virtio`, `vmware`.
+    Defaults to `std`.
+    
+    -   `memory` (int) - How much memory to assign.
+
 -   `network_adapters` (array of objects) - Network adapters attached to the
     virtual machine. Example:
 
@@ -165,6 +180,9 @@ builder.
 
 -   `unmount_iso` (bool) - If true, remove the mounted ISO from the template
     after finishing. Defaults to `false`.
+    
+    `onboot` (boolean) - Specifies whether a VM will be started during system
+    bootup. Defaults to `false`.
 
 -   `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
     then `qemu-guest-agent` must be installed on the guest. When disabled, then 
@@ -180,7 +198,7 @@ Here is a basic example creating a Fedora 29 server image with a Kickstart
 file served with Packer's HTTP server. Note that the iso file needs to be
 manually downloaded.
 
-``` json
+```json
 {
   "variables": {
     "username": "apiuser@pve",

@@ -29,6 +29,7 @@ type FlatConfig struct {
 	SSHBastionAgentAuth       *bool    `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        *string  `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword        *string  `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive     *bool    `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile  *string  `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     *string  `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost              *string  `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -83,6 +84,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":       &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":         &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":         &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":      &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file": &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":     &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":               &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},
@@ -128,6 +130,7 @@ type FlatSSH struct {
 	SSHBastionAgentAuth       *bool    `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        *string  `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword        *string  `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive     *bool    `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile  *string  `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     *string  `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost              *string  `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -145,7 +148,9 @@ type FlatSSH struct {
 // FlatMapstructure returns a new FlatSSH.
 // FlatSSH is an auto-generated flat version of SSH.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*SSH) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } { return new(FlatSSH) }
+func (*SSH) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatSSH)
+}
 
 // HCL2Spec returns the hcl spec of a SSH.
 // This spec is used by HCL to read the fields of SSH.
@@ -170,6 +175,7 @@ func (*FlatSSH) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":       &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":         &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":         &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":      &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file": &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":     &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":               &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},
@@ -202,7 +208,9 @@ type FlatWinRM struct {
 // FlatMapstructure returns a new FlatWinRM.
 // FlatWinRM is an auto-generated flat version of WinRM.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*WinRM) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } { return new(FlatWinRM) }
+func (*WinRM) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatWinRM)
+}
 
 // HCL2Spec returns the hcl spec of a WinRM.
 // This spec is used by HCL to read the fields of WinRM.

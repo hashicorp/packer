@@ -228,11 +228,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepDeleteAdditionalDisks(azureClient, ui),
 		}
 	} else if b.config.OSType == constants.Target_Windows {
-		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 		}
 		if b.config.BuildKeyVaultName == "" {
+			keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 			steps = append(steps,
 				NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
 				NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
@@ -254,7 +254,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.UserName,
-						Password: b.config.Comm.WinRMPassword,
+						Password: b.config.Password,
 					}, nil
 				},
 			},
@@ -399,7 +399,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 
-	if b.config.OSType == constants.Target_Windows {
+	if b.config.OSType == constants.Target_Windows && b.config.BuildKeyVaultName == "" {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
 

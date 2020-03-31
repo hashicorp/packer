@@ -5,3 +5,4 @@
     
 -   `convert_to_template` (bool) - Convert VM to a template. Defaults to `false`.
     
+-   `export` (\*common.ExportConfig) - Export

@@ -25,22 +25,17 @@ import (
 // * HTTP
 // * Amazon S3
 //
-//
-// \~&gt; On Windows, using a symlink to refer to local files is currently
-// unsupported. Packer will always copy a local iso into the Packer cache
-// directory.
-//
 // Examples:
 // go-getter can guess the checksum type based on `iso_checksum` len.
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum_type": "file",
 //   "iso_checksum": "ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
@@ -48,14 +43,14 @@ import (
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum_url": "./shasums.txt",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum_type": "sha256",
 //   "iso_checksum_url": "./shasums.txt",

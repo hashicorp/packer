@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/json"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -60,9 +61,13 @@ type Config struct {
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
-	// Key/value pair tags to
-	// add to the created image.
+	// Key/value pair tags to add to the created image.
 	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
+	// Same as [`image_tags`](#image_tags) but defined as a singular repeatable
+	// block containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	ImageTag hcl2template.NameValues `mapstructure:"image_tag" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
@@ -72,6 +77,11 @@ type Config struct {
 	// Key/value pair tags to
 	// add to the created server.
 	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
+	// Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
+	// containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	VmTag hcl2template.NameValues `mapstructure:"vm_tag" required:"false"`
 	// The name of the created disk.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// The type of the created disk. Defaults to ssd.
@@ -91,17 +101,29 @@ type Config struct {
 	// Can be useful when using custom api_url. Defaults to public.
 	PublicNetAdpService string `mapstructure:"public_netadp_service" required:"false"`
 
-	ChrootDisk           bool       `mapstructure:"chroot_disk"`
-	ChrootDiskSize       float32    `mapstructure:"chroot_disk_size"`
-	ChrootDiskType       string     `mapstructure:"chroot_disk_type"`
-	ChrootMountPath      string     `mapstructure:"chroot_mount_path"`
-	ChrootMounts         [][]string `mapstructure:"chroot_mounts"`
-	ChrootCopyFiles      []string   `mapstructure:"chroot_copy_files"`
-	ChrootCommandWrapper string     `mapstructure:"chroot_command_wrapper"`
+	ChrootDisk      bool       `mapstructure:"chroot_disk"`
+	ChrootDiskSize  float32    `mapstructure:"chroot_disk_size"`
+	ChrootDiskType  string     `mapstructure:"chroot_disk_type"`
+	ChrootMountPath string     `mapstructure:"chroot_mount_path"`
+	ChrootMounts    [][]string `mapstructure:"chroot_mounts"`
+	ChrootCopyFiles []string   `mapstructure:"chroot_copy_files"`
+	// How to run shell commands. This defaults to {{.Command}}. This may be
+	// useful to set if you want to set environmental variables or perhaps run
+	// it with sudo or so on. This is a configuration template where the
+	// .Command variable is replaced with the command to be run. Defaults to
+	// {{.Command}}.
+	ChrootCommandWrapper string `mapstructure:"chroot_command_wrapper"`
 
-	MountOptions      []string `mapstructure:"mount_options"`
-	MountPartition    string   `mapstructure:"mount_partition"`
-	PreMountCommands  []string `mapstructure:"pre_mount_commands"`
+	MountOptions   []string `mapstructure:"mount_options"`
+	MountPartition string   `mapstructure:"mount_partition"`
+	// A series of commands to execute after attaching the root volume and
+	// before mounting the chroot. This is not required unless using
+	// from_scratch. If so, this should include any partitioning and filesystem
+	// creation commands. The path to the device is provided by {{.Device}}.
+	PreMountCommands []string `mapstructure:"pre_mount_commands"`
+	// As pre_mount_commands, but the commands are executed after mounting the
+	// root device and before the extra mount and copy steps. The device and
+	// mount path are provided by {{.Device}} and {{.MountPath}}.
 	PostMountCommands []string `mapstructure:"post_mount_commands"`
 	// List of SSH keys by name or id to be added
 	// to the server on launch.
@@ -245,6 +267,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Validation
 	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, c.ImageTag.CopyOn(&c.ImageTags)...)
+	errs = packer.MultiErrorAppend(errs, c.VmTag.CopyOn(&c.VmTags)...)
+
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}

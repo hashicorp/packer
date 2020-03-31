@@ -24,7 +24,7 @@ Shell](/docs/provisioners/windows-shell.html) provisioners.
 
 The example below is fully functional.
 
-``` json
+```json
 {
   "type": "shell",
   "inline": ["echo foo"]
@@ -58,16 +58,16 @@ The example below is fully functional.
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`, unless the
     user has set `"use_env_var_file": true` -- in that case, the default
     `execute_command` is `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`.
-    The value of this is treated as a [configuration
-    template](/docs/templates/engine.html). There are three available
-    variables:
+    This is a [template engine](/docs/templates/engine.html). Therefore, you may
+    use user variables and template functions in this field. In addition, there
+    are three available extra variables:
     -   `Path` is the path to the script to run
     -   `Vars` is the list of `environment_vars`, if configured.
     -   `EnvVarFile` is the path to the file containing env vars, if
         `use_env_var_file` is true.
--   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if
-    the server disconnects us. A disconnect might happen if you restart the ssh
-    server or reboot the host.
+
+-   `expect_disconnect` (boolean) - Defaults to `false`. When `true`, allow the server to disconnect from Packer without throwing an error.
+    A disconnect might happen if you restart the ssh server or reboot the host.
 
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
@@ -182,7 +182,7 @@ and Packer will start executing the next one before SSH actually quits and the
 machine restarts. For this, put use "pause\_before" to make Packer wait before
 executing the next script:
 
-``` json
+```json
 {
   "type": "shell",
   "script": "script.sh",
@@ -216,7 +216,7 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-``` json
+```json
 {
   "type": "shell",
   "inline": [
@@ -259,7 +259,7 @@ would be:
     can create race conditions. Your first provisioner can tell the machine to
     wait until it completely boots.
 
-``` json
+```json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]
@@ -271,7 +271,7 @@ would be:
 Packer manages quoting for you, so you should't have to worry about it. Below
 is an example of packer template inputs and what you should expect to get out:
 
-``` json
+```json
   "provisioners": [
     {
       "type":  "shell",

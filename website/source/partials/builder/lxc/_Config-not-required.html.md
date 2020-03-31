@@ -9,7 +9,7 @@
     
 -   `command_wrapper` (string) - Allows you to specify a wrapper command, such
     as ssh so you can execute packer builds on a remote host. Defaults to
-    Empty.
+    `{{.Command}}`; i.e. no wrapper.
     
 -   `init_timeout` (duration string | ex: "1h5m2s") - The timeout in seconds to wait for the the
     container to start. Defaults to 20 seconds.

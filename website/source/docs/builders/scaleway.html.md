@@ -87,7 +87,7 @@ builder.
 Here is a basic example. It is completely valid as soon as you enter your own
 access tokens:
 
-``` json
+```json
 {
   "type": "scaleway",
   "organization_id": "YOUR ORGANIZATION ID",

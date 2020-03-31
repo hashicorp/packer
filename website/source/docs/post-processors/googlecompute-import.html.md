@@ -50,7 +50,9 @@ for details.
 ### Optional
 
 -   `gcs_object_name` (string) - The name of the GCS object in `bucket` where
-    the RAW disk image will be copied for import. Defaults to
+    the RAW disk image will be copied for import. This is treated as a
+    [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. Defaults to
     "packer-import-{{timestamp}}.tar.gz".
 
 -   `image_description` (string) - The description of the resulting image.
@@ -80,7 +82,7 @@ Here is a basic example. This assumes that the builder has produced an
 compressed raw disk image artifact for us to work with, and that the GCS bucket
 has been created.
 
-``` json
+```json
 {
   "type": "googlecompute-import",
   "account_file": "account.json",
@@ -98,7 +100,7 @@ server was running in GCE with the nested hypervisor feature enabled.
 
     $ packer build -var serial=$(tty) build.json
 
-``` json
+```json
 {
   "variables": {
     "serial": ""

@@ -25,7 +25,7 @@ post-processor.
 
 Within a template, a section of post-processor definitions looks like this:
 
-``` json
+```json
 {
   "post-processors": [
     // ... one or more post-processor definitions here
@@ -53,7 +53,7 @@ A **simple definition** is just a string; the name of the post-processor. An
 example is shown below. Simple definitions are used when no additional
 configuration is needed for the post-processor.
 
-``` json
+```json
 {
   "post-processors": ["compress"]
 }
@@ -66,7 +66,7 @@ post-processor. A detailed definition is used when additional configuration is
 needed beyond simply the type for the post-processor. An example is shown
 below.
 
-``` json
+```json
 {
   "post-processors": [
     {
@@ -88,7 +88,7 @@ compressed then uploaded, but the compressed result is not kept.
 It is very important that any post processors that need to be run in order, be
 sequenced!
 
-``` json
+```json
 {
   "post-processors": [
     [
@@ -113,7 +113,7 @@ In some cases, however, you may want to keep the intermediary artifacts. You
 can tell Packer to keep these artifacts by setting the `keep_input_artifact`
 configuration to `true`. An example is shown below:
 
-``` json
+```json
 {
   "post-processors": [
     {
@@ -151,7 +151,7 @@ will affect that post-processor and stop the sequence.
 The `-except` option can specifically skip a named post processor. The `-only`
 option *ignores* post-processors.
 
-``` json
+```json
 [
   {
     // can be skipped when running `packer build -except vbox`

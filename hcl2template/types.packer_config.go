@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
@@ -24,22 +25,150 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
+	ValidationOptions
+
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+}
+
+type ValidationOptions struct {
+	Strict bool
 }
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext() *hcl.EvalContext {
+	inputVariables, _ := cfg.InputVariables.Values()
+	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
-			"var":   cty.ObjectVal(cfg.InputVariables.Values()),
-			"local": cty.ObjectVal(cfg.LocalVariables.Values()),
+			"var":   cty.ObjectVal(inputVariables),
+			"local": cty.ObjectVal(localVariables),
 		},
 	}
 	return ectx
+}
+
+// decodeInputVariables looks in the found blocks for 'variables' and
+// 'variable' blocks. It should be called firsthand so that other blocks can
+// use the variables.
+func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case variableLabel:
+			moreDiags := c.InputVariables.decodeVariableBlock(block, nil)
+			diags = append(diags, moreDiags...)
+		case variablesLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			diags = append(diags, moreDiags...)
+			for key, attr := range attrs {
+				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
+				diags = append(diags, moreDiags...)
+			}
+		}
+	}
+	return diags
+}
+
+// parseLocalVariables looks in the found blocks for 'locals' blocks. It
+// should be called after parsing input variables so that they can be
+// referenced.
+func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+	var locals []*Local
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case localsLabel:
+			attrs, moreDiags := block.Body.JustAttributes()
+			diags = append(diags, moreDiags...)
+			for name, attr := range attrs {
+				if _, found := c.LocalVariables[name]; found {
+					diags = append(diags, &hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Duplicate value in " + localsLabel,
+						Detail:   "Duplicate " + name + " definition found.",
+						Subject:  attr.NameRange.Ptr(),
+						Context:  block.DefRange.Ptr(),
+					})
+					return nil, diags
+				}
+				locals = append(locals, &Local{
+					Name: name,
+					Expr: attr.Expr,
+				})
+			}
+		}
+	}
+
+	return locals, diags
+}
+
+func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	if len(locals) > 0 && c.LocalVariables == nil {
+		c.LocalVariables = Variables{}
+	}
+
+	var retry, previousL int
+	for len(locals) > 0 {
+		local := locals[0]
+		moreDiags := c.evaluateLocalVariable(local)
+		if moreDiags.HasErrors() {
+			if len(locals) == 1 {
+				// If this is the only local left there's no need
+				// to try evaluating again
+				return append(diags, moreDiags...)
+			}
+			if previousL == len(locals) {
+				if retry == 100 {
+					// To get to this point, locals must have a circle dependency
+					return append(diags, moreDiags...)
+				}
+				retry++
+			}
+			previousL = len(locals)
+
+			// If local uses another local that has not been evaluated yet this could be the reason of errors
+			// Push local to the end of slice to be evaluated later
+			locals = append(locals, local)
+		} else {
+			retry = 0
+			diags = append(diags, moreDiags...)
+		}
+		// Remove local from slice
+		locals = append(locals[:0], locals[1:]...)
+	}
+
+	return diags
+}
+
+func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	value, moreDiags := local.Expr.Value(c.EvalContext())
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+	c.LocalVariables[local.Name] = &Variable{
+		Name:         local.Name,
+		DefaultValue: value,
+		Type:         value.Type(),
+	}
+
+	return diags
 }
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
@@ -158,8 +287,8 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 //
 // Parse then return a slice of packer.Builds; which are what packer core uses
 // to run builds.
-func (p *Parser) Parse(path string, vars map[string]string) ([]packer.Build, hcl.Diagnostics) {
-	cfg, diags := p.parse(path, vars)
+func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string) ([]packer.Build, hcl.Diagnostics) {
+	cfg, diags := p.parse(path, varFiles, argVars)
 	if diags.HasErrors() {
 		return nil, diags
 	}

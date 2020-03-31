@@ -7,6 +7,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -19,9 +20,9 @@ type AMIConfig struct {
 	// engine](../templates/engine.html) for more info).
 	AMIName string `mapstructure:"ami_name" required:"true"`
 	// The description to set for the resulting
-	// AMI(s). By default this description is empty. This is a template
-	// engine, see Build template
-	// data for more information.
+	// AMI(s). By default this description is empty.  This is a
+	// [template engine](/docs/templates/engine.html), see [Build template
+	// data](#build-template-data) for more information.
 	AMIDescription string `mapstructure:"ami_description" required:"false"`
 	// The type of virtualization for the AMI
 	// you are building. This option is required to register HVM images. Can be
@@ -49,7 +50,12 @@ type AMIConfig struct {
 	// Tags applied to the AMI. This is a
 	// [template engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	AMITags TagMap `mapstructure:"tags" required:"false"`
+	AMITags map[string]string `mapstructure:"tags" required:"false"`
+	// Same as [`tags`](#tags) but defined as a singular repeatable block
+	// containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	AMITag hcl2template.NameValues `mapstructure:"tag" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy.
@@ -115,7 +121,12 @@ type AMIConfig struct {
 	// They will override AMI tags if already applied to snapshot. This is a
 	// [template engine](../templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	SnapshotTags TagMap `mapstructure:"snapshot_tags" required:"false"`
+	SnapshotTags map[string]string `mapstructure:"snapshot_tags" required:"false"`
+	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
+	// repeatable block containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	SnapshotTag hcl2template.NameValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional
 	// users other than the user creating the AMI has permissions to create
@@ -139,6 +150,9 @@ func stringInSlice(s []string, searchstr string) bool {
 
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
+
+	errs = append(errs, c.SnapshotTag.CopyOn(&c.SnapshotTags)...)
+	errs = append(errs, c.AMITag.CopyOn(&c.AMITags)...)
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
@@ -189,7 +203,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 	for _, kmsKey := range kmsKeys {
 		if !validateKmsKey(kmsKey) {
-			errs = append(errs, fmt.Errorf("%s is not a valid KMS Key Id.", kmsKey))
+			errs = append(errs, fmt.Errorf("%q is not a valid KMS Key Id.", kmsKey))
 		}
 	}
 

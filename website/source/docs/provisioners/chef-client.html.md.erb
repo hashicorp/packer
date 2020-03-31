@@ -25,7 +25,7 @@ installed, using the official Chef installers provided by Chef.
 The example below is fully functional. It will install Chef onto the remote
 machine and run Chef client.
 
-``` json
+```json
 {
   "type": "chef-client",
   "server_url": "https://mychefserver.com/"
@@ -49,6 +49,9 @@ configuration is actually required.
     `install_command` is unset. Possible values are `accept`,
     `accept-silent` and `accept-no-persist`. For details see [Accepting the
     Chef License](https://docs.chef.io/chef_license_accept.html).
+
+    This is a [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field.
 
 -   `config_template` (string) - Path to a template that will be used for the
     Chef configuration file. By default Packer only sets configuration it needs
@@ -315,7 +318,7 @@ mode.
 Set the necessary Packer variables using environment variables or provide a
 [var file](/docs/templates/user-variables.html).
 
-``` json
+```json
 "variables": {
   "chef_dir": "/tmp/packer-chef-client"
 }
@@ -327,7 +330,7 @@ Make sure we have the correct directories and permissions for the `chef-client`
 provisioner. You will need to bootstrap the Chef run by providing the necessary
 cookbooks using Berkshelf or some other means.
 
-``` json
+```json
   "provisioners": [
     ...
     { "type": "shell", "inline": [ "mkdir -p {{user `chef_dir`}}" ] },
@@ -380,7 +383,7 @@ mode, while passing a `run_list` using a variable.
 Set the necessary Packer variables using environment variables or provide a
 [var file](/docs/templates/user-variables.html).
 
-``` json
+```json
 "variables": {
   "chef_dir": "{{env `PACKER_CHEF_DIR`}}",
   "chef_run_list": "{{env `PACKER_CHEF_RUN_LIST`}}",
@@ -397,7 +400,7 @@ Make sure we have the correct directories and permissions for the `chef-client`
 provisioner. You will need to bootstrap the Chef run by providing the necessary
 cookbooks using Berkshelf or some other means.
 
-``` json
+```json
 {
   "type": "file",
   "source": "{{user `packer_chef_bootstrap_dir`}}",

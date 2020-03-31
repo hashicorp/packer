@@ -12,3 +12,5 @@
   for creating [Vultr](https://www.vultr.com/) snapshots.
 
 - [Huawei Cloud ECS builder](https://github.com/huaweicloud/packer-builder-huaweicloud-ecs) - Plugin for creating [Huawei Cloud ECS](https://www.huaweicloud.com/intl/en-us/) images.
+
+- [Citrix XenServer/Citrix Hypervisor](https://github.com/xenserver/packer-builder-xenserver) - Plugin for creating [Citrix XenServer/Citrix Hypervisor](https://xenserver.org/) images from an iso image or from an existing template.

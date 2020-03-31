@@ -1,0 +1,11 @@
+{
+  "variables": {
+    "env_1": "{{ env `INTERPOLATE_TEST_ENV_1` }}",
+    "env_2": "{{ env `INTERPOLATE_TEST_ENV_2` }}",
+    "env_3": "{{ env `INTERPOLATE_TEST_ENV_3` }}",
+    "env_4": "{{ env `INTERPOLATE_TEST_ENV_4` }}"
+  },
+    "builders": [{
+        "type": "test"
+    }]
+}

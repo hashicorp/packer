@@ -17,7 +17,7 @@ type ExportConfig struct {
 	// This can be useful for passing product information to include in the
 	// resulting appliance file. Packer JSON configuration file example:
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "type": "virtualbox-iso",
 	//   "export_opts":

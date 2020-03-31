@@ -34,7 +34,7 @@ However, if you are building from a brand-new and unconfigured operating system
 image, you will almost always have to perform some extra work to configure SSH
 on the guest machine. For most operating system distributions, this work will
 be performed by a
-(boot command)[/docs/builders/vmware-iso.html#boot-configuration]
+[boot command](/docs/builders/vmware-iso.html#boot-configuration)
 that references a file which provides answers to the normally-interactive
 questions you get asked when installing an operating system. The name of this
 file varies by operating system; some common examples are the "preseed" file
@@ -56,7 +56,7 @@ build. If your template contains multiple builds, you can have a different
 communicator configured for each. Here's an extremely basic example of
 configuring the SSH communicator for an Amazon builder:
 
-``` json
+```json
 {
   "builders": [
     {

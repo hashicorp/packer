@@ -25,7 +25,7 @@ this.
 The example below is fully functional and expects a Puppet server to be
 accessible from your network.
 
-``` json
+```json
 {
    "type": "puppet-server",
    "extra_arguments": "--test --pluginsync",
@@ -50,9 +50,23 @@ listed below:
     that contains the client private key for the node. This defaults to
     nothing, in which case a client private key won't be uploaded.
 
--   `execute_command` (string) - The command-line to execute Puppet. This also
-    has various [configuration template variables](/docs/templates/engine.html)
-    available.
+-   `execute_command` (string) - The command-line to execute Puppet. This is a
+    [template engine](/docs/templates/engine.html). Therefore, you
+    may use user variables and template functions in this field. In addition,
+    you may use the following extra variables:
+     * ClientCertPath: The value set in the template option
+         `client_cert_path`.
+     * ClientPrivateKeyPath: The value set in the template option
+         `client_private_key_path`.
+     * FacterVars: Additional facts to set when executing Puppet, joined for
+         use in a command. This is internal and not settable by the user.
+     * PuppetNode: The hostname of the Puppet node, set in `puppet_node`.
+     * PuppetServer: The hostname of the Puppet server, set in `puppet_server`
+     * PuppetBinDir: The directory that the Puppet binary is in.
+     * Sudo: Returns false when PreventSudo is set, and true when it is not.
+     * WorkingDir: The value provided in the `working_directory` option.
+    See below for `execute_command`'s  default value.
+
 
 -   `extra_arguments` (array of strings) - Additional options to pass to the
     Puppet command. This allows for customization of `execute_command` without
@@ -104,7 +118,10 @@ listed below:
 -   `elevated_user` and `elevated_password` (string) - If specified, Puppet
     will be run with elevated privileges using the given Windows user. See the
     [powershell](/docs/provisioners/powershell.html) provisioner for the full
-    details.
+    details. This is a [template engine](/docs/templates/engine.html).
+    Therefore, you may use user variables and template functions in this
+    field, including ```{{ build `Password`}}``` to use the password being used
+    by the communicator to connect to your instance.
 
 <%= partial "partials/provisioners/common-config" %>
 
