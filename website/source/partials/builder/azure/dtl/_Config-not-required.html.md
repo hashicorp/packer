@@ -184,5 +184,3 @@
     
 -   `vm_name` (string) - Name of the temporary virtual machine that can be optionally specified.
     
--   `async_resourcegroup_delete` (bool) - Cleanup
-    

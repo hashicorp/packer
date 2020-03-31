@@ -23,7 +23,6 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 		constants.ArmResourceGroupName,
 		constants.ArmVirtualMachineCaptureParameters,
 		constants.ArmPublicIPAddressName,
-		constants.ArmAsyncResourceGroupDelete,
 	}
 
 	for _, v := range expectedStateBagKeys {

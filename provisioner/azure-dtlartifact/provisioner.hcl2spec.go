@@ -53,7 +53,7 @@ type FlatConfig struct {
 	SubscriptionID         *string                `mapstructure:"subscription_id" cty:"subscription_id"`
 	DtlArtifacts           []FlatDtlArtifact      `mapstructure:"dtl_artifacts" cty:"dtl_artifacts"`
 	LabName                *string                `mapstructure:"lab_name" cty:"lab_name"`
-	ResourceGroupName      *string                `mapstructure:"resource_group_name" cty:"resource_group_name"`
+	ResourceGroupName      *string                `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name"`
 	VMName                 *string                `mapstructure:"vm_name" cty:"vm_name"`
 	PollingDurationTimeout *string                `mapstructure:"polling_duration_timeout" required:"false" cty:"polling_duration_timeout"`
 	AzureTags              map[string]*string     `mapstructure:"azure_tags" cty:"azure_tags"`
@@ -89,7 +89,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"subscription_id":            &hcldec.AttrSpec{Name: "subscription_id", Type: cty.String, Required: false},
 		"dtl_artifacts":              &hcldec.BlockListSpec{TypeName: "dtl_artifacts", Nested: hcldec.ObjectSpec((*FlatDtlArtifact)(nil).HCL2Spec())},
 		"lab_name":                   &hcldec.AttrSpec{Name: "lab_name", Type: cty.String, Required: false},
-		"resource_group_name":        &hcldec.AttrSpec{Name: "resource_group_name", Type: cty.String, Required: false},
+		"lab_resource_group_name":    &hcldec.AttrSpec{Name: "lab_resource_group_name", Type: cty.String, Required: false},
 		"vm_name":                    &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"polling_duration_timeout":   &hcldec.AttrSpec{Name: "polling_duration_timeout", Type: cty.String, Required: false},
 		"azure_tags":                 &hcldec.BlockAttrsSpec{TypeName: "azure_tags", ElementType: cty.String, Required: false},
