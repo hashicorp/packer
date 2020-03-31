@@ -22,7 +22,7 @@ This function is particularly useful for finding the exhaustive set of all
 combinations of members of multiple sets, such as per-application-per-environment
 resources.
 
-```
+```shell
 > setproduct(["development", "staging", "production"], ["app1", "app2"])
 [
   [
@@ -69,7 +69,7 @@ reusable folder situations.
 If any of the arguments is empty then the result is always empty itself,
 similar to how multiplying any number by zero gives zero:
 
-```
+```shell
 > setproduct(["development", "staging", "production"], [])
 []
 ```
@@ -77,7 +77,7 @@ similar to how multiplying any number by zero gives zero:
 Similarly, if all of the arguments have only one element then the result has
 only one element, which is the first element of each argument:
 
-```
+```shell
 > setproduct(["a"], ["b"])
 [
   [
@@ -93,7 +93,7 @@ error if such a conversion is impossible. For example, mixing both strings and
 numbers results in the numbers being converted to strings so that the result
 elements all have a consistent type:
 
-```
+```shell
 > setproduct(["staging", "production"], ["a", 2])
 [
   [

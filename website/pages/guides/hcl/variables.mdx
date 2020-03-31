@@ -78,7 +78,7 @@ of precedence in which variables are considered. So first defined; first used.
 You can set variables directly on the command-line with the
 `-var` flag.:
 
-```
+```shell
 $ packer build \
   -var 'access_key=foo' \
   -var 'secret_key=bar'
@@ -111,7 +111,7 @@ can create a local secret variables file and use `-var-file` to load it.
 You can use multiple `-var-file` arguments in a single command, with some
 checked in to version control and others not checked in. For example:
 
-```
+```shell
 $ packer build \
   -var-file="secret.pkrvars.hcl" \
   -var-file="production.pkrvars.hcl"
@@ -194,7 +194,7 @@ You can also do a static lookup of a map directly with
 We set defaults above, but maps can also be set using the `-var` and
 `-var-file` values. For example:
 
-```
+```shell
 $ packer build -var 'amis={ us-east-1 = "foo", us-west-2 = "bar" }'
 # ...
 ```
@@ -228,6 +228,6 @@ output "ami" {
 
 Like so:
 
-```
+```shell
 $ packer build -var region=us-west-2
 ```

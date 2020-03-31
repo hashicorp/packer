@@ -50,19 +50,18 @@ Example Packer template:
 
 Example playbook:
 
-```
+```yaml
 ---
 # playbook.yml
-- name: "Provision Image"
+- name: 'Provision Image'
   hosts: default
   become: true
 
   tasks:
-  - name: install Apache
-    package:
-      name: "httpd"
-      state: present
-
+    - name: install Apache
+      package:
+        name: 'httpd'
+        state: present
 ```
 
 ## Configuration Reference
@@ -486,13 +485,13 @@ times. All of your loaded keys will be tried before the dynamically generated
 key. If you have too many SSH keys loaded in your `ssh-agent`, the Ansible
 provisioner may fail authentication with a message similar to this:
 
-```console
+```text
     googlecompute: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Warning: Permanently added '[127.0.0.1]:62684' (RSA) to the list of known hosts.\r\nReceived disconnect from 127.0.0.1 port 62684:2: too many authentication failures\r\nAuthentication failed.\r\n", "unreachable": true}
 ```
 
 To unload all keys from your `ssh-agent`, run:
 
-```console
+```shell
 $ ssh-add -D
 ```
 
@@ -541,7 +540,7 @@ On a CI server you probably want to overwrite ansible_host with a random name.
 
 Example Packer template:
 
-```
+```hcl
 {
   "variables": {
     "ansible_host": "default",
@@ -571,7 +570,7 @@ Example Packer template:
 
 Example playbook:
 
-```
+```yaml
 - name: configure webserver
   hosts: webserver
   tasks:

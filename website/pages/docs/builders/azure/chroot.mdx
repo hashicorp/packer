@@ -122,7 +122,7 @@ available called `vm`, which returns the following VM metadata:
 
 This function can be used in the configuration templates, for example, use
 
-```
+```text
 "{{ vm `subscription_id` }}"
 ```
 
@@ -135,7 +135,7 @@ This builder requires privileged actions, such as mounting disks, running
 `chroot` and other admin commands. Usually it needs to be run with root
 permissions, for example:
 
-```
+```shell
 sudo -E packer build example.json
 ```
 

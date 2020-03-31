@@ -15,7 +15,7 @@ that isn't empty.
 
 ## Examples
 
-```
+```shell
 > coalescelist(["a", "b"], ["c", "d"])
 [
   "a",
@@ -31,7 +31,7 @@ that isn't empty.
 To perform the `coalescelist` operation with a list of lists, use the `...`
 symbol to expand the outer list as arguments:
 
-```
+```shell
 > coalescelist([[], ["c", "d"]]...)
 [
   "c",

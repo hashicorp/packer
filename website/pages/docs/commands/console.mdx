@@ -50,7 +50,7 @@ help output, which can be seen via `packer console -h`.
 
 Let's say you launch a console using a Packer template `example_template.json`:
 
-```
+```shell
 $ packer console example_template.json
 ```
 
@@ -58,7 +58,7 @@ You'll be dropped into a prompt that allows you to enter template functions and
 see how they're evaluated; for example, if the variable `myvar` is defined in
 your example_template's variable section:
 
-```
+```json
 "variables":{
 	"myvar": "asdfasdf"
 },
@@ -68,28 +68,28 @@ your example_template's variable section:
 and you enter `` {{user `myvar`}} `` in the Packer console, you'll see the value of
 myvar:
 
-```
+```shell
 > {{user `myvar`}}
 > asdfasdf
 ```
 
 From there you can test more complicated interpolations:
 
-```
+```shell
 > {{user `myvar`}}-{{timestamp}}
 > asdfasdf-1559854396
 ```
 
 And when you're done using the console, just type "exit" or CTRL-C
 
-```
+```shell
 > exit
 $
 ```
 
 If you'd like to provide a variable or variable files, you'd do this:
 
-```
+```shell
 packer console -var "myvar=fdsafdsa" -var-file myvars.json example_template.json
 ```
 
@@ -101,7 +101,7 @@ If you'd like to just see a specific single interpolation without launching
 the REPL, you can do so by echoing and piping the string into the console
 command:
 
-```
+```shell
 $ echo {{timestamp}} | packer console
 1559855090
 ```

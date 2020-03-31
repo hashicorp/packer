@@ -13,7 +13,7 @@ flattened sequence of the list contents.
 
 ## Examples
 
-```
+```shell
 > flatten([["a", "b"], [], ["c"]])
 ["a", "b", "c"]
 ```
@@ -21,7 +21,7 @@ flattened sequence of the list contents.
 If any of the nested lists also contain directly-nested lists, these too are
 flattened recursively:
 
-```
+```shell
 > flatten([[["a", "b"], []], ["c"]])
 ["a", "b", "c"]
 ```

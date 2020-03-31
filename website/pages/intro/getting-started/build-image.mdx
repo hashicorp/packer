@@ -539,7 +539,7 @@ Next we need to set things up so that Packer is able to access and use our
 AWS account. Set your access key and id as environment variables, so we
 don't need to pass them in through the command line:
 
-```
+```shell
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
 ```
@@ -618,13 +618,13 @@ set the value for the name field within `source_ami_filter` as required:
 
 For Windows 2008 SP2:
 
-```
+```text
 "name": "*Windows_Server-2008-SP2*English-64Bit-Base*",
 ```
 
 For Windows 2016:
 
-```
+```text
 "name": "*Windows_Server-2016-English-Full-Base*",
 ```
 

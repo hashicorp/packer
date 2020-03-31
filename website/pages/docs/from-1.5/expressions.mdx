@@ -179,7 +179,7 @@ A `for` expression can also include an optional `if` clause to filter elements
 from the source collection, which can produce a value with fewer elements than
 the source:
 
-```
+```text
 [for s in var.list : upper(s) if s != ""]
 ```
 
@@ -187,7 +187,7 @@ The source value can also be an object or map value, in which case two
 temporary variable names can be provided to access the keys and values
 respectively:
 
-```
+```text
 [for k, v in var.map : length(k) + length(v)]
 ```
 
@@ -195,7 +195,7 @@ Finally, if the result type is an object (using `{` and `}` delimiters) then
 the value result expression can be followed by the `...` symbol to group
 together results that have a common key:
 
-```
+```text
 {for s in var.list : substr(s, 0, 1) => s... if s != ""}
 ```
 
@@ -414,7 +414,7 @@ In this case, Packer analyses the lines in the sequence to find the one
 with the smallest number of leading spaces, and then trims that many spaces
 from the beginning of all of the lines, leading to the following result:
 
-```
+```text
 hello
   world
 ```

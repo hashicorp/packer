@@ -74,7 +74,7 @@ a username so that Packer will be able to connect.
 You need to make sure that your mirror settings are properly configured for your
 specific distribution of Debian.
 
-```
+```shell
 # Preseeding only locale sets language, country and locale.
 d-i debian-installer/locale string en_US
 
@@ -143,7 +143,7 @@ In this case, it is assumed that the file is saved as preseed.cfg inside of a
 directory called "http", and Packer is being called from the directory
 containing the "http" directory.
 
-```
+```hcl
   "builders": [
     {
       "boot_command": [

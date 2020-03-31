@@ -71,13 +71,13 @@ Optional parameters:
 - `execute_command` (array of strings) - The command used to execute the
   script. By default, on \*nix systems this is:
 
-  ```
+  ```text
   ["/bin/sh", "-c", "{{.Vars}} {{.Script}}"]
   ```
 
   While on Windows, `execute_command` defaults to:
 
-  ```
+  ```text
   ["cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"]
   ```
 
