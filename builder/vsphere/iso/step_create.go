@@ -70,8 +70,14 @@ type CreateConfig struct {
 func (c *CreateConfig) Prepare() []error {
 	var errs []error
 
-	if c.DiskSize == 0 {
-		errs = append(errs, fmt.Errorf("'disk_size' is required"))
+	if len(c.Storage) > 0 {
+		for i, storage := range c.Storage {
+			if storage.DiskSize == 0 {
+				errs = append(errs, fmt.Errorf("storage[%d].'disk_size' is required", i))
+			}
+		}
+	} else if c.DiskSize == 0 {
+		errs = append(errs, fmt.Errorf("'disk_size' or 'storage' is required"))
 	}
 
 	if c.GuestOSType == "" {
