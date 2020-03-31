@@ -81,7 +81,7 @@ func GetVirtualMachineDeployment(config *Config) (*dtl.LabVirtualMachineCreation
 	if strings.ToLower(config.OSType) == "windows" {
 		// Add mandatory Artifact
 		var winrma = "windows-winrm"
-		var artifactid = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.DevTestLab/labs/%s/artifactSources/privaterepo457/artifacts/%s",
+		var artifactid = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.DevTestLab/labs/%s/artifactSources/public repo/artifacts/%s",
 			config.ClientConfig.SubscriptionID,
 			config.tmpResourceGroupName,
 			config.LabName,

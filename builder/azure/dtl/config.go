@@ -302,9 +302,6 @@ type Config struct {
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  interpolate.Context
-
-	//Cleanup
-	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
 }
 
 type keyVaultCertificate struct {
@@ -693,10 +690,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if c.LabVirtualNetworkName == "" && c.LabResourceGroupName != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If lab_resource_group_name is specified, so must lab_virtual_network_name"))
 	}
 	if c.LabVirtualNetworkName == "" && c.LabSubnetName != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must lab_virtual_network_name"))
 	}
 
 	/////////////////////////////////////////////

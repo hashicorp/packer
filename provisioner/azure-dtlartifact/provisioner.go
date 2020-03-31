@@ -40,7 +40,7 @@ type Config struct {
 	DtlArtifacts []DtlArtifact `mapstructure:"dtl_artifacts"`
 	LabName      string        `mapstructure:"lab_name"`
 
-	ResourceGroupName string `mapstructure:"resource_group_name"`
+	ResourceGroupName string `mapstructure:"lab_resource_group_name"`
 
 	VMName string `mapstructure:"vm_name"`
 

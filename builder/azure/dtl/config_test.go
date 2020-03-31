@@ -424,30 +424,6 @@ func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
 	}
 }
 
-func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
-	config := map[string]interface{}{
-		"capture_name_prefix":      "ignore",
-		"capture_container_name":   "ignore",
-		"image_offer":              "ignore",
-		"image_publisher":          "ignore",
-		"image_sku":                "ignore",
-		"location":                 "ignore",
-		"subscription_id":          "ignore",
-		"communicator":             "none",
-		"lab_resource_group_name":  "ignore",
-		"lab_virtual_network_name": "ignore",
-
-		// custom may define one or the other, but not both
-		"temp_resource_group_name":  "rgn00",
-		"build_resource_group_name": "rgn00",
-	}
-
-	_, _, err := newConfig(config, getPackerConfiguration())
-	if err == nil {
-		t.Fatal("expected config to reject the use of both temp_resource_group_name and build_resource_group_name")
-	}
-}
-
 func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
 	c, _, _ := newConfig(getDtlBuilderConfiguration(), getPackerConfiguration())
 	if c.AdditionalDiskSize != nil {
@@ -487,78 +463,6 @@ func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
 	}
 }
 
-func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
-	config := map[string]interface{}{
-		"image_offer":                       "ignore",
-		"image_publisher":                   "ignore",
-		"image_sku":                         "ignore",
-		"location":                          "ignore",
-		"subscription_id":                   "ignore",
-		"communicator":                      "none",
-		"os_type":                           "linux",
-		"managed_image_name":                "ignore",
-		"managed_image_resource_group_name": "ignore",
-		"async_resourcegroup_delete":        "true",
-		"lab_resource_group_name":           "ignore",
-		"lab_virtual_network_name":          "ignore",
-	}
-
-	c, _, err := newConfig(config, getPackerConfiguration())
-	if err != nil {
-		t.Errorf("newConfig failed with %q", err)
-	}
-
-	if c.AsyncResourceGroupDelete != true {
-		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
-	}
-}
-func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
-	config := map[string]interface{}{
-		"image_offer":                       "ignore",
-		"image_publisher":                   "ignore",
-		"image_sku":                         "ignore",
-		"location":                          "ignore",
-		"subscription_id":                   "ignore",
-		"communicator":                      "none",
-		"os_type":                           "linux",
-		"managed_image_name":                "ignore",
-		"managed_image_resource_group_name": "ignore",
-		"lab_resource_group_name":           "ignore",
-		"lab_virtual_network_name":          "ignore",
-	}
-
-	c, _, err := newConfig(config, getPackerConfiguration())
-	if err != nil {
-		t.Errorf("newConfig failed with %q", err)
-	}
-
-	if c.AsyncResourceGroupDelete != false {
-		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
-	}
-}
-func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
-	config := map[string]interface{}{
-		"image_offer":                       "ignore",
-		"image_publisher":                   "ignore",
-		"image_sku":                         "ignore",
-		"location":                          "ignore",
-		"subscription_id":                   "ignore",
-		"communicator":                      "none",
-		"os_type":                           "linux",
-		"managed_image_name":                "ignore",
-		"managed_image_resource_group_name": "ignore",
-		"async_resourcegroup_delete":        "asdasda",
-		"lab_resource_group_name":           "ignore",
-		"lab_virtual_network_name":          "ignore",
-	}
-
-	c, _, err := newConfig(config, getPackerConfiguration())
-	if err != nil && c == nil {
-		t.Log("newConfig failed  which is expected ", err)
-
-	}
-
-}
 func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 	config := map[string]interface{}{
 		"location":                 "ignore",
@@ -594,8 +498,6 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 			"image_name":     "ignore",
 			"image_version":  "ignore",
 		},
-		"resource_group_name":      "ignore",
-		"storage_account":          "ignore",
 		"capture_container_name":   "ignore",
 		"capture_name_prefix":      "ignore",
 		"lab_resource_group_name":  "ignore",
