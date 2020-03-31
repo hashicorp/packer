@@ -29,8 +29,11 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 }
 
 func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
-	UUID, _ := uuid.GenerateUUID()
-	os.Setenv("PACKER_RUN_UUID", UUID)
+	UUID := os.Getenv("PACKER_RUN_UUID")
+	if UUID == "" {
+		UUID, _ = uuid.GenerateUUID()
+		os.Setenv("PACKER_RUN_UUID", UUID)
+	}
 
 	file := "provisioner.shell." + UUID + ".txt"
 	defer testshelper.CleanupFiles(file)

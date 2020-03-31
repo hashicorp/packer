@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	amazonEbs "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
+	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
 	"github.com/hashicorp/packer/command"
 	testshelper "github.com/hashicorp/packer/helper/tests"
 	"github.com/hashicorp/packer/packer"
@@ -43,9 +44,6 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 		provisioners = strings.Split(p, ",")
 	}
 
-	// set pre-config with necessary builders and provisioners
-	c := testBuildCommand(t, builders, provisioners)
-
 	// build template file and run build
 	for _, builder := range builders {
 		builderAcc := BuildersAccTest[builder]
@@ -53,30 +51,34 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 		if err != nil {
 			t.Fatalf("bad: failed to read builder config: %s", err.Error())
 		}
-
 		// Run a build for each builder with each of the provided provisioners
 		for _, provisioner := range provisioners {
-			provicionerAcc := ProvisionersAccTest[provisioner]
-			provisionerConfig, err := provicionerAcc.GetConfig()
-			if err != nil {
-				t.Fatalf("bad: failed to read provisioner config: %s", err.Error())
-			}
-
-			// Write json template
-			out := bytes.NewBuffer(nil)
-			fmt.Fprintf(out, `{"builders": [%s],"provisioners": [%s]}`, builderConfig, provisionerConfig)
-			fileName := fmt.Sprintf("%s_%s.json", builder, provisioner)
-			filePath := filepath.Join("./", fileName)
-			writeJsonTemplate(out, filePath, t)
-
-			// Run test
-			args := []string{
-				filePath,
-			}
 			testName := fmt.Sprintf("testing %s builder against %s provisioner", builder, provisioner)
 			t.Run(testName, func(t *testing.T) {
+				provicionerAcc := ProvisionersAccTest[provisioner]
+				provisionerConfig, err := provicionerAcc.GetConfig()
+				if err != nil {
+					t.Fatalf("bad: failed to read provisioner config: %s", err.Error())
+				}
+
+				// Write json template
+				out := bytes.NewBuffer(nil)
+				fmt.Fprintf(out, `{"builders": [%s],"provisioners": [%s]}`, builderConfig, provisionerConfig)
+				fileName := fmt.Sprintf("%s_%s.json", builder, provisioner)
+				filePath := filepath.Join("./", fileName)
+				writeJsonTemplate(out, filePath, t)
+
+				// set pre-config with necessary builder and provisioner
+				c := testBuildCommand(t, builder, provisioner)
+				args := []string{
+					filePath,
+				}
+
 				err = provicionerAcc.RunTest(c, args)
 				if err != nil {
+					// Cleanup created resources
+					testshelper.CleanupFiles(fileName)
+					builderAcc.CleanUp()
 					t.Fatalf("bad: failed to to run build: %s", err.Error())
 				}
 
@@ -103,26 +105,22 @@ func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 	outputFile.Sync()
 }
 
-func testBuildCommand(t *testing.T, builders []string, provisioners []string) *command.BuildCommand {
+func testBuildCommand(t *testing.T, builder string, provisioner string) *command.BuildCommand {
 	c := &command.BuildCommand{
 		Meta: testshelper.TestMetaFile(t),
 	}
 
-	mapOfBuilders := packer.MapOfBuilder{}
-	for _, builder := range builders {
-		mapOfBuilders[builder] = func() (packer.Builder, error) { return command.Builders[builder], nil }
-
-	}
-	mapOfProvisioner := packer.MapOfProvisioner{}
-	for _, provisioner := range provisioners {
-		mapOfProvisioner[provisioner] = func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil }
+	c.CoreConfig.Components.BuilderStore = packer.MapOfBuilder{
+		builder: func() (packer.Builder, error) { return command.Builders[builder], nil },
 	}
 
-	// Add basic provisioner used for testing others provisioners
-	mapOfProvisioner["file"] = func() (packer.Provisioner, error) { return command.Provisioners["file"], nil }
+	c.CoreConfig.Components.ProvisionerStore = packer.MapOfProvisioner{
+		provisioner: func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil },
 
-	c.CoreConfig.Components.BuilderStore = mapOfBuilders
-	c.CoreConfig.Components.ProvisionerStore = mapOfProvisioner
+		// Add basic provisioner used for testing others provisioners
+		"file": func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
+	}
+
 	return c
 }
 
@@ -133,7 +131,8 @@ var ProvisionersAccTest = map[string]ProvisionerAcceptance{
 
 // List of all builders available for acceptance test
 var BuildersAccTest = map[string]BuilderAcceptance{
-	"amazon-ebs": new(amazonEbs.AmazonEBSAccTest),
+	"virtualbox-iso": new(virtualboxISO.VirtualBoxISOAccTest),
+	"amazon-ebs":     new(amazonEbs.AmazonEBSAccTest),
 }
 
 type ProvisionerAcceptance interface {

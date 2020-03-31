@@ -1,5 +1,7 @@
 TEST?=$(shell go list ./...)
 VET?=$(shell go list ./...)
+ACC_TEST_BUILDERS?=all
+ACC_TEST_PROVISIONERS?=all
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
@@ -132,6 +134,10 @@ generate-check: generate ## Check go code generation is on par
 
 test: mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=3m
+
+# acctest runs provisioners acceptance tests
+provisioners-acctest: install-build-deps generate
+	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) ACC_TEST_PROVISIONERS=$(ACC_TEST_PROVISIONERS) go test ./helper/tests/provisioners/... -timeout=1h
 
 # testacc runs acceptance tests
 testacc: install-build-deps generate ## Run acceptance tests
