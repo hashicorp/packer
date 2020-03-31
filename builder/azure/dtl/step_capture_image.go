@@ -75,7 +75,7 @@ func (s *StepCaptureImage) captureImageFromVM(ctx context.Context) error {
 		CustomImageProperties: &customImageProperties,
 	}
 
-	f, err := s.client.DtlCustomImageClient.CreateOrUpdate(ctx, s.config.tmpResourceGroupName, s.config.LabName, s.config.ManagedImageName, *customImage)
+	f, err := s.client.DtlCustomImageClient.CreateOrUpdate(ctx, s.config.LabResourceGroupName, s.config.LabName, s.config.ManagedImageName, *customImage)
 	if err == nil {
 		err = f.WaitForCompletionRef(ctx, s.client.DtlCustomImageClient.Client)
 	}

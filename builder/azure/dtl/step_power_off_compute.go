@@ -51,7 +51,7 @@ func (s *StepPowerOffCompute) Run(ctx context.Context, state multistep.StateBag)
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
 
-	err := s.powerOff(ctx, resourceGroupName, s.config.LabName, computeName)
+	err := s.powerOff(ctx, s.config.LabResourceGroupName, s.config.LabName, computeName)
 
 	s.say("Powering off machine ...Complete")
 	return processStepResult(err, s.error, state)
