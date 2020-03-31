@@ -306,6 +306,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 
 			pcb := &packer.CoreBuild{
 				Type:           src.Type,
+				Label:          src.Name,
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
