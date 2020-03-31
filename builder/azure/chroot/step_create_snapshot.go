@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -72,7 +73,9 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 
 	f, err := azcli.SnapshotsClient().CreateOrUpdate(ctx, s.resourceGroup, s.snapshotName, snapshot)
 	if err == nil {
-		err = f.WaitForCompletionRef(ctx, azcli.PollClient())
+		cli := azcli.PollClient() // quick polling for quick operations
+		cli.PollingDelay = time.Second
+		err = f.WaitForCompletionRef(ctx, cli)
 	}
 	if err != nil {
 		log.Printf("StepCreateSnapshot.Run: error: %+v", err)

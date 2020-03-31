@@ -5,10 +5,11 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/packer/helper/useragent"
+
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute/computeapi"
 	"github.com/Azure/go-autorest/autorest"
-	"github.com/hashicorp/packer/helper/useragent"
 )
 
 type AzureClientSet interface {
@@ -127,6 +128,6 @@ func (s azureClientSet) GalleryImageVersionsClient() computeapi.GalleryImageVers
 func (s azureClientSet) PollClient() autorest.Client {
 	c := autorest.NewClientWithUserAgent("Packer-Azure-ClientSet")
 	s.configureAutorestClient(&c)
-	c.PollingDelay = time.Second / 3
+	c.PollingDelay = time.Second * 5
 	return c
 }

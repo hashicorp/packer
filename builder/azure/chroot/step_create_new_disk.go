@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -98,7 +99,9 @@ func (s *StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) m
 
 	f, err := azcli.DisksClient().CreateOrUpdate(ctx, s.resourceGroup, s.diskName, disk)
 	if err == nil {
-		err = f.WaitForCompletionRef(ctx, azcli.PollClient())
+		cli := azcli.PollClient() // quick polling for quick operations
+		cli.PollingDelay = time.Second
+		err = f.WaitForCompletionRef(ctx, cli)
 	}
 	if err != nil {
 		log.Printf("StepCreateNewDisk.Run: error: %+v", err)
