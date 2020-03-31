@@ -4,12 +4,12 @@ import bugsnagReact from '@bugsnag/plugin-react'
 
 const apiKey =
   typeof window === 'undefined'
-    ? '61141296f1ba00a95a8788b7871e1184'
-    : '4fa712dfcabddd05da29fd1f5ea5a4c0'
+    ? 'b6c57b27a37e531a5de94f065dd98bc0'
+    : 'de0b822b269aa57b620efd8927e03744'
 
 const bugsnagClient = bugsnag({
   apiKey,
-  releaseStage: process.env.NODE_ENV || 'development'
+  releaseStage: process.env.NODE_ENV || 'development',
 })
 
 bugsnagClient.use(bugsnagReact, React)
