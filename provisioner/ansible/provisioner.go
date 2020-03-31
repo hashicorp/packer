@@ -63,6 +63,7 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
+	KeepInventoryFile    bool     `mapstructure:"keep_inventory_file"`
 	GalaxyFile           string   `mapstructure:"galaxy_file"`
 	GalaxyCommand        string   `mapstructure:"galaxy_command"`
 	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
@@ -304,9 +305,14 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	return k.privKeyFile, nil
 }
 
+// ansible_user: LocalUsername
+// ansible_password: Password
+// ansible_connection: winrm
+// ansible_winrm_transport: basic
+
 const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
 const DefaultSSHInventoryFilev1 = "{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}\n"
-const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_password={{ .Password }} ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
+const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_winrm_transport=basic ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
 
 func (p *Provisioner) createInventoryFile() error {
 	log.Printf("Creating inventory file for Ansible run...")
@@ -470,12 +476,13 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		if err != nil {
 			return err
 		}
-
-		// Delete the generated inventory file
-		defer func() {
-			os.Remove(p.config.InventoryFile)
-			p.config.InventoryFile = ""
-		}()
+		if !p.config.KeepInventoryFile {
+			// Delete the generated inventory file
+			defer func() {
+				os.Remove(p.config.InventoryFile)
+				p.config.InventoryFile = ""
+			}()
+		}
 	}
 
 	if err := p.executeAnsibleFunc(ui, comm, privKeyFile); err != nil {
@@ -557,9 +564,8 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
 		}
 	}
-	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s -o IdentitiesOnly=yes",
-		p.config.PackerBuildName, p.config.PackerBuilderType),
-		"-i", inventory, playbook}
+
+	args := []string{"-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName), "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType), "-e", "IdentitiesOnly=yes"}
 	if len(privKeyFile) > 0 {
 		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
 		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
@@ -571,8 +577,15 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	// expose packer_http_addr extra variable
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
-		args = append(args, "--extra-vars", fmt.Sprintf("packer_http_addr=%s", httpAddr))
+		args = append(args, "-e", fmt.Sprintf(" packer_http_addr=%s", httpAddr))
 	}
+
+	// Add password to ansible call.
+	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+		args = append(args, "-e", fmt.Sprintf(" ansible_password=%s", p.generatedData["Password"]))
+	}
+
+	args = append(args, "-i", inventory, playbook)
 
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {
@@ -580,6 +593,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	}
 
 	cmd := exec.Command(p.config.Command, args...)
+	log.Printf("Megan cmd is %#v", cmd)
 
 	cmd.Env = os.Environ()
 	if len(envvars) > 0 {
@@ -622,11 +636,11 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	// remove winrm password from command, if it's been added
 	flattenedCmd := strings.Join(cmd.Args, " ")
 	sanitized := flattenedCmd
-	winRMPass, ok := p.generatedData["WinRMPassword"]
-	if ok && winRMPass != "" {
-		sanitized = strings.Replace(sanitized,
-			winRMPass.(string), "*****", -1)
-	}
+	// winRMPass, ok := p.generatedData["WinRMPassword"]
+	// if ok && winRMPass != "" {
+	// 	sanitized = strings.Replace(sanitized,
+	// 		winRMPass.(string), "*****", -1)
+	// }
 	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
 
 	if err := cmd.Start(); err != nil {
