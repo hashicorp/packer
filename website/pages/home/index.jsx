@@ -20,7 +20,7 @@ export default function Homepage() {
       </section>
       <section id="infrastructure-as-code" className="g-container">
         <div className="code-block">
-          <div class="circles">
+          <div className="circles">
             <span></span>
             <span></span>
             <span></span>
