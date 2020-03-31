@@ -28,7 +28,7 @@ dependency graph, so this function cannot be used with files that are generated
 dynamically during a Packer operation. We do not recommend using dynamic
 local files in Packer configurations, but in rare situations where this is
 necessary you can use
-[the `local_file` data source](/docs/providers/local/d/file.html)
+[the `local_file` data source](/docs/providers/local/d/file)
 to read files while respecting resource dependencies.
 
 ## Examples
@@ -40,5 +40,5 @@ Hello World
 
 ## Related Functions
 
-- [`fileexists`](./fileexists.html) determines whether a file exists
+- [`fileexists`](./fileexists) determines whether a file exists
   at a given path.

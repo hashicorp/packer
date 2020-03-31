@@ -15,13 +15,13 @@ sidebar_current: docs-post-processors-docker-tag
 Type: `docker-tag`
 
 The Packer Docker Tag post-processor takes an artifact from the [docker
-builder](/docs/builders/docker.html) that was committed and tags it into a
+builder](/docs/builders/docker) that was committed and tags it into a
 repository. This allows you to use the other Docker post-processors such as
-[docker-push](/docs/post-processors/docker-push.html) to push the image to a
+[docker-push](/docs/post-processors/docker-push) to push the image to a
 registry.
 
 This is very similar to the
-[docker-import](/docs/post-processors/docker-import.html) post-processor except
+[docker-import](/docs/post-processors/docker-import) post-processor except
 that this works with committed resources, rather than exported.
 
 ## Configuration
@@ -62,5 +62,5 @@ This example would take the image created by the Docker builder and tag it into
 the local Docker process with a name of `hashicorp/packer:0.7`.
 
 Following this, you can use the
-[docker-push](/docs/post-processors/docker-push.html) post-processor to push it
+[docker-push](/docs/post-processors/docker-push) post-processor to push it
 to a registry, if you want.

@@ -25,7 +25,7 @@ value is therefore a list with one element per `newbits` argument, each
 a string containing an address range in CIDR notation.
 
 For more information on IP addressing concepts, see the documentation for the
-related function [`cidrsubnet`](./cidrsubnet.html). `cidrsubnet` calculates
+related function [`cidrsubnet`](./cidrsubnet). `cidrsubnet` calculates
 a single subnet address within a prefix while allowing you to specify its
 subnet number, while `cidrsubnets` can calculate many at once, potentially of
 different sizes, and assigns subnet numbers automatically.
@@ -60,7 +60,7 @@ the same addressing scheme as the given prefix.
 ```
 
 You can use nested `cidrsubnets` calls with
-[`for` expressions](/docs/configuration/expressions.html#for-expressions)
+[`for` expressions](/docs/configuration/expressions#for-expressions)
 to concisely allocate groups of network address blocks:
 
 ```
@@ -87,9 +87,9 @@ to concisely allocate groups of network address blocks:
 
 ## Related Functions
 
-- [`cidrhost`](./cidrhost.html) calculates the IP address for a single host
+- [`cidrhost`](./cidrhost) calculates the IP address for a single host
   within a given network address prefix.
-- [`cidrnetmask`](./cidrnetmask.html) converts an IPv4 network prefix in CIDR
+- [`cidrnetmask`](./cidrnetmask) converts an IPv4 network prefix in CIDR
   notation into netmask notation.
-- [`cidrsubnet`](./cidrsubnet.html) calculates a single subnet address, allowing
+- [`cidrsubnet`](./cidrsubnet) calculates a single subnet address, allowing
   you to specify its network number.

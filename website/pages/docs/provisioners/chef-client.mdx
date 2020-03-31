@@ -67,7 +67,7 @@ configuration is actually required.
 
 - `elevated_user` and `elevated_password` (string) - If specified, Chef will
   be run with elevated privileges using the given Windows user. See the
-  [powershell](/docs/provisionders/powershell.html) provisioner for the full
+  [powershell](/docs/provisionders/powershell) provisioner for the full
   details.
 
 - `encrypted_data_bag_secret_path` (string) - The path to the file containing
@@ -75,7 +75,7 @@ configuration is actually required.
   will be available.
 
 - `execute_command` (string) - The command used to execute Chef. This has
-  various [configuration template variables](/docs/templates/engine.html)
+  various [configuration template variables](/docs/templates/engine)
   available. See below for more information.
 
 - `guest_os_type` (string) - The target guest OS type, either "unix" or
@@ -83,7 +83,7 @@ configuration is actually required.
   Windows friendly paths and commands. By default, this is "unix".
 
 - `install_command` (string) - The command used to install Chef. This has
-  various [configuration template variables](/docs/templates/engine.html)
+  various [configuration template variables](/docs/templates/engine)
   available. See below for more information.
 
 - `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -91,7 +91,7 @@ configuration is actually required.
 
 - `knife_command` (string) - The command used to run Knife during node
   clean-up. This has various [configuration template
-  variables](/docs/templates/engine.html) available. See below for more
+  variables](/docs/templates/engine) available. See below for more
   information.
 
 - `node_name` (string) - The name of the node to register with the Chef
@@ -109,7 +109,7 @@ configuration is actually required.
   windows.
 
 - `run_list` (array of strings) - The [run
-  list](http://docs.chef.io/essentials_node_object_run_lists.html) for Chef.
+  list](http://docs.chef.io/essentials_node_object_run_lists) for Chef.
   By default this is empty, and will use the run list sent down by the Chef
   Server.
 
@@ -206,7 +206,7 @@ trusted_certs_dir :{{.TrustedCertsDir}}
 {{end}}
 ```
 
-This template is a [configuration template](/docs/templates/engine.html) and
+This template is a [configuration template](/docs/templates/engine) and
 has a set of variables available to use:
 
 - `ChefEnvironment` - The Chef environment name.
@@ -321,7 +321,7 @@ mode.
 **Packer variables**
 
 Set the necessary Packer variables using environment variables or provide a
-[var file](/docs/templates/user-variables.html).
+[var file](/docs/templates/user-variables).
 
 ```json
 "variables": {
@@ -386,7 +386,7 @@ mode, while passing a `run_list` using a variable.
 **Packer variables**
 
 Set the necessary Packer variables using environment variables or provide a
-[var file](/docs/templates/user-variables.html).
+[var file](/docs/templates/user-variables).
 
 ```json
 "variables": {

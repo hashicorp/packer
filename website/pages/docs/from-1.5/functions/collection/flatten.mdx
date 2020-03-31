@@ -31,9 +31,9 @@ Indirectly-nested lists, such as those in maps, are _not_ flattened.
 ## Flattening nested structures for `for_each`
 
 The
-[resource `for_each`](/docs/configuration/resources.html#for_each-multiple-resource-instances-defined-by-a-map-or-set-of-strings)
+[resource `for_each`](/docs/configuration/resources#for_each-multiple-resource-instances-defined-by-a-map-or-set-of-strings)
 and
-[`dynamic` block](/docs/configuration/expressions.html#dynamic-blocks)
+[`dynamic` block](/docs/configuration/expressions#dynamic-blocks)
 language features both require a collection value that has one element for
 each repetition.
 
@@ -106,6 +106,6 @@ the associations between the subnets and their containing networks.
 
 ## Related Functions
 
-- [`setproduct`](./setproduct.html) finds all of the combinations of multiple
+- [`setproduct`](./setproduct) finds all of the combinations of multiple
   lists or sets of values, which can also be useful when preparing collections
   for use with `for_each` constructs.

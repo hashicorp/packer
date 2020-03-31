@@ -31,7 +31,7 @@ the extra fast build.
 
 ~> **This is an advanced builder** If you're just getting started with
 Packer, we recommend starting with the [osc-bsu
-builder](/docs/builders/osc-bsu.html), which is much easier to use.
+builder](/docs/builders/osc-bsu), which is much easier to use.
 
 The builder does _not_ manage OMIs. Once it creates an OMI and stores it in
 your account, it is up to you to use, delete, etc., the OMI.
@@ -62,18 +62,18 @@ each category, the available configuration keys are alphabetized.
 
 ### Required:
 
-- `access_key` (string) - The access key used to communicate with OUTSCALE. [Learn how to set this](outscale.html#authentication)
+- `access_key` (string) - The access key used to communicate with OUTSCALE. [Learn how to set this](outscale#authentication)
 
-- `omi_name` (string) - The name of the resulting OMIS that will appear when managing OMIs in the Outscale console or via APIs. This must be unique. To help make this unique, use a function like `timestamp` (see [template engine](../templates/engine.html) for more info).
+- `omi_name` (string) - The name of the resulting OMIS that will appear when managing OMIs in the Outscale console or via APIs. This must be unique. To help make this unique, use a function like `timestamp` (see [template engine](../templates/engine) for more info).
 
-- `secret_key` (string) - The secret key used to communicate with Outscale. [Learn how to set this](outscale.html#authentication)
+- `secret_key` (string) - The secret key used to communicate with Outscale. [Learn how to set this](outscale#authentication)
 
 - `source_omi` (string) - The initial OMI used as a base for the newly created machine. `source_omi_filter` may be used instead to populate this automatically.
 
 ### Optional:
 
 - `omi_description` (string) - The description to set for the resulting OMI(s).
-  By default this description is empty. This is a [template engine](../templates/engine.html),
+  By default this description is empty. This is a [template engine](../templates/engine),
   see [Build template data](#build-template-data) for more information.
 
 - `omi_account_ids` (array of strings) - A list of account IDs that have access to launch the resulting OMI(s). By default no additional users other than the user creating the OMIS has permissions to launch it.
@@ -195,7 +195,7 @@ each category, the available configuration keys are alphabetized.
 
 - `root_volume_tags` (object of key/value strings) - Tags to apply to the
   volumes that are _launched_. This is a [template
-  engine](/docs/templates/engine.html), see [Build template
+  engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 
 - `skip_region_validation` (boolean) - Set to true if you want to skip
@@ -203,7 +203,7 @@ each category, the available configuration keys are alphabetized.
 
 - `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
   They will override OMI tags if already applied to snapshot. This is a
-  [template engine](/docs/templates/engine.html), see [Build template
+  [template engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 
 - `snapshot_groups` (array of strings) - A list of groups that have access to
@@ -247,7 +247,7 @@ each category, the available configuration keys are alphabetized.
     filter, but will cause Packer to fail if the `source_omi` does not exist.
 
 - `tags` (object of key/value strings) - Tags applied to the OMI. This is a
-  [template engine](/docs/templates/engine.html), see [Build template
+  [template engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 
 ## Basic Example

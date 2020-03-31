@@ -18,7 +18,7 @@ by connecting to a Puppet master.
 -> **Note:** Puppet will _not_ be installed automatically by this
 provisioner. This provisioner expects that Puppet is already installed on the
 machine. It is common practice to use the [shell
-provisioner](/docs/provisioners/shell.html) before the Puppet provisioner to do
+provisioner](/docs/provisioners/shell) before the Puppet provisioner to do
 this.
 
 ## Basic Example
@@ -52,7 +52,7 @@ listed below:
   nothing, in which case a client private key won't be uploaded.
 
 - `execute_command` (string) - The command-line to execute Puppet. This is a
-  [template engine](/docs/templates/engine.html). Therefore, you
+  [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. In addition,
   you may use the following extra variables:
   - ClientCertPath: The value set in the template option
@@ -119,8 +119,8 @@ listed below:
 
 * `elevated_user` and `elevated_password` (string) - If specified, Puppet
   will be run with elevated privileges using the given Windows user. See the
-  [powershell](/docs/provisioners/powershell.html) provisioner for the full
-  details. This is a [template engine](/docs/templates/engine.html).
+  [powershell](/docs/provisioners/powershell) provisioner for the full
+  details. This is a [template engine](/docs/templates/engine).
   Therefore, you may use user variables and template functions in this
   field, including `` {{ build `Password`}} `` to use the password being used
   by the communicator to connect to your instance.

@@ -37,8 +37,8 @@ The example below is fully functional.
 
 - `execute_command` (string) - The command to use to execute the script. By
   default this is `{{ .Vars }}"{{ .Path }}"`. The value of this is treated as
-  [template engine](/docs/templates/engine.html). This is a
-  [template engine](/docs/templates/engine.html). Therefore, you may
+  [template engine](/docs/templates/engine). This is a
+  [template engine](/docs/templates/engine). Therefore, you may
   use user variables and template functions in this field. In addition, there
   are two available extra variables:
 
@@ -63,7 +63,7 @@ In addition to being able to specify custom environmental variables using the
 commonly useful environmental variables:
 
 - `PACKER_BUILD_NAME` is set to the [name of the
-  build](/docs/templates/builders.html#named-builds) that Packer is running.
+  build](/docs/templates/builders#named-builds) that Packer is running.
   This is most useful when Packer is making multiple builds and you want to
   distinguish them slightly from a common provisioning script.
 

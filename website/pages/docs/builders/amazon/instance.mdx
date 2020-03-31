@@ -44,7 +44,7 @@ machine. This can be done within a provisioner, but must be done before the
 builder finishes running.
 
 ~> Instance builds are not supported for Windows. Use
-[`amazon-ebs`](amazon-ebs.html) instead.
+[`amazon-ebs`](amazon-ebs) instead.
 
 ## Configuration Reference
 
@@ -169,7 +169,7 @@ variables are available:
 
 ## Build function template engine variables
 
-For the build function of [template engine](/docs/templates/engine.html), the following
+For the build function of [template engine](/docs/templates/engine), the following
 variables are available:
 
 - `SourceAMIName` - The source AMI Name (for example
@@ -190,7 +190,7 @@ upload the AMI.
 
 These are configured with `bundle_vol_command` and `bundle_upload_command`.
 Both of these configurations are [configuration
-templates](/docs/templates/engine.html) and have support for their own set of
+templates](/docs/templates/engine) and have support for their own set of
 template variables.
 
 ### Bundle Volume Command

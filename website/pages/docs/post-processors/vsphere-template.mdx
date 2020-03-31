@@ -20,7 +20,7 @@ Type: `vsphere-template`
 
 The Packer vSphere Template post-processor takes an artifact from the
 VMware-iso builder, built on ESXi (i.e. remote) or an artifact from the
-[vSphere](/docs/post-processors/vsphere.html) post-processor and allows to mark
+[vSphere](/docs/post-processors/vsphere) post-processor and allows to mark
 a VM as a template and leaving it in a path of choice.
 
 ## Example
@@ -89,11 +89,11 @@ Optional:
 
 ## Using the vSphere Template with local builders
 
-Once the [vSphere](/docs/post-processors/vsphere.html) takes an artifact from
+Once the [vSphere](/docs/post-processors/vsphere) takes an artifact from
 the VMware builder and uploads it to a vSphere endpoint, you will likely want
 to mark that VM as template. Packer can do this for you automatically using a
 sequence definition (a collection of post-processors that are treated as as
-single pipeline, see [Post-Processors](/docs/templates/post-processors.html)
+single pipeline, see [Post-Processors](/docs/templates/post-processors)
 for more information):
 
 ```json

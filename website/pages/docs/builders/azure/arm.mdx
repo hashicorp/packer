@@ -18,7 +18,7 @@ costs for VMs built and stored using Packer.
 
 Azure uses a combination of OAuth and Active Directory to authorize requests to
 the ARM API. Learn how to [authorize access to
-ARM](/docs/builders/azure.html#authentication-for-azure).
+ARM](/docs/builders/azure#authentication-for-azure).
 
 The documentation below references command output from the [Azure
 CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
@@ -27,7 +27,7 @@ CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/
 
 There are many configuration options available for the builder. We'll start
 with authentication parameters, then go over the Azure ARM builder specific
-options. In addition to the options listed here, a [communicator](/docs/templates/communicator.html) can be configured for this builder.
+options. In addition to the options listed here, a [communicator](/docs/templates/communicator) can be configured for this builder.
 
 ### Authentication options
 
@@ -35,7 +35,7 @@ options. In addition to the options listed here, a [communicator](/docs/template
 
 #### Managed Identity
 
-If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure.html#azure-managed-identity) you don't need to specify any additional configuration options. As Packer will attempt to use the Managed Identity and subscription of the VM that Packer is running on.
+If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure#azure-managed-identity) you don't need to specify any additional configuration options. As Packer will attempt to use the Managed Identity and subscription of the VM that Packer is running on.
 
 #### Interactive User Authentication
 
@@ -44,7 +44,7 @@ Packer will use cached credentials or redirect you to a website to log in.
 
 #### Service Principal
 
-To use a [service principal](/docs/builders/azure.html#azure-active-directory-service-principal)
+To use a [service principal](/docs/builders/azure#azure-active-directory-service-principal)
 you should specify `subscription_id`, `client_id` and one of `client_secret`,
 `client_cert_path` or `client_jwt`.
 

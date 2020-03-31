@@ -16,7 +16,7 @@ The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
 It assumes that the communicator in use is WinRM. However, the provisioner can
 work equally well (with a few caveats) when combined with the SSH communicator.
 See the [section
-below](/docs/provisioners/powershell.html#combining-the-powershell-provisioner-with-the-ssh-communicator)
+below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
 for details.
 
 ## Basic Example
@@ -41,7 +41,7 @@ The example below is fully functional.
   powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
   ```
 
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. In addition,
   you may use two extra variables:
 
@@ -54,7 +54,7 @@ The example below is fully functional.
   Packer injects some environmental variables by default into the
   environment, as well, which are covered in the section below.
 
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. If you are
   running on AWS, Azure, Google Compute, or OpenStack and would like to access
   the generated password that Packer uses to connect to the instance via WinRM,
@@ -76,7 +76,7 @@ The example below is fully functional.
   powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
   ```
 
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. In addition,
   you may use two extra variables:
 
@@ -95,7 +95,7 @@ The example below is fully functional.
   PowerShell script will be run with elevated privileges using the given
   Windows user.
 
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. If you are
   running a build on AWS, Azure, Google Compute,
   or OpenStack and would like to run using the generated password that Packer
@@ -157,7 +157,7 @@ In addition to being able to specify custom environmental variables using the
 commonly useful environmental variables:
 
 - `PACKER_BUILD_NAME` is set to the [name of the
-  build](/docs/templates/builders.html#named-builds) that Packer is running.
+  build](/docs/templates/builders#named-builds) that Packer is running.
   This is most useful when Packer is making multiple builds and you want to
   distinguish them slightly from a common provisioning script.
 

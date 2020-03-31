@@ -52,7 +52,7 @@ are organized below into two categories: required and optional. Within each
 category, the available options are alphabetized and described.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
+[communicator](/docs/templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -111,7 +111,7 @@ builder.
 - `parallels_tools_guest_path` (string) - The path in the VM to upload
   Parallels Tools. This only takes effect if `parallels_tools_mode`
   is "upload". This is a [configuration
-  template](/docs/templates/engine.html) that has a single
+  template](/docs/templates/engine) that has a single
   valid variable: `Flavor`, which will be the value of
   `parallels_tools_flavor`. By default this is `prl-tools-{{.Flavor}}.iso`
   which should upload into the login directory of the user.
@@ -130,7 +130,7 @@ builder.
   itself as an array of strings, where each string represents a single
   argument on the command-line to `prlctl` (but excluding `prlctl` itself).
   Each arg is treated as a [configuration
-  template](/docs/templates/engine.html), where the `Name`
+  template](/docs/templates/engine), where the `Name`
   variable is replaced with the VM name. More details on how to use `prlctl`
   are below.
 
@@ -186,7 +186,7 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character (using the Parallels
-Virtualization SDK, see [Parallels Builder](/docs/builders/parallels.html))
+Virtualization SDK, see [Parallels Builder](/docs/builders/parallels))
 simulating a human actually typing the keyboard.
 
 @include 'builders/boot-command.mdx'
@@ -218,6 +218,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/engine.html). The only available
+template](/docs/templates/engine). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.

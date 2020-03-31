@@ -48,7 +48,7 @@ each category, the available configuration keys are alphabetized.
 Required:
 
 - `access_key` (string) - The access key used to communicate with AWS. [Learn
-  how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+  how to set this.](/docs/builders/amazon#specifying-amazon-credentials)
 
 - `region` (string) - The name of the region, such as `us-east-1` in which to
   upload the OVA file to S3 and create the AMI. A list of valid regions can
@@ -59,7 +59,7 @@ Required:
   post-processor is run.
 
 - `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-  how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+  how to set this.](/docs/builders/amazon#specifying-amazon-credentials)
 
 Optional:
 
@@ -139,7 +139,7 @@ Optional:
   OVA file will be copied to for import. If not specified, this will default
   to "packer-import-{{timestamp}}.ova". This key (i.e., the uploaded OVA)
   will be removed after import, unless `skip_clean` is `true`. This is
-  treated as a [template engine](/docs/templates/engine.html). Therefore, you
+  treated as a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field.
 
 - `skip_clean` (boolean) - Whether we should skip removing the OVA file

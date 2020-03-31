@@ -185,10 +185,10 @@ provisioning step to make sure your image is secure.
 
 Most clouds allow you to provide a configuration script that runs when the
 instance is launched. In AWS, this is the
-[user_data_file](/docs/builders/amazon-ebs.html#user_data_file). In Google
+[user_data_file](/docs/builders/amazon-ebs#user_data_file). In Google
 Cloud, this is provided using the `windows-startup-script-cmd`
-[metadata](/docs/builders/googlecompute.html#metadata) tag.
-[Example](/docs/builders/googlecompute.html#windows-example)
+[metadata](/docs/builders/googlecompute#metadata) tag.
+[Example](/docs/builders/googlecompute#windows-example)
 
 Essentially, these files are powershell or cmd scripts that configure winrm,
 without having to be wrapped in an Autounattend. Provide the script in the

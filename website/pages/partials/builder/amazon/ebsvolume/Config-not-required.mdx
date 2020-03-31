@@ -27,7 +27,7 @@
   create EBS Volumes. These tags will _not_ appear in the tags of the
   resulting EBS volumes unless they're duplicated under `tags` in the
   `ebs_volumes` setting. This is a [template
-  engine](/docs/templates/engine.html), see [Build template
+  engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 
   Note: The tags specified here will be _temporarily_ applied to volumes
@@ -39,5 +39,5 @@
 - `run_volume_tag` ([]{name string, value string}) - Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
   repeatable block containing a `name` and a `value` field. In HCL2 mode
   the
-  [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+  [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
   will allow you to create those programatically.

@@ -29,7 +29,7 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
+[communicator](/docs/templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -184,14 +184,14 @@ builder.
   `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 - `user_data` (string) - User data to launch with the instance. This is a
-  [template engine](/docs/templates/engine.html) see _User Data_ bellow for
+  [template engine](/docs/templates/engine) see _User Data_ bellow for
   more details. Packer will not automatically wait for a user script to
   finish before shutting down the instance this must be handled in a
   provisioner.
 
 - `user_data_file` (string) - Path to a file that will be used for the user
   data when launching the instance. This file will be parsed as a [template
-  engine](/docs/templates/engine.html) see _User Data_ bellow for more
+  engine](/docs/templates/engine) see _User Data_ bellow for more
   details.
 
 - `use_local_ip_address` (boolean) - Set to `true` to indicate that the

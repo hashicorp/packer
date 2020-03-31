@@ -38,11 +38,11 @@ Along with each key, it is noted whether it is required or not.
   builders that will be used to create machine images for this template, and
   configures each of those builders. For more information on how to define
   and configure a builder, read the sub-section on [configuring builders in
-  templates](/docs/templates/builders.html).
+  templates](/docs/templates/builders).
 
 - `description` (optional) is a string providing a description of what the
   template does. This output is used only in the [inspect
-  command](/docs/commands/inspect.html).
+  command](/docs/commands/inspect).
 
 - `min_packer_version` (optional) is a string that has a minimum Packer
   version that is required to parse the template. This can be used to ensure
@@ -55,20 +55,20 @@ Along with each key, it is noted whether it is required or not.
   not specified, then no post-processing will be done. For more information
   on what post-processors do and how they're defined, read the sub-section on
   [configuring post-processors in
-  templates](/docs/templates/post-processors.html).
+  templates](/docs/templates/post-processors).
 
 - `provisioners` (optional) is an array of one or more objects that defines
   the provisioners that will be used to install and configure software for
   the machines created by each of the builders. If it is not specified, then
   no provisioners will be run. For more information on how to define and
   configure a provisioner, read the sub-section on [configuring provisioners
-  in templates](/docs/templates/provisioners.html).
+  in templates](/docs/templates/provisioners).
 
 - `variables` (optional) is an object of one or more key/value strings that
   defines user variables contained in the template. If it is not specified,
   then no variables are defined. For more information on how to define and
   use user variables, read the sub-section on [user variables in
-  templates](/docs/templates/user-variables.html).
+  templates](/docs/templates/user-variables).
 
 ## Comments
 
@@ -94,7 +94,7 @@ script to it and run that script using SSH.
 
 -> **Note:** This example requires an account with Amazon Web Services.
 There are a number of parameters which need to be provided for a functional
-build to take place. See the [Amazon builder](/docs/builders/amazon.html)
+build to take place. See the [Amazon builder](/docs/builders/amazon)
 documentation for more information.
 
 ```json

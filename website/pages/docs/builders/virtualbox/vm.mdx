@@ -61,7 +61,7 @@ are organized below into two categories: required and optional. Within each
 category, the available options are alphabetized and described.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
+[communicator](/docs/templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -174,7 +174,7 @@ builder.
   where the VirtualBox guest additions ISO will be uploaded. By default this
   is `VBoxGuestAdditions.iso` which should upload into the login directory of
   the user. This is a [configuration
-  template](/docs/templates/engine.html) where the `Version`
+  template](/docs/templates/engine) where the `Version`
   variable is replaced with the VirtualBox version.
 
 - `guest_additions_sha256` (string) - The SHA256 checksum of the guest
@@ -247,7 +247,7 @@ builder.
   defined itself as an array of strings, where each string represents a single
   argument on the command-line to `VBoxManage` (but excluding
   `VBoxManage` itself). Each arg is treated as a [configuration
-  template](/docs/templates/engine.html), where the `Name`
+  template](/docs/templates/engine), where the `Name`
   variable is replaced with the VM name. More details on how to use
   `VBoxManage` are below.
 
@@ -333,7 +333,7 @@ above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
 of your VM you must guarantee that you can still access this HTTP server.
 
 For more examples of various boot commands, see the sample projects from our
-[community templates page](/community-tools.html#templates).
+[community templates page](/community-tools#templates).
 
 ## Guest Additions
 
@@ -373,6 +373,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/engine.html). The only available
+template](/docs/templates/engine). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.

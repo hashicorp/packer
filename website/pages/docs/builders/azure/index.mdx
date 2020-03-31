@@ -16,12 +16,12 @@ Packer can create Azure virtual machine images through variety of ways
 depending on the strategy that you want to use for building the images.
 Packer supports the following builders for Azure images at the moment:
 
-- [azure-arm](/docs/builders/azure-arm.html) - Uses Azure Resource
+- [azure-arm](/docs/builders/azure-arm) - Uses Azure Resource
   Manager (ARM) to launch a virtual machine (VM) from which a new image is
   captured after provisioning. If in doubt, use this builder; it is the
   easiest builder to get started with.
 
-- [azure-chroot](/docs/builders/azure-chroot.html) - Uses ARM to create
+- [azure-chroot](/docs/builders/azure-chroot) - Uses ARM to create
   a managed disk that is attached to an existing Azure VM that Packer is
   running on. Provisioning leverages [Chroot](https://en.wikipedia.org/wiki/Chroot)
   environment. After provisioning, the disk is detached an image is created
@@ -30,7 +30,7 @@ Packer supports the following builders for Azure images at the moment:
   Azure.
 
 -> **Don't know which builder to use?** If in doubt, use the [azure-arm
-builder](/docs/builders/azure-arm.html). It is much easier to use.
+builder](/docs/builders/azure-arm). It is much easier to use.
 
 # Authentication for Azure
 

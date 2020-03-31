@@ -13,7 +13,7 @@ sidebar_current: docs-post-processors-docker-push
 Type: `docker-push`
 
 The Packer Docker push post-processor takes an artifact from the
-[docker-import](/docs/post-processors/docker-import.html) post-processor and
+[docker-import](/docs/post-processors/docker-import) post-processor and
 pushes it to a Docker registry.
 
 ## Configuration
@@ -22,11 +22,11 @@ This post-processor has only optional configuration:
 
 - `aws_access_key` (string) - The AWS access key used to communicate with
   AWS. [Learn how to set
-  this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+  this.](/docs/builders/amazon#specifying-amazon-credentials)
 
 - `aws_secret_key` (string) - The AWS secret key used to communicate with
   AWS. [Learn how to set
-  this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+  this.](/docs/builders/amazon#specifying-amazon-credentials)
 
 - `aws_token` (string) - The AWS access token to use. This is different from
   the access key and secret key. If you're not sure what this is, then you
@@ -35,7 +35,7 @@ This post-processor has only optional configuration:
 
 - `aws_profile` (string) - The AWS shared credentials profile used to
   communicate with AWS. [Learn how to set
-  this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+  this.](/docs/builders/amazon#specifying-amazon-credentials)
 
 - `ecr_login` (boolean) - Defaults to false. If true, the post-processor will
   login in order to push the image to [Amazon EC2 Container Registry
@@ -67,4 +67,4 @@ will automatically log you out afterwards (just the server specified).
 ## Example
 
 For an example of using docker-push, see the section on using generated
-artifacts from the [docker builder](/docs/builders/docker.html).
+artifacts from the [docker builder](/docs/builders/docker).

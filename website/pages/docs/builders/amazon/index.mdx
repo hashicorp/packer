@@ -14,29 +14,29 @@ Packer is able to create Amazon AMIs. To achieve this, Packer comes with
 multiple builders depending on the strategy you want to use to build the AMI.
 Packer supports the following builders at the moment:
 
-- [amazon-ebs](/docs/builders/amazon-ebs.html) - Create EBS-backed AMIs by
+- [amazon-ebs](/docs/builders/amazon-ebs) - Create EBS-backed AMIs by
   launching a source AMI and re-packaging it into a new AMI after
   provisioning. If in doubt, use this builder, which is the easiest to get
   started with.
 
-- [amazon-instance](/docs/builders/amazon-instance.html) - Create
+- [amazon-instance](/docs/builders/amazon-instance) - Create
   instance-store AMIs by launching and provisioning a source instance, then
   rebundling it and uploading it to S3.
 
-- [amazon-chroot](/docs/builders/amazon-chroot.html) - Create EBS-backed AMIs
+- [amazon-chroot](/docs/builders/amazon-chroot) - Create EBS-backed AMIs
   from an existing EC2 instance by mounting the root device and using a
   [Chroot](https://en.wikipedia.org/wiki/Chroot) environment to provision
   that device. This is an **advanced builder and should not be used by
   newcomers**. However, it is also the fastest way to build an EBS-backed AMI
   since no new EC2 instance needs to be launched.
 
-- [amazon-ebssurrogate](/docs/builders/amazon-ebssurrogate.html) - Create EBS
+- [amazon-ebssurrogate](/docs/builders/amazon-ebssurrogate) - Create EBS
   -backed AMIs from scratch. Works similarly to the `chroot` builder but does
   not require running in AWS. This is an **advanced builder and should not be
   used by newcomers**.
 
 -> **Don't know which builder to use?** If in doubt, use the [amazon-ebs
-builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
+builder](/docs/builders/amazon-ebs). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
 # Amazon EBS Volume Builder
@@ -44,7 +44,7 @@ generally recommends EBS-backed images nowadays.
 Packer is able to create Amazon EBS Volumes which are preinitialized with a
 filesystem and data.
 
-- [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS
+- [amazon-ebsvolume](/docs/builders/amazon-ebsvolume) - Create EBS
   volumes by launching a source AMI with block devices mapped. Provision the
   instance, then destroy it, retaining the EBS volumes.
 

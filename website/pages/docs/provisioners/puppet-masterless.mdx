@@ -31,7 +31,7 @@ master.
 -> **Note:** Puppet will _not_ be installed automatically by this
 provisioner. This provisioner expects that Puppet is already installed on the
 machine. It is common practice to use the [shell
-provisioner](/docs/provisioners/shell.html) before the Puppet provisioner to do
+provisioner](/docs/provisioners/shell) before the Puppet provisioner to do
 this.
 
 ## Basic Example
@@ -55,14 +55,14 @@ Required parameters:
 - `manifest_file` (string) - This is either a path to a puppet manifest
   (`.pp` file) _or_ a directory containing multiple manifests that puppet
   will apply (the ["main
-  manifest"](https://docs.puppetlabs.com/puppet/latest/reference/dirs_manifest.html)).
+  manifest"](https://docs.puppetlabs.com/puppet/latest/reference/dirs_manifest)).
   These file(s) must exist on your local system and will be uploaded to the
   remote machine.
 
 Optional parameters:
 
 - `execute_command` (string) - The command-line to execute Puppet. This is a
-  [template engine](/docs/templates/engine.html). Therefore, you
+  [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field. In addition,
   you may use the following extra variables:
   - FacterVars: Additional facts to set when executing Puppet, joined for
@@ -141,8 +141,8 @@ multiple manifests you should use `manifest_file` instead.
 
 - `elevated_user` and `elevated_password` (string) - If specified, Puppet
   will be run with elevated privileges using the given Windows user. See the
-  [powershell](/docs/provisioners/powershell.html) provisioner for the full
-  details. This is a [template engine](/docs/templates/engine.html).
+  [powershell](/docs/provisioners/powershell) provisioner for the full
+  details. This is a [template engine](/docs/templates/engine).
   Therefore, you may use user variables and template functions in this
   field, including `` {{ build `Password`}} `` to use the password being used
   by the communicator to connect to your instance.

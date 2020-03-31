@@ -73,11 +73,11 @@ briefly. Create a file `example.json` and fill it with the following contents:
 ```
 
 When building, you'll pass in `aws_access_key` and `aws_secret_key` as
-[user variables](/docs/templates/user-variables.html), keeping your secret keys
+[user variables](/docs/templates/user-variables), keeping your secret keys
 out of the template. You can create security credentials on [this
 page](https://console.aws.amazon.com/iam/home?#security_credential). An example
 IAM policy document can be found in the [Amazon EC2 builder
-docs](/docs/builders/amazon.html).
+docs](/docs/builders/amazon).
 
 This is a basic template that is ready-to-go. It should be immediately
 recognizable as a normal, basic JSON object. Within the object, the `builders`
@@ -116,7 +116,7 @@ similar to below. Note that this process typically takes a few minutes.
 
 -> **Note:** For the tutorial it is convenient to use the credentials in the
 command line. However, it is potentially insecure. See our documentation for
-other ways to [specify Amazon credentials](/docs/builders/amazon.html#specifying-amazon-credentials).
+other ways to [specify Amazon credentials](/docs/builders/amazon#specifying-amazon-credentials).
 
 -> **Note:** When using packer on Windows, replace the single-quotes in the
 command below with double-quotes.
@@ -315,7 +315,7 @@ usage, you should not be charged for actually building the AMI.
 However, please note that you will be charged for storage of the snapshot
 associated with any AMI that you create.
 If you wish to avoid further charges, follow the steps in the [Managing the
-Image](/intro/getting-started/build-image.html#managing-the-image) section
+Image](/intro/getting-started/build-image#managing-the-image) section
 above to deregister the created AMI and delete the associated snapshot once
 you're done.
 
@@ -328,7 +328,7 @@ customized package up into a brand new AMI that will be available from the
 [AWS AMI management page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
 instances we subsequently create from this AMI will have all of our
 customizations baked in. This is the core benefit we are looking to
-achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
+achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs)
 in this example.
 
 Now, all this sounds simple enough right? Well, actually it turns out we
@@ -430,7 +430,7 @@ which is actually configuring and customizing the instance. Again, we do this
 with [Provisioners](/docs/provisioners).
 
 The example config below shows the two different ways of using the [PowerShell
-provisioner](/docs/provisioners/powershell.html): `inline` and `script`.
+provisioner](/docs/provisioners/powershell): `inline` and `script`.
 The first example, `inline`, allows you to provide short snippets of code, and
 will create the script file for you. The second example allows you to run more
 complex code by providing the path to a script to run on the guest VM.

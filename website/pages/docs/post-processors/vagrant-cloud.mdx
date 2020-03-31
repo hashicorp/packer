@@ -18,9 +18,9 @@ simple way.
 
 The Vagrant Cloud post-processor enables the upload of Vagrant boxes to Vagrant
 Cloud. Currently, the Vagrant Cloud post-processor will accept and upload boxes
-supplied to it from the [Vagrant](/docs/post-processors/vagrant.html) or
-[Artifice](/docs/post-processors/artifice.html) post-processors and the
-[Vagrant](/docs/builders/vagrant.html) builder.
+supplied to it from the [Vagrant](/docs/post-processors/vagrant) or
+[Artifice](/docs/post-processors/artifice) post-processors and the
+[Vagrant](/docs/builders/vagrant) builder.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand
@@ -102,7 +102,7 @@ on Vagrant Cloud, as well as authentication and version information.
 
 - `box_download_url` (string) - Optional URL for a self-hosted box. If this
   is set the box will not be uploaded to the Vagrant Cloud.
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/engine). Therefore, you
   may use user variables and template functions in this field.
   The following extra variables are also avilable in this engine:
   - `Provider`: The Vagrant provider the box is for

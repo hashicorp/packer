@@ -72,7 +72,7 @@ configuration is actually required, but at least `run_list` is recommended.
   directory specified by the `staging_directory`. By default, this is empty.
 
 - `execute_command` (string) - The command used to execute Chef. This has
-  various [configuration template variables](/docs/templates/engine.html)
+  various [configuration template variables](/docs/templates/engine)
   available. See below for more information.
 
 - `guest_os_type` (string) - The target guest OS type, either "unix" or
@@ -80,7 +80,7 @@ configuration is actually required, but at least `run_list` is recommended.
   Windows friendly paths and commands. By default, this is "unix".
 
 - `install_command` (string) - The command used to install Chef. This has
-  various [configuration template variables](/docs/templates/engine.html)
+  various [configuration template variables](/docs/templates/engine)
   available. See below for more information.
 
 - `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -133,7 +133,7 @@ The default value for the configuration template is:
 cookbook_path [{{.CookbookPaths}}]
 ```
 
-This template is a [configuration template](/docs/templates/engine.html) and
+This template is a [configuration template](/docs/templates/engine) and
 has a set of variables available to use:
 
 - `ChefEnvironment` - The current enabled environment. Only non-empty if the
