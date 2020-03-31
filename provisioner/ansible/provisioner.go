@@ -565,7 +565,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		}
 	}
 
-	args := []string{"-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName), "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType), "-e", "IdentitiesOnly=yes"}
+	args := []string{"-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName), "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType)}
 	if len(privKeyFile) > 0 {
 		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
 		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
@@ -583,6 +583,11 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	// Add password to ansible call.
 	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
 		args = append(args, "-e", fmt.Sprintf(" ansible_password=%s", p.generatedData["Password"]))
+	}
+
+	if p.generatedData["ConnType"] == "ssh" {
+		// Add ssh extra args to set IdentitiesOnly
+		args = append(args, "--ssh-extra-args", "-o IdentitiesOnly=yes")
 	}
 
 	args = append(args, "-i", inventory, playbook)
