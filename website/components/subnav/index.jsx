@@ -8,15 +8,16 @@ export default function PackerSubnav() {
     <Subnav
       titleLink={{
         text: 'packer',
-        url: '/'
+        url: '/',
       }}
       ctaLinks={[
         { text: 'GitHub', url: 'https://www.github.com/hashicorp/packer' },
-        { text: 'Download', url: '/downloads' }
+        { text: 'Download', url: '/downloads' },
       ]}
       currentPath={router.pathname}
       menuItemsAlign="right"
       menuItems={subnavItems}
+      constrainWidth
     />
   )
 }

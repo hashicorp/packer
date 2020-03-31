@@ -33,7 +33,7 @@ content and enables some capabilities that are not possible with the
 This builder works by creating a new MD from either an existing source or from
 scratch and attaching it to the (already existing) Azure VM where Packer is
 running. Once attached, a [chroot](https://en.wikipedia.org/wiki/Chroot) is set
-up and made available to the [provisioners](/docs/provisioners/index.html).
+up and made available to the [provisioners](/docs/provisioners).
 After provisioning, the MD is detached, snapshotted and a MD image is created.
 
 Using this process, minutes can be shaved off the image creation process

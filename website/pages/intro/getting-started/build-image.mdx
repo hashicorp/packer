@@ -93,7 +93,7 @@ re-packaging it into a new AMI.
 The additional keys within the object are configuration for this builder,
 specifying things such as access keys, the source AMI to build from and more.
 The exact set of configuration variables available for a builder are specific to
-each builder and can be found within the [documentation](/docs/index.html).
+each builder and can be found within the [documentation](/docs).
 
 Before we take this template and build an image from it, let's validate the
 template by running `packer validate example.json`. This command checks the
@@ -350,7 +350,7 @@ Here's a basic example of a file that will configure the instance to allow
 Packer to connect in over WinRM. As you will see, we will tell Packer about
 our intentions by referencing this file and the commands within it from
 within the `"builders"` section of our
-[build template](/docs/templates/index.html) that we will create later.
+[build template](/docs/templates) that we will create later.
 
 Note the `<powershell>` and `</powershell>` tags at the top and bottom of
 the file. These tags tell Amazon we'd like to run the enclosed code with
@@ -427,7 +427,7 @@ your Packer build to stall irrecoverably or fail!
 Now we've got the business of getting Packer connected to our instance
 taken care of, let's get on with the _real_ reason we're doing all this,
 which is actually configuring and customizing the instance. Again, we do this
-with [Provisioners](/docs/provisioners/index.html).
+with [Provisioners](/docs/provisioners).
 
 The example config below shows the two different ways of using the [PowerShell
 provisioner](/docs/provisioners/powershell.html): `inline` and `script`.
