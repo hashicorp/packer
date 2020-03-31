@@ -13,7 +13,7 @@ type ToolsConfig struct {
 	ToolsUploadFlavor string `mapstructure:"tools_upload_flavor" required:"false"`
 	// The path in the VM to upload the VMware tools. This only takes effect if
 	// `tools_upload_flavor` is non-empty. This is a [configuration
-	// template](/docs/templates/engine.html) that has a single valid variable:
+	// template](https://packer.io/docs/templates/engine) that has a single valid variable:
 	// `Flavor`, which will be the value of `tools_upload_flavor`. By default
 	// the upload path is set to `{{.Flavor}}.iso`. This setting is not used
 	// when `remote_type` is `esx5`.

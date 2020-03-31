@@ -107,7 +107,7 @@ type Config struct {
 	VMName string `mapstructure:"vm_name" required:"false"`
 
 	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
-	// Path to a [configuration template](/docs/templates/engine.html) that
+	// Path to a [configuration template](https://packer.io/docs/templates/engine) that
 	// defines the contents of the virtual machine VMX file for VMware. The
 	// engine has access to the template variables `{{ .DiskNumber }}` and
 	// `{{ .DiskName }}`.

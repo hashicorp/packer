@@ -172,7 +172,7 @@ type Config struct {
 	// Google's cloud. The value should be the path of the token generator
 	// within vault.
 	// For information on how to configure your Vault + GCP engine to produce
-	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp.html
+	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp
 	// You must have the environment variables VAULT_ADDR and VAULT_TOKEN set,
 	// along with any other relevant variables for accessing your vault
 	// instance. For more information, see the Vault docs:

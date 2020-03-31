@@ -22,7 +22,7 @@ type ExportConfig struct {
 	// argument. Currently, exporting the build VM (with ovftool) is only
 	// supported when building on ESXi e.g. when `remote_type` is set to
 	// `esx5`. See the [Building on a Remote vSphere
-	// Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
+	// Hypervisor](https://packer.io/docs/builders/vmware-iso#building-on-a-remote-vsphere-hypervisor)
 	// section below for more info.
 	OVFToolOptions []string `mapstructure:"ovftool_options" required:"false"`
 	// Defaults to `false`. When enabled, Packer will not export the VM. Useful
@@ -30,7 +30,7 @@ type ExportConfig struct {
 	// VM. Currently, exporting the build VM is only supported when building on
 	// ESXi e.g. when `remote_type` is set to `esx5`. See the [Building on a
 	// Remote vSphere
-	// Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
+	// Hypervisor](https://packer.io/docs/builders/vmware-iso#building-on-a-remote-vsphere-hypervisor)
 	// section below for more info.
 	SkipExport bool `mapstructure:"skip_export" required:"false"`
 	// Set this to true if you would like to keep

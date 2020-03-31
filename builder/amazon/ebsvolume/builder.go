@@ -57,7 +57,7 @@ type Config struct {
 	// create EBS Volumes. These tags will *not* appear in the tags of the
 	// resulting EBS volumes unless they're duplicated under `tags` in the
 	// `ebs_volumes` setting. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// engine](https://packer.io/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	//
 	//  Note: The tags specified here will be *temporarily* applied to volumes
@@ -69,7 +69,7 @@ type Config struct {
 	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
 	// repeatable block containing a `name` and a `value` field. In HCL2 mode
 	// the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	VolumeRunTag hcl2template.NameValues `mapstructure:"run_volume_tag"`
 

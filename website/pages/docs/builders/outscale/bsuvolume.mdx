@@ -92,7 +92,7 @@ builder.
   sometimes desirable to [run Sysprep](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-vista/cc721940(v=ws.10)>) which will stop the VM for you. If this is set to `true`, Packer
   _will not_ stop the VM but will assume that you will send the stop
   signal yourself through your final provisioner. You can do this with a
-  [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell).
+  [windows-shell provisioner](/docs/provisioners/windows-shell).
 
   Note that Packer will still wait for the VM to be stopped, and
   failing to send the stop signal yourself, when you have set this flag to

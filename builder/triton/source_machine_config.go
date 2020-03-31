@@ -57,7 +57,7 @@ type SourceMachineConfig struct {
 	MachineTags map[string]string `mapstructure:"source_machine_tags" required:"false"`
 	// Same as [`source_machine_tags`](#source_machine_tags) but defined as a
 	// singular block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	MachineTag hcl2template.NameValues `mapstructure:"source_machine_tag" required:"false"`
 	// Whether or not the firewall

@@ -18,7 +18,7 @@ import (
 // is attached as the first floppy device. The summary size of the listed files
 // must not exceed 1.44 MB. The supported ways to move large files into the OS
 // are using `http_directory` or [the file
-// provisioner](https://www.packer.io/docs/provisioners/file.html).
+// provisioner](https://packer.io/docs/provisioners/file).
 type FloppyConfig struct {
 	// A list of files to place onto a floppy disk that is attached when the VM
 	// is booted. Currently, no support exists for creating sub-directories on
