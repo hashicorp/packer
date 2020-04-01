@@ -39,31 +39,6 @@ var accels = map[string]struct{}{
 	"whpx": {},
 }
 
-var netDevice = map[string]bool{
-	"ne2k_pci":       true,
-	"i82551":         true,
-	"i82557b":        true,
-	"i82559er":       true,
-	"rtl8139":        true,
-	"e1000":          true,
-	"pcnet":          true,
-	"virtio":         true,
-	"virtio-net":     true,
-	"virtio-net-pci": true,
-	"usb-net":        true,
-	"i82559a":        true,
-	"i82559b":        true,
-	"i82559c":        true,
-	"i82550":         true,
-	"i82562":         true,
-	"i82557a":        true,
-	"i82557c":        true,
-	"i82801":         true,
-	"vmxnet3":        true,
-	"i82558a":        true,
-	"i82558b":        true,
-}
-
 var diskInterface = map[string]bool{
 	"ide":         true,
 	"scsi":        true,
@@ -524,11 +499,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
-	}
-
-	if _, ok := netDevice[b.config.NetDevice]; !ok {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("unrecognized network device type"))
 	}
 
 	if _, ok := diskInterface[b.config.DiskInterface]; !ok {
