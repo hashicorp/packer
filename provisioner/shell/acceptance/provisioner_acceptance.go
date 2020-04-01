@@ -16,10 +16,6 @@ import (
 
 type ShellProvisionerAccTest struct{}
 
-func NewShellProvisionerAccTest() *ShellProvisionerAccTest {
-	return new(ShellProvisionerAccTest)
-}
-
 func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 	filePath := filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
 	config, err := os.Open(filePath)
