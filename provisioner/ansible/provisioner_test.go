@@ -429,7 +429,7 @@ default ansible_ssh_host=123.45.67.89 ansible_ssh_user=testuser ansible_ssh_port
 				"ConnType": "winrm",
 				"Password": "12345",
 			}),
-			Expected: "default ansible_host=123.45.67.89 ansible_connection=winrm ansible_password=12345 ansible_shell_type=powershell ansible_user=testuser ansible_port=1234\n",
+			Expected: "default ansible_host=123.45.67.89 ansible_connection=winrm ansible_winrm_transport=basic ansible_shell_type=powershell ansible_user=testuser ansible_port=1234\n",
 		},
 	}
 
