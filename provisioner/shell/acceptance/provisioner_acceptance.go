@@ -1,4 +1,4 @@
-package shell_acceptance
+package shell_acc
 
 import (
 	"bytes"

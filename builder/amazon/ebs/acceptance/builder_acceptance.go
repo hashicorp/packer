@@ -1,4 +1,4 @@
-package amazon_acceptance
+package amazon_acc
 
 import (
 	"fmt"

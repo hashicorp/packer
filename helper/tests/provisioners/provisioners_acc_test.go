@@ -1,4 +1,4 @@
-package acceptance
+package acceptance_test
 
 import (
 	"bytes"
@@ -8,12 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	amazonEbs "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
+	amazonEBS "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
 	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
+	shell "github.com/hashicorp/packer/provisioner/shell/acceptance"
+
 	"github.com/hashicorp/packer/command"
 	testshelper "github.com/hashicorp/packer/helper/tests"
 	"github.com/hashicorp/packer/packer"
-	shell "github.com/hashicorp/packer/provisioner/shell/acceptance"
 )
 
 func TestProvisionersAgainstBuilders(t *testing.T) {
@@ -126,7 +127,7 @@ var ProvisionersAccTest = map[string]ProvisionerAcceptance{
 // List of all builders available for acceptance test
 var BuildersAccTest = map[string]BuilderAcceptance{
 	"virtualbox-iso": new(virtualboxISO.VirtualBoxISOAccTest),
-	"amazon-ebs":     new(amazonEbs.AmazonEBSAccTest),
+	"amazon-ebs":     new(amazonEBS.AmazonEBSAccTest),
 }
 
 type ProvisionerAcceptance interface {

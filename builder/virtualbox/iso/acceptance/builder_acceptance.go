@@ -1,4 +1,4 @@
-package virtualbox_acceptance
+package virtualbox_acc
 
 import (
 	"fmt"
