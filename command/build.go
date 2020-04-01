@@ -220,9 +220,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 	}
 
 	builds, ret := c.GetBuilds(cfg.Path)
-	if ret != 0 {
-		return ret
-	}
 
 	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
