@@ -30,6 +30,8 @@
 /docs/basics/terminology                          /docs/terminology                           301!
 /docs/basics/terminology.html                     /docs/terminology                           301!
 
+/docs/other/*                                     /docs/:splat                                200
+
 /docs/configuration/from-1.5/*                    /docs/from-1.5/:splat                       200
 /docs/configuration/from-1.5/*/overview           /docs/from-1.5/:splat                       200
 /docs/configuration/from-1.5/*/overview.html      /docs/from-1.5/:splat                       200

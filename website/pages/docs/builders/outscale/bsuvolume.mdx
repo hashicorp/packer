@@ -42,13 +42,13 @@ builder.
 
 ### Required:
 
-- `access_key` (string) - The access key used to communicate with OUTSCALE. [Learn how to set this](outscale#authentication)
+- `access_key` (string) - The access key used to communicate with OUTSCALE. [Learn how to set this](/docs/builders/outscale#authentication)
 
 - `vm_type` (string) - The Outscale VM type to use while building the OMI, such as `t2.small`.
 
 - `region` (string) - The name of the region, such as `us-east-1`, in which to launch the Outscale VM to create the OMI.
 
-- `secret_key` (string) - The secret key used to communicate with Outscale. [Learn how to set this](outscale#authentication)
+- `secret_key` (string) - The secret key used to communicate with Outscale. [Learn how to set this](/docs/builders/outscale#authentication)
 
 - `source_omi` (string) - The initial OMI used as a base for the newly created machine. `source_omi_filter` may be used instead to populate this automatically.
 
@@ -161,7 +161,7 @@ builder.
     This will fail unless _exactly_ one OMIS is returned. In the above example,
     `most_recent` will cause this to succeed by selecting the newest image.
 
-- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](/docs/templates/communicator#ssh_password) is used. [`ssh_private_key_file`](/docs/templates/communicator#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
+- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](/docs/communicators/ssh#ssh_password) is used. [`ssh_private_key_file`](/docs/communicators/ssh#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 - `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If set, either the public IP address, private IP address, public DNS name or private DNS name will used as the host for SSH. The default behaviour if inside a Net is to use the public IP address if available, otherwise the private IP address will be used. If not in a Net the public DNS name will be used. Also works for WinRM.
 

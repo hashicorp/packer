@@ -161,7 +161,7 @@ Because of the way our WinRM transfers works, it can take a very long time to
 upload and download even moderately sized files. If you're experiencing
 slowness using the file provisioner on Windows, it's suggested that you set up
 an SSH server and use the [ssh
-communicator](/docs/templates/communicator#ssh-communicator). If you only
+communicator](/docs/communicators/ssh). If you only
 want to transfer files to your guest, and if your builder supports it, you may
 also use the `http_directory` directive. This will cause that directory to be
 available to the guest over http, and set the environment variable

@@ -198,7 +198,7 @@ builder.
     This will fail unless _exactly_ one OMIS is returned. In the above example,
     `most_recent` will cause this to succeed by selecting the newest image.
 
-- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](/docs/templates/communicator#ssh_password) is used. [`ssh_private_key_file`](/docs/templates/communicator#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
+- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](/docs/communicators/ssh#ssh_password) is used. [`ssh_private_key_file`](/docs/communicators/ssh#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 - `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to authenticate connections to the source VM. No temporary keypair will be created, and the values of `ssh_password` and `ssh_private_key_file` will be ignored. To use this option with a key pair already configured in the source OMI, leave the `ssh_keypair_name` blank. To associate an existing key pair in Outscale with the source VM, set the `ssh_keypair_name` field to the name of the key pair.
 
