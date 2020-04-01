@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/packer/template"
 	"golang.org/x/sync/semaphore"
 
+	"github.com/gobwas/glob"
 	"github.com/posener/complete"
 )
 
@@ -139,34 +140,68 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 		}
 
 		if len(c.Meta.CoreConfig.Only) > 0 {
-			// Build a set of all the names to filter to
-			nameSet := make(map[string]struct{})
-			for _, buildName := range c.Meta.CoreConfig.Only {
-				nameSet[buildName] = struct{}{}
+			// Build a slice of glob.Glob representing the -only filters.
+			var onlyGlobs []glob.Glob
+			for _, pattern := range c.Meta.CoreConfig.Only {
+				onlyGlob, err := glob.Compile(pattern)
+				if err != nil {
+					c.Ui.Error(fmt.Sprintf("invalid glob pattern %s for -only: %s", pattern, err))
+					return nil, 1
+				}
+
+				onlyGlobs = append(onlyGlobs, onlyGlob)
 			}
 
 			var filteredBuilds []packer.Build
+
 			for _, build := range builds {
-				if _, ok := nameSet[build.Name()]; ok {
+				include := false
+
+				for _, onlyGlob := range onlyGlobs {
+					if onlyGlob.Match(build.Name()) {
+						include = true
+						break
+					}
+				}
+
+				if include {
 					filteredBuilds = append(filteredBuilds, build)
 				}
 			}
+
 			builds = filteredBuilds
 		}
 
 		if len(c.Meta.CoreConfig.Except) > 0 {
-			// Build a set of all the names to filter out
-			nameSet := make(map[string]struct{})
-			for _, buildName := range c.Meta.CoreConfig.Except {
-				nameSet[buildName] = struct{}{}
+			// Build a slice of glob.Glob representing the -except filters.
+			var exceptGlobs []glob.Glob
+			for _, pattern := range c.Meta.CoreConfig.Except {
+				exceptGlob, err := glob.Compile(pattern)
+				if err != nil {
+					c.Ui.Error(fmt.Sprintf("invalid glob pattern %s for -except: %s", pattern, err))
+					return nil, 1
+				}
+
+				exceptGlobs = append(exceptGlobs, exceptGlob)
 			}
 
 			var filteredBuilds []packer.Build
+
 			for _, build := range builds {
-				if _, ok := nameSet[build.Name()]; !ok {
+				exclude := false
+
+				for _, exceptGlob := range exceptGlobs {
+					if exceptGlob.Match(build.Name()) {
+						exclude = true
+						break
+					}
+				}
+
+				if !exclude {
 					filteredBuilds = append(filteredBuilds, build)
 				}
 			}
+
 			builds = filteredBuilds
 		}
 
