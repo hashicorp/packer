@@ -36,12 +36,12 @@ type Config struct {
 	Commit bool `mapstructure:"commit" required:"true"`
 
 	// The directory inside container to mount temp directory from host server
-	// for work [file provisioner](https://packer.io/docs/provisioners/file). This defaults
+	// for work [file provisioner](/docs/provisioners/file). This defaults
 	// to c:/packer-files on windows and /packer-files on other systems.
 	ContainerDir string `mapstructure:"container_dir" required:"false"`
 	// Throw away the container when the build is complete. This is useful for
 	// the [artifice
-	// post-processor](https://www.packer.io/docs/post-processors/artifice).
+	// post-processor](/docs/post-processors/artifice).
 	Discard bool `mapstructure:"discard" required:"true"`
 	// Username (UID) to run remote commands with. You can also set the group
 	// name/ID if you want: (UID or UID:GID). You may need this if you get

@@ -14,7 +14,7 @@ type VBoxManageConfig struct {
 	// array of strings, where each string represents a single argument on the
 	// command-line to `VBoxManage` (but excluding `VBoxManage` itself). Each
 	// arg is treated as a [configuration
-	// template](https://packer.io/docs/templates/engine), where the `Name` variable is
+	// template](/docs/templates/engine), where the `Name` variable is
 	// replaced with the VM name. More details on how to use `VBoxManage` are
 	// below.
 	VBoxManage [][]string `mapstructure:"vboxmanage" required:"false"`

@@ -90,7 +90,7 @@ type RunConfig struct {
 	// *will not* stop the instance but will assume that you will send the stop
 	// signal yourself through your final provisioner. You can do this with a
 	// [windows-shell
-	// provisioner](https://www.packer.io/docs/provisioners/windows-shell).
+	// provisioner](/docs/provisioners/windows-shell).
 	// Note that Packer will still wait for the instance to be stopped, and
 	// failing to send the stop signal yourself, when you have set this flag to
 	// `true`, will cause a timeout.
@@ -184,12 +184,12 @@ type RunConfig struct {
 	// `security_group_ids` take precedence over this.
 	SecurityGroupFilter SecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false"`
 	// Tags to apply to the instance that is that is *launched* to create the
-	// EBS volumes. This is a [template engine](https://packer.io/docs/templates/engine),
+	// EBS volumes. This is a [template engine](/docs/templates/engine),
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
 	// block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	RunTag hcl2template.NameValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
@@ -286,7 +286,7 @@ type RunConfig struct {
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
 	// Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
 	// containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	SpotTag hcl2template.NameValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.

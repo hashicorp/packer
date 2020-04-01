@@ -73,7 +73,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
-			"https://packer.io/docs/configuration/from-1.5/syntax.html for " +
+			"https://packer.io/docs/configuration/from-1.5/syntax for " +
 			"details.",
 		Context: v.Range.Ptr(),
 	}

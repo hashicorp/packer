@@ -44,7 +44,7 @@ func (v *VaultAWSEngineOptions) Empty() bool {
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	// The access key used to communicate with AWS. [Learn how  to set this]
-	// (https://packer.io/docs/builders/amazon#specifying-amazon-credentials). On EBS, this
+	// (/docs/builders/amazon#specifying-amazon-credentials). On EBS, this
 	// is not required if you are using `use_vault_aws_engine` for
 	// authentication instead.
 	AccessKey string `mapstructure:"access_key" required:"true"`
@@ -79,7 +79,7 @@ type AccessConfig struct {
 	// When chroot building, this value is guessed from environment.
 	RawRegion string `mapstructure:"region" required:"true"`
 	// The secret key used to communicate with AWS. [Learn how to set
-	// this](https://packer.io/docs/builders/amazon#specifying-amazon-credentials). This is not required
+	// this](/docs/builders/amazon#specifying-amazon-credentials). This is not required
 	// if you are using `use_vault_aws_engine` for authentication instead.
 	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// Set to true if you want to skip

@@ -245,7 +245,7 @@ type Config struct {
 	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
 	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
 	// containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	AzureTag hcl2template.NameValues `mapstructure:"azure_tag" required:"false"`
 	// Resource group under which the final artifact will be stored.

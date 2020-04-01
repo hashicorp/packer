@@ -105,7 +105,7 @@ import (
 // ]
 // ```
 // For more examples of various boot commands, see the sample projects from our
-// [community templates page](https://packer.io/community-tools#templates).
+// [community templates page](/community-tools#templates).
 type BootConfig struct {
 	// Time to wait after sending a group of key pressses. The value of this
 	// should be a duration. Examples are `5s` and `1m30s` which will cause
