@@ -13,21 +13,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/common/retry"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepCreateSSMTunnel struct {
-	CommConfig *communicator.Config
-	AWSSession *session.Session
-	InstanceID string
-	DstPort    int
-
-	ssmSession *ssm.StartSessionOutput
+	AWSSession      *session.Session
+	DstPort         int
+	SSMAgentEnabled bool
+	instanceId      string
+	ssmSession      *ssm.StartSessionOutput
 }
 
 func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if !s.SSMAgentEnabled {
+		return multistep.ActionContinue
+	}
+
 	ui := state.Get("ui").(packer.Ui)
 	// Find an available TCP port for our HTTP server
 	l, err := net.ListenRangeConfig{
@@ -58,26 +60,26 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	s.InstanceID = aws.StringValue(instance.InstanceId)
+	s.instanceId = aws.StringValue(instance.InstanceId)
 	ssmconn := ssm.New(s.AWSSession)
 	input := ssm.StartSessionInput{
 		DocumentName: aws.String("AWS-StartPortForwardingSession"),
 		Parameters:   params,
-		Target:       aws.String(s.InstanceID),
+		Target:       aws.String(s.instanceId),
 	}
 
+	ui.Message(fmt.Sprintf("Starting PortForwarding session to instance %q on local port %q to remote port %q", s.instanceId, src, dst))
 	var output *ssm.StartSessionOutput
 	err = retry.Config{
-		Tries:       11,
 		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
-		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		output, err = ssmconn.StartSessionWithContext(ctx, &input)
 		return err
 	})
 
 	if err != nil {
-		err = fmt.Errorf("error encountered in starting session for instance %q: %s", s.InstanceID, err)
+		err = fmt.Errorf("error encountered in starting session for instance %q: %s", s.instanceId, err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -110,6 +112,7 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
+	ui.Message(fmt.Sprintf("PortForwarding session to instance %q established!", s.instanceId))
 	state.Put("sessionPort", l.Port)
 
 	return multistep.ActionContinue

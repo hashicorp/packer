@@ -90,9 +90,9 @@ func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.St
 	}
 }
 
-// SSHPort returns a function that can be given to the SSH communicator
-// for determining the SSH port to use when connecting to an instance.
-func SSHPort(sshInterface string, port int) func(multistep.StateBag) (int, error) {
+// Port returns a function that can be given to the communicator
+// for determining the port to use when connecting to an instance.
+func Port(sshInterface string, port int) func(multistep.StateBag) (int, error) {
 	return func(state multistep.StateBag) (int, error) {
 		if sshInterface != "session_manager" {
 			return port, nil
