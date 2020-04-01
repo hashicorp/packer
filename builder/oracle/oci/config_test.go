@@ -15,6 +15,7 @@ import (
 
 func testConfig(accessConfFile *os.File) map[string]interface{} {
 	return map[string]interface{}{
+
 		"availability_domain": "aaaa:PHX-AD-3",
 		"access_cfg_file":     accessConfFile.Name(),
 
@@ -252,6 +253,36 @@ func TestConfig(t *testing.T) {
 			t.Errorf("Expected ConfigProvider.KeyFingerprint: %s, got %s", expected, fingerprint)
 		}
 	})
+
+	// Test the correct errors are produced when certain template keys
+	// are present alongside use_instance_principals key.
+	invalidKeys := []string{
+		"access_cfg_file",
+		"access_cfg_file_account",
+		"user_ocid",
+		"tenancy_ocid",
+		"region",
+		"fingerprint",
+		"key_file",
+		"pass_phrase",
+	}
+	for _, k := range invalidKeys {
+		t.Run(k+"_mixed_with_use_instance_principals", func(t *testing.T) {
+			raw := testConfig(cfgFile)
+			raw["use_instance_principals"] = "true"
+			raw[k] = "some_random_value"
+
+			var c Config
+
+			c.configProvider = instancePrincipalConfigurationProviderMock{}
+
+			errs := c.Prepare(raw)
+
+			if !strings.Contains(errs.Error(), k) {
+				t.Errorf("Expected '%s' to contain '%s'", errs.Error(), k)
+			}
+		})
+	}
 }
 
 // BaseTestConfig creates the base (DEFAULT) config including a temporary key
