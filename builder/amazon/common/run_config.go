@@ -387,8 +387,8 @@ type RunConfig struct {
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
 
-	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
-	//    set, either the public IP address, private IP address, public DNS name
+	// One of `public_ip`, `private_ip`, `public_dns`, `private_dns` or `session_manager`.
+	//    If set, either the public IP address, private IP address, public DNS name
 	//    or private DNS name will be used as the host for SSH. The default behaviour
 	//    if inside a VPC is to use the public IP address if available, otherwise
 	//    the private IP address will be used. If not in a VPC the public DNS name
@@ -398,6 +398,10 @@ type RunConfig struct {
 	//    should be direct, `ssh_interface` must be set to `private_dns` and
 	//    `<region>.compute.internal` included in the `NO_PROXY` environment
 	//    variable.
+	//
+	//    When using `session_manager` the machine running Packer must have
+	//	  the AWS Session Manager Plugin installed and within its path.
+	//    https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 	SSHInterface string `mapstructure:"ssh_interface"`
 }
 
