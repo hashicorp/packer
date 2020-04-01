@@ -101,6 +101,7 @@ func TestParser_complete(t *testing.T) {
 			[]packer.Build{
 				&packer.CoreBuild{
 					Type:     "virtualbox-iso",
+					Label:    "ubuntu-1204",
 					Prepared: true,
 					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{

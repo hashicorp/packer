@@ -129,7 +129,11 @@ type CoreBuildProvisioner struct {
 
 // Returns the name of the build.
 func (b *CoreBuild) Name() string {
-	return fmt.Sprintf("%s.%s", b.Type, b.Label)
+	if b.Label != "" {
+		return fmt.Sprintf("%s.%s", b.Type, b.Label)
+	} else {
+		return b.Type
+	}
 }
 
 // Prepare prepares the build by doing some initialization for the builder
