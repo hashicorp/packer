@@ -17,7 +17,7 @@ type AlicloudDiskDevice struct {
 	// 128] English or Chinese characters, must begin with an
 	// uppercase/lowercase letter or Chinese character. Can contain numbers,
 	// ., _ and -. The disk name will appear on the console. It cannot
-	// begin with http:// or https://.
+	// begin with `http:// or `https://`.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// Category of the system disk. Optional values
 	// are:
@@ -35,7 +35,7 @@ type AlicloudDiskDevice struct {
 	SnapshotId string `mapstructure:"disk_snapshot_id" required:"false"`
 	// The value of disk description is blank by
 	// default. [2, 256] characters. The disk description will appear on the
-	// console. It cannot begin with http:// or https://.
+	// console. It cannot begin with `http://` or `https://`.
 	Description string `mapstructure:"disk_description" required:"false"`
 	// Whether or not the disk is
 	// released along with the instance:
@@ -139,14 +139,14 @@ type AlicloudImageConfig struct {
 	// The name of the user-defined image, [2, 128]
 	// English or Chinese characters. It must begin with an uppercase/lowercase
 	// letter or a Chinese character, and may contain numbers, _ or -. It
-	// cannot begin with http:// or https://.
+	// cannot begin with `http://` or `https://`.
 	AlicloudImageName string `mapstructure:"image_name" required:"true"`
 	// The version number of the image, with a length
 	// limit of 1 to 40 English characters.
 	AlicloudImageVersion string `mapstructure:"image_version" required:"false"`
 	// The description of the image, with a length
 	// limit of 0 to 256 characters. Leaving it blank means null, which is the
-	// default value. It cannot begin with http:// or https://.
+	// default value. It cannot begin with `http://` or `https://`.
 	AlicloudImageDescription string `mapstructure:"image_description" required:"false"`
 	// The IDs of to-be-added Aliyun
 	// accounts to which the image is shared. The number of accounts is 1 to 10.
@@ -158,7 +158,7 @@ type AlicloudImageConfig struct {
 	// The name of the destination image,
 	// [2, 128] English or Chinese characters. It must begin with an
 	// uppercase/lowercase letter or a Chinese character, and may contain numbers,
-	// _ or -. It cannot begin with http:// or https://.
+	// _ or -. It cannot begin with `http://` or `https://`.
 	AlicloudImageDestinationNames []string `mapstructure:"image_copy_names" required:"false"`
 	// Whether or not to encrypt the target images,            including those copied if image_copy_regions is specified. If this option
 	// is set to true, a temporary image will be created from the provisioned

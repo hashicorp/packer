@@ -15,7 +15,7 @@ description: The yamlencode function encodes a given value as a YAML string.
 result format may change in future versions of Packer, based on feedback.
 Do not use `yamldecode` to construct a value for any resource argument where
 changes to the result would be disruptive. To get a consistent string
-representation of a value use [`jsonencode`](./jsonencode) instead; its
+representation of a value use [`jsonencode`](/docs/from-1.5/functions/encoding/jsonencode) instead; its
 results are also valid YAML because YAML is a JSON superset.
 
 <!--
@@ -29,7 +29,7 @@ results are also valid YAML because YAML is a JSON superset.
 -->
 
 This function maps
-[Packer language values](../expressions#types-and-values)
+[Packer language values](/docs/from-1.5/expressions#types-and-values)
 to YAML tags in the following way:
 
 | Packer type   | YAML type            |
@@ -77,12 +77,12 @@ mean that this is rarely a problem in practice.
 
 `yamlencode` always uses YAML's "block style" for mappings and sequences, unless
 the mapping or sequence is empty. To generate flow-style YAML, use
-[`jsonencode`](./jsonencode) instead: YAML flow-style is a superset
+[`jsonencode`](/docs/from-1.5/functions/encoding/jsonencode) instead: YAML flow-style is a superset
 of JSON syntax.
 
 ## Related Functions
 
-- [`jsonencode`](./jsonencode) is a similar operation using JSON instead
+- [`jsonencode`](/docs/from-1.5/functions/encoding/jsonencode) is a similar operation using JSON instead
   of YAML.
-- [`yamldecode`](./yamldecode) performs the opposite operation, _decoding_
+- [`yamldecode`](/docs/from-1.5/functions/encoding/yamldecode) performs the opposite operation, _decoding_
   a YAML string to obtain its represented value.
