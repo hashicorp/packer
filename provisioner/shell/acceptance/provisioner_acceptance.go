@@ -16,6 +16,10 @@ import (
 
 type ShellProvisionerAccTest struct{}
 
+func NewShellProvisionerAccTest() *ShellProvisionerAccTest {
+	return new(ShellProvisionerAccTest)
+}
+
 func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 	filePath := filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
 	config, err := os.Open(filePath)
@@ -52,4 +56,11 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 		return fmt.Errorf("Expected to find %s", file)
 	}
 	return nil
+}
+
+func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
+	return packer.MapOfProvisioner{
+		"shell": func() (packer.Provisioner, error) { return command.Provisioners["shell"], nil },
+		"file":  func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
+	}
 }

@@ -17,31 +17,24 @@ import (
 )
 
 func TestProvisionersAgainstBuilders(t *testing.T) {
-	// validate if we want to run provisioners acc tests
-	b := os.Getenv("ACC_TEST_BUILDERS")
-	p := os.Getenv("ACC_TEST_PROVISIONERS")
-	if b == "" || p == "" {
-		t.Skip("Provisioners Acceptance tests skipped unless env 'ACC_TEST_BUILDERS' and 'ACC_TEST_PROVISIONERS' are set")
-	}
+	b, p := provisionerAccTestPreCheck(t)
 
 	// Get builders and provisioners type to be tested
 	var builders []string
-	if b == "all" {
-		// test all available builders
-		for k := range BuildersAccTest {
-			builders = append(builders, k)
+	for k := range BuildersAccTest {
+		// This will validate that only defined builders are executed against
+		if b != "all" && !strings.Contains(b, k) {
+			continue
 		}
-	} else {
-		builders = strings.Split(b, ",")
+		builders = append(builders, k)
 	}
+
 	var provisioners []string
-	if p == "all" {
-		// test all available provisioners
-		for k := range ProvisionersAccTest {
-			provisioners = append(provisioners, k)
+	for k := range ProvisionersAccTest {
+		if p != "all" && !strings.Contains(p, k) {
+			continue
 		}
-	} else {
-		provisioners = strings.Split(p, ",")
+		provisioners = append(provisioners, k)
 	}
 
 	// build template file and run build
@@ -55,8 +48,8 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 		for _, provisioner := range provisioners {
 			testName := fmt.Sprintf("testing %s builder against %s provisioner", builder, provisioner)
 			t.Run(testName, func(t *testing.T) {
-				provicionerAcc := ProvisionersAccTest[provisioner]
-				provisionerConfig, err := provicionerAcc.GetConfig()
+				provisionerAcc := ProvisionersAccTest[provisioner]
+				provisionerConfig, err := provisionerAcc.GetConfig()
 				if err != nil {
 					t.Fatalf("bad: failed to read provisioner config: %s", err.Error())
 				}
@@ -69,12 +62,12 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 				writeJsonTemplate(out, filePath, t)
 
 				// set pre-config with necessary builder and provisioner
-				c := testBuildCommand(t, builder, provisioner)
+				c := buildCommand(t, builderAcc, provisionerAcc)
 				args := []string{
 					filePath,
 				}
 
-				err = provicionerAcc.RunTest(c, args)
+				err = provisionerAcc.RunTest(c, args)
 				if err != nil {
 					// Cleanup created resources
 					testshelper.CleanupFiles(fileName)
@@ -93,6 +86,16 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 	}
 }
 
+func provisionerAccTestPreCheck(t *testing.T) (string, string) {
+	b := os.Getenv("ACC_TEST_BUILDERS")
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+	// validate if we want to run provisioners acc tests
+	if b == "" || p == "" {
+		t.Skip("Provisioners Acceptance tests skipped unless env 'ACC_TEST_BUILDERS' and 'ACC_TEST_PROVISIONERS' are set")
+	}
+	return b, p
+}
+
 func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 	outputFile, err := os.Create(filePath)
 	if err != nil {
@@ -105,21 +108,12 @@ func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 	outputFile.Sync()
 }
 
-func testBuildCommand(t *testing.T, builder string, provisioner string) *command.BuildCommand {
+func buildCommand(t *testing.T, builder BuilderAcceptance, provisioner ProvisionerAcceptance) *command.BuildCommand {
 	c := &command.BuildCommand{
 		Meta: testshelper.TestMetaFile(t),
 	}
-
-	c.CoreConfig.Components.BuilderStore = packer.MapOfBuilder{
-		builder: func() (packer.Builder, error) { return command.Builders[builder], nil },
-	}
-
-	c.CoreConfig.Components.ProvisionerStore = packer.MapOfProvisioner{
-		provisioner: func() (packer.Provisioner, error) { return command.Provisioners[provisioner], nil },
-
-		// Add basic provisioner used for testing others provisioners
-		"file": func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
-	}
+	c.CoreConfig.Components.BuilderStore = builder.GetBuilderStore()
+	c.CoreConfig.Components.ProvisionerStore = provisioner.GetProvisionerStore()
 
 	return c
 }
@@ -138,9 +132,11 @@ var BuildersAccTest = map[string]BuilderAcceptance{
 type ProvisionerAcceptance interface {
 	GetConfig() (string, error)
 	RunTest(c *command.BuildCommand, args []string) error
+	GetProvisionerStore() packer.MapOfProvisioner
 }
 
 type BuilderAcceptance interface {
 	GetConfig() (string, error)
 	CleanUp() error
+	GetBuilderStore() packer.MapOfBuilder
 }

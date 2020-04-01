@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer"
+
 	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
@@ -29,4 +32,10 @@ func (s *AmazonEBSAccTest) CleanUp() error {
 		AMIName: "packer-acc-test",
 	}
 	return helper.CleanUpAmi()
+}
+
+func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
+	return packer.MapOfBuilder{
+		"amazon-ebs": func() (packer.Builder, error) { return command.Builders["amazon-ebs"], nil },
+	}
 }
