@@ -547,37 +547,31 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	return nil
 }
 
-func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
-	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.InventoryFile
+func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile string) (args []string, envVars []string) {
+	args = []string{}
 
-	var envvars []string
-
-	// Fetch external dependencies
-	if len(p.config.GalaxyFile) > 0 {
-		if err := p.executeGalaxy(ui, comm); err != nil {
-			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
-		}
+	if p.config.PackerBuildName != "" {
+		// HCL configs don't currently have the PakcerBuildName. Don't
+		// cause weirdness with a half-set variable
+		args = append(args, "-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName))
 	}
 
-	args := []string{"-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName), "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType)}
+	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
 	if len(privKeyFile) > 0 {
-		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
-		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
-		// as seen in #5852
-		// args = append(args, "--private-key", privKeyFile)
+		// "-e ansible_ssh_private_key_file" is preferable to "--private-key"
+		// because it is a higher priority variable and therefore won't get
+		// overridden by dynamic variables. See #5852 for more details.
 		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
 
 	// expose packer_http_addr extra variable
-	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
-		args = append(args, "-e", fmt.Sprintf(" packer_http_addr=%s", httpAddr))
+		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
 	}
 
 	// Add password to ansible call.
 	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
-		args = append(args, "-e", fmt.Sprintf(" ansible_password=%s", p.generatedData["Password"]))
+		args = append(args, "-e", fmt.Sprintf("ansible_password=%s", p.generatedData["Password"]))
 	}
 
 	if p.generatedData["ConnType"] == "ssh" {
@@ -589,11 +583,27 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {
-		envvars = append(envvars, p.config.AnsibleEnvVars...)
+		envVars = append(envVars, p.config.AnsibleEnvVars...)
 	}
 
+	return args, envVars
+}
+
+func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
+	playbook, _ := filepath.Abs(p.config.PlaybookFile)
+	inventory := p.config.InventoryFile
+	httpAddr := common.GetHTTPAddr()
+
+	// Fetch external dependencies
+	if len(p.config.GalaxyFile) > 0 {
+		if err := p.executeGalaxy(ui, comm); err != nil {
+			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
+	}
+
+	args, envvars := p.createCmdArgs(httpAddr, inventory, playbook, privKeyFile)
+
 	cmd := exec.Command(p.config.Command, args...)
-	log.Printf("Megan cmd is %#v", cmd)
 
 	cmd.Env = os.Environ()
 	if len(envvars) > 0 {
