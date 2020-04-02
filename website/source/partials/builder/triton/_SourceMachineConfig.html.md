@@ -1,3 +1,0 @@
-<!-- Code generated from the comments of the SourceMachineConfig struct in builder/triton/source_machine_config.go; DO NOT EDIT MANUALLY -->
-SourceMachineConfig represents the configuration to run a machine using
-the SDC API in order for provisioning to take place.

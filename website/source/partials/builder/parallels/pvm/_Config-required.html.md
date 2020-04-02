@@ -1,5 +1,0 @@
-<!-- Code generated from the comments of the Config struct in builder/parallels/pvm/config.go; DO NOT EDIT MANUALLY -->
-
--   `source_path` (string) - The path to a PVM directory that acts as the source
-    of this build.
-    

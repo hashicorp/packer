@@ -1,3 +1,0 @@
-<!-- Code generated from the comments of the PrlctlPostConfig struct in builder/parallels/common/prlctl_post_config.go; DO NOT EDIT MANUALLY -->
-PrlctlPostConfig contains the configuration for running "prlctl" commands
-in the end of artifact build.

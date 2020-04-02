@@ -1,2 +1,0 @@
-<!-- Code generated from the comments of the ToolsConfig struct in builder/parallels/common/tools_config.go; DO NOT EDIT MANUALLY -->
-ToolsConfig contains the builder configuration related to Parallels Tools.

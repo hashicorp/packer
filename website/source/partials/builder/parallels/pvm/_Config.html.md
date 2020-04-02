@@ -1,2 +1,0 @@
-<!-- Code generated from the comments of the Config struct in builder/parallels/pvm/config.go; DO NOT EDIT MANUALLY -->
-Config is the configuration structure for the builder.

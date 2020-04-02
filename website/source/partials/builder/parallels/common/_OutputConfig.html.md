@@ -1,2 +1,0 @@
-<!-- Code generated from the comments of the OutputConfig struct in builder/parallels/common/output_config.go; DO NOT EDIT MANUALLY -->
-OutputConfig contains the configuration for builder's output.
