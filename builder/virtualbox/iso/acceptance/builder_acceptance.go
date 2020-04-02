@@ -29,7 +29,7 @@ func (v *VirtualBoxISOAccTest) GetConfigs() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Uneble to read %s", filePath)
 	}
-	return map[string]string{"linux" : string(file)}, nil
+	return map[string]string{"linux": string(file)}, nil
 }
 
 func (v *VirtualBoxISOAccTest) CleanUp() error {
