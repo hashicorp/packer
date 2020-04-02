@@ -392,6 +392,7 @@ type Config struct {
 	tmpDeploymentName      string
 	tmpKeyVaultName        string
 	tmpOSDiskName          string
+	tmpDataDiskName        string
 	tmpSubnetName          string
 	tmpVirtualNetworkName  string
 	tmpNsgName             string
@@ -645,6 +646,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
+	c.tmpDataDiskName = tempName.DataDiskname
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpNsgName = tempName.NsgName
