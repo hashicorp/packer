@@ -1,5 +1,4 @@
 <!-- Code generated from the comments of the ISOConfig struct in common/iso_config.go; DO NOT EDIT MANUALLY -->
-
 By default, Packer will symlink, download or copy image files to the Packer
 cache into a "`hash($iso_url+$iso_checksum).$iso_target_extension`" file.
 Packer uses [hashicorp/go-getter](https://github.com/hashicorp/go-getter) in
@@ -7,11 +6,11 @@ file mode in order to perform a download.
 
 go-getter supports the following protocols:
 
-- Local files
-- Git
-- Mercurial
-- HTTP
-- Amazon S3
+* Local files
+* Git
+* Mercurial
+* HTTP
+* Amazon S3
 
 Examples:
 go-getter can guess the checksum type based on `iso_checksum` len.
