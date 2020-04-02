@@ -108,7 +108,7 @@ mode-check: ## Check that only certain files are executable
 		echo "Check passed."; \
 	fi
 fmt-docs:
-	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
+	@find ./website/pages/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
 
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:

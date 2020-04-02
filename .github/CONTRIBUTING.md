@@ -15,20 +15,20 @@ can quickly merge or address your contributions.
 
 ### Reporting an Issue
 
-* Make sure you test against the latest released version. It is possible we
+- Make sure you test against the latest released version. It is possible we
   already fixed the bug you're experiencing.
 
-* Run the command with debug output with the environment variable `PACKER_LOG`.
+- Run the command with debug output with the environment variable `PACKER_LOG`.
   For example: `PACKER_LOG=1 packer build template.json`. Take the _entire_
   output and create a [gist](https://gist.github.com) for linking to in your
   issue. Packer should strip sensitive keys from the output, but take a look
   through just in case.
 
-* Provide a reproducible test case. If a contributor can't reproduce an issue,
+- Provide a reproducible test case. If a contributor can't reproduce an issue,
   then it dramatically lowers the chances it'll get fixed. And in some cases,
   the issue will eventually be closed.
 
-* Respond promptly to any questions made by the Packer team to your issue. Stale
+- Respond promptly to any questions made by the Packer team to your issue. Stale
   issues will be closed.
 
 ### Issue Lifecycle
@@ -86,22 +86,22 @@ The instructions below are for go 1.7. or later.
    submitting a pull-request.
 
 ### Windows Systems
+
 On windows systems you need at least the [MinGW Tools](http://www.mingw.org/), e.g. install via [choco](https://chocolatey.org/):
 
 ```
 choco install mingw -y
 ```
 
-This installs the GCC compiler, as well as a ```mingw32-make``` which can be used wherever
-this documentation mentions ```make```
+This installs the GCC compiler, as well as a `mingw32-make` which can be used wherever
+this documentation mentions `make`
 
-when building using ```go``` you also need to mention the windows
+when building using `go` you also need to mention the windows
 executable extension
 
 ```
 go build -o bin/packer.exe
 ```
-
 
 ### Opening an Pull Request
 
@@ -131,37 +131,36 @@ to use `git push ...`.
 ### Pull Request Lifecycle
 
 1. You are welcome to submit your pull request for commentary or review before
-  it is fully completed. Please prefix the title of your pull request with
-  "[WIP]" to indicate this. It's also a good idea to include specific questions
-  or items you'd like feedback on.
+   it is fully completed. Please prefix the title of your pull request with
+   "[WIP]" to indicate this. It's also a good idea to include specific questions
+   or items you'd like feedback on.
 
 2. Once you believe your pull request is ready to be merged, you can remove any
-  "[WIP]" prefix from the title and a core team member will review.
+   "[WIP]" prefix from the title and a core team member will review.
 
 3. One of Packer's core team members will look over your contribution and
-  either merge, or provide comments letting you know if there is anything left
-  to do. We do our best to provide feedback in a timely manner, but it may take
-  some time for us to respond. We may also have questions that we need answered
-  about the code, either because something doesn't make sense to us or because
-  we want to understand your thought process.
+   either merge, or provide comments letting you know if there is anything left
+   to do. We do our best to provide feedback in a timely manner, but it may take
+   some time for us to respond. We may also have questions that we need answered
+   about the code, either because something doesn't make sense to us or because
+   we want to understand your thought process.
 
 4. If we have requested changes, you can either make those changes or, if you
-  disagree with the suggested changes, we can have a conversation about our
-  reasoning and agree on a path forward. This may be a multi-step process. Our
-  view is that pull requests are a chance to collaborate, and we welcome
-  conversations about how to do things better. It is the contributor's
-  responsibility to address any changes requested. While reviewers are happy to
-  give guidance, it is unsustainable for us to perform the coding work necessary
-  to get a PR into a mergeable state.
+   disagree with the suggested changes, we can have a conversation about our
+   reasoning and agree on a path forward. This may be a multi-step process. Our
+   view is that pull requests are a chance to collaborate, and we welcome
+   conversations about how to do things better. It is the contributor's
+   responsibility to address any changes requested. While reviewers are happy to
+   give guidance, it is unsustainable for us to perform the coding work necessary
+   to get a PR into a mergeable state.
 
 5. Once all outstanding comments and checklist items have been addressed, your
-  contribution will be merged! Merged PRs will be included in the next
-  Packer release. The core team takes care of updating the
-  [CHANGELOG.md](../CHANGELOG.md) as they merge.
+   contribution will be merged! Merged PRs will be included in the next
+   Packer release. The core team takes care of updating the
+   [CHANGELOG.md](../CHANGELOG.md) as they merge.
 
 6. In rare cases, we might decide that a PR should be closed without merging.
-  We'll make sure to provide clear reasoning when this happens.
-
+   We'll make sure to provide clear reasoning when this happens.
 
 ### Tips for Working on Packer
 
@@ -250,7 +249,7 @@ does not attempt to track the latest version for each dependency.
 
 Packer relies on `go generate` to generate a [peg parser for boot
 commands](https://github.com/hashicorp/packer/blob/master/common/bootcommand/boot_command.go),
-[docs](https://github.com/hashicorp/packer/blob/master/website/source/partials/builder/amazon/chroot/_Config-not-required.html.md)
+[docs](https://github.com/hashicorp/packer/blob/master/website/pages/partials/builder/amazon/chroot/_Config-not-required.mdx)
 and HCL2's bridging code. Packer's testing suite will run `make check-generate`
 to check that all the generated files Packer needs are what they should be.
 `make generate` re-generates all these file and can take a while depending on
@@ -266,11 +265,13 @@ Packer relies on [golangci-lint](https://github.com/golangci/golangci-lint) for 
 The main configuration for golangci-lint is the `.golangci.yml` in the project root. See `golangci-lint --help` for a list of flags that can be used to override the default configuration.
 
 Run golangci-lint on the entire Packer code base.
+
 ```
 make lint
 ```
 
 Run golangci-lint on a single pkg or directory; PKG_NAME expands to /builder/amazon/...
+
 ```
 make lint PKG_NAME=builder/amazon
 ```

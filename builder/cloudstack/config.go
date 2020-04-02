@@ -114,7 +114,7 @@ type Config struct {
 	SourceTemplate string `mapstructure:"source_template" required:"true"`
 	// The name of the temporary SSH key pair
 	// to generate. By default, Packer generates a name that looks like
-	// packer_<UUID>, where <UUID> is a 36 character unique identifier.
+	// `packer_<UUID>`, where `<UUID>` is a 36 character unique identifier.
 	TemporaryKeypairName string `mapstructure:"temporary_keypair_name" required:"false"`
 	// Set to true to indicate that the
 	// provisioners should connect to the local IP address of the instance.

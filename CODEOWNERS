@@ -3,61 +3,61 @@
 # builders
 
 /builder/alicloud/                      @chhaj5236 @alexyueer
-/website/source/docs/builders/alicloud* @chhaj5236 @alexyueer
+/website/pages/docs/builders/alicloud* @chhaj5236 @alexyueer
 
 /builder/azure/                      @paulmey
-/website/source/docs/builders/azure* @paulmey
+/website/pages/docs/builders/azure* @paulmey
 
 /builder/hyperv/                      @taliesins
-/website/source/docs/builders/hyperv* @taliesins
+/website/pages/docs/builders/hyperv* @taliesins
 
 /builder/jdcloud/                      @XiaohanLiang @remrain
-/website/source/docs/builders/jdcloud* @XiaohanLiang @remrain
+/website/pages/docs/builders/jdcloud* @XiaohanLiang @remrain
 
 /builder/linode/                      @displague @ctreatma @stvnjacobs
-/website/source/docs/builders/linode* @displague @ctreatma @stvnjacobs
+/website/pages/docs/builders/linode* @displague @ctreatma @stvnjacobs
 
 /builder/lxc/                      @ChrisLundquist
-/website/source/docs/builders/lxc* @ChrisLundquist
+/website/pages/docs/builders/lxc* @ChrisLundquist
 
 /builder/lxd/                      @ChrisLundquist
-/website/source/docs/builders/lxd* @ChrisLundquist
+/website/pages/docs/builders/lxd* @ChrisLundquist
 
 /builder/oneandone/                      @jasmingacic
-/website/source/docs/builders/oneandone* @jasmingacic
+/website/pages/docs/builders/oneandone* @jasmingacic
 
 /builder/oracle/                      @prydie @owainlewis
-/website/source/docs/builders/oracle* @prydie @owainlewis
+/website/pages/docs/builders/oracle* @prydie @owainlewis
 
 /builder/profitbricks/                      @jasmingacic
-/website/source/docs/builders/profitbricks* @jasmingacic
+/website/pages/docs/builders/profitbricks* @jasmingacic
 
 /builder/triton/                      @sean-
-/website/source/docs/builders/triton* @sean-
+/website/pages/docs/builders/triton* @sean-
 
 /builder/ncloud/                      @YuSungDuk
-/website/source/docs/builders/ncloud* @YuSungDuk
+/website/pages/docs/builders/ncloud* @YuSungDuk
 
 /builder/proxmox/                      @carlpett
-/website/source/docs/builders/proxmox* @carlpett
+/website/pages/docs/builders/proxmox* @carlpett
 
 /builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
-/website/source/docs/builders/scaleway* @sieben @mvaude @jqueuniet @fflorens @brmzkw
+/website/pages/docs/builders/scaleway* @sieben @mvaude @jqueuniet @fflorens @brmzkw
 
 /builder/hcloud/                      @LKaemmerling
-/website/source/docs/builders/hcloud* @LKaemmerling
+/website/pages/docs/builders/hcloud* @LKaemmerling
 
 /builder/hyperone/                      @m110 @gregorybrzeski @ad-m
-/website/source/docs/builders/hyperone* @m110 @gregorybrzeski @ad-m
+/website/pages/docs/builders/hyperone* @m110 @gregorybrzeski @ad-m
 
 /builder/ucloud/                      @shawnmssu
-/website/source/docs/builders/ucloud* @shawnmssu
+/website/pages/docs/builders/ucloud* @shawnmssu
 
 /builder/yandex/                      @GennadySpb @alexanderKhaustov @seukyaso
-/website/source/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
+/website/pages/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
 
 /builder/osc/                      @marinsalinas
-/website/source/docs/builders/osc* @marinsalinas
+/website/pages/docs/builders/osc* @marinsalinas
 
 
 # provisioners

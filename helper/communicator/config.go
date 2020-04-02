@@ -175,7 +175,7 @@ type WinRM struct {
 	//
 	// NOTE: If using an Amazon EBS builder, you can specify the interface
 	// WinRM connects to via
-	// [`ssh_interface`](https://www.packer.io/docs/builders/amazon-ebs#ssh_interface)
+	// [`ssh_interface`](/docs/builders/amazon-ebs#ssh_interface)
 	WinRMHost string `mapstructure:"winrm_host"`
 	// The WinRM port to connect to. This defaults to `5985` for plain
 	// unencrypted connection and `5986` for SSL when `winrm_use_ssl` is set to

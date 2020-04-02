@@ -5,7 +5,7 @@
 
 - `image_description` (string) - The description of the image, with a length
   limit of 0 to 256 characters. Leaving it blank means null, which is the
-  default value. It cannot begin with http:// or https://.
+  default value. It cannot begin with `http://` or `https://`.
 
 - `image_share_account` ([]string) - The IDs of to-be-added Aliyun
   accounts to which the image is shared. The number of accounts is 1 to 10.
@@ -17,7 +17,7 @@
 - `image_copy_names` ([]string) - The name of the destination image,
   [2, 128] English or Chinese characters. It must begin with an
   uppercase/lowercase letter or a Chinese character, and may contain numbers,
-  \_ or -. It cannot begin with http:// or https://.
+  \_ or -. It cannot begin with `http://` or `https://`.
 
 - `image_encrypted` (boolean) - Whether or not to encrypt the target images, including those copied if image_copy_regions is specified. If this option
   is set to true, a temporary image will be created from the provisioned

@@ -17,7 +17,7 @@ type AlicloudDiskDevice struct {
 	// 128] English or Chinese characters, must begin with an
 	// uppercase/lowercase letter or Chinese character. Can contain numbers,
 	// ., _ and -. The disk name will appear on the console. It cannot
-	// begin with `http:// or `https://`.
+	// begin with `http://` or `https://`.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// Category of the system disk. Optional values
 	// are:
@@ -61,9 +61,9 @@ type AlicloudDiskDevices struct {
 	//         -   `cloud_efficiency` - efficiency cloud disk
 	//         -   `cloud_ssd` - cloud SSD
 	//
-	//         For phased-out instance types and non-I/O optimized instances, the
-	//         default value is cloud. Otherwise, the default value is
-	//         cloud\_efficiency.
+	//      For phased-out instance types and non-I/O optimized instances, the
+	//      default value is cloud. Otherwise, the default value is
+	//      cloud\_efficiency.
 	//
 	// -   `disk_description` (string) - The value of disk description is blank by
 	//     default. \[2, 256\] characters. The disk description will appear on the

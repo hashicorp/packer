@@ -66,13 +66,9 @@ type RunConfig struct {
 	//     following are valid:
 	//
 	//     -   name (string)
-	//
 	//     -   owner (string)
-	//
 	//     -   tags (array of strings)
-	//
 	//     -   visibility (string)
-	//
 	//     -   properties (map of strings to strings) (fields that can be set
 	//         with `openstack image set --property key=value`)
 	//
