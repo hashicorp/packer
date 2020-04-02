@@ -17,16 +17,19 @@ import (
 
 type AmazonEBSAccTest struct{}
 
-func (s *AmazonEBSAccTest) GetConfig() (string, error) {
+func (s *AmazonEBSAccTest) GetConfigs() (map[string]string, error) {
 	filePath := filepath.Join("../../builder/amazon/ebs/acceptance/test-fixtures/", "amazon-ebs.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("Expected to find %s", filePath)
+		return nil, fmt.Errorf("Expected to find %s", filePath)
 	}
 	defer config.Close()
 
 	file, err := ioutil.ReadAll(config)
-	return string(file), nil
+	if err != nil {
+		return nil, fmt.Errorf("Uneble to read %s", filePath)
+	}
+	return map[string]string{"linux" : string(file)}, nil
 }
 
 func (s *AmazonEBSAccTest) CleanUp() error {

@@ -32,46 +32,52 @@ func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *te
 	// build template file and run a build for each builder with the current provisioner
 	for _, builder := range builders {
 		builderAcc := BuildersAccTest[builder]
-		builderConfig, err := builderAcc.GetConfig()
+		builderConfigs, err := builderAcc.GetConfigs()
 		if err != nil {
 			t.Fatalf("bad: failed to read builder config: %s", err.Error())
 		}
 
-		testName := fmt.Sprintf("testing %s builder against %s provisioner", builder, provisioner)
-		t.Run(testName, func(t *testing.T) {
-			provisionerConfig, err := provisionerAcc.GetConfig()
-			if err != nil {
-				t.Fatalf("bad: failed to read provisioner config: %s", err.Error())
+		for vmOS, builderConfig := range builderConfigs {
+			if !provisionerAcc.IsCompatibleOS(vmOS) {
+				continue
 			}
 
-			// Write json template
-			out := bytes.NewBuffer(nil)
-			fmt.Fprintf(out, `{"builders": [%s],"provisioners": [%s]}`, builderConfig, provisionerConfig)
-			fileName := fmt.Sprintf("%s_%s.json", builder, provisioner)
-			filePath := filepath.Join("./", fileName)
-			writeJsonTemplate(out, filePath, t)
+			testName := fmt.Sprintf("testing %s builder against %s provisioner", builder, provisioner)
+			t.Run(testName, func(t *testing.T) {
+				provisionerConfig, err := provisionerAcc.GetConfig()
+				if err != nil {
+					t.Fatalf("bad: failed to read provisioner config: %s", err.Error())
+				}
 
-			// set pre-config with necessary builder and provisioner
-			c := buildCommand(t, builderAcc, provisionerAcc)
-			args := []string{
-				filePath,
-			}
+				// Write json template
+				out := bytes.NewBuffer(nil)
+				fmt.Fprintf(out, `{"builders": [%s],"provisioners": [%s]}`, builderConfig, provisionerConfig)
+				fileName := fmt.Sprintf("%s_%s.json", builder, provisioner)
+				filePath := filepath.Join("./", fileName)
+				writeJsonTemplate(out, filePath, t)
 
-			err = provisionerAcc.RunTest(c, args)
-			if err != nil {
+				// set pre-config with necessary builder and provisioner
+				c := buildCommand(t, builderAcc, provisionerAcc)
+				args := []string{
+					filePath,
+				}
+
+				err = provisionerAcc.RunTest(c, args)
+				if err != nil {
+					// Cleanup created resources
+					testshelper.CleanupFiles(fileName)
+					builderAcc.CleanUp()
+					t.Fatalf("bad: failed to to run build: %s", err.Error())
+				}
+
 				// Cleanup created resources
 				testshelper.CleanupFiles(fileName)
-				builderAcc.CleanUp()
-				t.Fatalf("bad: failed to to run build: %s", err.Error())
-			}
-
-			// Cleanup created resources
-			testshelper.CleanupFiles(fileName)
-			err = builderAcc.CleanUp()
-			if err != nil {
-				t.Fatalf("bad: failed to clean up resources: %s", err.Error())
-			}
-		})
+				err = builderAcc.CleanUp()
+				if err != nil {
+					t.Fatalf("bad: failed to clean up resources: %s", err.Error())
+				}
+			})
+		}
 	}
 }
 
@@ -110,11 +116,12 @@ type ProvisionerAcceptance interface {
 	GetName() string
 	GetConfig() (string, error)
 	GetProvisionerStore() packer.MapOfProvisioner
+	IsCompatibleOS(builder string) bool
 	RunTest(c *command.BuildCommand, args []string) error
 }
 
 type BuilderAcceptance interface {
-	GetConfig() (string, error)
+	GetConfigs() (map[string]string, error)
 	GetBuilderStore() packer.MapOfBuilder
 	CleanUp() error
 }

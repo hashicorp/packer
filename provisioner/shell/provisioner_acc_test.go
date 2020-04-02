@@ -50,6 +50,10 @@ func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner 
 	}
 }
 
+func (s *ShellProvisionerAccTest) IsCompatibleOS(vmOS string) bool {
+	return vmOS == "linux"
+}
+
 func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
 	UUID := os.Getenv("PACKER_RUN_UUID")
 	if UUID == "" {
