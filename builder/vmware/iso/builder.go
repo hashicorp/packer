@@ -98,6 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&vmwcommon.StepRemoteUpload{
 			Key:          "iso_path",
 			Message:      "Uploading ISO to remote machine...",
+			DoCleanup:    b.config.DriverConfig.CleanUpRemoteCache,
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 		},

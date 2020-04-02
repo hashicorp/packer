@@ -485,6 +485,7 @@ github.com/nu7hatch/gouuid
 github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk v1.8.0
 github.com/oracle/oci-go-sdk/common
+github.com/oracle/oci-go-sdk/common/auth
 github.com/oracle/oci-go-sdk/core
 # github.com/outscale/osc-go v0.0.1
 github.com/outscale/osc-go/oapi
@@ -572,6 +573,7 @@ github.com/vmware/govmomi/find
 github.com/vmware/govmomi/list
 github.com/vmware/govmomi/nfc
 github.com/vmware/govmomi/object
+github.com/vmware/govmomi/ovf
 github.com/vmware/govmomi/property
 github.com/vmware/govmomi/session
 github.com/vmware/govmomi/task

@@ -8,6 +8,10 @@
     usually a project (also called the "tenant") with whom the image is
     shared.
     
+-   `image_auto_accept_members` (bool) - When true, perform the image accept so the members can see the image in their
+    project. This requires a user with priveleges both in the build project and
+    in the members provided. Defaults to false.
+    
 -   `image_disk_format` (string) - Disk format of the resulting image. This option works if
     use_blockstorage_volume is true.
     

@@ -57,6 +57,7 @@ type FlatConfig struct {
 	WinRMUseSSL               *bool                             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl"`
 	WinRMInsecure             *bool                             `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM              *bool                             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
+	InstancePrincipals        *bool                             `mapstructure:"use_instance_principals" cty:"use_instance_principals"`
 	AccessCfgFile             *string                           `mapstructure:"access_cfg_file" cty:"access_cfg_file"`
 	AccessCfgFileAccount      *string                           `mapstructure:"access_cfg_file_account" cty:"access_cfg_file_account"`
 	UserID                    *string                           `mapstructure:"user_ocid" cty:"user_ocid"`
@@ -140,6 +141,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
+		"use_instance_principals":      &hcldec.AttrSpec{Name: "use_instance_principals", Type: cty.Bool, Required: false},
 		"access_cfg_file":              &hcldec.AttrSpec{Name: "access_cfg_file", Type: cty.String, Required: false},
 		"access_cfg_file_account":      &hcldec.AttrSpec{Name: "access_cfg_file_account", Type: cty.String, Required: false},
 		"user_ocid":                    &hcldec.AttrSpec{Name: "user_ocid", Type: cty.String, Required: false},

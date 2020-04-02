@@ -70,8 +70,14 @@ type CreateConfig struct {
 func (c *CreateConfig) Prepare() []error {
 	var errs []error
 
-	if c.DiskSize == 0 {
-		errs = append(errs, fmt.Errorf("'disk_size' is required"))
+	if len(c.Storage) > 0 {
+		for i, storage := range c.Storage {
+			if storage.DiskSize == 0 {
+				errs = append(errs, fmt.Errorf("storage[%d].'disk_size' is required", i))
+			}
+		}
+	} else if c.DiskSize == 0 {
+		errs = append(errs, fmt.Errorf("'disk_size' or 'storage' is required"))
 	}
 
 	if c.GuestOSType == "" {
@@ -94,17 +100,18 @@ type StepCreateVM struct {
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
+	vmPath := fmt.Sprintf("%s/%s", s.Location.Folder, s.Location.VMName)
 
-	vm, err := d.FindVM(s.Location.VMName)
+	vm, err := d.FindVM(vmPath)
 
 	if s.Force == false && err == nil {
-		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", s.Location.VMName, err))
+		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err))
 		return multistep.ActionHalt
 	} else if s.Force == true && err == nil {
-		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", s.Location.VMName))
+		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
 		err := vm.Destroy()
 		if err != nil {
-			state.Put("error", fmt.Errorf("error destroying %s: %v", s.Location.VMName, err))
+			state.Put("error", fmt.Errorf("error destroying %s: %v", vmPath, err))
 		}
 	}
 
