@@ -16,7 +16,7 @@ Type: `vsphere-clone`
 This builder clones VMs from existing templates.
 
 - VMware Player is not required.
-- It uses the official vCenter API, and does not require ESXi host [modification](/docs/builders/vmware-iso#building-on-a-remote-vsphere-hypervisor)
+- It uses the official vCenter API, and does not require ESXi host [modification](https://www.packer.io/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
 
 ## Examples
 
@@ -91,15 +91,15 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Export Configuration
 
-@include 'partials/builder/vsphere/common/ExportConfig.mdx'
+@include 'builder/vsphere/common/ExportConfig.mdx'
 
 ### Optional:
 
-@include 'partials/builder/vsphere/common/ExportConfig-not-required.mdx'
+@include 'builder/vsphere/common/ExportConfig-not-required.mdx'
 
 #### Output Configuration:
 
-@include 'partials/builder/vsphere/common/OutputConfig-not-required.mdx'
+@include 'builder/vsphere/common/OutputConfig-not-required.mdx'
 
 ## Working with Clusters
 
