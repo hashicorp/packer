@@ -210,8 +210,8 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
 	return errCh, nil
 }
-
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
+
 	projects := []string{
 		d.projectId,
 		// Public projects, drawn from
@@ -234,6 +234,9 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"google-containers",
 		"opensuse-cloud",
 	}
+	return d.GetImageFromProjects(projects, name, fromFamily)
+}
+func (d *driverGCE) GetImageFromProjects(projects []string, name string, fromFamily bool) (*Image, error) {
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
