@@ -608,7 +608,6 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	c.ClientConfig.Validate(errs)
 
-	/////////////////////////////////////////////
 	// Capture
 	if c.CaptureContainerName == "" && c.ManagedImageName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name or managed_image_name must be specified"))
