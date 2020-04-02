@@ -50,7 +50,7 @@ func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner 
 	}
 }
 
-func (s *ShellProvisionerAccTest) IsCompatibleOS(vmOS string) bool {
+func (s *ShellProvisionerAccTest) IsCompatible(builder string, vmOS string) bool {
 	return vmOS == "linux"
 }
 

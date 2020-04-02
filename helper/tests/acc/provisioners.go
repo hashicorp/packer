@@ -38,7 +38,7 @@ func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *te
 		}
 
 		for vmOS, builderConfig := range builderConfigs {
-			if !provisionerAcc.IsCompatibleOS(vmOS) {
+			if !provisionerAcc.IsCompatible(builder, vmOS) {
 				continue
 			}
 
@@ -116,7 +116,7 @@ type ProvisionerAcceptance interface {
 	GetName() string
 	GetConfig() (string, error)
 	GetProvisionerStore() packer.MapOfProvisioner
-	IsCompatibleOS(builder string) bool
+	IsCompatible(builder string, vmOS string) bool
 	RunTest(c *command.BuildCommand, args []string) error
 }
 
