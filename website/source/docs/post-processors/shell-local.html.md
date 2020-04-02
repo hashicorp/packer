@@ -19,7 +19,7 @@ some task with packer outputs and variables.
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "shell-local",
   "inline": ["echo foo"]
@@ -81,11 +81,9 @@ Optional parameters:
     ```
 
     This is treated as a [template engine](/docs/templates/engine.html).
-    There are several available variables: `Script`, which is the path to the
+    There are two available variables: `Script`, which is the path to the
     script to run, and `Vars`, which is the list of `environment_vars`, if
-    configured. In addition, you may access any of the variables stored in the
-    generated data using the [build](/docs/templates/engine.html) template
-    function. If you choose to set this option, make sure that the first
+    configured. If you choose to set this option, make sure that the first
     element in the array is the shell program you want to use (for example,
     "sh" or "/usr/local/bin/zsh" or even "powershell.exe" although anything
     other than a flavor of the shell command language is not explicitly
@@ -173,7 +171,6 @@ still in beta. There will be some limitations as a result. For example, it will
 likely not work unless both Packer and the scripts you want to run are both on
 the C drive.
 
-```json
     {
         "builders": [
           {
@@ -198,7 +195,6 @@ the C drive.
           }
       ]
     }
-```
 
 ## Default Environmental Variables
 
@@ -238,7 +234,7 @@ of files produced by a `builder` to a json file after each `builder` is run.
 For example, if you wanted to package a file from the file builder into a
 tarball, you might write this:
 
-```json
+``` json
 {
   "builders": [
     {
@@ -282,13 +278,11 @@ For a shell script, that means the script **must** exit with a zero code. You
 
 Example of running a .cmd file on windows:
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
-      "scripts": ["./scripts/test_cmd.cmd"]
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
+              "scripts": ["./scripts/test_cmd.cmd"]
+          },
 
 Contents of "test\_cmd.cmd":
 
@@ -297,27 +291,23 @@ Contents of "test\_cmd.cmd":
 Example of running an inline command on windows: Required customization:
 tempfile\_extension
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
-      "tempfile_extension": ".cmd",
-      "inline": ["echo %SHELLLOCALTEST%"]
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
+              "tempfile_extension": ".cmd",
+              "inline": ["echo %SHELLLOCALTEST%"]
+          },
 
 Example of running a bash command on windows using WSL: Required
 customizations: use\_linux\_pathing and execute\_command
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
-      "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
-      "use_linux_pathing": true,
-      "script": "./scripts/example_bash.sh"
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
+              "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+              "use_linux_pathing": true,
+              "script": "./scripts/example_bash.sh"
+          }
 
 Contents of "example\_bash.sh":
 
@@ -327,63 +317,53 @@ Contents of "example\_bash.sh":
 Example of running a powershell script on windows: Required customizations:
 env\_var\_format and execute\_command
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
-      "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-      "env_var_format": "$env:%s=\"%s\"; ",
-      "script": "./scripts/example_ps.ps1"
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
+              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+              "env_var_format": "$env:%s=\"%s\"; ",
+              "script": "./scripts/example_ps.ps1"
+          }
 
 Example of running a powershell script on windows as "inline": Required
 customizations: env\_var\_format, tempfile\_extension, and execute\_command
 
-```json
-    {
-      "type": "shell-local",
-      "tempfile_extension": ".ps1",
-      "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
-      "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-      "env_var_format": "$env:%s=\"%s\"; ",
-      "inline": ["write-output $env:SHELLLOCALTEST"]
-    }
-```
+          {
+              "type": "shell-local",
+              "tempfile_extension": ".ps1",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
+              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+              "env_var_format": "$env:%s=\"%s\"; ",
+              "inline": ["write-output $env:SHELLLOCALTEST"]
+          }
 
 ### Unix Host
 
 Example of running a bash script on unix:
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-      "scripts": ["./scripts/example_bash.sh"]
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+              "scripts": ["./scripts/example_bash.sh"]
+          }
 
 Example of running a bash "inline" on unix:
 
-```json
-    {
-      "type": "shell-local",
-      "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
-      "inline": ["echo hello",
-                 "echo $PROVISIONERTEST"]
-    }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+              "inline": ["echo hello",
+                         "echo $PROVISIONERTEST"]
+          }
 
 Example of running a python script on unix:
 
-```json
-    {
-      "type": "shell-local",
-      "script": "hello.py",
-      "environment_vars": ["HELLO_USER=packeruser"],
-      "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
-    }
-```
+          {
+              "type": "shell-local",
+              "script": "hello.py",
+              "environment_vars": ["HELLO_USER=packeruser"],
+              "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
+          }
 
 Where "hello.py" contains:
 

@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
+//go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig
 
 package hcl2template
 
@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/zclconf/go-cty/cty"
-	"github.com/zclconf/go-cty/cty/json"
 )
 
 type NestedMockConfig struct {
@@ -25,12 +23,6 @@ type NestedMockConfig struct {
 	SliceSliceString     [][]string           `mapstructure:"slice_slice_string"`
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
 	NamedString          NamedString          `mapstructure:"named_string"`
-	Tags                 []MockTag            `mapstructure:"tag"`
-}
-
-type MockTag struct {
-	Key   string `mapstructure:"key"`
-	Value string `mapstructure:"value"`
 }
 
 type MockConfig struct {
@@ -38,27 +30,6 @@ type MockConfig struct {
 	NestedMockConfig `mapstructure:",squash"`
 	Nested           NestedMockConfig   `mapstructure:"nested"`
 	NestedSlice      []NestedMockConfig `mapstructure:"nested_slice"`
-}
-
-func (b *MockConfig) Prepare(raws ...interface{}) error {
-	for i, raw := range raws {
-		cval, ok := raw.(cty.Value)
-		if !ok {
-			continue
-		}
-		b, err := json.Marshal(cval, cty.DynamicPseudoType)
-		if err != nil {
-			return err
-		}
-		ccval, err := json.Unmarshal(b, cty.DynamicPseudoType)
-		if err != nil {
-			return err
-		}
-		raws[i] = ccval
-	}
-	return config.Decode(b, &config.DecodeOpts{
-		Interpolate: true,
-	}, raws...)
 }
 
 //////
@@ -74,7 +45,9 @@ var _ packer.Builder = new(MockBuilder)
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
 func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	return nil, nil, b.Config.Prepare(raws...)
+	return nil, nil, config.Decode(&b.Config, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
 }
 
 func (b *MockBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -96,7 +69,9 @@ func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockProvisioner) Prepare(raws ...interface{}) error {
-	return b.Config.Prepare(raws...)
+	return config.Decode(&b.Config, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
 }
 
 func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
@@ -118,7 +93,9 @@ func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockPostProcessor) Configure(raws ...interface{}) error {
-	return b.Config.Prepare(raws...)
+	return config.Decode(&b.Config, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
 }
 
 func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
@@ -141,7 +118,9 @@ func (b *MockCommunicator) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (b *MockCommunicator) Configure(raws ...interface{}) ([]string, error) {
-	return nil, b.Config.Prepare(raws...)
+	return nil, config.Decode(&b.Config, &config.DecodeOpts{
+		Interpolate: true,
+	}, raws...)
 }
 
 //////

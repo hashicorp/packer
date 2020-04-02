@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 )
 
@@ -74,7 +73,7 @@ func TestRunConfigPrepare_SourceAmiFilterOwnersBlank(t *testing.T) {
 	c := testConfigFilter()
 	filter_key := "name"
 	filter_value := "foo"
-	c.SourceAmiFilter.Filters = map[string]string{filter_key: filter_value}
+	c.SourceAmiFilter = AmiFilterOptions{Filters: map[string]string{filter_key: filter_value}}
 	if err := c.Prepare(nil); len(err) != 1 {
 		t.Fatalf("Should error if Owners is not specified)")
 	}
@@ -85,12 +84,7 @@ func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
 	owner := "123"
 	filter_key := "name"
 	filter_value := "foo"
-	goodFilter := AmiFilterOptions{
-		Owners: []string{owner},
-		KVFilter: hcl2template.KVFilter{
-			Filters: map[string]string{filter_key: filter_value},
-		},
-	}
+	goodFilter := AmiFilterOptions{Owners: []string{owner}, Filters: map[string]string{filter_key: filter_value}}
 	c.SourceAmiFilter = goodFilter
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)

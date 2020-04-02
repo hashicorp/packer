@@ -104,7 +104,7 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
 	}
 
-	builds, diags := parser.Parse(path, c.varFiles, c.flagVars)
+	builds, diags := parser.Parse(path, c.flagVars)
 	{
 		// write HCL errors/diagnostics if any.
 		b := bytes.NewBuffer(nil)
@@ -419,7 +419,7 @@ Options:
   -parallel-builds=1            Number of builds to run in parallel. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
-  -var-file=path                JSON file containing user variables. [ Note that even in HCL mode this expects file to contain JSON, a fix is comming soon ]
+  -var-file=path                JSON file containing user variables.
 `
 
 	return strings.TrimSpace(helpText)

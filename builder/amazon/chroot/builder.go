@@ -18,7 +18,6 @@ import (
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -121,54 +120,50 @@ type Config struct {
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the source_ami field. Example:
 	//
-	//```json
-	//{
-	//	 "source_ami_filter": {
-	//	 "filters": {
-	//	  "virtualization-type": "hvm",
-	//	  "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-	//	  "root-device-type": "ebs"
-	//	},
-	//	"owners": ["099720109477"],
-	//	"most_recent": true
-	//	 }
-	//}
-	//```
 	//
-	//This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
-	//This will fail unless *exactly* one AMI is returned. In the above example,
-	//`most_recent` will cause this to succeed by selecting the newest image.
+	//     ``` json
+	//     {
+	//       "source_ami_filter": {
+	//       "filters": {
+	//        "virtualization-type": "hvm",
+	//        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+	//        "root-device-type": "ebs"
+	//      },
+	//      "owners": ["099720109477"],
+	//      "most_recent": true
+	//       }
+	//     }
+	//     ```
 	//
-	//-   `filters` (map of strings) - filters used to select a `source_ami`.
-	//	NOTE: This will fail unless *exactly* one AMI is returned. Any filter
-	//	described in the docs for
-	//	[DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-	//	is valid.
+	//     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+	//     This will fail unless *exactly* one AMI is returned. In the above example,
+	//     `most_recent` will cause this to succeed by selecting the newest image.
 	//
-	//-   `owners` (array of strings) - Filters the images by their owner. You
-	//	may specify one or more AWS account IDs, "self" (which will use the
-	//	account whose credentials you are using to run Packer), or an AWS owner
-	//	alias: for example, "amazon", "aws-marketplace", or "microsoft". This
-	//	option is required for security reasons.
+	//     -   `filters` (map of strings) - filters used to select a `source_ami`.
+	//         NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+	//         described in the docs for
+	//         [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+	//         is valid.
 	//
-	//-   `most_recent` (boolean) - Selects the newest created image when true.
-	//	This is most useful for selecting a daily distro build.
+	//     -   `owners` (array of strings) - Filters the images by their owner. You
+	//         may specify one or more AWS account IDs, "self" (which will use the
+	//         account whose credentials you are using to run Packer), or an AWS owner
+	//         alias: for example, "amazon", "aws-marketplace", or "microsoft". This
+	//         option is required for security reasons.
 	//
-	//You may set this in place of `source_ami` or in conjunction with it. If you
-	//set this in conjunction with `source_ami`, the `source_ami` will be added
-	//to the filter. The provided `source_ami` must meet all of the filtering
-	//criteria provided in `source_ami_filter`; this pins the AMI returned by the
-	//filter, but will cause Packer to fail if the `source_ami` does not exist.
+	//     -   `most_recent` (boolean) - Selects the newest created image when true.
+	//         This is most useful for selecting a daily distro build.
+	//
+	//     You may set this in place of `source_ami` or in conjunction with it. If you
+	//     set this in conjunction with `source_ami`, the `source_ami` will be added
+	//     to the filter. The provided `source_ami` must meet all of the filtering
+	//     criteria provided in `source_ami_filter`; this pins the AMI returned by the
+	//     filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
 	// Tags to apply to the volumes that are *launched*. This is a [template
 	// engine](/docs/templates/engine.html), see [Build template
 	// data](#build-template-data) for more information.
-	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
-	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
-	// singular block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-	// will allow you to create those programatically.
-	RootVolumeTag hcl2template.NameValues `mapstructure:"root_volume_tag" required:"false"`
+	RootVolumeTags awscommon.TagMap `mapstructure:"root_volume_tags" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -258,9 +253,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors or warnings
 	var errs *packer.MultiError
 	var warns []string
-
-	errs = packer.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(&b.config.RootVolumeTags)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SourceAmiFilter.Prepare()...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,

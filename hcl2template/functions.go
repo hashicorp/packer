@@ -78,8 +78,6 @@ func Functions(basedir string) map[string]function.Function {
 		"pow":             stdlib.PowFunc,
 		"range":           stdlib.RangeFunc,
 		"reverse":         stdlib.ReverseFunc,
-		"replace":         stdlib.ReplaceFunc,
-		"regex_replace":   stdlib.RegexReplaceFunc,
 		"rsadecrypt":      crypto.RsaDecryptFunc,
 		"setintersection": stdlib.SetIntersectionFunc,
 		"setproduct":      stdlib.SetProductFunc,

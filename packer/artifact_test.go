@@ -28,7 +28,7 @@ func (*TestArtifact) String() string {
 }
 
 func (a *TestArtifact) State(name string) interface{} {
-	value := a.state[name]
+	value, _ := a.state[name]
 	return value
 }
 

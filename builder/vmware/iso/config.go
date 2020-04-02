@@ -92,9 +92,7 @@ type Config struct {
 	// set in the VMware VMX. By default this is other. By specifying a more
 	// specific OS type, VMware may perform some optimizations or virtual hardware
 	// changes to better support the operating system running in the
-	// virtual machine. Valid values differ by platform and version numbers, and may
-	// not match other VMware API's representation of the guest OS names. Consult your
-	// platform for valid values.
+	// virtual machine.
 	GuestOSType string `mapstructure:"guest_os_type" required:"false"`
 	// The [vmx hardware
 	// version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)
@@ -108,11 +106,8 @@ type Config struct {
 
 	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
 	// Path to a [configuration template](/docs/templates/engine.html) that
-	// defines the contents of the virtual machine VMX file for VMware. The
-	// engine has access to the template variables `{{ .DiskNumber }}` and
-	// `{{ .DiskName }}`.
-	//
-	// This is for **advanced users only** as this can render the virtual machine
+	// defines the contents of the virtual machine VMX file for VMware. This is
+	// for **advanced users only** as this can render the virtual machine
 	// non-functional. See below for more information. For basic VMX
 	// modifications, try `vmx_data` first.
 	VMXTemplatePath string `mapstructure:"vmx_template_path" required:"false"`

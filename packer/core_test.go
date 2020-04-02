@@ -463,15 +463,37 @@ func TestCoreValidate(t *testing.T) {
 		Vars map[string]string
 		Err  bool
 	}{
-		{"validate-dup-builder.json", nil, true},
+		{
+			"validate-dup-builder.json",
+			nil,
+			true,
+		},
 
 		// Required variable not set
-		{"validate-req-variable.json", nil, true},
-		{"validate-req-variable.json", map[string]string{"foo": "bar"}, false},
+		{
+			"validate-req-variable.json",
+			nil,
+			true,
+		},
+
+		{
+			"validate-req-variable.json",
+			map[string]string{"foo": "bar"},
+			false,
+		},
 
 		// Min version good
-		{"validate-min-version.json", map[string]string{"foo": "bar"}, false},
-		{"validate-min-version-high.json", map[string]string{"foo": "bar"}, true},
+		{
+			"validate-min-version.json",
+			map[string]string{"foo": "bar"},
+			false,
+		},
+
+		{
+			"validate-min-version-high.json",
+			map[string]string{"foo": "bar"},
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -540,12 +562,7 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 		})
 
 		if (err != nil) != tc.Err {
-			if tc.Err == false {
-				t.Fatalf("Error interpolating %s: Expected no error, but got: %s", tc.File, err)
-			} else {
-				t.Fatalf("Error interpolating %s: Expected an error, but got: %s", tc.File, err)
-			}
-
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 		if !tc.Err {
 			for k, v := range ccf.variables {
@@ -681,101 +698,6 @@ func TestSensitiveVars(t *testing.T) {
 		// clear filter so it doesn't break other tests
 		LogSecretFilter.s = make(map[string]struct{})
 	}
-}
-
-// Normally I wouldn't test a little helper function, but it's regex.
-func TestIsDoneInterpolating(t *testing.T) {
-	cases := []struct {
-		inputString  string
-		expectedBool bool
-		expectedErr  bool
-	}{
-		// Many of these tests are just exercising the regex to make sure it
-		// doesnt get confused by different kinds of whitespace
-		{"charmander-{{ user `spacesaroundticks` }}", false, false},
-		{"pidgey-{{ user `partyparrot`}}", false, false},
-		{"jigglypuff-{{ user`notickspaaces`}}", false, false},
-		{"eevee-{{user`nospaces`}}", false, false},
-		{"staryu-{{  user  `somanyspaces`  }}", false, false},
-		{"{{  user  `somanyspaces`  }}-{{isotime}}", false, false},
-		// Make sure that we only flag on "user" when it's in the right set of
-		// brackets, in a properly declared template engine format
-		{"missingno-{{ user `missingbracket` }", true, false},
-		{"missing2-{user ``missingopenbrackets }}", true, false},
-		{"wat-userjustinname", true, false},
-		// Any functions that aren't "user" should have already been properly
-		// interpolated by the time this is called, so these cases aren't
-		// realistic. That said, this makes it clear that this function doesn't
-		// care about anything but the user function
-		{"pokemon-{{ isotime }}", true, false},
-		{"squirtle-{{ env `water`}}", true, false},
-		{"bulbasaur-notinterpolated", true, false},
-		{"extra-{{thisfunc `user`}}", true, false},
-	}
-	for _, tc := range cases {
-		done, err := isDoneInterpolating(tc.inputString)
-		if (err != nil) != tc.expectedErr {
-			t.Fatalf("Test case failed. Error: %s expected error: "+
-				"%t test string: %s", err, tc.expectedErr, tc.inputString)
-		}
-		if done != tc.expectedBool {
-			t.Fatalf("Test case failed. inputString: %s. "+
-				"Expected done = %t but got done = %t", tc.inputString,
-				tc.expectedBool, done)
-		}
-	}
-}
-
-func TestEnvAndFileVars(t *testing.T) {
-	os.Setenv("INTERPOLATE_TEST_ENV_1", "bulbasaur")
-	os.Setenv("INTERPOLATE_TEST_ENV_3", "/path/to/nowhere")
-	os.Setenv("INTERPOLATE_TEST_ENV_2", "5")
-	os.Setenv("INTERPOLATE_TEST_ENV_4", "bananas")
-
-	f, err := os.Open(fixtureDir("complex-recursed-env-user-var-file.json"))
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	tpl, err := template.Parse(f)
-	f.Close()
-	if err != nil {
-		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
-	}
-
-	ccf, err := NewCore(&CoreConfig{
-		Template: tpl,
-		Version:  "1.0.0",
-		Variables: map[string]string{
-			"var_1":     "partyparrot",
-			"var_2":     "{{user `env_1`}}-{{user `env_2`}}{{user `env_3`}}-{{user `var_1`}}",
-			"final_var": "{{user `env_1`}}/{{user `env_2`}}/{{user `env_4`}}{{user `env_3`}}-{{user `var_1`}}/vmware/{{user `var_2`}}.vmx",
-		},
-	})
-	expected := map[string]string{
-		"var_1":     "partyparrot",
-		"var_2":     "bulbasaur-5/path/to/nowhere-partyparrot",
-		"final_var": "bulbasaur/5/bananas/path/to/nowhere-partyparrot/vmware/bulbasaur-5/path/to/nowhere-partyparrot.vmx",
-		"env_1":     "bulbasaur",
-		"env_2":     "5",
-		"env_3":     "/path/to/nowhere",
-		"env_4":     "bananas",
-	}
-	if err != nil {
-		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
-	}
-	for k, v := range ccf.variables {
-		if expected[k] != v {
-			t.Fatalf("Expected value %s for key %s but got %s",
-				expected[k], k, v)
-		}
-	}
-
-	// Clean up env vars
-	os.Unsetenv("INTERPOLATE_TEST_ENV_1")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_3")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_2")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_4")
 }
 
 func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {

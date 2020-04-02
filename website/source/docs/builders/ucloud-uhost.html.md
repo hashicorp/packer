@@ -87,7 +87,7 @@ builder.
 
 Here is a basic example for build UCloud CentOS image:
 
-```json
+``` json
 {
   "variables": {
     "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
@@ -112,7 +112,7 @@ Here is a basic example for build UCloud CentOS image:
 
 Here is a example for build UCloud Ubuntu image:
 
-```json
+``` json
 {
   "variables": {
     "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",

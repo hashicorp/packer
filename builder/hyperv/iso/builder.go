@@ -242,8 +242,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&hypervcommon.StepEnableIntegrationService{},
 
 		&hypervcommon.StepMountDvdDrive{
-			Generation:      b.config.Generation,
-			FirstBootDevice: b.config.FirstBootDevice,
+			Generation: b.config.Generation,
 		},
 		&hypervcommon.StepMountFloppydrive{
 			Generation: b.config.Generation,
@@ -263,11 +262,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&hypervcommon.StepConfigureVlan{
 			VlanId:       b.config.VlanId,
 			SwitchVlanId: b.config.SwitchVlanId,
-		},
-
-		&hypervcommon.StepSetFirstBootDevice{
-			Generation:      b.config.Generation,
-			FirstBootDevice: b.config.FirstBootDevice,
 		},
 
 		&hypervcommon.StepRun{

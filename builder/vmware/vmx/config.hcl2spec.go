@@ -27,7 +27,6 @@ type FlatConfig struct {
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command"`
 	DisableVNC                *bool             `mapstructure:"disable_vnc" cty:"disable_vnc"`
 	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval"`
-	CleanUpRemoteCache        *bool             `mapstructure:"cleanup_remote_cache" required:"false" cty:"cleanup_remote_cache"`
 	FusionAppPath             *string           `mapstructure:"fusion_app_path" required:"false" cty:"fusion_app_path"`
 	RemoteType                *string           `mapstructure:"remote_type" required:"false" cty:"remote_type"`
 	RemoteDatastore           *string           `mapstructure:"remote_datastore" required:"false" cty:"remote_datastore"`
@@ -67,7 +66,6 @@ type FlatConfig struct {
 	SSHBastionAgentAuth       *bool             `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        *string           `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword        *string           `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
-	SSHBastionInteractive     *bool             `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile  *string           `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     *string           `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost              *string           `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -135,7 +133,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"disable_vnc":                    &hcldec.AttrSpec{Name: "disable_vnc", Type: cty.Bool, Required: false},
 		"boot_key_interval":              &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
-		"cleanup_remote_cache":           &hcldec.AttrSpec{Name: "cleanup_remote_cache", Type: cty.Bool, Required: false},
 		"fusion_app_path":                &hcldec.AttrSpec{Name: "fusion_app_path", Type: cty.String, Required: false},
 		"remote_type":                    &hcldec.AttrSpec{Name: "remote_type", Type: cty.String, Required: false},
 		"remote_datastore":               &hcldec.AttrSpec{Name: "remote_datastore", Type: cty.String, Required: false},
@@ -175,7 +172,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":         &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":           &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":           &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
-		"ssh_bastion_interactive":        &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file":   &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":       &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":                 &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},

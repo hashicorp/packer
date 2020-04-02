@@ -23,7 +23,7 @@ type StepCreateVolume struct {
 	volumeId       string
 	RootVolumeSize int64
 	RootVolumeType string
-	RootVolumeTags map[string]string
+	RootVolumeTags awscommon.TagMap
 	Ctx            interpolate.Context
 }
 
@@ -33,7 +33,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	volTags, err := awscommon.TagMap(s.RootVolumeTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	volTags, err := s.RootVolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging volumes: %s", err)
 		state.Put("error", err)

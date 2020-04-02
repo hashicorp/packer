@@ -17,9 +17,6 @@ type DriverMock struct {
 	CreateNVMeControllerController string
 	CreateNVMeControllerErr        error
 
-	RemoveFloppyControllersVM  string
-	RemoveFloppyControllersErr error
-
 	DeleteCalled bool
 	DeleteName   string
 	DeleteErr    error
@@ -82,11 +79,6 @@ func (d *DriverMock) CreateNVMeController(vm string, controller string, portcoun
 	d.CreateNVMeControllerVM = vm
 	d.CreateNVMeControllerController = vm
 	return d.CreateNVMeControllerErr
-}
-
-func (d *DriverMock) RemoveFloppyControllers(vm string) error {
-	d.RemoveFloppyControllersVM = vm
-	return d.RemoveFloppyControllersErr
 }
 
 func (d *DriverMock) Delete(name string) error {

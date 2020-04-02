@@ -21,7 +21,7 @@ by Packer.
 This is a fully functional template that will test an image on DigitalOcean.
 Replace the mock `api_token` value with your own.
 
-```json
+``` json
 {
   "provisioners": [
     {
@@ -52,7 +52,7 @@ Optional Parameters:
 -   `inspec_env_vars` (array of strings) - Environment variables to set before
     running InSpec. Usage example:
 
-    ```json
+    ``` json
       "inspec_env_vars": [ "FOO=bar" ]
     ```
 
@@ -62,7 +62,7 @@ Optional Parameters:
     These arguments *will not* be passed through a shell and arguments should
     not be quoted. Usage example:
 
-    ```json
+    ``` json
       "extra_arguments": [ "--sudo", "--reporter", "json" ]
     ```
 
@@ -126,7 +126,7 @@ commonly useful InSpec Attributes:
 To debug underlying issues with InSpec, add `"-l"` to `"extra_arguments"` to
 enable verbose logging.
 
-```json
+``` json
 {
   "extra_arguments": [ "-l", "debug" ]
 }

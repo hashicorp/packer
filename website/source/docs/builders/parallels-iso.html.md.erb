@@ -29,7 +29,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-```json
+``` json
 {
   "type": "parallels-iso",
   "guest_os_type": "ubuntu",
@@ -277,7 +277,7 @@ Extra `prlctl` commands are defined in the template in the `prlctl` section. In 
 example below `prlctl` is used to explicitly enable the adaptive hypervisor, and
 disable 3d acceleration:
 
-```json
+``` json
 {
   "prlctl": [
     ["set", "{{.Name}}", "--3d-accelerate", "off"],

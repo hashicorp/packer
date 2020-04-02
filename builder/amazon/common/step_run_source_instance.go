@@ -31,10 +31,10 @@ type StepRunSourceInstance struct {
 	InstanceType                      string
 	IsRestricted                      bool
 	SourceAMI                         string
-	Tags                              map[string]string
+	Tags                              TagMap
 	UserData                          string
 	UserDataFile                      string
-	VolumeTags                        map[string]string
+	VolumeTags                        TagMap
 	NoEphemeral                       bool
 
 	instanceId string
@@ -88,7 +88,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags, err := TagMap(s.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
@@ -96,7 +96,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
-	volTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	volTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging volumes: %s", err)
 		state.Put("error", err)
@@ -322,10 +322,10 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 			}
 		}
 
-		if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
+		if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
 			ui.Say("Adding tags to source EBS Volumes")
 
-			volumeTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
 				err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 				state.Put("error", err)

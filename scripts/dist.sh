@@ -40,9 +40,6 @@ for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
 done
 
 ./scripts/sign.sh
-if [ $? -ne 0 ]; then
-  exit 1
-fi
 
 if [ -z $NOSIGN ]; then
   echo "==> Signing..."

@@ -4,7 +4,7 @@ page_title: "Expressions - Configuration Language"
 sidebar_current: configuration-expressions
 description: |-
   HCL allows the use of expressions to access data exported
-  by sources and to transform and combine that data to produce other values.
+  by resources and to transform and combine that data to produce other values.
 ---
 
 # Expressions
@@ -12,7 +12,7 @@ description: |-
 _Expressions_ are used to refer to or compute values within a configuration.
 The simplest expressions are just literal values, like `"hello"` or `5`, but
 HCL also allows more complex expressions such as references to data exported by
-sources, arithmetic, conditional evaluation, and a number of built-in
+resources, arithmetic, conditional evaluation, and a number of built-in
 functions.
 
 Expressions can be used in a number of places in HCL, but some contexts limit
@@ -70,9 +70,9 @@ source arguments.
 
 ### Type Conversion
 
-Expressions are most often used to set values for arguments. In these cases,
-the argument has an expected type and the given expression must produce a value
-of that type.
+Expressions are most often used to set values for the arguments of resources and
+child modules. In these cases, the argument has an expected type and the given
+expression must produce a value of that type.
 
 Where possible, Packer automatically converts values from one type to
 another in order to produce the expected type. If this isn't possible, Packer
@@ -136,216 +136,6 @@ The following named values are available:
 * `source.<SOURCE TYPE>.<NAME>` is an object representing a
   [source](./sources.html) of the given type
   and name.
-
-### Available Functions
-
-For a full list of available functions, see [the function
-reference](/docs/configuration/from-1.5/functions.html).
-
-## `for` Expressions
-
-A _`for` expression_ creates a complex type value by transforming
-another complex type value. Each element in the input value
-can correspond to either one or zero values in the result, and an arbitrary
-expression can be used to transform each input element into an output element.
-
-For example, if `var.list` is a list of strings, then the following expression
-produces a list of strings with all-uppercase letters:
-
-```hcl
-[for s in var.list : upper(s)]
-```
-
-This `for` expression iterates over each element of `var.list`, and then
-evaluates the expression `upper(s)` with `s` set to each respective element.
-It then builds a new tuple value with all of the results of executing that
-expression in the same order.
-
-The type of brackets around the `for` expression decide what type of result
-it produces. The above example uses `[` and `]`, which produces a tuple. If
-`{` and `}` are used instead, the result is an object, and two result
-expressions must be provided separated by the `=>` symbol:
-
-```hcl
-{for s in var.list : s => upper(s)}
-```
-
-This expression produces an object whose attributes are the original elements
-from `var.list` and their corresponding values are the uppercase versions.
-
-A `for` expression can also include an optional `if` clause to filter elements
-from the source collection, which can produce a value with fewer elements than
-the source:
-
-```
-[for s in var.list : upper(s) if s != ""]
-```
-
-The source value can also be an object or map value, in which case two
-temporary variable names can be provided to access the keys and values
-respectively:
-
-```
-[for k, v in var.map : length(k) + length(v)]
-```
-
-Finally, if the result type is an object (using `{` and `}` delimiters) then
-the value result expression can be followed by the `...` symbol to group
-together results that have a common key:
-
-```
-{for s in var.list : substr(s, 0, 1) => s... if s != ""}
-```
-
-## Splat Expressions
-
-A _splat expression_ provides a more concise way to express a common operation
-that could otherwise be performed with a `for` expression.
-
-If `var.list` is a list of objects that all have an attribute `id`, then a list
-of the ids could be produced with the following `for` expression:
-
-```hcl
-[for o in var.list : o.id]
-```
-
-This is equivalent to the following _splat expression:_
-
-```hcl
-var.list[*].id
-```
-
-The special `[*]` symbol iterates over all of the elements of the list given to
-its left and accesses from each one the attribute name given on its right. A
-splat expression can also be used to access attributes and indexes from lists
-of complex types by extending the sequence of operations to the right of the
-symbol:
-
-```hcl
-var.list[*].interfaces[0].name
-```
-
-The above expression is equivalent to the following `for` expression:
-
-```hcl
-[for o in var.list : o.interfaces[0].name]
-```
-
-Splat expressions are for lists only (and thus cannot be used [to reference
-resources created with
-`for_each`](/docs/configuration/resources.html#referring-to-instances-1), which
-are represented as maps). However, if a splat expression is applied to a value
-that is _not_ a list or tuple then the value is automatically wrapped in a
-single-element list before processing.
-
-For example, `var.single_object[*].id` is equivalent to
-`[var.single_object][*].id`, or effectively `[var.single_object.id]`. This
-behavior is not interesting in most cases, but it is particularly useful when
-referring to resources that may or may not have `count` set, and thus may or
-may not produce a tuple value:
-
-```hcl
-aws_instance.example[*].id
-```
-
-The above will produce a list of ids whether `aws_instance.example` has `count`
-set or not, avoiding the need to revise various other expressions in the
-configuration when a particular resource switches to and from having `count`
-set.
-
-## `dynamic` blocks
-
-Within top-level block constructs like sources, expressions can usually be used
-only when assigning a value to an argument using the `name = expression` form.
-This covers many uses, but some source types include repeatable _nested
-blocks_ in their arguments, which do not accept expressions:
-
-```hcl
-source "amazon-ebs" "example" {
-  name = "pkr-test-name" # can use expressions here
-
-  tag {
-    # but the "tag" block is always a literal block
-  }
-}
-```
-
-You can dynamically construct repeatable nested blocks like `tag` using a
-special `dynamic` block type, which is supported anywhere, example:
-
-```hcl
-locals {
-  standard_tags = {
-    Component   = "user-service"
-    Environment = "production"
-  }
-}
-
-source "amazon-ebs" "example" {
-  # ...
-
-  tag {
-    key                 = "Name"
-    value               = "example-asg-name"
-  }
-
-  dynamic "tag" {
-    for_each = local.standard_tags
-
-    content {
-      key                 = tag.key
-      value               = tag.value
-    }
-  }
-}
-```
-
-A `dynamic` block acts much like a `for` expression, but produces nested blocks
-instead of a complex typed value. It iterates over a given complex value, and
-generates a nested block for each element of that complex value.
-
-- The label of the dynamic block (`"tag"` in the example above) specifies
-  what kind of nested block to generate.
-- The `for_each` argument provides the complex value to iterate over.
-- The `iterator` argument (optional) sets the name of a temporary variable
-  that represents the current element of the complex value. If omitted, the name
-  of the variable defaults to the label of the `dynamic` block (`"tag"` in
-  the example above).
-- The `labels` argument (optional) is a list of strings that specifies the block
-  labels, in order, to use for each generated block. You can use the temporary
-  iterator variable in this value.
-- The nested `content` block defines the body of each generated block. You can
-  use the temporary iterator variable inside this block.
-
-Since the `for_each` argument accepts any collection or structural value,
-you can use a `for` expression or splat expression to transform an existing
-collection.
-
-The iterator object (`tag` in the example above) has two attributes:
-
-* `key` is the map key or list element index for the current element. If the
-  `for_each` expression produces a _set_ value then `key` is identical to
-  `value` and should not be used.
-* `value` is the value of the current element.
-
-A `dynamic` block can only generate arguments that belong to the source type,
-data source or provisioner being configured.
-
-The `for_each` value must be a map or set with one element per desired nested
-block. If you need to declare resource instances based on a nested data
-structure or combinations of elements from multiple data structures you can use
-expressions and functions to derive a suitable value. For some common examples
-of such situations, see the
-[`flatten`](/docs/configuration/from-1.5/functions/collection/flatten.html) and
-[`setproduct`](/docs/configuration/from-1.5/functions/collection/setproduct.html)
-functions.
-
-### Best Practices for `dynamic` Blocks
-
-Overuse of `dynamic` blocks can make configuration hard to read and maintain,
-so we recommend using them only when you need to hide details in order to build
-a clean user interface for a re-usable code. Always write nested blocks out
-literally where possible.
 
 ## String Literals
 

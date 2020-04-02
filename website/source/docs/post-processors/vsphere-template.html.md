@@ -22,7 +22,7 @@ a VM as a template and leaving it in a path of choice.
 
 An example is shown below, showing only the post-processor configuration:
 
-```json
+``` json
 {
    "type": "vsphere-template",
    "host": "vcenter.local",
@@ -91,7 +91,7 @@ sequence definition (a collection of post-processors that are treated as as
 single pipeline, see [Post-Processors](/docs/templates/post-processors.html)
 for more information):
 
-```json
+``` json
 {
   "post-processors": [
     [

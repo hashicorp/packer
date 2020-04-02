@@ -234,7 +234,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ForceDeregister: b.config.AMIForceDeregister,
 			VpcId:           b.config.VpcId,
 			SubnetId:        b.config.SubnetId,
-			HasSubnetFilter: !b.config.SubnetFilter.Empty(),
+			HasSubnetFilter: len(b.config.SubnetFilter.Filters) > 0,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,

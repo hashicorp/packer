@@ -217,7 +217,7 @@ each category, the available configuration keys are alphabetized.
   
     Example:
 
-    ```json
+    ``` json
     {
       "source_omi_filter": {
         "filters": {
@@ -248,7 +248,7 @@ each category, the available configuration keys are alphabetized.
 
 Here is a basic example. It is completely valid except for the access keys:
 
-```json
+``` json
 {
   "type": "osc-chroot",
   "access_key": "YOUR KEY HERE",
@@ -275,7 +275,7 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/proc` and `/dev`:
 
-```json
+``` json
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
@@ -317,7 +317,7 @@ For debian based distributions you can setup a
 file which will prevent packages installed by your provisioners from starting
 services:
 
-```json
+``` json
 {
   "type": "shell",
   "inline": [
@@ -350,7 +350,7 @@ The device setup commands partition the device with one partition for use as an
 HVM image and format it ext4. This builder block should be followed by
 provisioning commands to install the os and bootloader.
 
-```json
+``` json
 {
   "type": "osc-chroot",
   "ami_name": "packer-from-scratch {{timestamp}}",

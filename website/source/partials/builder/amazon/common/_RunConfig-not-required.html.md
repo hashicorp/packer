@@ -26,7 +26,7 @@
     `true`, will cause a timeout.
     Example of a valid shutdown command:
     
-    ```json
+    ``` json
     {
       "type": "windows-shell",
       "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -90,7 +90,7 @@
     
 -   `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. Example:
     
-    ```json
+    ``` json
     {
       "security_group_filter": {
         "filters": {
@@ -113,11 +113,6 @@
     EBS volumes. This is a [template engine](/docs/templates/engine.html),
     see [Build template data](#build-template-data) for more information.
     
--   `run_tag` ([]{name string, value string}) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-    block containing a `name` and a `value` field. In HCL2 mode the
-    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-    will allow you to create those programatically.
-    
 -   `security_group_id` (string) - The ID (not the name) of the security
     group to assign to the instance. By default this is not set and Packer will
     automatically create a new temporary security group to allow SSH access.
@@ -131,7 +126,7 @@
 -   `source_ami_filter` (AmiFilterOptions) - Filters used to populate the `source_ami`
     field. Example:
     
-      ```json
+      ``` json
       {
         "source_ami_filter": {
           "filters": {
@@ -180,21 +175,13 @@
     because a particular availability zone does not have capacity for the
     specific instance_type requested in instance_type.
     
--   `spot_price` (string) - With Spot Instances, you pay the Spot price that's in effect for the
-    time period your instances are running. Spot Instance prices are set by
-    Amazon EC2 and adjust gradually based on long-term trends in supply and
-    demand for Spot Instance capacity.
-    
-    When this field is set, it represents the maximum hourly price you are
-    willing to pay for a spot instance. If you do not set this value, it
-    defaults to a maximum price equal to the on demand price of the
-    instance. In the situation where the current Amazon-set spot price
-    exceeds the value set in this field, Packer will not launch an instance
-    and the build will error. In the situation where the Amazon-set spot
-    price is less than the value set in this field, Packer will launch and
-    you will pay the Amazon-set spot price, not this maximum value.
-    For more information, see the Amazon docs on
-    [spot pricing](https://aws.amazon.com/ec2/spot/pricing/).
+-   `spot_price` (string) - The maximum hourly price to pay for a spot instance
+    to create the AMI. Spot instances are a type of instance that EC2 starts
+    when the current spot price is less than the maximum price you specify.
+    Spot price will be updated based on available spot instance capacity and
+    current spot instance requests. It may save you some costs. You can set
+    this to auto for Packer to automatically discover the best spot price or
+    to "0" to use an on demand instance (default).
     
 -   `spot_price_auto_product` (string) - Required if spot_price is set to
     auto. This tells Packer what sort of AMI you're launching to find the
@@ -202,18 +189,13 @@
     Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
     Windows (Amazon VPC)
     
--   `spot_tags` (map[string]string) - Requires spot_price to be set. This tells Packer to apply tags to the
-    spot request that is issued.
-    
--   `spot_tag` ([]{name string, value string}) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
-    containing a `name` and a `value` field. In HCL2 mode the
-    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-    will allow you to create those programatically.
+-   `spot_tags` (map[string]string) - Requires spot_price to be
+    set. This tells Packer to apply tags to the spot request that is issued.
     
 -   `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
     Example:
     
-      ```json
+      ``` json
       {
         "subnet_filter": {
           "filters": {
@@ -270,7 +252,7 @@
 -   `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
     Example:
     
-    ```json
+    ``` json
     {
       "vpc_filter": {
         "filters": {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -22,7 +21,6 @@ func getBasicParser() *Parser {
 		BuilderSchemas: packer.MapOfBuilder{
 			"amazon-ebs":     func() (packer.Builder, error) { return &MockBuilder{}, nil },
 			"virtualbox-iso": func() (packer.Builder, error) { return &MockBuilder{}, nil },
-			"null":           func() (packer.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionersSchemas: packer.MapOfProvisioner{
 			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
@@ -37,7 +35,6 @@ func getBasicParser() *Parser {
 type parseTestArgs struct {
 	filename string
 	vars     map[string]string
-	varFiles []string
 }
 
 type parseTest struct {
@@ -59,9 +56,9 @@ func testParse(t *testing.T, tests []parseTest) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
+			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
-				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
+				t.Fatalf("Parser.parse() unexpected diagnostics. %s", gotDiags)
 			}
 			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
@@ -83,34 +80,6 @@ func testParse(t *testing.T, tests []parseTest) {
 			); diff != "" {
 				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
 			}
-
-			if gotCfg != nil && !tt.parseWantDiagHasErrors {
-				gotInputVar := gotCfg.InputVariables
-				for name, value := range tt.parseWantCfg.InputVariables {
-					if variable, ok := gotInputVar[name]; ok {
-						if diff := cmp.Diff(variable.DefaultValue.GoString(), value.DefaultValue.GoString()); diff != "" {
-							t.Fatalf("Parser.parse(): unexpected default value for %s: %s", name, diff)
-						}
-						if diff := cmp.Diff(variable.VarfileValue.GoString(), value.VarfileValue.GoString()); diff != "" {
-							t.Fatalf("Parser.parse(): varfile value differs for %s: %s", name, diff)
-						}
-					} else {
-						t.Fatalf("Parser.parse() missing input variable. %s", name)
-					}
-				}
-
-				gotLocalVar := gotCfg.LocalVariables
-				for name, value := range tt.parseWantCfg.LocalVariables {
-					if variable, ok := gotLocalVar[name]; ok {
-						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
-							t.Fatalf("Parser.parse() local variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
-						}
-					} else {
-						t.Fatalf("Parser.parse() missing local variable. %s", name)
-					}
-				}
-			}
-
 			if gotDiags.HasErrors() {
 				return
 			}
@@ -126,7 +95,6 @@ func testParse(t *testing.T, tests []parseTest) {
 					packer.CoreBuild{},
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
-					null.Builder{},
 				),
 			); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
@@ -158,7 +126,6 @@ var (
 			{"a", "b"},
 			{"c", "d"},
 		},
-		Tags: []MockTag{},
 	}
 
 	basicMockBuilder = &MockBuilder{
@@ -178,9 +145,7 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{
-					Tags: dynamicTagList,
-				},
+				{},
 			},
 		},
 	}
@@ -189,9 +154,7 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{
-					Tags: []MockTag{},
-				},
+				{},
 			},
 		},
 	}
@@ -200,25 +163,8 @@ var (
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				{
-					Tags: []MockTag{},
-				},
+				{},
 			},
-		},
-	}
-
-	dynamicTagList = []MockTag{
-		{
-			Key:   "first_tag_key",
-			Value: "first_tag_value",
-		},
-		{
-			Key:   "Component",
-			Value: "user-service",
-		},
-		{
-			Key:   "Environment",
-			Value: "production",
 		},
 	}
 )

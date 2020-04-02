@@ -176,7 +176,7 @@ builder.
   
     Example:
 
-    ```json
+    ``` json
     {
       "source_omi_filter": {
         "filters": {
@@ -218,7 +218,7 @@ builder.
 - `net_filter` (object) - Filters used to populate the `net_id` field.
     Example:
 
-    ```json
+    ``` json
     {
       "net_filter": {
         "filters": {
@@ -283,7 +283,7 @@ configuration of `launch_block_device_mappings` will expand the root volume
 `ami_block_device_mappings` Outscale will attach additional volumes `/dev/sdb` and
 `/dev/sdc` when we boot a new VM of our OMI.
 
-```json
+``` json
 {
   "type": "osc-bsu",
   "access_key": "YOUR KEY HERE",
@@ -327,7 +327,7 @@ In configuration directives marked as a template engine above, the following var
 
 Here is an example using the optional OMIS tags. This will add the tags `OS_Version` and `Release` to the finished OMI. As before, you will need to provide your access keys, and may need to change the source OMIS ID based on what images exist when this template is run:
 
-```json
+``` json
 {
   "type": "osc-bsu",
   "access_key": "YOUR KEY HERE",

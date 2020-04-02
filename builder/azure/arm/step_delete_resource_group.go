@@ -45,8 +45,7 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state
 
 		if keyVaultDeploymentName, ok := state.GetOk(constants.ArmKeyVaultDeploymentName); ok {
 			// Only delete if custom keyvault was not provided.
-			if exists := state.Get(constants.ArmIsExistingKeyVault).(bool); !exists {
-				s.say("\n Deleting the keyvault deployment because it was created by Packer...")
+			if exists := state.Get(constants.ArmIsExistingKeyVault).(bool); exists {
 				err = s.deleteDeploymentResources(ctx, keyVaultDeploymentName.(string), resourceGroupName)
 				if err != nil {
 					return err

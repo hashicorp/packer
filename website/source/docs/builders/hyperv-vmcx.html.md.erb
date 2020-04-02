@@ -30,7 +30,7 @@ could be used as a starting point for more advanced templates.
 
 Import from folder:
 
-```json
+``` json
 {
   "type": "hyperv-vmcx",
   "clone_from_vmcx_path": "c:/path/to/ubuntu-12.04.5-server-amd64",
@@ -42,7 +42,7 @@ Import from folder:
 
 Clone from existing virtual machine:
 
-```json
+``` json
 {
     "clone_from_vm_name": "ubuntu-12.04.5-server-amd64",
     "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
@@ -121,7 +121,7 @@ to the machine, simulating a human actually typing the keyboard.
 The example shown below is a working boot command used to start an Ubuntu
 12.04 installer:
 
-```json
+``` json
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -200,7 +200,7 @@ if (test-path $isoFolder){
 
 Packer config:
 
-```json
+``` json
 {
   "builders": [
     {
@@ -731,7 +731,7 @@ virtual switch with an `External` connection type.
 
 ### Packer config:
 
-```json
+``` json
 {
   "variables": {
     "vm_name": "ubuntu-xenial",

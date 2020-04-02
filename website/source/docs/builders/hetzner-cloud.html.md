@@ -55,7 +55,7 @@ builder.
 -   `image_filter` (object) - Filters used to populate the `filter`
     field. Example:
 
-    ```json
+    ``` json
     {
       "image_filter": {
       "with_selector": [
@@ -113,7 +113,7 @@ builder.
 Here is a basic example. It is completely valid as soon as you enter your own
 access tokens:
 
-```json
+``` json
 {
   "builders": [{
     "type": "hcloud",

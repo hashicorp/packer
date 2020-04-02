@@ -100,11 +100,6 @@
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
     
--   `azure_tag` ([]{name string, value string}) - Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
-    containing a `name` and a `value` field. In HCL2 mode the
-    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-    will allow you to create those programatically.
-    
 -   `resource_group_name` (string) - Resource group under which the final artifact will be stored.
     
 -   `storage_account` (string) - Storage account under which the final artifact will be stored.
@@ -122,9 +117,6 @@
     
 -   `build_key_vault_name` (string) - Specify an existing key vault to use for uploading certificates to the
     instance to connect.
-    
--   `build_key_vault_sku` (string) - Specify the KeyVault SKU to create during the build. Valid values are
-    standard or premium. The default value is standard.
     
 -   `private_virtual_network_with_public_ip` (bool) - This value allows you to
     set a virtual_network_name and obtain a public IP. If this value is not
@@ -164,7 +156,7 @@
     
     An example plan\_info object is defined below.
     
-    ```json
+    ``` json
     {
       "plan_info": {
           "plan_name": "rabbitmq",

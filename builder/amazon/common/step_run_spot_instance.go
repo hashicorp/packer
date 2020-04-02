@@ -34,10 +34,10 @@ type StepRunSpotInstance struct {
 	InstanceType                      string
 	SourceAMI                         string
 	SpotPrice                         string
-	SpotTags                          map[string]string
+	SpotTags                          TagMap
 	SpotInstanceTypes                 []string
-	Tags                              map[string]string
-	VolumeTags                        map[string]string
+	Tags                              TagMap
+	VolumeTags                        TagMap
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
@@ -49,6 +49,24 @@ type StepRunSpotInstance struct {
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	state multistep.StateBag, marketOptions *ec2.LaunchTemplateInstanceMarketOptionsRequest) *ec2.RequestLaunchTemplateData {
 	blockDeviceMappings := s.LaunchMappings.BuildEC2BlockDeviceMappings()
+	if s.NoEphemeral {
+		// This is only relevant for windows guests. Ephemeral drives by
+		// default are assigned to drive names xvdca-xvdcz.
+		// When vms are launched from the AWS console, they're automatically
+		// removed from the block devices if the user hasn't said to use them,
+		// but the SDK does not perform this cleanup. The following code just
+		// manually removes the ephemeral drives from the mapping so that they
+		// don't clutter up console views and cause confusion.
+		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
+		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
+		for _, letter := range DefaultEphemeralDeviceLetters {
+			bd := &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("xvdc" + string(letter)),
+				NoDevice:   aws.String(""),
+			}
+			blockDeviceMappings = append(blockDeviceMappings, bd)
+		}
+	}
 	// Convert the BlockDeviceMapping into a
 	// LaunchTemplateBlockDeviceMappingRequest. These structs are identical,
 	// except for the EBS field -- on one, that field contains a
@@ -62,28 +80,10 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{
 			DeviceName:  mapping.DeviceName,
 			Ebs:         (*ec2.LaunchTemplateEbsBlockDeviceRequest)(mapping.Ebs),
+			NoDevice:    mapping.NoDevice,
 			VirtualName: mapping.VirtualName,
 		}
 		launchMappingRequests = append(launchMappingRequests, launchRequest)
-	}
-	if s.NoEphemeral {
-		// This is only relevant for windows guests. Ephemeral drives by
-		// default are assigned to drive names xvdca-xvdcz.
-		// When vms are launched from the AWS console, they're automatically
-		// removed from the block devices if the user hasn't said to use them,
-		// but the SDK does not perform this cleanup. The following code just
-		// manually removes the ephemeral drives from the mapping so that they
-		// don't clutter up console views and cause confusion.
-		log.Printf("no_ephemeral was set, so creating drives xvdca-xvdcz as empty mappings")
-		DefaultEphemeralDeviceLetters := "abcdefghijklmnopqrstuvwxyz"
-		for _, letter := range DefaultEphemeralDeviceLetters {
-			launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{
-				DeviceName: aws.String("xvdc" + string(letter)),
-				NoDevice:   aws.String(""),
-			}
-			launchMappingRequests = append(launchMappingRequests, launchRequest)
-		}
-
 	}
 
 	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
@@ -194,7 +194,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Convert tags from the tag map provided by the user into *ec2.Tag s
-	ec2Tags, err := TagMap(s.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error generating tags for source instance: %s", err)
 		state.Put("error", err)
@@ -300,7 +300,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		if len(createOutput.Errors) > 0 {
 			errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
 			for _, outErr := range createOutput.Errors {
-				errString = errString + aws.StringValue(outErr.ErrorMessage)
+				errString = errString + fmt.Sprintf("%s", *outErr.ErrorMessage)
 			}
 			err = fmt.Errorf(errString)
 			state.Put("error", err)
@@ -336,7 +336,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	instance := describeOutput.Reservations[0].Instances[0]
 
 	// Tag the spot instance request (not the eventual spot instance)
-	spotTags, err := TagMap(s.SpotTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error generating tags for spot request: %s", err)
 		state.Put("error", err)
@@ -344,7 +344,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	if len(spotTags) > 0 && len(s.SpotTags) > 0 {
+	if len(spotTags) > 0 && s.SpotTags.IsSet() {
 		spotTags.Report(ui)
 		// Use the instance ID to find out the SIR, so that we can tag the spot
 		// request associated with this instance.
@@ -400,10 +400,10 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
+	if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
 		ui.Say("Adding tags to source EBS Volumes")
 
-		volumeTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)

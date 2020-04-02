@@ -127,7 +127,7 @@ a [communicator](/docs/templates/communicator.html) can be configured for this b
 
 Here is a basic example for Tencentcloud.
 
-```json
+``` json
 {
   "variables": {
     "secret_id": "{{env `TENCENTCLOUD_ACCESS_KEY`}}",

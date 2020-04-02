@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -20,9 +19,9 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type AmiFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
-	Owners                []string
-	MostRecent            bool `mapstructure:"most_recent"`
+	Filters    map[string]string
+	Owners     []string
+	MostRecent bool `mapstructure:"most_recent"`
 }
 
 func (d *AmiFilterOptions) GetOwners() []*string {
@@ -35,7 +34,7 @@ func (d *AmiFilterOptions) GetOwners() []*string {
 }
 
 func (d *AmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && d.KVFilter.Empty()
+	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
 func (d *AmiFilterOptions) NoOwner() bool {
@@ -43,13 +42,17 @@ func (d *AmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
-	MostFree              bool `mapstructure:"most_free"`
-	Random                bool `mapstructure:"random"`
+	Filters  map[string]string
+	MostFree bool `mapstructure:"most_free"`
+	Random   bool `mapstructure:"random"`
+}
+
+func (d *SubnetFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
 }
 
 type VpcFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
+	Filters map[string]string
 }
 
 type Statement struct {
@@ -63,8 +66,16 @@ type PolicyDocument struct {
 	Statement []Statement
 }
 
+func (d *VpcFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
+}
+
 type SecurityGroupFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
+	Filters map[string]string
+}
+
+func (d *SecurityGroupFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -96,7 +107,7 @@ type RunConfig struct {
 	// `true`, will cause a timeout.
 	// Example of a valid shutdown command:
 	//
-	// ```json
+	// ``` json
 	// {
 	//   "type": "windows-shell",
 	//   "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -164,7 +175,7 @@ type RunConfig struct {
 	InstanceType string `mapstructure:"instance_type" required:"true"`
 	// Filters used to populate the `security_group_ids` field. Example:
 	//
-	// ```json
+	// ``` json
 	// {
 	//   "security_group_filter": {
 	//     "filters": {
@@ -187,11 +198,6 @@ type RunConfig struct {
 	// EBS volumes. This is a [template engine](/docs/templates/engine.html),
 	// see [Build template data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
-	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-	// block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-	// will allow you to create those programatically.
-	RunTag hcl2template.NameValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
 	// automatically create a new temporary security group to allow SSH access.
@@ -210,7 +216,7 @@ type RunConfig struct {
 	// Filters used to populate the `source_ami`
 	// field. Example:
 	//
-	//   ```json
+	//   ``` json
 	//   {
 	//     "source_ami_filter": {
 	//       "filters": {
@@ -259,21 +265,13 @@ type RunConfig struct {
 	// because a particular availability zone does not have capacity for the
 	// specific instance_type requested in instance_type.
 	SpotInstanceTypes []string `mapstructure:"spot_instance_types" required:"false"`
-	// With Spot Instances, you pay the Spot price that's in effect for the
-	// time period your instances are running. Spot Instance prices are set by
-	// Amazon EC2 and adjust gradually based on long-term trends in supply and
-	// demand for Spot Instance capacity.
-	//
-	// When this field is set, it represents the maximum hourly price you are
-	// willing to pay for a spot instance. If you do not set this value, it
-	// defaults to a maximum price equal to the on demand price of the
-	// instance. In the situation where the current Amazon-set spot price
-	// exceeds the value set in this field, Packer will not launch an instance
-	// and the build will error. In the situation where the Amazon-set spot
-	// price is less than the value set in this field, Packer will launch and
-	// you will pay the Amazon-set spot price, not this maximum value.
-	// For more information, see the Amazon docs on
-	// [spot pricing](https://aws.amazon.com/ec2/spot/pricing/).
+	// The maximum hourly price to pay for a spot instance
+	// to create the AMI. Spot instances are a type of instance that EC2 starts
+	// when the current spot price is less than the maximum price you specify.
+	// Spot price will be updated based on available spot instance capacity and
+	// current spot instance requests. It may save you some costs. You can set
+	// this to auto for Packer to automatically discover the best spot price or
+	// to "0" to use an on demand instance (default).
 	SpotPrice string `mapstructure:"spot_price" required:"false"`
 	// Required if spot_price is set to
 	// auto. This tells Packer what sort of AMI you're launching to find the
@@ -281,18 +279,13 @@ type RunConfig struct {
 	// Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
 	// Windows (Amazon VPC)
 	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false"`
-	// Requires spot_price to be set. This tells Packer to apply tags to the
-	// spot request that is issued.
+	// Requires spot_price to be
+	// set. This tells Packer to apply tags to the spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
-	// Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
-	// containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-	// will allow you to create those programatically.
-	SpotTag hcl2template.NameValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
 	// Example:
 	//
-	//   ```json
+	//   ``` json
 	//   {
 	//     "subnet_filter": {
 	//       "filters": {
@@ -349,7 +342,7 @@ type RunConfig struct {
 	// Filters used to populate the `vpc_id` field.
 	// Example:
 	//
-	// ```json
+	// ``` json
 	// {
 	//   "vpc_filter": {
 	//     "filters": {
@@ -421,19 +414,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-
-	// Copy singular tag maps
-	errs = append(errs, c.RunTag.CopyOn(&c.RunTags)...)
-	errs = append(errs, c.SpotTag.CopyOn(&c.SpotTags)...)
-
-	for _, preparer := range []interface{ Prepare() []error }{
-		&c.SourceAmiFilter,
-		&c.SecurityGroupFilter,
-		&c.SubnetFilter,
-		&c.VpcFilter,
-	} {
-		errs = append(errs, preparer.Prepare()...)
-	}
 
 	// Validating ssh_interface
 	if c.SSHInterface != "public_ip" &&

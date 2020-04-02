@@ -7,10 +7,9 @@ import (
 )
 
 var (
-	PossibleNumbers          = "0123456789"
-	PossibleLowerCase        = "abcdefghijklmnopqrstuvwxyz"
-	PossibleUpperCase        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	PossibleSpecialCharacter = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+	PossibleNumbers   = "0123456789"
+	PossibleLowerCase = "abcdefghijklmnopqrstuvwxyz"
+	PossibleUpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	PossibleAlphaNum      = PossibleNumbers + PossibleLowerCase + PossibleUpperCase
 	PossibleAlphaNumLower = PossibleNumbers + PossibleLowerCase

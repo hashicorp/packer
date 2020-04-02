@@ -76,10 +76,7 @@ Optional:
     Defaults to `false`.
 
 -   `space_object_name` (string) - The name of the key used in the Space where
-    the image file will be copied to for import. This is treated as a
-    [template engine](/docs/templates/engine.html). Therefore, you
-    may use user variables and template functions in this field.
-    If not specified, this will default to "packer-import-{{timestamp}}".
+    the image file will be copied to for import. If not specified, this will default to "packer-import-{{timestamp}}".
 
 -   `timeout` (number) - The length of time in minutes to wait for individual
     steps in the process to successfully complete. This includes both importing
@@ -90,7 +87,7 @@ Optional:
 
 Here is a basic example:
 
-```json
+``` json
 {
   "type": "digitalocean-import",
   "api_token": "{{user `token`}}",

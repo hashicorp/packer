@@ -60,9 +60,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 		Config      hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
-	if diags.HasErrors() {
-		return nil, diags
-	}
 
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)
@@ -87,9 +84,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 
 	content, moreDiags := b.Config.Content(buildSchema)
 	diags = append(diags, moreDiags...)
-	if diags.HasErrors() {
-		return nil, diags
-	}
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case buildProvisionerLabel:

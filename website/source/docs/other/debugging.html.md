@@ -112,7 +112,7 @@ Adding the following provisioner to the packer template, allows for the
 cloud-init process to fully finish before packer starts provisioning the source
 AMI.
 
-```json
+``` json
 {
   "type": "shell",
   "inline": [

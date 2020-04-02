@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -44,11 +43,11 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 		// volume will have had these tags applied when the instance was
 		// created. We now need to remove these tags to ensure only the EBS
 		// volume tags are applied (if any)
-		if len(config.VolumeRunTags) > 0 {
+		if config.VolumeRunTags.IsSet() {
 			ui.Say("Removing any tags applied to EBS volumes when the source instance was created...")
 
 			ui.Message("Compiling list of existing tags to remove...")
-			existingTags, err := awscommon.TagMap(config.VolumeRunTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			existingTags, err := config.VolumeRunTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
 				err := fmt.Errorf("Error generating list of tags to remove: %s", err)
 				state.Put("error", err)
@@ -92,7 +91,7 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 			}
 
 			ui.Message(fmt.Sprintf("Compiling list of tags to apply to volume on %s...", mapping.DeviceName))
-			tags, err := awscommon.TagMap(mapping.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
 				err := fmt.Errorf("Error generating tags for device %s: %s", mapping.DeviceName, err)
 				state.Put("error", err)

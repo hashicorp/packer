@@ -155,7 +155,7 @@ builder.
 -   `source_machine_image_filter` (object) - Filters used to populate the
     `source_machine_image` field. Example:
 
-    ```json
+    ``` json
     {
       "source_machine_image_filter": {
         "name": "ubuntu-16.04",
@@ -169,7 +169,7 @@ builder.
 
 Below is a minimal example to create an image on the Joyent public cloud:
 
-```json
+``` json
 {
   "builders": [
     {

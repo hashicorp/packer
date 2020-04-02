@@ -36,7 +36,7 @@
     
     example:
     
-     ```json
+     ``` json
      {
         "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
      }
@@ -96,7 +96,7 @@
 -   `scopes` ([]string) - The service account scopes for launched
     instance. Defaults to:
     
-    ```json
+    ``` json
     [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/compute",

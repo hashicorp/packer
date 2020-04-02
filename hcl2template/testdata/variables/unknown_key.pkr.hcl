@@ -1,5 +1,4 @@
 
-variable "broken_variable" {
+variable "broken_type" {
     invalid = true
-    default = true
 }

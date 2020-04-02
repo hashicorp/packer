@@ -24,10 +24,10 @@
     
     ```json
     {
-      "communicator": "ssh",
-      "ssh_username": "myuser",
-      "pause_before_connecting": "10m"
-    }
+        "communicator": "ssh",
+        "ssh_username": "myuser",
+        "pause_before_connecting": "10m"
+      }
     ```
     
     In this example, Packer will check whether it can connect, as normal. But once

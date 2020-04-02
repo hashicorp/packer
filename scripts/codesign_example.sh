@@ -156,9 +156,6 @@ signed_checksum=$(
     | grep -i "x-checksum-sha256" | awk 'gsub("[\r\n]", "", $2) {print $2;}'
 )
 
-echo "${signed_checksum}  signed_${SN_ID}.zip" | $SHASUM_PROG -c
-if [ $? -ne 0 ]; then
-  exit 1
-fi
+echo "${signed_checksum}  signed_${SN_ID}.zip" | SHASUM_PROG -c
 
 mv "signed_${SN_ID}.zip" "$TARGET_ZIP"

@@ -3,7 +3,7 @@ description: |
     The osc-bsusurrogate Packer builder is like the chroot builder, but does not
     require running inside an Outscale virtual machine.
 layout: docs
-page_title: 'Outscale BSU Surrogate - Builders'
+page_title: 'Outacale BSU Surrogate - Builders'
 sidebar_current: 'docs-builders-osc-bsusurrogate'
 ---
 
@@ -187,7 +187,7 @@ builder.
   
     Example:
 
-    ```json
+    ``` json
     {
       "source_omi_filter": {
         "filters": {
@@ -229,7 +229,7 @@ builder.
 - `net_filter` (object) - Filters used to populate the `net_id` field.
     Example:
 
-    ```json
+    ``` json
     {
       "net_filter": {
         "filters": {
@@ -250,7 +250,7 @@ builder.
 
 ## Basic Example
 
-```json
+``` json
 {
    "type" : "osc-bsusurrogate",
    "secret_key" : "YOUR SECRET KEY HERE",

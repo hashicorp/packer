@@ -18,7 +18,7 @@ build {
             a = "b"
             c = "d"
         }
-        slice_string = [for s in var.availability_zone_names : lower(s)]
+        slice_string = var.availability_zone_names
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
@@ -35,7 +35,7 @@ build {
                 a = "b"
                 c = "d"
             }
-            slice_string = [for s in var.availability_zone_names : lower(s)]
+            slice_string = var.availability_zone_names
             slice_slice_string = [
                 ["a","b"],
                 ["c","d"]
@@ -43,17 +43,6 @@ build {
         }
 
         nested_slice {
-            tag {
-                key = "first_tag_key"
-                value = "first_tag_value"
-            }
-            dynamic "tag" {
-                for_each = local.standard_tags
-                content {
-                    key                 = tag.key
-                    value               = tag.value
-                }
-            }
         }
     }
 
@@ -69,7 +58,11 @@ build {
             a = "b"
             c = "d"
         }
-        slice_string = local.abc_map[*].id
+        slice_string = [
+            "a",
+            "b",
+            "c",
+        ]
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
@@ -98,17 +91,6 @@ build {
         }
 
         nested_slice {
-            tag {
-                key = "first_tag_key"
-                value = "first_tag_value"
-            }
-            dynamic "tag" {
-                for_each = local.standard_tags
-                content {
-                    key                 = tag.key
-                    value               = tag.value
-                }
-            }
         }
     }
 

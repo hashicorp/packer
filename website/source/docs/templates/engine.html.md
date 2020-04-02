@@ -74,37 +74,15 @@ Here is a full list of the available functions for reference.
     }
     ```
 
-    Valid variables to request are: 
-    - __ID__: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean, 
-    it is the droplet id; in Vmware, it is the vm name.   
-     
-    - __Host__, __Port__, __User__ and __Password__: The host, port, user, and password that Packer uses to access the machine. 
-    Useful for using the shell local provisioner to run Ansible or Inspec against the provisioned instance.
-    
-    - __ConnType__: Type of communicator being used. For example, for SSH communicator this will be "ssh".
-    
-    - __PackerRunUUID__: Current build's unique id. Can be used to specify build artifacts.
-    
-    - __PackerHTTPAddr__: HTTP address of the file server Packer creates to serve items in the "http" dir to the vm, displayed in the format `IP:PORT`.
-    
-    - __SSHPublicKey__ and __SSHPrivateKey__: The public and private key that Packer uses to connect to the instance. 
-    These are unique to the SSH communicator and are unset when using other communicators. 
-    __SSHPublicKey__ and __SSHPrivateKey__ can have escape sequences and special characters so their output should be single quoted to avoid surprises.  For example:
-       
-        ```json
-        {
-          ...
-          "provisioners": [
-            {
-              "type": "shell",
-              "inline": [
-                "echo '{{ build `SSHPrivateKey`}}'  > /tmp/packer-session.pem"
-              ]
-             }
-          ]
-        }
-        ```
-      
+    Valid variables to request are: "ID", "Host",
+    "Port", "User", "Password", "ConnType",
+    "PackerRunUUID", "PackerHTTPAddr", "SSHPublicKey", and "SSHPrivateKey".
+    Depending on which communicator you are using, some of these values may be
+    empty -- for example, the public and private keys are unique to the SSH
+    communicator. InstanceID represents the vm being provisioned. For example,
+    in Amazon it is the instance id; in digitalocean, it is the droplet id; in
+    Vmware, it is the vm name.
+
     For backwards compatability, `WinRMPassword` is also available through this
     engine, though it is no different than using the more general `Password`.
 
@@ -213,7 +191,7 @@ are available to customize the
 [`execute_command`](/docs/provisioners/shell.html#execute_command) parameter
 used to determine how Packer will run the shell command.
 
-```json
+``` liquid
 {
     "provisioners": [
         {
@@ -353,7 +331,7 @@ isotime = June 7, 7:22:43pm 2014
 Please note that double quote characters need escaping inside of templates (in
 this case, on the `ami_name` value):
 
-```json
+``` json
 {
   "builders": [
     {
@@ -396,7 +374,7 @@ build_name = foo-bar-provider
 Please note that double quote characters need escaping inside of templates (in
 this case, on the `fixed-string` value):
 
-```json
+``` json
 {
   "post-processors": [
     [

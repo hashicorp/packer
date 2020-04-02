@@ -27,15 +27,8 @@ you will need to specify the `output` option.
     tarball. `.zip` will be a zip file. If the extension can't be detected
     packer defaults to `.tar.gz` behavior but will not change the filename.
 
-    This is treated as a
-    [template engine](/docs/templates/engine.html). Therefore, you
-    may use user variables and template functions in this field.
-    The following special variables are also available to use in the output
-    template:
-    - `{{.BuildName}}`
-    - `{{.BuilderType}}`
-
-     If you are executing multiple builders in parallel you should make sure
+    You can use `{{.BuildName}}` and `{{.BuilderType}}` in your output path. If
+    you are executing multiple builders in parallel you should make sure
     `output` is unique for each one. For example `packer_{{.BuildName}}.zip`.
 
 -   `format` (string) - Disable archive format autodetection and use provided
@@ -60,21 +53,21 @@ compress.
 Some minimal examples are shown below, showing only the post-processor
 configuration:
 
-```json
+``` json
 {
   "type": "compress",
   "output": "archive.tar.lz4"
 }
 ```
 
-```json
+``` json
 {
   "type": "compress",
   "output": "{{.BuildName}}_bundle.zip"
 }
 ```
 
-```json
+``` json
 {
   "type": "compress",
   "output": "log_{{.BuildName}}.gz",

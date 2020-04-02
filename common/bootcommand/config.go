@@ -76,12 +76,12 @@ import (
 //     `http_directory` configuration parameter. If `http_directory` isn't
 //     specified, these will be blank!
 //
-// -   `{{ .Name }}` - The name of the VM.
+// -   `Name` - The name of the VM.
 //
 // Example boot command. This is actually a working boot command used to start an
 // CentOS 6.4 installer:
 //
-// ```json
+// ``` json
 // "boot_command": [
 //     "<tab><wait>",
 //     " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
@@ -91,7 +91,7 @@ import (
 // The example shown below is a working boot command used to start an Ubuntu
 // 12.04 installer:
 //
-// ```json
+// ``` json
 // [
 //   "<esc><esc><enter><wait>",
 //   "/install/vmlinuz noapic ",

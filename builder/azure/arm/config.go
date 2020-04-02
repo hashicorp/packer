@@ -18,8 +18,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common/random"
-
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
@@ -29,7 +27,6 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -43,7 +40,6 @@ const (
 	DefaultUserName                          = "packer"
 	DefaultPrivateVirtualNetworkWithPublicIp = false
 	DefaultVMSize                            = "Standard_A1"
-	DefaultKeyVaultSKU                       = "standard"
 )
 
 const (
@@ -59,12 +55,12 @@ const (
 )
 
 var (
-	reCaptureContainerName = regexp.MustCompile(`^[a-z0-9][a-z0-9\-]{2,62}$`)
-	reCaptureNamePrefix    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_\-\.]{0,23}$`)
+	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
+	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnapshotName         = regexp.MustCompile(`^[A-Za-z0-9_]{1,79}$`)
-	reSnapshotPrefix       = regexp.MustCompile(`^[A-Za-z0-9_]{1,59}$`)
+	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{1,79}$")
+	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{1,59}$")
 )
 
 type PlanInformation struct {
@@ -243,11 +239,6 @@ type Config struct {
 	// 256 characters. Tags are applied to every resource deployed by a Packer
 	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
 	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
-	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
-	// containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
-	// will allow you to create those programatically.
-	AzureTag hcl2template.NameValues `mapstructure:"azure_tag" required:"false"`
 	// Resource group under which the final artifact will be stored.
 	ResourceGroupName string `mapstructure:"resource_group_name"`
 	// Storage account under which the final artifact will be stored.
@@ -265,10 +256,7 @@ type Config struct {
 	BuildResourceGroupName string `mapstructure:"build_resource_group_name"`
 	// Specify an existing key vault to use for uploading certificates to the
 	// instance to connect.
-	BuildKeyVaultName string `mapstructure:"build_key_vault_name"`
-	// Specify the KeyVault SKU to create during the build. Valid values are
-	// standard or premium. The default value is standard.
-	BuildKeyVaultSKU           string `mapstructure:"build_key_vault_sku"`
+	BuildKeyVaultName          string `mapstructure:"build_key_vault_name"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
 	// set a virtual_network_name and obtain a public IP. If this value is not
@@ -309,7 +297,7 @@ type Config struct {
 	//
 	// An example plan\_info object is defined below.
 	//
-	// ```json
+	// ``` json
 	// {
 	//   "plan_info": {
 	//       "plan_name": "rabbitmq",
@@ -383,8 +371,8 @@ type Config struct {
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
 	// Runtime Values
-	UserName               string `mapstructure-to-hcl2:",skip"`
-	Password               string `mapstructure-to-hcl2:",skip"`
+	UserName               string
+	Password               string
 	tmpAdminPassword       string
 	tmpCertificatePassword string
 	tmpResourceGroupName   string
@@ -530,17 +518,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	provideDefaultValues(c)
 	setRuntimeValues(c)
-	err = setUserNamePassword(c)
-	if err != nil {
-		return nil, err
-	}
-
-	// copy singular blocks
-	for _, kv := range c.AzureTag {
-		v := kv.Value
-		c.AzureTags[kv.Name] = &v
-	}
-
+	setUserNamePassword(c)
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
 		return nil, err
@@ -656,34 +634,23 @@ func setRuntimeValues(c *Config) {
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
-func setUserNamePassword(c *Config) error {
-	// SSH comm
+func setUserNamePassword(c *Config) {
 	if c.Comm.SSHUsername == "" {
 		c.Comm.SSHUsername = DefaultUserName
 	}
+
 	c.UserName = c.Comm.SSHUsername
 
 	if c.Comm.SSHPassword != "" {
 		c.Password = c.Comm.SSHPassword
-		return nil
+		return
 	}
 
-	// WinRM comm
-	if c.Comm.WinRMUser == "" {
-		c.Comm.WinRMUser = DefaultUserName
-	}
-	c.UserName = c.Comm.WinRMUser
-
+	// Configure password settings using Azure generated credentials
+	c.Password = c.tmpAdminPassword
 	if c.Comm.WinRMPassword == "" {
-		// Configure password settings using Azure generated credentials
-		c.Comm.WinRMPassword = c.tmpAdminPassword
+		c.Comm.WinRMPassword = c.Password
 	}
-	if !isValidPassword(c.Comm.WinRMPassword) {
-		return fmt.Errorf("The supplied \"winrm_password\" must be between 8-123 characters long and must satisfy at least 3 from the following: \n1) Contains an uppercase character \n2) Contains a lowercase character\n3) Contains a numeric digit\n4) Contains a special character\n5) Control characters are not allowed")
-	}
-	c.Password = c.Comm.WinRMPassword
-
-	return nil
 }
 
 func setCustomData(c *Config) error {
@@ -715,10 +682,6 @@ func provideDefaultValues(c *Config) {
 
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
-	}
-
-	if c.BuildKeyVaultSKU == "" {
-		c.BuildKeyVaultSKU = DefaultKeyVaultSKU
 	}
 
 	c.ClientConfig.SetDefaultValues()
@@ -1051,34 +1014,6 @@ func isValidAzureName(re *regexp.Regexp, rgn string) bool {
 	return re.Match([]byte(rgn)) &&
 		!strings.HasSuffix(rgn, ".") &&
 		!strings.HasSuffix(rgn, "-")
-}
-
-// The supplied password must be between 8-123 characters long and must satisfy at least 3 of password complexity requirements from the following:
-// 1) Contains an uppercase character
-// 2) Contains a lowercase character
-// 3) Contains a numeric digit
-// 4) Contains a special character
-// 5) Control characters are not allowed (a very specific case - not included in this validation)
-func isValidPassword(password string) bool {
-	if !(len(password) >= 8 && len(password) <= 123) {
-		return false
-	}
-
-	requirements := 0
-	if strings.ContainsAny(password, random.PossibleNumbers) {
-		requirements++
-	}
-	if strings.ContainsAny(password, random.PossibleLowerCase) {
-		requirements++
-	}
-	if strings.ContainsAny(password, random.PossibleUpperCase) {
-		requirements++
-	}
-	if strings.ContainsAny(password, random.PossibleSpecialCharacter) {
-		requirements++
-	}
-
-	return requirements >= 3
 }
 
 func (c *Config) validateLocationZoneResiliency(say func(s string)) {

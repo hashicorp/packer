@@ -52,7 +52,7 @@ The OUTSCALE provider offers a flexible means of providing credentials for authe
 Static credentials can be provided in the form of an access key id and secret.
 These look like:
 
-```json
+``` json
 {
     "access_key": "AKIAIOSFODNN7EXAMPLE",
     "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",

@@ -80,7 +80,7 @@ In order for this example to work, the account associated with `account.json`
 must have write access to both `gs://mybucket1/path/to/file1.tar.gz` and
 `gs://mybucket2/path/to/file2.tar.gz`.
 
-```json
+``` json
 {
   "builders": [
     {

@@ -15,8 +15,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"golang.org/x/tools/imports"
 )
 
 const target = "command/plugin.go"
@@ -60,23 +58,12 @@ func main() {
 	}
 	defer file.Close()
 
-	output = string(goFmt(target, []byte(output)))
-
 	_, err = file.WriteString(output)
 	if err != nil {
 		log.Fatalf("Failed writing to %s: %s", target, err)
 	}
 
 	log.Printf("Generated %s", target)
-}
-
-func goFmt(filename string, b []byte) []byte {
-	fb, err := imports.Process(filename, b, nil)
-	if err != nil {
-		log.Printf("formatting err: %v", err)
-		return b
-	}
-	return fb
 }
 
 type plugin struct {

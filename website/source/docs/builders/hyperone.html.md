@@ -216,7 +216,7 @@ builder.
 Here is a basic example. It is completely valid as soon as you enter your own
 token.
 
-```json
+``` json
 {
     "type": "hyperone",
     "token": "YOUR_AUTH_TOKEN",
@@ -229,7 +229,7 @@ token.
 ## Chroot Example
 
 
-```json
+``` json
 {
     "type": "hyperone",
     "token": "YOUR_AUTH_TOKEN",

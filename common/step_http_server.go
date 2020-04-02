@@ -94,7 +94,7 @@ func GetHTTPPort() string {
 	if err != nil {
 		return ""
 	}
-	return port
+	return fmt.Sprintf("%s", port)
 }
 
 func GetHTTPIP() string {
@@ -102,7 +102,7 @@ func GetHTTPIP() string {
 	if err != nil {
 		return ""
 	}
-	return ip
+	return fmt.Sprintf("%s", ip)
 }
 
 func (s *StepHTTPServer) Cleanup(multistep.StateBag) {

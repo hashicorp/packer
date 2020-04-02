@@ -18,7 +18,7 @@ a container or VM, a common model used by most CI/CD services. However, the
 [KVM](https://www.linux-kvm.org/page/Main_Page) and
 [Xen](https://www.xenproject.org/) virtual machine images, [VirtualBox
 builder](/docs/builders/virtualbox.html) for OVA or OVF virtual machines and
-[VMware builder](/docs/builders/vmware.html) for use with VMware products
+[VMWare builder](/docs/builders/vmware.html) for use with VMware products
 require running on a bare-metal machine.
 
 The [Building a VirtualBox Image with Packer in

@@ -23,7 +23,7 @@ func (s *stepResizeDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		"resize",
 		"-f", config.Format,
 		path,
-		config.DiskSize,
+		fmt.Sprintf("%s", config.DiskSize),
 	}
 	if config.DiskImage == false {
 		return multistep.ActionContinue

@@ -5,8 +5,7 @@
     
 -   `container_name` (string) - Container Name
 -   `command_wrapper` (string) - Lets you prefix all builder commands, such as
-    with ssh for a remote build host. Defaults to "{{.Command}}"; i.e. no
-    wrapper.
+    with ssh for a remote build host. Defaults to "".
     
 -   `profile` (string) - Profile
 -   `init_sleep` (string) - The number of seconds to sleep between launching

@@ -15,8 +15,8 @@ import (
 )
 
 type StepCreateTags struct {
-	Tags         map[string]string
-	SnapshotTags map[string]string
+	Tags         TagMap
+	SnapshotTags TagMap
 	Ctx          interpolate.Context
 }
 
@@ -26,7 +26,7 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
 
-	if len(s.Tags) == 0 && len(s.SnapshotTags) == 0 {
+	if !s.Tags.IsSet() && !s.SnapshotTags.IsSet() {
 		return multistep.ActionContinue
 	}
 
@@ -72,7 +72,7 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 
 		// Convert tags to ec2.Tag format
 		ui.Say("Creating AMI tags")
-		amiTags, err := TagMap(s.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+		amiTags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -81,7 +81,7 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 		amiTags.Report(ui)
 
 		ui.Say("Creating snapshot tags")
-		snapshotTags, err := TagMap(s.SnapshotTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+		snapshotTags, err := s.SnapshotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())

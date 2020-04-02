@@ -39,12 +39,10 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		QemuCores:    c.Cores,
 		QemuSockets:  c.Sockets,
 		QemuOs:       c.OS,
-		QemuVga:      generateProxmoxVga(c.VGA),
 		QemuIso:      isoFile,
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
 		Scsihw:       c.SCSIController,
-		Onboot:       c.Onboot,
 	}
 
 	if c.VMID == 0 {
@@ -119,15 +117,6 @@ func generateProxmoxDisks(disks []diskConfig) proxmox.QemuDevices {
 		setDeviceParamIfDefined(devs[idx], "format", disks[idx].DiskFormat)
 	}
 	return devs
-}
-func generateProxmoxVga(vga vgaConfig) proxmox.QemuDevice {
-	dev := make(proxmox.QemuDevice)
-	setDeviceParamIfDefined(dev, "type", vga.Type)
-
-	if vga.Memory > 0 {
-		dev["memory"] = vga.Memory
-	}
-	return dev
 }
 
 func setDeviceParamIfDefined(dev proxmox.QemuDevice, key, value string) {

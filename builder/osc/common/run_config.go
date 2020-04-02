@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -19,13 +18,13 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type OmiFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
-	Owners                []string
-	MostRecent            bool `mapstructure:"most_recent"`
+	Filters    map[string]string
+	Owners     []string
+	MostRecent bool `mapstructure:"most_recent"`
 }
 
 func (d *OmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && d.KVFilter.Empty()
+	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
 func (d *OmiFilterOptions) NoOwner() bool {
@@ -33,17 +32,29 @@ func (d *OmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
-	MostFree              bool `mapstructure:"most_free"`
-	Random                bool `mapstructure:"random"`
+	Filters  map[string]string
+	MostFree bool `mapstructure:"most_free"`
+	Random   bool `mapstructure:"random"`
+}
+
+func (d *SubnetFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
 }
 
 type NetFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
+	Filters map[string]string
+}
+
+func (d *NetFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
 }
 
 type SecurityGroupFilterOptions struct {
-	hcl2template.KVFilter `mapstructure:",squash"`
+	Filters map[string]string
+}
+
+func (d *SecurityGroupFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
 }
 
 // RunConfig contains configuration for running an vm from a source
@@ -103,15 +114,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-
-	for _, preparer := range []interface{ Prepare() []error }{
-		&c.SourceOmiFilter,
-		&c.SecurityGroupFilter,
-		&c.SubnetFilter,
-		&c.NetFilter,
-	} {
-		errs = append(errs, preparer.Prepare()...)
-	}
 
 	// Validating ssh_interface
 	if c.SSHInterface != "public_ip" &&

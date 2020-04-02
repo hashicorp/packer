@@ -26,7 +26,7 @@ so Windows must be completely booted in order to continue.
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "windows-restart"
 }
@@ -64,11 +64,11 @@ Optional parameters:
 -   `restart_check_command` (string) - A command to execute to check if the
     restart succeeded. This will be done in a loop. Example usage:
 
-```json
+``` json
     {
       "type": "windows-restart",
       "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
-    }
+    },
 ```
 
 -   `restart_timeout` (string) - The timeout to wait for the restart. By

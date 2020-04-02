@@ -22,7 +22,6 @@ type TemplateParameters struct {
 	AdminPassword              *TemplateParameter `json:"adminPassword,omitempty"`
 	DnsNameForPublicIP         *TemplateParameter `json:"dnsNameForPublicIP,omitempty"`
 	KeyVaultName               *TemplateParameter `json:"keyVaultName,omitempty"`
-	KeyVaultSKU                *TemplateParameter `json:"keyVaultSKU,omitempty"`
 	KeyVaultSecretValue        *TemplateParameter `json:"keyVaultSecretValue,omitempty"`
 	ObjectId                   *TemplateParameter `json:"objectId,omitempty"`
 	NicName                    *TemplateParameter `json:"nicName,omitempty"`

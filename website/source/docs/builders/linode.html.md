@@ -79,7 +79,7 @@ Here is a Linode builder example. The `linode_token` should be replaced with an
 actual [Linode Personal Access
 Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-api/#get-an-access-token).
 
-```json
+``` json
 {
   "type": "linode",
   "linode_token": "YOUR API TOKEN",

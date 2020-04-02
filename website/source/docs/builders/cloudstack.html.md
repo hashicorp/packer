@@ -111,14 +111,14 @@ builder.
 -   `hypervisor` (string) - The target hypervisor (e.g. `XenServer`, `KVM`) for
     the new template. This option is required when using `source_iso`.
 
--   `eject_iso` (boolean) - If `true` make a call to the CloudStack API, after
-    loading image to cache, requesting to check and detach ISO file (if any)
-    currently attached to a virtual machine. Defaults to `false`. This option
+-   `eject_iso` (boolean) - If `true` make a call to the CloudStack API, after 
+    loading image to cache, requesting to check and detach ISO file (if any) 
+    currently attached to a virtual machine. Defaults to `false`. This option 
     is only available when using `source_iso`.
 
 -   `eject_iso_delay` (time.Duration) - Configure the duration time to wait, making
-    sure virtual machine is able to finish installing OS before it ejects safely.
-    Requires `eject_iso` set to `true` and this option is only available when
+    sure virtual machine is able to finish installing OS before it ejects safely. 
+    Requires `eject_iso` set to `true` and this option is only available when 
     using `source_iso`.
 
 -   `keypair` (string) - The name of the SSH key pair that will be used to
@@ -203,13 +203,13 @@ The available variables are:
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
-    blank. Example: `{{.HTTPIP}}:{{.HTTPPort}}/path/to/a/file/in/http_directory`
+    blank.
 
 ## Basic Example
 
 Here is a basic example.
 
-```json
+``` json
 {
   "type": "cloudstack",
   "api_url": "https://cloudstack.company.com/client/api",

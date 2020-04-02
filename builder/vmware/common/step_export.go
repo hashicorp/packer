@@ -102,7 +102,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	ui.Message(out.String())
+	ui.Message(fmt.Sprintf("%s", out.String()))
 
 	return multistep.ActionContinue
 }

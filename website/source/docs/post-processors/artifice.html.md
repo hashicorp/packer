@@ -81,7 +81,7 @@ This minimal example:
 VMX is a fast way to build and test locally, but you can easily substitute
 another builder.
 
-```json
+``` json
 {
   "builders": [
     {
@@ -136,7 +136,7 @@ one set of square braces the post-processors will run individually against the
 build artifact (the vmx file in this case) and it will not have the desired
 result.
 
-```json
+``` json
 {
   "post-processors": [
     [       // <--- Start post-processor chain

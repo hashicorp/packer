@@ -58,7 +58,7 @@ install-gen-deps: ## Install dependencies for code generation
 
 install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.1
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -76,13 +76,13 @@ lint: install-lint-deps ## Lint Go code
 		echo "golangci-lint run ./$(PKG_NAME)/..."; \
 		golangci-lint run ./$(PKG_NAME)/...; \
 	else \
-		echo "golangci-lint run ./..."; \
-		golangci-lint run ./...; \
+		echo "golangci-lint run"; \
+		golangci-lint run; \
 	fi
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	GO111MODULE=on golangci-lint run --new-from-rev=`git merge-base master HEAD` ./...
+	GO111MODULE=on golangci-lint run --new-from-rev=origin/master
 
 
 fmt: ## Format Go code
@@ -121,6 +121,7 @@ generate: install-gen-deps ## Generate dynamically generated code
 	@find post-processor common helper template builder provisioner -type f | xargs grep -l '^// Code generated' | xargs rm
 	go generate ./...
 	go fmt common/bootcommand/boot_command.go
+	go fmt command/plugin.go
 
 generate-check: generate ## Check go code generation is on par
 	@echo "==> Checking that auto-generated code is not changed..."
@@ -140,12 +141,6 @@ testacc: install-build-deps generate ## Run acceptance tests
 
 testrace: mode-check vet ## Test with race detection enabled
 	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
-
-# Runs code coverage and open a html page with report
-cover:
-	go test $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
-	go tool cover -html=coverage.out
-	rm coverage.out
 
 check-vendor-vs-mod: ## Check that go modules and vendored code are on par
 	@GO111MODULE=on go mod vendor

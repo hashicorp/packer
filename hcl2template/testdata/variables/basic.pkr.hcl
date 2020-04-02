@@ -29,7 +29,6 @@ variable "super_secret_password" {
 description = <<IMSENSIBLE
 Handle with care plz
 IMSENSIBLE
-  default = null
 }
 
 locals {

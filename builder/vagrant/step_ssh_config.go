@@ -56,9 +56,9 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 	log.Printf("identity file is %s", sshConfig.IdentityFile)
 	log.Printf("Removing quotes from identity file")
-	unquoted, err := strconv.Unquote(sshConfig.IdentityFile)
-	if err == nil {
-		sshConfig.IdentityFile = unquoted
+	sshConfig.IdentityFile, err = strconv.Unquote(sshConfig.IdentityFile)
+	if err != nil {
+		log.Printf("Error unquoting identity file: %s", err)
 	}
 	config.Comm.SSHPrivateKeyFile = sshConfig.IdentityFile
 	config.Comm.SSHUsername = sshConfig.User

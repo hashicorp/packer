@@ -167,20 +167,10 @@ func (s *Session) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
 
-	// The response body reader needs to be closed, but lots of places call
-	// session.Do, and they might not be able to reliably close it themselves.
-	// Therefore, read the body out, close the original, then replace it with
-	// a NopCloser over the bytes, which does not need to be closed downsteam.
-	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	resp.Body.Close()
-	resp.Body = ioutil.NopCloser(bytes.NewReader(respBody))
 
 	if *Debug {
 		dr, _ := httputil.DumpResponse(resp, true)

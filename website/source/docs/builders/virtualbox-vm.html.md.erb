@@ -27,7 +27,7 @@ from the applied provisioners.
 
 Here is a basic example. which serves to show the basic configuration:
 
-```json
+``` json
 {
   "type"                  : "virtualbox-vm",
   "communicator"          : "winrm",
@@ -92,7 +92,7 @@ builder.
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
-    ```json
+    ``` json
     {
       "type": "virtualbox-vm",
       "export_opts":
@@ -290,7 +290,7 @@ delay of 100ms between groups. The delay alleviates issues with latency and CPU
 contention. If you notice missing keys, you can tune this delay by specifying
 "boot_keygroup_interval" in your Packer template, for example:
 
-```json
+```
 {
   "builders": [
     {
@@ -357,7 +357,7 @@ used to do things such as set RAM, CPUs, etc.
 Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the VRAM within the virtual machine:
 
-```json
+``` json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--vram", "64"]
