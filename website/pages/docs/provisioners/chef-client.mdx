@@ -139,8 +139,8 @@ configuration is actually required.
 
 - `staging_directory` (string) - This is the directory where all the
   configuration of Chef by Packer will be placed. By default this is
-  "/tmp/packer-chef-client" when guest_os_type unix and
-  "\$env:TEMP/packer-chef-client" when windows. This directory doesn't need to
+  `/tmp/packer-chef-client` when guest_os_type unix and
+  `$env:TEMP/packer-chef-client` when windows. This directory doesn't need to
   exist but must have proper permissions so that the user that Packer uses is
   able to create directories and write into this folder. By default the
   provisioner will create and chmod 0777 this directory.

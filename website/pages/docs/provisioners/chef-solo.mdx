@@ -109,8 +109,8 @@ configuration is actually required, but at least `run_list` is recommended.
 
 - `staging_directory` (string) - This is the directory where all the
   configuration of Chef by Packer will be placed. By default this is
-  "/tmp/packer-chef-solo" when guest_os_type unix and
-  "\$env:TEMP/packer-chef-solo" when windows. This directory doesn't need to
+  `/tmp/packer-chef-solo` when guest_os_type unix and
+  `$env:TEMP/packer-chef-solo` when windows. This directory doesn't need to
   exist but must have proper permissions so that the user that Packer uses is
   able to create directories and write into this folder. If the permissions
   are not correct, use a shell provisioner prior to this to configure it
