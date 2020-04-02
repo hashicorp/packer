@@ -11,7 +11,7 @@
   "ssh_username": "vagrant",
   "ssh_wait_timeout": "10000s",
 
-  "http_directory": "../../../builder/virtualbox/iso/acceptance/test-fixtures/http",
+  "http_directory": "../../builder/virtualbox/iso/acceptance/test-fixtures/http",
   "boot_wait": "10s",
   "boot_command": [
     "<esc><wait>",

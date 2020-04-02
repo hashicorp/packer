@@ -137,7 +137,7 @@ test: mode-check vet ## Run unit tests
 
 # acctest runs provisioners acceptance tests
 provisioners-acctest: install-build-deps generate
-	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) ACC_TEST_PROVISIONERS=$(ACC_TEST_PROVISIONERS) go test ./helper/tests/provisioners/... -timeout=1h
+	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) ACC_TEST_PROVISIONERS=$(ACC_TEST_PROVISIONERS) go test ./provisioner/... -timeout=1h
 
 # testacc runs acceptance tests
 testacc: install-build-deps generate ## Run acceptance tests

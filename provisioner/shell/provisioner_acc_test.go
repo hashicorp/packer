@@ -1,11 +1,14 @@
-package shell_acc
+package shell_test
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/packer/helper/tests/acc"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/hashicorp/packer/packer"
 
@@ -14,10 +17,22 @@ import (
 	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
+func TestShellProvisioner(t *testing.T) {
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+	if p != "all" && !strings.Contains(p, "shell") {
+		t.Skip()
+	}
+	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
+}
+
 type ShellProvisionerAccTest struct{}
 
+func (s *ShellProvisionerAccTest) GetName() string {
+	return "shell"
+}
+
 func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
+	filePath := filepath.Join("./test-fixtures", "shell-provisioner.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Expected to find %s", filePath)
@@ -26,6 +41,13 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 
 	file, err := ioutil.ReadAll(config)
 	return string(file), nil
+}
+
+func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
+	return packer.MapOfProvisioner{
+		"shell": func() (packer.Provisioner, error) { return command.Provisioners["shell"], nil },
+		"file":  func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
+	}
 }
 
 func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
@@ -52,11 +74,4 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 		return fmt.Errorf("Expected to find %s", file)
 	}
 	return nil
-}
-
-func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
-	return packer.MapOfProvisioner{
-		"shell": func() (packer.Provisioner, error) { return command.Provisioners["shell"], nil },
-		"file":  func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
-	}
 }

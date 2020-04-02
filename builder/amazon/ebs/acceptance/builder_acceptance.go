@@ -1,5 +1,8 @@
 package amazon_acc
 
+// This is the code necessary for running the provisioner acceptance tests.
+// It provides the builder config and cleans up created resource.
+
 import (
 	"fmt"
 	"io/ioutil"
@@ -15,7 +18,7 @@ import (
 type AmazonEBSAccTest struct{}
 
 func (s *AmazonEBSAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("../../../builder/amazon/ebs/acceptance/test-fixtures/", "amazon-ebs.txt")
+	filePath := filepath.Join("../../builder/amazon/ebs/acceptance/test-fixtures/", "amazon-ebs.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Expected to find %s", filePath)

@@ -1,5 +1,8 @@
 package virtualbox_acc
 
+// This is the code necessary for running the provisioner acceptance tests.
+// It provides the builder config and cleans up created resource.
+
 import (
 	"fmt"
 	"io/ioutil"
@@ -15,7 +18,7 @@ import (
 type VirtualBoxISOAccTest struct{}
 
 func (v *VirtualBoxISOAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("../../../builder/virtualbox/iso/acceptance/test-fixtures/", "virtualbox-iso.txt")
+	filePath := filepath.Join("../../builder/virtualbox/iso/acceptance/test-fixtures/", "virtualbox-iso.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Expected to find %s", filePath)
