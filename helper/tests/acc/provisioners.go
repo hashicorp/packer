@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/hashicorp/packer/helper/tests"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,20 +17,10 @@ import (
 )
 
 func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *testing.T) {
-	b := builderAccTestCheck(t)
 	provisioner := provisionerAcc.GetName()
+	builders := checkBuilders(t)
 
-	// Get builders type to test provisioners against
-	var builders []string
-	for k := range BuildersAccTest {
-		// This will validate that only defined builders are executed against
-		if b != "all" && !strings.Contains(b, k) {
-			continue
-		}
-		builders = append(builders, k)
-	}
-
-	// build template file and run a build for each builder with the current provisioner
+	// build template file and run a build for each builder with the provisioner
 	for _, builder := range builders {
 		builderAcc := BuildersAccTest[builder]
 		builderConfigs, err := builderAcc.GetConfigs()
@@ -63,31 +54,37 @@ func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *te
 				}
 
 				err = provisionerAcc.RunTest(c, args)
-				if err != nil {
-					// Cleanup created resources
-					testshelper.CleanupFiles(fileName)
-					builderAcc.CleanUp()
-					t.Fatalf("bad: failed to to run build: %s", err.Error())
-				}
-
 				// Cleanup created resources
 				testshelper.CleanupFiles(fileName)
-				err = builderAcc.CleanUp()
+				cleanErr := builderAcc.CleanUp()
+				if cleanErr != nil {
+					log.Printf("bad: failed to clean up resources: %s", cleanErr.Error())
+				}
 				if err != nil {
-					t.Fatalf("bad: failed to clean up resources: %s", err.Error())
+					t.Fatalf("bad: failed to to run build: %s", err.Error())
 				}
 			})
 		}
 	}
 }
 
-func builderAccTestCheck(t *testing.T) string {
+func checkBuilders(t *testing.T) []string {
 	b := os.Getenv("ACC_TEST_BUILDERS")
 	// validate if we want to run provisioners acc tests
 	if b == "" {
 		t.Skip("Provisioners Acceptance tests skipped unless env 'ACC_TEST_BUILDERS' is set")
 	}
-	return b
+
+	// Get builders type to test provisioners against
+	var builders []string
+	for k := range BuildersAccTest {
+		// This will validate that only defined builders are executed against
+		if b != "all" && !strings.Contains(b, k) {
+			continue
+		}
+		builders = append(builders, k)
+	}
+	return builders
 }
 
 func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
