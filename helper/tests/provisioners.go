@@ -1,20 +1,31 @@
-package acceptance
+package testshelper
 
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	amazonEbs "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
-	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
 	"github.com/hashicorp/packer/command"
-	testshelper "github.com/hashicorp/packer/helper/tests"
 	"github.com/hashicorp/packer/packer"
-	shell "github.com/hashicorp/packer/provisioner/shell/acceptance"
 )
+
+func getBuilderTestConfig(name string) (string, error) {
+	pathName := strings.ReplaceAll(name, "-", "/")
+	fileName := name + ".json"
+	filePath := filepath.Join("../../builder", pathName, "test-fixtures", fileName)
+	config, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("Expected to find %s", filePath)
+	}
+	defer config.Close()
+
+	file, err := ioutil.ReadAll(config)
+	return string(file), nil
+}
 
 func TestProvisionersAgainstBuilders(t *testing.T) {
 	// validate if we want to run provisioners acc tests
@@ -25,15 +36,7 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 	}
 
 	// Get builders and provisioners type to be tested
-	var builders []string
-	if b == "all" {
-		// test all available builders
-		for k := range BuildersAccTest {
-			builders = append(builders, k)
-		}
-	} else {
-		builders = strings.Split(b, ",")
-	}
+	builders := strings.Split(b, ",")
 	var provisioners []string
 	if p == "all" {
 		// test all available provisioners
@@ -46,8 +49,7 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 
 	// build template file and run build
 	for _, builder := range builders {
-		builderAcc := BuildersAccTest[builder]
-		builderConfig, err := builderAcc.GetConfig()
+		builderConfig, err := getBuilderTestConfig(builder)
 		if err != nil {
 			t.Fatalf("bad: failed to read builder config: %s", err.Error())
 		}
@@ -77,17 +79,12 @@ func TestProvisionersAgainstBuilders(t *testing.T) {
 				err = provicionerAcc.RunTest(c, args)
 				if err != nil {
 					// Cleanup created resources
-					testshelper.CleanupFiles(fileName)
-					builderAcc.CleanUp()
+					CleanupFiles(fileName)
 					t.Fatalf("bad: failed to to run build: %s", err.Error())
 				}
 
 				// Cleanup created resources
-				testshelper.CleanupFiles(fileName)
-				err = builderAcc.CleanUp()
-				if err != nil {
-					t.Fatalf("bad: failed to clean up resources: %s", err.Error())
-				}
+				CleanupFiles(fileName)
 			})
 		}
 	}
@@ -107,7 +104,7 @@ func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 
 func testBuildCommand(t *testing.T, builder string, provisioner string) *command.BuildCommand {
 	c := &command.BuildCommand{
-		Meta: testshelper.TestMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 
 	c.CoreConfig.Components.BuilderStore = packer.MapOfBuilder{
@@ -125,15 +122,10 @@ func testBuildCommand(t *testing.T, builder string, provisioner string) *command
 }
 
 // List of all provisioners available for acceptance test
-var ProvisionersAccTest = map[string]ProvisionerAcceptance{
-	"shell": new(shell.ShellProvisionerAccTest),
-}
+var ProvisionersAccTest = map[string]ProvisionerAcceptance{}
 
 // List of all builders available for acceptance test
-var BuildersAccTest = map[string]BuilderAcceptance{
-	"virtualbox-iso": new(virtualboxISO.VirtualBoxISOAccTest),
-	"amazon-ebs":     new(amazonEbs.AmazonEBSAccTest),
-}
+var BuildersAccTest = map[string]BuilderAcceptance{}
 
 type ProvisionerAcceptance interface {
 	GetConfig() (string, error)

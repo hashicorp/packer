@@ -17,6 +17,7 @@ website/.bundle
 website/vendor
 
 packer-test*.log
+packer_cache
 
 *.received.txt
 *.received.json

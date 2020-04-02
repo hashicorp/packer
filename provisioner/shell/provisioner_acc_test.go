@@ -1,4 +1,4 @@
-package shell_acceptance
+package shell_test
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/hashicorp/packer/packer"
 
@@ -17,7 +19,7 @@ import (
 type ShellProvisionerAccTest struct{}
 
 func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("../../../provisioner/shell/acceptance/test-fixtures/", "shell-provisioner.txt")
+	filePath := filepath.Join("test-fixtures/", "shell-provisioner.txt")
 	config, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Expected to find %s", filePath)
@@ -52,4 +54,16 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 		return fmt.Errorf("Expected to find %s", file)
 	}
 	return nil
+}
+
+func TestShellProvsioner(t *testing.T) {
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+	if !strings.Contains(p, "shell") {
+		t.Skip()
+	}
+
+	testshelper.ProvisionersAccTest = map[string]testshelper.ProvisionerAcceptance{
+		"shell": new(ShellProvisionerAccTest),
+	}
+	testshelper.TestProvisionersAgainstBuilders(t)
 }
