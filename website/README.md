@@ -57,7 +57,8 @@ The significant keys in the YAML frontmatter are:
 The structure of the sidebars are controlled by files in the [`/data` directory](data).
 
 - Edit [this file](data/docs-navigation.js) to change the **docs** sidebar
-- Edit [this file](data/api-navigation.js) to change the **api docs** sidebar
+- Edit [this file](data/guides-navigation.js) to change the **guides** sidebar
+- Edit [this file](data/intro-navigation.js) to change the **intro** sidebar
 
 To nest sidebar items, you'll want to add a new `category` key/value accompanied by the appropriate embedded `content` values.
 
@@ -96,7 +97,7 @@ To add a prerelease, an extra `prerelease` property can be added to the componen
   prerelease={{
     type: 'release candidate', // the type of prerelease: beta, release candidate, etc.
     name: 'v1.0.0', // the name displayed in text on the website
-    version: '1.0.0-rc1' // the actual version tag that was pushed to releases.hashicorp.com
+    version: '1.0.0-rc1', // the actual version tag that was pushed to releases.hashicorp.com
   }}
 />
 ```
@@ -108,6 +109,31 @@ A {{ release candidate }} for Packer {{ v1.0.0 }} is available! The release can 
 ```
 
 You may customize the parameters in any way you'd like. To remove a prerelease from the website, simply delete the `prerelease` paremeter from the above component.
+
+### Markdown Enhancements
+
+There are several custom markdown plugins that are available by default that enhance standard markdown to fit our use cases. This set of plugins introduces a couple instances of custom syntax, and a couple specific pitfalls that are not present by default with markdown, detailed below:
+
+- If you see the symbols `~>`, `->`, `=>`, or `!>`, these represent [custom alerts](https://github.com/hashicorp/remark-plugins/tree/master/plugins/paragraph-custom-alerts#paragraph-custom-alerts). These render as colored boxes to draw the user's attention to some type of aside.
+- If you see `@include '/some/path.mdx'`, this is a [markdown include](https://github.com/hashicorp/remark-plugins/tree/master/plugins/include-markdown#include-markdown-plugin). It's worth noting as well that all includes resolve from `website/pages/partials` by default.
+- If you see `# Headline ((#slug))`, this is an example of an [anchor link alias](https://github.com/hashicorp/remark-plugins/tree/je.anchor-link-adjustments/plugins/anchor-links#anchor-link-aliases). It adds an extra permalink to a headline for compatibility and is removed from the output.
+- Due to [automatically generated permalinks](https://github.com/hashicorp/remark-plugins/tree/je.anchor-link-adjustments/plugins/anchor-links#anchor-links), any text changes to _headlines_ or _list items that begin with inline code_ can and will break existing permalinks. Be very cautious when changing either of these two text items.
+
+  Headlines are fairly self-explanitory, but here's an example of how list items that begin with inline code look.
+
+  ```markdown
+  - this is a normal list item
+  - `this` is a list item that begins with inline code
+  ```
+
+  Its worth noting that _only the inline code at the beginning of the list item_ will cause problems if changed. So if you changed the above markup to...
+
+  ```markdown
+  - lsdhfhksdjf
+  - `this` jsdhfkdsjhkdsfjh
+  ```
+
+  ...while it perhaps would not be an improved user experience, no links would break because of it. The best approach is to **avoid changing headlines and inline code at the start of a list item**. If you must change one of these items, make sure to tag someone from the digital marketing development team on your pull request, they will help to ensure as much compatibility as possible.
 
 ### Deployment
 

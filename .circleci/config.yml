@@ -158,6 +158,28 @@ jobs:
           at: .
       - run: |
           ghr -prerelease -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
+  build-website-docker-image:
+    docker:
+      - image: circleci/buildpack-deps
+    shell: /usr/bin/env bash -euo pipefail -c
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image if Necessary
+          command: |
+            IMAGE_TAG=$(cat website/Dockerfile website/package-lock.json | sha256sum | awk '{print $1;}')
+            echo "Using $IMAGE_TAG"
+            if curl https://hub.docker.com/v2/repositories/hashicorp/packer-website/tags/$IMAGE_TAG -fsL > /dev/null; then
+                echo "Dependencies have not changed, not building a new website docker image."
+            else
+                cd website/
+                docker build -t hashicorp/packer-website:$IMAGE_TAG .
+                docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
+                docker login -u $WEBSITE_DOCKER_USER -p $WEBSITE_DOCKER_PASS
+                docker push hashicorp/packer-website
+            fi
+
 workflows:
   version: 2
   test:
@@ -218,3 +240,10 @@ workflows:
               ignore: /.*/
             tags:
               only: nightly
+  build_website_docker_image:
+    jobs:
+      - build-website-docker-image:
+          filters:
+            branches:
+              only:
+                - master
