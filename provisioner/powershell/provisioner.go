@@ -78,7 +78,8 @@ type Config struct {
 
 	remoteCleanUpScriptPath string
 
-	DebugMode bool `mapstructure:"debug_mode"`
+	// If set, sets PowerShell's debug mode as part of the execute command
+	DebugMode int `mapstructure:"debug_mode"`
 
 	ctx interpolate.Context
 }
@@ -93,8 +94,8 @@ func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
 		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
 
-	if p.config.DebugMode == true {
-		baseCmd += `Set-PsDebug -Trace 1;`
+	if p.config.DebugMode != 0 {
+		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
 
 	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`

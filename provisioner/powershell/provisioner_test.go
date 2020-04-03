@@ -85,7 +85,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 
 func TestProvisionerPrepare_Config(t *testing.T) {
 	config := testConfig()
-	config["debug_mode"] = true
+	config["debug_mode"] = 1
 	config["elevated_user"] = "{{user `user`}}"
 	config["elevated_password"] = "{{user `password`}}"
 	config[packer.UserVariablesConfigKey] = map[string]string{
