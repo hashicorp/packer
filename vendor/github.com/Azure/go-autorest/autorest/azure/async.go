@@ -417,11 +417,6 @@ func (pt *pollingTrackerBase) pollForStatus(ctx context.Context, sender autorest
 	}
 
 	req = req.WithContext(ctx)
-	preparer := autorest.CreatePreparer(autorest.GetPrepareDecorators(ctx)...)
-	req, err = preparer.Prepare(req)
-	if err != nil {
-		return autorest.NewErrorWithError(err, "pollingTrackerBase", "pollForStatus", nil, "failed preparing HTTP request")
-	}
 	pt.resp, err = sender.Do(req)
 	if err != nil {
 		return autorest.NewErrorWithError(err, "pollingTrackerBase", "pollForStatus", nil, "failed to send HTTP request")

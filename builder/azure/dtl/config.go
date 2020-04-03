@@ -487,16 +487,10 @@ func setWinRMCertificate(c *Config) error {
 func setRuntimeValues(c *Config) {
 	var tempName = NewTempName(c)
 
-<<<<<<< HEAD
-	c.tmpAdminPassword = "Packer~1" //tempName.AdminPassword
-	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
-=======
 	c.tmpAdminPassword = tempName.AdminPassword
->>>>>>> Fixing the linting errors now required for merging
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
-	c.tmpCertificatePassword = "Packer~1" //tempName.CertificatePassword
+	c.tmpCertificatePassword = tempName.CertificatePassword
 	c.tmpComputeName = tempName.ComputeName
 
 	c.tmpDeploymentName = tempName.DeploymentName

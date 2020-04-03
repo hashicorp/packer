@@ -76,12 +76,12 @@ type FlatConfig struct {
 	AdditionalDiskSize                  []int32                            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size"`
 	DiskCachingType                     *string                            `mapstructure:"disk_caching_type" required:"false" cty:"disk_caching_type"`
 	StorageType                         *string                            `mapstructure:"storage_type" cty:"storage_type"`
-	LabVirtualNetworkName               *string                            `mapstructure:"lab_virtual_network_name" required:"false" cty:"lab_virtual_network_name"`
+	LabVirtualNetworkName               *string                            `mapstructure:"lab_virtual_network_name" cty:"lab_virtual_network_name"`
 	LabName                             *string                            `mapstructure:"lab_name" cty:"lab_name"`
-	LabSubnetName                       *string                            `mapstructure:"lab_subnet_name" required:"false" cty:"lab_subnet_name"`
+	LabSubnetName                       *string                            `mapstructure:"lab_subnet_name" cty:"lab_subnet_name"`
 	LabResourceGroupName                *string                            `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name"`
 	DtlArtifacts                        []FlatDtlArtifact                  `mapstructure:"dtl_artifacts" cty:"dtl_artifacts"`
-	VMName                              *string                            `mapstructure:"vm_name" required:"false" cty:"vm_name"`
+	VMName                              *string                            `mapstructure:"vm_name" cty:"vm_name"`
 	UserName                            *string                            `cty:"user_name"`
 	Password                            *string                            `cty:"password"`
 	VMCreationResourceGroup             *string                            `cty:"vm_creation_resource_group"`

@@ -111,7 +111,7 @@
     type for a managed image. Valid values are Standard_LRS and Premium_LRS.
     The default is Standard_LRS.
     
--   `azure_tags` (map[string]\*string) - The user can define up to 15
+-   `azure_tags` (map[string]\*string) - the user can define up to 15
     tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
     256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
@@ -148,39 +148,11 @@
 -   `disk_caching_type` (string) - Specify the disk caching type. Valid values
     are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
     
--   `storage_type` (string) - Storage Type
--   `lab_virtual_network_name` (string) - The virtual netowrk which is used for the Lab Virtual machines creation. This should be specified with
-    LabSubnetName that the user wishes to create the virtual machine. If both LabVirtualNetworkName and LabSubnetName
-    are not specified then packer picks the first network that it can find. The build can fail if this subnetname picked is
-    not empty.
+-   `storage_type` (string) - DTL values
     
--   `lab_name` (string) - The name of the DevTest Lab in which user creates the virtual machine and the image.
-    
--   `lab_subnet_name` (string) - The DevTest Lab subnet in which the user wishes to create the temporary virtual machine. Should be specified
-    with LabVirtualNetworkName
-    
--   `lab_resource_group_name` (string) - The resource group in which DevTest Lab is located
-    
--   `dtl_artifacts` ([]DtlArtifact) - The list of DevTest labs artifacts that can be applied while preparing the Virtual machine. It is often recommended and
-    faster to install the artifacts during the creation of the Virtual Machine. For example,
-      {
-        "artifact_name": "linux-apt-package",
-        "parameters" : [{
-          "name": "packages",
-          "value": "vim"
-        },
-        {
-          "name":"update",
-          "value": "true"
-        },
-        {
-          "name": "options",
-          "value": "--fix-broken"
-        }
-      ]},
-      {
-        "artifact_name": "linux-install-mongodb"
-      }
-    
--   `vm_name` (string) - Name of the temporary virtual machine that can be optionally specified.
-    
+-   `lab_virtual_network_name` (string) - Lab Virtual Network Name
+-   `lab_name` (string) - Lab Name
+-   `lab_subnet_name` (string) - Lab Subnet Name
+-   `lab_resource_group_name` (string) - Lab Resource Group Name
+-   `dtl_artifacts` ([]DtlArtifact) - Dtl Artifacts
+-   `vm_name` (string) - VM Name
