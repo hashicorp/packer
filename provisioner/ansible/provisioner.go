@@ -63,10 +63,14 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
+	KeepInventoryFile    bool     `mapstructure:"keep_inventory_file"`
 	GalaxyFile           string   `mapstructure:"galaxy_file"`
 	GalaxyCommand        string   `mapstructure:"galaxy_command"`
 	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
 	RolesPath            string   `mapstructure:"roles_path"`
+	//TODO: change default to false in v1.6.0.
+	UseProxy     config.Trilean `mapstructure:"use_proxy"`
+	userWasEmpty bool
 }
 
 type Provisioner struct {
@@ -76,6 +80,9 @@ type Provisioner struct {
 	ansibleVersion    string
 	ansibleMajVersion uint
 	generatedData     map[string]interface{}
+
+	setupAdapterFunc   func(ui packer.Ui, comm packer.Communicator) (string, error)
+	executeAnsibleFunc func(ui packer.Ui, comm packer.Communicator, privKeyFile string) error
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -163,6 +170,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
+		p.config.userWasEmpty = true
 		usr, err := user.Current()
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
@@ -172,6 +180,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
+	}
+
+	// These fields exist so that we can replace the functions for testing
+	// logic inside of the Provision func; in actual use, these don't ever
+	// need to get set.
+	if p.setupAdapterFunc == nil {
+		p.setupAdapterFunc = p.setupAdapter
+	}
+	if p.executeAnsibleFunc == nil {
+		p.executeAnsibleFunc = p.executeAnsible
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -207,40 +225,17 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
-	ui.Say("Provisioning with Ansible...")
-	// Interpolate env vars to check for generated values like password and port
-	p.generatedData = generatedData
-	p.config.ctx.Data = generatedData
-	for i, envVar := range p.config.AnsibleEnvVars {
-		envVar, err := interpolate.Render(envVar, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
-		}
-		p.config.AnsibleEnvVars[i] = envVar
-	}
-	// Interpolate extra vars to check for generated values like password and port
-	for i, arg := range p.config.ExtraArguments {
-		arg, err := interpolate.Render(arg, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
-		}
-		p.config.ExtraArguments[i] = arg
-	}
+func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (string, error) {
+	ui.Message("Setting up proxy adapter for Ansible....")
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	hostSigner, err := newSigner(p.config.SSHHostKeyFile)
 	if err != nil {
-		return fmt.Errorf("error creating host signer: %s", err)
-	}
-
-	// Remove the private key file
-	if len(k.privKeyFile) > 0 {
-		defer os.Remove(k.privKeyFile)
+		return "", fmt.Errorf("error creating host signer: %s", err)
 	}
 
 	keyChecker := ssh.CertChecker{
@@ -298,7 +293,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	ui = &packer.SafeUi{
@@ -307,50 +302,185 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 	p.adapter = adapter.NewAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
-	defer func() {
-		log.Print("shutting down the SSH proxy")
-		close(p.done)
-		p.adapter.Shutdown()
-	}()
+	return k.privKeyFile, nil
+}
 
-	go p.adapter.Serve()
+const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
+const DefaultSSHInventoryFilev1 = "{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}\n"
+const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_winrm_transport=basic ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
 
-	if len(p.config.InventoryFile) == 0 {
-		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
-		if err != nil {
-			return fmt.Errorf("Error preparing inventory file: %s", err)
-		}
-		defer os.Remove(tf.Name())
-
-		host := fmt.Sprintf("%s ansible_host=127.0.0.1 ansible_user=%s ansible_port=%d\n",
-			p.config.HostAlias, p.config.User, p.config.LocalPort)
-		if p.ansibleMajVersion < 2 {
-			host = fmt.Sprintf("%s ansible_ssh_host=127.0.0.1 ansible_ssh_user=%s ansible_ssh_port=%d\n",
-				p.config.HostAlias, p.config.User, p.config.LocalPort)
-		}
-
-		w := bufio.NewWriter(tf)
-		w.WriteString(host)
-		for _, group := range p.config.Groups {
-			fmt.Fprintf(w, "[%s]\n%s", group, host)
-		}
-
-		for _, group := range p.config.EmptyGroups {
-			fmt.Fprintf(w, "[%s]\n", group)
-		}
-
-		if err := w.Flush(); err != nil {
-			tf.Close()
-			return fmt.Errorf("Error preparing inventory file: %s", err)
-		}
-		tf.Close()
-		p.config.InventoryFile = tf.Name()
-		defer func() {
-			p.config.InventoryFile = ""
-		}()
+func (p *Provisioner) createInventoryFile() error {
+	log.Printf("Creating inventory file for Ansible run...")
+	tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
+	if err != nil {
+		return fmt.Errorf("Error preparing inventory file: %s", err)
 	}
 
-	if err := p.executeAnsible(ui, comm, k.privKeyFile); err != nil {
+	// figure out which inventory line template to use
+	hostTemplate := DefaultSSHInventoryFilev2
+	if p.ansibleMajVersion < 2 {
+		hostTemplate = DefaultSSHInventoryFilev1
+	}
+	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+		hostTemplate = DefaultWinRMInventoryFilev2
+	}
+
+	// interpolate template to generate host with necessary vars.
+	ctxData := p.generatedData
+	ctxData["HostAlias"] = p.config.HostAlias
+	ctxData["User"] = p.config.User
+	if !p.config.UseProxy.False() {
+		ctxData["Host"] = "127.0.0.1"
+		ctxData["Port"] = p.config.LocalPort
+	}
+	p.config.ctx.Data = ctxData
+
+	host, err := interpolate.Render(hostTemplate, &p.config.ctx)
+
+	if err != nil {
+		return fmt.Errorf("Error generating inventory file from template: %s", err)
+	}
+
+	w := bufio.NewWriter(tf)
+	w.WriteString(host)
+
+	for _, group := range p.config.Groups {
+		fmt.Fprintf(w, "[%s]\n%s", group, host)
+	}
+
+	for _, group := range p.config.EmptyGroups {
+		fmt.Fprintf(w, "[%s]\n", group)
+	}
+
+	if err := w.Flush(); err != nil {
+		tf.Close()
+		os.Remove(tf.Name())
+		return fmt.Errorf("Error preparing inventory file: %s", err)
+	}
+	tf.Close()
+	p.config.InventoryFile = tf.Name()
+
+	return nil
+}
+
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+	ui.Say("Provisioning with Ansible...")
+	// Interpolate env vars to check for generated values like password and port
+	p.generatedData = generatedData
+	p.config.ctx.Data = generatedData
+	for i, envVar := range p.config.AnsibleEnvVars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.AnsibleEnvVars[i] = envVar
+	}
+	// Interpolate extra vars to check for generated values like password and port
+	for i, arg := range p.config.ExtraArguments {
+		arg, err := interpolate.Render(arg, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.ExtraArguments[i] = arg
+	}
+
+	// Set up proxy if host IP is missing or communicator type is wrong.
+	if p.config.UseProxy.False() {
+		hostIP := generatedData["Host"].(string)
+		if hostIP == "" {
+			ui.Error("Warning: use_proxy is false, but instance does" +
+				" not have an IP address to give to Ansible. Falling back" +
+				" to use localhost proxy.")
+			p.config.UseProxy = config.TriTrue
+		}
+		connType := generatedData["ConnType"]
+		if connType != "ssh" && connType != "winrm" {
+			ui.Error("Warning: use_proxy is false, but communicator is " +
+				"neither ssh nor winrm, so without the proxy ansible will not" +
+				" function. Falling back to localhost proxy.")
+			p.config.UseProxy = config.TriTrue
+		}
+	}
+
+	privKeyFile := ""
+	if !p.config.UseProxy.False() {
+		// We set up the proxy if useProxy is either true or unset.
+		pkf, err := p.setupAdapterFunc(ui, comm)
+		if err != nil {
+			return err
+		}
+		// This is necessary to avoid accidentally redeclaring
+		// privKeyFile in the scope of this if statement.
+		privKeyFile = pkf
+
+		defer func() {
+			log.Print("shutting down the SSH proxy")
+			close(p.done)
+			p.adapter.Shutdown()
+		}()
+
+		go p.adapter.Serve()
+
+		// Remove the private key file
+		if len(privKeyFile) > 0 {
+			defer os.Remove(privKeyFile)
+		}
+	} else {
+		connType := generatedData["ConnType"].(string)
+		switch connType {
+		case "ssh":
+			ui.Message("Not using Proxy adapter for Ansible run:\n" +
+				"\tUsing ssh keys from Packer communicator...")
+			// In this situation, we need to make sure we have the
+			// private key we actually use to access the instance.
+			SSHPrivateKeyFile := generatedData["SSHPrivateKeyFile"].(string)
+			if SSHPrivateKeyFile != "" {
+				privKeyFile = SSHPrivateKeyFile
+			} else {
+				// See if we can get a private key and write that to a tmpfile
+				SSHPrivateKey := generatedData["SSHPrivateKey"].(string)
+				tmpSSHPrivateKey, err := tmp.File("ansible-key")
+				if err != nil {
+					return fmt.Errorf("Error writing private key to temp file for"+
+						"ansible connection: %v", err)
+				}
+				_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
+				if err != nil {
+					return errors.New("failed to write private key to temp file")
+				}
+				err = tmpSSHPrivateKey.Close()
+				if err != nil {
+					return errors.New("failed to close private key temp file")
+				}
+				privKeyFile = tmpSSHPrivateKey.Name()
+			}
+
+			// Also make sure that the username matches the SSH keys given.
+			if p.config.userWasEmpty {
+				p.config.User = generatedData["User"].(string)
+			}
+		case "winrm":
+			ui.Message("Not using Proxy adapter for Ansible run:\n" +
+				"\tUsing WinRM Password from Packer communicator...")
+		}
+	}
+
+	if len(p.config.InventoryFile) == 0 {
+		// Create the inventory file
+		err := p.createInventoryFile()
+		if err != nil {
+			return err
+		}
+		if !p.config.KeepInventoryFile {
+			// Delete the generated inventory file
+			defer func() {
+				os.Remove(p.config.InventoryFile)
+				p.config.InventoryFile = ""
+			}()
+		}
+	}
+
+	if err := p.executeAnsibleFunc(ui, comm, privKeyFile); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
 
@@ -417,11 +547,52 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	return nil
 }
 
+func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile string) (args []string, envVars []string) {
+	args = []string{}
+
+	if p.config.PackerBuildName != "" {
+		// HCL configs don't currently have the PakcerBuildName. Don't
+		// cause weirdness with a half-set variable
+		args = append(args, "-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName))
+	}
+
+	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
+	if len(privKeyFile) > 0 {
+		// "-e ansible_ssh_private_key_file" is preferable to "--private-key"
+		// because it is a higher priority variable and therefore won't get
+		// overridden by dynamic variables. See #5852 for more details.
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
+	}
+
+	// expose packer_http_addr extra variable
+	if httpAddr != "" {
+		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
+	}
+
+	// Add password to ansible call.
+	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+		args = append(args, "-e", fmt.Sprintf("ansible_password=%s", p.generatedData["Password"]))
+	}
+
+	if p.generatedData["ConnType"] == "ssh" {
+		// Add ssh extra args to set IdentitiesOnly
+		args = append(args, "--ssh-extra-args", "-o IdentitiesOnly=yes")
+	}
+
+	args = append(args, "-i", inventory, playbook)
+
+	args = append(args, p.config.ExtraArguments...)
+	if len(p.config.AnsibleEnvVars) > 0 {
+		envVars = append(envVars, p.config.AnsibleEnvVars...)
+	}
+
+	return args, envVars
+}
+
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
-
-	var envvars []string
+	httpAddr := common.GetHTTPAddr()
 
 	// Fetch external dependencies
 	if len(p.config.GalaxyFile) > 0 {
@@ -429,27 +600,8 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
 		}
 	}
-	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s -o IdentitiesOnly=yes",
-		p.config.PackerBuildName, p.config.PackerBuilderType),
-		"-i", inventory, playbook}
-	if len(privKeyFile) > 0 {
-		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
-		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
-		// as seen in #5852
-		// args = append(args, "--private-key", privKeyFile)
-		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
-	}
 
-	// expose packer_http_addr extra variable
-	httpAddr := common.GetHTTPAddr()
-	if httpAddr != "" {
-		args = append(args, "--extra-vars", fmt.Sprintf("packer_http_addr=%s", httpAddr))
-	}
-
-	args = append(args, p.config.ExtraArguments...)
-	if len(p.config.AnsibleEnvVars) > 0 {
-		envvars = append(envvars, p.config.AnsibleEnvVars...)
-	}
+	args, envvars := p.createCmdArgs(httpAddr, inventory, playbook, privKeyFile)
 
 	cmd := exec.Command(p.config.Command, args...)
 
