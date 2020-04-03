@@ -4,6 +4,7 @@ package powershell
 
 import (
 	"reflect"
+	"strconv"
 )
 
 // ExecutionPolicy setting to run the command(s).
@@ -27,5 +28,14 @@ func StringToExecutionPolicyHook(f reflect.Kind, t reflect.Kind, data interface{
 	}
 
 	raw := data.(string)
+	// It's possible that the thing being read is not supposed to be an
+	// execution policy; if the string provided is actally an int, just return
+	// the int.
+	i, err := strconv.Atoi(raw)
+	if err == nil {
+		return i, nil
+	}
+	// If it can't just be cast to an int, try to parse string into an
+	// execution policy.
 	return ExecutionPolicyString(raw)
 }
