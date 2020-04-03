@@ -13,7 +13,6 @@
 @import '~@hashicorp/react-newsletter-signup-form/dist/style.css';
 @import '~@hashicorp/react-text-input/dist/style.css';
 @import '~@hashicorp/react-button/dist/style.css';
-@import '~@hashicorp/react-footer/dist/style.css';
 @import '~@hashicorp/react-consent-manager/dist/style.css';
 @import '~@hashicorp/react-checkbox-input/dist/style.css';
 @import '~@hashicorp/react-hero/dist/style.css';
@@ -33,6 +32,7 @@
 @import '~@hashicorp/react-docs-page/style.css';
 
 /* Local Components */
+@import '../components/footer/style.css';
 
 /* Local Pages */
 @import './home/style.css';
@@ -41,6 +41,11 @@
 
 /* Print Styles */
 @import './print.css';
+
+/* Sticky Footer */
+.content {
+  min-height: calc(100vh - 260px);
+}
 
 /*
  * About this selector:

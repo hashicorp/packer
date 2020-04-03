@@ -48,7 +48,7 @@
 
     & .code-block,
     & .text {
-      width: calc(50% - 50px);
+      width: calc(50%);
 
       @media (max-width: 1000px) {
         width: 100%;
@@ -117,7 +117,7 @@
 
     & .logos,
     & .text {
-      width: calc(50% - 50px);
+      width: calc(50%);
 
       @media (max-width: 1000px) {
         width: 100%;
