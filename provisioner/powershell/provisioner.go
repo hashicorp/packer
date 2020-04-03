@@ -78,6 +78,8 @@ type Config struct {
 
 	remoteCleanUpScriptPath string
 
+	DebugMode bool `mapstructure:"debug_mode"`
+
 	ctx interpolate.Context
 }
 
@@ -89,8 +91,13 @@ type Provisioner struct {
 
 func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
-		`. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	if p.config.DebugMode == true {
+		baseCmd += `Set-PsDebug -Trace 1;`
+	}
+
+	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd

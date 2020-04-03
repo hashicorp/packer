@@ -85,6 +85,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 
 func TestProvisionerPrepare_Config(t *testing.T) {
 	config := testConfig()
+	config["debug_mode"] = true
 	config["elevated_user"] = "{{user `user`}}"
 	config["elevated_password"] = "{{user `password`}}"
 	config[packer.UserVariablesConfigKey] = map[string]string{
@@ -104,7 +105,9 @@ func TestProvisionerPrepare_Config(t *testing.T) {
 	if p.config.ElevatedPassword != "mypassword" {
 		t.Fatalf("Expected 'mypassword' for key `elevated_password`: %s", p.config.ElevatedPassword)
 	}
-
+	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
+		t.Fatalf(`Expected command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }' but got %s`, p.config.ExecuteCommand)
+	}
 }
 
 func TestProvisionerPrepare_InvalidKey(t *testing.T) {
