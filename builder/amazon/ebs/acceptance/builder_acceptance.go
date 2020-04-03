@@ -18,18 +18,31 @@ import (
 type AmazonEBSAccTest struct{}
 
 func (s *AmazonEBSAccTest) GetConfigs() (map[string]string, error) {
-	filePath := filepath.Join("../../builder/amazon/ebs/acceptance/test-fixtures/", "amazon-ebs.txt")
-	config, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("Expected to find %s", filePath)
+	fixtures := map[string]string{
+		"linux":   "amazon-ebs.txt",
+		"windows": "amazon-ebs_windows.txt",
 	}
-	defer config.Close()
 
-	file, err := ioutil.ReadAll(config)
-	if err != nil {
-		return nil, fmt.Errorf("Uneble to read %s", filePath)
+	configs := make(map[string]string)
+
+	for distro, fixture := range fixtures {
+		fileName := fixture
+		filePath := filepath.Join("../../builder/amazon/ebs/acceptance/test-fixtures/", fileName)
+		config, err := os.Open(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("Expected to find %s", filePath)
+		}
+		defer config.Close()
+
+		file, err := ioutil.ReadAll(config)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to read %s", filePath)
+		}
+
+		configs[distro] = string(file)
+
 	}
-	return map[string]string{"linux": string(file)}, nil
+	return configs, nil
 }
 
 func (s *AmazonEBSAccTest) CleanUp() error {
