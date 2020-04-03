@@ -95,7 +95,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if len(config.AdditionalDiskSize) > 0 {
-		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "")
+		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "") || config.SharedGallery.Subscription != ""
 		builder.SetAdditionalDisks(config.AdditionalDiskSize, isManaged, config.diskCachingType)
 	}
 
