@@ -20,6 +20,7 @@ function DocsLayoutWrapper(pageMeta) {
           currentPage: props.path,
           data: [],
           order: [],
+          disableFilter: true,
         }}
         resourceURL={`https://github.com/hashicorp/packer/blob/master/website/pages/${pageMeta.__resourcePath}`}
       />
