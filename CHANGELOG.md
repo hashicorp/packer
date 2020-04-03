@@ -1,8 +1,9 @@
 ## 1.5.6 (Upcoming)
 
 ### Bug Fixes:
-* core: Make sure CLI variables supersede variables from var files [GH-8964]
+* builder/azure: Allow Managed Data Disks to be used with Azure Shared Image Gallery  [GH-8912]
 * builder/qemu: Remove `net_device` pre-validation [GH-8979]
+* core: Make sure CLI variables supersede variables from var files [GH-8964]
     
 ## 1.5.5 (March 25,2020)
 
