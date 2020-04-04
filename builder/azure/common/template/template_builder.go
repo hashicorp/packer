@@ -243,7 +243,8 @@ func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, dataDiskname st
 	for i, additionalSize := range diskSizeGB {
 		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalSize)
 		dataDisks[i].Lun = to.IntPtr(i)
-		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("%s-%d", dataDiskname, i+1))
+		// dataDisks[i].Name = to.StringPtr(fmt.Sprintf("%s-%d", dataDiskname, i+1))
+		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("[concat(parameters('dataDiskName'),'-%d'", i+1))
 		dataDisks[i].CreateOption = "Empty"
 		dataDisks[i].Caching = cachingType
 		if isManaged {
@@ -251,7 +252,7 @@ func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, dataDiskname st
 			dataDisks[i].ManagedDisk = profile.OsDisk.ManagedDisk
 		} else {
 			dataDisks[i].Vhd = &compute.VirtualHardDisk{
-				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/%s-', '%d','.vhd')]", dataDiskname, i+1)),
+				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-%d','.vhd')]", i+1)),
 			}
 			dataDisks[i].ManagedDisk = nil
 		}
@@ -581,7 +582,10 @@ const BasicTemplate = `{
     },
     "vmName": {
       "type": "string"
-    }
+	},
+	"dataDiskName": {
+		"type": "string"
+	}
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",

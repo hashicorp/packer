@@ -8,6 +8,9 @@
     "adminUsername": {
       "type": "string"
     },
+    "dataDiskName": {
+      "type": "string"
+    },
     "dnsNameForPublicIP": {
       "type": "string"
     },
@@ -158,9 +161,9 @@
               "createOption": "Empty",
               "diskSizeGB": 32,
               "lun": 0,
-              "name": "datadisk-1",
+              "name": "[concat(parameters('dataDiskName'),'-1'",
               "vhd": {
-                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/datadisk-', '1','.vhd')]"
+                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-1','.vhd')]"
               }
             },
             {
@@ -168,9 +171,9 @@
               "createOption": "Empty",
               "diskSizeGB": 64,
               "lun": 1,
-              "name": "datadisk-2",
+              "name": "[concat(parameters('dataDiskName'),'-2'",
               "vhd": {
-                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/datadisk-', '2','.vhd')]"
+                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-2','.vhd')]"
               }
             }
           ],
