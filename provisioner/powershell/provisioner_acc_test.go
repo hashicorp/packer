@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/provisioner/powershell"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/helper/tests/acc"
@@ -57,7 +59,7 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *PowershellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"powershell": func() (packer.Provisioner, error) { return command.Provisioners["powershell"], nil },
+		"powershell": func() (packer.Provisioner, error) { return &powershell.Provisioner{}, nil },
 	}
 }
 

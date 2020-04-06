@@ -9,7 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/command"
+	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
+
 	"github.com/hashicorp/packer/packer"
 
 	testshelper "github.com/hashicorp/packer/helper/tests"
@@ -55,6 +56,6 @@ func (s *AmazonEBSAccTest) CleanUp() error {
 
 func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
 	return packer.MapOfBuilder{
-		"amazon-ebs": func() (packer.Builder, error) { return command.Builders["amazon-ebs"], nil },
+		"amazon-ebs": func() (packer.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 	}
 }
