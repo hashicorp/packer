@@ -244,7 +244,7 @@ func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, dataDiskname st
 		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalSize)
 		dataDisks[i].Lun = to.IntPtr(i)
 		// dataDisks[i].Name = to.StringPtr(fmt.Sprintf("%s-%d", dataDiskname, i+1))
-		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("[concat(parameters('dataDiskName'),'-%d'", i+1))
+		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("[concat(parameters('dataDiskName'),'-%d')]", i+1))
 		dataDisks[i].CreateOption = "Empty"
 		dataDisks[i].Caching = cachingType
 		if isManaged {

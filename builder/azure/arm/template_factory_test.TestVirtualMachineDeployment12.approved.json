@@ -150,7 +150,7 @@
               "managedDisk": {
                 "storageAccountType": "Standard_LRS"
               },
-              "name": "[concat(parameters('dataDiskName'),'-1'"
+              "name": "[concat(parameters('dataDiskName'),'-1')]"
             }
           ],
           "imageReference": {
