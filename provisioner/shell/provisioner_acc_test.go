@@ -1,41 +1,81 @@
 package shell_test
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/hashicorp/packer/helper/tests/acc"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
-func TestBuildShellProvisionerWithBuildVariablesSharing(t *testing.T) {
-	testshelper.AccTestPreValidate(t)
+func TestShellProvisioner(t *testing.T) {
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+	if p != "all" && !strings.Contains(p, "shell") {
+		t.Skip()
+	}
+	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
+}
 
-	UUID, _ := uuid.GenerateUUID()
-	os.Setenv("PACKER_RUN_UUID", UUID)
-	c := &command.BuildCommand{
-		Meta: testshelper.TestMetaFile(t),
+type ShellProvisionerAccTest struct{}
+
+func (s *ShellProvisionerAccTest) GetName() string {
+	return "shell"
+}
+
+func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
+	filePath := filepath.Join("./test-fixtures", "shell-provisioner.txt")
+	config, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("Expected to find %s", filePath)
+	}
+	defer config.Close()
+
+	file, err := ioutil.ReadAll(config)
+	return string(file), nil
+}
+
+func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
+	return packer.MapOfProvisioner{
+		"shell": func() (packer.Provisioner, error) { return command.Provisioners["shell"], nil },
+		"file":  func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
+	}
+}
+
+func (s *ShellProvisionerAccTest) IsCompatible(builder string, vmOS string) bool {
+	return vmOS == "linux"
+}
+
+func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
+	UUID := os.Getenv("PACKER_RUN_UUID")
+	if UUID == "" {
+		UUID, _ = uuid.GenerateUUID()
+		os.Setenv("PACKER_RUN_UUID", UUID)
 	}
 
 	file := "provisioner.shell." + UUID + ".txt"
 	defer testshelper.CleanupFiles(file)
 
-	args := []string{
-		filepath.Join("./test-fixtures", "shell-provisioner.json"),
-	}
 	if code := c.Run(args); code != 0 {
-		testshelper.FatalCommand(t, c.Meta)
+		ui := c.Meta.Ui.(*packer.BasicUi)
+		out := ui.Writer.(*bytes.Buffer)
+		err := ui.ErrorWriter.(*bytes.Buffer)
+		return fmt.Errorf(
+			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
+			out.String(),
+			err.String())
 	}
 
 	if !testshelper.FileExists(file) {
-		t.Errorf("Expected to find %s", file)
-	} else {
-		helper := testshelper.AWSHelper{
-			Region:  "us-east-1",
-			AMIName: "packer-test-shell-interpolate",
-		}
-		helper.CleanUpAmi(t)
+		return fmt.Errorf("Expected to find %s", file)
 	}
+	return nil
 }

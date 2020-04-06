@@ -1,8 +1,7 @@
 package testshelper
 
 import (
-	"testing"
-
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
@@ -13,11 +12,11 @@ type AWSHelper struct {
 	AMIName string
 }
 
-func (a *AWSHelper) CleanUpAmi(t *testing.T) {
+func (a *AWSHelper) CleanUpAmi() error {
 	accessConfig := &awscommon.AccessConfig{}
 	session, err := accessConfig.Session()
 	if err != nil {
-		t.Errorf("AWSAMICleanUp: Unable to create aws session %s", err.Error())
+		return fmt.Errorf("AWSAMICleanUp: Unable to create aws session %s", err.Error())
 	}
 
 	regionconn := ec2.New(session.Copy(&aws.Config{
@@ -31,13 +30,14 @@ func (a *AWSHelper) CleanUpAmi(t *testing.T) {
 			Values: aws.StringSlice([]string{a.AMIName}),
 		}}})
 	if err != nil {
-		t.Errorf("AWSAMICleanUp: Unable to find Image %s: %s", a.AMIName, err.Error())
+		return fmt.Errorf("AWSAMICleanUp: Unable to find Image %s: %s", a.AMIName, err.Error())
 	}
 
 	_, err = regionconn.DeregisterImage(&ec2.DeregisterImageInput{
 		ImageId: resp.Images[0].ImageId,
 	})
 	if err != nil {
-		t.Errorf("AWSAMICleanUp: Unable to Deregister Image %s", err.Error())
+		return fmt.Errorf("AWSAMICleanUp: Unable to Deregister Image %s", err.Error())
 	}
+	return nil
 }

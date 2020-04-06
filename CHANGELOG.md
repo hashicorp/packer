@@ -1,9 +1,24 @@
 ## 1.5.6 (Upcoming)
 
+**New Builder** azure-dtl allows creation of devtestlabs images in Azure. [GH-8987]
+
+### IMPROVEMENTS:
+* builder/google: Allow `source_image_project_id` to be a list of several
+    projects to search. [GH-8679]
+* builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
+    [GH-8893]
+* provisioner/ansible: Add option to not use localhost proxy adapter. Removes
+    need for ansible connection_plugin when using WinRM. [GH-8625]
+
 ### Bug Fixes:
-* core: Make sure CLI variables supersede variables from var files [GH-8964]
+* builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
+    [GH-8945] builder/vsphere-iso: disk_size is no longer required if storage
+    is defined [GH-8975]
+* builder/azure: Allow Managed Data Disks to be used with Azure Shared Image
+    Gallery  [GH-8912]
 * builder/qemu: Remove `net_device` pre-validation [GH-8979]
-    
+* core: Make sure CLI variables supersede variables from var files [GH-8964]
+
 ## 1.5.5 (March 25,2020)
 
 ### IMPROVEMENTS:
