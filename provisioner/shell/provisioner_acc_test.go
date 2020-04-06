@@ -40,7 +40,7 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 	defer config.Close()
 
 	file, err := ioutil.ReadAll(config)
-	return string(file), nil
+	return string(file), err
 }
 
 func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
