@@ -328,6 +328,199 @@ Acceptance tests typically require other environment variables to be set for
 things such as API tokens and keys. Each test should error and tell you which
 credentials are missing, so those are not documented here.
 
+#### Running Provisioners Acceptance Tests
+
+To run the Provisioners Acceptance Tests you should set both ACC_TEST_BUILDERS and ACC_TEST_PROVISIONERS environment variables.
+These will tell which provisioner and builder should run the test against with.
+
+Examples of usage:
+
+```
+ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell go test ./provisioner/shell/... -v -timeout=1
+```
+Will run the Shell provisioner acceptance tests against the Amazon EBS builder.
+```
+ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell make provisioners-acctest
+```
+Will do the same but using the Makefile
+```
+ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell,powershell make provisioners-acctest
+```
+Will run the all Shell and Powershell provisioners acceptance tests against the Amazon EBS builder.
+```
+ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=all make provisioners-acctest
+```
+Will run the all provisioners acceptance tests against the Amazon EBS builder.
+```
+ACC_TEST_BUILDERS=all ACC_TEST_PROVISIONERS=all make provisioners-acctest
+```
+Will run the all provisioners acceptance tests against all builders whenever they are compatible.
+
+Both ACC_TEST_BUILDERS and ACC_TEST_PROVISIONERS allows defining a list of builders and provisioners separated by comma 
+(e.g. ACC_TEST_BUILDERS=amazon-ebs,virtualbox-iso)   
+
+
+#### Writing Provisioner Acceptance Tests
+
+Packer has an already implemented structure that will run the provisioner against builders and you can find it in `helper/tests/acc/provisioners.go`.
+All provisioner's acceptance test should use this structure in their acceptance tests.  
+
+To start writing a new provisioner acceptance test, you should add a test file named as `provisioner_acc_test.go` in the provisioner folder
+and the package should be `<provisioner>_test`. This file should have a struct that will implement the ProvisionerAcceptance interface.
+
+```go
+type ProvisionerAcceptance interface {
+	GetName() string
+	GetConfig() (string, error)
+	GetProvisionerStore() packer.MapOfProvisioner
+	IsCompatible(builder string, vmOS string) bool
+	RunTest(c *command.BuildCommand, args []string) error
+}
+```
+
+- **GetName()** should return the provisioner type. For example for the Shell provisioner the method returns "shell".
+
+- **GetConfig()** should read a text file with the json configuration block for the provisioner and any other necessary. 
+For the Shell provisioner the file contains:
+
+    ```
+    {
+      "type": "shell",
+      "inline": [
+        "echo {{ build `ID`}} > provisioner.{{ build `PackerRunUUID`}}.txt"
+      ]
+    },
+    {
+        "type": "file",
+        "source": "provisioner.{{ build `PackerRunUUID`}}.txt",
+        "destination": "provisioner.shell.{{ build `PackerRunUUID`}}.txt",
+        "direction": "download"
+    }
+    ```
+  The file should be placed under the `test-fixtures` folder.   
+  In this case, it's necessary to use the File provisioner to validate if the Shell provisioner test is successful or not. 
+  This config should be returned as string that will be later merged with the builder config into a full template.
+
+- **GetProvisionerStore()** this returns the provisioner store where we declare the available provisioners for running the build. 
+For Shell provisioners this is:
+    ```go
+      func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
+      	return packer.MapOfProvisioner{
+      		"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+      		"file":  func() (packer.Provisioner, error) { return &file.Provisioner{}, nil },
+      	}
+      }
+    ```
+
+- **IsCompatible(builder string, vmOS string)** returns true or false whether the provisioner should run against a
+specific builder or/and specific OS.
+
+- **RunTest(c \*command.BuildCommand, args []string)** it will actually run the build and return any error if it fails any necessary validation.
+For Shell provisioner this is: 
+    ```go
+      func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
+      	// Provisioner specific setup
+      	UUID := os.Getenv("PACKER_RUN_UUID")
+      	if UUID == "" {
+      		UUID, _ = uuid.GenerateUUID()
+      		os.Setenv("PACKER_RUN_UUID", UUID)
+      	}  
+      	file := "provisioner.shell." + UUID + ".txt"
+      	defer testshelper.CleanupFiles(file)
+      
+      	// Run build 
+    	// All provisioner acc tests should contain this code and validation
+      	if code := c.Run(args); code != 0 {
+      		ui := c.Meta.Ui.(*packer.BasicUi)
+      		out := ui.Writer.(*bytes.Buffer)
+      		err := ui.ErrorWriter.(*bytes.Buffer)
+      		return fmt.Errorf(
+      			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
+      			out.String(),
+      			err.String())
+      	}
+      
+      	// Any other extra specific validation
+      	if !testshelper.FileExists(file) {
+      		return fmt.Errorf("Expected to find %s", file)
+      	}
+      	return nil
+      }
+    
+    ```   
+    
+After writing the struct and implementing the interface, now is time to actually write the test that will run all
+of this code. Your test should look like: 
+
+```go
+func TestShellProvisioner(t *testing.T) {
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+	if p != "all" && !strings.Contains(p, "shell") {
+		t.Skip()
+	}
+	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
+}
+``` 
+
+If the environment variable **ACC_TEST_PROVISIONERS** is set as `all` or contains the provisioner type the test should run, otherwise the test should skip.
+In case of running it, you'll need to call the helper function `acc.TestProvisionersAgainstBuilders` passing a pointer to the test struct created above and the test testing pointer.  
+
+The method `TestProvisionersAgainstBuilders` will run the provisioner against all available and compatible builder. An available builder
+is the one that has the necessary code for running this type of test. In case the builder you want to run against is not available for testing, you can write it following the next steps.   
+
+To add a new builder to the available builders for acc testing, you'll need to create a new folder under the builder folder
+called `acceptace` and inside you create the `builder_acceptance.go` file and the package should be `<builder>_acc`. Like the provisioners, you'll need to create a struct that will
+implement the BuilderAcceptance interface.
+```go
+type BuilderAcceptance interface {
+	GetConfigs() (map[string]string, error)
+	GetBuilderStore() packer.MapOfBuilder
+	CleanUp() error
+}
+```
+- **GetConfigs()** should read a text file with the json configuration block for the builder and return a map of configs by OS type. 
+For the Amazon EBS builder the file contains:
+    ```
+      {
+        "type": "amazon-ebs",
+        "ami_name": "packer-acc-test",
+        "instance_type": "m1.small",
+        "region": "us-east-1",
+        "ssh_username": "ubuntu",
+        "source_ami": "ami-0568456c",
+        "force_deregister" : true,
+        "tags": {
+          "packer-test": "true"
+        }
+      }
+    ```
+    The file should be placed under the `test-fixtures` folder. 
+    In case you need to make references to another file, you'll need to add the relative path to provisioners folder like:
+    `../../builder/amazon/ebs/acceptance/test-fixtures/file.txt`. 
+
+- **GetBuilderStore()** this returns the builder store where we declare the available builders for running the build. 
+For the Amazon EBS builder this is:
+    ```go
+    func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
+        return packer.MapOfBuilder{
+            "amazon-ebs": func() (packer.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
+        }
+    }
+    ```
+  
+- **CleanUp()** cleans any resource created by the builder whether local or remote.
+
+Once you created the builder necessary code, the last step is adding it to the `BuildersAccTest` map in `helper/tests/acc/provisioners.go`.
+```go
+var BuildersAccTest = map[string]BuilderAcceptance{
+	...
+	"amazon-ebs":     new(amazonEBS.AmazonEBSAccTest),
+	...
+}
+```
+
+Once you finish the steps, you should be ready to run your new provisioner acceptance test. 
+
 #### Debugging Plugins
 
 Each packer plugin runs in a separate process and communicates via RPC over a
