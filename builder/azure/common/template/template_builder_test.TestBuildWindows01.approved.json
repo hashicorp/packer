@@ -164,7 +164,7 @@
               "managedDisk": {
                 "storageAccountType": "Premium_LRS"
               },
-              "name": "[concat(parameters('dataDiskName'),'-1'"
+              "name": "[concat(parameters('dataDiskName'),'-1')]"
             },
             {
               "caching": "ReadWrite",
