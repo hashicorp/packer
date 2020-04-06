@@ -22,20 +22,36 @@ type TempName struct {
 	NsgName             string
 }
 
-func NewTempName() *TempName {
+func NewTempName(p string) *TempName {
 	tempName := &TempName{}
 
-	suffix := random.AlphaNumLower(10)
-	tempName.ComputeName = fmt.Sprintf("pkrvm%s", suffix)
-	tempName.DeploymentName = fmt.Sprintf("pkrdp%s", suffix)
-	tempName.KeyVaultName = fmt.Sprintf("pkrkv%s", suffix)
-	tempName.OSDiskName = fmt.Sprintf("pkros%s", suffix)
-	tempName.NicName = fmt.Sprintf("pkrni%s", suffix)
-	tempName.PublicIPAddressName = fmt.Sprintf("pkrip%s", suffix)
-	tempName.SubnetName = fmt.Sprintf("pkrsn%s", suffix)
-	tempName.VirtualNetworkName = fmt.Sprintf("pkrvn%s", suffix)
-	tempName.NsgName = fmt.Sprintf("pkrsg%s", suffix)
-	tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
+	if p == "" {
+		suffix := random.AlphaNumLower(10)
+		tempName.ComputeName = fmt.Sprintf("pkrvm%s", suffix)
+		tempName.DeploymentName = fmt.Sprintf("pkrdp%s", suffix)
+		tempName.KeyVaultName = fmt.Sprintf("pkrkv%s", suffix)
+		tempName.OSDiskName = fmt.Sprintf("pkros%s", suffix)
+		tempName.NicName = fmt.Sprintf("pkrni%s", suffix)
+		tempName.PublicIPAddressName = fmt.Sprintf("pkrip%s", suffix)
+		tempName.SubnetName = fmt.Sprintf("pkrsn%s", suffix)
+		tempName.VirtualNetworkName = fmt.Sprintf("pkrvn%s", suffix)
+		tempName.NsgName = fmt.Sprintf("pkrsg%s", suffix)
+		tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
+
+	} else {
+		suffix := random.AlphaNumLower(5)
+		tempName.ComputeName = fmt.Sprintf("%svm%s", p, suffix)
+		tempName.DeploymentName = fmt.Sprintf("%sdp%s", p, suffix)
+		tempName.KeyVaultName = fmt.Sprintf("%skv%s", p, suffix)
+		tempName.OSDiskName = fmt.Sprintf("%sos%s", p, suffix)
+		tempName.NicName = fmt.Sprintf("%sni%s", p, suffix)
+		tempName.PublicIPAddressName = fmt.Sprintf("%sip%s", p, suffix)
+		tempName.SubnetName = fmt.Sprintf("%ssn%s", p, suffix)
+		tempName.VirtualNetworkName = fmt.Sprintf("%svn%s", p, suffix)
+		tempName.NsgName = fmt.Sprintf("%ssg%s", p, suffix)
+		tempName.ResourceGroupName = fmt.Sprintf("%s-Resource-Group-%s", p, suffix)
+
+	}
 
 	tempName.AdminPassword = generatePassword()
 	tempName.CertificatePassword = random.AlphaNum(32)

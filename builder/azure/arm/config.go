@@ -56,6 +56,7 @@ const (
 	// This is not an exhaustive match, but it should be extremely close.
 	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,89}$"
 	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+	validResourceNamePrefix  = "^[^_\\W][\\w-._)]{0,10}$"
 )
 
 var (
@@ -65,6 +66,7 @@ var (
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 	reSnapshotName         = regexp.MustCompile(`^[A-Za-z0-9_]{1,79}$`)
 	reSnapshotPrefix       = regexp.MustCompile(`^[A-Za-z0-9_]{1,59}$`)
+	reResourceNamePrefix   = regexp.MustCompile(validResourceNamePrefix)
 )
 
 type PlanInformation struct {
@@ -382,6 +384,9 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
+	// specify custom azure resource names
+	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
+
 	// Runtime Values
 	UserName               string `mapstructure-to-hcl2:",skip"`
 	Password               string `mapstructure-to-hcl2:",skip"`
@@ -628,7 +633,7 @@ func setWinRMCertificate(c *Config) error {
 }
 
 func setRuntimeValues(c *Config) {
-	var tempName = NewTempName()
+	var tempName = NewTempName(c.CaptureNamePrefix)
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
@@ -934,6 +939,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.CustomResourcePrefix != "" {
+		if ok, err := assertResourceNamePrefix(c.CustomResourcePrefix, "custom_resource_build_prefix"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}
@@ -1025,6 +1036,13 @@ func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
 func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
 	if !isValidAzureName(reSnapshotPrefix, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
+	}
+	return true, nil
+}
+
+func assertResourceNamePrefix(name, setting string) (bool, error) {
+	if !isValidAzureName(reResourceNamePrefix, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 10 characters", setting)
 	}
 	return true, nil
 }

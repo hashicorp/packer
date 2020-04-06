@@ -8,7 +8,7 @@ import (
 )
 
 func TestTempNameShouldCreatePrefixedRandomNames(t *testing.T) {
-	tempName := NewTempName()
+	tempName := NewTempName("")
 
 	if strings.Index(tempName.ComputeName, "pkrvm") != 0 {
 		t.Errorf("Expected ComputeName to begin with 'pkrvm', but got '%s'!", tempName.ComputeName)
@@ -48,7 +48,7 @@ func TestTempNameShouldCreatePrefixedRandomNames(t *testing.T) {
 }
 
 func TestTempAdminPassword(t *testing.T) {
-	tempName := NewTempName()
+	tempName := NewTempName("")
 
 	if !strings.ContainsAny(tempName.AdminPassword, random.PossibleNumbers) {
 		t.Errorf("Expected AdminPassword to contain at least one of '%s'!", random.PossibleNumbers)
@@ -62,7 +62,7 @@ func TestTempAdminPassword(t *testing.T) {
 }
 
 func TestTempNameShouldHaveSameSuffix(t *testing.T) {
-	tempName := NewTempName()
+	tempName := NewTempName("")
 	suffix := tempName.ComputeName[5:]
 
 	if strings.HasSuffix(tempName.ComputeName, suffix) != true {
@@ -99,5 +99,45 @@ func TestTempNameShouldHaveSameSuffix(t *testing.T) {
 
 	if strings.HasSuffix(tempName.NsgName, suffix) != true {
 		t.Errorf("Expected NsgName to end with '%s', but the value is '%s'!", suffix, tempName.NsgName)
+	}
+}
+
+func TestTempNameShouldCreateCustomPrefix(t *testing.T) {
+	tempName := NewTempName("CustPrefix")
+
+	if strings.Index(tempName.ComputeName, "CustPrefixvm") != 0 {
+		t.Errorf("Expected ComputeName to begin with 'CustPrefixvm', but got '%s'!", tempName.ComputeName)
+	}
+
+	if strings.Index(tempName.DeploymentName, "CustPrefixdp") != 0 {
+		t.Errorf("Expected ComputeName to begin with 'CustPrefixdp', but got '%s'!", tempName.ComputeName)
+	}
+
+	if strings.Index(tempName.OSDiskName, "CustPrefixos") != 0 {
+		t.Errorf("Expected OSDiskName to begin with 'CustPrefixos', but got '%s'!", tempName.OSDiskName)
+	}
+
+	if strings.Index(tempName.NicName, "CustPrefixni") != 0 {
+		t.Errorf("Expected NicName to begin with 'CustPrefixni', but got '%s'!", tempName.NicName)
+	}
+
+	if strings.Index(tempName.PublicIPAddressName, "CustPrefixip") != 0 {
+		t.Errorf("Expected PublicIPAddressName to begin with 'CustPrefixip', but got '%s'!", tempName.PublicIPAddressName)
+	}
+
+	if strings.Index(tempName.ResourceGroupName, "CustPrefix-Resource-Group-") != 0 {
+		t.Errorf("Expected ResourceGroupName to begin with 'packer-Resource-Group-', but got '%s'!", tempName.ResourceGroupName)
+	}
+
+	if strings.Index(tempName.SubnetName, "CustPrefixsn") != 0 {
+		t.Errorf("Expected SubnetName to begin with 'pkrip', but got '%s'!", tempName.SubnetName)
+	}
+
+	if strings.Index(tempName.VirtualNetworkName, "CustPrefixvn") != 0 {
+		t.Errorf("Expected VirtualNetworkName to begin with 'CustPrefixvn', but got '%s'!", tempName.VirtualNetworkName)
+	}
+
+	if strings.Index(tempName.NsgName, "CustPrefixsg") != 0 {
+		t.Errorf("Expected NsgName to begin with 'CustPrefixsg', but got '%s'!", tempName.NsgName)
 	}
 }
