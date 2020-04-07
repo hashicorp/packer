@@ -3,12 +3,14 @@ package shell_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/helper/tests/acc"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/tests/acc"
+	"github.com/hashicorp/packer/provisioner/file"
+	"github.com/hashicorp/packer/provisioner/shell"
 
 	"github.com/hashicorp/packer/packer"
 
@@ -18,10 +20,7 @@ import (
 )
 
 func TestShellProvisioner(t *testing.T) {
-	p := os.Getenv("ACC_TEST_PROVISIONERS")
-	if p != "all" && !strings.Contains(p, "shell") {
-		t.Skip()
-	}
+	acc.TestProvisionersPreCheck("shell", t)
 	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
 }
 
@@ -45,8 +44,8 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"shell": func() (packer.Provisioner, error) { return command.Provisioners["shell"], nil },
-		"file":  func() (packer.Provisioner, error) { return command.Provisioners["file"], nil },
+		"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+		"file":  func() (packer.Provisioner, error) { return &file.Provisioner{}, nil },
 	}
 }
 
