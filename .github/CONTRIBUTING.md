@@ -463,10 +463,7 @@ of this code you wrote. Your test should be like:
 
 ```go
 func TestShellProvisioner(t *testing.T) {
-	p := os.Getenv("ACC_TEST_PROVISIONERS")
-	if p != "all" && !strings.Contains(p, "shell") {
-		t.Skip()
-	}
+	acc.TestProvisionersPreCheck("shell", t)
 	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
 }
 ``` 
