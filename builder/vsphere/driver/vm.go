@@ -47,6 +47,7 @@ type HardwareConfig struct {
 	CpuHotAddEnabled    bool
 	MemoryHotAddEnabled bool
 	VideoRAM            int64
+	Firmware            string
 }
 
 type NIC struct {
@@ -353,6 +354,15 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 			Operation: types.VirtualDeviceConfigSpecOperationEdit,
 		}
 		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
+	}
+
+	if config.Firmware == "efi-secure" || config.Firmware == "efi" {
+		confSpec.Firmware = "efi"
+		confSpec.BootOptions = &types.VirtualMachineBootOptions{
+			EfiSecureBootEnabled: types.NewBool(config.Firmware == "efi-secure"),
+		}
+	} else if config.Firmware != "" {
+		confSpec.Firmware = config.Firmware
 	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
