@@ -328,7 +328,7 @@ func funcGenSed(ctx *Context) interface{} {
 	return func(expression string, inputString string) (string, error) {
 		return "", errors.New("template function `sed` is deprecated " +
 			"use `replace` or `replace_all` instead." +
-			"Documentation: https://www.packer.io/docs/templates/engine.html")
+			"Documentation: https://www.packer.io/docs/templates/engine")
 	}
 }
 

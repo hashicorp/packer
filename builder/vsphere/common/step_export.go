@@ -42,7 +42,7 @@ import (
 // ```
 // The above configuration would create the following files:
 //
-// ```
+// ```text
 // ./output_vsphere/example-ubuntu-disk-0.vmdk
 // ./output_vsphere/example-ubuntu.mf
 // ./output_vsphere/example-ubuntu.ovf

@@ -1,0 +1,233 @@
+---
+description: >
+  The openstack Packer builder is able to create new images for use with
+
+  OpenStack. The builder takes a source image, runs any provisioning necessary
+  on
+
+  the image after launching it, then creates a new reusable image. This reusable
+
+  image can then be used as the foundation of new servers that are launched
+
+  within OpenStack.
+layout: docs
+page_title: OpenStack - Builders
+sidebar_title: OpenStack
+---
+
+# OpenStack Builder
+
+Type: `openstack`
+
+The `openstack` Packer builder is able to create new images for use with
+[OpenStack](http://www.openstack.org). The builder takes a source image, runs
+any provisioning necessary on the image after launching it, then creates a new
+reusable image. This reusable image can then be used as the foundation of new
+servers that are launched within OpenStack. The builder will create temporary
+keypairs that provide temporary access to the server while the image is being
+created. This simplifies configuration quite a bit.
+
+The builder does _not_ manage images. Once it creates an image, it is up to you
+to use it or delete it.
+
+~> **Note:** To use OpenStack builder with the OpenStack Newton (Oct 2016)
+or earlier, we recommend you use Packer v1.1.2 or earlier version.
+
+~> **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
+builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
+installed _if you are using temporary key pairs_, i.e. don't use
+[`ssh_keypair_name`](#ssh_keypair_name) nor
+[`ssh_password`](#ssh_password). All major
+OS'es have OpenSSL installed by default except Windows. This have been resolved
+in OpenStack Ocata(Feb 2017).
+
+~> **Note:** OpenStack Block Storage volume support is available only for
+V3 Block Storage API. It's available in OpenStack since Mitaka release (Apr
+2016).
+
+## Configuration Reference
+
+There are many configuration options available for the builder. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+### Required:
+
+@include 'builder/openstack/AccessConfig-required.mdx'
+
+@include 'builder/openstack/ImageConfig-required.mdx'
+
+@include 'builder/openstack/RunConfig-required.mdx'
+
+### Optional:
+
+@include 'builder/openstack/AccessConfig-not-required.mdx'
+
+@include 'builder/openstack/ImageConfig-not-required.mdx'
+
+@include 'builder/openstack/RunConfig-not-required.mdx'
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+@include 'helper/communicator/SSHInterface-not-required.mdx'
+
+## Basic Example: DevStack
+
+Here is a basic example. This is a example to build on DevStack running in a
+VM.
+
+```json
+{
+  "type": "openstack",
+  "identity_endpoint": "http://<devstack-ip>:5000/v3",
+  "tenant_name": "admin",
+  "domain_name": "Default",
+  "username": "admin",
+  "password": "<your admin password>",
+  "region": "RegionOne",
+  "ssh_username": "root",
+  "image_name": "Test image",
+  "source_image": "<image id>",
+  "flavor": "m1.tiny",
+  "insecure": "true"
+}
+```
+
+## Basic Example: Rackspace public cloud
+
+Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
+(Precise Pangolin) on Rackspace OpenStack cloud offering.
+
+```json
+{
+  "type": "openstack",
+  "username": "foo",
+  "password": "foo",
+  "region": "DFW",
+  "ssh_username": "root",
+  "image_name": "Test image",
+  "source_image": "23b564c9-c3e6-49f9-bc68-86c7a9ab5018",
+  "flavor": "2"
+}
+```
+
+## Basic Example: Private OpenStack cloud
+
+This example builds an Ubuntu 14.04 image on a private OpenStack cloud, powered
+by Metacloud.
+
+```json
+{
+  "type": "openstack",
+  "ssh_username": "root",
+  "image_name": "ubuntu1404_packer_test_1",
+  "source_image": "91d9c168-d1e5-49ca-a775-3bfdbb6c97f1",
+  "flavor": "2"
+}
+```
+
+In this case, the connection information for connecting to OpenStack doesn't
+appear in the template. That is because I source a standard OpenStack script
+with environment variables set before I run this. This script is setting
+environment variables like:
+
+- `OS_AUTH_URL`
+- `OS_TENANT_ID`
+- `OS_USERNAME`
+- `OS_PASSWORD`
+
+This is slightly different when identity v3 is used:
+
+- `OS_AUTH_URL`
+- `OS_USERNAME`
+- `OS_PASSWORD`
+- `OS_DOMAIN_NAME`
+- `OS_TENANT_NAME`
+
+This will authenticate the user on the domain and scope you to the project. A
+tenant is the same as a project. It's optional to use names or IDs in v3. This
+means you can use `OS_USERNAME` or `OS_USERID`, `OS_TENANT_ID` or
+`OS_TENANT_NAME` and `OS_DOMAIN_ID` or `OS_DOMAIN_NAME`.
+
+The above example would be equivalent to an RC file looking like this :
+
+```shell
+export OS_AUTH_URL="https://identity.myprovider/v3"
+export OS_USERNAME="myuser"
+export OS_PASSWORD="password"
+export OS_USER_DOMAIN_NAME="mydomain"
+export OS_PROJECT_DOMAIN_NAME="mydomain"
+```
+
+## Basic Example: Instance with Block Storage root volume
+
+A basic example of Instance with a remote root Block Storage service volume.
+This is a working example to build an image on private OpenStack cloud powered
+by Selectel VPC.
+
+```json
+{
+  "type": "openstack",
+  "identity_endpoint": "https://api.selvpc.com/identity/v3",
+  "tenant_id": "2e90c5c04c7b4c509be78723e2b55b77",
+  "username": "foo",
+  "password": "foo",
+  "region": "ru-3",
+  "ssh_username": "root",
+  "image_name": "Test image",
+  "source_image": "5f58ea7e-6264-4939-9d0f-0c23072b1132",
+  "networks": "9aab504e-bedf-48af-9256-682a7fa3dabb",
+  "flavor": "1001",
+  "availability_zone": "ru-3a",
+  "use_blockstorage_volume": true,
+  "volume_type": "fast.ru-3a"
+}
+```
+
+## Notes on OpenStack Authorization
+
+The simplest way to get all settings for authorization against OpenStack is to
+go into the OpenStack Dashboard (Horizon) select your _Project_ and navigate
+_Project, Access & Security_, select _API Access_ and _Download OpenStack RC
+File v3_. Source the file, and select your wanted region by setting environment
+variable `OS_REGION_NAME` or `OS_REGION_ID` and
+`export OS_TENANT_NAME=$OS_PROJECT_NAME` or
+`export OS_TENANT_ID=$OS_PROJECT_ID`.
+
+~> `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
+`OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
+
+To troubleshoot authorization issues test you environment variables with the
+OpenStack cli. It can be installed with
+
+    $ pip install --user python-openstackclient
+
+### Authorize Using Tokens
+
+To authorize with a access token only `identity_endpoint` and `token` is
+needed, and possibly `tenant_name` or `tenant_id` depending on your token type.
+Or use the following environment variables:
+
+- `OS_AUTH_URL`
+- `OS_TOKEN`
+- One of `OS_TENANT_NAME` or `OS_TENANT_ID`
+
+### Authorize Using Application Credential
+
+To authorize with an application credential, only `identity_endpoint`,
+`application_credential_id`, and `application_credential_secret` are needed.
+Or use the following environment variables:
+
+- `OS_AUTH_URL`
+- `OS_APPLICATION_CREDENTIAL_ID`
+- `OS_APPLICATION_CREDENTIAL_SECRET`

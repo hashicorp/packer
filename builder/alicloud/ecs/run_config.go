@@ -57,7 +57,7 @@ type RunConfig struct {
 	// The security group name. The default value
 	// is blank. [2, 128] English or Chinese characters, must begin with an
 	// uppercase/lowercase letter or Chinese character. Can contain numbers, .,
-	// _ or -. It cannot begin with http:// or https://.
+	// _ or -. It cannot begin with `http://` or `https://`.
 	SecurityGroupName string `mapstructure:"security_group_name" required:"false"`
 	// User data to apply when launching the instance. Note
 	// that you need to be careful about escaping characters due to the templates
@@ -73,8 +73,8 @@ type RunConfig struct {
 	// The VPC name. The default value is blank. [2, 128]
 	// English or Chinese characters, must begin with an uppercase/lowercase
 	// letter or Chinese character. Can contain numbers, _ and -. The disk
-	// description will appear on the console. Cannot begin with http:// or
-	// https://.
+	// description will appear on the console. Cannot begin with `http://` or
+	// `https://`.
 	VpcName string `mapstructure:"vpc_name" required:"false"`
 	// Value options: 192.168.0.0/16 and
 	// 172.16.0.0/16. When not specified, the default value is 172.16.0.0/16.

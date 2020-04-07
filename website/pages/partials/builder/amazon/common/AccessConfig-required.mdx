@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the AccessConfig struct in builder/amazon/common/access_config.go; DO NOT EDIT MANUALLY -->
+
+-   `access_key` (string) - The access key used to communicate with AWS. [Learn how  to set this]
+    (/docs/builders/amazon#specifying-amazon-credentials). On EBS, this
+    is not required if you are using `use_vault_aws_engine` for
+    authentication instead.
+    
+-   `region` (string) - The name of the region, such as `us-east-1`, in which
+    to launch the EC2 instance to create the AMI.
+    When chroot building, this value is guessed from environment.
+    
+-   `secret_key` (string) - The secret key used to communicate with AWS. [Learn how to set
+    this](/docs/builders/amazon#specifying-amazon-credentials). This is not required
+    if you are using `use_vault_aws_engine` for authentication instead.
+    

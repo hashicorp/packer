@@ -1,0 +1,260 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+  The VirtualBox Packer builder is able to create VirtualBox virtual machines
+  and export them in the OVF format, starting from an ISO image.
+layout: docs
+page_title: VirtualBox ISO - Builders
+sidebar_title: ISO
+---
+
+# VirtualBox Builder (from an ISO)
+
+Type: `virtualbox-iso`
+
+The VirtualBox Packer builder is able to create
+[VirtualBox](https://www.virtualbox.org/) virtual machines and export them in
+the OVF format, starting from an ISO image.
+
+The builder builds a virtual machine by creating a new virtual machine from
+scratch, booting it, installing an OS, provisioning software within the OS, then
+shutting it down. The result of the VirtualBox builder is a directory containing
+all the files necessary to run the virtual machine portably.
+
+## Basic Example
+
+Here is a basic example. This example is not functional. It will start the OS
+installer but then fail because we don't provide the preseed file for Ubuntu to
+self-install. Still, the example serves to show the basic configuration:
+
+```json
+{
+  "type": "virtualbox-iso",
+  "guest_os_type": "Ubuntu_64",
+  "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
+  "iso_checksum": "769474248a3897f4865817446f9a4a53",
+  "iso_checksum_type": "md5",
+  "ssh_username": "packer",
+  "ssh_password": "packer",
+  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+}
+```
+
+It is important to add a `shutdown_command`. By default Packer halts the virtual
+machine and the file system may not be sync'd. Thus, changes made in a
+provisioner might not be saved.
+
+## VirtualBox-ISO Builder Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Export](#export-configuration),
+[Boot](#boot-configuration),
+[Shutdown](#shutdown-configuration),
+[Run](#run-configuration),
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+#### Optional:
+
+@include 'builder/virtualbox/iso/Config-not-required.mdx'
+
+@include 'builder/virtualbox/common/VBoxVersionConfig-not-required.mdx'
+
+@include 'builder/virtualbox/common/VBoxBundleConfig-not-required.mdx'
+
+@include 'builder/virtualbox/common/GuestAdditionsConfig-not-required.mdx'
+
+### ISO Configuration
+
+@include 'common/ISOConfig.mdx'
+
+#### Required:
+
+@include 'common/ISOConfig-required.mdx'
+
+#### Optional:
+
+@include 'common/ISOConfig-not-required.mdx'
+
+### Http directory configuration
+
+@include 'common/HTTPConfig.mdx'
+
+#### Optional:
+
+@include 'common/HTTPConfig-not-required.mdx'
+
+### Floppy configuration
+
+@include 'common/FloppyConfig.mdx'
+
+#### Optional:
+
+@include 'common/FloppyConfig-not-required.mdx'
+
+### Export configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/ExportConfig-not-required.mdx'
+
+### Output configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/OutputConfig-not-required.mdx'
+
+### Run configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/RunConfig-not-required.mdx'
+
+### Shutdown configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/ShutdownConfig-not-required.mdx'
+
+### Hardware configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/HWConfig-not-required.mdx'
+
+### VBox Manage configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/VBoxManageConfig-not-required.mdx'
+
+### Communicator configuration
+
+#### Optional common fields:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'builder/virtualbox/common/CommConfig-not-required.mdx'
+
+#### Optional SSH fields:
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+#### Optional WinRM fields:
+
+@include 'helper/communicator/WinRM-not-required.mdx'
+
+### Boot Configuration
+
+@include 'common/bootcommand/BootConfig.mdx'
+
+The boot command is sent to the VM through the `VBoxManage` utility in as few
+invocations as possible. We send each character in groups of 25, with a default
+delay of 100ms between groups. The delay alleviates issues with latency and CPU
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+```json
+{
+  "builders": [
+    {
+      "type": "virtualbox",
+      "boot_keygroup_interval": "500ms"
+      ...
+    }
+  ]
+}
+```
+
+#### Optional:
+
+@include 'common/bootcommand/BootConfig-not-required.mdx'
+
+@include 'builders/boot-command.mdx'
+
+@include 'builders/virtualbox-ssh-key-pair.mdx'
+
+Example boot command. This is actually a working boot command used to start an
+Ubuntu 12.04 installer:
+
+```text
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+Please note that for the Virtuabox builder, the IP address of the HTTP server
+Packer launches for you to access files like the preseed file in the example
+above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
+of your VM you must guarantee that you can still access this HTTP server.
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+## Guest Additions
+
+Packer will automatically download the proper guest additions for the version of
+VirtualBox that is running and upload those guest additions into the virtual
+machine so that provisioners can easily install them.
+
+Packer downloads the guest additions from the official VirtualBox website, and
+verifies the file with the official checksums released by VirtualBox.
+
+After the virtual machine is up and the operating system is installed, Packer
+uploads the guest additions into the virtual machine. The path where they are
+uploaded is controllable by `guest_additions_path`, and defaults to
+"VBoxGuestAdditions.iso". Without an absolute path, it is uploaded to the home
+directory of the SSH user.
+
+## VBoxManage Commands
+
+In order to perform extra customization of the virtual machine, a template can
+define extra calls to `VBoxManage` to perform.
+[VBoxManage](https://www.virtualbox.org/manual/ch09.html) is the command-line
+interface to VirtualBox where you can completely control VirtualBox. It can be
+used to do things such as set RAM, CPUs, etc.
+
+Extra VBoxManage commands are defined in the template in the `vboxmanage`
+section. An example is shown below that sets the VRAM within the virtual machine:
+
+```json
+{
+  "vboxmanage": [["modifyvm", "{{.Name}}", "--vram", "64"]]
+}
+```
+
+The value of `vboxmanage` is an array of commands to execute. These commands are
+executed in the order defined. So in the above example, the memory will be set
+followed by the CPUs.
+
+Each command itself is an array of strings, where each string is an argument to
+`VBoxManage`. Each argument is treated as a [configuration
+template](/docs/templates/engine). The only available
+variable is `Name` which is replaced with the unique name of the VM, which is
+required for many VBoxManage calls.
+
+## Creating an EFI enabled VM
+
+If you want to create an EFI enabled VM, make sure you set the `iso_interface`
+to "sata". Otherwise your attached drive will not be bootable. Example:
+
+```json
+      "iso_interface": "sata",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ]
+      ]
+```

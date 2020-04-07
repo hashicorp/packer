@@ -103,32 +103,34 @@ type Config struct {
 	// as the source for this build. *VHD targets are incompatible with this
 	// build type* - the target must be a *Managed Image*.
 	//
-	//     "shared_image_gallery": {
-	//         "subscription": "00000000-0000-0000-0000-00000000000",
-	//         "resource_group": "ResourceGroup",
-	//         "gallery_name": "GalleryName",
-	//         "image_name": "ImageName",
-	//         "image_version": "1.0.0"
-	//     }
-	//     "managed_image_name": "TargetImageName",
-	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```json
+	// "shared_image_gallery": {
+	//     "subscription": "00000000-0000-0000-0000-00000000000",
+	//     "resource_group": "ResourceGroup",
+	//     "gallery_name": "GalleryName",
+	//     "image_name": "ImageName",
+	//     "image_version": "1.0.0"
+	// }
+	// "managed_image_name": "TargetImageName",
+	// "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```
 	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery"`
 
 	// The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
 	//
 	// Following is an example.
 	//
-	// <!-- -->
-	//
-	//     "shared_image_gallery_destination": {
-	//         "resource_group": "ResourceGroup",
-	//         "gallery_name": "GalleryName",
-	//         "image_name": "ImageName",
-	//         "image_version": "1.0.0",
-	//         "replication_regions": ["regionA", "regionB", "regionC"]
-	//     }
-	//     "managed_image_name": "TargetImageName",
-	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```json
+	// "shared_image_gallery_destination": {
+	//     "resource_group": "ResourceGroup",
+	//     "gallery_name": "GalleryName",
+	//     "image_name": "ImageName",
+	//     "image_version": "1.0.0",
+	//     "replication_regions": ["regionA", "regionB", "regionC"]
+	// }
+	// "managed_image_name": "TargetImageName",
+	// "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```
 	SharedGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination"`
 
 	// How long to wait for an image to be published to the shared image
