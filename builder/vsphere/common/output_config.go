@@ -5,6 +5,8 @@ package common
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -27,4 +29,21 @@ func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 	}
 
 	return nil
+}
+
+// Stolen from output_dir_local.go in vmware builder.
+func (c *OutputConfig) ListFiles() ([]string, error) {
+	files := make([]string, 0, 10)
+
+	visit := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	}
+
+	return files, filepath.Walk(c.OutputDir, visit)
 }
