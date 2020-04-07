@@ -12,12 +12,15 @@
 
 ### Bug Fixes:
 * builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
-    [GH-8945] builder/vsphere-iso: disk_size is no longer required if storage
-    is defined [GH-8975]
+    [GH-8945]
 * builder/azure: Allow Managed Data Disks to be used with Azure Shared Image
     Gallery  [GH-8912]
 * builder/qemu: Remove `net_device` pre-validation [GH-8979]
+* builder/vsphere-iso: disk_size is no longer required if storage is defined
+    [GH-8975]
 * core: Make sure CLI variables supersede variables from var files [GH-8964]
+* provisioner/powershell: Fix integer decoding issue in the execution policy
+    parser [GH-8940]
 
 ## 1.5.5 (March 25,2020)
 
