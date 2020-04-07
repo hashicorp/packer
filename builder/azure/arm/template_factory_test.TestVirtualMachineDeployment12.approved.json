@@ -8,6 +8,9 @@
     "adminUsername": {
       "type": "string"
     },
+    "dataDiskName": {
+      "type": "string"
+    },
     "dnsNameForPublicIP": {
       "type": "string"
     },
@@ -147,7 +150,7 @@
               "managedDisk": {
                 "storageAccountType": "Standard_LRS"
               },
-              "name": "datadisk-1"
+              "name": "[concat(parameters('dataDiskName'),'-1')]"
             }
           ],
           "imageReference": {

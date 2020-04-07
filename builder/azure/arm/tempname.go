@@ -15,6 +15,7 @@ type TempName struct {
 	KeyVaultName        string
 	ResourceGroupName   string
 	OSDiskName          string
+	DataDiskname        string
 	NicName             string
 	SubnetName          string
 	PublicIPAddressName string
@@ -30,6 +31,7 @@ func NewTempName() *TempName {
 	tempName.DeploymentName = fmt.Sprintf("pkrdp%s", suffix)
 	tempName.KeyVaultName = fmt.Sprintf("pkrkv%s", suffix)
 	tempName.OSDiskName = fmt.Sprintf("pkros%s", suffix)
+	tempName.DataDiskname = fmt.Sprintf("pkrdd%s", suffix)
 	tempName.NicName = fmt.Sprintf("pkrni%s", suffix)
 	tempName.PublicIPAddressName = fmt.Sprintf("pkrip%s", suffix)
 	tempName.SubnetName = fmt.Sprintf("pkrsn%s", suffix)
