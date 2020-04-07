@@ -339,14 +339,14 @@ resources are not accidentally destroyed or overwritten during testing.
 Also, these typically require an API key (AWS, GCE), or additional software 
 to be installed on your computer (VirtualBox, VMware).
 
-To run the Provisioners Acceptance Tests you should use both ACC_TEST_BUILDERS and ACC_TEST_PROVISIONERS variables to 
+To run the Provisioners Acceptance Tests you should use both **ACC_TEST_BUILDERS** and **ACC_TEST_PROVISIONERS** variables to 
 tell which provisioner and builder the test should be run against.
 
 Examples of usage:
 
 - Run the Shell provisioner acceptance tests against the Amazon EBS builder.
     ```
-    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell go test ./provisioner/shell/... -v -timeout=1
+    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell go test ./provisioner/shell/... -v -timeout=1h
     ```
 - Do the same but using the Makefile
     ```
@@ -365,14 +365,14 @@ Examples of usage:
     ACC_TEST_BUILDERS=all ACC_TEST_PROVISIONERS=all make provisioners-acctest
     ```
 
-Both ACC_TEST_BUILDERS and ACC_TEST_PROVISIONERS allows defining a list of builders and provisioners separated by comma 
+Both **ACC_TEST_BUILDERS** and **ACC_TEST_PROVISIONERS** allows defining a list of builders and provisioners separated by comma 
 (e.g. `ACC_TEST_BUILDERS=amazon-ebs,virtualbox-iso`)   
 
 
 #### Writing Provisioner Acceptance Tests
 
 Packer has an already implemented structure that will run the provisioner against builders and you can find it in `helper/tests/acc/provisioners.go`.
-All provisioner's should use this structure in their acceptance tests.  
+All provisioners should use this structure in their acceptance tests.  
 
 To start writing a new provisioner acceptance test, you should add a test file named as `provisioner_acc_test.go` in the provisioner folder
 and the package should be `<provisioner>_test`. This file should have a struct that will implement the ProvisionerAcceptance interface.
@@ -478,7 +478,7 @@ The method `TestProvisionersAgainstBuilders` will run the provisioner against al
 is the one that has the necessary code for running this type of test. In case the builder you want to run against is not available for testing, you can write it following the next steps.   
 
 To add a new builder to the available builders for provisioners acc testing, you'll need to create a new folder under the builder folder
-called `acceptace` and inside you create the `builder_acceptance.go` file and the package should be `<builder>_acc`. Like the provisioners, you'll need to create a struct that will
+called `acceptance` and inside you create the `builder_acceptance.go` file and the package should be `<builder>_acc`. Like the provisioners, you'll need to create a struct that will
 implement the BuilderAcceptance interface.
 ```go
 type BuilderAcceptance interface {
