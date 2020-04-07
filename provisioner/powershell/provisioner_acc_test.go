@@ -8,24 +8,31 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/provisioner/powershell"
-
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/helper/tests/acc"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner/powershell"
+	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
 )
 
 const TestProvisionerName = "powershell"
 
-func TestPowershellProvisioner_Inline(t *testing.T) {
+func TestAccPowershellProvisioner_basic(t *testing.T) {
+	acc.TestProvisionersPreCheck(TestProvisionerName, t)
+
+	testProvisioner := PowershellProvisionerAccTest{"powershell-provisioner-cleanup.txt"}
+	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
+}
+
+func TestAccPowershellProvisioner_Inline(t *testing.T) {
 	acc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	testProvisioner := PowershellProvisionerAccTest{"powershell-inline-provisioner.txt"}
 	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
-func TestPowershellProvisioner_Script(t *testing.T) {
+func TestAccPowershellProvisioner_Script(t *testing.T) {
 	acc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	testProvisioner := PowershellProvisionerAccTest{"powershell-script-provisioner.txt"}
@@ -55,6 +62,7 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 func (s *PowershellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
 		TestProvisionerName: func() (packer.Provisioner, error) { return &powershell.Provisioner{}, nil },
+		"windows-shell":     func() (packer.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
 	}
 }
 
