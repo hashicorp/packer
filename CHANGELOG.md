@@ -20,7 +20,7 @@
     [GH-8975]
 * core: Make sure CLI variables supersede variables from var files [GH-8964]
 * provisioner/powershell: Fix integer decoding issue in the execution policy
-    parser [GH-8940]
+    parser [GH-8997]
 
 ## 1.5.5 (March 25,2020)
 
