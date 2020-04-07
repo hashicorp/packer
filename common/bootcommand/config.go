@@ -117,7 +117,8 @@ type BootConfig struct {
 	// the `boot_command`. The value of this should be a duration. Examples are
 	// `5s` and `1m30s` which will cause Packer to wait five seconds and one
 	// minute 30 seconds, respectively. If this isn't specified, the default is
-	// `10s` or 10 seconds.
+	// `10s` or 10 seconds. To set boot_wait to 0s, use a negative number, such
+	// as "-1s"
 	BootWait time.Duration `mapstructure:"boot_wait"`
 	// This is an array of commands to type when the virtual machine is first
 	// booted. The goal of these commands should be to type just enough to
