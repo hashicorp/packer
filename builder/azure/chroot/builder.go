@@ -76,8 +76,6 @@ type Config struct {
 	// `/etc/resolv.conf`. You may need to do this if you're building an image that uses systemd.
 	CopyFiles []string `mapstructure:"copy_files"`
 
-	// The id of the temporary disk that will be created. Will be generated if not set.
-	TemporaryOSDiskID string `mapstructure:"temporary_os_disk_id"`
 	// Try to resize the OS disk to this size on the first copy. Disks can only be englarged. If not specified,
 	// the disk will keep its original size. Required when using `from_scratch`
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb"`
@@ -87,22 +85,24 @@ type Config struct {
 	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
 	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
 	OSDiskCacheType string `mapstructure:"os_disk_cache_type"`
+	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
+	// Defaults to `V1`.
+	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
+
+	// The id of the temporary disk that will be created. Will be generated if not set.
+	TemporaryOSDiskID string `mapstructure:"temporary_os_disk_id"`
 
 	// The id of the temporary snapshot that will be created. Will be generated if not set.
 	TemporaryOSDiskSnapshotID string `mapstructure:"temporary_os_disk_snapshot_id"`
+
+	// If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
+	SkipCleanup bool `mapstructure:"skip_cleanup"`
 
 	// The managed image to create using this build.
 	ImageResourceID string `mapstructure:"image_resource_id"`
 
 	// The shared image to create using this build.
 	SharedImageGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_destination"`
-
-	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
-	// Defaults to `V1`.
-	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
-
-	// If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
-	SkipCleanup bool `mapstructure:"skip_cleanup"`
 
 	ctx interpolate.Context
 }
@@ -120,7 +120,6 @@ func (c *Config) GetContext() interpolate.Context {
 	return c.ctx
 }
 
-// Builder is the Azure chroot builder
 type Builder struct {
 	config Config
 	runner multistep.Runner

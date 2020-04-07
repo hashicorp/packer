@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type SharedImageGalleryDestination
+//go:generate mapstructure-to-hcl2 -type SharedImageGalleryDestination,TargetRegion
 
 package chroot
 
@@ -8,13 +8,13 @@ import (
 	"regexp"
 )
 
-// SharedImageGalleryDestination models an image version in a SIG
-// that can be used as an source or destination for builders
+// SharedImageGalleryDestination models an image version in a Shared
+// Image Gallery that can be used as a destination.
 type SharedImageGalleryDestination struct {
-	ResourceGroup string `mapstructure:"resource_group"`
-	GalleryName   string `mapstructure:"gallery_name"`
-	ImageName     string `mapstructure:"image_name"`
-	ImageVersion  string `mapstructure:"image_version"`
+	ResourceGroup string `mapstructure:"resource_group" required:"true"`
+	GalleryName   string `mapstructure:"gallery_name" required:"true"`
+	ImageName     string `mapstructure:"image_name" required:"true"`
+	ImageVersion  string `mapstructure:"image_version" required:"true"`
 
 	TargetRegions     []TargetRegion `mapstructure:"target_regions"`
 	ExcludeFromLatest bool           `mapstructure:"exlude_from_latest"`
@@ -22,8 +22,8 @@ type SharedImageGalleryDestination struct {
 
 // TargetRegion describes a region where the shared image should be replicated
 type TargetRegion struct {
-	// Name of the region
-	Name string `mapstructure:"name"`
+	// Name of the Azure region
+	Name string `mapstructure:"name" required:"true"`
 	// Number of replicas in this region. Default: 1
 	ReplicaCount int32 `mapstructure:"replicas"`
 	// Storage account type: Standard_LRS or Standard_ZRS. Default: Standard_ZRS
