@@ -1,0 +1,160 @@
+<!-- Code generated from the comments of the Config struct in builder/azure/dtl/config.go; DO NOT EDIT MANUALLY -->
+
+-   `capture_name_prefix` (string) - Capture
+    
+-   `capture_container_name` (string) - Capture Container Name
+-   `shared_image_gallery` (SharedImageGallery) - Use a [Shared Gallery
+    image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
+    as the source for this build. *VHD targets are incompatible with this
+    build type* - the target must be a *Managed Image*.
+    
+    ```json
+    "shared_image_gallery": {
+        "subscription": "00000000-0000-0000-0000-00000000000",
+        "resource_group": "ResourceGroup",
+        "gallery_name": "GalleryName",
+        "image_name": "ImageName",
+        "image_version": "1.0.0"
+    }
+    "managed_image_name": "TargetImageName",
+    "managed_image_resource_group_name": "TargetResourceGroup"
+    ```
+    
+-   `shared_image_gallery_destination` (SharedImageGalleryDestination) - The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
+    
+    Following is an example.
+    
+    ```json
+    "shared_image_gallery_destination": {
+        "resource_group": "ResourceGroup",
+        "gallery_name": "GalleryName",
+        "image_name": "ImageName",
+        "image_version": "1.0.0",
+        "replication_regions": ["regionA", "regionB", "regionC"]
+    }
+    "managed_image_name": "TargetImageName",
+    "managed_image_resource_group_name": "TargetResourceGroup"
+    ```
+    
+-   `shared_image_gallery_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
+    gallery before timing out. If your Packer build is failing on the
+    Publishing to Shared Image Gallery step with the error `Original Error:
+    context deadline exceeded`, but the image is present when you check your
+    Azure dashboard, then you probably need to increase this timeout from
+    its default of "60m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
+-   `image_publisher` (string) - PublisherName for your base image. See
+    [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+    for details.
+    
+    CLI example `az vm image list-publishers --location westus`
+    
+-   `image_offer` (string) - Offer for your base image. See
+    [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+    for details.
+    
+    CLI example
+    `az vm image list-offers --location westus --publisher Canonical`
+    
+-   `image_sku` (string) - SKU for your base image. See
+    [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+    for details.
+    
+    CLI example
+    `az vm image list-skus --location westus --publisher Canonical --offer UbuntuServer`
+    
+-   `image_version` (string) - Specify a specific version of an OS to boot from.
+    Defaults to `latest`. There may be a difference in versions available
+    across regions due to image synchronization latency. To ensure a consistent
+    version across regions set this value to one that is available in all
+    regions where you are deploying.
+    
+    CLI example
+    `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
+    
+-   `image_url` (string) - Specify a custom VHD to use. If this value is set, do
+    not set image_publisher, image_offer, image_sku, or image_version.
+    
+-   `custom_managed_image_resource_group_name` (string) - Specify the source managed image's resource group used to use. If this
+    value is set, do not set image\_publisher, image\_offer, image\_sku, or
+    image\_version. If this value is set, the value
+    `custom_managed_image_name` must also be set. See
+    [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
+    
+-   `custom_managed_image_name` (string) - Specify the source managed image's name to use. If this value is set, do
+    not set image\_publisher, image\_offer, image\_sku, or image\_version.
+    If this value is set, the value
+    `custom_managed_image_resource_group_name` must also be set. See
+    [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
+    
+-   `location` (string) - Location
+-   `vm_size` (string) - Size of the VM used for building. This can be changed when you deploy a
+    VM from your VHD. See
+    [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
+    information. Defaults to `Standard_A1`.
+    
+    CLI example `az vm list-sizes --location westus`
+    
+-   `managed_image_resource_group_name` (string) - Specify the managed image resource group name where the result of the
+    Packer build will be saved. The resource group must already exist. If
+    this value is set, the value managed_image_name must also be set. See
+    documentation to learn more about managed images.
+    
+-   `managed_image_name` (string) - Specify the managed image name where the result of the Packer build will
+    be saved. The image name must not exist ahead of time, and will not be
+    overwritten. If this value is set, the value
+    managed_image_resource_group_name must also be set. See documentation to
+    learn more about managed images.
+    
+-   `managed_image_storage_account_type` (string) - Specify the storage account
+    type for a managed image. Valid values are Standard_LRS and Premium_LRS.
+    The default is Standard_LRS.
+    
+-   `azure_tags` (map[string]\*string) - the user can define up to 15
+    tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
+    256 characters. Tags are applied to every resource deployed by a Packer
+    build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+    
+-   `plan_id` (string) - Used for creating images from Marketplace images. Please refer to
+    [Deploy an image with Marketplace
+    terms](https://aka.ms/azuremarketplaceapideployment) for more details.
+    Not all Marketplace images support programmatic deployment, and support
+    is controlled by the image publisher.
+    Plan_id is a string with unique identifier for the plan associated with images.
+    Ex plan_id="1-12ab"
+    
+-   `polling_duration_timeout` (duration string | ex: "1h5m2s") - The default PollingDuration for azure is 15mins, this property will override
+    that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
+    If your Packer build is failing on the
+    ARM deployment step with the error `Original Error:
+    context deadline exceeded`, then you probably need to increase this timeout from
+    its default of "15m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
+-   `os_type` (string) - If either Linux or Windows is specified Packer will
+    automatically configure authentication credentials for the provisioned
+    machine. For Linux this configures an SSH authorized key. For Windows
+    this configures a WinRM certificate.
+    
+-   `os_disk_size_gb` (int32) - Specify the size of the OS disk in GB
+    (gigabytes). Values of zero or less than zero are ignored.
+    
+-   `disk_additional_size` ([]int32) - For Managed build the final artifacts are included in the managed image.
+    The additional disk will have the same storage account type as the OS
+    disk, as specified with the `managed_image_storage_account_type`
+    setting.
+    
+-   `disk_caching_type` (string) - Specify the disk caching type. Valid values
+    are None, ReadOnly, and ReadWrite. The default value is ReadWrite.
+    
+-   `storage_type` (string) - DTL values
+    
+-   `lab_virtual_network_name` (string) - Lab Virtual Network Name
+-   `lab_name` (string) - Lab Name
+-   `lab_subnet_name` (string) - Lab Subnet Name
+-   `lab_resource_group_name` (string) - Lab Resource Group Name
+-   `dtl_artifacts` ([]DtlArtifact) - Dtl Artifacts
+-   `vm_name` (string) - VM Name

@@ -1,0 +1,46 @@
+<!-- Code generated from the comments of the Config struct in builder/digitalocean/config.go; DO NOT EDIT MANUALLY -->
+
+-   `api_url` (string) - Non standard api endpoint URL. Set this if you are
+    using a DigitalOcean API compatible service. It can also be specified via
+    environment variable DIGITALOCEAN_API_URL.
+    
+-   `private_networking` (bool) - Set to true to enable private networking
+    for the droplet being created. This defaults to false, or not enabled.
+    
+-   `monitoring` (bool) - Set to true to enable monitoring for the droplet
+    being created. This defaults to false, or not enabled.
+    
+-   `ipv6` (bool) - Set to true to enable ipv6 for the droplet being
+    created. This defaults to false, or not enabled.
+    
+-   `snapshot_name` (string) - The name of the resulting snapshot that will
+    appear in your account. Defaults to `packer-{{timestamp}}` (see
+    configuration templates for more info).
+    
+-   `snapshot_regions` ([]string) - The regions of the resulting
+    snapshot that will appear in your account.
+    
+-   `state_timeout` (duration string | ex: "1h5m2s") - The time to wait, as a duration string, for a
+    droplet to enter a desired state (such as "active") before timing out. The
+    default state timeout is "6m".
+    
+-   `snapshot_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
+    gallery before timing out. If your Packer build is failing on the
+    Publishing to Shared Image Gallery step with the error `Original Error:
+    context deadline exceeded`, but the image is present when you check your
+    Azure dashboard, then you probably need to increase this timeout from
+    its default of "60m" (valid time units include `s` for seconds, `m` for
+    minutes, and `h` for hours.)
+    
+-   `droplet_name` (string) - The name assigned to the droplet. DigitalOcean
+    sets the hostname of the machine to this value.
+    
+-   `user_data` (string) - User data to launch with the Droplet. Packer will
+    not automatically wait for a user script to finish before shutting down the
+    instance this must be handled in a provisioner.
+    
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the Droplet.
+    
+-   `tags` ([]string) - Tags to apply to the droplet when it is created
+    

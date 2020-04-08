@@ -61,7 +61,7 @@ type Config struct {
 	// exist and be writable.
 	BundleDestination string `mapstructure:"bundle_destination" required:"false"`
 	// The prefix for files created from bundling the root volume. By default
-	// this is image-{{timestamp}}. The timestamp variable should be used to
+	// this is `image-{{timestamp}}`. The timestamp variable should be used to
 	// make sure this is unique, otherwise it can collide with other created
 	// AMIs by Packer in your account.
 	BundlePrefix string `mapstructure:"bundle_prefix" required:"false"`

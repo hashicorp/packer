@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the Config struct in builder/docker/config.go; DO NOT EDIT MANUALLY -->
+
+-   `commit` (bool) - If true, the container will be committed to an image rather than exported.
+    
+-   `discard` (bool) - Throw away the container when the build is complete. This is useful for
+    the [artifice
+    post-processor](/docs/post-processors/artifice).
+    
+-   `export_path` (string) - The path where the final container will be exported as a tar file.
+    
+-   `image` (string) - The base image for the Docker container that will be started. This image
+    will be pulled from the Docker registry if it doesn't already exist.
+    
+-   `message` (string) - Set a message for the commit.
+    

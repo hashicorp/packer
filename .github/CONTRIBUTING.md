@@ -15,20 +15,20 @@ can quickly merge or address your contributions.
 
 ### Reporting an Issue
 
-* Make sure you test against the latest released version. It is possible we
+- Make sure you test against the latest released version. It is possible we
   already fixed the bug you're experiencing.
 
-* Run the command with debug output with the environment variable `PACKER_LOG`.
+- Run the command with debug output with the environment variable `PACKER_LOG`.
   For example: `PACKER_LOG=1 packer build template.json`. Take the _entire_
   output and create a [gist](https://gist.github.com) for linking to in your
   issue. Packer should strip sensitive keys from the output, but take a look
   through just in case.
 
-* Provide a reproducible test case. If a contributor can't reproduce an issue,
+- Provide a reproducible test case. If a contributor can't reproduce an issue,
   then it dramatically lowers the chances it'll get fixed. And in some cases,
   the issue will eventually be closed.
 
-* Respond promptly to any questions made by the Packer team to your issue. Stale
+- Respond promptly to any questions made by the Packer team to your issue. Stale
   issues will be closed.
 
 ### Issue Lifecycle
@@ -86,22 +86,22 @@ The instructions below are for go 1.7. or later.
    submitting a pull-request.
 
 ### Windows Systems
+
 On windows systems you need at least the [MinGW Tools](http://www.mingw.org/), e.g. install via [choco](https://chocolatey.org/):
 
 ```
 choco install mingw -y
 ```
 
-This installs the GCC compiler, as well as a ```mingw32-make``` which can be used wherever
-this documentation mentions ```make```
+This installs the GCC compiler, as well as a `mingw32-make` which can be used wherever
+this documentation mentions `make`
 
-when building using ```go``` you also need to mention the windows
+when building using `go` you also need to mention the windows
 executable extension
 
 ```
 go build -o bin/packer.exe
 ```
-
 
 ### Opening an Pull Request
 
@@ -131,37 +131,36 @@ to use `git push ...`.
 ### Pull Request Lifecycle
 
 1. You are welcome to submit your pull request for commentary or review before
-  it is fully completed. Please prefix the title of your pull request with
-  "[WIP]" to indicate this. It's also a good idea to include specific questions
-  or items you'd like feedback on.
+   it is fully completed. Please prefix the title of your pull request with
+   "[WIP]" to indicate this. It's also a good idea to include specific questions
+   or items you'd like feedback on.
 
 2. Once you believe your pull request is ready to be merged, you can remove any
-  "[WIP]" prefix from the title and a core team member will review.
+   "[WIP]" prefix from the title and a core team member will review.
 
 3. One of Packer's core team members will look over your contribution and
-  either merge, or provide comments letting you know if there is anything left
-  to do. We do our best to provide feedback in a timely manner, but it may take
-  some time for us to respond. We may also have questions that we need answered
-  about the code, either because something doesn't make sense to us or because
-  we want to understand your thought process.
+   either merge, or provide comments letting you know if there is anything left
+   to do. We do our best to provide feedback in a timely manner, but it may take
+   some time for us to respond. We may also have questions that we need answered
+   about the code, either because something doesn't make sense to us or because
+   we want to understand your thought process.
 
 4. If we have requested changes, you can either make those changes or, if you
-  disagree with the suggested changes, we can have a conversation about our
-  reasoning and agree on a path forward. This may be a multi-step process. Our
-  view is that pull requests are a chance to collaborate, and we welcome
-  conversations about how to do things better. It is the contributor's
-  responsibility to address any changes requested. While reviewers are happy to
-  give guidance, it is unsustainable for us to perform the coding work necessary
-  to get a PR into a mergeable state.
+   disagree with the suggested changes, we can have a conversation about our
+   reasoning and agree on a path forward. This may be a multi-step process. Our
+   view is that pull requests are a chance to collaborate, and we welcome
+   conversations about how to do things better. It is the contributor's
+   responsibility to address any changes requested. While reviewers are happy to
+   give guidance, it is unsustainable for us to perform the coding work necessary
+   to get a PR into a mergeable state.
 
 5. Once all outstanding comments and checklist items have been addressed, your
-  contribution will be merged! Merged PRs will be included in the next
-  Packer release. The core team takes care of updating the
-  [CHANGELOG.md](../CHANGELOG.md) as they merge.
+   contribution will be merged! Merged PRs will be included in the next
+   Packer release. The core team takes care of updating the
+   [CHANGELOG.md](../CHANGELOG.md) as they merge.
 
 6. In rare cases, we might decide that a PR should be closed without merging.
-  We'll make sure to provide clear reasoning when this happens.
-
+   We'll make sure to provide clear reasoning when this happens.
 
 ### Tips for Working on Packer
 
@@ -250,7 +249,7 @@ does not attempt to track the latest version for each dependency.
 
 Packer relies on `go generate` to generate a [peg parser for boot
 commands](https://github.com/hashicorp/packer/blob/master/common/bootcommand/boot_command.go),
-[docs](https://github.com/hashicorp/packer/blob/master/website/source/partials/builder/amazon/chroot/_Config-not-required.html.md)
+[docs](https://github.com/hashicorp/packer/blob/master/website/pages/partials/builder/amazon/chroot/_Config-not-required.mdx)
 and HCL2's bridging code. Packer's testing suite will run `make check-generate`
 to check that all the generated files Packer needs are what they should be.
 `make generate` re-generates all these file and can take a while depending on
@@ -266,11 +265,13 @@ Packer relies on [golangci-lint](https://github.com/golangci/golangci-lint) for 
 The main configuration for golangci-lint is the `.golangci.yml` in the project root. See `golangci-lint --help` for a list of flags that can be used to override the default configuration.
 
 Run golangci-lint on the entire Packer code base.
+
 ```
 make lint
 ```
 
 Run golangci-lint on a single pkg or directory; PKG_NAME expands to /builder/amazon/...
+
 ```
 make lint PKG_NAME=builder/amazon
 ```
@@ -327,6 +328,205 @@ make testacc TEST=./builder/amazon/ebs TESTARGS="-run TestBuilderAcc_forceDelete
 Acceptance tests typically require other environment variables to be set for
 things such as API tokens and keys. Each test should error and tell you which
 credentials are missing, so those are not documented here.
+
+#### Running Provisioners Acceptance Tests
+
+**Warning:** The acceptance tests create/destroy/modify _real resources_, which
+may incur costs for real money. In the presence of a bug, it is possible that
+resources may be left behind, which can cost money even though you were not
+using them. We recommend running tests in an account used only for that purpose
+so it is easy to see if there are any dangling resources, and so production
+resources are not accidentally destroyed or overwritten during testing. 
+Also, these typically require an API key (AWS, GCE), or additional software 
+to be installed on your computer (VirtualBox, VMware).
+
+To run the Provisioners Acceptance Tests you should use both **ACC_TEST_BUILDERS** and **ACC_TEST_PROVISIONERS** variables to 
+tell which provisioner and builder the test should be run against.
+
+Examples of usage:
+
+- Run the Shell provisioner acceptance tests against the Amazon EBS builder.
+    ```
+    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell go test ./provisioner/shell/... -v -timeout=1h
+    ```
+- Do the same but using the Makefile
+    ```
+    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell make provisioners-acctest
+    ```
+- Run the all Shell and Powershell provisioners acceptance tests against the Amazon EBS builder.
+    ```
+    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=shell,powershell make provisioners-acctest
+    ```
+- Run the all provisioners acceptance tests against the Amazon EBS builder.
+    ```
+    ACC_TEST_BUILDERS=amazon-ebs ACC_TEST_PROVISIONERS=all make provisioners-acctest
+    ```
+- Run the all provisioners acceptance tests against all builders whenever they are compatible.
+    ```
+    ACC_TEST_BUILDERS=all ACC_TEST_PROVISIONERS=all make provisioners-acctest
+    ```
+
+Both **ACC_TEST_BUILDERS** and **ACC_TEST_PROVISIONERS** allows defining a list of builders and provisioners separated by comma 
+(e.g. `ACC_TEST_BUILDERS=amazon-ebs,virtualbox-iso`)   
+
+
+#### Writing Provisioner Acceptance Tests
+
+Packer has an already implemented structure that will run the provisioner against builders and you can find it in `helper/tests/acc/provisioners.go`.
+All provisioners should use this structure in their acceptance tests.  
+
+To start writing a new provisioner acceptance test, you should add a test file named as `provisioner_acc_test.go` in the provisioner folder
+and the package should be `<provisioner>_test`. This file should have a struct that will implement the ProvisionerAcceptance interface.
+
+```go
+type ProvisionerAcceptance interface {
+	GetName() string
+	GetConfig() (string, error)
+	GetProvisionerStore() packer.MapOfProvisioner
+	IsCompatible(builder string, vmOS string) bool
+	RunTest(c *command.BuildCommand, args []string) error
+}
+```
+
+- **GetName()** should return the provisioner type. For example for the Shell provisioner the method returns "shell".
+
+- **GetConfig()** should read a text file with the json configuration block for the provisioner and any other necessary provisioner. 
+For the Shell one the file contains:
+
+    ```
+    {
+      "type": "shell",
+      "inline": [
+        "echo {{ build `ID`}} > provisioner.{{ build `PackerRunUUID`}}.txt"
+      ]
+    },
+    {
+        "type": "file",
+        "source": "provisioner.{{ build `PackerRunUUID`}}.txt",
+        "destination": "provisioner.shell.{{ build `PackerRunUUID`}}.txt",
+        "direction": "download"
+    }
+    ```
+  The file should be placed under the `test-fixtures` folder.   
+  In this case, it's necessary to use the File provisioner to validate if the Shell provisioner test is successful or not. 
+  This config should be returned as string that will be later merged with the builder config into a full template.
+
+- **GetProvisionerStore()** this returns the provisioner store where we declare the available provisioners for running the build. 
+For the Shell provisioners this is:
+    ```go
+      func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
+      	return packer.MapOfProvisioner{
+      		"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+      		"file":  func() (packer.Provisioner, error) { return &file.Provisioner{}, nil },
+      	}
+      }
+    ```
+
+- **IsCompatible(builder string, vmOS string)** returns true or false whether the provisioner should run against a
+specific builder or/and specific OS.
+
+- **RunTest(c \*command.BuildCommand, args []string)** it will actually run the build and return any error if it fails the validations.
+For the Shell provisioner this is: 
+    ```go
+      func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
+      	// Provisioner specific setup
+      	UUID := os.Getenv("PACKER_RUN_UUID")
+      	if UUID == "" {
+      		UUID, _ = uuid.GenerateUUID()
+      		os.Setenv("PACKER_RUN_UUID", UUID)
+      	}  
+      	file := "provisioner.shell." + UUID + ".txt"
+      	defer testshelper.CleanupFiles(file)
+      
+      	// Run build 
+    	// All provisioner acc tests should contain this code and validation
+      	if code := c.Run(args); code != 0 {
+      		ui := c.Meta.Ui.(*packer.BasicUi)
+      		out := ui.Writer.(*bytes.Buffer)
+      		err := ui.ErrorWriter.(*bytes.Buffer)
+      		return fmt.Errorf(
+      			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
+      			out.String(),
+      			err.String())
+      	}
+      
+      	// Any other extra specific validation
+      	if !testshelper.FileExists(file) {
+      		return fmt.Errorf("Expected to find %s", file)
+      	}
+      	return nil
+      }
+    
+    ```   
+    
+After writing the struct and implementing the interface, now is time to write the test that will run all
+of this code you wrote. Your test should be like: 
+
+```go
+func TestShellProvisioner(t *testing.T) {
+	acc.TestProvisionersPreCheck("shell", t)
+	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
+}
+``` 
+
+If the environment variable **ACC_TEST_PROVISIONERS** is set as `all` or contains the provisioner type, then the test should run, otherwise the test should skip.
+In case of running it, you'll need to call the helper function `acc.TestProvisionersAgainstBuilders` passing a pointer to the test struct created above and the test testing pointer.  
+
+The method `TestProvisionersAgainstBuilders` will run the provisioner against all available and compatible builders. An available builder
+is the one that has the necessary code for running this type of test. In case the builder you want to run against is not available for testing, you can write it following the next steps.   
+
+To add a new builder to the available builders for provisioners acc testing, you'll need to create a new folder under the builder folder
+called `acceptance` and inside you create the `builder_acceptance.go` file and the package should be `<builder>_acc`. Like the provisioners, you'll need to create a struct that will
+implement the BuilderAcceptance interface.
+```go
+type BuilderAcceptance interface {
+	GetConfigs() (map[string]string, error)
+	GetBuilderStore() packer.MapOfBuilder
+	CleanUp() error
+}
+```
+- **GetConfigs()** should read a text file with the json configuration block for the builder and return a map of configs by OS type. 
+For the Amazon EBS builder the file contains:
+    ```
+      {
+        "type": "amazon-ebs",
+        "ami_name": "packer-acc-test",
+        "instance_type": "m1.small",
+        "region": "us-east-1",
+        "ssh_username": "ubuntu",
+        "source_ami": "ami-0568456c",
+        "force_deregister" : true,
+        "tags": {
+          "packer-test": "true"
+        }
+      }
+    ```
+    The file should be placed under the `test-fixtures` folder. 
+    In case you need to make references to another file, you'll need to add the relative path to provisioners folder like:
+    `../../builder/amazon/ebs/acceptance/test-fixtures/file.txt`. 
+
+- **GetBuilderStore()** this returns the builder store where we declare the available builders for running the build. 
+For the Amazon EBS builder this is:
+    ```go
+    func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
+        return packer.MapOfBuilder{
+            "amazon-ebs": func() (packer.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
+        }
+    }
+    ```
+  
+- **CleanUp()** cleans any resource created by the builder whether local or remote.
+
+Once you created the builder necessary code, the last step is adding it to the `BuildersAccTest` map in `helper/tests/acc/provisioners.go`.
+```go
+var BuildersAccTest = map[string]BuilderAcceptance{
+	...
+	"amazon-ebs":     new(amazonEBS.AmazonEBSAccTest),
+	...
+}
+```
+
+Once you finish the steps, you should be ready to run your new provisioner acceptance test. 
 
 #### Debugging Plugins
 

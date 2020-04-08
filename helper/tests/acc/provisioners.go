@@ -3,12 +3,13 @@ package acc
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/helper/tests"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	testshelper "github.com/hashicorp/packer/helper/tests"
 
 	amazonEBS "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
 	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
@@ -66,6 +67,26 @@ func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *te
 			})
 		}
 	}
+}
+
+// TestProvisionersPreCheck checks if the Provisioner with name is set in ACC_TEST_PROVISIONERS environment variable
+func TestProvisionersPreCheck(name string, t *testing.T) {
+	p := os.Getenv("ACC_TEST_PROVISIONERS")
+
+	if p == "all" {
+		return
+	}
+
+	provisioners := strings.Split(p, ",")
+	for _, provisioner := range provisioners {
+		if provisioner == name {
+			return
+		}
+	}
+
+	msg := fmt.Sprintf("Provisioner %q not defined in ACC_TEST_PROVISIONERS", name)
+	t.Skip(msg)
+
 }
 
 func checkBuilders(t *testing.T) []string {

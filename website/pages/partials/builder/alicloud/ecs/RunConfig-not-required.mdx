@@ -1,0 +1,94 @@
+<!-- Code generated from the comments of the RunConfig struct in builder/alicloud/ecs/run_config.go; DO NOT EDIT MANUALLY -->
+
+-   `associate_public_ip_address` (bool) - Associate Public Ip Address
+-   `zone_id` (string) - ID of the zone to which the disk belongs.
+    
+-   `io_optimized` (boolean) - Whether an ECS instance is I/O optimized or not. If this option is not
+    provided, the value will be determined by product API according to what
+    `instance_type` is used.
+    
+-   `description` (string) - Description
+-   `force_stop_instance` (bool) - Whether to force shutdown upon device
+    restart. The default value is `false`.
+    
+    If it is set to `false`, the system is shut down normally; if it is set to
+    `true`, the system is forced to shut down.
+    
+-   `disable_stop_instance` (bool) - If this option is set to true, Packer
+    will not stop the instance for you, and you need to make sure the instance
+    will be stopped in the final provisioner command. Otherwise, Packer will
+    timeout while waiting the instance to be stopped. This option is provided
+    for some specific scenarios that you want to stop the instance by yourself.
+    E.g., Sysprep a windows which may shutdown the instance within its command.
+    The default value is false.
+    
+-   `security_group_id` (string) - ID of the security group to which a newly
+    created instance belongs. Mutual access is allowed between instances in one
+    security group. If not specified, the newly created instance will be added
+    to the default security group. If the default group doesn’t exist, or the
+    number of instances in it has reached the maximum limit, a new security
+    group will be created automatically.
+    
+-   `security_group_name` (string) - The security group name. The default value
+    is blank. [2, 128] English or Chinese characters, must begin with an
+    uppercase/lowercase letter or Chinese character. Can contain numbers, .,
+    _ or -. It cannot begin with `http://` or `https://`.
+    
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use user_data_file, instead.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
+    
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
+    
+-   `vpc_id` (string) - VPC ID allocated by the system.
+    
+-   `vpc_name` (string) - The VPC name. The default value is blank. [2, 128]
+    English or Chinese characters, must begin with an uppercase/lowercase
+    letter or Chinese character. Can contain numbers, _ and -. The disk
+    description will appear on the console. Cannot begin with `http://` or
+    `https://`.
+    
+-   `vpc_cidr_block` (string) - Value options: 192.168.0.0/16 and
+    172.16.0.0/16. When not specified, the default value is 172.16.0.0/16.
+    
+-   `vswitch_id` (string) - The ID of the VSwitch to be used.
+    
+-   `vswitch_name` (string) - The ID of the VSwitch to be used.
+    
+-   `instance_name` (string) - Display name of the instance, which is a string of 2 to 128 Chinese or
+    English characters. It must begin with an uppercase/lowercase letter or
+    a Chinese character and can contain numerals, `.`, `_`, or `-`. The
+    instance name is displayed on the Alibaba Cloud console. If this
+    parameter is not specified, the default value is InstanceId of the
+    instance. It cannot begin with `http://` or `https://`.
+    
+-   `internet_charge_type` (string) - Internet charge type, which can be
+    `PayByTraffic` or `PayByBandwidth`. Optional values:
+    -   `PayByBandwidth`
+    -   `PayByTraffic`
+    
+    If this parameter is not specified, the default value is `PayByBandwidth`.
+    For the regions out of China, currently only support `PayByTraffic`, you
+    must set it manfully.
+    
+-   `internet_max_bandwidth_out` (int) - Maximum outgoing bandwidth to the
+    public network, measured in Mbps (Mega bits per second).
+    
+    Value range:
+    -   `PayByBandwidth`: \[0, 100\]. If this parameter is not specified, API
+        automatically sets it to 0 Mbps.
+    -   `PayByTraffic`: \[1, 100\]. If this parameter is not specified, an
+        error is returned.
+    
+-   `wait_snapshot_ready_timeout` (int) - Timeout of creating snapshot(s).
+    The default timeout is 3600 seconds if this option is not set or is set
+    to 0. For those disks containing lots of data, it may require a higher
+    timeout value.
+    
+-   `ssh_private_ip` (bool) - If this value is true, packer will connect to
+    the ECS created through private ip instead of allocating a public ip or an
+    EIP. The default value is false.
+    

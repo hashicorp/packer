@@ -3,6 +3,7 @@ package powershell
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() map[string]interface{} {
@@ -560,6 +562,113 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		flattenedEnvVars = p.createFlattenedEnvVars(true)
 		if flattenedEnvVars != expectedValue {
 			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
+	}
+}
+
+func TestProvisionerCorrectlyInterpolatesValidExitCodes(t *testing.T) {
+	type testCases struct {
+		Input    interface{}
+		Expected []int
+	}
+	validExitCodeTests := []testCases{
+		{"0", []int{0}},
+		{[]string{"0"}, []int{0}},
+		{[]int{0, 12345}, []int{0, 12345}},
+		{[]string{"0", "12345"}, []int{0, 12345}},
+		{"0,12345", []int{0, 12345}},
+	}
+
+	for _, tc := range validExitCodeTests {
+		p := new(Provisioner)
+		config := testConfig()
+		config["valid_exit_codes"] = tc.Input
+		err := p.Prepare(config)
+
+		if err != nil {
+			t.Fatalf("Shouldn't have had error interpolating exit codes")
+		}
+		assert.ElementsMatchf(t, p.config.ValidExitCodes, tc.Expected,
+			fmt.Sprintf("expected exit codes to be: %#v, got %#v.", p.config.ValidExitCodes, tc.Expected))
+	}
+}
+
+func TestProvisionerCorrectlyInterpolatesExecutionPolicy(t *testing.T) {
+	type testCases struct {
+		Input       interface{}
+		Expected    ExecutionPolicy
+		ErrExpected bool
+	}
+	tests := []testCases{
+		{
+			Input:       "bypass",
+			Expected:    ExecutionPolicy(0),
+			ErrExpected: false,
+		},
+		{
+			Input:       "allsigned",
+			Expected:    ExecutionPolicy(1),
+			ErrExpected: false,
+		},
+		{
+			Input:       "default",
+			Expected:    ExecutionPolicy(2),
+			ErrExpected: false,
+		},
+		{
+			Input:       "remotesigned",
+			Expected:    ExecutionPolicy(3),
+			ErrExpected: false,
+		},
+		{
+			Input:       "restricted",
+			Expected:    ExecutionPolicy(4),
+			ErrExpected: false,
+		},
+		{
+			Input:       "undefined",
+			Expected:    ExecutionPolicy(5),
+			ErrExpected: false,
+		},
+		{
+			Input:       "unrestricted",
+			Expected:    ExecutionPolicy(6),
+			ErrExpected: false,
+		},
+		{
+			Input:       "none",
+			Expected:    ExecutionPolicy(7),
+			ErrExpected: false,
+		},
+		{
+			Input:       "0", // User can supply a valid number for policy, too
+			Expected:    0,
+			ErrExpected: false,
+		},
+		{
+			Input:       "invalid",
+			Expected:    0,
+			ErrExpected: true,
+		},
+		{
+			Input:       "100", // If number is invalid policy, reject.
+			Expected:    100,
+			ErrExpected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		p := new(Provisioner)
+		config := testConfig()
+		config["execution_policy"] = tc.Input
+		err := p.Prepare(config)
+
+		if (err != nil) != tc.ErrExpected {
+			t.Fatalf("Either err was expected, or shouldn't have happened: %#v", tc)
+		}
+		if err == nil {
+			assert.Equal(t, p.config.ExecutionPolicy, tc.Expected,
+				fmt.Sprintf("expected %#v, got %#v.", p.config.ExecutionPolicy, tc.Expected))
 		}
 	}
 }

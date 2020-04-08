@@ -58,7 +58,7 @@ type Config struct {
 	// Defaults to pd-standard.
 	DiskType string `mapstructure:"disk_type" required:"false"`
 	// The unique name of the resulting image. Defaults to
-	// "packer-{{timestamp}}".
+	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
@@ -84,7 +84,7 @@ type Config struct {
 	// Licenses to apply to the created image.
 	ImageLicenses []string `mapstructure:"image_licenses" required:"false"`
 	// A name to give the launched instance. Beware that this must be unique.
-	// Defaults to "packer-{{uuid}}".
+	// Defaults to `packer-{{uuid}}`.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
 	// Key/value pair labels to apply to the launched instance.
 	Labels map[string]string `mapstructure:"labels" required:"false"`
@@ -172,7 +172,7 @@ type Config struct {
 	// Google's cloud. The value should be the path of the token generator
 	// within vault.
 	// For information on how to configure your Vault + GCP engine to produce
-	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp.html
+	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp
 	// You must have the environment variables VAULT_ADDR and VAULT_TOKEN set,
 	// along with any other relevant variables for accessing your vault
 	// instance. For more information, see the Vault docs:

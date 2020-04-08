@@ -36,12 +36,12 @@ type Config struct {
 	Commit bool `mapstructure:"commit" required:"true"`
 
 	// The directory inside container to mount temp directory from host server
-	// for work [file provisioner](/docs/provisioners/file.html). This defaults
+	// for work [file provisioner](/docs/provisioners/file). This defaults
 	// to c:/packer-files on windows and /packer-files on other systems.
 	ContainerDir string `mapstructure:"container_dir" required:"false"`
 	// Throw away the container when the build is complete. This is useful for
 	// the [artifice
-	// post-processor](https://www.packer.io/docs/post-processors/artifice.html).
+	// post-processor](/docs/post-processors/artifice).
 	Discard bool `mapstructure:"discard" required:"true"`
 	// Username (UID) to run remote commands with. You can also set the group
 	// name/ID if you want: (UID or UID:GID). You may need this if you get
@@ -63,10 +63,10 @@ type Config struct {
 	// used. This defaults to true if not set.
 	Pull bool `mapstructure:"pull" required:"false"`
 	// An array of arguments to pass to docker run in order to run the
-	// container. By default this is set to ["-d", "-i", "-t",
-	// "--entrypoint=/bin/sh", "--", "{{.Image}}"] if you are using a linux
-	// container, and ["-d", "-i", "-t", "--entrypoint=powershell", "--",
-	// "{{.Image}}"] if you are running a windows container. {{.Image}} is a
+	// container. By default this is set to `["-d", "-i", "-t",
+	// "--entrypoint=/bin/sh", "--", "{{.Image}}"]` if you are using a linux
+	// container, and `["-d", "-i", "-t", "--entrypoint=powershell", "--",
+	// "{{.Image}}"]` if you are running a windows container. `{{.Image}}` is a
 	// template variable that corresponds to the image template option. Passing
 	// the entrypoint option this way will make it the default entrypoint of
 	// the resulting image, so running docker run -it --rm  will start the

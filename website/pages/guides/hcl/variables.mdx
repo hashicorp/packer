@@ -1,0 +1,233 @@
+---
+layout: guides
+page_title: Input and Local Variables guide
+sidebar_title: Variables
+description: |-
+  This page introduces input variables and local variables as a way to
+  parameterize a configuration.
+---
+
+# Input Variables and local variables
+
+@include 'guides/hcl2-beta-note.mdx'
+
+This page introduces input variables and local variables as a way to
+parameterize a configuration. Once defined, input variables are settable from a
+default value, environment, special var files, and command line arguments.
+Local variables can be a compound of input variables and local variables.
+
+## Defining Variables and locals
+
+Let's create a file `variables.pkr.hcl` with the following contents.
+
+-> **Note**: that the file can be named anything, since Packer loads all
+files ending in `.pkr.hcl` in a directory. If you split your configuration
+across multiple files, use `packer build <source directory>` to initiate
+a build.
+
+```hcl
+# variables.pkr.hcl
+
+variable "access_key" {}
+variable "secret_key" {}
+variable "region" {
+  default = "us-east-1"
+}
+
+locals {
+  debian_ami_name = "${var.image_id}-debian"
+  foo             = "bar"
+}
+```
+
+This defines three variables within your Packer configuration. The first
+two have empty blocks `{}`. The third sets a default. If a default value is
+set, the variable is optional. Otherwise, the variable is required.
+This also defines two locals: `debian_ami_name` and `foo`.
+
+-> **Note**: that it is _not_ possible to use variables in a variable definition
+but it _is_ possible to use locals and variables in a local definition.
+
+## Using Variables and locals in Configuration
+
+Next, you can define a source using the variables :
+
+```hcl
+# source.pkr.hcl
+
+source "amazon-ebs" "debian" {
+  ami_name   = local.debian_ami_name
+  access_key = var.aws_access_key
+  secret_key = "${var.aws_secret_key}"
+  region     = "${var.aws_region}"
+}
+```
+
+This uses more interpolations, this time prefixed with `var.` and `.local`.
+This tells Packer that you're accessing variables. This configures the builder
+with the given variables.
+
+## Assigning Variables
+
+There are multiple ways to assign variables. Below is also the order
+in which variable values are chosen. The following is the descending order
+of precedence in which variables are considered. So first defined; first used.
+
+#### Command-line flags
+
+You can set variables directly on the command-line with the
+`-var` flag.:
+
+```shell
+$ packer build \
+  -var 'access_key=foo' \
+  -var 'secret_key=bar'
+# ...
+```
+
+Once again, setting variables this way will not save them, and they'll
+have to be input repeatedly as commands are executed.
+
+#### From a file
+
+To persist variable values, create a file and assign variables within
+this file. Create a file named `variables.pkrvars.hcl` with the following
+contents:
+
+```hcl
+access_key = "foo"
+secret_key = "bar"
+```
+
+For all files which match `*.auto.pkrvars.hcl` present in the current
+directory, Packer automatically loads them to populate variables. If the file
+is named something else, you can use the `-var-file` flag directly to specify a
+file. These files are the same syntax as Packer configuration files. And like
+Packer configuration files, these files can also be JSON.
+
+We don't recommend saving usernames and password to version control, but you
+can create a local secret variables file and use `-var-file` to load it.
+
+You can use multiple `-var-file` arguments in a single command, with some
+checked in to version control and others not checked in. For example:
+
+```shell
+$ packer build \
+  -var-file="secret.pkrvars.hcl" \
+  -var-file="production.pkrvars.hcl"
+```
+
+#### From environment variables
+
+Packer will read environment variables in the form of `PKR_VAR_name` to find
+the value for a variable. For example, the `PKR_VAR_access_key` variable can be
+set to set the `access_key` variable.
+
+#### Variable Defaults
+
+If no value is assigned to a variable via any of these methods and the
+variable has a `default` key in its declaration, that value will be used
+for the variable.
+
+#### Unspecified values fails
+
+If you execute `packer build` with certain variables unspecified and those are
+used somewhere, Packer will error.
+
+## Lists
+
+Lists are defined either explicitly or implicitly
+
+```hcl
+# implicitly by using brackets [...]
+variable "cidrs" { default = [] }
+
+# explicitly
+variable "cidrs" { type = "list" }
+```
+
+You can specify lists in a `variables.pkrvars.hcl` file:
+
+```hcl
+cidrs = [ "10.0.0.0/16", "10.1.0.0/16" ]
+```
+
+## Maps
+
+Maps are a way to create variables that are lookup tables. An example
+will show this best. Let's extract our AMIs into a map and add
+support for the `us-west-2` region as well:
+
+```hcl
+variable "amis" {
+  type = "map"
+  default = {
+    "us-east-1" = "ami-b374d5a5"
+    "us-west-2" = "ami-4b32be2b"
+  }
+}
+```
+
+A variable can have a `map` type assigned explicitly, or it can be implicitly
+declared as a map by specifying a default value that is a map. The above
+demonstrates both.
+
+Then we can `lookup` in maps like in the following:
+
+```hcl
+source "amazon-ebs" "example" {
+  source_ami    = "${lookup(var.amis, var.region)}"
+  instance_type = "t2.micro"
+}
+```
+
+This introduces a new type of interpolation: a function call. The
+`lookup` function does a dynamic lookup in a map for a key. The
+key is `var.region`, which specifies that the value of the region
+variables is the key.
+
+You can also do a static lookup of a map directly with
+`${var.amis["us-east-1"]}`.
+
+## Assigning Maps
+
+We set defaults above, but maps can also be set using the `-var` and
+`-var-file` values. For example:
+
+```shell
+$ packer build -var 'amis={ us-east-1 = "foo", us-west-2 = "bar" }'
+# ...
+```
+
+Here is an example of setting a map's keys from a file. Starting with these
+variable definitions:
+
+```hcl
+variable "region" {}
+variable "amis" {
+  type = "map"
+}
+```
+
+You can specify keys in a `variables.pkrvars.hcl` file:
+
+```hcl
+amis = {
+  "us-east-1" = "ami-abc123"
+  "us-west-2" = "ami-def456"
+}
+```
+
+And access them via `lookup()`:
+
+```hcl
+output "ami" {
+  value = "${lookup(var.amis, var.region)}"
+}
+```
+
+Like so:
+
+```shell
+$ packer build -var region=us-west-2
+```

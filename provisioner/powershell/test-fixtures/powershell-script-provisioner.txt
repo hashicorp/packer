@@ -1,0 +1,11 @@
+{
+ "type": "powershell",
+ "script": "../../provisioner/powershell/test-fixtures/scripts/sample_script.ps1",
+ "environment_vars": [
+  "VAR1=A$Dollar",
+  "VAR2=A`Backtick",
+  "VAR3=A'SingleQuote",
+  "VAR4=A\"DoubleQuote"
+ ]
+}
+

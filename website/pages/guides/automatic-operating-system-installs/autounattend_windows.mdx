@@ -1,0 +1,92 @@
+---
+layout: guides
+page_title: Unattended Windows Installation
+sidebar_title: Unattended Installation for Windows
+description: |-
+  Learn how to use an autounattend file to automatically answer installation
+  questions and enable Packer to connect to your windows instnace.
+---
+
+# Unattended Installation for Windows
+
+Unattended Windows installation is done via "Answer Files", or "Unattend files".
+
+These files are generally named "autounattend.xml". They are not
+Packer-specific tools, though we do make use of them.
+
+If, after following this guide, you're still having issues getting an answer
+file working, We recommend you read the official documentation on
+[answer files](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/update-windows-settings-and-scripts-create-your-own-answer-file-sxs).
+
+The guide here is hopefully enough to get you started, but isn't a replacement
+for the official documentation.
+
+## When To Use an Answer File
+
+If you are installing the Windows Operating System from a mounted iso as part of
+your Packer build, you will need to use an Answer file. For example, you're
+building an image from scratch using the [vmware-iso](/docs/builders/vmware-iso),
+[virtualbox-iso](/docs/builders/virtualbox-iso), or
+[hyperv-iso](/docs/builders/hyperv-iso) builders.
+
+If you are not installing the operating system, you won't need to provide an
+answer file. If you are using a pre-built image
+in a cloud, you don't need to worry about Answer files.
+
+## How to make an Answer File
+
+You can either start from an example answer file from a known repo (take a look
+at the examples links below), or you can generate one using an answer file
+wizard by selecting New File > New Answer file on a Windows machine.
+A comprehensive list of all the options you can set in an answer file can be
+found [here](https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/components-b-unattend)
+
+## Where to put the Answer File
+
+Windows will automatically look for an autounattend.xml file on mounted drives.
+Many users use the `floppy_files` option or a secondary mounted iso for
+providing the answer file to their iso builders.
+
+You can also specify an unattend file to use by using the /unattend: option when
+running Windows Setup (setup.exe) in your `boot_command`.
+
+## What does Packer _need_ the Answer File to do?
+
+Packer needs the Answer File to handle any questions that would normally be
+answered interactively during a Windows installation.
+
+If you want to be able to use provisioners, the Answer file must also contain
+a script that sets up SSH or WinRM so that Packer can connect to the instance.
+
+Finally, your Packer build will be much smoother if the Answer File handles or
+disables windows updates rather than you tyring to run them using a Packer
+provisioner. This is because the winrm communicator does not handle the
+disconnects caused by automatic reboots in Windows updates well, and the
+disconnections can fail a build.
+
+## Examples
+
+The chef-maintained bento boxes are a great example of a windows build that
+sets up openssh as part of the unattended installation so that Packer can
+connect using the ssh communicator. They functioning answer files for every
+modern Windows version can be found [here](https://github.com/chef/bento/tree/master/packer_templates/windows/answer_files).
+
+Stefan Scherer's [packer-windows repo](https://github.com/StefanScherer/packer-windows)
+is a great example of windows builds that set up WinRM as part of the unattended
+installation so that Packer can connect using the winrm communicator:
+
+```json
+{
+  "type": "virtualbox-iso",
+  "guest_os_type": "Windows2008_64",
+  "iso_url": "https://download.microsoft.com/download/7/5/E/75EC4E54-5B02-42D6-8879-D8D3A25FBEF7/7601.17514.101119-1850_x64fre_server_eval_en-us-GRMSXEVAL_EN_DVD.iso",
+  "iso_checksum": "30832AD76CCFA4CE48CCB936EDEFE02079D42FB1DA32201BF9E3A880C8ED6312",
+  "iso_checksum_type": "sha256",
+  "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c Packer_Provisioning_Shutdown",
+  "guest_additions_mode": "attach",
+  "floppy_files": ["./scripts/Autounattend.xml", "./scripts/openssh.ps1"],
+  "communicator": "winrm",
+  "winrm_username": "vagrant",
+  "winrm_password": "vagrant"
+}
+```

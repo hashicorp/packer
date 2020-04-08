@@ -37,6 +37,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		DnsNameForPublicIP:         &template.TemplateParameter{Value: config.tmpComputeName},
 		NicName:                    &template.TemplateParameter{Value: config.tmpNicName},
 		OSDiskName:                 &template.TemplateParameter{Value: config.tmpOSDiskName},
+		DataDiskName:               &template.TemplateParameter{Value: config.tmpDataDiskName},
 		PublicIPAddressName:        &template.TemplateParameter{Value: config.tmpPublicIPAddressName},
 		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
@@ -96,7 +97,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	if len(config.AdditionalDiskSize) > 0 {
 		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "") || config.SharedGallery.Subscription != ""
-		builder.SetAdditionalDisks(config.AdditionalDiskSize, isManaged, config.diskCachingType)
+		builder.SetAdditionalDisks(config.AdditionalDiskSize, config.tmpDataDiskName, isManaged, config.diskCachingType)
 	}
 
 	if config.customData != "" {

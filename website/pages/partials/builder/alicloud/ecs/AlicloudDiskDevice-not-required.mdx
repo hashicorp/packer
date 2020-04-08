@@ -1,0 +1,39 @@
+<!-- Code generated from the comments of the AlicloudDiskDevice struct in builder/alicloud/ecs/image_config.go; DO NOT EDIT MANUALLY -->
+
+-   `disk_name` (string) - The value of disk name is blank by default. [2,
+    128] English or Chinese characters, must begin with an
+    uppercase/lowercase letter or Chinese character. Can contain numbers,
+    ., _ and -. The disk name will appear on the console. It cannot
+    begin with `http://` or `https://`.
+    
+-   `disk_category` (string) - Category of the system disk. Optional values
+    are:
+        -   cloud - general cloud disk
+        -   cloud_efficiency - efficiency cloud disk
+        -   cloud_ssd - cloud SSD
+    
+-   `disk_size` (int) - Size of the system disk, measured in GiB. Value
+    range: [20, 500]. The specified value must be equal to or greater
+    than max{20, ImageSize}. Default value: max{40, ImageSize}.
+    
+-   `disk_snapshot_id` (string) - Snapshots are used to create the data
+    disk After this parameter is specified, Size is ignored. The actual
+    size of the created disk is the size of the specified snapshot.
+    
+-   `disk_description` (string) - The value of disk description is blank by
+    default. [2, 256] characters. The disk description will appear on the
+    console. It cannot begin with `http://` or `https://`.
+    
+-   `disk_delete_with_instance` (bool) - Whether or not the disk is
+    released along with the instance:
+    
+-   `disk_device` (string) - Device information of the related instance:
+    such as /dev/xvdb It is null unless the Status is In_use.
+    
+-   `disk_encrypted` (boolean) - Whether or not to encrypt the data disk.
+    If this option is set to true, the data disk will be encryped and corresponding snapshot in the target image will also be encrypted. By
+    default, if this is an extra data disk, Packer will not encrypt the
+    data disk. Otherwise, Packer will keep the encryption setting to what
+    it was in the source image. Please refer to Introduction of ECS disk encryption
+    for more details.
+    

@@ -1,8 +1,0 @@
-required:
-    <config parameter>:
-        type: <type>
-        docs: <doc string>
-optional:
-    <config parameter>:
-        type: <type>
-        docs: <doc string>

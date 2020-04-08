@@ -894,7 +894,7 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 		if _, err := io.Copy(tf, src); err != nil {
 			return fmt.Errorf("Error copying input data into local temporary "+
 				"file. Check that TEMPDIR has enough space. Please see "+
-				"https://www.packer.io/docs/other/environment-variables.html#tmpdir"+
+				"https://www.packer.io/docs/other/environment-variables#tmpdir"+
 				"for more info. Error: %s", err)
 		}
 

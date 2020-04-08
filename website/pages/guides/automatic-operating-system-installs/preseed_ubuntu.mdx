@@ -1,0 +1,179 @@
+---
+layout: guides
+page_title: Unattended Debian/Ubuntu Installation
+sidebar_title: Unattended Installation for Debian
+description: |-
+  Learn how to use a preseed file to automatically answer installation
+  questions and enable Packer to connect to your Debian instnace.
+---
+
+# Unattended Installation for Debian
+
+Unattended Debian/Ubuntu installation is done via "preseed" files
+
+These files are generally named "preseed.cfg". They are not
+Packer-specific tools, though we do make use of them.
+
+If, after following this guide, you're still having issues getting a preseed
+file working, We recommend you read the official documentation on
+[preseed files](https://wiki.debian.org/DebianInstaller/Preseed).
+
+The guide here is hopefully enough to get you started, but isn't a replacement
+for the official documentation.
+
+## When To Use a Preseed File
+
+If you are installing the operating system from a mounted iso as part of
+your Packer build, you will need to use a preseed file. For example, you're
+building an image from scratch using the [vmware-iso](/docs/builders/vmware-iso),
+[virtualbox-iso](/docs/builders/virtualbox-iso), or
+[hyperv-iso](/docs/builders/hyperv-iso) builders.
+
+If you are not installing the operating system, you won't need to provide a
+preseed file. If you are using a pre-built image in a cloud, you don't need to
+worry about preseed files.
+
+## How to make a Preseed File
+
+You can either start from an example preseed file from a known repo (take a look
+at the examples links below), or you can start with the official [example
+preseed](https://www.debian.org/releases/stable/example-preseed.txt), and
+comment or uncomment the options as you need them.
+
+## Where to put the preseed file
+
+The `-iso` builders mentioned above all have an `http_dir` option. Any file
+inside of your `http_dir` will be served on a local fileserver for your virtual
+machine to be able to access. One very common use for this directory is to use
+it to provide your preseed file.
+
+You then reference the file using a `boot_command` to kick off the installation.
+In the example below, see how the `preseed/url` command line option is being
+used in the `/install/vmlinuz command`. The `{{ .HTTPIP }}` and
+`{{ .HTTPPort }}` options are special Packer template options that will get set
+by Packer to point to the http server we create, so that your boot command can
+access it. For an example of a working boot_command, see the Examples section
+below. For more information on how boot_command works, see the
+boot_command section of the docs for whatever builder you are using.
+
+## What does Packer _need_ the preseed file to do?
+
+Packer needs the preseed file to handle any questions that would normally be
+answered interactively during a Debian installation.
+
+If you want to be able to use provisioners, the preseed file must also install
+SSH so that Packer can connect to the instance.
+
+## Examples
+
+A very minimal example of a preseed file can be found below. Much of this was
+copied from the official example-preseed shared above. Notice that we are
+installing ssh via `d-i pkgsel/include string openssh-server` and configuring
+a username so that Packer will be able to connect.
+
+You need to make sure that your mirror settings are properly configured for your
+specific distribution of Debian.
+
+```shell
+# Preseeding only locale sets language, country and locale.
+d-i debian-installer/locale string en_US
+
+# Keyboard selection.
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/xkb-keymap select us
+
+choose-mirror-bin mirror/http/proxy string
+
+### Clock and time zone setup
+d-i clock-setup/utc boolean true
+d-i time/zone string UTC
+
+# Avoid that last message about the install being complete.
+d-i finish-install/reboot_in_progress note
+
+# This is fairly safe to set, it makes grub install automatically to the MBR
+# if no other operating system is detected on the machine.
+d-i grub-installer/only_debian boolean true
+
+# This one makes grub-installer install to the MBR if it also finds some other
+# OS, which is less safe as it might not be able to boot that other OS.
+d-i grub-installer/with_other_os boolean true
+
+### Mirror settings
+# If you select ftp, the mirror/country string does not need to be set.
+d-i mirror/country string manual
+d-i mirror/http/directory string /ubuntu/
+d-i mirror/http/hostname string archive.ubuntu.com
+d-i mirror/http/proxy string
+
+### Partitioning
+d-i partman-auto/method string lvm
+
+# This makes partman automatically partition without confirmation.
+d-i partman-md/confirm boolean true
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+### Account setup
+d-i passwd/user-fullname string vagrant
+d-i passwd/user-uid string 1000
+d-i passwd/user-password password vagrant
+d-i passwd/user-password-again password vagrant
+d-i passwd/username string vagrant
+
+# The installer will warn about weak passwords. If you are sure you know
+# what you're doing and want to override it, uncomment this.
+d-i user-setup/allow-password-weak boolean true
+d-i user-setup/encrypt-home boolean false
+
+### Package selection
+tasksel tasksel/first standard
+d-i pkgsel/include string openssh-server build-essential
+d-i pkgsel/install-language-support boolean false
+
+# disable automatic package updates
+d-i pkgsel/update-policy select none
+d-i pkgsel/upgrade select full-upgrade
+```
+
+Here's an example of the vmware-iso builder being used to call this preseed.
+In this case, it is assumed that the file is saved as preseed.cfg inside of a
+directory called "http", and Packer is being called from the directory
+containing the "http" directory.
+
+```hcl
+  "builders": [
+    {
+      "boot_command": [
+        "<esc><wait>",
+        "<esc><wait>",
+        "<enter><wait>",
+        "/install/vmlinuz<wait>",
+        " initrd=/install/initrd.gz",
+        " auto-install/enable=true",
+        " debconf/priority=critical",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_2.cfg<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "guest_os_type": "ubuntu-64",
+      "http_directory": "http",
+      "iso_checksum_type": "sha256",
+      "iso_checksum_url": "file:///Users/mmarsh/dev/repro_cases/packer_cache/shasums.txt",
+      "iso_url": "http://old-releases.ubuntu.com/releases/14.04.1/ubuntu-14.04.1-server-amd64.iso",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "ssh_password": "vagrant",
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "tools_upload_flavor": "linux",
+      "type": "vmware-iso"
+    }
+  ],
+```
+
+For more functional examples of a debian preseeded installation, you can see the
+Chef-maintained bento boxes for [Debian](https://github.com/chef/bento/tree/master/packer_templates/debian)
+and [Ubuntu](https://github.com/chef/bento/tree/master/packer_templates/ubuntu)

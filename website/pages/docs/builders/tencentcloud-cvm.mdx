@@ -1,0 +1,168 @@
+---
+description: |
+  The `tencentcloud-cvm` Packer builder plugin provide the capability to build
+  customized images based on an existing base images.
+layout: docs
+page_title: Tencentcloud Image Builder
+sidebar_title: Tencent Cloud
+---
+
+# Tencentcloud Image Builder
+
+Type: `tencentcloud-cvm`
+
+The `tencentcloud-cvm` Packer builder plugin provide the capability to build
+customized images based on an existing base images.
+
+## Configuration Reference
+
+The following configuration options are available for building Tencentcloud images.
+In addition to the options listed here,
+a [communicator](/docs/templates/communicator) can be configured for this builder.
+
+### Required:
+
+- `secret_id` (string) - Tencentcloud secret id. You should set it directly,
+  or set the `TENCENTCLOUD_ACCESS_KEY` environment variable.
+
+- `secret_key` (string) - Tencentcloud secret key. You should set it directly,
+  or set the `TENCENTCLOUD_SECRET_KEY` environment variable.
+
+- `region` (string) - The region where your cvm will be launch. You should
+  reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
+  for parameter taking.
+
+- `zone` (string) - The zone where your cvm will be launch. You should
+  reference [Region and Zone](https://intl.cloud.tencent.com/document/product/213/6091)
+  for parameter taking.
+
+- `instance_type` (string) - The instance type your cvm will be launched by.
+  You should reference [Instace Type](https://intl.cloud.tencent.com/document/product/213/11518)
+  for parameter taking.
+
+- `source_image_id` (string) - The base image id of Image you want to create
+  your customized image from.
+
+- `image_name` (string) - The name you want to create your customize image,
+  it should be composed of no more than 60 characters, of letters, numbers
+  or minus sign.
+
+### Optional:
+
+- `force_poweroff` (boolean) - Indicates whether to perform a forced shutdown to
+  create an image when soft shutdown fails. Default value is `false`.
+
+- `image_description` (string) - Image description. It should no more than 60 characters.
+
+- `reboot` (boolean, **deprecated**) - Whether shutdown cvm to create Image.
+  Please refer to parameter `force_poweroff`.
+
+- `sysprep` (boolean) - Whether enable Sysprep during creating windows image.
+
+- `image_copy_regions` (array of strings) - Regions that will be copied to after
+  your image created.
+
+- `image_share_accounts` (array of strings) - Accounts that will be shared to
+  after your image created.
+
+- `skip_region_validation` (boolean) - Do not check region and zone when validate.
+
+- `associate_public_ip_address` (boolean) - Whether allocate public ip to your cvm.
+  Default value is `false`.
+
+  If not set, you could access your cvm from the same vpc.
+
+- `internet_max_bandwidth_out` (number) - Max bandwidth out your cvm will be launched by(in MB).
+  values can be set between 1 ~ 100.
+
+- `instance_name` (string) - Instance name.
+
+- `disk_type` (string) - Root disk type your cvm will be launched by. you could
+  reference [Disk Type](https://intl.cloud.tencent.com/document/product/213/15753#SystemDisk)
+  for parameter taking.
+
+- `disk_size` (number) - Root disk size your cvm will be launched by. values range(in GB):
+
+  - LOCAL_BASIC: 50
+  - Other: 50 ~ 1000 (need whitelist if > 50)
+
+- `data_disks` (array of data disks) - Add one or more data disks to the instance before creating the
+  image. Note that if the source image has data disk snapshots, this argument will be ignored, and
+  the running instance will use source image data disk settings, in such case, `disk_type`
+  argument will be used as disk type for all data disks, and each data disk size will use the
+  origin value in source image.
+  The data disks allow for the following argument:
+
+  - `disk_type` - Type of the data disk. Valid choices: `CLOUD_BASIC`, `CLOUD_PREMIUM` and `CLOUD_SSD`.
+  - `disk_size` - Size of the data disk.
+  - `disk_snapshot_id` - Id of the snapshot for a data disk.
+
+- `vpc_id` (string) - Specify vpc your cvm will be launched by.
+
+- `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, packer will
+  create a vpc for you named this parameter.
+
+- `cidr_block` (boolean) - Specify cider block of the vpc you will create if `vpc_id` is not set.
+
+- `subnet_id` (string) - Specify subnet your cvm will be launched by.
+
+- `subnet_name` (string) - Specify subnet name you will create. if `subnet_id` is not set, packer will
+  create a subnet for you named this parameter.
+
+- `subnect_cidr_block` (boolean) - Specify cider block of the subnet you will create if
+  `subnet_id` is not set.
+
+- `security_group_id` (string) - Specify security group your cvm will be launched by.
+
+- `security_group_name` (string) - Specify security name you will create if `security_group_id` is not set.
+
+- `user_data` (string) - userdata.
+
+- `user_data_file` (string) - userdata file.
+
+- `host_name` (string) - host name.
+
+- `run_tags` (map of strings) - Tags to apply to the instance that is _launched_ to create the image.
+  These tags are _not_ applied to the resulting image.
+
+## Basic Example
+
+Here is a basic example for Tencentcloud.
+
+```json
+{
+  "variables": {
+    "secret_id": "{{env `TENCENTCLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `TENCENTCLOUD_SECRET_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "tencentcloud-cvm",
+      "secret_id": "{{user `secret_id`}}",
+      "secret_key": "{{user `secret_key`}}",
+      "region": "ap-guangzhou",
+      "zone": "ap-guangzhou-4",
+      "instance_type": "S4.SMALL1",
+      "source_image_id": "img-oikl1tzv",
+      "ssh_username": "root",
+      "image_name": "PackerTest",
+      "disk_type": "CLOUD_PREMIUM",
+      "packer_debug": true,
+      "associate_public_ip_address": true,
+      "run_tags": {
+        "good": "luck"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 30", "yum install redis.x86_64 -y"]
+    }
+  ]
+}
+```
+
+See the
+[examples/tencentcloud](https://github.com/hashicorp/packer/tree/master/examples/tencentcloud)
+folder in the packer project for more examples.

@@ -188,6 +188,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.ExecutionPolicy > 7 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf(`Invalid execution `+
+			`policy provided. Please supply one of: "bypass", "allsigned",`+
+			` "default", "remotesigned", "restricted", "undefined", `+
+			`"unrestricted", "none".`))
+	}
+
 	if errs != nil {
 		return errs
 	}
