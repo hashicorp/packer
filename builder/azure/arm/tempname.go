@@ -26,7 +26,6 @@ type TempName struct {
 func NewTempName(p string) *TempName {
 	tempName := &TempName{}
 
-
 	if p == "" {
 		suffix := random.AlphaNumLower(10)
 		tempName.ComputeName = fmt.Sprintf("pkrvm%s", suffix)
