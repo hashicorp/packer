@@ -633,7 +633,7 @@ func setWinRMCertificate(c *Config) error {
 }
 
 func setRuntimeValues(c *Config) {
-	var tempName = NewTempName(c.CaptureNamePrefix)
+	var tempName = NewTempName(c.CustomResourcePrefix)
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
