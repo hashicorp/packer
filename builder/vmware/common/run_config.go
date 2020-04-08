@@ -14,6 +14,11 @@ type RunConfig struct {
 	// this value is set to true, the machine will start without a console. For
 	// VMware machines, Packer will output VNC connection information in case you
 	// need to connect to the console to debug the build process.
+	// Some users have experienced issues where Packer cannot properly connect
+	// to a VM if it is headless; this appears to be a result of not ever having
+	// launched the VMWare GUI and accepting the evaluation license, or
+	// supplying a real license. If you experience this, launching VMWare and
+	// accepting the license should resolve your problem.
 	Headless bool `mapstructure:"headless" required:"false"`
 	// The IP address that should be
 	// binded to for VNC. By default packer will use 127.0.0.1 for this. If you
