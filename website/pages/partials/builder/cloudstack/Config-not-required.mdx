@@ -1,0 +1,108 @@
+<!-- Code generated from the comments of the Config struct in builder/cloudstack/config.go; DO NOT EDIT MANUALLY -->
+
+-   `async_timeout` (duration string | ex: "1h5m2s") - The time duration to wait for async calls to
+    finish. Defaults to 30m.
+    
+-   `http_get_only` (bool) - Some cloud providers only allow HTTP GET calls
+    to their CloudStack API. If using such a provider, you need to set this to
+    true in order for the provider to only make GET calls and no POST calls.
+    
+-   `ssl_no_verify` (bool) - Set to true to skip SSL verification.
+    Defaults to false.
+    
+-   `cidr_list` ([]string) - List of CIDR's that will have access to the new
+    instance. This is needed in order for any provisioners to be able to
+    connect to the instance. Defaults to [ "0.0.0.0/0" ]. Only required when
+    use_local_ip_address is false.
+    
+-   `create_security_group` (bool) - If true a temporary security group
+    will be created which allows traffic towards the instance from the
+    cidr_list. This option will be ignored if security_groups is also
+    defined. Requires expunge set to true. Defaults to false.
+    
+-   `disk_offering` (string) - The name or ID of the disk offering used for the
+    instance. This option is only available (and also required) when using
+    source_iso.
+    
+-   `disk_size` (int64) - The size (in GB) of the root disk of the new
+    instance. This option is only available when using source_template.
+    
+-   `eject_iso` (bool) - If `true` make a call to the CloudStack API, after loading image to
+    cache, requesting to check and detach ISO file (if any) currently
+    attached to a virtual machine. Defaults to `false`. This option is only
+    available when using `source_iso`.
+    
+-   `eject_iso_delay` (duration string | ex: "1h5m2s") - Configure the duration time to wait, making sure virtual machine is able
+    to finish installing OS before it ejects safely. Requires `eject_iso`
+    set to `true` and this option is only available when using `source_iso`.
+    
+-   `expunge` (bool) - Set to true to expunge the instance when it is
+    destroyed. Defaults to false.
+    
+-   `hypervisor` (string) - The target hypervisor (e.g. XenServer, KVM) for
+    the new template. This option is required when using source_iso.
+    
+-   `instance_name` (string) - The name of the instance. Defaults to
+    "packer-UUID" where UUID is dynamically generated.
+    
+-   `instance_display_name` (string) - The display name of the instance. Defaults to "Created by Packer".
+    
+-   `project` (string) - The name or ID of the project to deploy the instance
+    to.
+    
+-   `public_ip_address` (string) - The public IP address or it's ID used for
+    connecting any provisioners to. If not provided, a temporary public IP
+    address will be associated and released during the Packer run.
+    
+-   `public_port` (int) - The fixed port you want to configure in the port
+    forwarding rule. Set this attribute if you do not want to use the a random
+    public port.
+    
+-   `security_groups` ([]string) - A list of security group IDs or
+    names to associate the instance with.
+    
+-   `prevent_firewall_changes` (bool) - Set to true to prevent network
+    ACLs or firewall rules creation. Defaults to false.
+    
+-   `temporary_keypair_name` (string) - The name of the temporary SSH key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where `<UUID>` is a 36 character unique identifier.
+    
+-   `use_local_ip_address` (bool) - Set to true to indicate that the
+    provisioners should connect to the local IP address of the instance.
+    
+-   `user_data` (string) - User data to launch with the instance. This is a
+    template engine; see "User Data" bellow for
+    more details. Packer will not automatically wait for a user script to
+    finish before shutting down the instance this must be handled in a
+    provisioner.
+    
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance. This file will be parsed as a template
+    engine see User Data bellow for more
+    details.
+    
+-   `template_name` (string) - The name of the new template. Defaults to
+    `packer-{{timestamp}}` where timestamp will be the current time.
+    
+-   `template_display_text` (string) - The display text of the new template.
+    Defaults to the template_name.
+    
+-   `template_featured` (bool) - Set to true to indicate that the template
+    is featured. Defaults to false.
+    
+-   `template_public` (bool) - Set to true to indicate that the template
+    is available for all accounts. Defaults to false.
+    
+-   `template_password_enabled` (bool) - Set to true to indicate the
+    template should be password enabled. Defaults to false.
+    
+-   `template_requires_hvm` (bool) - Set to true to indicate the template
+    requires hardware-assisted virtualization. Defaults to false.
+    
+-   `template_scalable` (bool) - Set to true to indicate that the template
+    contains tools to support dynamic scaling of VM cpu/memory. Defaults to
+    false.
+    
+-   `template_tag` (string) - 
+-   `tags` (map[string]string) - Tags

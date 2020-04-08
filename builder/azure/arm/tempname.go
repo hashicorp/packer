@@ -15,6 +15,7 @@ type TempName struct {
 	KeyVaultName        string
 	ResourceGroupName   string
 	OSDiskName          string
+	DataDiskname        string
 	NicName             string
 	SubnetName          string
 	PublicIPAddressName string
@@ -24,6 +25,7 @@ type TempName struct {
 
 func NewTempName(p string) *TempName {
 	tempName := &TempName{}
+
 
 	if p == "" {
 		suffix := random.AlphaNumLower(10)

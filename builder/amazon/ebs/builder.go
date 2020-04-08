@@ -52,7 +52,7 @@ type Config struct {
 	// Tags to apply to the volumes that are *launched* to create the AMI.
 	// These tags are *not* applied to the resulting AMI unless they're
 	// duplicated in `tags`. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
 	// Relevant only to Windows guests: If you set this flag, we'll add clauses

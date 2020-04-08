@@ -1,0 +1,92 @@
+---
+layout: guides
+page_title: Getting started configuring Packer with HCL2 files
+sidebar_title: HCL guides
+---
+
+# Introduction to Packer HCL2
+
+-> **Note:** Starting from version **1.5.0** Packer can read HCL2 files.
+
+@include 'guides/hcl2-beta-note.mdx'
+
+It is not necessary to know all of the details of the HCL syntax in order to
+use Packer, and so this page summarizes the most important details to get you
+started. If you are interested, you can find a [full definition of HCL
+syntax](https://github.com/hashicorp/hcl2/blob/master/hcl/hclsyntax/spec.md) in
+the HCL native syntax specification.
+
+## Arguments and Blocks
+
+The HCL syntax is built around two key syntax constructs: arguments and blocks.
+
+```hcl
+# block
+source "amazon-ebs" "example" {
+
+  # argument
+  ami_name = "abc123"
+}
+```
+
+## Comments
+
+The HCL language supports three different syntaxes for comments:
+
+- `#` begins a single-line comment, ending at the end of the line.
+- `//` also begins a single-line comment, as an alternative to `#`.
+- `/*` and `*/` are start and end delimiters for a comment that might
+  span over multiple lines.
+
+## Multi-line strings
+
+A multi-line string value can be provided using heredoc syntax.
+
+```hcl
+variable "long_key" {
+  type = "string"
+  default = <<EOF
+This is a long key.
+Running over several lines.
+It could be super handy for a boot_command.
+EOF
+}
+```
+
+## Building blocks can be split in files
+
+Currently Packer offers the `source` and the `build` root blocks. These two
+building blocks can be defined in any order and a `build` can import one or more
+`source`. Usually a `source` defines what we currently call a builder and a
+`build` can apply multiple provisioning steps to a source. For example:
+
+```hcl
+# folder/sources.pkr.hcl
+source "amazon-ebs" "example-1" {
+  ami_name = "example-1-ami"
+}
+
+source "virtualbox-iso" "example-2" {
+  boot_command = <<EOF
+<esc><esc><enter><wait>
+/install/vmlinuz noapic
+...
+EOF
+}
+```
+
+```hcl
+# folder/build.pkr.hcl
+build {
+  sources = [
+    "source.amazon-ebs.example-1",
+    "source.virtualbox-iso.example-2"
+  ]
+
+  provisioner "shell" {
+    inline = [
+      "echo it's alive !"
+    ]
+  }
+}
+```

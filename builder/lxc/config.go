@@ -20,11 +20,11 @@ type Config struct {
 	// The path to the lxc configuration file.
 	ConfigFile string `mapstructure:"config_file" required:"true"`
 	// The directory in which to save the exported
-	// tar.gz. Defaults to output-<BuildName> in the current directory.
+	// tar.gz. Defaults to `output-<BuildName>` in the current directory.
 	OutputDir string `mapstructure:"output_directory" required:"false"`
 	// The name of the LXC container. Usually stored
-	// in /var/lib/lxc/containers/<container_name>. Defaults to
-	// packer-<BuildName>.
+	// in `/var/lib/lxc/containers/<container_name>`. Defaults to
+	// `packer-<BuildName>`.
 	ContainerName string `mapstructure:"container_name" required:"false"`
 	// Allows you to specify a wrapper command, such
 	// as ssh so you can execute packer builds on a remote host. Defaults to
@@ -53,7 +53,7 @@ type Config struct {
 	Name string `mapstructure:"template_name" required:"true"`
 	// Options to pass to the given
 	// lxc-template command, usually located in
-	// /usr/share/lxc/templates/lxc-<template_name>. Note: This gets passed as
+	// `/usr/share/lxc/templates/lxc-<template_name>`. Note: This gets passed as
 	// ARGV to the template command. Ensure you have an array of strings, as a
 	// single string with spaces probably won't work. Defaults to [].
 	Parameters []string `mapstructure:"template_parameters" required:"false"`

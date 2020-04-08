@@ -1,0 +1,274 @@
+---
+description: >
+  The amazon-instance Packer builder is able to create Amazon AMIs backed by
+
+  instance storage as the root device. For more information on the difference
+
+  between instance storage and EBS-backed instances, see the storage for the
+  root
+
+  device section in the EC2 documentation.
+layout: docs
+page_title: Amazon instance-store - Builders
+sidebar_title: Instance
+---
+
+# AMI Builder (instance-store)
+
+Type: `amazon-instance`
+
+The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
+instance storage as the root device. For more information on the difference
+between instance storage and EBS-backed instances, see the ["storage for the
+root device" section in the EC2
+documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+
+This builder builds an AMI by launching an EC2 instance from an existing
+instance-storage backed AMI, provisioning that running machine, and then
+bundling and creating a new AMI from that machine. This is all done in your own
+AWS account. This builder will create temporary key pairs, security group
+rules, etc. that provide it temporary access to the instance while the image is
+being created. This simplifies configuration quite a bit.
+
+This builder does _not_ manage AMIs. Once it creates an AMI and stores it in
+your account, it is up to you to use, delete, etc. the AMI.
+
+-> **Note:** Temporary resources are, by default, all created with the
+prefix `packer`. This can be useful if you want to restrict the security groups
+and key pairs packer is able to operate on.
+
+-> **Note:** This builder requires that the [Amazon EC2 AMI
+Tools](https://aws.amazon.com/developertools/368) are installed onto the
+machine. This can be done within a provisioner, but must be done before the
+builder finishes running.
+
+~> Instance builds are not supported for Windows. Use
+[`amazon-ebs`](/docs/builders/amazon-ebs) instead.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration),
+[Access](#access-configuration),
+[Run](#run-configuration) and
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+### Required:
+
+@include 'builder/amazon/instance/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/amazon/instance/Config-not-required.mdx'
+
+### AMI Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AMIConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
+
+### Access Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AccessConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
+
+### Run Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/RunConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/RunConfig-not-required.mdx'
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) or the
+[launch_block_device_mappings](#launch_block_device_mappings) array.
+
+@include 'builder/amazon/common/BlockDevice.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+## Basic Example
+
+Here is a basic example. It is completely valid except for the access keys:
+
+```json
+{
+  "type": "amazon-instance",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-d9d6a6b0",
+  "instance_type": "m1.small",
+  "ssh_username": "ubuntu",
+
+  "account_id": "0123-4567-0890",
+  "s3_bucket": "packer-images",
+  "x509_cert_path": "x509.cert",
+  "x509_key_path": "x509.key",
+  "x509_upload_path": "/tmp",
+
+  "ami_name": "packer-quick-start {{timestamp}}"
+}
+```
+
+-> **Note:** Packer can also read the access key and secret access key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+## Accessing the Instance to Debug
+
+If you need to access the instance to debug for some reason, run this builder
+with the `-debug` flag. In debug mode, the Amazon builder will save the private
+key in the current directory and will output the DNS or IP information as well.
+You can use this information to access the instance as it is running.
+
+## Build template data
+
+In configuration directives marked as a template engine above, the following
+variables are available:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
+## Build function template engine variables
+
+For the build function of [template engine](/docs/templates/engine), the following
+variables are available:
+
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+
+## Custom Bundle Commands
+
+A lot of the process required for creating an instance-store backed AMI
+involves commands being run on the actual source instance. Specifically, the
+`ec2-bundle-vol` and `ec2-upload-bundle` commands must be used to bundle the
+root filesystem and upload it, respectively.
+
+Each of these commands have a lot of available flags. Instead of exposing each
+possible flag as a template configuration option, the instance-store AMI
+builder for Packer lets you customize the entire command used to bundle and
+upload the AMI.
+
+These are configured with `bundle_vol_command` and `bundle_upload_command`.
+Both of these configurations are [configuration
+templates](/docs/templates/engine) and have support for their own set of
+template variables.
+
+### Bundle Volume Command
+
+The default value for `bundle_vol_command` is shown below. It is split across
+multiple lines for convenience of reading. The bundle volume command is
+responsible for executing `ec2-bundle-vol` in order to store and image of the
+root filesystem to use to create the AMI.
+
+```text
+sudo -i -n ec2-bundle-vol \
+  -k {{.KeyPath}}  \
+  -u {{.AccountId}} \
+  -c {{.CertPath}} \
+  -r {{.Architecture}} \
+  -e {{.PrivatePath}}/* \
+  -d {{.Destination}} \
+  -p {{.Prefix}} \
+  --batch \
+  --no-filter
+```
+
+The available template variables should be self-explanatory based on the
+parameters they're used to satisfy the `ec2-bundle-vol` command.
+
+~> **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem
+and .gpg files during the bundling of the AMI, which can cause problems on some
+systems, such as Ubuntu. You may want to customize the bundle volume command to
+include those files (see the `--no-filter` option of `ec2-bundle-vol`).
+
+### Bundle Upload Command
+
+The default value for `bundle_upload_command` is shown below. It is split
+across multiple lines for convenience of reading. Access key and secret key are
+omitted if using instance profile. The bundle upload command is responsible for
+taking the bundled volume and uploading it to S3.
+
+```text
+sudo -i -n ec2-upload-bundle \
+  -b {{.BucketName}} \
+  -m {{.ManifestPath}} \
+  -a {{.AccessKey}} \
+  -s {{.SecretKey}} \
+  -d {{.BundleDirectory}} \
+  --batch \
+  --region {{.Region}} \
+  --retry
+```
+
+The available template variables should be self-explanatory based on the
+parameters they're used to satisfy the `ec2-upload-bundle` command.
+Additionally, `{{.Token}}` is available when overriding this command. You must
+create your own bundle command with the addition of `-t {{.Token}}` if you are
+assuming a role.
+
+#### Bundle Upload Permissions
+
+The `ec2-upload-bundle` requires a policy document that looks something like
+this:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+You may wish to constrain the resource to a specific bucket.
+
+@include 'builders/aws-ssh-differentiation-table.mdx'

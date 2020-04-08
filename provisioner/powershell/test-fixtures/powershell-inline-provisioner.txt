@@ -1,0 +1,8 @@
+{
+  "type": "powershell",
+  "environment_vars": "PackerRunUUID={{build `PackerRunUUID`}},ID={{build `ID`}}",
+  "inline": [
+    "Write-Host \"$env:ID for provisioner.$env:PackerRunUUID\""
+  ]
+}
+

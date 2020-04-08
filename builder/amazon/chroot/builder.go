@@ -48,11 +48,11 @@ type Config struct {
 	// in the Chroot Mounts section. Please read that section for more
 	// information on how to use this.
 	ChrootMounts [][]string `mapstructure:"chroot_mounts" required:"false"`
-	// How to run shell commands. This defaults to {{.Command}}. This may be
+	// How to run shell commands. This defaults to `{{.Command}}`. This may be
 	// useful to set if you want to set environmental variables or perhaps run
 	// it with sudo or so on. This is a configuration template where the
 	// .Command variable is replaced with the command to be run. Defaults to
-	// {{.Command}}.
+	// `{{.Command}}`.
 	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
 	// Paths to files on the running EC2 instance that will be copied into the
 	// chroot environment prior to provisioning. Defaults to /etc/resolv.conf
@@ -90,18 +90,18 @@ type Config struct {
 	MountPartition string `mapstructure:"mount_partition" required:"false"`
 	// The path where the volume will be mounted. This is where the chroot
 	// environment will be. This defaults to
-	// /mnt/packer-amazon-chroot-volumes/{{.Device}}. This is a configuration
+	// `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration
 	// template where the .Device variable is replaced with the name of the
 	// device where the volume is attached.
 	MountPath string `mapstructure:"mount_path" required:"false"`
 	// As pre_mount_commands, but the commands are executed after mounting the
 	// root device and before the extra mount and copy steps. The device and
-	// mount path are provided by {{.Device}} and {{.MountPath}}.
+	// mount path are provided by `{{.Device}}` and `{{.MountPath}}`.
 	PostMountCommands []string `mapstructure:"post_mount_commands" required:"false"`
 	// A series of commands to execute after attaching the root volume and
 	// before mounting the chroot. This is not required unless using
 	// from_scratch. If so, this should include any partitioning and filesystem
-	// creation commands. The path to the device is provided by {{.Device}}.
+	// creation commands. The path to the device is provided by `{{.Device}}`.
 	PreMountCommands []string `mapstructure:"pre_mount_commands" required:"false"`
 	// The root device name. For example, xvda.
 	RootDeviceName string `mapstructure:"root_device_name" required:"false"`
@@ -161,12 +161,12 @@ type Config struct {
 	//filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
 	// Tags to apply to the volumes that are *launched*. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
 	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
 	// singular block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	RootVolumeTag hcl2template.NameValues `mapstructure:"root_volume_tag" required:"false"`
 	// what architecture to use when registering the final AMI; valid options

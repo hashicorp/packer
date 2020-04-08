@@ -27,6 +27,7 @@ type TemplateParameters struct {
 	ObjectId                   *TemplateParameter `json:"objectId,omitempty"`
 	NicName                    *TemplateParameter `json:"nicName,omitempty"`
 	OSDiskName                 *TemplateParameter `json:"osDiskName,omitempty"`
+	DataDiskName               *TemplateParameter `json:"dataDiskName,omitempty"`
 	PublicIPAddressName        *TemplateParameter `json:"publicIPAddressName,omitempty"`
 	StorageAccountBlobEndpoint *TemplateParameter `json:"storageAccountBlobEndpoint,omitempty"`
 	SubnetName                 *TemplateParameter `json:"subnetName,omitempty"`

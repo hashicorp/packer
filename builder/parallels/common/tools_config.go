@@ -29,7 +29,7 @@ type ToolsConfig struct {
 	// is "upload". This is a configuration
 	// template that has a single
 	// valid variable: Flavor, which will be the value of
-	// parallels_tools_flavor. By default this is "prl-tools-{{.Flavor}}.iso"
+	// parallels_tools_flavor. By default this is `prl-tools-{{.Flavor}}.iso`
 	// which should upload into the login directory of the user.
 	ParallelsToolsGuestPath string `mapstructure:"parallels_tools_guest_path" required:"false"`
 	// The method by which Parallels Tools are

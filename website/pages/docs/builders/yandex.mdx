@@ -1,0 +1,64 @@
+---
+description: |
+  The yandex Packer builder is able to create images for use with
+  Yandex.Cloud based on existing images.
+layout: docs
+page_title: Yandex Compute - Builders
+sidebar_title: Yandex.Cloud
+---
+
+# Yandex Compute Builder
+
+Type: `yandex`
+
+The `yandex` Packer builder is able to create
+[images](https://cloud.yandex.com/docs/compute/concepts/images) for use with
+[Yandex Compute Cloud](https://cloud.yandex.com/docs/compute/)
+based on existing images.
+
+## Authentication
+
+Yandex.Cloud services authentication requires one of the following security credentials:
+
+- OAuth token
+- File with Service Account Key
+
+### Authentication Using Token
+
+To authenticate with an OAuth token only `token` config key is needed.
+Or use the `YC_TOKEN` environment variable.
+
+### Authentication Using Service Account Key File
+
+To authenticate with a service account credential, only `service_account_key_file` is needed.
+Or use the `YC_SERVICE_ACCOUNT_KEY_FILE` environment variable.
+
+## Basic Example
+
+```json
+{
+  "type": "yandex",
+  "token": "YOUR OAUTH TOKEN",
+  "folder_id": "YOUR FOLDER ID",
+  "source_image_family": "ubuntu-1804-lts",
+  "ssh_username": "ubuntu",
+  "use_ipv4_nat": "true"
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+In addition to the options listed here, a [communicator](/docs/templates/communicator)
+can be configured for this builder.
+
+### Required:
+
+@include 'builder/yandex/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/yandex/Config-not-required.mdx'
