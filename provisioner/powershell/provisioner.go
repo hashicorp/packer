@@ -53,7 +53,10 @@ type Config struct {
 	ElevatedExecuteCommand string `mapstructure:"elevated_execute_command"`
 
 	// Whether to clean scripts up after executing the provisioner.
-	// Defaults to false.
+	// Defaults to false. When true any script created by a non-elevated Powershell
+	// provisioner will be removed from the remote machine. Elevated scripts,
+	// along with the scheduled tasks, will always be removed regardless of the
+	// value set for `skip_clean`.
 	SkipClean bool `mapstructure:"skip_clean"`
 
 	// The timeout for retrying to start the process. Until this timeout is
