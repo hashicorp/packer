@@ -44,11 +44,14 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 	filePath := filepath.Join("./test-fixtures", s.ConfigName)
 	config, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("Expected to find %s", filePath)
+		return "", fmt.Errorf("os.Open:%v", err)
 	}
 	defer config.Close()
 
 	file, err := ioutil.ReadAll(config)
+	if err != nil {
+		return "", fmt.Errorf("ioutil.ReadAll:%v", err)
+	}
 	return string(file), nil
 }
 
