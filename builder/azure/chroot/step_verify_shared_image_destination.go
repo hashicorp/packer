@@ -35,7 +35,8 @@ func (s *StepVerifySharedImageDestination) Run(ctx context.Context, state multis
 		return multistep.ActionHalt
 	}
 
-	imageURI := fmt.Sprintf(".../resourcegroup/%s/providers/Microsoft.Compute/galleries/%s/images/%s",
+	imageURI := fmt.Sprintf("/subscriptions/%s/resourcegroup/%s/providers/Microsoft.Compute/galleries/%s/images/%s",
+		azcli.SubscriptionID(),
 		s.Image.ResourceGroup,
 		s.Image.GalleryName,
 		s.Image.ImageName,

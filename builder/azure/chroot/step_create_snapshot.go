@@ -40,10 +40,6 @@ func parseSnapshotResourceID(resourceID string) (subscriptionID, resourceGroup, 
 	return r.SubscriptionID, r.ResourceGroup, r.ResourceName, nil
 }
 
-const (
-	stateBagKey_OSDiskSnapshotResourceID = "os_disk_snapshot_resource_id"
-)
-
 func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
