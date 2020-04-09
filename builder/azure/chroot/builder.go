@@ -387,13 +387,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &azcommon.Artifact{
 		BuilderIdValue: BuilderID,
 		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
+		AzureClientSet: azcli,
 	}
-	resources := []string{}
 	if b.config.ImageResourceID != "" {
-		resources = append(resources, b.config.ImageResourceID)
+		artifact.Resources = append(artifact.Resources, b.config.ImageResourceID)
 	}
 	if e, _ := b.config.SharedImageGalleryDestination.Validate(""); len(e) == 0 {
-		resources = append(resources, b.config.SharedImageGalleryDestination.ResourceID(info.SubscriptionID))
+		artifact.Resources = append(artifact.Resources, b.config.SharedImageGalleryDestination.ResourceID(info.SubscriptionID))
+	}
+	if b.config.SkipCleanup {
+		if d, ok := state.GetOk(stateBagKey_OSDiskResourceID); ok {
+			artifact.Resources = append(artifact.Resources, d.(string))
+		}
+		if d, ok := state.GetOk(stateBagKey_OSDiskSnapshotResourceID); ok {
+			artifact.Resources = append(artifact.Resources, d.(string))
+		}
 	}
 
 	return artifact, nil
