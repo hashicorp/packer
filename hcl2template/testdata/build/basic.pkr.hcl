@@ -13,7 +13,7 @@ build {
         bool     = "true"
         trilean  = true
         duration = "${9 + 1}s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -34,7 +34,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
@@ -60,7 +60,7 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -81,7 +81,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
@@ -107,7 +107,7 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -128,7 +128,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
