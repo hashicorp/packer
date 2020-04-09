@@ -25,7 +25,7 @@ func (*KVFilter) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec
 // The decoded values from this spec will then be applied to a FlatKVFilter.
 func (*FlatKVFilter) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
+		"filters": &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
 		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
