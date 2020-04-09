@@ -71,7 +71,7 @@ func TestStepVerifySharedImageDestination_Run(t *testing.T) {
 		{
 			name:    "version exists",
 			want:    multistep.ActionHalt,
-			wantErr: "Shared image version \"2.3.4\" already exists from image \"image-resourceid-goes-here\".",
+			wantErr: "Shared image version \"2.3.4\" already exists for image \"image-resourceid-goes-here\".",
 			fields: fields{
 				Image: SharedImageGalleryDestination{
 					ResourceGroup: "rg",

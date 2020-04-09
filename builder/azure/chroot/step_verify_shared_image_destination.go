@@ -99,7 +99,7 @@ func (s *StepVerifySharedImageDestination) Run(ctx context.Context, state multis
 			return errorMessage("Could not retrieve versions for image %q: unexpected nil name", to.String(image.ID))
 		}
 		if *version.Name == s.Image.ImageVersion {
-			return errorMessage("Shared image version %q already exists from image %q.", s.Image.ImageVersion, to.String(image.ID))
+			return errorMessage("Shared image version %q already exists for image %q.", s.Image.ImageVersion, to.String(image.ID))
 		}
 
 		err := versions.NextWithContext(ctx)
