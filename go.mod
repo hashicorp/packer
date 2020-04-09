@@ -5,10 +5,16 @@ require (
 	cloud.google.com/go/bigquery v1.3.0 // indirect
 	cloud.google.com/go/pubsub v1.1.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
-	contrib.go.opencensus.io/exporter/ocagent v0.5.0 // indirect
+	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
-	github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
-	github.com/Azure/go-autorest v12.0.0+incompatible
+	github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
+	github.com/Azure/go-autorest v14.0.0+incompatible // indirect
+	github.com/Azure/go-autorest/autorest v0.10.0
+	github.com/Azure/go-autorest/autorest/adal v0.8.2
+	github.com/Azure/go-autorest/autorest/azure/auth v0.4.2
+	github.com/Azure/go-autorest/autorest/date v0.2.0
+	github.com/Azure/go-autorest/autorest/to v0.3.0
+	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
@@ -36,7 +42,6 @@ require (
 	github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
-	github.com/dimchansky/utfbom v1.1.0 // indirect
 	github.com/dnaeon/go-vcr v1.0.0 // indirect
 	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -51,7 +56,8 @@ require (
 	github.com/gocolly/colly v1.2.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/protobuf v1.3.5 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-querystring v1.0.0 // indirect
@@ -62,6 +68,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
+	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
 	github.com/hashicorp/consul v1.4.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
@@ -154,21 +161,21 @@ require (
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
 	github.com/zclconf/go-cty v1.3.2-0.20200309235747-0b5d9cf50df7
 	github.com/zclconf/go-cty-yaml v1.0.1
-	go.opencensus.io v0.22.2 // indirect
+	go.opencensus.io v0.22.3 // indirect
 	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
-	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa
-	google.golang.org/api v0.14.0
+	google.golang.org/api v0.20.0
 	google.golang.org/appengine v1.6.5 // indirect
-	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect
-	google.golang.org/grpc v1.25.1
+	google.golang.org/genproto v0.0.0-20200325114520-5b2d0af7952b // indirect
+	google.golang.org/grpc v1.28.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect

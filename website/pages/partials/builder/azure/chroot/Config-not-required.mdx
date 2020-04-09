@@ -31,9 +31,6 @@
     provisioning. Defaults to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip copying
     `/etc/resolv.conf`. You may need to do this if you're building an image that uses systemd.
     
--   `temporary_os_disk_name` (string) - The name of the temporary disk that will be created in the resource group of the VM that Packer is
-    running on. Will be generated if not set.
-    
 -   `os_disk_size_gb` (int32) - Try to resize the OS disk to this size on the first copy. Disks can only be englarged. If not specified,
     the disk will keep its original size. Required when using `from_scratch`
     
@@ -43,8 +40,16 @@
 -   `os_disk_cache_type` (string) - The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
     specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
     
--   `os_disk_skip_cleanup` (bool) - If set to `true`, leaves the temporary disk behind in the Packer VM resource group. Defaults to `false`
-    
--   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes).
+-   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
     Defaults to `V1`.
+    
+-   `temporary_os_disk_id` (string) - The id of the temporary disk that will be created. Will be generated if not set.
+    
+-   `temporary_os_disk_snapshot_id` (string) - The id of the temporary snapshot that will be created. Will be generated if not set.
+    
+-   `skip_cleanup` (bool) - If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
+    
+-   `image_resource_id` (string) - The managed image to create using this build.
+    
+-   `shared_image_destination` (SharedImageGalleryDestination) - The shared image to create using this build.
     

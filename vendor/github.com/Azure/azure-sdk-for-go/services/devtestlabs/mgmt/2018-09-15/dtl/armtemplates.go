@@ -35,7 +35,8 @@ func NewArmTemplatesClient(subscriptionID string) ArmTemplatesClient {
 	return NewArmTemplatesClientWithBaseURI(DefaultBaseURI, subscriptionID)
 }
 
-// NewArmTemplatesClientWithBaseURI creates an instance of the ArmTemplatesClient client.
+// NewArmTemplatesClientWithBaseURI creates an instance of the ArmTemplatesClient client using a custom endpoint.  Use
+// this when interacting with an Azure cloud that uses a non-standard base URI (sovereign clouds, Azure stack).
 func NewArmTemplatesClientWithBaseURI(baseURI string, subscriptionID string) ArmTemplatesClient {
 	return ArmTemplatesClient{NewWithBaseURI(baseURI, subscriptionID)}
 }
@@ -45,7 +46,7 @@ func NewArmTemplatesClientWithBaseURI(baseURI string, subscriptionID string) Arm
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
 // artifactSourceName - the name of the artifact source.
-// name - the name of the azure Resource Manager template.
+// name - the name of the azure resource manager template.
 // expand - specify the $expand query. Example: 'properties($select=displayName)'
 func (client ArmTemplatesClient) Get(ctx context.Context, resourceGroupName string, labName string, artifactSourceName string, name string, expand string) (result ArmTemplate, err error) {
 	if tracing.IsEnabled() {
@@ -108,8 +109,7 @@ func (client ArmTemplatesClient) GetPreparer(ctx context.Context, resourceGroupN
 // GetSender sends the Get request. The method will close the
 // http.Response Body if it receives an error.
 func (client ArmTemplatesClient) GetSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // GetResponder handles the response to the Get request. The method always
@@ -204,8 +204,7 @@ func (client ArmTemplatesClient) ListPreparer(ctx context.Context, resourceGroup
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client ArmTemplatesClient) ListSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // ListResponder handles the response to the List request. The method always
