@@ -52,6 +52,13 @@ type Config struct {
 	// can be used to inject the environment_vars into the environment.
 	ElevatedExecuteCommand string `mapstructure:"elevated_execute_command"`
 
+	// Whether to clean scripts up after executing the provisioner.
+	// Defaults to false. When true any script created by a non-elevated Powershell
+	// provisioner will be removed from the remote machine. Elevated scripts,
+	// along with the scheduled tasks, will always be removed regardless of the
+	// value set for `skip_clean`.
+	SkipClean bool `mapstructure:"skip_clean"`
+
 	// The timeout for retrying to start the process. Until this timeout is
 	// reached, if the provisioner can't start a process, it retries.  This
 	// can be set high to allow for reboots.
@@ -69,6 +76,8 @@ type Config struct {
 
 	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy"`
 
+	remoteCleanUpScriptPath string
+
 	ctx interpolate.Context
 }
 
@@ -82,12 +91,14 @@ func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
 		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
 		`. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
-	} else {
-		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
 	}
+
+	return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
 }
+
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -148,6 +159,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Vars == nil {
 		p.config.Vars = make([]string, 0)
 	}
+
+	p.config.remoteCleanUpScriptPath = fmt.Sprintf(`c:/Windows/Temp/packer-cleanup-%s.ps1`, uuid.TimeOrderedUUID())
 
 	var errs error
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
@@ -243,6 +256,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		defer os.Remove(temp)
 	}
 
+	// every provisioner run will only have one env var script file so lets add it first
+	uploadedScripts := []string{p.config.RemoteEnvVarPath}
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
 
@@ -289,14 +304,61 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		// Close the original file since we copied it
 		f.Close()
 
-		log.Printf("%s returned with exit code %d", p.config.RemotePath, cmd.ExitStatus())
+		// Record every other uploaded script file so we can clean it up later
+		uploadedScripts = append(uploadedScripts, p.config.RemotePath)
 
+		log.Printf("%s returned with exit code %d", p.config.RemotePath, cmd.ExitStatus())
 		if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
 			return err
 		}
 	}
 
+	if p.config.SkipClean {
+		return nil
+	}
+
+	err := retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
+		command, err := p.createRemoteCleanUpCommand(uploadedScripts)
+		if err != nil {
+			log.Printf("failed to create a remote cleanup script: %s", err)
+			return err
+		}
+
+		cmd := &packer.RemoteCmd{Command: command}
+		return cmd.RunWithUi(ctx, comm, ui)
+	})
+	if err != nil {
+		log.Printf("failed to clean up temporary files: %s", strings.Join(uploadedScripts, ","))
+	}
+
 	return nil
+}
+
+// createRemoteCleanUpCommand will generated a powershell script that will remove remote files;
+// returning a command that can be executed remotely to do the cleanup.
+func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, error) {
+	if len(remoteFiles) == 0 {
+		return "", fmt.Errorf("no remoteFiles provided for cleanup")
+	}
+
+	var b strings.Builder
+	// This script should self destruct.
+	remotePath := p.config.remoteCleanUpScriptPath
+	remoteFiles = append(remoteFiles, remotePath)
+	for _, filename := range remoteFiles {
+		fmt.Fprintf(&b, "Remove-Item %s\n", filename)
+	}
+
+	if err := p.communicator.Upload(remotePath, strings.NewReader(b.String()), nil); err != nil {
+		return "", fmt.Errorf("clean up script %q failed to upload: %s", remotePath, err)
+	}
+
+	data := map[string]string{
+		"Path": remotePath,
+		"Vars": p.config.RemoteEnvVarPath,
+	}
+	p.config.ctx.Data = data
+	return interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 }
 
 // Environment variables required within the remote environment are uploaded
@@ -388,9 +450,6 @@ func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
 		}
 		return err
 	})
-	if err != nil {
-		return err
-	}
 	return
 }
 

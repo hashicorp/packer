@@ -25,6 +25,7 @@ type elevatedOptions struct {
 	TaskDescription   string
 	LogFile           string
 	XMLEscapedCommand string
+	ScriptFile        string
 }
 
 var psEscape = strings.NewReplacer(
@@ -117,6 +118,14 @@ $result = $t.LastTaskResult
 if (Test-Path $log) {
     Remove-Item $log -Force -ErrorAction SilentlyContinue | Out-Null
 }
+
+$script = [System.Environment]::ExpandEnvironmentVariables("{{.ScriptFile}}")
+if (Test-Path $script) {
+    Remove-Item $script -Force -ErrorAction SilentlyContinue | Out-Null
+}
+$f = $s.GetFolder("\")
+$f.DeleteTask("\$name", "")
+
 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($s) | Out-Null
 exit $result`))
 
@@ -166,12 +175,16 @@ func GenerateElevatedRunner(command string, p ElevatedProvisioner) (uploadedPath
 			elevatedPassword, escapedElevatedPassword)
 	}
 
+	uuid := uuid.TimeOrderedUUID()
+	path := fmt.Sprintf(`C:/Windows/Temp/packer-elevated-shell-%s.ps1`, uuid)
+
 	// Generate command
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
 		User:              escapedElevatedUser,
 		Password:          escapedElevatedPassword,
 		TaskName:          taskName,
 		TaskDescription:   "Packer elevated task",
+		ScriptFile:        path,
 		LogFile:           logFile,
 		XMLEscapedCommand: escapedCommand,
 	})
@@ -180,8 +193,6 @@ func GenerateElevatedRunner(command string, p ElevatedProvisioner) (uploadedPath
 		fmt.Printf("Error creating elevated template: %s", err)
 		return "", err
 	}
-	uuid := uuid.TimeOrderedUUID()
-	path := fmt.Sprintf(`C:/Windows/Temp/packer-elevated-shell-%s.ps1`, uuid)
 	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
 	err = p.Communicator().Upload(path, &buffer, nil)
 	if err != nil {
