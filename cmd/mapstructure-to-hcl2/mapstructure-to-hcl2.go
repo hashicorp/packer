@@ -260,10 +260,9 @@ func goFieldToCtyType(accessor string, fieldType types.Type) (interface{}, cty.T
 			Required: false,
 		}, ctyType
 	case *types.Map:
-		return &hcldec.BlockAttrsSpec{
-			TypeName:    accessor,
-			ElementType: cty.String, // for now everything can be simplified to a map[string]string
-			Required:    false,
+		return &hcldec.AttrSpec{
+			Name: accessor,
+			Type: cty.Map(cty.String), // for now everything can be simplified to a map[string]string
 		}, cty.Map(cty.String)
 	case *types.Named:
 		// Named is the relative type when of a field with a struct.
