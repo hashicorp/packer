@@ -1,0 +1,5 @@
+{
+  "type": "powershell",
+  "inline": "this is not a valid powershell command",
+  "valid_exit_codes": ["1"]
+}
