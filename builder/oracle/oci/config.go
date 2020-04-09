@@ -63,6 +63,9 @@ type Config struct {
 	// Instance
 	InstanceName string `mapstructure:"instance_name"`
 
+	// Source Details
+	BootVolumeSizeInGBs string `mapstructure:"boot_volume_size_in_GBs"`
+
 	// Metadata optionally contains custom metadata key/value pairs provided in the
 	// configuration. While this can be used to set metadata["user_data"] the explicit
 	// "user_data" and "user_data_file" values will have precedence.

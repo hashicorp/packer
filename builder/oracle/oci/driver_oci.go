@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	core "github.com/oracle/oci-go-sdk/core"
@@ -51,10 +52,18 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		metadata["user_data"] = d.cfg.UserData
 	}
 
+	instanceSourceViaImageDetails := core.InstanceSourceViaImageDetails{ImageId: &d.cfg.BaseImageID}
+	if d.cfg.BootVolumeSizeInGBs != "" {
+		result, err := strconv.Atoi(d.cfg.BootVolumeSizeInGBs)
+		if err != nil {
+			return "", err
+		}
+		instanceSourceViaImageDetails.BootVolumeSizeInGBs = &result
+	}
 	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
-		ImageId:            &d.cfg.BaseImageID,
+		SourceDetails:		instanceSourceViaImageDetails,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
