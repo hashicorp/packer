@@ -234,7 +234,9 @@
     Providing `allowed_inbound_ip_addresses` in combination with
     `virtual_network_name` is not allowed.
     
--   `custom_resource_build_prefix` (string) - specify custom azure resource names
+-   `custom_resource_build_prefix` (string) - specify custom azure resource names during build limited to max 10 charcters
+    this will set the prefix for the resources. The actuall resource names will be
+    `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
     
 -   `async_resourcegroup_delete` (bool) - If you want packer to delete the
     temporary resource group asynchronously set this value. It's a boolean
