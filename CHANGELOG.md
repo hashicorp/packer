@@ -3,6 +3,7 @@
 **New Builder** azure-dtl allows creation of devtestlabs images in Azure. [GH-8987]
 
 ### IMPROVEMENTS:
+* builder/azure: Add shared image destination for azure-chroot [GH-9021]
 * builder/google: Allow `source_image_project_id` to be a list of several
     projects to search. [GH-8679]
 * builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
