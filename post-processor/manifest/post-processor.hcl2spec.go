@@ -18,6 +18,7 @@ type FlatConfig struct {
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
 	OutputPath          *string           `mapstructure:"output" cty:"output"`
 	StripPath           *bool             `mapstructure:"strip_path" cty:"strip_path"`
+	StripTime           *bool             `mapstructure:"strip_time" cty:"strip_time"`
 	CustomData          map[string]string `mapstructure:"custom_data" cty:"custom_data"`
 }
 
@@ -42,6 +43,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"output":                     &hcldec.AttrSpec{Name: "output", Type: cty.String, Required: false},
 		"strip_path":                 &hcldec.AttrSpec{Name: "strip_path", Type: cty.Bool, Required: false},
+		"strip_time":                 &hcldec.AttrSpec{Name: "strip_time", Type: cty.Bool, Required: false},
 		"custom_data":                &hcldec.BlockAttrsSpec{TypeName: "custom_data", ElementType: cty.String, Required: false},
 	}
 	return s

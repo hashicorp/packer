@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package manifest
 
@@ -22,8 +23,17 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	OutputPath string            `mapstructure:"output"`
-	StripPath  bool              `mapstructure:"strip_path"`
+	// The manifest will be written to this file. This defaults to
+	// `packer-manifest.json`.
+	OutputPath string `mapstructure:"output"`
+	// Write only filename without the path to the manifest file. This defaults
+	// to false.
+	StripPath bool `mapstructure:"strip_path"`
+	// Don't write the `build_time` field from the output.
+	StripTime bool `mapstructure:"strip_time"`
+	// Arbitrary data to add to the manifest. This is a [template
+	// engine](https://packer.io/docs/templates/engine.html). Therefore, you
+	// may use user variables and template functions in this field.
 	CustomData map[string]string `mapstructure:"custom_data"`
 	ctx        interpolate.Context
 }
@@ -101,6 +111,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 	artifact.BuilderType = p.config.PackerBuilderType
 	artifact.BuildName = p.config.PackerBuildName
 	artifact.BuildTime = time.Now().Unix()
+	if p.config.StripTime {
+		artifact.BuildTime = 0
+	}
 	// Since each post-processor runs in a different process we need a way to
 	// coordinate between various post-processors in a single packer run. We do
 	// this by setting a UUID per run and tracking this in the manifest file.
