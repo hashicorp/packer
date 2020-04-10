@@ -98,13 +98,15 @@ type Provisioner struct {
 
 func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
+		`{set-variable -name variable:global:ErrorActionPreference -value 'Continue'};` +
+		`%s. {{.Vars}};try { . '{{.Path}}' } catch { Write-Error $Error[0]; exit 1 }; exit $LastExitCode }`
 
+	var debugLine string
 	if p.config.DebugMode != 0 {
-		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+		debugLine = fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
-
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+	baseCmd = fmt.Sprintf(baseCmd, debugLine)
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
