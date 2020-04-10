@@ -22,7 +22,7 @@ ifeq ($(UNAME_S),Linux)
 	LDFLAGS=-linkmode external -extldflags -static
 endif
 
-GOLDFLAGS="$(LDFLAGS) -X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)"
+GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) $(LDFLAGS)
 
 export GOLDFLAGS
 
