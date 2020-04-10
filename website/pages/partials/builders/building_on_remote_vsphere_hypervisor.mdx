@@ -15,8 +15,8 @@ esxcli system settings advanced set -o /Net/GuestIPHack -i 1
 
 When using a remote VMware Hypervisor, the builder still downloads the ISO and
 various files locally, and uploads these to the remote machine. Packer currently
-uses SSH to communicate to the ESXi machine rather than the vSphere API. At some
-point, the vSphere API may be used.
+uses SSH to communicate to the ESXi machine rather than the vSphere API. 
+If you want to use vSphere API, see the [vsphere-iso](/docs/builders/vsphere-iso) builder.
 
 Packer also requires VNC to issue boot commands during a build, which may be
 disabled on some remote VMware Hypervisors. Please consult the appropriate
