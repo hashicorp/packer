@@ -117,7 +117,7 @@ func (d *Driver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
 			return fmt.Errorf("error destroying %s: %v", vmPath, err)
 		}
 	}
-	if force && vm != nil {
+	if !force && vm != nil {
 		return fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err)
 	}
 
