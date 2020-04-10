@@ -63,7 +63,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
-		SourceDetails:		instanceSourceViaImageDetails,
+		SourceDetails:      instanceSourceViaImageDetails,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,

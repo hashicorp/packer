@@ -73,6 +73,7 @@ type FlatConfig struct {
 	Shape                     *string                           `mapstructure:"shape" cty:"shape"`
 	ImageName                 *string                           `mapstructure:"image_name" cty:"image_name"`
 	InstanceName              *string                           `mapstructure:"instance_name" cty:"instance_name"`
+	BootVolumeSizeInGBs       *string                           `mapstructure:"boot_volume_size_in_GBs" cty:"boot_volume_size_in_GBs"`
 	Metadata                  map[string]string                 `mapstructure:"metadata" cty:"metadata"`
 	UserData                  *string                           `mapstructure:"user_data" cty:"user_data"`
 	UserDataFile              *string                           `mapstructure:"user_data_file" cty:"user_data_file"`
@@ -157,6 +158,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shape":                        &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
+		"boot_volume_size_in_GBs":      &hcldec.AttrSpec{Name: "boot_volume_size_in_GBs", Type: cty.String, Required: false},
 		"metadata":                     &hcldec.BlockAttrsSpec{TypeName: "metadata", ElementType: cty.String, Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":               &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
