@@ -72,6 +72,51 @@ func TestTemplateFinalize(t *testing.T) {
 			expectedAction: multistep.ActionContinue,
 		},
 		{
+			name: "all options with cloud-init",
+			builderConfig: &Config{
+				TemplateName:        "my-template",
+				TemplateDescription: "some-description",
+				UnmountISO:          true,
+				CloudInit:           true,
+			},
+			initialVMConfig: map[string]interface{}{
+				"name":        "dummy",
+				"description": "Packer ephemeral build VM",
+				"ide2":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
+				"bootdisk":    "virtio0",
+				"virtio0":     "ceph01:base-223-disk-0,cache=unsafe,media=disk,size=32G",
+			},
+			expectCallSetConfig: true,
+			expectedVMConfig: map[string]interface{}{
+				"name":        "my-template",
+				"description": "some-description",
+				"ide2":        "none,media=cdrom",
+				"ide3":        "ceph01:cloudinit",
+			},
+			expectedAction: multistep.ActionContinue,
+		},
+		{
+			name: "no available controller for cloud-init drive",
+			builderConfig: &Config{
+				TemplateName:        "my-template",
+				TemplateDescription: "some-description",
+				UnmountISO:          false,
+				CloudInit:           true,
+			},
+			initialVMConfig: map[string]interface{}{
+				"name":        "dummy",
+				"description": "Packer ephemeral build VM",
+				"ide0":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
+				"ide1":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
+				"ide2":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
+				"ide3":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
+				"bootdisk":    "virtio0",
+				"virtio0":     "ceph01:base-223-disk-0,cache=unsafe,media=disk,size=32G",
+			},
+			expectCallSetConfig: false,
+			expectedAction:      multistep.ActionHalt,
+		},
+		{
 			name: "no cd-drive with unmount=true should returns halt",
 			builderConfig: &Config{
 				TemplateName:        "my-template",
