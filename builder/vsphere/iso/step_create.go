@@ -6,6 +6,9 @@ package iso
 import (
 	"context"
 	"fmt"
+	"path"
+
+	"github.com/vmware/govmomi/find"
 
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
@@ -100,18 +103,28 @@ type StepCreateVM struct {
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
-	vmPath := fmt.Sprintf("%s/%s", s.Location.Folder, s.Location.VMName)
+	vmPath := path.Join(s.Location.Folder, s.Location.VMName)
 
 	vm, err := d.FindVM(vmPath)
+	if err != nil {
+		if _, ok := err.(*find.NotFoundError); !ok {
+			state.Put("error", fmt.Errorf("error looking up old vm: %v", err))
+			return multistep.ActionHalt
+		}
+	} else {
+		if s.Force {
+			ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
 
-	if s.Force == false && err == nil {
-		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err))
-		return multistep.ActionHalt
-	} else if s.Force == true && err == nil {
-		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
-		err := vm.Destroy()
-		if err != nil {
-			state.Put("error", fmt.Errorf("error destroying %s: %v", vmPath, err))
+			// power off just in case it is still on
+			vm.PowerOff()
+
+			err := vm.Destroy()
+			if err != nil {
+				state.Put("error", fmt.Errorf("error destroying %s: %v", vmPath, err))
+			}
+		} else {
+			state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err))
+			return multistep.ActionHalt
 		}
 	}
 
