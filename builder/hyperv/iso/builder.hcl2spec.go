@@ -99,6 +99,7 @@ type FlatConfig struct {
 	SkipExport                     *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
 	Headless                       *bool             `mapstructure:"headless" required:"false" cty:"headless"`
 	FirstBootDevice                *string           `mapstructure:"first_boot_device" required:"false" cty:"first_boot_device"`
+	BootOrder                      []string          `mapstructure:"boot_order" required:"false" cty:"boot_order"`
 	ShutdownCommand                *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
 	ShutdownTimeout                *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	DiskSize                       *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size"`
@@ -209,6 +210,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_export":                      &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"headless":                         &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 		"first_boot_device":                &hcldec.AttrSpec{Name: "first_boot_device", Type: cty.String, Required: false},
+		"boot_order":                       &hcldec.AttrSpec{Name: "boot_order", Type: cty.List(cty.String), Required: false},
 		"shutdown_command":                 &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":                 &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"disk_size":                        &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
