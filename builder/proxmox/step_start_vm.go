@@ -27,7 +27,6 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	isoFile := state.Get("iso_file").(string)
-
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
@@ -84,6 +83,12 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	// instance id inside of the provisioners, used in step_provision.
 	state.Put("instance_id", vmRef)
 
+	for idx := range c.CDDrive{
+		params := map[string]interface{}{
+			c.CDDrive[idx].BUS : c.CDDrive[idx].Filename+",media=cdrom",
+		}
+		client.SetVmConfig(vmRef,params)
+	}
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
 	if err != nil {

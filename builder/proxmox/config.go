@@ -60,6 +60,8 @@ type Config struct {
 
 	shouldUploadISO bool
 
+	CDDrive		[]storageConfig	`mapstructure:"cd_drive"`
+
 	ctx interpolate.Context
 }
 
@@ -80,6 +82,10 @@ type diskConfig struct {
 type vgaConfig struct {
 	Type   string `mapstructure:"type"`
 	Memory int    `mapstructure:"memory"`
+}
+type storageConfig struct {
+	BUS		string `mapstructure:"bus"`
+	Filename	string `mapstructure:"filename"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
