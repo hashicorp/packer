@@ -382,6 +382,9 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
+	//Spcify storage to store Boot Diagnostics
+	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
+
 	// Runtime Values
 	UserName               string `mapstructure-to-hcl2:",skip"`
 	Password               string `mapstructure-to-hcl2:",skip"`
