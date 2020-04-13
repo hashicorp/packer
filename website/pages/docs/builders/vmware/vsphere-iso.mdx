@@ -105,11 +105,21 @@ from the datastore. Example:
 
 ### Network Adapter Configuration
 
+@include 'builder/vsphere/iso/NIC.mdx'
+
 @include 'builder/vsphere/iso/NIC-required.mdx'
+
+#### Optional
+
+@include 'builder/vsphere/iso/NIC-not-required.mdx'
 
 ### Storage Configuration
 
+@include 'builder/vsphere/iso/DiskConfig.mdx'
+
 @include 'builder/vsphere/iso/DiskConfig-required.mdx'
+
+#### Optional
 
 @include 'builder/vsphere/iso/DiskConfig-not-required.mdx'
 
@@ -121,7 +131,7 @@ from the datastore. Example:
 
 @include 'builder/vsphere/common/ExportConfig.mdx'
 
-### Optional:
+#### Optional:
 
 @include 'builder/vsphere/common/ExportConfig-not-required.mdx'
 
@@ -138,10 +148,6 @@ from the datastore. Example:
 #### Optional common fields:
 
 @include 'helper/communicator/Config-not-required.mdx'
-
-#### Optional Network Adapter fields:
-
-@include 'builder/vsphere/iso/NIC-not-required.mdx'
 
 #### Optional SSH fields:
 
