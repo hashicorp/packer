@@ -127,6 +127,13 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		}
 	}
 
+	if config.BootDiagSTGAccount != "" {
+		err = builder.SetBootDiagnostics(config.BootDiagSTGAccount)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	builder.SetTags(&config.AzureTags)
 	doc, _ := builder.ToJSON()
 	return createDeploymentParameters(*doc, params)

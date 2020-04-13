@@ -357,6 +357,26 @@ func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetBootDiagnostics(diagSTG string) error {
+
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	t := true
+	stg := fmt.Sprintf("https://%s.blob.core.windows.net", diagSTG)
+
+	// var b compute.DiagnosticsProfile
+	// (*b.BootDiagnostics.Enabled) = true
+	// (*b.BootDiagnostics.StorageURI) = fmt.Sprintf("https://%s.blob.core.windows.net", diagSTG)
+
+	resource.Properties.DiagnosticsProfile.BootDiagnostics.Enabled = &t
+	resource.Properties.DiagnosticsProfile.BootDiagnostics.StorageURI = &stg
+
+	return nil
+}
+
 func (s *TemplateBuilder) ToJSON() (*string, error) {
 	bs, err := json.MarshalIndent(s.template, jsonPrefix, jsonIndent)
 
