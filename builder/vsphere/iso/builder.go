@@ -96,7 +96,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Config:   &b.config.RunConfig,
 				SetOrder: true,
 			},
-			&StepBootCommand{
+			&common.StepBootCommand{
 				Config: &b.config.BootConfig,
 				Ctx:    b.config.ctx,
 				VMName: b.config.VMName,
