@@ -111,12 +111,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	if b.config.isManagedImage() {
-		group, err := azureClient.GroupsClient.Get(ctx, b.config.ManagedImageResourceGroupName)
+		_, err := azureClient.GroupsClient.Get(ctx, b.config.ManagedImageResourceGroupName)
 		if err != nil {
 			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.ManagedImageResourceGroupName)
 		}
-
-		b.config.manageImageLocation = *group.Location
 
 		// If a managed image already exists it cannot be overwritten.
 		_, err = azureClient.ImagesClient.Get(ctx, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
@@ -311,7 +309,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType,
 				b.config.ManagedImageResourceGroupName,
 				b.config.ManagedImageName,
-				b.config.manageImageLocation,
+				b.config.Location,
 				managedImageID,
 				b.config.ManagedImageOSDiskSnapshotName,
 				b.config.ManagedImageDataDiskSnapshotPrefix,
@@ -321,7 +319,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return NewManagedImageArtifact(b.config.OSType,
 			b.config.ManagedImageResourceGroupName,
 			b.config.ManagedImageName,
-			b.config.manageImageLocation,
+			b.config.Location,
 			managedImageID,
 			b.config.ManagedImageOSDiskSnapshotName,
 			b.config.ManagedImageDataDiskSnapshotPrefix,
@@ -448,7 +446,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 // Parameters that are only known at runtime after querying Azure.
 func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmLocation, b.config.Location)
-	stateBag.Put(constants.ArmManagedImageLocation, b.config.manageImageLocation)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {

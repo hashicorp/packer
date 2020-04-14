@@ -131,7 +131,6 @@ func createTestStateBagStepCaptureImage() multistep.StateBag {
 	stateBag.Put(constants.ArmIsManagedImage, false)
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, "")
 	stateBag.Put(constants.ArmManagedImageName, "")
-	stateBag.Put(constants.ArmManagedImageLocation, "")
 	stateBag.Put(constants.ArmImageParameters, &compute.Image{})
 
 	return stateBag
