@@ -15,6 +15,7 @@ type FlatProvisioner struct {
 	Config      map[string]interface{} `json:"config,omitempty" cty:"config"`
 	Override    map[string]interface{} `json:"override,omitempty" cty:"override"`
 	PauseBefore *string                `mapstructure:"pause_before" json:"pause_before,omitempty" cty:"pause_before"`
+	Retry       *int                   `mapstructure:"retry" json:"retry,omitempty" cty:"retry"`
 	Timeout     *string                `mapstructure:"timeout" json:"timeout,omitempty" cty:"timeout"`
 }
 
@@ -36,6 +37,7 @@ func (*FlatProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"config":       &hcldec.AttrSpec{Name: "config", Type: cty.Map(cty.String), Required: false},
 		"override":     &hcldec.AttrSpec{Name: "override", Type: cty.Map(cty.String), Required: false},
 		"pause_before": &hcldec.AttrSpec{Name: "pause_before", Type: cty.String, Required: false},
+		"retry":        &hcldec.AttrSpec{Name: "retry", Type: cty.Number, Required: false},
 		"timeout":      &hcldec.AttrSpec{Name: "timeout", Type: cty.String, Required: false},
 	}
 	return s

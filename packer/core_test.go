@@ -786,3 +786,45 @@ func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {
 
 	c.Template = tpl
 }
+
+func TestCoreBuild_provRetry(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-prov-retry.json"))
+	b := TestBuilder(t, config, "test")
+	p := TestProvisioner(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ui := testUi()
+	ctx, topCtxCancel := context.WithCancel(context.Background())
+	p.ProvFunc = func(ctx context.Context) error {
+		topCtxCancel()
+		<-ctx.Done()
+		return ctx.Err()
+	}
+
+	artifact, err := build.Run(ctx, ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifact) != 1 {
+		t.Fatalf("bad: %#v", artifact)
+	}
+
+	if artifact[0].Id() != b.ArtifactId {
+		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+	if !p.ProvRetried {
+		t.Fatal("provisioner should retry")
+	}
+}
