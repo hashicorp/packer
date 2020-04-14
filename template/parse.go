@@ -76,6 +76,7 @@ func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
 	delete(p.Config, "only")
 	delete(p.Config, "override")
 	delete(p.Config, "pause_before")
+	delete(p.Config, "retry")
 	delete(p.Config, "type")
 	delete(p.Config, "timeout")
 

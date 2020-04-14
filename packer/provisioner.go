@@ -179,7 +179,8 @@ func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communic
 	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
 
 	retries := 0
-	if err != nil && retries < r.Retry {
+	for err != nil && retries < r.Retry {
+		ui.Say("Retrying provisioner")
 		err = r.Provisioner.Provision(ctx, ui, comm, generatedData)
 		retries++
 	}
