@@ -162,6 +162,31 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communica
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
+// RetriedProvisioner is a Provisioner implementation that retries
+// the provisioner whenever there's an error.
+type RetriedProvisioner struct {
+	Retry       int
+	Provisioner Provisioner
+}
+
+func (r *RetriedProvisioner) ConfigSpec() hcldec.ObjectSpec { return r.ConfigSpec() }
+func (r *RetriedProvisioner) FlatConfig() interface{}       { return r.FlatConfig() }
+func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
+	return r.Provisioner.Prepare(raws...)
+}
+
+func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
+
+	retries := 0
+	if err != nil && retries < r.Retry {
+		err = r.Provisioner.Provision(ctx, ui, comm, generatedData)
+		retries++
+	}
+
+	return err
+}
+
 // DebuggedProvisioner is a Provisioner implementation that waits until a key
 // press before the provisioner is actually run.
 type DebuggedProvisioner struct {
