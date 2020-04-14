@@ -28,6 +28,7 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
+	IAP         bool   `mapstructure:"iap"`
 
 	Bucket               string            `mapstructure:"bucket"`
 	GCSObjectName        string            `mapstructure:"gcs_object_name"`
@@ -77,7 +78,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile, p.config.IAP)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -117,7 +118,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	p.config.ctx.Data = generatedData
 
-	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
+	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine, p.config.IAP)
 	if err != nil {
 		return nil, false, false, err
 	}

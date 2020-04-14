@@ -34,7 +34,13 @@ type driverGCE struct {
 	ui        packer.Ui
 }
 
-var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
+func getDriverScopes(iap bool) []string {
+	ds := []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
+	// if iap {
+	// 	ds = append(ds, "https://www.googleapis.com/auth/iap.tunnelResourceAccessor")
+	// }
+	return ds
+}
 
 // Define a TokenSource that gets tokens from Vault
 type OauthTokenSource struct {
@@ -69,7 +75,7 @@ func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
 
 }
 
-func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
+func NewClientGCE(conf *jwt.Config, vaultOauth string, iap bool) (*http.Client, error) {
 	var err error
 
 	var client *http.Client
@@ -84,7 +90,7 @@ func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
 		log.Printf("[INFO]   -- Email: %s", conf.Email)
-		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
+		log.Printf("[INFO]   -- Scopes: %s", getDriverScopes(iap))
 		log.Printf("[INFO]   -- Private Key Length: %d", len(conf.PrivateKey))
 
 		// Initiate an http.Client. The following GET request will be
@@ -93,7 +99,7 @@ func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 		client = conf.Client(context.TODO())
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
-		client, err = google.DefaultClient(context.TODO(), DriverScopes...)
+		client, err = google.DefaultClient(context.TODO(), getDriverScopes(iap)...)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -115,8 +121,8 @@ func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 	return client, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (Driver, error) {
-	client, err := NewClientGCE(conf, vaultOauth)
+func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string, iap bool) (Driver, error) {
+	client, err := NewClientGCE(conf, vaultOauth, iap)
 	if err != nil {
 		return nil, err
 	}

@@ -70,6 +70,10 @@ type FlatConfig struct {
 	EnableSecureBoot             *bool                      `mapstructure:"enable_secure_boot" required:"false" cty:"enable_secure_boot"`
 	EnableVtpm                   *bool                      `mapstructure:"enable_vtpm" required:"false" cty:"enable_vtpm"`
 	EnableIntegrityMonitoring    *bool                      `mapstructure:"enable_integrity_monitoring" required:"false" cty:"enable_integrity_monitoring"`
+	IAP                          *bool                      `mapstructure:"use_iap" required:"false" cty:"use_iap"`
+	IAPLocalhostPort             *int                       `mapstructure:"iap_localhost_port" cty:"iap_localhost_port"`
+	IAPHashBang                  *string                    `mapstructure:"iap_hashbang" required:"false" cty:"iap_hashbang"`
+	IAPExt                       *string                    `mapstructure:"iap_ext" required:"false" cty:"iap_ext"`
 	ImageName                    *string                    `mapstructure:"image_name" required:"false" cty:"image_name"`
 	ImageDescription             *string                    `mapstructure:"image_description" required:"false" cty:"image_description"`
 	ImageEncryptionKey           *FlatCustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false" cty:"image_encryption_key"`
@@ -175,6 +179,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"enable_secure_boot":              &hcldec.AttrSpec{Name: "enable_secure_boot", Type: cty.Bool, Required: false},
 		"enable_vtpm":                     &hcldec.AttrSpec{Name: "enable_vtpm", Type: cty.Bool, Required: false},
 		"enable_integrity_monitoring":     &hcldec.AttrSpec{Name: "enable_integrity_monitoring", Type: cty.Bool, Required: false},
+		"use_iap":                         &hcldec.AttrSpec{Name: "use_iap", Type: cty.Bool, Required: false},
+		"iap_localhost_port":              &hcldec.AttrSpec{Name: "iap_localhost_port", Type: cty.Number, Required: false},
+		"iap_hashbang":                    &hcldec.AttrSpec{Name: "iap_hashbang", Type: cty.String, Required: false},
+		"iap_ext":                         &hcldec.AttrSpec{Name: "iap_ext", Type: cty.String, Required: false},
 		"image_name":                      &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":               &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_encryption_key":            &hcldec.BlockSpec{TypeName: "image_encryption_key", Nested: hcldec.ObjectSpec((*FlatCustomerEncryptionKey)(nil).HCL2Spec())},

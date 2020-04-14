@@ -37,7 +37,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 // representing a GCE machine image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine)
+		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine,
+		b.config.IAP)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +66,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepInstanceInfo{
 			Debug: b.config.PackerDebug,
+		},
+		&StepStartTunnel{
+			IAPConf:     &b.config.IAPConfig,
+			CommConf:    &b.config.Comm,
+			AccountFile: b.config.AccountFile,
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
