@@ -27,6 +27,7 @@ type FlatConfig struct {
 	ExecuteCommand         *string           `mapstructure:"execute_command" cty:"execute_command"`
 	RemoteEnvVarPath       *string           `mapstructure:"remote_env_var_path" cty:"remote_env_var_path"`
 	ElevatedExecuteCommand *string           `mapstructure:"elevated_execute_command" cty:"elevated_execute_command"`
+	SkipClean              *bool             `mapstructure:"skip_clean" cty:"skip_clean"`
 	StartRetryTimeout      *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
 	ElevatedEnvVarFormat   *string           `mapstructure:"elevated_env_var_format" cty:"elevated_env_var_format"`
 	ElevatedUser           *string           `mapstructure:"elevated_user" cty:"elevated_user"`
@@ -64,6 +65,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"remote_env_var_path":        &hcldec.AttrSpec{Name: "remote_env_var_path", Type: cty.String, Required: false},
 		"elevated_execute_command":   &hcldec.AttrSpec{Name: "elevated_execute_command", Type: cty.String, Required: false},
+		"skip_clean":                 &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
 		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},
 		"elevated_env_var_format":    &hcldec.AttrSpec{Name: "elevated_env_var_format", Type: cty.String, Required: false},
 		"elevated_user":              &hcldec.AttrSpec{Name: "elevated_user", Type: cty.String, Required: false},
