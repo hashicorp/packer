@@ -80,9 +80,9 @@ jobs:
   check-lint:
     executor: golang
     resource_class: large
-    working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
+      - run: git fetch --all
       - run:
           command: make ci-lint
           no_output_timeout: 30m
