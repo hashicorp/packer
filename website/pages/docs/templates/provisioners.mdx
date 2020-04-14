@@ -177,6 +177,27 @@ that provisioner. By default, there is no pause. An example is shown below:
 For the above provisioner, Packer will wait 10 seconds before uploading and
 executing the shell script.
 
+## Retry on error
+
+With certain provisioners it is sometimes desirable to retry when it fails.
+Specifically, in cases where the provisioner depends on external processes that are not done yet.
+
+
+Every provisioner definition in a Packer template can take a special
+configuration `retry` that is the maximum number of times a provisioner will retry on error.
+By default, there is no retry. An example is shown below:
+
+```json
+{
+  "type": "shell",
+  "script": "script.sh",
+  "retry": 5
+}
+```
+
+For the above provisioner, Packer will retry maximum five times until stops failing.
+If after five retries the provisioner still fails, then the complete build will fail.
+
 ## Timeout
 
 Sometimes a command can take much more time than expected
