@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
@@ -28,7 +28,7 @@ type StepCreateImage struct {
 func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get("os_disk_resource_id").(string)
+	diskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
 
 	ui.Say(fmt.Sprintf("Creating image %s\n   using %s for os disk.",
 		s.ImageResourceID,

@@ -3,6 +3,7 @@
 *.sh text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+*.mdx text eol=lf
 *.ps1 text eol=lf
 *.hcl text eol=lf
 go.mod text eol=lf

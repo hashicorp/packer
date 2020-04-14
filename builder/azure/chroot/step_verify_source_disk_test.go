@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -18,7 +18,6 @@ import (
 
 func Test_StepVerifySourceDisk_Run(t *testing.T) {
 	type fields struct {
-		SubscriptionID       string
 		SourceDiskResourceID string
 		Location             string
 
@@ -38,7 +37,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "HappyPath",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
 				Location:             "westus2",
 
@@ -50,7 +48,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "NotAResourceID",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/other",
 				Location:             "westus2",
 
@@ -63,7 +60,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "DiskNotFound",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
 				Location:             "westus2",
 
@@ -76,7 +72,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "NotADisk",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/images/image1",
 				Location:             "westus2",
 
@@ -88,7 +83,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "OtherSubscription",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/subscriptions/subid2/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
 				Location:             "westus2",
 
@@ -101,7 +95,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 		{
 			name: "OtherLocation",
 			fields: fields{
-				SubscriptionID:       "subid1",
 				SourceDiskResourceID: "/subscriptions/subid1/resourcegroups/rg1/providers/Microsoft.Compute/disks/disk1",
 				Location:             "eastus",
 
@@ -115,7 +108,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := StepVerifySourceDisk{
-				SubscriptionID:       tt.fields.SubscriptionID,
 				SourceDiskResourceID: tt.fields.SourceDiskResourceID,
 				Location:             tt.fields.Location,
 			}
@@ -129,16 +121,12 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 				}, nil
 			})
 
-			errorBuffer := &strings.Builder{}
-			ui := &packer.BasicUi{
-				Reader:      strings.NewReader(""),
-				Writer:      ioutil.Discard,
-				ErrorWriter: errorBuffer,
-			}
+			ui, getErr := testUI()
 
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{
-				DisksClientMock: m,
+				DisksClientMock:    m,
+				SubscriptionIDMock: "subid1",
 			})
 			state.Put("ui", ui)
 
@@ -148,8 +136,9 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 			}
 
 			if tt.errormatch != "" {
-				if !regexp.MustCompile(tt.errormatch).MatchString(errorBuffer.String()) {
-					t.Errorf("Expected the error output (%q) to match %q", errorBuffer.String(), tt.errormatch)
+				errs := getErr()
+				if !regexp.MustCompile(tt.errormatch).MatchString(errs) {
+					t.Errorf("Expected the error output (%q) to match %q", errs, tt.errormatch)
 				}
 			}
 
