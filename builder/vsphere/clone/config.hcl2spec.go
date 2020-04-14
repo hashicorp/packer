@@ -143,12 +143,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"RAM_hot_plug":                 &hcldec.AttrSpec{Name: "RAM_hot_plug", Type: cty.Bool, Required: false},
 		"video_ram":                    &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"NestedHV":                     &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
-<<<<<<< HEAD
-		"configuration_parameters":     &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
-=======
 		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
-		"configuration_parameters":     &hcldec.BlockAttrsSpec{TypeName: "configuration_parameters", ElementType: cty.String, Required: false},
->>>>>>> builder/vsphere-clone: support firmware changing
+		"configuration_parameters":     &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"boot_order":                   &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"ip_wait_timeout":              &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":            &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},
