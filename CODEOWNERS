@@ -59,6 +59,10 @@
 /builder/osc/                      @marinsalinas
 /website/pages/docs/builders/osc* @marinsalinas
 
+/builder/tencentcloud/                      @likexian
+/website/pages/docs/builders/tencentcloud* @likexian
+
+
 
 # provisioners
 
