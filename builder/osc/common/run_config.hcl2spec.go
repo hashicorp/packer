@@ -63,7 +63,7 @@ func (*NetFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 // The decoded values from this spec will then be applied to a FlatNetFilterOptions.
 func (*FlatNetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
+		"filters": &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
 		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
@@ -90,7 +90,7 @@ func (*OmiFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 // The decoded values from this spec will then be applied to a FlatOmiFilterOptions.
 func (*FlatOmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"filters":     &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
+		"filters":     &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
 		"filter":      &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"owners":      &hcldec.AttrSpec{Name: "owners", Type: cty.List(cty.String), Required: false},
 		"most_recent": &hcldec.AttrSpec{Name: "most_recent", Type: cty.Bool, Required: false},
@@ -117,7 +117,7 @@ func (*SecurityGroupFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[
 // The decoded values from this spec will then be applied to a FlatSecurityGroupFilterOptions.
 func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"filters": &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
+		"filters": &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
 		"filter":  &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
@@ -144,7 +144,7 @@ func (*SubnetFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]
 // The decoded values from this spec will then be applied to a FlatSubnetFilterOptions.
 func (*FlatSubnetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"filters":   &hcldec.BlockAttrsSpec{TypeName: "filters", ElementType: cty.String, Required: false},
+		"filters":   &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
 		"filter":    &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"most_free": &hcldec.AttrSpec{Name: "most_free", Type: cty.Bool, Required: false},
 		"random":    &hcldec.AttrSpec{Name: "random", Type: cty.Bool, Required: false},

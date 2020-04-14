@@ -45,7 +45,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"bootstrap":                  &hcldec.AttrSpec{Name: "bootstrap", Type: cty.Bool, Required: false},
 		"version":                    &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},
@@ -54,7 +54,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"module_dirs":                &hcldec.BlockListSpec{TypeName: "module_dirs", Nested: hcldec.ObjectSpec((*FlatModuleDir)(nil).HCL2Spec())},
 		"module":                     &hcldec.AttrSpec{Name: "module", Type: cty.String, Required: false},
 		"working_directory":          &hcldec.AttrSpec{Name: "working_directory", Type: cty.String, Required: false},
-		"params":                     &hcldec.BlockAttrsSpec{TypeName: "params", ElementType: cty.String, Required: false},
+		"params":                     &hcldec.AttrSpec{Name: "params", Type: cty.Map(cty.String), Required: false},
 		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"prevent_sudo":               &hcldec.AttrSpec{Name: "prevent_sudo", Type: cty.Bool, Required: false},
 	}

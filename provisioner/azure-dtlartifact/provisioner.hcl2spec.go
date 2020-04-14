@@ -77,7 +77,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"cloud_environment_name":     &hcldec.AttrSpec{Name: "cloud_environment_name", Type: cty.String, Required: false},
 		"client_id":                  &hcldec.AttrSpec{Name: "client_id", Type: cty.String, Required: false},
@@ -92,8 +92,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"lab_resource_group_name":    &hcldec.AttrSpec{Name: "lab_resource_group_name", Type: cty.String, Required: false},
 		"vm_name":                    &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"polling_duration_timeout":   &hcldec.AttrSpec{Name: "polling_duration_timeout", Type: cty.String, Required: false},
-		"azure_tags":                 &hcldec.BlockAttrsSpec{TypeName: "azure_tags", ElementType: cty.String, Required: false},
-		"json":                       &hcldec.BlockAttrsSpec{TypeName: "json", ElementType: cty.String, Required: false},
+		"azure_tags":                 &hcldec.AttrSpec{Name: "azure_tags", Type: cty.Map(cty.String), Required: false},
+		"json":                       &hcldec.AttrSpec{Name: "json", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }
