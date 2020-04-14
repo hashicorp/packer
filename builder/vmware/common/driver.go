@@ -144,12 +144,13 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 	errs := ""
 	for _, driver := range drivers {
 		err := driver.Verify()
-		log.Printf("Testing vmware driver %T. Success: %t",
-			driver, err == nil)
 
+		log.Printf("Testing against vmware driver %T, Success: %t", driver, err == nil)
 		if err == nil {
 			return driver, nil
 		}
+
+		log.Printf("skipping %T because it failed with the following error %s", driver, err)
 		errs += "* " + err.Error() + "\n"
 	}
 
