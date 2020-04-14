@@ -74,7 +74,7 @@ type CreateConfig struct {
 	// here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
 	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
-	// Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
+	// Set the Firmware at machine creation. Supported values: `bios`, `efi` or `efi-secure`. Defaults to `bios`.
 	Firmware string `mapstructure:"firmware"`
 	// Set VM disk controller type. Example `pvscsi`.
 	DiskControllerType string `mapstructure:"disk_controller_type"`
@@ -115,8 +115,8 @@ func (c *CreateConfig) Prepare() []error {
 		c.GuestOSType = "otherGuest"
 	}
 
-	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" {
-		errs = append(errs, fmt.Errorf("'firmware' must be 'bios' or 'efi'"))
+	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" && c.Firmware != "efi-secure" {
+		errs = append(errs, fmt.Errorf("'firmware' must be 'bios', 'efi' or 'efi-secure'"))
 	}
 
 	return errs
