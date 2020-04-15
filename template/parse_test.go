@@ -111,7 +111,7 @@ func TestParse(t *testing.T) {
 			&Template{
 				Provisioners: []*Provisioner{
 					{
-						Type:  "something",
+						Type:       "something",
 						MaxRetries: 5,
 					},
 				},
