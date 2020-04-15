@@ -42,7 +42,10 @@ type Config struct {
 
 	// When set to `true`, starts with an empty, unpartitioned disk. Defaults to `false`.
 	FromScratch bool `mapstructure:"from_scratch"`
-	// Either a managed disk resource ID or a publisher:offer:sku:version specifier for plaform image sources.
+	// One of the following can be used as a source for an image:
+	// - a shared image version resource ID
+	// - a managed disk resource ID
+	// - a publisher:offer:sku:version specifier for plaform image sources.
 	Source     string `mapstructure:"source" required:"true"`
 	sourceType sourceType
 
@@ -112,6 +115,7 @@ type sourceType string
 const (
 	sourcePlatformImage sourceType = "PlatformImage"
 	sourceDisk          sourceType = "Disk"
+	sourceSharedImage   sourceType = "SharedImage"
 )
 
 // GetContext implements ContextProvider to allow steps to use the config context
@@ -251,6 +255,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			strings.EqualFold(id.ResourceType.String(), "disks") {
 			log.Println("Source is a disk resource ID:", b.config.Source)
 			b.config.sourceType = sourceDisk
+		} else if id, err := client.ParseResourceID(b.config.Source); err == nil &&
+			strings.EqualFold(id.Provider, "Microsoft.Compute") &&
+			strings.EqualFold(id.ResourceType.String(), "galleries/images/versions") {
+			log.Println("Source is a shared image ID:", b.config.Source)
+			b.config.sourceType = sourceSharedImage
 		} else {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("source: %q is not a valid platform image specifier, nor is it a disk resource ID", b.config.Source))
@@ -474,6 +483,22 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					HyperVGeneration:       config.ImageHyperVGeneration,
 					SourceDiskResourceID:   config.Source,
 					Location:               info.Location,
+
+					SkipCleanup: config.SkipCleanup,
+				})
+
+		case sourceSharedImage:
+			addSteps(
+				&StepVerifySharedImageSource{
+					SharedImageID:  config.Source,
+					SubscriptionID: info.SubscriptionID,
+					Location:       info.Location,
+				},
+				&StepCreateNewDisk{
+					ResourceID:            config.TemporaryOSDiskID,
+					DiskSizeGB:            config.OSDiskSizeGB,
+					SourceImageResourceID: config.Source,
+					Location:              info.Location,
 
 					SkipCleanup: config.SkipCleanup,
 				})
