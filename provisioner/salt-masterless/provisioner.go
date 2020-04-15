@@ -404,14 +404,9 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 	}
 	defer f.Close()
 
-	_, temp_dst := filepath.Split(dst)
-
-	if err = comm.Upload(temp_dst, f, nil); err != nil {
+	if err = comm.Upload(dst, f, nil); err != nil {
 		return fmt.Errorf("Error uploading %s: %s", src, err)
 	}
-
-	p.moveFile(ui, comm, dst, temp_dst)
-
 	return nil
 }
 
@@ -478,9 +473,14 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 }
 
 func (p *Provisioner) uploadDir(ui packer.Ui, comm packer.Communicator, dst, src string, ignore []string) error {
-	_, temp_dst := filepath.Split(dst)
-	if err := comm.UploadDir(temp_dst, src, ignore); err != nil {
+	if err := p.createDir(ui, comm, dst); err != nil {
 		return err
 	}
-	return p.moveFile(ui, comm, dst, temp_dst)
+
+	// Make sure there is a trailing "/" so that the directory isn't
+	// created on the other side.
+	if src[len(src)-1] != '/' {
+		src = src + "/"
+	}
+	return comm.UploadDir(dst, src, ignore)
 }
