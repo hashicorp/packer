@@ -21,6 +21,7 @@ type FlatHardwareConfig struct {
 	VideoRAM            *int64  `mapstructure:"video_ram" cty:"video_ram"`
 	VGPUProfile         *string `mapstructure:"vgpu_profile" cty:"vgpu_profile"`
 	NestedHV            *bool   `mapstructure:"NestedHV" cty:"NestedHV"`
+	Firmware            *string `mapstructure:"firmware" cty:"firmware"`
 }
 
 // FlatMapstructure returns a new FlatHardwareConfig.
@@ -47,6 +48,7 @@ func (*FlatHardwareConfig) HCL2Spec() map[string]hcldec.Spec {
 		"video_ram":       &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"vgpu_profile":    &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":        &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
+		"firmware":        &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 	}
 	return s
 }

@@ -45,6 +45,7 @@ type FlatConfig struct {
 	VideoRAM                  *int64                   `mapstructure:"video_ram" cty:"video_ram"`
 	VGPUProfile               *string                  `mapstructure:"vgpu_profile" cty:"vgpu_profile"`
 	NestedHV                  *bool                    `mapstructure:"NestedHV" cty:"NestedHV"`
+	Firmware                  *string                  `mapstructure:"firmware" cty:"firmware"`
 	ConfigParams              map[string]string        `mapstructure:"configuration_parameters" cty:"configuration_parameters"`
 	BootOrder                 *string                  `mapstructure:"boot_order" cty:"boot_order"`
 	WaitTimeout               *string                  `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout"`
@@ -114,7 +115,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                 &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":        &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"vcenter_server":               &hcldec.AttrSpec{Name: "vcenter_server", Type: cty.String, Required: false},
 		"username":                     &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
@@ -144,7 +145,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"video_ram":                    &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"vgpu_profile":                 &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                     &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
-		"configuration_parameters":     &hcldec.BlockAttrsSpec{TypeName: "configuration_parameters", ElementType: cty.String, Required: false},
+		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"configuration_parameters":     &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"boot_order":                   &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"ip_wait_timeout":              &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":            &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},

@@ -13,6 +13,22 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+// Defines a Network Adapter
+//
+// Example that creates two network adapters:
+//
+// ```json
+//   "network_adapters": [
+//     {
+//       "network": "VM Network",
+//       "network_card": "vmxnet3"
+//     },
+//     {
+//       "network": "OtherNetwork",
+//       "network_card": "vmxnet3"
+//     }
+//   ],
+// ```
 type NIC struct {
 	// Set network VM will be connected to.
 	Network string `mapstructure:"network"`
@@ -24,8 +40,23 @@ type NIC struct {
 	Passthrough *bool `mapstructure:"passthrough"`
 }
 
+// Defines the disk storage for a VM.
+//
+// Example that will create a 15GB and a 20GB disk on the VM. The second disk will be thin provisioned:
+//
+// ```json
+//   "storage": [
+//     {
+//       "disk_size": 15000,
+//     },
+//     {
+//       "disk_size": 20000,
+//       "disk_thin_provisioned": true
+//     }
+//   ],
+// ```
 type DiskConfig struct {
-	// Set the size of the disk
+	// The size of the disk in MB.
 	DiskSize int64 `mapstructure:"disk_size" required:"true"`
 	// Enable VMDK thin provisioning for VM. Defaults to `false`.
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
@@ -43,7 +74,7 @@ type CreateConfig struct {
 	// here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
 	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
-	// Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
+	// Set the Firmware at machine creation. Supported values: `bios`, `efi` or `efi-secure`. Defaults to `bios`.
 	Firmware string `mapstructure:"firmware"`
 	// Set VM disk controller type. Example `pvscsi`.
 	DiskControllerType string `mapstructure:"disk_controller_type"`
@@ -84,8 +115,8 @@ func (c *CreateConfig) Prepare() []error {
 		c.GuestOSType = "otherGuest"
 	}
 
-	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" {
-		errs = append(errs, fmt.Errorf("'firmware' must be 'bios' or 'efi'"))
+	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" && c.Firmware != "efi-secure" {
+		errs = append(errs, fmt.Errorf("'firmware' must be 'bios', 'efi' or 'efi-secure'"))
 	}
 
 	return errs

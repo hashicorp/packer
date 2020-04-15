@@ -166,7 +166,7 @@ func (p *Parser) parse(filename string, varFiles []string, argVars map[string]st
 func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := dynblock.Expand(f.Body, cfg.EvalContext())
+	body := dynblock.Expand(f.Body, cfg.EvalContext(nil))
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 

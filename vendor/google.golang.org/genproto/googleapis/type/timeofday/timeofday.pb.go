@@ -97,7 +97,9 @@ func init() {
 	proto.RegisterType((*TimeOfDay)(nil), "google.type.TimeOfDay")
 }
 
-func init() { proto.RegisterFile("google/type/timeofday.proto", fileDescriptor_6c354ab94588cebb) }
+func init() {
+	proto.RegisterFile("google/type/timeofday.proto", fileDescriptor_6c354ab94588cebb)
+}
 
 var fileDescriptor_6c354ab94588cebb = []byte{
 	// 201 bytes of a gzipped FileDescriptorProto

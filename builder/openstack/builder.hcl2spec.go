@@ -134,7 +134,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":         &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":         &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":    &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"username":                      &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"user_id":                       &hcldec.AttrSpec{Name: "user_id", Type: cty.String, Required: false},
@@ -156,7 +156,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"application_credential_secret": &hcldec.AttrSpec{Name: "application_credential_secret", Type: cty.String, Required: false},
 		"cloud":                         &hcldec.AttrSpec{Name: "cloud", Type: cty.String, Required: false},
 		"image_name":                    &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
-		"metadata":                      &hcldec.BlockAttrsSpec{TypeName: "metadata", ElementType: cty.String, Required: false},
+		"metadata":                      &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
 		"image_visibility":              &hcldec.AttrSpec{Name: "image_visibility", Type: cty.String, Required: false},
 		"image_members":                 &hcldec.AttrSpec{Name: "image_members", Type: cty.List(cty.String), Required: false},
 		"image_auto_accept_members":     &hcldec.AttrSpec{Name: "image_auto_accept_members", Type: cty.Bool, Required: false},
@@ -223,7 +223,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"user_data":                     &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":                &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
 		"instance_name":                 &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
-		"instance_metadata":             &hcldec.BlockAttrsSpec{TypeName: "instance_metadata", ElementType: cty.String, Required: false},
+		"instance_metadata":             &hcldec.AttrSpec{Name: "instance_metadata", Type: cty.Map(cty.String), Required: false},
 		"force_delete":                  &hcldec.AttrSpec{Name: "force_delete", Type: cty.Bool, Required: false},
 		"config_drive":                  &hcldec.AttrSpec{Name: "config_drive", Type: cty.Bool, Required: false},
 		"floating_ip_pool":              &hcldec.AttrSpec{Name: "floating_ip_pool", Type: cty.String, Required: false},
@@ -289,7 +289,7 @@ func (*FlatImageFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 		"owner":      &hcldec.AttrSpec{Name: "owner", Type: cty.String, Required: false},
 		"tags":       &hcldec.AttrSpec{Name: "tags", Type: cty.List(cty.String), Required: false},
 		"visibility": &hcldec.AttrSpec{Name: "visibility", Type: cty.String, Required: false},
-		"properties": &hcldec.BlockAttrsSpec{TypeName: "properties", ElementType: cty.String, Required: false},
+		"properties": &hcldec.AttrSpec{Name: "properties", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }

@@ -12,11 +12,22 @@ import (
 // DefaultMetadataClient is the default instance metadata client for Azure. Replace this variable for testing purposes only
 var DefaultMetadataClient = NewMetadataClient()
 
-// MetadataClient holds methods that Packer uses to get information about the current VM
+// MetadataClientAPI holds methods that Packer uses to get information about the current VM
 type MetadataClientAPI interface {
 	GetComputeInfo() (*ComputeInfo, error)
 }
 
+// MetadataClientStub is an easy way to put a test hook in DefaultMetadataClient
+type MetadataClientStub struct {
+	ComputeInfo
+}
+
+//GetComputeInfo implements MetadataClientAPI
+func (s MetadataClientStub) GetComputeInfo() (*ComputeInfo, error) {
+	return &s.ComputeInfo, nil
+}
+
+// ComputeInfo defines the Azure VM metadata that is used in Packer
 type ComputeInfo struct {
 	Name              string
 	ResourceGroupName string

@@ -47,7 +47,7 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"volume_type":           &hcldec.AttrSpec{Name: "volume_type", Type: cty.String, Required: false},
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
 		"kms_key_id":            &hcldec.AttrSpec{Name: "kms_key_id", Type: cty.String, Required: false},
-		"tags":                  &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tags":                  &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 		"tag":                   &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s
@@ -173,7 +173,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":         &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":         &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":    &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"access_key":                    &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
@@ -200,7 +200,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shutdown_behavior":                     &hcldec.AttrSpec{Name: "shutdown_behavior", Type: cty.String, Required: false},
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"security_group_filter":                 &hcldec.BlockSpec{TypeName: "security_group_filter", Nested: hcldec.ObjectSpec((*common.FlatSecurityGroupFilterOptions)(nil).HCL2Spec())},
-		"run_tags":                              &hcldec.BlockAttrsSpec{TypeName: "run_tags", ElementType: cty.String, Required: false},
+		"run_tags":                              &hcldec.AttrSpec{Name: "run_tags", Type: cty.Map(cty.String), Required: false},
 		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"security_group_id":                     &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_ids":                    &hcldec.AttrSpec{Name: "security_group_ids", Type: cty.List(cty.String), Required: false},
@@ -209,7 +209,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"spot_instance_types":                   &hcldec.AttrSpec{Name: "spot_instance_types", Type: cty.List(cty.String), Required: false},
 		"spot_price":                            &hcldec.AttrSpec{Name: "spot_price", Type: cty.String, Required: false},
 		"spot_price_auto_product":               &hcldec.AttrSpec{Name: "spot_price_auto_product", Type: cty.String, Required: false},
-		"spot_tags":                             &hcldec.BlockAttrsSpec{TypeName: "spot_tags", ElementType: cty.String, Required: false},
+		"spot_tags":                             &hcldec.AttrSpec{Name: "spot_tags", Type: cty.Map(cty.String), Required: false},
 		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"subnet_filter":                         &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                             &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
@@ -264,7 +264,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ena_support":                           &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                         &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"ebs_volumes":                           &hcldec.BlockListSpec{TypeName: "ebs_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
-		"run_volume_tags":                       &hcldec.BlockAttrsSpec{TypeName: "run_volume_tags", ElementType: cty.String, Required: false},
+		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},
 		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 	}
 	return s

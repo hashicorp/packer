@@ -125,6 +125,7 @@ if [ -n "${PACKER_DEV+x}" ]; then
     XC_ARCH=$(go env GOARCH)
 fi
 
+export CGO_ENABLED=0
 set +e
 ${GOX:?command not found} \
     -os="${XC_OS:-$ALL_XC_OS}" \

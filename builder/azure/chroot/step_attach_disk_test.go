@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -78,7 +78,7 @@ func TestStepAttachDisk_Run(t *testing.T) {
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{})
 			state.Put("ui", ui)
-			state.Put("os_disk_resource_id", "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1")
+			state.Put(stateBagKey_OSDiskResourceID, "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1")
 
 			got := s.Run(context.TODO(), state)
 			if !reflect.DeepEqual(got, tt.want) {

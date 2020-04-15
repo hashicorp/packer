@@ -39,6 +39,8 @@ type HardwareConfig struct {
 	VGPUProfile string `mapstructure:"vgpu_profile"`
 	// Enable nested hardware virtualization for VM. Defaults to `false`.
 	NestedHV bool `mapstructure:"NestedHV"`
+	// Set the Firmware for virtual machine. Supported values: `bios`, `efi`, `efi-secure` or empty string to keep as in template. Defaults to empty string.
+	Firmware string `mapstructure:"firmware"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -46,6 +48,10 @@ func (c *HardwareConfig) Prepare() []error {
 
 	if c.RAMReservation > 0 && c.RAMReserveAll != false {
 		errs = append(errs, fmt.Errorf("'RAM_reservation' and 'RAM_reserve_all' cannot be used together"))
+	}
+
+	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" && c.Firmware != "efi-secure" {
+		errs = append(errs, fmt.Errorf("'firmware' must be '', 'bios', 'efi' or 'efi-secure'"))
 	}
 
 	return errs
@@ -75,6 +81,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 			MemoryHotAddEnabled: s.Config.MemoryHotAddEnabled,
 			VideoRAM:            s.Config.VideoRAM,
 			VGPUProfile:         s.Config.VGPUProfile,
+			Firmware:            s.Config.Firmware,
 		})
 		if err != nil {
 			state.Put("error", err)

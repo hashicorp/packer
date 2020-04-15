@@ -383,11 +383,13 @@ const (
 	Premium StorageType = "Premium"
 	// Standard ...
 	Standard StorageType = "Standard"
+	// StandardSSD ...
+	StandardSSD StorageType = "StandardSSD"
 )
 
 // PossibleStorageTypeValues returns an array of possible values for the StorageType const type.
 func PossibleStorageTypeValues() []StorageType {
-	return []StorageType{Premium, Standard}
+	return []StorageType{Premium, Standard, StandardSSD}
 }
 
 // TargetCostStatus enumerates the values for target cost status.
@@ -445,11 +447,13 @@ const (
 	FromCustomImage VirtualMachineCreationSource = "FromCustomImage"
 	// FromGalleryImage ...
 	FromGalleryImage VirtualMachineCreationSource = "FromGalleryImage"
+	// FromSharedGalleryImage ...
+	FromSharedGalleryImage VirtualMachineCreationSource = "FromSharedGalleryImage"
 )
 
 // PossibleVirtualMachineCreationSourceValues returns an array of possible values for the VirtualMachineCreationSource const type.
 func PossibleVirtualMachineCreationSourceValues() []VirtualMachineCreationSource {
-	return []VirtualMachineCreationSource{FromCustomImage, FromGalleryImage}
+	return []VirtualMachineCreationSource{FromCustomImage, FromGalleryImage, FromSharedGalleryImage}
 }
 
 // WindowsOsState enumerates the values for windows os state.
@@ -1632,21 +1636,21 @@ type AttachDiskProperties struct {
 
 // AttachNewDataDiskOptions properties to attach new disk to the Virtual Machine.
 type AttachNewDataDiskOptions struct {
-	// DiskSizeGiB - Size of the disk to be attached in Gibibytes.
+	// DiskSizeGiB - Size of the disk to be attached in GibiBytes.
 	DiskSizeGiB *int32 `json:"diskSizeGiB,omitempty"`
 	// DiskName - The name of the disk to be attached.
 	DiskName *string `json:"diskName,omitempty"`
-	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium'
+	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	DiskType StorageType `json:"diskType,omitempty"`
 }
 
 // AttachNewDataDiskOptionsFragment properties to attach new disk to the Virtual Machine.
 type AttachNewDataDiskOptionsFragment struct {
-	// DiskSizeGiB - Size of the disk to be attached in Gibibytes.
+	// DiskSizeGiB - Size of the disk to be attached in GibiBytes.
 	DiskSizeGiB *int32 `json:"diskSizeGiB,omitempty"`
 	// DiskName - The name of the disk to be attached.
 	DiskName *string `json:"diskName,omitempty"`
-	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium'
+	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	DiskType StorageType `json:"diskType,omitempty"`
 }
 
@@ -2260,7 +2264,7 @@ type DataDiskPropertiesFragment struct {
 type DataDiskStorageTypeInfo struct {
 	// Lun - Disk Lun
 	Lun *string `json:"lun,omitempty"`
-	// StorageType - Disk Storage Type. Possible values include: 'Standard', 'Premium'
+	// StorageType - Disk Storage Type. Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	StorageType StorageType `json:"storageType,omitempty"`
 }
 
@@ -2268,7 +2272,7 @@ type DataDiskStorageTypeInfo struct {
 type DataDiskStorageTypeInfoFragment struct {
 	// Lun - Disk Lun
 	Lun *string `json:"lun,omitempty"`
-	// StorageType - Disk Storage Type. Possible values include: 'Standard', 'Premium'
+	// StorageType - Disk Storage Type. Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	StorageType StorageType `json:"storageType,omitempty"`
 }
 
@@ -2598,9 +2602,9 @@ func NewDiskListPage(getNextPage func(context.Context, DiskList) (DiskList, erro
 
 // DiskProperties properties of a disk.
 type DiskProperties struct {
-	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium'
+	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	DiskType StorageType `json:"diskType,omitempty"`
-	// DiskSizeGiB - The size of the disk in Gibibytes.
+	// DiskSizeGiB - The size of the disk in GibiBytes.
 	DiskSizeGiB *int32 `json:"diskSizeGiB,omitempty"`
 	// LeasedByLabVMID - The resource ID of the VM to which this disk is leased.
 	LeasedByLabVMID *string `json:"leasedByLabVmId,omitempty"`
@@ -2622,9 +2626,9 @@ type DiskProperties struct {
 
 // DiskPropertiesFragment properties of a disk.
 type DiskPropertiesFragment struct {
-	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium'
+	// DiskType - The storage type for the disk (i.e. Standard, Premium). Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	DiskType StorageType `json:"diskType,omitempty"`
-	// DiskSizeGiB - The size of the disk in Gibibytes.
+	// DiskSizeGiB - The size of the disk in GibiBytes.
 	DiskSizeGiB *int32 `json:"diskSizeGiB,omitempty"`
 	// LeasedByLabVMID - The resource ID of the VM to which this disk is leased.
 	LeasedByLabVMID *string `json:"leasedByLabVmId,omitempty"`
@@ -4466,7 +4470,7 @@ type LabProperties struct {
 	PremiumDataDiskStorageAccount *string `json:"premiumDataDiskStorageAccount,omitempty"`
 	// VaultName - READ-ONLY; The lab's Key vault.
 	VaultName *string `json:"vaultName,omitempty"`
-	// LabStorageType - Type of storage used by the lab. It can be either Premium or Standard. Default is Premium. Possible values include: 'Standard', 'Premium'
+	// LabStorageType - Type of storage used by the lab. It can be either Premium or Standard. Default is Premium. Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	LabStorageType StorageType `json:"labStorageType,omitempty"`
 	// MandatoryArtifactsResourceIdsLinux - The ordered list of artifact resource IDs that should be applied on all Linux VM creations by default, prior to the artifacts specified by the user.
 	MandatoryArtifactsResourceIdsLinux *[]string `json:"mandatoryArtifactsResourceIdsLinux,omitempty"`
@@ -4484,7 +4488,7 @@ type LabProperties struct {
 	Announcement *LabAnnouncementProperties `json:"announcement,omitempty"`
 	// Support - The properties of any lab support message associated with this lab
 	Support *LabSupportProperties `json:"support,omitempty"`
-	// VMCreationResourceGroup - READ-ONLY; The resource group in which lab virtual machines will be created in.
+	// VMCreationResourceGroup - READ-ONLY; The resource group in which all new lab virtual machines will be created. To let DevTest Labs manage resource group creation, set this value to null.
 	VMCreationResourceGroup *string `json:"vmCreationResourceGroup,omitempty"`
 	// PublicIPID - READ-ONLY; The public IP address for the lab's load balancer.
 	PublicIPID *string `json:"publicIpId,omitempty"`
@@ -4532,7 +4536,7 @@ func (lp LabProperties) MarshalJSON() ([]byte, error) {
 
 // LabPropertiesFragment properties of a lab.
 type LabPropertiesFragment struct {
-	// LabStorageType - Type of storage used by the lab. It can be either Premium or Standard. Default is Premium. Possible values include: 'Standard', 'Premium'
+	// LabStorageType - Type of storage used by the lab. It can be either Premium or Standard. Default is Premium. Possible values include: 'Standard', 'Premium', 'StandardSSD'
 	LabStorageType StorageType `json:"labStorageType,omitempty"`
 	// MandatoryArtifactsResourceIdsLinux - The ordered list of artifact resource IDs that should be applied on all Linux VM creations by default, prior to the artifacts specified by the user.
 	MandatoryArtifactsResourceIdsLinux *[]string `json:"mandatoryArtifactsResourceIdsLinux,omitempty"`
@@ -5234,7 +5238,7 @@ type LabVirtualMachineCreationParameterProperties struct {
 	AllowClaim *bool `json:"allowClaim,omitempty"`
 	// StorageType - Storage type to use for virtual machine (i.e. Standard, Premium).
 	StorageType *string `json:"storageType,omitempty"`
-	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage'
+	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage', 'FromSharedGalleryImage'
 	VirtualMachineCreationSource VirtualMachineCreationSource `json:"virtualMachineCreationSource,omitempty"`
 	// EnvironmentID - The resource ID of the environment that contains this virtual machine, if any.
 	EnvironmentID *string `json:"environmentId,omitempty"`
@@ -5302,7 +5306,7 @@ type LabVirtualMachineCreationParameterPropertiesFragment struct {
 	AllowClaim *bool `json:"allowClaim,omitempty"`
 	// StorageType - Storage type to use for virtual machine (i.e. Standard, Premium).
 	StorageType *string `json:"storageType,omitempty"`
-	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage'
+	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage', 'FromSharedGalleryImage'
 	VirtualMachineCreationSource VirtualMachineCreationSource `json:"virtualMachineCreationSource,omitempty"`
 	// EnvironmentID - The resource ID of the environment that contains this virtual machine, if any.
 	EnvironmentID *string `json:"environmentId,omitempty"`
@@ -5571,7 +5575,7 @@ type LabVirtualMachineProperties struct {
 	AllowClaim *bool `json:"allowClaim,omitempty"`
 	// StorageType - Storage type to use for virtual machine (i.e. Standard, Premium).
 	StorageType *string `json:"storageType,omitempty"`
-	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage'
+	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage', 'FromSharedGalleryImage'
 	VirtualMachineCreationSource VirtualMachineCreationSource `json:"virtualMachineCreationSource,omitempty"`
 	// EnvironmentID - The resource ID of the environment that contains this virtual machine, if any.
 	EnvironmentID *string `json:"environmentId,omitempty"`
@@ -5641,7 +5645,7 @@ type LabVirtualMachinePropertiesFragment struct {
 	AllowClaim *bool `json:"allowClaim,omitempty"`
 	// StorageType - Storage type to use for virtual machine (i.e. Standard, Premium).
 	StorageType *string `json:"storageType,omitempty"`
-	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage'
+	// VirtualMachineCreationSource - Tells source of creation of lab virtual machine. Output property only. Possible values include: 'FromCustomImage', 'FromGalleryImage', 'FromSharedGalleryImage'
 	VirtualMachineCreationSource VirtualMachineCreationSource `json:"virtualMachineCreationSource,omitempty"`
 	// EnvironmentID - The resource ID of the environment that contains this virtual machine, if any.
 	EnvironmentID *string `json:"environmentId,omitempty"`
@@ -8092,152 +8096,6 @@ func (sr ServiceRunner) MarshalJSON() ([]byte, error) {
 		objectMap["tags"] = sr.Tags
 	}
 	return json.Marshal(objectMap)
-}
-
-// ServiceRunnerList the response of a list operation.
-type ServiceRunnerList struct {
-	autorest.Response `json:"-"`
-	// Value - Results of the list operation.
-	Value *[]ServiceRunner `json:"value,omitempty"`
-	// NextLink - Link for next set of results.
-	NextLink *string `json:"nextLink,omitempty"`
-}
-
-// ServiceRunnerListIterator provides access to a complete listing of ServiceRunner values.
-type ServiceRunnerListIterator struct {
-	i    int
-	page ServiceRunnerListPage
-}
-
-// NextWithContext advances to the next value.  If there was an error making
-// the request the iterator does not advance and the error is returned.
-func (iter *ServiceRunnerListIterator) NextWithContext(ctx context.Context) (err error) {
-	if tracing.IsEnabled() {
-		ctx = tracing.StartSpan(ctx, fqdn+"/ServiceRunnerListIterator.NextWithContext")
-		defer func() {
-			sc := -1
-			if iter.Response().Response.Response != nil {
-				sc = iter.Response().Response.Response.StatusCode
-			}
-			tracing.EndSpan(ctx, sc, err)
-		}()
-	}
-	iter.i++
-	if iter.i < len(iter.page.Values()) {
-		return nil
-	}
-	err = iter.page.NextWithContext(ctx)
-	if err != nil {
-		iter.i--
-		return err
-	}
-	iter.i = 0
-	return nil
-}
-
-// Next advances to the next value.  If there was an error making
-// the request the iterator does not advance and the error is returned.
-// Deprecated: Use NextWithContext() instead.
-func (iter *ServiceRunnerListIterator) Next() error {
-	return iter.NextWithContext(context.Background())
-}
-
-// NotDone returns true if the enumeration should be started or is not yet complete.
-func (iter ServiceRunnerListIterator) NotDone() bool {
-	return iter.page.NotDone() && iter.i < len(iter.page.Values())
-}
-
-// Response returns the raw server response from the last page request.
-func (iter ServiceRunnerListIterator) Response() ServiceRunnerList {
-	return iter.page.Response()
-}
-
-// Value returns the current value or a zero-initialized value if the
-// iterator has advanced beyond the end of the collection.
-func (iter ServiceRunnerListIterator) Value() ServiceRunner {
-	if !iter.page.NotDone() {
-		return ServiceRunner{}
-	}
-	return iter.page.Values()[iter.i]
-}
-
-// Creates a new instance of the ServiceRunnerListIterator type.
-func NewServiceRunnerListIterator(page ServiceRunnerListPage) ServiceRunnerListIterator {
-	return ServiceRunnerListIterator{page: page}
-}
-
-// IsEmpty returns true if the ListResult contains no values.
-func (srl ServiceRunnerList) IsEmpty() bool {
-	return srl.Value == nil || len(*srl.Value) == 0
-}
-
-// serviceRunnerListPreparer prepares a request to retrieve the next set of results.
-// It returns nil if no more results exist.
-func (srl ServiceRunnerList) serviceRunnerListPreparer(ctx context.Context) (*http.Request, error) {
-	if srl.NextLink == nil || len(to.String(srl.NextLink)) < 1 {
-		return nil, nil
-	}
-	return autorest.Prepare((&http.Request{}).WithContext(ctx),
-		autorest.AsJSON(),
-		autorest.AsGet(),
-		autorest.WithBaseURL(to.String(srl.NextLink)))
-}
-
-// ServiceRunnerListPage contains a page of ServiceRunner values.
-type ServiceRunnerListPage struct {
-	fn  func(context.Context, ServiceRunnerList) (ServiceRunnerList, error)
-	srl ServiceRunnerList
-}
-
-// NextWithContext advances to the next page of values.  If there was an error making
-// the request the page does not advance and the error is returned.
-func (page *ServiceRunnerListPage) NextWithContext(ctx context.Context) (err error) {
-	if tracing.IsEnabled() {
-		ctx = tracing.StartSpan(ctx, fqdn+"/ServiceRunnerListPage.NextWithContext")
-		defer func() {
-			sc := -1
-			if page.Response().Response.Response != nil {
-				sc = page.Response().Response.Response.StatusCode
-			}
-			tracing.EndSpan(ctx, sc, err)
-		}()
-	}
-	next, err := page.fn(ctx, page.srl)
-	if err != nil {
-		return err
-	}
-	page.srl = next
-	return nil
-}
-
-// Next advances to the next page of values.  If there was an error making
-// the request the page does not advance and the error is returned.
-// Deprecated: Use NextWithContext() instead.
-func (page *ServiceRunnerListPage) Next() error {
-	return page.NextWithContext(context.Background())
-}
-
-// NotDone returns true if the page enumeration should be started or is not yet complete.
-func (page ServiceRunnerListPage) NotDone() bool {
-	return !page.srl.IsEmpty()
-}
-
-// Response returns the raw server response from the last page request.
-func (page ServiceRunnerListPage) Response() ServiceRunnerList {
-	return page.srl
-}
-
-// Values returns the slice of values for the current page or nil if there are no values.
-func (page ServiceRunnerListPage) Values() []ServiceRunner {
-	if page.srl.IsEmpty() {
-		return nil
-	}
-	return *page.srl.Value
-}
-
-// Creates a new instance of the ServiceRunnerListPage type.
-func NewServiceRunnerListPage(getNextPage func(context.Context, ServiceRunnerList) (ServiceRunnerList, error)) ServiceRunnerListPage {
-	return ServiceRunnerListPage{fn: getNextPage}
 }
 
 // SharedPublicIPAddressConfiguration properties of a virtual machine that determine how it is connected to

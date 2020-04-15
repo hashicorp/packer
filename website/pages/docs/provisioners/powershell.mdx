@@ -142,6 +142,12 @@ The example below is fully functional.
   script is uploaded to. The value must be a writable location and any parent
   directories must already exist.
 
+- `skip_clean` (bool) - Whether to clean scripts up after executing the provisioner.
+	Defaults to false. When true any script created by a non-elevated Powershell
+	provisioner will be removed from the remote machine. Elevated scripts,
+	along with the scheduled tasks, will always be removed regardless of the
+	value set for `skip_clean`.
+
 - `start_retry_timeout` (string) - The amount of time to attempt to _start_
   the remote process. By default this is "5m" or 5 minutes. This setting
   exists in order to deal with times when SSH may restart, such as a system

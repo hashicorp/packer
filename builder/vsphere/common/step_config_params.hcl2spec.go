@@ -24,7 +24,7 @@ func (*ConfigParamsConfig) FlatMapstructure() interface{ HCL2Spec() map[string]h
 // The decoded values from this spec will then be applied to a FlatConfigParamsConfig.
 func (*FlatConfigParamsConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"configuration_parameters": &hcldec.BlockAttrsSpec{TypeName: "configuration_parameters", ElementType: cty.String, Required: false},
+		"configuration_parameters": &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }

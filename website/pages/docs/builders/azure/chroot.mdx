@@ -72,6 +72,20 @@ information.
 
 @include 'builder/azure/chroot/Config-not-required.mdx'
 
+#### Output options:
+At least one of these options needs to be specified:
+-   `image_resource_id` (string) - The managed image to create using this build.
+    
+-   `shared_image_destination` (object) - The shared image to create using this build.
+
+Where `shared_image_destination` is an object with the following properties:
+@include 'builder/azure/chroot/_SharedImageGalleryDestination-required.mdx
+@include 'builder/azure/chroot/_SharedImageGalleryDestination-not-required.mdx
+
+And `target_regions` is an array of objects with the following properties:
+@include 'builder/azure/chroot/_TargetRegion-required.mdx
+@include 'builder/azure/chroot/_TargetRegion-not-required.mdx
+
 ## Chroot Mounts
 
 The `chroot_mounts` configuration can be used to mount specific devices within

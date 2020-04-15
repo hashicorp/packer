@@ -15,7 +15,6 @@ import (
 )
 
 type StepVerifySourceDisk struct {
-	SubscriptionID       string
 	SourceDiskResourceID string
 	Location             string
 }
@@ -34,10 +33,10 @@ func (s StepVerifySourceDisk) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	if !strings.EqualFold(resource.SubscriptionID, s.SubscriptionID) {
+	if !strings.EqualFold(resource.SubscriptionID, azcli.SubscriptionID()) {
 		err := fmt.Errorf("Source disk resource %q is in a different subscription than this VM (%q). "+
 			"Packer does not know how to handle that.",
-			s.SourceDiskResourceID, s.SubscriptionID)
+			s.SourceDiskResourceID, azcli.SubscriptionID())
 		log.Printf("StepVerifySourceDisk.Run: error: %+v", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

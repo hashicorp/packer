@@ -36,7 +36,9 @@ func NewVirtualMachineSchedulesClient(subscriptionID string) VirtualMachineSched
 	return NewVirtualMachineSchedulesClientWithBaseURI(DefaultBaseURI, subscriptionID)
 }
 
-// NewVirtualMachineSchedulesClientWithBaseURI creates an instance of the VirtualMachineSchedulesClient client.
+// NewVirtualMachineSchedulesClientWithBaseURI creates an instance of the VirtualMachineSchedulesClient client using a
+// custom endpoint.  Use this when interacting with an Azure cloud that uses a non-standard base URI (sovereign clouds,
+// Azure stack).
 func NewVirtualMachineSchedulesClientWithBaseURI(baseURI string, subscriptionID string) VirtualMachineSchedulesClient {
 	return VirtualMachineSchedulesClient{NewWithBaseURI(baseURI, subscriptionID)}
 }
@@ -114,8 +116,7 @@ func (client VirtualMachineSchedulesClient) CreateOrUpdatePreparer(ctx context.C
 // CreateOrUpdateSender sends the CreateOrUpdate request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) CreateOrUpdateSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // CreateOrUpdateResponder handles the response to the CreateOrUpdate request. The method always
@@ -195,8 +196,7 @@ func (client VirtualMachineSchedulesClient) DeletePreparer(ctx context.Context, 
 // DeleteSender sends the Delete request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) DeleteSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // DeleteResponder handles the response to the Delete request. The method always
@@ -270,8 +270,7 @@ func (client VirtualMachineSchedulesClient) ExecutePreparer(ctx context.Context,
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) ExecuteSender(req *http.Request) (future VirtualMachineSchedulesExecuteFuture, err error) {
 	var resp *http.Response
-	resp, err = autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
@@ -359,8 +358,7 @@ func (client VirtualMachineSchedulesClient) GetPreparer(ctx context.Context, res
 // GetSender sends the Get request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) GetSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // GetResponder handles the response to the Get request. The method always
@@ -455,8 +453,7 @@ func (client VirtualMachineSchedulesClient) ListPreparer(ctx context.Context, re
 // ListSender sends the List request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) ListSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // ListResponder handles the response to the List request. The method always
@@ -509,7 +506,7 @@ func (client VirtualMachineSchedulesClient) ListComplete(ctx context.Context, re
 	return
 }
 
-// Update modify properties of schedules.
+// Update allows modifying tags of schedules. All other properties will be ignored.
 // Parameters:
 // resourceGroupName - the name of the resource group.
 // labName - the name of the lab.
@@ -576,8 +573,7 @@ func (client VirtualMachineSchedulesClient) UpdatePreparer(ctx context.Context, 
 // UpdateSender sends the Update request. The method will close the
 // http.Response Body if it receives an error.
 func (client VirtualMachineSchedulesClient) UpdateSender(req *http.Request) (*http.Response, error) {
-	return autorest.SendWithSender(client, req,
-		azure.DoRetryWithRegistration(client.Client))
+	return client.Send(req, azure.DoRetryWithRegistration(client.Client))
 }
 
 // UpdateResponder handles the response to the Update request. The method always

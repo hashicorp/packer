@@ -180,6 +180,49 @@ func PossibleNetworkRuleBypassOptionsValues() []NetworkRuleBypassOptions {
 	return []NetworkRuleBypassOptions{AzureServices, None}
 }
 
+// PrivateEndpointConnectionProvisioningState enumerates the values for private endpoint connection
+// provisioning state.
+type PrivateEndpointConnectionProvisioningState string
+
+const (
+	// Creating ...
+	Creating PrivateEndpointConnectionProvisioningState = "Creating"
+	// Deleting ...
+	Deleting PrivateEndpointConnectionProvisioningState = "Deleting"
+	// Disconnected ...
+	Disconnected PrivateEndpointConnectionProvisioningState = "Disconnected"
+	// Failed ...
+	Failed PrivateEndpointConnectionProvisioningState = "Failed"
+	// Succeeded ...
+	Succeeded PrivateEndpointConnectionProvisioningState = "Succeeded"
+	// Updating ...
+	Updating PrivateEndpointConnectionProvisioningState = "Updating"
+)
+
+// PossiblePrivateEndpointConnectionProvisioningStateValues returns an array of possible values for the PrivateEndpointConnectionProvisioningState const type.
+func PossiblePrivateEndpointConnectionProvisioningStateValues() []PrivateEndpointConnectionProvisioningState {
+	return []PrivateEndpointConnectionProvisioningState{Creating, Deleting, Disconnected, Failed, Succeeded, Updating}
+}
+
+// PrivateEndpointServiceConnectionStatus enumerates the values for private endpoint service connection status.
+type PrivateEndpointServiceConnectionStatus string
+
+const (
+	// PrivateEndpointServiceConnectionStatusApproved ...
+	PrivateEndpointServiceConnectionStatusApproved PrivateEndpointServiceConnectionStatus = "Approved"
+	// PrivateEndpointServiceConnectionStatusDisconnected ...
+	PrivateEndpointServiceConnectionStatusDisconnected PrivateEndpointServiceConnectionStatus = "Disconnected"
+	// PrivateEndpointServiceConnectionStatusPending ...
+	PrivateEndpointServiceConnectionStatusPending PrivateEndpointServiceConnectionStatus = "Pending"
+	// PrivateEndpointServiceConnectionStatusRejected ...
+	PrivateEndpointServiceConnectionStatusRejected PrivateEndpointServiceConnectionStatus = "Rejected"
+)
+
+// PossiblePrivateEndpointServiceConnectionStatusValues returns an array of possible values for the PrivateEndpointServiceConnectionStatus const type.
+func PossiblePrivateEndpointServiceConnectionStatusValues() []PrivateEndpointServiceConnectionStatus {
+	return []PrivateEndpointServiceConnectionStatus{PrivateEndpointServiceConnectionStatusApproved, PrivateEndpointServiceConnectionStatusDisconnected, PrivateEndpointServiceConnectionStatusPending, PrivateEndpointServiceConnectionStatusRejected}
+}
+
 // Reason enumerates the values for reason.
 type Reason string
 
@@ -297,6 +340,19 @@ type CheckNameAvailabilityResult struct {
 	// Reason - READ-ONLY; The reason that a vault name could not be used. The Reason element is only returned if NameAvailable is false. Possible values include: 'AccountNameInvalid', 'AlreadyExists'
 	Reason Reason `json:"reason,omitempty"`
 	// Message - READ-ONLY; An error message explaining the Reason value in more detail.
+	Message *string `json:"message,omitempty"`
+}
+
+// CloudError an error response from Key Vault resource provider
+type CloudError struct {
+	Error *CloudErrorBody `json:"error,omitempty"`
+}
+
+// CloudErrorBody an error response from Key Vault resource provider
+type CloudErrorBody struct {
+	// Code - Error code. This is a mnemonic that can be consumed programmatically.
+	Code *string `json:"code,omitempty"`
+	// Message - User friendly error message. The message is typically localized and may vary with service version.
 	Message *string `json:"message,omitempty"`
 }
 
@@ -765,29 +821,324 @@ type Permissions struct {
 	Storage *[]StoragePermissions `json:"storage,omitempty"`
 }
 
+// PrivateEndpoint private endpoint object properties.
+type PrivateEndpoint struct {
+	// ID - READ-ONLY; Full identifier of the private endpoint resource.
+	ID *string `json:"id,omitempty"`
+}
+
+// PrivateEndpointConnection private endpoint connection resource.
+type PrivateEndpointConnection struct {
+	autorest.Response `json:"-"`
+	// PrivateEndpointConnectionProperties - Resource properties.
+	*PrivateEndpointConnectionProperties `json:"properties,omitempty"`
+	// ID - READ-ONLY; Fully qualified identifier of the key vault resource.
+	ID *string `json:"id,omitempty"`
+	// Name - READ-ONLY; Name of the key vault resource.
+	Name *string `json:"name,omitempty"`
+	// Type - READ-ONLY; Resource type of the key vault resource.
+	Type *string `json:"type,omitempty"`
+	// Location - READ-ONLY; Azure location of the key vault resource.
+	Location *string `json:"location,omitempty"`
+	// Tags - READ-ONLY; Tags assigned to the key vault resource.
+	Tags map[string]*string `json:"tags"`
+}
+
+// MarshalJSON is the custom marshaler for PrivateEndpointConnection.
+func (pec PrivateEndpointConnection) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if pec.PrivateEndpointConnectionProperties != nil {
+		objectMap["properties"] = pec.PrivateEndpointConnectionProperties
+	}
+	return json.Marshal(objectMap)
+}
+
+// UnmarshalJSON is the custom unmarshaler for PrivateEndpointConnection struct.
+func (pec *PrivateEndpointConnection) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	for k, v := range m {
+		switch k {
+		case "properties":
+			if v != nil {
+				var privateEndpointConnectionProperties PrivateEndpointConnectionProperties
+				err = json.Unmarshal(*v, &privateEndpointConnectionProperties)
+				if err != nil {
+					return err
+				}
+				pec.PrivateEndpointConnectionProperties = &privateEndpointConnectionProperties
+			}
+		case "id":
+			if v != nil {
+				var ID string
+				err = json.Unmarshal(*v, &ID)
+				if err != nil {
+					return err
+				}
+				pec.ID = &ID
+			}
+		case "name":
+			if v != nil {
+				var name string
+				err = json.Unmarshal(*v, &name)
+				if err != nil {
+					return err
+				}
+				pec.Name = &name
+			}
+		case "type":
+			if v != nil {
+				var typeVar string
+				err = json.Unmarshal(*v, &typeVar)
+				if err != nil {
+					return err
+				}
+				pec.Type = &typeVar
+			}
+		case "location":
+			if v != nil {
+				var location string
+				err = json.Unmarshal(*v, &location)
+				if err != nil {
+					return err
+				}
+				pec.Location = &location
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				pec.Tags = tags
+			}
+		}
+	}
+
+	return nil
+}
+
+// PrivateEndpointConnectionItem private endpoint connection item.
+type PrivateEndpointConnectionItem struct {
+	// PrivateEndpointConnectionProperties - Private endpoint connection properties.
+	*PrivateEndpointConnectionProperties `json:"properties,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for PrivateEndpointConnectionItem.
+func (peci PrivateEndpointConnectionItem) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if peci.PrivateEndpointConnectionProperties != nil {
+		objectMap["properties"] = peci.PrivateEndpointConnectionProperties
+	}
+	return json.Marshal(objectMap)
+}
+
+// UnmarshalJSON is the custom unmarshaler for PrivateEndpointConnectionItem struct.
+func (peci *PrivateEndpointConnectionItem) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	for k, v := range m {
+		switch k {
+		case "properties":
+			if v != nil {
+				var privateEndpointConnectionProperties PrivateEndpointConnectionProperties
+				err = json.Unmarshal(*v, &privateEndpointConnectionProperties)
+				if err != nil {
+					return err
+				}
+				peci.PrivateEndpointConnectionProperties = &privateEndpointConnectionProperties
+			}
+		}
+	}
+
+	return nil
+}
+
+// PrivateEndpointConnectionProperties properties of the private endpoint connection resource.
+type PrivateEndpointConnectionProperties struct {
+	// PrivateEndpoint - Properties of the private endpoint object.
+	PrivateEndpoint *PrivateEndpoint `json:"privateEndpoint,omitempty"`
+	// PrivateLinkServiceConnectionState - Approval state of the private link connection.
+	PrivateLinkServiceConnectionState *PrivateLinkServiceConnectionState `json:"privateLinkServiceConnectionState,omitempty"`
+	// ProvisioningState - Provisioning state of the private endpoint connection. Possible values include: 'Succeeded', 'Creating', 'Updating', 'Deleting', 'Failed', 'Disconnected'
+	ProvisioningState PrivateEndpointConnectionProvisioningState `json:"provisioningState,omitempty"`
+}
+
+// PrivateEndpointConnectionsDeleteFuture an abstraction for monitoring and retrieving the results of a
+// long-running operation.
+type PrivateEndpointConnectionsDeleteFuture struct {
+	azure.Future
+}
+
+// Result returns the result of the asynchronous operation.
+// If the operation has not completed it will return an error.
+func (future *PrivateEndpointConnectionsDeleteFuture) Result(client PrivateEndpointConnectionsClient) (pec PrivateEndpointConnection, err error) {
+	var done bool
+	done, err = future.DoneWithContext(context.Background(), client)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.PrivateEndpointConnectionsDeleteFuture", "Result", future.Response(), "Polling failure")
+		return
+	}
+	if !done {
+		err = azure.NewAsyncOpIncompleteError("keyvault.PrivateEndpointConnectionsDeleteFuture")
+		return
+	}
+	sender := autorest.DecorateSender(client, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
+	if pec.Response.Response, err = future.GetResult(sender); err == nil && pec.Response.Response.StatusCode != http.StatusNoContent {
+		pec, err = client.DeleteResponder(pec.Response.Response)
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "keyvault.PrivateEndpointConnectionsDeleteFuture", "Result", pec.Response.Response, "Failure responding to request")
+		}
+	}
+	return
+}
+
+// PrivateLinkResource a private link resource
+type PrivateLinkResource struct {
+	// PrivateLinkResourceProperties - Resource properties.
+	*PrivateLinkResourceProperties `json:"properties,omitempty"`
+	// ID - READ-ONLY; Fully qualified identifier of the key vault resource.
+	ID *string `json:"id,omitempty"`
+	// Name - READ-ONLY; Name of the key vault resource.
+	Name *string `json:"name,omitempty"`
+	// Type - READ-ONLY; Resource type of the key vault resource.
+	Type *string `json:"type,omitempty"`
+	// Location - READ-ONLY; Azure location of the key vault resource.
+	Location *string `json:"location,omitempty"`
+	// Tags - READ-ONLY; Tags assigned to the key vault resource.
+	Tags map[string]*string `json:"tags"`
+}
+
+// MarshalJSON is the custom marshaler for PrivateLinkResource.
+func (plr PrivateLinkResource) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if plr.PrivateLinkResourceProperties != nil {
+		objectMap["properties"] = plr.PrivateLinkResourceProperties
+	}
+	return json.Marshal(objectMap)
+}
+
+// UnmarshalJSON is the custom unmarshaler for PrivateLinkResource struct.
+func (plr *PrivateLinkResource) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	for k, v := range m {
+		switch k {
+		case "properties":
+			if v != nil {
+				var privateLinkResourceProperties PrivateLinkResourceProperties
+				err = json.Unmarshal(*v, &privateLinkResourceProperties)
+				if err != nil {
+					return err
+				}
+				plr.PrivateLinkResourceProperties = &privateLinkResourceProperties
+			}
+		case "id":
+			if v != nil {
+				var ID string
+				err = json.Unmarshal(*v, &ID)
+				if err != nil {
+					return err
+				}
+				plr.ID = &ID
+			}
+		case "name":
+			if v != nil {
+				var name string
+				err = json.Unmarshal(*v, &name)
+				if err != nil {
+					return err
+				}
+				plr.Name = &name
+			}
+		case "type":
+			if v != nil {
+				var typeVar string
+				err = json.Unmarshal(*v, &typeVar)
+				if err != nil {
+					return err
+				}
+				plr.Type = &typeVar
+			}
+		case "location":
+			if v != nil {
+				var location string
+				err = json.Unmarshal(*v, &location)
+				if err != nil {
+					return err
+				}
+				plr.Location = &location
+			}
+		case "tags":
+			if v != nil {
+				var tags map[string]*string
+				err = json.Unmarshal(*v, &tags)
+				if err != nil {
+					return err
+				}
+				plr.Tags = tags
+			}
+		}
+	}
+
+	return nil
+}
+
+// PrivateLinkResourceListResult a list of private link resources
+type PrivateLinkResourceListResult struct {
+	autorest.Response `json:"-"`
+	// Value - Array of private link resources
+	Value *[]PrivateLinkResource `json:"value,omitempty"`
+}
+
+// PrivateLinkResourceProperties properties of a private link resource.
+type PrivateLinkResourceProperties struct {
+	// GroupID - READ-ONLY; Group identifier of private link resource.
+	GroupID *string `json:"groupId,omitempty"`
+	// RequiredMembers - READ-ONLY; Required member names of private link resource.
+	RequiredMembers *[]string `json:"requiredMembers,omitempty"`
+	// RequiredZoneNames - Required DNS zone names of the the private link resource.
+	RequiredZoneNames *[]string `json:"requiredZoneNames,omitempty"`
+}
+
+// PrivateLinkServiceConnectionState an object that represents the approval state of the private link
+// connection.
+type PrivateLinkServiceConnectionState struct {
+	// Status - Indicates whether the connection has been approved, rejected or removed by the key vault owner. Possible values include: 'PrivateEndpointServiceConnectionStatusPending', 'PrivateEndpointServiceConnectionStatusApproved', 'PrivateEndpointServiceConnectionStatusRejected', 'PrivateEndpointServiceConnectionStatusDisconnected'
+	Status PrivateEndpointServiceConnectionStatus `json:"status,omitempty"`
+	// Description - The reason for approval or rejection.
+	Description *string `json:"description,omitempty"`
+	// ActionRequired - A message indicating if changes on the service provider require any updates on the consumer.
+	ActionRequired *string `json:"actionRequired,omitempty"`
+}
+
 // Resource key Vault resource
 type Resource struct {
-	// ID - READ-ONLY; The Azure Resource Manager resource ID for the key vault.
+	// ID - READ-ONLY; Fully qualified identifier of the key vault resource.
 	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; The name of the key vault.
+	// Name - READ-ONLY; Name of the key vault resource.
 	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; The resource type of the key vault.
+	// Type - READ-ONLY; Resource type of the key vault resource.
 	Type *string `json:"type,omitempty"`
-	// Location - The supported Azure location where the key vault should be created.
+	// Location - READ-ONLY; Azure location of the key vault resource.
 	Location *string `json:"location,omitempty"`
-	// Tags - The tags that will be assigned to the key vault.
+	// Tags - READ-ONLY; Tags assigned to the key vault resource.
 	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for Resource.
 func (r Resource) MarshalJSON() ([]byte, error) {
 	objectMap := make(map[string]interface{})
-	if r.Location != nil {
-		objectMap["location"] = r.Location
-	}
-	if r.Tags != nil {
-		objectMap["tags"] = r.Tags
-	}
 	return json.Marshal(objectMap)
 }
 
@@ -954,31 +1305,31 @@ type Sku struct {
 // Vault resource information with extended details.
 type Vault struct {
 	autorest.Response `json:"-"`
+	// ID - READ-ONLY; Fully qualified identifier of the key vault resource.
+	ID *string `json:"id,omitempty"`
+	// Name - READ-ONLY; Name of the key vault resource.
+	Name *string `json:"name,omitempty"`
+	// Type - READ-ONLY; Resource type of the key vault resource.
+	Type *string `json:"type,omitempty"`
+	// Location - Azure location of the key vault resource.
+	Location *string `json:"location,omitempty"`
+	// Tags - Tags assigned to the key vault resource.
+	Tags map[string]*string `json:"tags"`
 	// Properties - Properties of the vault
 	Properties *VaultProperties `json:"properties,omitempty"`
-	// ID - READ-ONLY; The Azure Resource Manager resource ID for the key vault.
-	ID *string `json:"id,omitempty"`
-	// Name - READ-ONLY; The name of the key vault.
-	Name *string `json:"name,omitempty"`
-	// Type - READ-ONLY; The resource type of the key vault.
-	Type *string `json:"type,omitempty"`
-	// Location - The supported Azure location where the key vault should be created.
-	Location *string `json:"location,omitempty"`
-	// Tags - The tags that will be assigned to the key vault.
-	Tags map[string]*string `json:"tags"`
 }
 
 // MarshalJSON is the custom marshaler for Vault.
 func (vVar Vault) MarshalJSON() ([]byte, error) {
 	objectMap := make(map[string]interface{})
-	if vVar.Properties != nil {
-		objectMap["properties"] = vVar.Properties
-	}
 	if vVar.Location != nil {
 		objectMap["location"] = vVar.Location
 	}
 	if vVar.Tags != nil {
 		objectMap["tags"] = vVar.Tags
+	}
+	if vVar.Properties != nil {
+		objectMap["properties"] = vVar.Properties
 	}
 	return json.Marshal(objectMap)
 }
@@ -1249,8 +1600,10 @@ type VaultProperties struct {
 	CreateMode CreateMode `json:"createMode,omitempty"`
 	// EnablePurgeProtection - Property specifying whether protection against purge is enabled for this vault. Setting this property to true activates protection against purge for this vault and its content - only the Key Vault service may initiate a hard, irrecoverable deletion. The setting is effective only if soft delete is also enabled. Enabling this functionality is irreversible - that is, the property does not accept false as its value.
 	EnablePurgeProtection *bool `json:"enablePurgeProtection,omitempty"`
-	// NetworkAcls - A collection of rules governing the accessibility of the vault from specific network locations.
+	// NetworkAcls - Rules governing the accessibility of the key vault from specific network locations.
 	NetworkAcls *NetworkRuleSet `json:"networkAcls,omitempty"`
+	// PrivateEndpointConnections - READ-ONLY; List of private endpoint connections associated with the key vault.
+	PrivateEndpointConnections *[]PrivateEndpointConnectionItem `json:"privateEndpointConnections,omitempty"`
 }
 
 // VaultsCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a long-running
