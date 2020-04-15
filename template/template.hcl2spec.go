@@ -15,7 +15,7 @@ type FlatProvisioner struct {
 	Config      map[string]interface{} `json:"config,omitempty" cty:"config"`
 	Override    map[string]interface{} `json:"override,omitempty" cty:"override"`
 	PauseBefore *string                `mapstructure:"pause_before" json:"pause_before,omitempty" cty:"pause_before"`
-	MaxRetries  *int                   `mapstructure:"max_retries" json:"retry,omitempty" cty:"max_retries"`
+	MaxRetries  *int                   `mapstructure:"max_retries" json:"max_retries,omitempty" cty:"max_retries"`
 	Timeout     *string                `mapstructure:"timeout" json:"timeout,omitempty" cty:"timeout"`
 }
 
