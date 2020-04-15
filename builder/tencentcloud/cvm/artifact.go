@@ -104,7 +104,7 @@ func (a *Artifact) Destroy() error {
 			}
 		}
 
-		if shareAccountIds != nil && len(shareAccountIds) != 0 {
+		if len(shareAccountIds) != 0 {
 			cancelShareReq := cvm.NewModifyImageSharePermissionRequest()
 			cancelShareReq.ImageId = &imageId
 			cancelShareReq.AccountIds = shareAccountIds

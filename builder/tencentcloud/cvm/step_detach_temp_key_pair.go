@@ -35,6 +35,12 @@ func (s *stepDetachTempKeyPair) Run(ctx context.Context, state multistep.StateBa
 		return Halt(state, err, "Fail to detach keypair from instance")
 	}
 
+	Message(state, "Waiting for keypair detached", "")
+	err = WaitForInstance(ctx, client, *instance.InstanceId, "RUNNING", 1800)
+	if err != nil {
+		return Halt(state, err, "Failed to wait for keypair detached")
+	}
+
 	Message(state, "Keypair detached", "")
 
 	return multistep.ActionContinue
