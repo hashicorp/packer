@@ -184,14 +184,14 @@ Specifically, in cases where the provisioner depends on external processes that 
 
 
 Every provisioner definition in a Packer template can take a special
-configuration `retry` that is the maximum number of times a provisioner will retry on error.
-By default, there is no retry. An example is shown below:
+configuration `max_retries` that is the maximum number of times a provisioner will retry on error.
+By default, there `max_retries` is zero and there is no retry on error. An example is shown below:
 
 ```json
 {
   "type": "shell",
   "script": "script.sh",
-  "retry": 5
+  "max_retries": 5
 }
 ```
 

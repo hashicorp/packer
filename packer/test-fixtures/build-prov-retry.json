@@ -5,6 +5,6 @@
 
     "provisioners": [{
         "type": "test",
-        "retry": 1
+        "max_retries": 1
     }]
 }

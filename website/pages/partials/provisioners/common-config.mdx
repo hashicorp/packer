@@ -2,7 +2,7 @@ Parameters common to all provisioners:
 
 - `pause_before` (duration) - Sleep for duration before execution.
 
-- `retry` (int) - Max times the provisioner will retry in case of failure.
+- `max_retries` (int) - Max times the provisioner will retry in case of failure. Defaults to zero (0). Zero means an error will not be retried.
 
 - `only` (array of string) - Only run the provisioner for listed builder(s)
   by name.

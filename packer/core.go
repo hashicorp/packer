@@ -170,9 +170,9 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			Provisioner: provisioner,
 		}
 	}
-	if rawP.Retry != 0 {
+	if rawP.MaxRetries != 0 {
 		provisioner = &RetriedProvisioner{
-			Retry:       rawP.Retry,
+			MaxRetries:  rawP.MaxRetries,
 			Provisioner: provisioner,
 		}
 	}

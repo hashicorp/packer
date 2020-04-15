@@ -165,7 +165,7 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communica
 // RetriedProvisioner is a Provisioner implementation that retries
 // the provisioner whenever there's an error.
 type RetriedProvisioner struct {
-	Retry       int
+	MaxRetries  int
 	Provisioner Provisioner
 }
 
@@ -179,7 +179,7 @@ func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communic
 	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
 
 	retries := 0
-	for err != nil && retries < r.Retry {
+	for err != nil && retries < r.MaxRetries {
 		ui.Say("Retrying provisioner")
 		err = r.Provisioner.Provision(ctx, ui, comm, generatedData)
 		retries++

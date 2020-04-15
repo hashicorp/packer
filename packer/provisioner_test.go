@@ -261,7 +261,7 @@ func TestRetriedProvisionerProvision(t *testing.T) {
 	}
 
 	prov := &RetriedProvisioner{
-		Retry:       2,
+		MaxRetries:  2,
 		Provisioner: mock,
 	}
 
