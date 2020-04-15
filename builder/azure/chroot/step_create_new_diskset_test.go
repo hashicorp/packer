@@ -99,14 +99,14 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := StepCreateNewDisk{
-				ResourceID:             tt.fields.ResourceID,
-				DiskSizeGB:             tt.fields.DiskSizeGB,
-				DiskStorageAccountType: tt.fields.DiskStorageAccountType,
-				HyperVGeneration:       tt.fields.HyperVGeneration,
-				Location:               tt.fields.Location,
-				PlatformImage:          tt.fields.PlatformImage,
-				SourceDiskResourceID:   tt.fields.SourceDiskResourceID,
+			s := StepCreateNewDiskset{
+				OSDiskID:                 tt.fields.ResourceID,
+				OSDiskSizeGB:             tt.fields.DiskSizeGB,
+				OSDiskStorageAccountType: tt.fields.DiskStorageAccountType,
+				HyperVGeneration:         tt.fields.HyperVGeneration,
+				Location:                 tt.fields.Location,
+				SourcePlatformImage:      tt.fields.PlatformImage,
+				SourceOSDiskResourceID:   tt.fields.SourceDiskResourceID,
 			}
 
 			expectedPutDiskBody := regexp.MustCompile(`[\s\n]`).ReplaceAllString(tt.fields.expectedPutDiskBody, "")

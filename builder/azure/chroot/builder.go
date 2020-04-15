@@ -464,12 +464,12 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	}
 
 	if config.FromScratch {
-		addSteps(&StepCreateNewDisk{
-			ResourceID:             config.TemporaryOSDiskID,
-			DiskSizeGB:             config.OSDiskSizeGB,
-			DiskStorageAccountType: config.OSDiskStorageAccountType,
-			HyperVGeneration:       config.ImageHyperVGeneration,
-			Location:               info.Location})
+		addSteps(&StepCreateNewDiskset{
+			OSDiskID:                 config.TemporaryOSDiskID,
+			OSDiskSizeGB:             config.OSDiskSizeGB,
+			OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+			HyperVGeneration:         config.ImageHyperVGeneration,
+			Location:                 info.Location})
 	} else {
 		switch config.sourceType {
 		case sourcePlatformImage:
@@ -482,13 +482,13 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 						})
 				}
 				addSteps(
-					&StepCreateNewDisk{
-						ResourceID:             config.TemporaryOSDiskID,
-						DiskSizeGB:             config.OSDiskSizeGB,
-						DiskStorageAccountType: config.OSDiskStorageAccountType,
-						HyperVGeneration:       config.ImageHyperVGeneration,
-						Location:               info.Location,
-						PlatformImage:          pi,
+					&StepCreateNewDiskset{
+						OSDiskID:                 config.TemporaryOSDiskID,
+						OSDiskSizeGB:             config.OSDiskSizeGB,
+						OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+						HyperVGeneration:         config.ImageHyperVGeneration,
+						Location:                 info.Location,
+						SourcePlatformImage:      pi,
 
 						SkipCleanup: config.SkipCleanup,
 					})
@@ -502,13 +502,13 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					SourceDiskResourceID: config.Source,
 					Location:             info.Location,
 				},
-				&StepCreateNewDisk{
-					ResourceID:             config.TemporaryOSDiskID,
-					DiskSizeGB:             config.OSDiskSizeGB,
-					DiskStorageAccountType: config.OSDiskStorageAccountType,
-					HyperVGeneration:       config.ImageHyperVGeneration,
-					SourceDiskResourceID:   config.Source,
-					Location:               info.Location,
+				&StepCreateNewDiskset{
+					OSDiskID:                 config.TemporaryOSDiskID,
+					OSDiskSizeGB:             config.OSDiskSizeGB,
+					OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+					HyperVGeneration:         config.ImageHyperVGeneration,
+					SourceOSDiskResourceID:   config.Source,
+					Location:                 info.Location,
 
 					SkipCleanup: config.SkipCleanup,
 				})
@@ -520,9 +520,9 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					SubscriptionID: info.SubscriptionID,
 					Location:       info.Location,
 				},
-				&StepCreateNewDisk{
-					ResourceID:            config.TemporaryOSDiskID,
-					DiskSizeGB:            config.OSDiskSizeGB,
+				&StepCreateNewDiskset{
+					OSDiskID:              config.TemporaryOSDiskID,
+					OSDiskSizeGB:          config.OSDiskSizeGB,
 					SourceImageResourceID: config.Source,
 					Location:              info.Location,
 
