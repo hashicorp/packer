@@ -188,7 +188,7 @@ func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communic
 		}
 
 		ui.Say(fmt.Sprintf("Provisioner failed with %q, retrying with %d trie(s) left", err, leftTries))
-		
+
 		err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
 		if err == nil {
 			return nil
