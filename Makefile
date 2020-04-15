@@ -61,6 +61,7 @@ install-gen-deps: ## Install dependencies for code generation
 	@go install ./cmd/mapstructure-to-hcl2
 
 install-lint-deps: ## Install linter dependencies
+	# Pinning golangci-lint at v1.23.8 as --new-from-rev seems to work properly; the latest 1.24.0 has caused issues with memory consumption
 	@echo "==> Updating linter dependencies..."
 	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
 
@@ -86,7 +87,7 @@ lint: install-lint-deps ## Lint Go code
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	@GO111MODULE=on sh -c "$(CURDIR)/scripts/lint.sh"
+	GO111MODULE=on golangci-lint run --new-from-rev=$(shell git merge-base origin/master HEAD) ./...
 
 fmt: ## Format Go code
 	@go fmt ./...
