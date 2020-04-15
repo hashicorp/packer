@@ -520,6 +520,8 @@ github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible h1:y2gZtLpcWqFz
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible h1:/5EEPgCRsWdGgZsM7YRLhYE9gpE9+kUGoIfGCrFYU0s=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.121+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible h1:M+Q7+SIBnUZbV0ec+HAOtv2M/wmOUsfjEOpQxM3u4xI=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/ucloud/ucloud-sdk-go v0.12.0 h1:VCFN3jWg/G4wvwjG6qG5AhFuAT1JdmGvY6+4WHbuJcw=
 github.com/ucloud/ucloud-sdk-go v0.12.0/go.mod h1:lM6fpI8y6iwACtlbHUav823/uKPdXsNBlnBpRF2fj3c=
 github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6 h1:FAWNiqocJ04wC4Znj7Ax4PGWstZijayO6ifuHHvb+vI=

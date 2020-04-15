@@ -38,7 +38,8 @@ func WaitForInstance(ctx context.Context, client *cvm.Client, instanceId string,
 		if *resp.Response.TotalCount == 0 {
 			return fmt.Errorf("instance(%s) not exist", instanceId)
 		}
-		if *resp.Response.InstanceSet[0].InstanceState == status {
+		if *resp.Response.InstanceSet[0].InstanceState == status &&
+			(resp.Response.InstanceSet[0].LatestOperationState == nil || *resp.Response.InstanceSet[0].LatestOperationState != "OPERATING") {
 			break
 		}
 		time.Sleep(DefaultWaitForInterval * time.Second)
@@ -149,14 +150,15 @@ func SSHHost(pubilcIp bool) func(multistep.StateBag) (string, error) {
 // Retry do retry on api request
 func Retry(ctx context.Context, fn func(context.Context) error) error {
 	return retry.Config{
-		Tries: 30,
+		Tries: 60,
 		ShouldRetry: func(err error) bool {
 			e, ok := err.(*errors.TencentCloudSDKError)
 			if !ok {
 				return false
 			}
 			if e.Code == "ClientError.NetworkError" || e.Code == "ClientError.HttpStatusCodeError" ||
-				e.Code == "InvalidKeyPair.NotSupported" || e.Code == "InvalidInstance.NotSupported" ||
+				e.Code == "InvalidKeyPair.NotSupported" || e.Code == "InvalidParameterValue.KeyPairNotSupported" ||
+				e.Code == "InvalidInstance.NotSupported" || e.Code == "OperationDenied.InstanceOperationInProgress" ||
 				strings.Contains(e.Code, "RequestLimitExceeded") || strings.Contains(e.Code, "InternalError") ||
 				strings.Contains(e.Code, "ResourceInUse") || strings.Contains(e.Code, "ResourceBusy") {
 				return true

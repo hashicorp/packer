@@ -65,7 +65,7 @@ func (c *Client) sendWithSignatureV1(request tchttp.Request, response tchttp.Res
 		return err
 	}
 	if request.GetHttpMethod() == "POST" {
-		httpRequest.Header["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+		httpRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 	if c.debug {
 		outbytes, err := httputil.DumpRequest(httpRequest, true)
@@ -243,6 +243,7 @@ func (c *Client) WithProfile(clientProfile *profile.ClientProfile) *Client {
 	c.signMethod = clientProfile.SignMethod
 	c.unsignedPayload = clientProfile.UnsignedPayload
 	c.httpProfile = clientProfile.HttpProfile
+	c.debug = clientProfile.Debug
 	c.httpClient.Timeout = time.Duration(c.httpProfile.ReqTimeout) * time.Second
 	return c
 }
@@ -254,6 +255,11 @@ func (c *Client) WithSignatureMethod(method string) *Client {
 
 func (c *Client) WithHttpTransport(transport http.RoundTripper) *Client {
 	c.httpClient.Transport = transport
+	return c
+}
+
+func (c *Client) WithDebug(flag bool) *Client {
+	c.debug = flag
 	return c
 }
 
