@@ -128,7 +128,8 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 
 			state := new(multistep.BasicStateBag)
 			state.Put("azureclient", &client.AzureClientSetMock{
-				DisksClientMock: m,
+				SubscriptionIDMock: "SubscriptionID",
+				DisksClientMock:    m,
 			})
 			state.Put("ui", packer.TestUi(t))
 

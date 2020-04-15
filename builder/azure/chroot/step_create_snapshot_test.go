@@ -94,7 +94,7 @@ func TestStepCreateSnapshot_Run(t *testing.T) {
 				"properties": {
 					"creationData": {
 						"createOption": "Copy",
-						"sourceResourceId": "osdiskresourceid"
+						"sourceResourceId": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1"
 					},
 					"incremental": false
 				}
@@ -132,7 +132,7 @@ func TestStepCreateSnapshot_Run(t *testing.T) {
 			SnapshotsClientMock: m,
 		})
 		state.Put("ui", packer.TestUi(t))
-		state.Put(stateBagKey_OSDiskResourceID, "osdiskresourceid")
+		state.Put(stateBagKey_Diskset, diskset("/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/disks/disk1"))
 
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StepCreateSnapshot{

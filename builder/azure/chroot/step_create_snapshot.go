@@ -44,7 +44,8 @@ func parseSnapshotResourceID(resourceID string) (subscriptionID, resourceGroup, 
 func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	osDiskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
+	diskset := state.Get(stateBagKey_Diskset).(Diskset)
+	osDiskResourceID := diskset.OS().String()
 
 	state.Put(stateBagKey_OSDiskSnapshotResourceID, s.ResourceID)
 	ui.Say(fmt.Sprintf("Creating snapshot '%s'", s.ResourceID))

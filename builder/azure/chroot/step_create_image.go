@@ -28,7 +28,8 @@ type StepCreateImage struct {
 func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
+	diskset := state.Get(stateBagKey_Diskset).(Diskset)
+	diskResourceID := diskset.OS().String()
 
 	ui.Say(fmt.Sprintf("Creating image %s\n   using %s for os disk.",
 		s.ImageResourceID,

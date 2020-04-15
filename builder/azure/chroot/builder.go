@@ -432,8 +432,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact.Resources = append(artifact.Resources, b.config.SharedImageGalleryDestination.ResourceID(info.SubscriptionID))
 	}
 	if b.config.SkipCleanup {
-		if d, ok := state.GetOk(stateBagKey_OSDiskResourceID); ok {
-			artifact.Resources = append(artifact.Resources, d.(string))
+		if d, ok := state.GetOk(stateBagKey_Diskset); ok {
+			for _, disk := range d.([]client.Resource) {
+				artifact.Resources = append(artifact.Resources, disk.String())
+			}
 		}
 		if d, ok := state.GetOk(stateBagKey_OSDiskSnapshotResourceID); ok {
 			artifact.Resources = append(artifact.Resources, d.(string))

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
-	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
+	"github.com/Azure/go-autorest/autorest/to"
 )
 
 var _ multistep.Step = &StepCreateNewDiskset{}
@@ -22,7 +22,7 @@ type StepCreateNewDiskset struct {
 	OSDiskSizeGB             int32  // optional, ignored if 0
 	OSDiskStorageAccountType string // from compute.DiskStorageAccountTypes
 
-	subscriptionID, resourceGroup, diskName string // split out resource id
+	disks Diskset
 
 	HyperVGeneration string // For OS disk
 
@@ -39,38 +39,56 @@ type StepCreateNewDiskset struct {
 	SkipCleanup bool
 }
 
-func parseDiskResourceID(resourceID string) (subscriptionID, resourceGroup, diskName string, err error) {
-	r, err := azure.ParseResourceID(resourceID)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	if !strings.EqualFold(r.Provider, "Microsoft.Compute") ||
-		!strings.EqualFold(r.ResourceType, "disks") {
-		return "", "", "", fmt.Errorf("Resource %q is not of type Microsoft.Compute/disks", resourceID)
-	}
-
-	return r.SubscriptionID, r.ResourceGroup, r.ResourceName, nil
-}
-
 func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
 
-	state.Put(stateBagKey_OSDiskResourceID, s.OSDiskID)
-	ui.Say(fmt.Sprintf("Creating disk '%s'", s.OSDiskID))
+	s.disks = make(map[int]client.Resource)
 
-	var err error
-	s.subscriptionID, s.resourceGroup, s.diskName, err = parseDiskResourceID(s.OSDiskID)
-	if err != nil {
-		log.Printf("StepCreateNewDisk.Run: error: %+v", err)
-		err := fmt.Errorf(
-			"error parsing resource id '%s': %v", s.OSDiskID, err)
+	errorMessage := func(format string, params ...interface{}) multistep.StepAction {
+		err := fmt.Errorf("StepCreateNewDisk.Run: error: "+format, params...)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
+	// we always have an OS disk
+	osDisk, err := client.ParseResourceID(s.OSDiskID)
+	if err != nil {
+		return errorMessage("error parsing resource id '%s': %v", s.OSDiskID, err)
+	}
+	if !strings.EqualFold(osDisk.Provider, "Microsoft.Compute") ||
+		!strings.EqualFold(osDisk.ResourceType.String(), "disks") {
+		return errorMessage("Resource %q is not of type Microsoft.Compute/disks", s.OSDiskID)
+	}
+
+	// transform step config to disk model
+	disk := s.getOSDiskDefinition(azcli)
+
+	// Initiate disk creation
+	f, err := azcli.DisksClient().CreateOrUpdate(ctx, osDisk.ResourceGroup, osDisk.ResourceName.String(), disk)
+	if err != nil {
+		return errorMessage("Failed to initiate resource creation: %q", osDisk)
+	}
+	s.disks[-1] = osDisk                    // save the resoure we just create in our disk set
+	state.Put(stateBagKey_Diskset, s.disks) // update the statebag
+	ui.Say(fmt.Sprintf("Creating disk %q", s.OSDiskID))
+
+	// Wait for completion
+	{
+		cli := azcli.PollClient() // quick polling for quick operations
+		cli.PollingDelay = time.Second
+		err = f.WaitForCompletionRef(ctx, cli)
+		if err != nil {
+			return errorMessage(
+				"error creating new disk '%s': %v", s.OSDiskID, err)
+		}
+	}
+
+	return multistep.ActionContinue
+}
+
+func (s *StepCreateNewDiskset) getOSDiskDefinition(azcli client.AzureClientSet) compute.Disk {
 	disk := compute.Disk{
 		Location: to.StringPtr(s.Location),
 		DiskProperties: &compute.DiskProperties{
@@ -99,7 +117,8 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 		disk.CreationData.ImageReference = &compute.ImageDiskReference{
 			ID: to.StringPtr(fmt.Sprintf(
 				"/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/artifacttypes/vmimage/offers/%s/skus/%s/versions/%s",
-				s.subscriptionID, s.Location, s.SourcePlatformImage.Publisher, s.SourcePlatformImage.Offer, s.SourcePlatformImage.Sku, s.SourcePlatformImage.Version)),
+				azcli.SubscriptionID(), s.Location,
+				s.SourcePlatformImage.Publisher, s.SourcePlatformImage.Offer, s.SourcePlatformImage.Sku, s.SourcePlatformImage.Version)),
 		}
 	case s.SourceOSDiskResourceID != "":
 		disk.CreationData.CreateOption = compute.Copy
@@ -112,23 +131,7 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 	default:
 		disk.CreationData.CreateOption = compute.Empty
 	}
-
-	f, err := azcli.DisksClient().CreateOrUpdate(ctx, s.resourceGroup, s.diskName, disk)
-	if err == nil {
-		cli := azcli.PollClient() // quick polling for quick operations
-		cli.PollingDelay = time.Second
-		err = f.WaitForCompletionRef(ctx, cli)
-	}
-	if err != nil {
-		log.Printf("StepCreateNewDisk.Run: error: %+v", err)
-		err := fmt.Errorf(
-			"error creating new disk '%s': %v", s.OSDiskID, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	return multistep.ActionContinue
+	return disk
 }
 
 func (s *StepCreateNewDiskset) Cleanup(state multistep.StateBag) {
@@ -136,21 +139,24 @@ func (s *StepCreateNewDiskset) Cleanup(state multistep.StateBag) {
 		azcli := state.Get("azureclient").(client.AzureClientSet)
 		ui := state.Get("ui").(packer.Ui)
 
-		ui.Say(fmt.Sprintf("Waiting for disk %q detach to complete", s.OSDiskID))
-		err := NewDiskAttacher(azcli).WaitForDetach(context.Background(), s.OSDiskID)
-		if err != nil {
-			ui.Error(fmt.Sprintf("error detaching disk %q: %s", s.OSDiskID, err))
-		}
+		for _, d := range s.disks {
 
-		ui.Say(fmt.Sprintf("Deleting disk %q", s.OSDiskID))
+			ui.Say(fmt.Sprintf("Waiting for disk %q detach to complete", d))
+			err := NewDiskAttacher(azcli).WaitForDetach(context.Background(), d.String())
+			if err != nil {
+				ui.Error(fmt.Sprintf("error detaching disk %q: %s", d, err))
+			}
 
-		f, err := azcli.DisksClient().Delete(context.TODO(), s.resourceGroup, s.diskName)
-		if err == nil {
-			err = f.WaitForCompletionRef(context.TODO(), azcli.PollClient())
-		}
-		if err != nil {
-			log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
-			ui.Error(fmt.Sprintf("error deleting disk '%s': %v.", s.OSDiskID, err))
+			ui.Say(fmt.Sprintf("Deleting disk %q", d))
+
+			f, err := azcli.DisksClient().Delete(context.TODO(), d.ResourceGroup, d.ResourceName.String())
+			if err == nil {
+				err = f.WaitForCompletionRef(context.TODO(), azcli.PollClient())
+			}
+			if err != nil {
+				log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
+				ui.Error(fmt.Sprintf("error deleting disk '%s': %v.", d, err))
+			}
 		}
 	}
 }
