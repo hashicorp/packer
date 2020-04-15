@@ -1,10 +1,10 @@
 package hcl2template
 
 import (
-	"testing"
-
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+	"testing"
+	"time"
 )
 
 var (
@@ -172,6 +172,90 @@ func TestParser_complete(t *testing.T) {
 			},
 			parseWantDiags:         true,
 			parseWantDiagHasErrors: true,
+		},
+		{"provisioner with wrappers pause_before and max_retriers",
+			defaultParser,
+			parseTestArgs{"testdata/build/provisioner_paused_before_retry.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: "testdata/build",
+				Sources: map[SourceRef]*SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{refVBIsoUbuntu1204},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType:       "shell",
+								PauseBefore: time.Second * 10,
+								MaxRetries:  5,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "shell",
+							Provisioner: &packer.RetriedProvisioner{
+								MaxRetries: 5,
+								Provisioner: &packer.PausedProvisioner{
+									PauseBefore: time.Second * 10,
+									Provisioner: emptyMockProvisioner,
+								},
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
+		},
+		{"provisioner with wrappers timeout",
+			defaultParser,
+			parseTestArgs{"testdata/build/provisioner_timeout.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: "testdata/build",
+				Sources: map[SourceRef]*SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{refVBIsoUbuntu1204},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType:   "shell",
+								Timeout: time.Second * 10,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "shell",
+							Provisioner: &packer.TimeoutProvisioner{
+								Timeout:     time.Second * 10,
+								Provisioner: emptyMockProvisioner,
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
 		},
 	}
 	testParse(t, tests)

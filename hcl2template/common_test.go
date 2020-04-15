@@ -207,6 +207,23 @@ var (
 		},
 	}
 
+	emptyMockBuilder = &MockBuilder{
+		Config: MockConfig{
+			NestedMockConfig: NestedMockConfig{
+				Tags: []MockTag{},
+			},
+			Nested:      NestedMockConfig{},
+			NestedSlice: []NestedMockConfig{},
+		},
+	}
+
+	emptyMockProvisioner = &MockProvisioner{
+		Config: MockConfig{
+			NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+			NestedSlice:      []NestedMockConfig{},
+		},
+	}
+
 	dynamicTagList = []MockTag{
 		{
 			Key:   "first_tag_key",

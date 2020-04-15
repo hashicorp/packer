@@ -25,23 +25,44 @@ func (p *ProvisionerBlock) String() string {
 
 func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Diagnostics) {
 	var b struct {
-		Name        string        `hcl:"name,optional"`
-		PauseBefore time.Duration `hcl:"pause_before,optional"`
-		MaxRetries  int           `hcl:"max_retries,optional"`
-		Timeout     time.Duration `hcl:"timeout,optional"`
-		Rest        hcl.Body      `hcl:",remain"`
+		Name        string   `hcl:"name,optional"`
+		PauseBefore string   `hcl:"pause_before,optional"`
+		MaxRetries  int      `hcl:"max_retries,optional"`
+		Timeout     string   `hcl:"timeout,optional"`
+		Rest        hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
+
 	provisioner := &ProvisionerBlock{
-		PType:       block.Labels[0],
-		PName:       b.Name,
-		PauseBefore: b.PauseBefore,
-		MaxRetries:  b.MaxRetries,
-		Timeout:     b.Timeout,
-		HCL2Ref:     newHCL2Ref(block, b.Rest),
+		PType:      block.Labels[0],
+		PName:      b.Name,
+		MaxRetries: b.MaxRetries,
+		HCL2Ref:    newHCL2Ref(block, b.Rest),
+	}
+
+	if b.PauseBefore != "" {
+		pauseBefore, err := time.ParseDuration(b.PauseBefore)
+		if err != nil {
+			return nil, append(diags, &hcl.Diagnostic{
+				Summary: "Failed to parse pause_before duration",
+				Detail:  err.Error(),
+			})
+		}
+		provisioner.PauseBefore = pauseBefore
+	}
+
+	if b.Timeout != "" {
+		timeout, err := time.ParseDuration(b.Timeout)
+		if err != nil {
+			return nil, append(diags, &hcl.Diagnostic{
+				Summary: "Failed to parse timeout duration",
+				Detail:  err.Error(),
+			})
+		}
+		provisioner.Timeout = timeout
 	}
 
 	if !p.ProvisionersSchemas.Has(provisioner.PType) {
