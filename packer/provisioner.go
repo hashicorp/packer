@@ -176,6 +176,10 @@ func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
 }
 
 func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+	if ctx.Err() != nil { // context was cancelled
+		return ctx.Err()
+	}
+
 	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
 	if err == nil {
 		return nil
