@@ -43,9 +43,13 @@
 -   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
     Defaults to `V1`.
     
--   `temporary_os_disk_id` (string) - The id of the temporary disk that will be created. Will be generated if not set.
+-   `temporary_os_disk_id` (string) - The id of the temporary OS disk that will be created. Will be generated if not set.
     
--   `temporary_os_disk_snapshot_id` (string) - The id of the temporary snapshot that will be created. Will be generated if not set.
+-   `temporary_os_disk_snapshot_id` (string) - The id of the temporary OS isk snapshot that will be created. Will be generated if not set.
+    
+-   `temporary_data_disk_id_prefix` (string) - The prefix for the resource ids of the temporary data disks that will be created. The disks will be suffixed with a number. Will be generated if not set.
+    
+-   `temporary_data_disk_snapshot_id` (string) - The prefix for the resource ids of the temporary data disk snapshots that will be created. The snapshots will be suffixed with a number. Will be generated if not set.
     
 -   `skip_cleanup` (bool) - If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
     

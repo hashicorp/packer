@@ -92,11 +92,17 @@ type Config struct {
 	// Defaults to `V1`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
 
-	// The id of the temporary disk that will be created. Will be generated if not set.
+	// The id of the temporary OS disk that will be created. Will be generated if not set.
 	TemporaryOSDiskID string `mapstructure:"temporary_os_disk_id"`
 
-	// The id of the temporary snapshot that will be created. Will be generated if not set.
+	// The id of the temporary OS isk snapshot that will be created. Will be generated if not set.
 	TemporaryOSDiskSnapshotID string `mapstructure:"temporary_os_disk_snapshot_id"`
+
+	// The prefix for the resource ids of the temporary data disks that will be created. The disks will be suffixed with a number. Will be generated if not set.
+	TemporaryDataDiskIDPrefix string `mapstructure:"temporary_data_disk_id_prefix"`
+
+	// The prefix for the resource ids of the temporary data disk snapshots that will be created. The snapshots will be suffixed with a number. Will be generated if not set.
+	TemporaryDataDiskSnapshotIDPrefix string `mapstructure:"temporary_data_disk_snapshot_id"`
 
 	// If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
 	SkipCleanup bool `mapstructure:"skip_cleanup"`
@@ -216,6 +222,26 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			b.config.TemporaryOSDiskSnapshotID = def
 		} else {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary snapshot id: %s", err))
+		}
+	}
+
+	if b.config.TemporaryDataDiskIDPrefix == "" {
+		if def, err := interpolate.Render(
+			"/subscriptions/{{ vm `subscription_id` }}/resourceGroups/{{ vm `resource_group` }}/providers/Microsoft.Compute/disks/PackerTemp-datadisk-{{timestamp}}-",
+			&b.config.ctx); err == nil {
+			b.config.TemporaryDataDiskIDPrefix = def
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary data disk id prefix: %s", err))
+		}
+	}
+
+	if b.config.TemporaryDataDiskSnapshotIDPrefix == "" {
+		if def, err := interpolate.Render(
+			"/subscriptions/{{ vm `subscription_id` }}/resourceGroups/{{ vm `resource_group` }}/providers/Microsoft.Compute/snapshots/PackerTemp-datadisk-snapshot-{{timestamp}}-",
+			&b.config.ctx); err == nil {
+			b.config.TemporaryDataDiskSnapshotIDPrefix = def
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary data disk snapshot id prefix: %s", err))
 		}
 	}
 
