@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -806,14 +807,11 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	}
 
 	ui := testUi()
-	ctx, topCtxCancel := context.WithCancel(context.Background())
 	p.ProvFunc = func(ctx context.Context) error {
-		topCtxCancel()
-		<-ctx.Done()
-		return ctx.Err()
+		return errors.New("failed")
 	}
 
-	artifact, err := build.Run(ctx, ui)
+	artifact, err := build.Run(context.Background(), ui)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

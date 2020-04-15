@@ -177,13 +177,25 @@ func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
 
 func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
 	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
-
-	retries := 0
-	for err != nil && retries < r.MaxRetries {
-		ui.Say("Retrying provisioner")
-		err = r.Provisioner.Provision(ctx, ui, comm, generatedData)
-		retries++
+	if err == nil {
+		return nil
 	}
+
+	leftTries := r.MaxRetries
+	for ; leftTries > 0; leftTries-- {
+		if ctx.Err() != nil { // context was cancelled
+			return ctx.Err()
+		}
+
+		ui.Say(fmt.Sprintf("Provisioner failed with %q, retrying with %d trie(s) left", err, leftTries))
+		
+		err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
+		if err == nil {
+			return nil
+		}
+
+	}
+	ui.Say("retry limit reached.")
 
 	return err
 }

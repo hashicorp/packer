@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -253,6 +254,39 @@ func TestRetriedProvisionerPrepare(t *testing.T) {
 }
 
 func TestRetriedProvisionerProvision(t *testing.T) {
+	mock := &MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			return errors.New("failed")
+		},
+	}
+
+	prov := &RetriedProvisioner{
+		MaxRetries:  2,
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if !mock.ProvRetried {
+		t.Fatal("prov should be retried")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+}
+
+func TestRetriedProvisionerCancelledProvision(t *testing.T) {
+	// Don't retry if context is cancelled
 	ctx, topCtxCancel := context.WithCancel(context.Background())
 
 	mock := &MockProvisioner{
@@ -271,14 +305,14 @@ func TestRetriedProvisionerProvision(t *testing.T) {
 	ui := testUi()
 	comm := new(MockCommunicator)
 	err := prov.Provision(ctx, ui, comm, make(map[string]interface{}))
-	if err != nil {
-		t.Fatal("should not have errored")
+	if err == nil {
+		t.Fatal("should have errored")
 	}
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
-	if !mock.ProvRetried {
-		t.Fatal("prov should be retried")
+	if mock.ProvRetried {
+		t.Fatal("prov should NOT be retried")
 	}
 	if mock.ProvUi != ui {
 		t.Fatal("should have proper ui")
