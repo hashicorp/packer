@@ -195,6 +195,26 @@ func (p *Parser) getCoreBuildProvisioners(source *SourceBlock, blocks []*Provisi
 		if moreDiags.HasErrors() {
 			continue
 		}
+
+		// If we're pausing, we wrap the provisioner in a special pauser.
+		if pb.PauseBefore != 0 {
+			provisioner = &packer.PausedProvisioner{
+				PauseBefore: pb.PauseBefore,
+				Provisioner: provisioner,
+			}
+		} else if pb.Timeout != 0 {
+			provisioner = &packer.TimeoutProvisioner{
+				Timeout:     pb.Timeout,
+				Provisioner: provisioner,
+			}
+		}
+		if pb.MaxRetries != 0 {
+			provisioner = &packer.RetriedProvisioner{
+				MaxRetries:  pb.MaxRetries,
+				Provisioner: provisioner,
+			}
+		}
+
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
 			PName:       pb.PName,
