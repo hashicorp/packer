@@ -240,7 +240,10 @@ func TestRetriedProvisionerPrepare(t *testing.T) {
 		Provisioner: mock,
 	}
 
-	prov.Prepare(42)
+	err := prov.Prepare(42)
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
 	if !mock.PrepCalled {
 		t.Fatal("prepare should be called")
 	}
@@ -267,7 +270,10 @@ func TestRetriedProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(MockCommunicator)
-	prov.Provision(ctx, ui, comm, make(map[string]interface{}))
+	err := prov.Provision(ctx, ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
