@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -178,7 +179,7 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/provisioner_paused_before_retry.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: "testdata/build",
+				Basedir: filepath.Join("testdata", "build"),
 				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
@@ -222,7 +223,7 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/build/provisioner_timeout.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: "testdata/build",
+				Basedir: filepath.Join("testdata", "build"),
 				Sources: map[SourceRef]*SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
