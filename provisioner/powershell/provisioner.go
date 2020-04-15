@@ -222,6 +222,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			`"unrestricted", "none".`))
 	}
 
+	if !(p.config.DebugMode >= 0 && p.config.DebugMode <= 2) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("%d is an invalid Trace level for `debug_mode`; valid values are 0, 1, and 2", p.config.DebugMode))
+	}
+
 	if errs != nil {
 		return errs
 	}

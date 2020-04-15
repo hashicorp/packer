@@ -122,6 +122,22 @@ func TestProvisionerPrepare_DebugMode(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_InvalidDebugMode(t *testing.T) {
+	config := testConfig()
+	config["debug_mode"] = -1
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+
+	message := "invalid Trace level for `debug_mode`; valid values are 0, 1, and 2"
+	if !strings.Contains(err.Error(), message) {
+		t.Fatalf("expected Prepare() error %q to contain %q", err.Error(), message)
+	}
+}
+
 func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
