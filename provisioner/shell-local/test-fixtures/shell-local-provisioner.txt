@@ -1,0 +1,5 @@
+{
+    "type": "shell-local",
+    "script": "test-fixtures/script.sh",
+    "max_retries" : 5
+}

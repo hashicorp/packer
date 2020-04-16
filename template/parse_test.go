@@ -107,6 +107,19 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"parse-provisioner-retry.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					{
+						Type:       "something",
+						MaxRetries: 5,
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"parse-provisioner-timeout.json",
 			&Template{
 				Provisioners: []*Provisioner{

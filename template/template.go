@@ -141,6 +141,7 @@ type Provisioner struct {
 	Config      map[string]interface{} `json:"config,omitempty"`
 	Override    map[string]interface{} `json:"override,omitempty"`
 	PauseBefore time.Duration          `mapstructure:"pause_before" json:"pause_before,omitempty"`
+	MaxRetries  int                    `mapstructure:"max_retries" json:"max_retries,omitempty"`
 	Timeout     time.Duration          `mapstructure:"timeout" json:"timeout,omitempty"`
 }
 

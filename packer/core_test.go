@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -785,4 +786,43 @@ func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {
 	}
 
 	c.Template = tpl
+}
+
+func TestCoreBuild_provRetry(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-prov-retry.json"))
+	b := TestBuilder(t, config, "test")
+	p := TestProvisioner(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ui := testUi()
+	p.ProvFunc = func(ctx context.Context) error {
+		return errors.New("failed")
+	}
+
+	artifact, err := build.Run(context.Background(), ui)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(artifact) != 1 {
+		t.Fatalf("bad: %#v", artifact)
+	}
+
+	if artifact[0].Id() != b.ArtifactId {
+		t.Fatalf("bad: %s", artifact[0].Id())
+	}
+	if !p.ProvRetried {
+		t.Fatal("provisioner should retry")
+	}
 }

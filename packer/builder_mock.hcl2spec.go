@@ -155,6 +155,7 @@ type FlatMockProvisioner struct {
 	PrepCalled       *bool         `cty:"prep_called"`
 	PrepConfigs      []interface{} `cty:"prep_configs"`
 	ProvCalled       *bool         `cty:"prov_called"`
+	ProvRetried      *bool         `cty:"prov_retried"`
 	ProvCommunicator Communicator  `cty:"prov_communicator"`
 	ProvUi           Ui            `cty:"prov_ui"`
 }
@@ -174,6 +175,7 @@ func (*FlatMockProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"prep_called":       &hcldec.AttrSpec{Name: "prep_called", Type: cty.Bool, Required: false},
 		"prep_configs":      &hcldec.AttrSpec{Name: "prep_configs", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"prov_called":       &hcldec.AttrSpec{Name: "prov_called", Type: cty.Bool, Required: false},
+		"prov_retried":      &hcldec.AttrSpec{Name: "prov_retried", Type: cty.Bool, Required: false},
 		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false},           /* TODO(azr): could not find type */
 	}

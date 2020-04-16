@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -227,5 +228,116 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 	err := prov.Provision(topCtx, testUi(), new(MockCommunicator), make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestRetriedProvisioner_impl(t *testing.T) {
+	var _ Provisioner = new(RetriedProvisioner)
+}
+
+func TestRetriedProvisionerPrepare(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &RetriedProvisioner{
+		Provisioner: mock,
+	}
+
+	err := prov.Prepare(42)
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if mock.PrepConfigs[0] != 42 {
+		t.Fatal("should have proper configs")
+	}
+}
+
+func TestRetriedProvisionerProvision(t *testing.T) {
+	mock := &MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			return errors.New("failed")
+		},
+	}
+
+	prov := &RetriedProvisioner{
+		MaxRetries:  2,
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if !mock.ProvRetried {
+		t.Fatal("prov should be retried")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+}
+
+func TestRetriedProvisionerCancelledProvision(t *testing.T) {
+	// Don't retry if context is cancelled
+	ctx, topCtxCancel := context.WithCancel(context.Background())
+
+	mock := &MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			topCtxCancel()
+			<-ctx.Done()
+			return ctx.Err()
+		},
+	}
+
+	prov := &RetriedProvisioner{
+		MaxRetries:  2,
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	err := prov.Provision(ctx, ui, comm, make(map[string]interface{}))
+	if err == nil {
+		t.Fatal("should have errored")
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if mock.ProvRetried {
+		t.Fatal("prov should NOT be retried")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+}
+
+func TestRetriedProvisionerCancel(t *testing.T) {
+	topCtx, cancelTopCtx := context.WithCancel(context.Background())
+
+	mock := new(MockProvisioner)
+	prov := &RetriedProvisioner{
+		Provisioner: mock,
+	}
+
+	mock.ProvFunc = func(ctx context.Context) error {
+		cancelTopCtx()
+		<-ctx.Done()
+		return ctx.Err()
+	}
+
+	err := prov.Provision(topCtx, testUi(), new(MockCommunicator), make(map[string]interface{}))
+	if err == nil {
+		t.Fatal("should have err")
 	}
 }
