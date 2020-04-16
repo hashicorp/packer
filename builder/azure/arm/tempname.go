@@ -28,9 +28,10 @@ func NewTempName(p string) *TempName {
 
 	suffix := random.AlphaNumLower(5)
 	if p == "" {
-	    p = "pkr"
-	    suffix = random.AlphaNumLower(10)
-	} 
+		p = "pkr"
+		suffix = random.AlphaNumLower(10)
+	}
+
 	tempName.ComputeName = fmt.Sprintf("%svm%s", p, suffix)
 	tempName.DeploymentName = fmt.Sprintf("%sdp%s", p, suffix)
 	tempName.KeyVaultName = fmt.Sprintf("%skv%s", p, suffix)

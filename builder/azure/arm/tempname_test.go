@@ -30,8 +30,8 @@ func TestTempNameShouldCreatePrefixedRandomNames(t *testing.T) {
 		t.Errorf("Expected PublicIPAddressName to begin with 'pkrip', but got '%s'!", tempName.PublicIPAddressName)
 	}
 
-	if strings.Index(tempName.ResourceGroupName, "packer-Resource-Group-") != 0 {
-		t.Errorf("Expected ResourceGroupName to begin with 'packer-Resource-Group-', but got '%s'!", tempName.ResourceGroupName)
+	if strings.Index(tempName.ResourceGroupName, "pkr-Resource-Group-") != 0 {
+		t.Errorf("Expected ResourceGroupName to begin with 'pkr-Resource-Group-', but got '%s'!", tempName.ResourceGroupName)
 	}
 
 	if strings.Index(tempName.SubnetName, "pkrsn") != 0 {
