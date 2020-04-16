@@ -86,6 +86,7 @@ type FlatConfig struct {
 	SourceImageID             *string           `mapstructure:"source_image_id" required:"false" cty:"source_image_id"`
 	SourceImageName           *string           `mapstructure:"source_image_name" cty:"source_image_name"`
 	SubnetID                  *string           `mapstructure:"subnet_id" required:"false" cty:"subnet_id"`
+	TargetImageFolderID       *string           `mapstructure:"target_image_folder_id" required:"false" cty:"target_image_folder_id"`
 	UseIPv4Nat                *bool             `mapstructure:"use_ipv4_nat" required:"false" cty:"use_ipv4_nat"`
 	UseIPv6                   *bool             `mapstructure:"use_ipv6" required:"false" cty:"use_ipv6"`
 	UseInternalIP             *bool             `mapstructure:"use_internal_ip" required:"false" cty:"use_internal_ip"`
@@ -182,6 +183,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image_id":              &hcldec.AttrSpec{Name: "source_image_id", Type: cty.String, Required: false},
 		"source_image_name":            &hcldec.AttrSpec{Name: "source_image_name", Type: cty.String, Required: false},
 		"subnet_id":                    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
+		"target_image_folder_id":       &hcldec.AttrSpec{Name: "target_image_folder_id", Type: cty.String, Required: false},
 		"use_ipv4_nat":                 &hcldec.AttrSpec{Name: "use_ipv4_nat", Type: cty.Bool, Required: false},
 		"use_ipv6":                     &hcldec.AttrSpec{Name: "use_ipv6", Type: cty.Bool, Required: false},
 		"use_internal_ip":              &hcldec.AttrSpec{Name: "use_internal_ip", Type: cty.Bool, Required: false},
