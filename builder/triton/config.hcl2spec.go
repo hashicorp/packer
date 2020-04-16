@@ -29,7 +29,7 @@ type FlatConfig struct {
 	MachineNetworks           []string                     `mapstructure:"source_machine_networks" required:"false" cty:"source_machine_networks"`
 	MachineMetadata           map[string]string            `mapstructure:"source_machine_metadata" required:"false" cty:"source_machine_metadata"`
 	MachineTags               map[string]string            `mapstructure:"source_machine_tags" required:"false" cty:"source_machine_tags"`
-	MachineTag                []hcl2template.FlatNameValue `mapstructure:"source_machine_tag" required:"false" cty:"source_machine_tag"`
+	MachineTag                []hcl2template.FlatKeyValue  `mapstructure:"source_machine_tag" required:"false" cty:"source_machine_tag"`
 	MachineFirewallEnabled    *bool                        `mapstructure:"source_machine_firewall_enabled" required:"false" cty:"source_machine_firewall_enabled"`
 	MachineImageFilters       *FlatMachineImageFilter      `mapstructure:"source_machine_image_filter" required:"false" cty:"source_machine_image_filter"`
 	ImageName                 *string                      `mapstructure:"image_name" required:"true" cty:"image_name"`
@@ -114,7 +114,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_machine_networks":         &hcldec.AttrSpec{Name: "source_machine_networks", Type: cty.List(cty.String), Required: false},
 		"source_machine_metadata":         &hcldec.AttrSpec{Name: "source_machine_metadata", Type: cty.Map(cty.String), Required: false},
 		"source_machine_tags":             &hcldec.AttrSpec{Name: "source_machine_tags", Type: cty.Map(cty.String), Required: false},
-		"source_machine_tag":              &hcldec.BlockListSpec{TypeName: "source_machine_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"source_machine_tag":              &hcldec.BlockListSpec{TypeName: "source_machine_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"source_machine_firewall_enabled": &hcldec.AttrSpec{Name: "source_machine_firewall_enabled", Type: cty.Bool, Required: false},
 		"source_machine_image_filter":     &hcldec.BlockSpec{TypeName: "source_machine_image_filter", Nested: hcldec.ObjectSpec((*FlatMachineImageFilter)(nil).HCL2Spec())},
 		"image_name":                      &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},

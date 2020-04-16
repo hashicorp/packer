@@ -74,7 +74,7 @@ func TestRunConfigPrepare_SourceOmiFilterOwnersBlank(t *testing.T) {
 	filter_key := "name"
 	filter_value := "foo"
 	c.SourceOmiFilter = OmiFilterOptions{
-		KVFilter: hcl2template.KVFilter{
+		NameValueFilter: hcl2template.NameValueFilter{
 			Filters: map[string]string{filter_key: filter_value},
 		},
 	}
@@ -90,7 +90,7 @@ func TestRunConfigPrepare_SourceOmiFilterGood(t *testing.T) {
 	filter_value := "foo"
 	goodFilter := OmiFilterOptions{
 		Owners: []string{owner},
-		KVFilter: hcl2template.KVFilter{
+		NameValueFilter: hcl2template.NameValueFilter{
 			Filters: map[string]string{filter_key: filter_value},
 		},
 	}

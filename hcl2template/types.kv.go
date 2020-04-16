@@ -1,6 +1,40 @@
-//go:generate mapstructure-to-hcl2 -type NameValue,NameValues,KVFilter
+//go:generate mapstructure-to-hcl2 -type KeyValue,KeyValues,KeyValueFilter,NameValue,NameValues,NameValueFilter
 
 package hcl2template
+
+type KeyValue struct {
+	Key   string
+	Value string
+}
+
+type KeyValues []KeyValue
+
+func (kvs KeyValues) CopyOn(to *map[string]string) []error {
+	if len(kvs) == 0 {
+		return nil
+	}
+	if *to == nil {
+		*to = map[string]string{}
+	}
+	for _, kv := range kvs {
+		(*to)[kv.Key] = kv.Value
+	}
+	return nil
+}
+
+type KeyValueFilter struct {
+	Filters map[string]string
+	Filter  KeyValues
+}
+
+func (kvf *KeyValueFilter) Prepare() []error {
+	kvf.Filter.CopyOn(&kvf.Filters)
+	return nil
+}
+
+func (kvf *KeyValueFilter) Empty() bool {
+	return len(kvf.Filters) == 0
+}
 
 type NameValue struct {
 	Name  string
@@ -9,29 +43,29 @@ type NameValue struct {
 
 type NameValues []NameValue
 
-func (kvs NameValues) CopyOn(to *map[string]string) []error {
-	if len(kvs) == 0 {
+func (nvs NameValues) CopyOn(to *map[string]string) []error {
+	if len(nvs) == 0 {
 		return nil
 	}
 	if *to == nil {
 		*to = map[string]string{}
 	}
-	for _, kv := range kvs {
+	for _, kv := range nvs {
 		(*to)[kv.Name] = kv.Value
 	}
 	return nil
 }
 
-type KVFilter struct {
+type NameValueFilter struct {
 	Filters map[string]string
 	Filter  NameValues
 }
 
-func (kvf *KVFilter) Prepare() []error {
-	kvf.Filter.CopyOn(&kvf.Filters)
+func (nvf *NameValueFilter) Prepare() []error {
+	nvf.Filter.CopyOn(&nvf.Filters)
 	return nil
 }
 
-func (kvf *KVFilter) Empty() bool {
-	return len(kvf.Filters) == 0
+func (nvf *NameValueFilter) Empty() bool {
+	return len(nvf.Filters) == 0
 }

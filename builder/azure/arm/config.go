@@ -238,10 +238,10 @@ type Config struct {
 	// region that supports [availability
 	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
 	ManagedImageZoneResilient bool `mapstructure:"managed_image_zone_resilient" required:"false"`
-	// the user can define up to 15
-	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
-	// 256 characters. Tags are applied to every resource deployed by a Packer
-	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+	// Name/value pair tags to apply to every resource deployed i.e. Resource
+	// Group, VM, NIC, VNET, Public IP, KeyVault, etc. The user can define up
+	// to 15 tags. Tag names cannot exceed 512 characters, and tag values
+	// cannot exceed 256 characters.
 	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
 	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
 	// containing a `name` and a `value` field. In HCL2 mode the

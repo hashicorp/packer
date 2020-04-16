@@ -10,10 +10,10 @@ import (
 // FlatAmiFilterOptions is an auto-generated flat version of AmiFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatAmiFilterOptions struct {
-	Filters    map[string]string            `cty:"filters"`
-	Filter     []hcl2template.FlatNameValue `cty:"filter"`
-	Owners     []string                     `cty:"owners"`
-	MostRecent *bool                        `mapstructure:"most_recent" cty:"most_recent"`
+	Filters    map[string]string           `cty:"filters"`
+	Filter     []hcl2template.FlatKeyValue `cty:"filter"`
+	Owners     []string                    `cty:"owners"`
+	MostRecent *bool                       `mapstructure:"most_recent" cty:"most_recent"`
 }
 
 // FlatMapstructure returns a new FlatAmiFilterOptions.
@@ -29,7 +29,7 @@ func (*AmiFilterOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 func (*FlatAmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"filters":     &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
-		"filter":      &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"filter":      &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"owners":      &hcldec.AttrSpec{Name: "owners", Type: cty.List(cty.String), Required: false},
 		"most_recent": &hcldec.AttrSpec{Name: "most_recent", Type: cty.Bool, Required: false},
 	}

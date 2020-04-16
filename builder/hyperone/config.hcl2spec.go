@@ -67,7 +67,7 @@ type FlatConfig struct {
 	ImageName                 *string                      `mapstructure:"image_name" required:"false" cty:"image_name"`
 	ImageDescription          *string                      `mapstructure:"image_description" required:"false" cty:"image_description"`
 	ImageTags                 map[string]string            `mapstructure:"image_tags" required:"false" cty:"image_tags"`
-	ImageTag                  []hcl2template.FlatNameValue `mapstructure:"image_tag" required:"false" cty:"image_tag"`
+	ImageTag                  []hcl2template.FlatKeyValue  `mapstructure:"image_tag" required:"false" cty:"image_tag"`
 	ImageService              *string                      `mapstructure:"image_service" required:"false" cty:"image_service"`
 	VmType                    *string                      `mapstructure:"vm_type" required:"true" cty:"vm_type"`
 	VmName                    *string                      `mapstructure:"vm_name" required:"false" cty:"vm_name"`
@@ -164,7 +164,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_tags":                   &hcldec.AttrSpec{Name: "image_tags", Type: cty.Map(cty.String), Required: false},
-		"image_tag":                    &hcldec.BlockListSpec{TypeName: "image_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"image_tag":                    &hcldec.BlockListSpec{TypeName: "image_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"image_service":                &hcldec.AttrSpec{Name: "image_service", Type: cty.String, Required: false},
 		"vm_type":                      &hcldec.AttrSpec{Name: "vm_type", Type: cty.String, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
