@@ -324,6 +324,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupFilter:    b.config.SecurityGroupFilter,
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
+			SkipSSHRuleCreation:    b.config.SSMAgentEnabled(),
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
@@ -337,12 +338,27 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Timeout:   b.config.WindowsPasswordTimeout,
 			BuildName: b.config.PackerBuildName,
 		},
+		&awscommon.StepCreateSSMTunnel{
+			AWSSession:      session,
+			DstPort:         b.config.Comm.Port(),
+			SSMAgentEnabled: b.config.SSMAgentEnabled(),
+		},
 		&communicator.StepConnect{
+			// StepConnect is provided settings for WinRM and SSH, but
+			// the communicator will ultimately determine which port to use.
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
 				b.config.Comm.Host(),
+			),
+			SSHPort: awscommon.Port(
+				b.config.SSHInterface,
+				b.config.Comm.Port(),
+			),
+			WinRMPort: awscommon.Port(
+				b.config.SSHInterface,
+				b.config.Comm.Port(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
