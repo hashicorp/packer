@@ -57,6 +57,21 @@ type Config struct {
 	// Type of disk used to back your instance, like pd-ssd or pd-standard.
 	// Defaults to pd-standard.
 	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Create a Shielded VM image with Secure Boot enabled. It helps ensure that
+	// the system only runs authentic software by verifying the digital signature
+	// of all boot components, and halting the boot process if signature verification
+	// fails. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableSecureBoot bool `mapstructure:"enable_secure_boot" required:"false"`
+	// Create a Shielded VM image with virtual trusted platform module
+	// Measured Boot enabled. A vTPM is a virtualized trusted platform module,
+	// which is a specialized computer chip you can use to protect objects,
+	// like keys and certificates, that you use to authenticate access to your
+	// system. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableVtpm bool `mapstructure:"enable_vtpm" required:"false"`
+	// Integrity monitoring helps you understand and make decisions about the
+	// state of your VM instances. Note: integrity monitoring relies on having
+	// vTPM enabled. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
@@ -220,6 +235,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.DiskType == "" {
 		c.DiskType = "pd-standard"
+	}
+
+	// Disabling the vTPM also disables integrity monitoring, because integrity
+	// monitoring relies on data gathered by Measured Boot.
+	if !c.EnableVtpm {
+		if c.EnableIntegrityMonitoring {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("You cannot enable Integrity Monitoring when vTPM is disabled."))
+		}
 	}
 
 	if c.ImageDescription == "" {
