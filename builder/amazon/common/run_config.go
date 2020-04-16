@@ -400,7 +400,7 @@ type RunConfig struct {
 	//    variable.
 	//
 	//    When using `session_manager` the machine running Packer must have
-	//	  the AWS Session Manager Plugin installed and within its path.
+	//	  the AWS Session Manager Plugin installed and within the users' or system path.
 	//    https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 	SSHInterface string `mapstructure:"ssh_interface"`
 }
@@ -448,6 +448,20 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.SSHInterface != "session_manager" &&
 		c.SSHInterface != "" {
 		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
+	}
+
+	// Connectivity via Session Manager has a few requirements
+	if c.SSHInterface == "session_manager" {
+		if c.Comm.Type == "winrm" {
+			msg := fmt.Errorf(`connectivity via %q is not currently supported with the %q communicator; please use "ssh"`, c.SSHInterface, c.Comm.Type)
+			errs = append(errs, msg)
+		}
+
+		// TODO (nywilken) add support for temporary iam instance policy generation
+		if c.IamInstanceProfile == "" {
+			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with SSM managed instance permissions is required`, c.SSHInterface)
+			errs = append(errs, msg)
+		}
 	}
 
 	if c.Comm.SSHKeyPairName != "" {
@@ -538,4 +552,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 func (c *RunConfig) IsSpotInstance() bool {
 	return c.SpotPrice != "" && c.SpotPrice != "0"
+}
+
+func (c *RunConfig) SSMAgentEnabled() bool {
+	return c.SSHInterface == "session_manager" && c.IamInstanceProfile != ""
 }

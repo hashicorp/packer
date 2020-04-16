@@ -239,7 +239,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
-			SkipSSHRuleCreation:    b.config.SSHInterface == "session_manager",
+			SkipSSHRuleCreation:    b.config.SSMAgentEnabled(),
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
@@ -259,7 +259,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepCreateSSMTunnel{
 			AWSSession:      session,
 			DstPort:         b.config.Comm.Port(),
-			SSMAgentEnabled: b.config.SSHInterface == "session_manager",
+			SSMAgentEnabled: b.config.SSMAgentEnabled(),
 		},
 		&communicator.StepConnect{
 			// StepConnect is provided settings for WinRM and SSH, but
