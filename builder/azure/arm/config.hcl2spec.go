@@ -69,6 +69,7 @@ type FlatConfig struct {
 	AdditionalDiskSize                         []int32                            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size"`
 	DiskCachingType                            *string                            `mapstructure:"disk_caching_type" required:"false" cty:"disk_caching_type"`
 	AllowedInboundIpAddresses                  []string                           `mapstructure:"allowed_inbound_ip_addresses" cty:"allowed_inbound_ip_addresses"`
+	CustomResourcePrefix                       *string                            `mapstructure:"custom_resource_build_prefix" required:"false" cty:"custom_resource_build_prefix"`
 	Type                                       *string                            `mapstructure:"communicator" cty:"communicator"`
 	PauseBeforeConnect                         *string                            `mapstructure:"pause_before_connecting" cty:"pause_before_connecting"`
 	SSHHost                                    *string                            `mapstructure:"ssh_host" cty:"ssh_host"`
@@ -184,6 +185,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_additional_size":                    &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"disk_caching_type":                       &hcldec.AttrSpec{Name: "disk_caching_type", Type: cty.String, Required: false},
 		"allowed_inbound_ip_addresses":            &hcldec.AttrSpec{Name: "allowed_inbound_ip_addresses", Type: cty.List(cty.String), Required: false},
+		"custom_resource_build_prefix":            &hcldec.AttrSpec{Name: "custom_resource_build_prefix", Type: cty.String, Required: false},
 		"communicator":                            &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":                 &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                                &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
