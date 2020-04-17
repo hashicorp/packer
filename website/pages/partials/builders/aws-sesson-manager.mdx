@@ -1,0 +1,51 @@
+### Session Manager Connections
+
+Support for the AWS Systems Manager session manager capability lets users manage EC2 instances without the need to open inbound ports, or maintain bastion hosts. Session manager connectivity relies on the use of the [session manager plugin](#session-manager-plugin) to open a secure tunnel between the local machine and the remote instance. Once the tunnel has been created all SSH communication will be tunneled through the SSM to the remote instance.
+
+To use the session manager as the connection interface for the SSH communicator you need to add the following configuration options to the Amazon builder options:
+
+ * `ssh_interface`: The ssh interface must be set to "session_manager", when using this option the builder will no to create an SSM tunnel to the configured `ssh_port` (defaults to 22) on the remote host.
+ * `iam_instance_profile`: A valid instance profile granting Systems Manger permissions to manage the remote instance is required in order for the aws ssm-agent to start and stop session connections. See below for more details on IAM instance profile for Systems Manager(#iam-instance-profile-for-systems-manager).
+
+```json
+{
+  "builders": [
+      {
+        "type": "amazon-ebs",
+        "ami_name": "packer-ami-{{timestamp}}",
+        "instance_type": "t2.micro",
+        "source_ami_filter": {
+            "filters": {
+                "virtualization-type": "hvm",
+                "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+                "root-device-type": "ebs"
+            },
+            "owners": [
+                "099720109477"
+            ],
+            "most_recent": true
+        },
+        "ssh_username": "ubuntu",
+        "ssh_interface": "session_manager",
+        "communicator": "ssh",
+        "iam_instance_profile": "{{user `iam_instance_profile`}}"
+      }
+  ],
+  "provisioners": [
+      {
+          "type": "shell",
+          "inline": [ "echo Connected via SSM at '{{build `User`}}@{{build `Host`}}:{{build `Port`}}'" ]
+      }
+  ]
+}
+```
+
+#### Session Manager Plugin
+Connectivity via the session manager requires the use of a session-manger-plugin which can be downloaded and installed along side Packer and an instance AMI that is capable of running the AWS ssm-agent - see [About SSM Agent](https://docs.aws.amazon.com/systems-manager/latest/userguide/prereqs-ssm-agent.html) for details on supported AMIs.
+
+
+In order for Packer to start and end sessions that connect you to your managed instances, you must first install the Session Manager plugin on your local machine. The plugin can be installed on supported versions of Microsoft Windows, macOS, Linux, and Ubuntu Server.
+[Installation instructions for the session-manager-plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+
+#### IAM instance profile for Systems Manager
+By default systems manager doesn't have permission to perform actions on the instances so you must grant SSM access by creating an instance profile with the `AmazonSSMManagedInstanceCore` policy. The instance profile can then be attached to any instance you wish to manage via the sesson-manager. See [Adding System Manager instance profile](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-add-permissions) for details on creating the required instance profile.
