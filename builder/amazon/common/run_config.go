@@ -459,7 +459,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 		// TODO (nywilken) add support for temporary iam instance policy generation
 		if c.IamInstanceProfile == "" {
-			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with SSM managed instance permissions is required`, c.SSHInterface)
+			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with AmazonSSMManagedInstanceCore permissions is required`, c.SSHInterface)
 			errs = append(errs, msg)
 		}
 	}
