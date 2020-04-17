@@ -58,6 +58,9 @@ type Config struct {
 	TemplateDescription string `mapstructure:"template_description"`
 	UnmountISO          bool   `mapstructure:"unmount_iso"`
 
+	CloudInit            bool   `mapstructure:"cloud_init"`
+	CloudInitStoragePool string `mapstructure:"cloud_init_storage_pool"`
+
 	shouldUploadISO bool
 
 	ctx interpolate.Context
@@ -85,6 +88,8 @@ type vgaConfig struct {
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	// Agent defaults to true
 	c.Agent = true
+	// Do not add a cloud-init cdrom by default
+	c.CloudInit = false
 
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{

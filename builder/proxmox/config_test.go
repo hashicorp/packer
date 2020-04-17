@@ -125,6 +125,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	if b.config.SCSIController != "lsi" {
 		t.Errorf("Expected SCSI controller to be 'lsi', got %s", b.config.SCSIController)
 	}
+	if b.config.CloudInit != false {
+		t.Errorf("Expected CloudInit to be false, got %t", b.config.CloudInit)
+	}
 }
 
 func TestAgentSetToFalse(t *testing.T) {
