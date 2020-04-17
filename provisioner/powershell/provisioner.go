@@ -78,6 +78,15 @@ type Config struct {
 
 	remoteCleanUpScriptPath string
 
+	// If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
+	//  in order to make script debugging easier. For instance, setting the
+	//    value to 1 results in adding this to the execute command:
+	//
+	//    ``` powershell
+	//    Set-PSDebug -Trace 1
+	//    ```
+	DebugMode int `mapstructure:"debug_mode"`
+
 	ctx interpolate.Context
 }
 
@@ -89,8 +98,13 @@ type Provisioner struct {
 
 func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
-		`. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	if p.config.DebugMode != 0 {
+		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+	}
+
+	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
@@ -206,6 +220,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			`policy provided. Please supply one of: "bypass", "allsigned",`+
 			` "default", "remotesigned", "restricted", "undefined", `+
 			`"unrestricted", "none".`))
+	}
+
+	if !(p.config.DebugMode >= 0 && p.config.DebugMode <= 2) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("%d is an invalid Trace level for `debug_mode`; valid values are 0, 1, and 2", p.config.DebugMode))
 	}
 
 	if errs != nil {

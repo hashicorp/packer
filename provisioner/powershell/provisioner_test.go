@@ -104,7 +104,38 @@ func TestProvisionerPrepare_Config(t *testing.T) {
 	if p.config.ElevatedPassword != "mypassword" {
 		t.Fatalf("Expected 'mypassword' for key `elevated_password`: %s", p.config.ElevatedPassword)
 	}
+}
 
+func TestProvisionerPrepare_DebugMode(t *testing.T) {
+	config := testConfig()
+	config["debug_mode"] = 1
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+	if p.config.ExecuteCommand != command {
+		t.Fatalf(fmt.Sprintf(`Expected command should be '%s' but got '%s'`, command, p.config.ExecuteCommand))
+	}
+}
+
+func TestProvisionerPrepare_InvalidDebugMode(t *testing.T) {
+	config := testConfig()
+	config["debug_mode"] = -1
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+
+	message := "invalid Trace level for `debug_mode`; valid values are 0, 1, and 2"
+	if !strings.Contains(err.Error(), message) {
+		t.Fatalf("expected Prepare() error %q to contain %q", err.Error(), message)
+	}
 }
 
 func TestProvisionerPrepare_InvalidKey(t *testing.T) {
