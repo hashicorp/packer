@@ -313,7 +313,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 // Parameters that are only known at runtime after querying Azure.
 func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmLocation, b.config.Location)
-	stateBag.Put(constants.ArmManagedImageLocation, b.config.Location)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {

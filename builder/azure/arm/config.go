@@ -235,7 +235,6 @@ type Config struct {
 	// disk(s) is created with the same prefix as this value before the VM is
 	// captured.
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
-	manageImageLocation                string
 	// Store the image in zone-resilient storage. You need to create it in a
 	// region that supports [availability
 	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
