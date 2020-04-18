@@ -72,6 +72,9 @@ type InstanceConfig struct {
 	DisableDefaultServiceAccount bool
 	DiskSizeGb                   int64
 	DiskType                     string
+	EnableSecureBoot             bool
+	EnableVtpm                   bool
+	EnableIntegrityMonitoring    bool
 	Image                        *Image
 	Labels                       map[string]string
 	MachineType                  string

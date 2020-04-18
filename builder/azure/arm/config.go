@@ -56,6 +56,7 @@ const (
 	// This is not an exhaustive match, but it should be extremely close.
 	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,89}$"
 	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+	validResourceNamePrefix  = "^[^_\\W][\\w-._)]{0,10}$"
 )
 
 var (
@@ -65,6 +66,7 @@ var (
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 	reSnapshotName         = regexp.MustCompile(`^[A-Za-z0-9_]{1,79}$`)
 	reSnapshotPrefix       = regexp.MustCompile(`^[A-Za-z0-9_]{1,59}$`)
+	reResourceNamePrefix   = regexp.MustCompile(validResourceNamePrefix)
 )
 
 type PlanInformation struct {
@@ -233,7 +235,6 @@ type Config struct {
 	// disk(s) is created with the same prefix as this value before the VM is
 	// captured.
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
-	manageImageLocation                string
 	// Store the image in zone-resilient storage. You need to create it in a
 	// region that supports [availability
 	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
@@ -382,11 +383,18 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
+
 	// Specify storage to store Boot Diagnostics -- Enabling this option
 	// will create 2 Files in the specified storage account. (serial console log & screehshot file)
 	// once the build is completed, it has to be removed manually.
 	// see [here](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/boot-diagnostics) for more info
 	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
+
+	// specify custom azure resource names during build limited to max 10 charcters
+	// this will set the prefix for the resources. The actuall resource names will be
+	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
+	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
+
 
 	// Runtime Values
 	UserName               string `mapstructure-to-hcl2:",skip"`
@@ -635,7 +643,7 @@ func setWinRMCertificate(c *Config) error {
 }
 
 func setRuntimeValues(c *Config) {
-	var tempName = NewTempName()
+	var tempName = NewTempName(c.CustomResourcePrefix)
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
@@ -942,6 +950,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.CustomResourcePrefix != "" {
+		if ok, err := assertResourceNamePrefix(c.CustomResourcePrefix, "custom_resource_build_prefix"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}
@@ -1033,6 +1047,13 @@ func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
 func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
 	if !isValidAzureName(reSnapshotPrefix, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
+	}
+	return true, nil
+}
+
+func assertResourceNamePrefix(name, setting string) (bool, error) {
+	if !isValidAzureName(reResourceNamePrefix, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 10 characters", setting)
 	}
 	return true, nil
 }

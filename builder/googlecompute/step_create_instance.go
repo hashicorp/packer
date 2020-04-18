@@ -107,6 +107,13 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
+	if c.EnableSecureBoot && !sourceImage.IsSecureBootCompatible() {
+		err := fmt.Errorf("Image: %s is not secure boot compatible. Please set 'enable_secure_boot' to false or choose another source image.", sourceImage.Name)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	ui.Say(fmt.Sprintf("Using image: %s", sourceImage.Name))
 
 	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
@@ -133,6 +140,9 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		DisableDefaultServiceAccount: c.DisableDefaultServiceAccount,
 		DiskSizeGb:                   c.DiskSizeGb,
 		DiskType:                     c.DiskType,
+		EnableSecureBoot:             c.EnableSecureBoot,
+		EnableVtpm:                   c.EnableVtpm,
+		EnableIntegrityMonitoring:    c.EnableIntegrityMonitoring,
 		Image:                        sourceImage,
 		Labels:                       c.Labels,
 		MachineType:                  c.MachineType,

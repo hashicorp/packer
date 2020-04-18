@@ -131,15 +131,15 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 		miSigReplicaCount = constants.SharedImageGalleryImageVersionDefaultMaxReplicaCount
 	}
 
-	s.say(fmt.Sprintf(" -> MDI ID used for SIG publish		: '%s'", mdiID))
-	s.say(fmt.Sprintf(" -> SIG publish resource group		: '%s'", miSigPubRg))
-	s.say(fmt.Sprintf(" -> SIG gallery name				: '%s'", miSIGalleryName))
-	s.say(fmt.Sprintf(" -> SIG image name				: '%s'", miSGImageName))
-	s.say(fmt.Sprintf(" -> SIG image version			: '%s'", miSGImageVersion))
-	s.say(fmt.Sprintf(" -> SIG replication regions			: '%v'", miSigReplicationRegions))
-	s.say(fmt.Sprintf(" -> SIG image version endoflife date		: '%s'", miSGImageVersionEndOfLifeDate))
-	s.say(fmt.Sprintf(" -> SIG image version exclude from latest	: '%t'", miSGImageVersionExcludeFromLatest))
-	s.say(fmt.Sprintf(" -> SIG replica count [1, 10] 		: '%d'", miSigReplicaCount))
+	s.say(fmt.Sprintf(" -> MDI ID used for SIG publish           : '%s'", mdiID))
+	s.say(fmt.Sprintf(" -> SIG publish resource group            : '%s'", miSigPubRg))
+	s.say(fmt.Sprintf(" -> SIG gallery name                      : '%s'", miSIGalleryName))
+	s.say(fmt.Sprintf(" -> SIG image name                        : '%s'", miSGImageName))
+	s.say(fmt.Sprintf(" -> SIG image version                     : '%s'", miSGImageVersion))
+	s.say(fmt.Sprintf(" -> SIG replication regions               : '%v'", miSigReplicationRegions))
+	s.say(fmt.Sprintf(" -> SIG image version endoflife date      : '%s'", miSGImageVersionEndOfLifeDate))
+	s.say(fmt.Sprintf(" -> SIG image version exclude from latest : '%t'", miSGImageVersionExcludeFromLatest))
+	s.say(fmt.Sprintf(" -> SIG replica count [1, 10]             : '%d'", miSigReplicaCount))
 
 	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, miSGImageVersionEndOfLifeDate, miSGImageVersionExcludeFromLatest, miSigReplicaCount, location, tags)
 

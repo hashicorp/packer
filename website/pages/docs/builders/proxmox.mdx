@@ -193,6 +193,11 @@ builder.
   `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
   Defaults to `lsi`.
 
+- `cloud_init` (bool) - If true, add a Cloud-Init CDROM drive after the virtual machine has been converted to a template.
+
+- `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
+    to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
+
 ## Example: Fedora with kickstart
 
 Here is a basic example creating a Fedora 29 server image with a Kickstart
