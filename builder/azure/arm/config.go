@@ -383,7 +383,6 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
-
 	// Specify storage to store Boot Diagnostics -- Enabling this option
 	// will create 2 Files in the specified storage account. (serial console log & screehshot file)
 	// once the build is completed, it has to be removed manually.
@@ -394,7 +393,6 @@ type Config struct {
 	// this will set the prefix for the resources. The actuall resource names will be
 	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
 	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
-
 
 	// Runtime Values
 	UserName               string `mapstructure-to-hcl2:",skip"`
