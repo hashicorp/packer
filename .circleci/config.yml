@@ -197,26 +197,38 @@ workflows:
   build_packer_binaries:
     jobs:
       - build_linux:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - build_darwin:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - build_windows:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - build_freebsd:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - build_openbsd:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - build_solaris:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
