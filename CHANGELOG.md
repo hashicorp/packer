@@ -16,6 +16,8 @@
 * provisioner/powershell: Add cleanup step to remove temporarily created
     scripts; cleanup can be skipped by setting the `skip_clean` option
     [GH-8908]
+* builder/yandex: Allow set `target_image_folder_id ` where save built 
+    image in [GH-9079]
 
 ### Bug Fixes:
 * builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
