@@ -118,6 +118,7 @@ type FlatConfig struct {
 	WinRMUseNTLM              *bool                    `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	Command                   *string                  `mapstructure:"shutdown_command" cty:"shutdown_command"`
 	Timeout                   *string                  `mapstructure:"shutdown_timeout" cty:"shutdown_timeout"`
+	DisableShutdown           *bool                    `mapstructure:"disable_shutdown" cty:"disable_shutdown"`
 	CreateSnapshot            *bool                    `mapstructure:"create_snapshot" cty:"create_snapshot"`
 	ConvertToTemplate         *bool                    `mapstructure:"convert_to_template" cty:"convert_to_template"`
 	Export                    *common.FlatExportConfig `mapstructure:"export" cty:"export"`
@@ -243,6 +244,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"shutdown_command":             &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
+		"disable_shutdown":             &hcldec.AttrSpec{Name: "disable_shutdown", Type: cty.Bool, Required: false},
 		"create_snapshot":              &hcldec.AttrSpec{Name: "create_snapshot", Type: cty.Bool, Required: false},
 		"convert_to_template":          &hcldec.AttrSpec{Name: "convert_to_template", Type: cty.Bool, Required: false},
 		"export":                       &hcldec.BlockSpec{TypeName: "export", Nested: hcldec.ObjectSpec((*common.FlatExportConfig)(nil).HCL2Spec())},
