@@ -383,6 +383,12 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
+	// Specify storage to store Boot Diagnostics -- Enabling this option
+	// will create 2 Files in the specified storage account. (serial console log & screehshot file)
+	// once the build is completed, it has to be removed manually.
+	// see [here](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/boot-diagnostics) for more info
+	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
+
 	// specify custom azure resource names during build limited to max 10 charcters
 	// this will set the prefix for the resources. The actuall resource names will be
 	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
