@@ -36,8 +36,8 @@ type Config struct {
 	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// The folder ID that will be used to launch instances and store images.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
-	// To use a different folder for looking up the source image or saving the target image to.
-	// Check options 'source_image_folder_id' and 'target_image_folder_id'.
+	// To use a different folder for looking up the source image or saving the target image to
+	// check options 'source_image_folder_id' and 'target_image_folder_id'.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Path to file with Service Account key in json format. This
 	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
