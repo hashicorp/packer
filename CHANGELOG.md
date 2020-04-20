@@ -1,30 +1,52 @@
 ## 1.5.6 (Upcoming)
 
-**New Builder** azure-dtl allows creation of devtestlabs images in Azure. [GH-8987]
+### BACKWARDS INCOMPATIBILITIES:
+* core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
+    For example `tags = {}` instead of `tags {}` [GH-9035]
+
+### FEATURES:
+* **New Builder** azure-dtl allows creation of devtestlabs images in Azure
+    [GH-8987]
+
+* **New Core Feature** provisioners now support a `max_retries` option that can
+    be used for retrying a provisioner on error [GH-9061]
 
 ### IMPROVEMENTS:
+* builder/azure-arm: Add `boot_diag_storage_account` option for enabling boot
+    diagnostics on a virtual machine [GH-9053]
+* builder/azure-arm: Add support for setting custom resource names [GH-9028]
+* builder/azure-arm: Data disk names are now randomly generated [GH-8986]
 * builder/azure: Add shared image destination for azure-chroot [GH-9021]
-* builder/azure: Data disk names are now randomly generated [GH-8986]
+* builder/google: Add support for custom shielded images [GH-8970]
 * builder/google: Allow `source_image_project_id` to be a list of several
     projects to search. [GH-8679]
 * builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
     [GH-8893]
+* builder/proxmox: Add ability to add a cloud-init drive [GH-9045]
+* builder/vsphere: Add support for EFI Secure Boot [GH-9018]
+* builder/yandex: Add `target_image_folder_id ` option for changing the folder
+    where a built image will be saved to [GH-9080]
 * core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
     builder provisioners and post-processors [GH-8956]
 * provisioner/ansible: Add option to not use localhost proxy adapter. Removes
     need for ansible connection_plugin when using WinRM. [GH-8625]
+* provisioner/powershell: Add `debug_mode` option to help with debugging
+    generated scripts [GH-8996]
 * provisioner/powershell: Add cleanup step to remove temporarily created
     scripts; cleanup can be skipped by setting the `skip_clean` option
     [GH-8908]
-* builder/yandex: Allow set `target_image_folder_id ` where save built 
-    image in [GH-9079]
 
-### Bug Fixes:
+### BUG FIXES:
 * builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
     [GH-8945]
+* builder/azure-arm: Fix issue where managed image builds were using a
+    different `location` then what was specified in the build configuration
+    [GH-9068]
 * builder/azure: Allow Managed Data Disks to be used with Azure Shared Image
     Gallery  [GH-8912]
 * builder/qemu: Remove `net_device` pre-validation [GH-8979]
+* builder/tencentcloud: Update builder to handle the
+    InstanceOperationInProgress error [GH-9069]
 * builder/vsphere-iso: disk_size is no longer required if storage is defined
     [GH-8975]
 * core: Fix crash in wrapperreadline helper when calling `os.NewFile` on
@@ -349,7 +371,7 @@ making changes for HCL2.
 ## 1.4.4 (October 1, 2019)
 
 ### IMPROVEMENTS:
-** new core feature** Error cleanup provisioner [GH-8155]
+**New Core Feature** Error cleanup provisioner [GH-8155]
 * builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
 * builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
 * builder/azure: Refactor client config [GH-8121]
