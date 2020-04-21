@@ -1,8 +1,9 @@
 <!-- Code generated from the comments of the Config struct in builder/azure/arm/config.go; DO NOT EDIT MANUALLY -->
 
--   `capture_name_prefix` (string) - Capture
+-   `capture_name_prefix` (string) - VHD prefix.
     
--   `capture_container_name` (string) - Capture Container Name
+-   `capture_container_name` (string) - Destination container name.
+    
 -   `shared_image_gallery` (SharedImageGallery) - Use a [Shared Gallery
     image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
     as the source for this build. *VHD targets are incompatible with this
@@ -59,7 +60,8 @@
     CLI example
     `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
     
--   `location` (string) - Location
+-   `location` (string) - Azure datacenter in which your VM will build.
+    
 -   `vm_size` (string) - Size of the VM used for building. This can be changed when you deploy a
     VM from your VHD. See
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
@@ -184,10 +186,12 @@
     tags to the image to ensure this information is not lost. The following
     tags are added.
     
+    ```
     1.  PlanName
     2.  PlanProduct
     3.  PlanPublisher
     4.  PlanPromotionCode
+    ```
     
 -   `polling_duration_timeout` (duration string | ex: "1h5m2s") - The default PollingDuration for azure is 15mins, this property will override
     that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
