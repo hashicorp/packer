@@ -1,7 +1,9 @@
 package ovf
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -109,4 +111,48 @@ func TestNewConfig_shutdown_timeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("bad: %s", err)
 	}
+}
+
+// TestChecksumFileNameMixedCaseBug reproduces Github issue #9049:
+//	https://github.com/hashicorp/packer/issues/9049
+func TestChecksumFileNameMixedCaseBug(t *testing.T) {
+
+	tf, err := ioutil.TempFile("", "Packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer tf.Close()
+
+	// Calculate sum of the tempfile and store in checksum file
+	hash := sha256.New()
+	if _, err := io.Copy(hash, tf); err != nil {
+		t.Fatal(err)
+	}
+	sum := hash.Sum(nil)
+	checksumFilepath := fmt.Sprintf("%s.sha256", tf.Name())
+	err = ioutil.WriteFile(checksumFilepath, sum, 0644)
+	if err != nil {
+		t.Errorf("Failed to write checksum file to: %s", checksumFilepath)
+		t.Fail()
+	}
+
+	cfg := testConfig(t)
+	cfg["source_path"] = tf.Name()
+	cfg["checksum_type"] = "file"
+	cfg["checksum"] = checksumFilepath
+	cfg["type"] = "virtualbox-ovf"
+	cfg["guest_additions_mode"] = "disable"
+	cfg["headless"] = false
+
+	var c Config
+	warns, err := c.Prepare(cfg)
+	if err != nil {
+		t.Errorf("config failed to Prepare, %s", err.Error())
+		t.Fail()
+	}
+
+	if len(warns) != 0 {
+		t.Errorf("Encountered warnings during config preparation: %s", warns)
+	}
+
 }
