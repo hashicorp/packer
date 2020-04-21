@@ -103,8 +103,9 @@ type Config struct {
 	// Authentication via OAUTH
 	ClientConfig client.Config `mapstructure:",squash"`
 
-	// Capture
-	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
+	// VHD prefix.
+	CaptureNamePrefix string `mapstructure:"capture_name_prefix"`
+	// Destination container name.
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 	// Use a [Shared Gallery
 	// image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
@@ -201,6 +202,7 @@ type Config struct {
 	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"true"`
 	customManagedImageID                string
 
+	// Azure datacenter in which your VM will build.
 	Location string `mapstructure:"location"`
 	// Size of the VM used for building. This can be changed when you deploy a
 	// VM from your VHD. See
@@ -330,10 +332,12 @@ type Config struct {
 	// tags to the image to ensure this information is not lost. The following
 	// tags are added.
 	//
+	// ```
 	// 1.  PlanName
 	// 2.  PlanProduct
 	// 3.  PlanPublisher
 	// 4.  PlanPromotionCode
+	// ```
 	//
 	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
 	// The default PollingDuration for azure is 15mins, this property will override

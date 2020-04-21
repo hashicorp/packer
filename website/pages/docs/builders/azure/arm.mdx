@@ -9,7 +9,7 @@ sidebar_title: ARM
 
 Type: `azure-arm`
 
-Packer supports building VHDs and Managed Images in [Azure Resource
+Packer supports building Virtual Hard Disks (VHDs) and Managed Images in [Azure Resource
 Manager](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/).
 Azure provides new users a [`$200` credit for the first 30
 days](https://azure.microsoft.com/en-us/free/); after which you will incur
@@ -68,7 +68,7 @@ you should specify `subscription_id`, `client_id` and one of `client_secret`,
 
 ### Azure ARM builder specific options
 
-The Azure builder can create either a VHD, or a managed image. If you are
+The Azure builder can create either a VHD or a managed image. If you are
 creating a VHD, you **must** start with a VHD. Likewise, if you want to create
 a managed image you **must** start with a managed image.
 
@@ -110,15 +110,15 @@ When creating a managed image the following additional options are required:
 
 #### Shared Image Gallery
 
-Managed images can optionally be published to [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
-as Shared Gallery Image version. Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
+Managed images can optionally be published to a [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
+as a Shared Gallery Image version. Publishing to a Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
 a Shared Image Gallery**.
 
 When publishing to a Shared Image Gallery the following options are required.
 
-- `shared_image_gallery_destination` (object) The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
+- `shared_image_gallery_destination` (object) - The name of the Shared Image Gallery under which the managed image will be published as an image version.
 
-Following is an example.
+The following is an example.
 
     "shared_image_gallery_destination": {
         "resource_group": "ResourceGroup",
@@ -129,6 +129,18 @@ Following is an example.
     }
     "managed_image_name": "TargetImageName",
     "managed_image_resource_group_name": "TargetResourceGroup"
+
+The `shared_image_gallery_destination` object expects the following attributes.
+
+- `resource_group` (string) - The resource group where the Shared Image Gallery is located.
+
+- `gallery_name` (string) - The name of the Shared Image Gallery where the managed image will be published.
+
+- `image_name` (string) - The name of the image definition within the Shared Image Gallery where the managed image will be published. This image definition must already exist.
+
+- `image_version` (string) - The version of the managed image to publish within the Shared Image Gallery.
+
+- `replication_regions` ([]string) - The regions where the published Share Image Gallery managed image should be replicated to.
 
 #### Resource Group Usage
 
