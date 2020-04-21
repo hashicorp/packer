@@ -188,6 +188,31 @@ The full list of available environment variables is:
 and detailed documentation for usage of each of those variables can be found
 [here](https://www.vaultproject.io/docs/commands/#environment-variables).
 
+## AWS Secrets Manager Variables
+
+Secrets can be read from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)
+and used within your template as user variables. the `aws_secretsmanager` function is
+available _only_ within the default value of a user variable, allowing you to default
+a user variable to an AWS Secrets Manager secret.
+
+```json
+{
+  "variables": {
+    "password": "{{ aws_secretsmanager `sample/app/password` }}"
+  }
+}
+```
+
+This will default `password` to the secret value stored at AWS Secrets Manager.
+
+In order to use this function you have to configure valid AWS credentials using
+one of the following methods:
+
+* [Environment Variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+* [CLI Configuration Files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+* [Container Credentials](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
+* [Instance Profile Credentials](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+
 ## Using array values
 
 Some templates call for array values. You can use template variables for these,
