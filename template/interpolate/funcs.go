@@ -338,11 +338,11 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 		// roles.
 		client, err := awssmapi.New()
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error getting AWS Secrets Manager client: %s", err))
+			return "", fmt.Errorf("Error getting AWS Secrets Manager client: %s", err)
 		}
 		secret, err := client.GetSecret(name)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error getting secret: %s", err))
+			return "", fmt.Errorf("Error getting secret: %s", err)
 		}
 		return secret, nil
 	}
