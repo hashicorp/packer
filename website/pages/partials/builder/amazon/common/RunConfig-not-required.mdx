@@ -114,7 +114,7 @@
     engine](/docs/templates/engine), see [Build template
     data](#build-template-data) for more information.
     
--   `run_tag` (hcl2template.KeyValues) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
+-   `run_tag` ([]{key string, value string}) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
     block containing a `key` and a `value` field. In HCL2 mode the
     [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
     will allow you to create those programatically.
@@ -206,7 +206,7 @@
 -   `spot_tags` (map[string]string) - Requires spot_price to be set. Key/value pair tags to apply tags to the
     spot request that is issued.
     
--   `spot_tag` (hcl2template.KeyValues) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
+-   `spot_tag` ([]{key string, value string}) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
     containing a `key` and a `value` field. In HCL2 mode the
     [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
     will allow you to create those programatically.

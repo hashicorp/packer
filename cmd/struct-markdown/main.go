@@ -119,6 +119,8 @@ func main() {
 				fieldType = `boolean`
 			case "hcl2template.NameValues":
 				fieldType = `[]{name string, value string}`
+			case "hcl2template.KeyValues":
+				fieldType = `[]{key string, value string}`
 			}
 
 			field := Field{
