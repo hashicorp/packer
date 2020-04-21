@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	RunSourceVmBSUExpectedRootDevice = "ebs"
+	RunSourceVmBSUExpectedRootDevice = "bsu"
 )
 
 type StepRunSourceVm struct {
