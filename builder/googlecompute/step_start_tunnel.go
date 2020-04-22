@@ -100,7 +100,7 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 	s.IAPConf.IAPHashBang = fmt.Sprintf("#!%s\n", s.IAPConf.IAPHashBang)
 	log.Printf("[INFO] (google): Prepending inline gcloud setup script with %s",
 		s.IAPConf.IAPHashBang)
-	err = writer.WriteString(s.IAPConf.IAPHashBang)
+	_, err = writer.WriteString(s.IAPConf.IAPHashBang)
 	if err != nil {
 		return "", fmt.Errorf("Error preparing inline hashbang: %s", err)
 	}

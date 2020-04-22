@@ -64,7 +64,7 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 func (t *TunnelDriverLinux) StopTunnel() {
 	if t.cmd != nil && t.cmd.Process != nil {
 		log.Printf("Cleaning up the IAP tunnel...")
-		// Why not just s.cmd.Process.Kill()?  I'm glad you asked. The gcloud
+		// Why not just cmd.Process.Kill()?  I'm glad you asked. The gcloud
 		// call spawns a python subprocess that listens on the port, and you
 		// need to use the process _group_ id to kill this process and its
 		// daemon child. We create the group ID with the syscall.SysProcAttr
