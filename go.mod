@@ -127,7 +127,7 @@ require (
 	github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/oracle/oci-go-sdk v1.8.0
+	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-go v0.0.1
 	github.com/overdrive3000/secretsmanager v0.0.0-20200421092817-bcdff577c37a
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a

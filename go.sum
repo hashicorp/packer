@@ -420,8 +420,8 @@ github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH
 github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b h1:LGItPaClbzopugAomw5VFKnG3h1dUr9QW5KOU+m8gu0=
 github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
-github.com/oracle/oci-go-sdk v1.8.0 h1:4SO45bKV0I3/Mn1os3ANDZmV0eSE5z5CLdSUIkxtyzs=
-github.com/oracle/oci-go-sdk v1.8.0/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
+github.com/oracle/oci-go-sdk v18.0.0+incompatible h1:FLV4KixsVfF3rwyVTMI6Ryp/Q+OSb9sR5TawbfjFLN4=
+github.com/oracle/oci-go-sdk v18.0.0+incompatible/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
 github.com/outscale/osc-go v0.0.1 h1:hvBtORyu7sWSKW1norGlfIP8C7c2aegI2Vkq75SRPCE=
 github.com/outscale/osc-go v0.0.1/go.mod h1:hJLmXzqU/t07qQYh90I0TqZzu9s85Zs6FMrxk3ukiFM=
 github.com/overdrive3000/secretsmanager v0.0.0-20200421092817-bcdff577c37a h1:75mTB6HzCWbVMbrOoC3Uul0ISN4hM2q3l8dyipdJHxM=

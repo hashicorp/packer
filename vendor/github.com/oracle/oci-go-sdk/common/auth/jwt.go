@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 package auth
 
@@ -7,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/oracle/oci-go-sdk/common"
 	"strings"
 	"time"
 )
@@ -17,9 +19,16 @@ type jwtToken struct {
 	payload map[string]interface{}
 }
 
+const bufferTimeBeforeTokenExpiration = 5 * time.Minute
+
 func (t *jwtToken) expired() bool {
 	exp := int64(t.payload["exp"].(float64))
-	return exp <= time.Now().Unix()
+	expTime := time.Unix(exp, 0)
+	expired := exp <= time.Now().Unix()+int64(bufferTimeBeforeTokenExpiration.Seconds())
+	if expired {
+		common.Debugf("Token expires at:  %v, currently expired due to bufferTime: %v", expTime.Format("15:04:05.000"), expired)
+	}
+	return expired
 }
 
 func parseJwt(tokenString string) (*jwtToken, error) {

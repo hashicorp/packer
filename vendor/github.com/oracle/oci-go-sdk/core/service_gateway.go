@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -12,16 +17,18 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ServiceGateway Represents a router that connects the edge of a VCN with public Oracle Cloud Infrastructure
-// services such as Object Storage. Traffic leaving the VCN and destined for a supported public
-// service (see ListServices) is routed through the
-// service gateway and does not traverse the internet. The instances in the VCN do not need to
-// have public IP addresses nor be in a public subnet. The VCN does not need an internet gateway
+// ServiceGateway Represents a router that lets your VCN privately access specific Oracle services such as Object
+// Storage without exposing the VCN to the public internet. Traffic leaving the VCN and destined
+// for a supported Oracle service (see ListServices) is
+// routed through the service gateway and does not traverse the internet. The instances in the VCN
+// do not need to have public IP addresses nor be in a public subnet. The VCN does not need an internet gateway
 // for this traffic. For more information, see
-// Access to Object Storage: Service Gateway (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Tasks/servicegateway.htm).
+// Access to Oracle Services: Service Gateway (https://docs.cloud.oracle.com/Content/Network/Tasks/servicegateway.htm).
 // To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized,
 // talk to an administrator. If you're an administrator who needs to write policies to give users access, see
-// Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
+// Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// **Warning:** Oracle recommends that you avoid using any confidential information when you
+// supply string values using the API.
 type ServiceGateway struct {
 
 	// Whether the service gateway blocks all traffic through it. The default is `false`. When
@@ -29,36 +36,44 @@ type ServiceGateway struct {
 	// Example: `true`
 	BlockTraffic *bool `mandatory:"true" json:"blockTraffic"`
 
-	// The OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the
 	// service gateway.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm) of the service gateway.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the service gateway.
 	Id *string `mandatory:"true" json:"id"`
 
 	// The service gateway's current state.
 	LifecycleState ServiceGatewayLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// List of the services enabled on this service gateway. The list can be empty.
-	// You can enable a particular service by using
-	// AttachServiceId.
+	// List of the Service objects enabled for this service gateway.
+	// The list can be empty. You can enable a particular `Service` by using
+	// AttachServiceId or
+	// UpdateServiceGateway.
 	Services []ServiceIdResponseDetails `mandatory:"true" json:"services"`
 
-	// The OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm) of the VCN the service gateway
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VCN the service gateway
 	// belongs to.
 	VcnId *string `mandatory:"true" json:"vcnId"`
 
-	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
-	// Example: `{"foo-namespace": {"bar-key": "foo-value"}}`
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-	// Example: `{"bar-key": "value"}`
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// The OCID of the route table the service gateway is using.
+	// For information about why you would associate a route table with a service gateway, see
+	// Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/Content/Network/Tasks/transitroutingoracleservices.htm).
+	RouteTableId *string `mandatory:"false" json:"routeTableId"`
 
 	// The date and time the service gateway was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
@@ -72,7 +87,7 @@ func (m ServiceGateway) String() string {
 // ServiceGatewayLifecycleStateEnum Enum with underlying type: string
 type ServiceGatewayLifecycleStateEnum string
 
-// Set of constants representing the allowable values for ServiceGatewayLifecycleState
+// Set of constants representing the allowable values for ServiceGatewayLifecycleStateEnum
 const (
 	ServiceGatewayLifecycleStateProvisioning ServiceGatewayLifecycleStateEnum = "PROVISIONING"
 	ServiceGatewayLifecycleStateAvailable    ServiceGatewayLifecycleStateEnum = "AVAILABLE"
@@ -87,7 +102,7 @@ var mappingServiceGatewayLifecycleState = map[string]ServiceGatewayLifecycleStat
 	"TERMINATED":   ServiceGatewayLifecycleStateTerminated,
 }
 
-// GetServiceGatewayLifecycleStateEnumValues Enumerates the set of values for ServiceGatewayLifecycleState
+// GetServiceGatewayLifecycleStateEnumValues Enumerates the set of values for ServiceGatewayLifecycleStateEnum
 func GetServiceGatewayLifecycleStateEnumValues() []ServiceGatewayLifecycleStateEnum {
 	values := make([]ServiceGatewayLifecycleStateEnum, 0)
 	for _, v := range mappingServiceGatewayLifecycleState {

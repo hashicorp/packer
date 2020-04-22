@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 package core
@@ -11,27 +12,36 @@ import (
 // ListPublicIpsRequest wrapper for the ListPublicIps operation
 type ListPublicIpsRequest struct {
 
-	// Whether the public IP is regional or specific to a particular Availability Domain.
-	// * `REGION`: The public IP exists within a region and can be assigned to a private IP
-	// in any Availability Domain in the region. Reserved public IPs have `scope` = `REGION`.
-	// * `AVAILABILITY_DOMAIN`: The public IP exists within the Availability Domain of the private IP
+	// Whether the public IP is regional or specific to a particular availability domain.
+	// * `REGION`: The public IP exists within a region and is assigned to a regional entity
+	// (such as a NatGateway), or can be assigned to a private IP
+	// in any availability domain in the region. Reserved public IPs have `scope` = `REGION`, as do
+	// ephemeral public IPs assigned to a regional entity.
+	// * `AVAILABILITY_DOMAIN`: The public IP exists within the availability domain of the entity
 	// it's assigned to, which is specified by the `availabilityDomain` property of the public IP object.
-	// Ephemeral public IPs have `scope` = `AVAILABILITY_DOMAIN`.
+	// Ephemeral public IPs that are assigned to private IPs have `scope` = `AVAILABILITY_DOMAIN`.
 	Scope ListPublicIpsScopeEnum `mandatory:"true" contributesTo:"query" name:"scope" omitEmpty:"true"`
 
-	// The OCID of the compartment.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
-	// The maximum number of items to return in a paginated "List" call.
-	// Example: `500`
+	// For list pagination. The maximum number of results per page, or items to return in a paginated
+	// "List" call. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// Example: `50`
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
-	// The value of the `opc-next-page` response header from the previous "List" call.
+	// For list pagination. The value of the `opc-next-page` response header from the previous "List"
+	// call. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
-	// The name of the Availability Domain.
+	// The name of the availability domain.
 	// Example: `Uocm:PHX-AD-1`
 	AvailabilityDomain *string `mandatory:"false" contributesTo:"query" name:"availabilityDomain"`
+
+	// A filter to return only public IPs that match given lifetime.
+	Lifetime ListPublicIpsLifetimeEnum `mandatory:"false" contributesTo:"query" name:"lifetime" omitEmpty:"true"`
 
 	// Unique Oracle-assigned identifier for the request.
 	// If you need to contact Oracle about a particular request, please provide the request ID.
@@ -65,13 +75,13 @@ type ListPublicIpsResponse struct {
 	// A list of []PublicIp instances
 	Items []PublicIp `presentIn:"body"`
 
-	// For pagination of a list of items. When paging through a list, if this header appears in the response,
-	// then a partial list might have been returned. Include this value as the `page` parameter for the
-	// subsequent GET request to get the next batch of items.
+	// For list pagination. When this header appears in the response, additional pages
+	// of results remain. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 
-	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
-	// a particular request, please provide the request ID.
+	// Unique Oracle-assigned identifier for the request. If you need to contact
+	// Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 }
 
@@ -87,7 +97,7 @@ func (response ListPublicIpsResponse) HTTPResponse() *http.Response {
 // ListPublicIpsScopeEnum Enum with underlying type: string
 type ListPublicIpsScopeEnum string
 
-// Set of constants representing the allowable values for ListPublicIpsScope
+// Set of constants representing the allowable values for ListPublicIpsScopeEnum
 const (
 	ListPublicIpsScopeRegion             ListPublicIpsScopeEnum = "REGION"
 	ListPublicIpsScopeAvailabilityDomain ListPublicIpsScopeEnum = "AVAILABILITY_DOMAIN"
@@ -98,10 +108,33 @@ var mappingListPublicIpsScope = map[string]ListPublicIpsScopeEnum{
 	"AVAILABILITY_DOMAIN": ListPublicIpsScopeAvailabilityDomain,
 }
 
-// GetListPublicIpsScopeEnumValues Enumerates the set of values for ListPublicIpsScope
+// GetListPublicIpsScopeEnumValues Enumerates the set of values for ListPublicIpsScopeEnum
 func GetListPublicIpsScopeEnumValues() []ListPublicIpsScopeEnum {
 	values := make([]ListPublicIpsScopeEnum, 0)
 	for _, v := range mappingListPublicIpsScope {
+		values = append(values, v)
+	}
+	return values
+}
+
+// ListPublicIpsLifetimeEnum Enum with underlying type: string
+type ListPublicIpsLifetimeEnum string
+
+// Set of constants representing the allowable values for ListPublicIpsLifetimeEnum
+const (
+	ListPublicIpsLifetimeEphemeral ListPublicIpsLifetimeEnum = "EPHEMERAL"
+	ListPublicIpsLifetimeReserved  ListPublicIpsLifetimeEnum = "RESERVED"
+)
+
+var mappingListPublicIpsLifetime = map[string]ListPublicIpsLifetimeEnum{
+	"EPHEMERAL": ListPublicIpsLifetimeEphemeral,
+	"RESERVED":  ListPublicIpsLifetimeReserved,
+}
+
+// GetListPublicIpsLifetimeEnumValues Enumerates the set of values for ListPublicIpsLifetimeEnum
+func GetListPublicIpsLifetimeEnumValues() []ListPublicIpsLifetimeEnum {
+	values := make([]ListPublicIpsLifetimeEnum, 0)
+	for _, v := range mappingListPublicIpsLifetime {
 		values = append(values, v)
 	}
 	return values

@@ -480,7 +480,7 @@ github.com/moul/gotty-client
 github.com/nu7hatch/gouuid
 # github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 github.com/olekukonko/tablewriter
-# github.com/oracle/oci-go-sdk v1.8.0
+# github.com/oracle/oci-go-sdk v18.0.0+incompatible
 github.com/oracle/oci-go-sdk/common
 github.com/oracle/oci-go-sdk/common/auth
 github.com/oracle/oci-go-sdk/core
