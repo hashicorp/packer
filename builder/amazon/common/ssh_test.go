@@ -13,6 +13,7 @@ const (
 	publicIP        = "192.168.1.1"
 	privateDNS      = "private.dns.test"
 	publicDNS       = "public.dns.test"
+	localhost       = "127.0.0.1"
 	sshHostTemplate = "custom.host.value"
 )
 
@@ -32,11 +33,13 @@ func TestSSHHost(t *testing.T) {
 	}{
 		{1, "", "", true, publicDNS, ""},
 		{1, "", "private_ip", true, privateIP, ""},
+		{1, "", "session_manager", true, localhost, ""},
 		{1, "vpc-id", "", true, publicIP, ""},
 		{1, "vpc-id", "private_ip", true, privateIP, ""},
 		{1, "vpc-id", "private_dns", true, privateDNS, ""},
 		{1, "vpc-id", "public_dns", true, publicDNS, ""},
 		{1, "vpc-id", "public_ip", true, publicIP, ""},
+		{1, "vpc-id", "session_manager", true, localhost, ""},
 		{2, "", "", true, publicDNS, ""},
 		{2, "", "private_ip", true, privateIP, ""},
 		{2, "vpc-id", "", true, publicIP, ""},

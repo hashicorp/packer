@@ -105,7 +105,7 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	// sessionDetails, region, "StartSession", profile, paramJson, endpoint
 	region := aws.StringValue(s.AWSSession.Config.Region)
 	// how to best get Profile name
-	if err := driver.StartSession(string(sessionDetails), region, "default", string(sessionParameters), ssmconn.Endpoint); err != nil {
+	if err := driver.StartSession(string(sessionDetails), region, "", string(sessionParameters), ssmconn.Endpoint); err != nil {
 		err = fmt.Errorf("error encountered in establishing a tunnel with the session-manager-plugin: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
