@@ -3,22 +3,14 @@
 package googlecompute
 
 import (
-	"bytes"
-	"context"
 	"fmt"
-	"log"
-	"os/exec"
-	"strings"
-	"syscall"
-	"time"
 )
 
 func NewTunnelDriver() TunnelDriver {
 	return &TunnelDriverWindows{}
 }
 
-type TunnelDriverLinux struct {
-	cmd *exec.Cmd
+type TunnelDriverWindows struct {
 }
 
 func (t *TunnelDriverWindows) StartTunnel(cancelCtx context.Context, tempScriptFileName string) error {
