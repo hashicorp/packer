@@ -5,15 +5,12 @@ package googlecompute
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/hashicorp/packer/common/net"
@@ -51,13 +48,17 @@ type IAPConfig struct {
 	IAPExt string `mapstructure:"iap_ext" required:"false"`
 }
 
+type TunnelDriver interface {
+	StartTunnel(context.Context, string) error
+	StopTunnel()
+}
+
 type StepStartTunnel struct {
 	IAPConf     *IAPConfig
 	CommConf    *communicator.Config
 	AccountFile string
 
-	ctxCancel context.CancelFunc
-	cmd       *exec.Cmd
+	tunnelDriver TunnelDriver
 }
 
 func (s *StepStartTunnel) ConfigureLocalHostPort(ctx context.Context) error {
@@ -179,82 +180,26 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	defer os.Remove(tempScriptFileName)
 
 	// Shell out to gcloud.
-	cancelCtx, cancel := context.WithCancel(ctx)
-	s.ctxCancel = cancel
+	s.tunnelDriver = NewTunnelDriver()
 
 	err = retry.Config{
 		Tries: 11,
 		ShouldRetry: func(err error) bool {
-			// Example of error you get as the tunnel is still getting users
-			// configured in the cloud:
-			//"ERROR: (gcloud.compute.start-iap-tunnel) Error while connecting
-			// [4033: u'not authorized']."
+			// TODO be stricter with retries.
 			return true
-			// if strings.Contains(err.Error(), "[4033: u'not authorized']") {
-			// 	log.Printf("Waiting for tunnel permissions to update. Retrying...")
-			// 	return true
-			// }
-			// return false
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
-		// set stdout and stderr so we can read what's going on.
-		var stdout, stderr bytes.Buffer
-
-		cmd := exec.CommandContext(cancelCtx, tempScriptFileName)
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-
-		err := cmd.Start()
-		log.Printf("Waiting 30s for tunnel to create...")
-		if err != nil {
-			err := fmt.Errorf("Error calling gcloud sdk to launch IAP tunnel: %s",
-				err)
-			cmd.Process.Kill()
-			return err
-		}
-		// Wait for tunnel to launch and gather response. TODO: do this without
-		// a sleep.
-		time.Sleep(30 * time.Second)
-
-		// Track stdout.
-		sout := stdout.String()
-		if sout != "" {
-			log.Printf("[start-iap-tunnel] stdout is:")
-		}
-
-		log.Printf("[start-iap-tunnel] stderr is:")
-		serr := stderr.String()
-		log.Println(serr)
-		if strings.Contains(serr, "ERROR") {
-			cmd.Process.Kill()
-			errIdx := strings.Index(serr, "ERROR:")
-			return fmt.Errorf("ERROR: %s", serr[errIdx+7:len(serr)])
-		}
-		// Store successful command on step so we can access it to cancel it
-		// later.
-		s.cmd = cmd
-		return nil
+		// tunnel launcher/destroyer has to be different on windows vs. unix.
+		err := s.tunnelDriver.StartTunnel(ctx, tempScriptFileName)
+		return err
 	})
 
 	return multistep.ActionContinue
 }
 
-// Cleanup destroys the GCE instance created during the image creation process.
+// Cleanup stops the IAP tunnel and cleans up processes.
 func (s *StepStartTunnel) Cleanup(state multistep.StateBag) {
-	if s.cmd != nil && s.cmd.Process != nil {
-		log.Printf("Cleaning up the IAP tunnel...")
-		// Why not just s.cmd.Process.Kill()?  I'm glad you asked. The gcloud
-		// call spawns a python subprocess that listens on the port, and you
-		// need to use the process _group_ id to kill this process and its
-		// daemon child. We create the group ID with the syscall.SysProcAttr
-		// call inside the retry loop above, and then store that ID on the
-		// command so we can destroy it here.
-		syscall.Kill(-s.cmd.Process.Pid, syscall.SIGKILL)
-	} else {
-		log.Printf("Couldn't find IAP tunnel process to kill. Continuing.")
-	}
+	s.tunnelDriver.StopTunnel()
 	return
 }
