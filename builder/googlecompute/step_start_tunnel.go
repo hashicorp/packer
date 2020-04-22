@@ -100,7 +100,10 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 	s.IAPConf.IAPHashBang = fmt.Sprintf("#!%s\n", s.IAPConf.IAPHashBang)
 	log.Printf("[INFO] (google): Prepending inline gcloud setup script with %s",
 		s.IAPConf.IAPHashBang)
-	writer.WriteString(s.IAPConf.IAPHashBang)
+	err = writer.WriteString(s.IAPConf.IAPHashBang)
+	if err != nil {
+		return "", fmt.Errorf("Error preparing inline hashbang: %s", err)
+	}
 
 	// authenticate to gcloud
 	_, err = writer.WriteString(
@@ -128,7 +131,10 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 	// figure out what extension the file should have, and rename it.
 	tempScriptFileName := tf.Name()
 	if s.IAPConf.IAPExt != "" {
-		os.Rename(tempScriptFileName, fmt.Sprintf("%s%s", tempScriptFileName, s.IAPConf.IAPExt))
+		err := os.Rename(tempScriptFileName, fmt.Sprintf("%s%s", tempScriptFileName, s.IAPConf.IAPExt))
+		if err != nil {
+			return "", fmt.Errorf("Error setting the correct temp file extension: %s", err)
+		}
 		tempScriptFileName = fmt.Sprintf("%s%s", tempScriptFileName, s.IAPConf.IAPExt)
 	}
 
@@ -179,7 +185,6 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 	defer os.Remove(tempScriptFileName)
 
-	// Shell out to gcloud.
 	s.tunnelDriver = NewTunnelDriver()
 
 	err = retry.Config{
@@ -201,5 +206,4 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 // Cleanup stops the IAP tunnel and cleans up processes.
 func (s *StepStartTunnel) Cleanup(state multistep.StateBag) {
 	s.tunnelDriver.StopTunnel()
-	return
 }

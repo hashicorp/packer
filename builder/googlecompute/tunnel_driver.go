@@ -36,7 +36,6 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 	if err != nil {
 		err := fmt.Errorf("Error calling gcloud sdk to launch IAP tunnel: %s",
 			err)
-		cmd.Process.Kill()
 		return err
 	}
 	// Wait for tunnel to launch and gather response. TODO: do this without
@@ -53,9 +52,8 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 	serr := stderr.String()
 	log.Println(serr)
 	if strings.Contains(serr, "ERROR") {
-		cmd.Process.Kill()
 		errIdx := strings.Index(serr, "ERROR:")
-		return fmt.Errorf("ERROR: %s", serr[errIdx+7:len(serr)])
+		return fmt.Errorf("ERROR: %s", serr[errIdx+7:])
 	}
 	// Store successful command on step so we can access it to cancel it
 	// later.
@@ -72,7 +70,10 @@ func (t *TunnelDriverLinux) StopTunnel() {
 		// daemon child. We create the group ID with the syscall.SysProcAttr
 		// call inside the retry loop above, and then store that ID on the
 		// command so we can destroy it here.
-		syscall.Kill(-t.cmd.Process.Pid, syscall.SIGKILL)
+		err := syscall.Kill(-t.cmd.Process.Pid, syscall.SIGKILL)
+		if err != nil {
+			log.Printf("Issue stopping IAP tunnel: %s", err)
+		}
 	} else {
 		log.Printf("Couldn't find IAP tunnel process to kill. Continuing.")
 	}
