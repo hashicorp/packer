@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 package common
 
@@ -51,7 +52,7 @@ type rawConfigurationProvider struct {
 	privateKeyPassphrase *string
 }
 
-// NewRawConfigurationProvider will create a rawConfigurationProvider
+// NewRawConfigurationProvider will create a ConfigurationProvider with the arguments of the function
 func NewRawConfigurationProvider(tenancy, user, region, fingerprint, privateKey string, privateKeyPassphrase *string) ConfigurationProvider {
 	return rawConfigurationProvider{tenancy, user, region, fingerprint, privateKey, privateKeyPassphrase}
 }
@@ -80,19 +81,28 @@ func (p rawConfigurationProvider) KeyID() (keyID string, err error) {
 }
 
 func (p rawConfigurationProvider) TenancyOCID() (string, error) {
+	if p.tenancy == "" {
+		return "", fmt.Errorf("tenancy OCID can not be empty")
+	}
 	return p.tenancy, nil
 }
 
 func (p rawConfigurationProvider) UserOCID() (string, error) {
+	if p.user == "" {
+		return "", fmt.Errorf("user OCID can not be empty")
+	}
 	return p.user, nil
 }
 
 func (p rawConfigurationProvider) KeyFingerprint() (string, error) {
+	if p.fingerprint == "" {
+		return "", fmt.Errorf("fingerprint can not be empty")
+	}
 	return p.fingerprint, nil
 }
 
 func (p rawConfigurationProvider) Region() (string, error) {
-	return p.region, nil
+	return canStringBeRegion(p.region)
 }
 
 // environmentConfigurationProvider reads configuration from environment variables
@@ -183,8 +193,10 @@ func (p environmentConfigurationProvider) Region() (value string, err error) {
 	var ok bool
 	if value, ok = os.LookupEnv(environmentVariable); !ok {
 		err = fmt.Errorf("can not read region from environment variable %s", environmentVariable)
+		return value, err
 	}
-	return
+
+	return canStringBeRegion(value)
 }
 
 // fileConfigurationProvider. reads configuration information from a file
@@ -310,7 +322,7 @@ func parseConfigAtLine(start int, content []string) (info *configFileInfo, err e
 func expandPath(filepath string) (expandedPath string) {
 	cleanedPath := path.Clean(filepath)
 	expandedPath = cleanedPath
-	if strings.HasPrefix(cleanedPath, "~/") {
+	if strings.HasPrefix(cleanedPath, "~") {
 		rest := cleanedPath[2:]
 		expandedPath = path.Join(getHomeFolder(), rest)
 	}
@@ -436,7 +448,11 @@ func (p fileConfigurationProvider) Region() (value string, err error) {
 	}
 
 	value, err = presentOrError(info.Region, hasRegion, info.PresentConfiguration, "region")
-	return
+	if err != nil {
+		return
+	}
+
+	return canStringBeRegion(value)
 }
 
 // A configuration provider that look for information in  multiple configuration providers

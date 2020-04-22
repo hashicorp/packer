@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"runtime"
 	"time"
 )
 
@@ -12,7 +13,7 @@ const (
 	UnlimitedNumAttemptsValue = uint(0)
 
 	// number of characters contained in the generated retry token
-	generatedRetryTokenLength = 30
+	generatedRetryTokenLength = 32
 )
 
 // OCIRetryableRequest represents a request that can be reissued according to the specified policy.
@@ -86,8 +87,8 @@ func shouldContinueIssuingRequests(current, maximum uint) bool {
 	return maximum == UnlimitedNumAttemptsValue || current <= maximum
 }
 
-// generateRetryToken generates a retry token that must be included on any request passed to the Retry method.
-func generateRetryToken() string {
+// RetryToken generates a retry token that must be included on any request passed to the Retry method.
+func RetryToken() string {
 	alphanumericChars := []rune("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	retryToken := make([]rune, generatedRetryTokenLength)
 	for i := range retryToken {
@@ -98,42 +99,61 @@ func generateRetryToken() string {
 
 // Retry is a package-level operation that executes the retryable request using the specified operation and retry policy.
 func Retry(ctx context.Context, request OCIRetryableRequest, operation OCIOperation, policy RetryPolicy) (OCIResponse, error) {
-	// use a one-based counter because it's easier to think about operation retry in terms of attempt numbering
-	for currentOperationAttempt := uint(1); shouldContinueIssuingRequests(currentOperationAttempt, policy.MaximumNumberAttempts); currentOperationAttempt++ {
-		Debugln(fmt.Sprintf("operation attempt #%v", currentOperationAttempt))
-		response, err := operation(ctx, request)
-		operationResponse := NewOCIOperationResponse(response, err, currentOperationAttempt)
 
-		select {
-		case <-ctx.Done():
-			// return why the request was aborted (could be user interrupted or deadline exceeded)
-			// => include last received response for information (user may choose to re-issue request)
-			return response, ctx.Err()
-		default:
-			// non-blocking select
-		}
-
-		if policy.ShouldRetryOperation(operationResponse) {
-			// this conditional is explicitly not added to the encompassing if condition to retry based on response
-			// => it is only to determine if, on the last round of this loop, we still skip sleeping (if we're the
-			//    last attempt, then there's no point sleeping before we round the loop again and fall out to the
-			//    Maximum Number Attempts exceeded error)
-			if currentOperationAttempt != policy.MaximumNumberAttempts {
-				// sleep before retrying the operation
-				duration := policy.NextDuration(operationResponse)
-				if deadline, ok := ctx.Deadline(); ok && time.Now().Add(duration).After(deadline) {
-					// we want to retry the operation, but the policy is telling us to wait for a duration that exceeds
-					// the specified overall deadline for the operation => instead of waiting for however long that
-					// time period is and then aborting, abort now and save the cycles
-					return response, DeadlineExceededByBackoff
-				}
-				Debugln(fmt.Sprintf("waiting %v before retrying operation", duration))
-				time.Sleep(duration)
-			}
-		} else {
-			// we should NOT retry operation based on response and/or error => return
-			return response, err
-		}
+	type retrierResult struct {
+		response OCIResponse
+		err      error
 	}
-	return nil, fmt.Errorf("maximum number of attempts exceeded (%v)", policy.MaximumNumberAttempts)
+
+	var response OCIResponse
+	var err error
+	retrierChannel := make(chan retrierResult)
+
+	go func() {
+
+		// Deal with panics more graciously
+		defer func() {
+			if r := recover(); r != nil {
+				stackBuffer := make([]byte, 1024)
+				bytesWritten := runtime.Stack(stackBuffer, false)
+				stack := string(stackBuffer[:bytesWritten])
+				retrierChannel <- retrierResult{nil, fmt.Errorf("panicked while retrying operation. Panic was: %s\nStack: %s", r, stack)}
+			}
+		}()
+
+		// use a one-based counter because it's easier to think about operation retry in terms of attempt numbering
+		for currentOperationAttempt := uint(1); shouldContinueIssuingRequests(currentOperationAttempt, policy.MaximumNumberAttempts); currentOperationAttempt++ {
+			Debugln(fmt.Sprintf("operation attempt #%v", currentOperationAttempt))
+			response, err = operation(ctx, request)
+			operationResponse := NewOCIOperationResponse(response, err, currentOperationAttempt)
+
+			if !policy.ShouldRetryOperation(operationResponse) {
+				// we should NOT retry operation based on response and/or error => return
+				retrierChannel <- retrierResult{response, err}
+				return
+			}
+
+			duration := policy.NextDuration(operationResponse)
+			//The following condition is kept for backwards compatibility reasons
+			if deadline, ok := ctx.Deadline(); ok && time.Now().Add(duration).After(deadline) {
+				// we want to retry the operation, but the policy is telling us to wait for a duration that exceeds
+				// the specified overall deadline for the operation => instead of waiting for however long that
+				// time period is and then aborting, abort now and save the cycles
+				retrierChannel <- retrierResult{response, DeadlineExceededByBackoff}
+				return
+			}
+			Debugln(fmt.Sprintf("waiting %v before retrying operation", duration))
+			// sleep before retrying the operation
+			<-time.After(duration)
+		}
+
+		retrierChannel <- retrierResult{response, err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return response, ctx.Err()
+	case result := <-retrierChannel:
+		return result.response, result.err
+	}
 }

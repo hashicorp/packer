@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 // Package auth provides supporting functions and structs for authentication
 package auth
@@ -9,18 +10,125 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"github.com/oracle/oci-go-sdk/common"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 // federationClient is a client to retrieve the security token for an instance principal necessary to sign a request.
 // It also provides the private key whose corresponding public key is used to retrieve the security token.
 type federationClient interface {
+	ClaimHolder
 	PrivateKey() (*rsa.PrivateKey, error)
 	SecurityToken() (string, error)
+}
+
+// ClaimHolder is implemented by any token interface that provides access to the security claims embedded in the token.
+type ClaimHolder interface {
+	GetClaim(key string) (interface{}, error)
+}
+
+type genericFederationClient struct {
+	SessionKeySupplier   sessionKeySupplier
+	RefreshSecurityToken func() (securityToken, error)
+
+	securityToken securityToken
+	mux           sync.Mutex
+}
+
+var _ federationClient = &genericFederationClient{}
+
+func (c *genericFederationClient) PrivateKey() (*rsa.PrivateKey, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	if err := c.renewKeyAndSecurityTokenIfNotValid(); err != nil {
+		return nil, err
+	}
+	return c.SessionKeySupplier.PrivateKey(), nil
+}
+
+func (c *genericFederationClient) SecurityToken() (token string, err error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	if err = c.renewKeyAndSecurityTokenIfNotValid(); err != nil {
+		return "", err
+	}
+	return c.securityToken.String(), nil
+}
+
+func (c *genericFederationClient) renewKeyAndSecurityTokenIfNotValid() (err error) {
+	if c.securityToken == nil || !c.securityToken.Valid() {
+		if err = c.renewKeyAndSecurityToken(); err != nil {
+			return fmt.Errorf("failed to renew security token: %s", err.Error())
+		}
+	}
+	return nil
+}
+
+func (c *genericFederationClient) renewKeyAndSecurityToken() (err error) {
+	common.Logf("Renewing keys for file based security token at: %v\n", time.Now().Format("15:04:05.000"))
+	if err = c.SessionKeySupplier.Refresh(); err != nil {
+		return fmt.Errorf("failed to refresh session key: %s", err.Error())
+	}
+
+	common.Logf("Renewing security token at: %v\n", time.Now().Format("15:04:05.000"))
+	if c.securityToken, err = c.RefreshSecurityToken(); err != nil {
+		return fmt.Errorf("failed to refresh security token key: %s", err.Error())
+	}
+	common.Logf("Security token renewed at: %v\n", time.Now().Format("15:04:05.000"))
+	return nil
+}
+
+func (c *genericFederationClient) GetClaim(key string) (interface{}, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	if err := c.renewKeyAndSecurityTokenIfNotValid(); err != nil {
+		return nil, err
+	}
+	return c.securityToken.GetClaim(key)
+}
+
+func newFileBasedFederationClient(securityTokenPath string, supplier sessionKeySupplier) (*genericFederationClient, error) {
+	return &genericFederationClient{
+		SessionKeySupplier: supplier,
+		RefreshSecurityToken: func() (token securityToken, err error) {
+			var content []byte
+			if content, err = ioutil.ReadFile(securityTokenPath); err != nil {
+				return nil, fmt.Errorf("failed to read security token from :%s. Due to: %s", securityTokenPath, err.Error())
+			}
+
+			var newToken securityToken
+			if newToken, err = newInstancePrincipalToken(string(content)); err != nil {
+				return nil, fmt.Errorf("failed to read security token from :%s. Due to: %s", securityTokenPath, err.Error())
+			}
+
+			return newToken, nil
+		},
+	}, nil
+}
+
+func newStaticFederationClient(sessionToken string, supplier sessionKeySupplier) (*genericFederationClient, error) {
+	var newToken securityToken
+	var err error
+	if newToken, err = newInstancePrincipalToken(string(sessionToken)); err != nil {
+		return nil, fmt.Errorf("failed to read security token. Due to: %s", err.Error())
+	}
+
+	return &genericFederationClient{
+		SessionKeySupplier: supplier,
+		RefreshSecurityToken: func() (token securityToken, err error) {
+			return newToken, nil
+		},
+	}, nil
 }
 
 // x509FederationClient retrieves a security token from Auth service.
@@ -34,15 +142,49 @@ type x509FederationClient struct {
 	mux                               sync.Mutex
 }
 
-func newX509FederationClient(region common.Region, tenancyID string, leafCertificateRetriever x509CertificateRetriever, intermediateCertificateRetrievers []x509CertificateRetriever) federationClient {
+func newX509FederationClient(region common.Region, tenancyID string, leafCertificateRetriever x509CertificateRetriever, intermediateCertificateRetrievers []x509CertificateRetriever, modifier dispatcherModifier) (federationClient, error) {
 	client := &x509FederationClient{
 		tenancyID:                         tenancyID,
 		leafCertificateRetriever:          leafCertificateRetriever,
 		intermediateCertificateRetrievers: intermediateCertificateRetrievers,
 	}
 	client.sessionKeySupplier = newSessionKeySupplier()
-	client.authClient = newAuthClient(region, client)
-	return client
+	authClient := newAuthClient(region, client)
+
+	var err error
+
+	if authClient.HTTPClient, err = modifier.Modify(authClient.HTTPClient); err != nil {
+		err = fmt.Errorf("failed to modify client: %s", err.Error())
+		return nil, err
+	}
+
+	client.authClient = authClient
+	return client, nil
+}
+
+func newX509FederationClientWithCerts(region common.Region, tenancyID string, leafCertificate, leafPassphrase, leafPrivateKey []byte, intermediateCertificates [][]byte, modifier dispatcherModifier) (federationClient, error) {
+	intermediateRetrievers := make([]x509CertificateRetriever, len(intermediateCertificates))
+	for i, c := range intermediateCertificates {
+		intermediateRetrievers[i] = &staticCertificateRetriever{Passphrase: []byte(""), CertificatePem: c, PrivateKeyPem: nil}
+	}
+
+	client := &x509FederationClient{
+		tenancyID:                         tenancyID,
+		leafCertificateRetriever:          &staticCertificateRetriever{Passphrase: leafPassphrase, CertificatePem: leafCertificate, PrivateKeyPem: leafPrivateKey},
+		intermediateCertificateRetrievers: intermediateRetrievers,
+	}
+	client.sessionKeySupplier = newSessionKeySupplier()
+	authClient := newAuthClient(region, client)
+
+	var err error
+
+	if authClient.HTTPClient, err = modifier.Modify(authClient.HTTPClient); err != nil {
+		err = fmt.Errorf("failed to modify client: %s", err.Error())
+		return nil, err
+	}
+
+	client.authClient = authClient
+	return client, nil
 }
 
 var (
@@ -53,10 +195,10 @@ var (
 func newAuthClient(region common.Region, provider common.KeyProvider) *common.BaseClient {
 	signer := common.RequestSigner(provider, genericHeaders, bodyHeaders)
 	client := common.DefaultBaseClientWithSigner(signer)
-	if region == common.RegionSEA {
-		client.Host = "https://auth.r1.oracleiaas.com"
+	if regionURL, ok := os.LookupEnv("OCI_SDK_AUTH_CLIENT_REGION_URL"); ok {
+		client.Host = regionURL
 	} else {
-		client.Host = fmt.Sprintf(common.DefaultHostURLTemplate, "auth", string(region))
+		client.Host = region.Endpoint("auth")
 	}
 	client.BasePath = "v1/x509"
 	return &client
@@ -71,7 +213,12 @@ func (c *x509FederationClient) KeyID() (string, error) {
 
 // For authClient to sign requests to X509 Federation Endpoint
 func (c *x509FederationClient) PrivateRSAKey() (*rsa.PrivateKey, error) {
-	return c.leafCertificateRetriever.PrivateKey(), nil
+	key := c.leafCertificateRetriever.PrivateKey()
+	if key == nil {
+		return nil, fmt.Errorf("can not read private key from leaf certificate. Likely an error in the metadata service")
+	}
+
+	return key, nil
 }
 
 func (c *x509FederationClient) PrivateKey() (*rsa.PrivateKey, error) {
@@ -124,9 +271,11 @@ func (c *x509FederationClient) renewSecurityToken() (err error) {
 		}
 	}
 
+	common.Logf("Renewing security token at: %v\n", time.Now().Format("15:04:05.000"))
 	if c.securityToken, err = c.getSecurityToken(); err != nil {
 		return fmt.Errorf("failed to get security token: %s", err.Error())
 	}
+	common.Logf("Security token renewed at: %v\n", time.Now().Format("15:04:05.000"))
 
 	return nil
 }
@@ -142,7 +291,14 @@ func (c *x509FederationClient) getSecurityToken() (securityToken, error) {
 
 	var httpResponse *http.Response
 	defer common.CloseBodyIfValid(httpResponse)
-	if httpResponse, err = c.authClient.Call(context.Background(), &httpRequest); err != nil {
+
+	for retry := 0; retry < 5; retry++ {
+		if httpResponse, err = c.authClient.Call(context.Background(), &httpRequest); err == nil {
+			break
+		}
+		time.Sleep(250 * time.Microsecond)
+	}
+	if err != nil {
 		return nil, fmt.Errorf("failed to call: %s", err.Error())
 	}
 
@@ -152,6 +308,16 @@ func (c *x509FederationClient) getSecurityToken() (securityToken, error) {
 	}
 
 	return newInstancePrincipalToken(response.Token.Token)
+}
+
+func (c *x509FederationClient) GetClaim(key string) (interface{}, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	if err := c.renewSecurityTokenIfNotValid(); err != nil {
+		return nil, err
+	}
+	return c.securityToken.GetClaim(key)
 }
 
 type x509FederationRequest struct {
@@ -204,6 +370,103 @@ type sessionKeySupplier interface {
 	Refresh() error
 	PrivateKey() *rsa.PrivateKey
 	PublicKeyPemRaw() []byte
+}
+
+//genericKeySupplier implements sessionKeySupplier and provides an arbitrary refresh mechanism
+type genericKeySupplier struct {
+	RefreshFn func() (*rsa.PrivateKey, []byte, error)
+
+	privateKey      *rsa.PrivateKey
+	publicKeyPemRaw []byte
+}
+
+func (s genericKeySupplier) PrivateKey() *rsa.PrivateKey {
+	if s.privateKey == nil {
+		return nil
+	}
+
+	c := *s.privateKey
+	return &c
+}
+
+func (s genericKeySupplier) PublicKeyPemRaw() []byte {
+	if s.publicKeyPemRaw == nil {
+		return nil
+	}
+
+	c := make([]byte, len(s.publicKeyPemRaw))
+	copy(c, s.publicKeyPemRaw)
+	return c
+}
+
+func (s *genericKeySupplier) Refresh() (err error) {
+	privateKey, publicPem, err := s.RefreshFn()
+	if err != nil {
+		return err
+	}
+
+	s.privateKey = privateKey
+	s.publicKeyPemRaw = publicPem
+	return nil
+}
+
+// create a sessionKeySupplier that reads keys from file every time it refreshes
+func newFileBasedKeySessionSupplier(privateKeyPemPath string, passphrasePath *string) (*genericKeySupplier, error) {
+	return &genericKeySupplier{
+		RefreshFn: func() (*rsa.PrivateKey, []byte, error) {
+			var err error
+			var passContent []byte
+			if passphrasePath != nil {
+				if passContent, err = ioutil.ReadFile(*passphrasePath); err != nil {
+					return nil, nil, fmt.Errorf("can not read passphrase from file: %s, due to %s", *passphrasePath, err.Error())
+				}
+			}
+
+			var keyPemContent []byte
+			if keyPemContent, err = ioutil.ReadFile(privateKeyPemPath); err != nil {
+				return nil, nil, fmt.Errorf("can not read private privateKey pem from file: %s, due to %s", privateKeyPemPath, err.Error())
+			}
+
+			var privateKey *rsa.PrivateKey
+			if privateKey, err = common.PrivateKeyFromBytesWithPassword(keyPemContent, passContent); err != nil {
+				return nil, nil, fmt.Errorf("can not create private privateKey from contents of: %s, due to: %s", privateKeyPemPath, err.Error())
+			}
+
+			var publicKeyAsnBytes []byte
+			if publicKeyAsnBytes, err = x509.MarshalPKIXPublicKey(privateKey.Public()); err != nil {
+				return nil, nil, fmt.Errorf("failed to marshal the public part of the new keypair: %s", err.Error())
+			}
+			publicKeyPemRaw := pem.EncodeToMemory(&pem.Block{
+				Type:  "PUBLIC KEY",
+				Bytes: publicKeyAsnBytes,
+			})
+			return privateKey, publicKeyPemRaw, nil
+		},
+	}, nil
+}
+
+func newStaticKeySessionSupplier(privateKeyPemContent, passphrase []byte) (*genericKeySupplier, error) {
+	var err error
+	var privateKey *rsa.PrivateKey
+
+	if privateKey, err = common.PrivateKeyFromBytesWithPassword(privateKeyPemContent, passphrase); err != nil {
+		return nil, fmt.Errorf("can not create private privateKey, due to: %s", err.Error())
+	}
+
+	var publicKeyAsnBytes []byte
+	if publicKeyAsnBytes, err = x509.MarshalPKIXPublicKey(privateKey.Public()); err != nil {
+		return nil, fmt.Errorf("failed to marshal the public part of the new keypair: %s", err.Error())
+	}
+	publicKeyPemRaw := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyAsnBytes,
+	})
+
+	return &genericKeySupplier{
+		RefreshFn: func() (key *rsa.PrivateKey, bytes []byte, err error) {
+			return privateKey, publicKeyPemRaw, nil
+		},
+	}, nil
 }
 
 // inMemorySessionKeySupplier implements sessionKeySupplier to vend an RSA keypair.
@@ -268,6 +531,8 @@ func (s *inMemorySessionKeySupplier) PublicKeyPemRaw() []byte {
 type securityToken interface {
 	fmt.Stringer
 	Valid() bool
+
+	ClaimHolder
 }
 
 type instancePrincipalToken struct {
@@ -289,4 +554,16 @@ func (t *instancePrincipalToken) String() string {
 
 func (t *instancePrincipalToken) Valid() bool {
 	return !t.jwtToken.expired()
+}
+
+var (
+	// ErrNoSuchClaim is returned when a token does not hold the claim sought
+	ErrNoSuchClaim = errors.New("no such claim")
+)
+
+func (t *instancePrincipalToken) GetClaim(key string) (interface{}, error) {
+	if value, ok := t.jwtToken.payload[key]; ok {
+		return value, nil
+	}
+	return nil, ErrNoSuchClaim
 }

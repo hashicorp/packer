@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -13,9 +18,11 @@ import (
 )
 
 // BootVolumeAttachment Represents an attachment between a boot volume and an instance.
+// **Warning:** Oracle recommends that you avoid using any confidential information when you
+// supply string values using the API.
 type BootVolumeAttachment struct {
 
-	// The Availability Domain of an instance.
+	// The availability domain of an instance.
 	// Example: `Uocm:PHX-AD-1`
 	AvailabilityDomain *string `mandatory:"true" json:"availabilityDomain"`
 
@@ -42,6 +49,9 @@ type BootVolumeAttachment struct {
 	// Avoid entering confidential information.
 	// Example: `My boot volume`
 	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Whether in-transit encryption for the boot volume's paravirtualized attachment is enabled or not.
+	IsPvEncryptionInTransitEnabled *bool `mandatory:"false" json:"isPvEncryptionInTransitEnabled"`
 }
 
 func (m BootVolumeAttachment) String() string {
@@ -51,7 +61,7 @@ func (m BootVolumeAttachment) String() string {
 // BootVolumeAttachmentLifecycleStateEnum Enum with underlying type: string
 type BootVolumeAttachmentLifecycleStateEnum string
 
-// Set of constants representing the allowable values for BootVolumeAttachmentLifecycleState
+// Set of constants representing the allowable values for BootVolumeAttachmentLifecycleStateEnum
 const (
 	BootVolumeAttachmentLifecycleStateAttaching BootVolumeAttachmentLifecycleStateEnum = "ATTACHING"
 	BootVolumeAttachmentLifecycleStateAttached  BootVolumeAttachmentLifecycleStateEnum = "ATTACHED"
@@ -66,7 +76,7 @@ var mappingBootVolumeAttachmentLifecycleState = map[string]BootVolumeAttachmentL
 	"DETACHED":  BootVolumeAttachmentLifecycleStateDetached,
 }
 
-// GetBootVolumeAttachmentLifecycleStateEnumValues Enumerates the set of values for BootVolumeAttachmentLifecycleState
+// GetBootVolumeAttachmentLifecycleStateEnumValues Enumerates the set of values for BootVolumeAttachmentLifecycleStateEnum
 func GetBootVolumeAttachmentLifecycleStateEnumValues() []BootVolumeAttachmentLifecycleStateEnum {
 	values := make([]BootVolumeAttachmentLifecycleStateEnum, 0)
 	for _, v := range mappingBootVolumeAttachmentLifecycleState {

@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -23,19 +28,21 @@ type LaunchOptions struct {
 	// * `VFIO` - Direct attached Virtual Function storage.  This is the default option for Local data
 	// volumes on Oracle provided images.
 	// * `PARAVIRTUALIZED` - Paravirtualized disk.
-	BootVolumeType LaunchOptionsBootVolumeTypeEnum `mandatory:"true" json:"bootVolumeType"`
+	BootVolumeType LaunchOptionsBootVolumeTypeEnum `mandatory:"false" json:"bootVolumeType,omitempty"`
 
 	// Firmware used to boot VM.  Select the option that matches your operating system.
 	// * `BIOS` - Boot VM using BIOS style firmware.  This is compatible with both 32 bit and 64 bit operating
 	// systems that boot using MBR style bootloaders.
 	// * `UEFI_64` - Boot VM using UEFI style firmware compatible with 64 bit operating systems.  This is the
 	// default for Oracle provided images.
-	Firmware LaunchOptionsFirmwareEnum `mandatory:"true" json:"firmware"`
+	Firmware LaunchOptionsFirmwareEnum `mandatory:"false" json:"firmware,omitempty"`
 
-	// Emulation type for NIC.
+	// Emulation type for the physical network interface card (NIC).
 	// * `E1000` - Emulated Gigabit ethernet controller.  Compatible with Linux e1000 network driver.
-	// * `VFIO` - Direct attached Virtual Function network controller.  Default for Oracle provided images.
-	NetworkType LaunchOptionsNetworkTypeEnum `mandatory:"true" json:"networkType"`
+	// * `VFIO` - Direct attached Virtual Function network controller. This is the networking type
+	// when you launch an instance using hardware-assisted (SR-IOV) networking.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using virtio drivers.
+	NetworkType LaunchOptionsNetworkTypeEnum `mandatory:"false" json:"networkType,omitempty"`
 
 	// Emulation type for volume.
 	// * `ISCSI` - ISCSI attached block storage device. This is the default for Boot Volumes and Remote Block
@@ -45,7 +52,13 @@ type LaunchOptions struct {
 	// * `VFIO` - Direct attached Virtual Function storage.  This is the default option for Local data
 	// volumes on Oracle provided images.
 	// * `PARAVIRTUALIZED` - Paravirtualized disk.
-	RemoteDataVolumeType LaunchOptionsRemoteDataVolumeTypeEnum `mandatory:"true" json:"remoteDataVolumeType"`
+	RemoteDataVolumeType LaunchOptionsRemoteDataVolumeTypeEnum `mandatory:"false" json:"remoteDataVolumeType,omitempty"`
+
+	// Whether to enable in-transit encryption for the boot volume's paravirtualized attachment. The default value is false.
+	IsPvEncryptionInTransitEnabled *bool `mandatory:"false" json:"isPvEncryptionInTransitEnabled"`
+
+	// Whether to enable consistent volume naming feature. Defaults to false.
+	IsConsistentVolumeNamingEnabled *bool `mandatory:"false" json:"isConsistentVolumeNamingEnabled"`
 }
 
 func (m LaunchOptions) String() string {
@@ -55,7 +68,7 @@ func (m LaunchOptions) String() string {
 // LaunchOptionsBootVolumeTypeEnum Enum with underlying type: string
 type LaunchOptionsBootVolumeTypeEnum string
 
-// Set of constants representing the allowable values for LaunchOptionsBootVolumeType
+// Set of constants representing the allowable values for LaunchOptionsBootVolumeTypeEnum
 const (
 	LaunchOptionsBootVolumeTypeIscsi           LaunchOptionsBootVolumeTypeEnum = "ISCSI"
 	LaunchOptionsBootVolumeTypeScsi            LaunchOptionsBootVolumeTypeEnum = "SCSI"
@@ -72,7 +85,7 @@ var mappingLaunchOptionsBootVolumeType = map[string]LaunchOptionsBootVolumeTypeE
 	"PARAVIRTUALIZED": LaunchOptionsBootVolumeTypeParavirtualized,
 }
 
-// GetLaunchOptionsBootVolumeTypeEnumValues Enumerates the set of values for LaunchOptionsBootVolumeType
+// GetLaunchOptionsBootVolumeTypeEnumValues Enumerates the set of values for LaunchOptionsBootVolumeTypeEnum
 func GetLaunchOptionsBootVolumeTypeEnumValues() []LaunchOptionsBootVolumeTypeEnum {
 	values := make([]LaunchOptionsBootVolumeTypeEnum, 0)
 	for _, v := range mappingLaunchOptionsBootVolumeType {
@@ -84,7 +97,7 @@ func GetLaunchOptionsBootVolumeTypeEnumValues() []LaunchOptionsBootVolumeTypeEnu
 // LaunchOptionsFirmwareEnum Enum with underlying type: string
 type LaunchOptionsFirmwareEnum string
 
-// Set of constants representing the allowable values for LaunchOptionsFirmware
+// Set of constants representing the allowable values for LaunchOptionsFirmwareEnum
 const (
 	LaunchOptionsFirmwareBios   LaunchOptionsFirmwareEnum = "BIOS"
 	LaunchOptionsFirmwareUefi64 LaunchOptionsFirmwareEnum = "UEFI_64"
@@ -95,7 +108,7 @@ var mappingLaunchOptionsFirmware = map[string]LaunchOptionsFirmwareEnum{
 	"UEFI_64": LaunchOptionsFirmwareUefi64,
 }
 
-// GetLaunchOptionsFirmwareEnumValues Enumerates the set of values for LaunchOptionsFirmware
+// GetLaunchOptionsFirmwareEnumValues Enumerates the set of values for LaunchOptionsFirmwareEnum
 func GetLaunchOptionsFirmwareEnumValues() []LaunchOptionsFirmwareEnum {
 	values := make([]LaunchOptionsFirmwareEnum, 0)
 	for _, v := range mappingLaunchOptionsFirmware {
@@ -107,18 +120,20 @@ func GetLaunchOptionsFirmwareEnumValues() []LaunchOptionsFirmwareEnum {
 // LaunchOptionsNetworkTypeEnum Enum with underlying type: string
 type LaunchOptionsNetworkTypeEnum string
 
-// Set of constants representing the allowable values for LaunchOptionsNetworkType
+// Set of constants representing the allowable values for LaunchOptionsNetworkTypeEnum
 const (
-	LaunchOptionsNetworkTypeE1000 LaunchOptionsNetworkTypeEnum = "E1000"
-	LaunchOptionsNetworkTypeVfio  LaunchOptionsNetworkTypeEnum = "VFIO"
+	LaunchOptionsNetworkTypeE1000           LaunchOptionsNetworkTypeEnum = "E1000"
+	LaunchOptionsNetworkTypeVfio            LaunchOptionsNetworkTypeEnum = "VFIO"
+	LaunchOptionsNetworkTypeParavirtualized LaunchOptionsNetworkTypeEnum = "PARAVIRTUALIZED"
 )
 
 var mappingLaunchOptionsNetworkType = map[string]LaunchOptionsNetworkTypeEnum{
-	"E1000": LaunchOptionsNetworkTypeE1000,
-	"VFIO":  LaunchOptionsNetworkTypeVfio,
+	"E1000":           LaunchOptionsNetworkTypeE1000,
+	"VFIO":            LaunchOptionsNetworkTypeVfio,
+	"PARAVIRTUALIZED": LaunchOptionsNetworkTypeParavirtualized,
 }
 
-// GetLaunchOptionsNetworkTypeEnumValues Enumerates the set of values for LaunchOptionsNetworkType
+// GetLaunchOptionsNetworkTypeEnumValues Enumerates the set of values for LaunchOptionsNetworkTypeEnum
 func GetLaunchOptionsNetworkTypeEnumValues() []LaunchOptionsNetworkTypeEnum {
 	values := make([]LaunchOptionsNetworkTypeEnum, 0)
 	for _, v := range mappingLaunchOptionsNetworkType {
@@ -130,7 +145,7 @@ func GetLaunchOptionsNetworkTypeEnumValues() []LaunchOptionsNetworkTypeEnum {
 // LaunchOptionsRemoteDataVolumeTypeEnum Enum with underlying type: string
 type LaunchOptionsRemoteDataVolumeTypeEnum string
 
-// Set of constants representing the allowable values for LaunchOptionsRemoteDataVolumeType
+// Set of constants representing the allowable values for LaunchOptionsRemoteDataVolumeTypeEnum
 const (
 	LaunchOptionsRemoteDataVolumeTypeIscsi           LaunchOptionsRemoteDataVolumeTypeEnum = "ISCSI"
 	LaunchOptionsRemoteDataVolumeTypeScsi            LaunchOptionsRemoteDataVolumeTypeEnum = "SCSI"
@@ -147,7 +162,7 @@ var mappingLaunchOptionsRemoteDataVolumeType = map[string]LaunchOptionsRemoteDat
 	"PARAVIRTUALIZED": LaunchOptionsRemoteDataVolumeTypeParavirtualized,
 }
 
-// GetLaunchOptionsRemoteDataVolumeTypeEnumValues Enumerates the set of values for LaunchOptionsRemoteDataVolumeType
+// GetLaunchOptionsRemoteDataVolumeTypeEnumValues Enumerates the set of values for LaunchOptionsRemoteDataVolumeTypeEnum
 func GetLaunchOptionsRemoteDataVolumeTypeEnumValues() []LaunchOptionsRemoteDataVolumeTypeEnum {
 	values := make([]LaunchOptionsRemoteDataVolumeTypeEnum, 0)
 	for _, v := range mappingLaunchOptionsRemoteDataVolumeType {

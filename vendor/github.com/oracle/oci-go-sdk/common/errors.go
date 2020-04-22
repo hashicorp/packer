@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 package common
 
@@ -18,45 +19,48 @@ type ServiceError interface {
 	GetMessage() string
 
 	// A short error code that defines the error, meant for programmatic parsing.
-	// See https://docs.us-phoenix-1.oraclecloud.com/Content/API/References/apierrors.htm
+	// See https://docs.cloud.oracle.com/Content/API/References/apierrors.htm
 	GetCode() string
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	GetOpcRequestID() string
 }
 
 type servicefailure struct {
-	StatusCode int
-	Code       string `json:"code,omitempty"`
-	Message    string `json:"message,omitempty"`
+	StatusCode   int
+	Code         string `json:"code,omitempty"`
+	Message      string `json:"message,omitempty"`
+	OpcRequestID string `json:"opc-request-id"`
 }
 
 func newServiceFailureFromResponse(response *http.Response) error {
 	var err error
 
+	se := servicefailure{
+		StatusCode:   response.StatusCode,
+		Code:         "BadErrorResponse",
+		OpcRequestID: response.Header.Get("opc-request-id")}
+
 	//If there is an error consume the body, entirely
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return servicefailure{
-			StatusCode: response.StatusCode,
-			Code:       "BadErrorResponse",
-			Message:    fmt.Sprintf("The body of the response was not readable, due to :%s", err.Error()),
-		}
+		se.Message = fmt.Sprintf("The body of the response was not readable, due to :%s", err.Error())
+		return se
 	}
 
-	se := servicefailure{StatusCode: response.StatusCode}
 	err = json.Unmarshal(body, &se)
 	if err != nil {
 		Debugf("Error response could not be parsed due to: %s", err.Error())
-		return servicefailure{
-			StatusCode: response.StatusCode,
-			Code:       "BadErrorResponse",
-			Message:    fmt.Sprintf("Error while parsing failure from response"),
-		}
+		se.Message = fmt.Sprintf("Failed to parse json from response body due to: %s. With response body %s.", err.Error(), string(body[:]))
+		return se
 	}
 	return se
 }
 
 func (se servicefailure) Error() string {
-	return fmt.Sprintf("Service error:%s. %s. http status code: %d",
-		se.Code, se.Message, se.StatusCode)
+	return fmt.Sprintf("Service error:%s. %s. http status code: %d. Opc request id: %s",
+		se.Code, se.Message, se.StatusCode, se.OpcRequestID)
 }
 
 func (se servicefailure) GetHTTPStatusCode() int {
@@ -70,6 +74,10 @@ func (se servicefailure) GetMessage() string {
 
 func (se servicefailure) GetCode() string {
 	return se.Code
+}
+
+func (se servicefailure) GetOpcRequestID() string {
+	return se.OpcRequestID
 }
 
 // IsServiceError returns false if the error is not service side, otherwise true

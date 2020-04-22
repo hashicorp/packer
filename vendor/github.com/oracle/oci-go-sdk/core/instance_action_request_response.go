@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 package core
@@ -64,8 +65,8 @@ type InstanceActionResponse struct {
 	// For optimistic concurrency control. See `if-match`.
 	Etag *string `presentIn:"header" name:"etag"`
 
-	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
-	// a particular request, please provide the request ID.
+	// Unique Oracle-assigned identifier for the request. If you need to contact
+	// Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 }
 
@@ -81,7 +82,7 @@ func (response InstanceActionResponse) HTTPResponse() *http.Response {
 // InstanceActionActionEnum Enum with underlying type: string
 type InstanceActionActionEnum string
 
-// Set of constants representing the allowable values for InstanceActionAction
+// Set of constants representing the allowable values for InstanceActionActionEnum
 const (
 	InstanceActionActionStop      InstanceActionActionEnum = "STOP"
 	InstanceActionActionStart     InstanceActionActionEnum = "START"
@@ -98,7 +99,7 @@ var mappingInstanceActionAction = map[string]InstanceActionActionEnum{
 	"SOFTSTOP":  InstanceActionActionSoftstop,
 }
 
-// GetInstanceActionActionEnumValues Enumerates the set of values for InstanceActionAction
+// GetInstanceActionActionEnumValues Enumerates the set of values for InstanceActionActionEnum
 func GetInstanceActionActionEnumValues() []InstanceActionActionEnum {
 	values := make([]InstanceActionActionEnum, 0)
 	for _, v := range mappingInstanceActionAction {

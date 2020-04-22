@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -15,16 +20,16 @@ import (
 
 // DhcpDnsOption DHCP option for specifying how DNS (hostname resolution) is handled in the subnets in the VCN.
 // For more information, see
-// DNS in Your Virtual Cloud Network (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/dns.htm).
+// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/Content/Network/Concepts/dns.htm).
 type DhcpDnsOption struct {
 
-	// If you set `serverType` to `CustomDnsServer`, specify the IP address
-	// of at least one DNS server of your choice (three maximum).
+	// If you set `serverType` to `CustomDnsServer`, specify the
+	// IP address of at least one DNS server of your choice (three maximum).
 	CustomDnsServers []string `mandatory:"false" json:"customDnsServers"`
 
-	// - **VcnLocal:** Reserved for future use.
-	// - **VcnLocalPlusInternet:** Also referred to as "Internet and VCN Resolver".
-	// Instances can resolve internet hostnames (no Internet Gateway is required),
+	// * **VcnLocal:** Reserved for future use.
+	// * **VcnLocalPlusInternet:** Also referred to as "Internet and VCN Resolver".
+	// Instances can resolve internet hostnames (no internet gateway is required),
 	// and can resolve hostnames of instances in the VCN. This is the default
 	// value in the default set of DHCP options in the VCN. For the Internet and
 	// VCN Resolver to work across the VCN, there must also be a DNS label set for
@@ -32,8 +37,9 @@ type DhcpDnsOption struct {
 	// The Internet and VCN Resolver also enables reverse DNS lookup, which lets
 	// you determine the hostname corresponding to the private IP address. For more
 	// information, see
-	// DNS in Your Virtual Cloud Network (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/dns.htm).
-	// - **CustomDnsServer:** Instances use a DNS server of your choice (three maximum).
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/Content/Network/Concepts/dns.htm).
+	// * **CustomDnsServer:** Instances use a DNS server of your choice (three
+	// maximum).
 	ServerType DhcpDnsOptionServerTypeEnum `mandatory:"true" json:"serverType"`
 }
 
@@ -58,7 +64,7 @@ func (m DhcpDnsOption) MarshalJSON() (buff []byte, e error) {
 // DhcpDnsOptionServerTypeEnum Enum with underlying type: string
 type DhcpDnsOptionServerTypeEnum string
 
-// Set of constants representing the allowable values for DhcpDnsOptionServerType
+// Set of constants representing the allowable values for DhcpDnsOptionServerTypeEnum
 const (
 	DhcpDnsOptionServerTypeVcnlocal             DhcpDnsOptionServerTypeEnum = "VcnLocal"
 	DhcpDnsOptionServerTypeVcnlocalplusinternet DhcpDnsOptionServerTypeEnum = "VcnLocalPlusInternet"
@@ -71,7 +77,7 @@ var mappingDhcpDnsOptionServerType = map[string]DhcpDnsOptionServerTypeEnum{
 	"CustomDnsServer":      DhcpDnsOptionServerTypeCustomdnsserver,
 }
 
-// GetDhcpDnsOptionServerTypeEnumValues Enumerates the set of values for DhcpDnsOptionServerType
+// GetDhcpDnsOptionServerTypeEnumValues Enumerates the set of values for DhcpDnsOptionServerTypeEnum
 func GetDhcpDnsOptionServerTypeEnumValues() []DhcpDnsOptionServerTypeEnum {
 	values := make([]DhcpDnsOptionServerTypeEnum, 0)
 	for _, v := range mappingDhcpDnsOptionServerType {

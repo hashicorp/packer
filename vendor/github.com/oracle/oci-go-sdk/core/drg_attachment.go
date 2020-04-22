@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -13,7 +18,9 @@ import (
 )
 
 // DrgAttachment A link between a DRG and VCN. For more information, see
-// Overview of the Networking Service (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/overview.htm).
+// Overview of the Networking Service (https://docs.cloud.oracle.com/Content/Network/Concepts/overview.htm).
+// **Warning:** Oracle recommends that you avoid using any confidential information when you
+// supply string values using the API.
 type DrgAttachment struct {
 
 	// The OCID of the compartment containing the DRG attachment.
@@ -35,6 +42,12 @@ type DrgAttachment struct {
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
+	// The OCID of the route table the DRG attachment is using.
+	// For information about why you would associate a route table with a DRG attachment, see:
+	//   * Transit Routing: Access to Multiple VCNs in Same Region (https://docs.cloud.oracle.com/Content/Network/Tasks/transitrouting.htm)
+	//   * Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/Content/Network/Tasks/transitroutingoracleservices.htm)
+	RouteTableId *string `mandatory:"false" json:"routeTableId"`
+
 	// The date and time the DRG attachment was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
@@ -47,7 +60,7 @@ func (m DrgAttachment) String() string {
 // DrgAttachmentLifecycleStateEnum Enum with underlying type: string
 type DrgAttachmentLifecycleStateEnum string
 
-// Set of constants representing the allowable values for DrgAttachmentLifecycleState
+// Set of constants representing the allowable values for DrgAttachmentLifecycleStateEnum
 const (
 	DrgAttachmentLifecycleStateAttaching DrgAttachmentLifecycleStateEnum = "ATTACHING"
 	DrgAttachmentLifecycleStateAttached  DrgAttachmentLifecycleStateEnum = "ATTACHED"
@@ -62,7 +75,7 @@ var mappingDrgAttachmentLifecycleState = map[string]DrgAttachmentLifecycleStateE
 	"DETACHED":  DrgAttachmentLifecycleStateDetached,
 }
 
-// GetDrgAttachmentLifecycleStateEnumValues Enumerates the set of values for DrgAttachmentLifecycleState
+// GetDrgAttachmentLifecycleStateEnumValues Enumerates the set of values for DrgAttachmentLifecycleStateEnum
 func GetDrgAttachmentLifecycleStateEnumValues() []DrgAttachmentLifecycleStateEnum {
 	values := make([]DrgAttachmentLifecycleStateEnum, 0)
 	for _, v := range mappingDrgAttachmentLifecycleState {
