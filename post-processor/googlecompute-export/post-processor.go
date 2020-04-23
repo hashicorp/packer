@@ -112,14 +112,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Set up credentials for GCE driver.
 	if builderAccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(builderAccountFile, p.config.IAP)
+		cfg, err := googlecompute.ProcessAccountFile(builderAccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
 		p.config.account = cfg
 	}
 	if p.config.AccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile, p.config.IAP)
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -160,7 +160,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
-		p.config.account, p.config.VaultGCPOauthEngine, p.config.IAP)
+		p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}

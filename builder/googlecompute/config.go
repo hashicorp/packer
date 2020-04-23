@@ -379,7 +379,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
 				"specify both account_file and vault_gcp_oauth_engine."))
 		}
-		cfg, err := ProcessAccountFile(c.AccountFile, c.IAP)
+		cfg, err := ProcessAccountFile(c.AccountFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}

@@ -78,7 +78,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile, p.config.IAP)
+		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -118,7 +118,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	p.config.ctx.Data = generatedData
 
-	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine, p.config.IAP)
+	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}
