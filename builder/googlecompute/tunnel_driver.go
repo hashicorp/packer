@@ -70,7 +70,7 @@ func (t *TunnelDriverLinux) StopTunnel() {
 		// daemon child. We create the group ID with the syscall.SysProcAttr
 		// call inside the retry loop above, and then store that ID on the
 		// command so we can destroy it here.
-		err := syscall.Kill(-t.cmd.Process.Pid, syscall.SIGKILL)
+		err := syscall.Kill(-t.cmd.Process.Pid, syscall.SIGINT)
 		if err != nil {
 			log.Printf("Issue stopping IAP tunnel: %s", err)
 		}
