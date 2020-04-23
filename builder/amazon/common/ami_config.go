@@ -47,15 +47,15 @@ type AMIConfig struct {
 	// Set to true if you want to skip
 	// validation of the ami_regions configuration option. Default false.
 	AMISkipRegionValidation bool `mapstructure:"skip_region_validation" required:"false"`
-	// Tags applied to the AMI. This is a
-	// [template engine](/docs/templates/engine), see [Build template
+	// Key/value pair tags applied to the AMI. This is a [template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	AMITags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
-	// containing a `name` and a `value` field. In HCL2 mode the
+	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	AMITag hcl2template.NameValues `mapstructure:"tag" required:"false"`
+	AMITag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy.
@@ -117,16 +117,16 @@ type AMIConfig struct {
 	// the intermediary AMI into any regions provided in `ami_regions`, then
 	// delete the intermediary AMI. Default `false`.
 	AMISkipBuildRegion bool `mapstructure:"skip_save_build_region"`
-	// Tags to apply to snapshot.
-	// They will override AMI tags if already applied to snapshot. This is a
-	// [template engine](/docs/templates/engine), see [Build template
+	// Key/value pair tags to apply to snapshot. They will override AMI tags if
+	// already applied to snapshot. This is a [template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	SnapshotTags map[string]string `mapstructure:"snapshot_tags" required:"false"`
 	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
-	// repeatable block containing a `name` and a `value` field. In HCL2 mode the
+	// repeatable block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	SnapshotTag hcl2template.NameValues `mapstructure:"snapshot_tag" required:"false"`
+	SnapshotTag hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional
 	// users other than the user creating the AMI has permissions to create

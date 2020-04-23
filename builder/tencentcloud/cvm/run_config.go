@@ -81,14 +81,14 @@ type TencentCloudRunConfig struct {
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// host name.
 	HostName string `mapstructure:"host_name" required:"false"`
-	// Tags to apply to the instance that is *launched* to create the image.
-	// These tags are *not* applied to the resulting image.
+	// Key/value pair tags to apply to the instance that is *launched* to
+	// create the image. These tags are *not* applied to the resulting image.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
-	// block containing a `name` and a `value` field. In HCL2 mode the
+	// block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag hcl2template.NameValues `mapstructure:"run_tag" required:"false"`
+	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
 
 	// Communicator settings
 	Comm         communicator.Config `mapstructure:",squash"`

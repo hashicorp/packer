@@ -160,15 +160,15 @@ type Config struct {
 	//criteria provided in `source_ami_filter`; this pins the AMI returned by the
 	//filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
-	// Tags to apply to the volumes that are *launched*. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// Key/value pair tags to apply to the volumes that are *launched*. This is
+	// a [template engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
 	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
-	// singular block containing a `name` and a `value` field. In HCL2 mode the
+	// singular block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	RootVolumeTag hcl2template.NameValues `mapstructure:"root_volume_tag" required:"false"`
+	RootVolumeTag hcl2template.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`

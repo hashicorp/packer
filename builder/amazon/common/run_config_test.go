@@ -87,7 +87,7 @@ func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
 	filter_value := "foo"
 	goodFilter := AmiFilterOptions{
 		Owners: []string{owner},
-		KVFilter: hcl2template.KVFilter{
+		KeyValueFilter: hcl2template.KeyValueFilter{
 			Filters: map[string]string{filter_key: filter_value},
 		},
 	}

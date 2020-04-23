@@ -64,21 +64,20 @@ type Config struct {
 	// Key/value pair tags to add to the created image.
 	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
 	// Same as [`image_tags`](#image_tags) but defined as a singular repeatable
-	// block containing a `name` and a `value` field. In HCL2 mode the
+	// block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	ImageTag hcl2template.NameValues `mapstructure:"image_tag" required:"false"`
+	ImageTag hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
 	VmType string `mapstructure:"vm_type" required:"true"`
 	// The name of the created server.
 	VmName string `mapstructure:"vm_name" required:"false"`
-	// Key/value pair tags to
-	// add to the created server.
+	// Key/value pair tags to add to the created server.
 	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
 	// Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
-	// containing a `name` and a `value` field. In HCL2 mode the
+	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	VmTag hcl2template.NameValues `mapstructure:"vm_tag" required:"false"`
