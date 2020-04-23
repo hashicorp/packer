@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -63,7 +64,11 @@ func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.
 		imageVersion)
 	if err == nil {
 		log.Println("Shared image version creation in process...")
-		err = f.WaitForCompletionRef(ctx, azcli.PollClient())
+		pollClient := azcli.PollClient()
+		pollClient.PollingDelay = 10 * time.Second
+		ctx, cancel := context.WithTimeout(ctx, time.Hour*12)
+		defer cancel()
+		err = f.WaitForCompletionRef(ctx, pollClient)
 	}
 	if err != nil {
 		log.Printf("StepCreateSharedImageVersion.Run: error: %+v", err)

@@ -9,11 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
-	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
+	"github.com/Azure/go-autorest/autorest"
 )
 
 func Test_parseSnapshotResourceID(t *testing.T) {
@@ -176,13 +177,13 @@ func TestStepCreateSnapshot_Cleanup(t *testing.T) {
 	m := compute.NewSnapshotsClient("subscriptionId")
 	{
 		expectedCalls := []string{
-			"POST /subscriptions/subscriptionId/resourceGroups/rg/providers/Microsoft.Compute/snapshots/snap1/endGetAccess?api-version=2019-07-01",
-			"DELETE /subscriptions/subscriptionId/resourceGroups/rg/providers/Microsoft.Compute/snapshots/snap1?api-version=2019-07-01",
+			"POST /subscriptions/subscriptionId/resourceGroups/rg/providers/Microsoft.Compute/snapshots/snap1/endGetAccess",
+			"DELETE /subscriptions/subscriptionId/resourceGroups/rg/providers/Microsoft.Compute/snapshots/snap1",
 		}
 		i := 0
 		m.Sender = autorest.SenderFunc(func(r *http.Request) (*http.Response, error) {
 			want := expectedCalls[i]
-			got := r.Method + " " + r.URL.RequestURI()
+			got := r.Method + " " + r.URL.Path
 			if want != got {
 				t.Errorf("unexpected HTTP call: %v, wanted %v", got, want)
 				return &http.Response{

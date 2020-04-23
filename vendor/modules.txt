@@ -13,8 +13,8 @@ github.com/1and1/oneandone-cloudserver-sdk-go
 # github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
-github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute
-github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute/computeapi
+github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute
+github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute/computeapi
 github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl
 github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2018-02-14/keyvault
 github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network

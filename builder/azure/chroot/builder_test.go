@@ -4,9 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/helper/multistep"
+
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 )
 
 func TestBuilder_Prepare(t *testing.T) {
@@ -27,6 +28,12 @@ func TestBuilder_Prepare(t *testing.T) {
 				"subscription_id":   "789",
 				"source":            "credativ:Debian:9:latest",
 				"image_resource_id": "/subscriptions/789/resourceGroups/otherrgname/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+				"shared_image_destination": config{
+					"resource_group": "otherrgname",
+					"gallery_name":   "myGallery",
+					"image_name":     "imageName",
+					"image_version":  "1.0.2",
+				},
 			},
 			validate: func(c Config) {
 				if c.OSDiskSizeGB != 0 {
@@ -84,6 +91,19 @@ func TestBuilder_Prepare(t *testing.T) {
 				},
 			},
 			wantErr: true,
+		},
+		{
+			name: "from shared image",
+			config: config{
+				"shared_image_destination": config{
+					"resource_group": "otherrgname",
+					"gallery_name":   "myGallery",
+					"image_name":     "imageName",
+					"image_version":  "1.0.2",
+				},
+				"source": "/subscriptions/789/resourceGroups/testrg/providers/Microsoft.Compute/disks/diskname",
+			},
+			wantErr: false,
 		},
 		{
 			name: "err: no output",

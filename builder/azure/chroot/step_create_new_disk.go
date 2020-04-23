@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
@@ -29,6 +29,8 @@ type StepCreateNewDisk struct {
 	PlatformImage *client.PlatformImage
 
 	SourceDiskResourceID string
+
+	SourceImageResourceID string
 
 	SkipCleanup bool
 }
@@ -67,34 +69,44 @@ func (s *StepCreateNewDisk) Run(ctx context.Context, state multistep.StateBag) m
 
 	disk := compute.Disk{
 		Location: to.StringPtr(s.Location),
-		Sku: &compute.DiskSku{
-			Name: compute.DiskStorageAccountTypes(s.DiskStorageAccountType),
-		},
-		//Zones: nil,
 		DiskProperties: &compute.DiskProperties{
-			OsType:           "Linux",
-			HyperVGeneration: compute.HyperVGeneration(s.HyperVGeneration),
-			CreationData:     &compute.CreationData{},
+			OsType:       "Linux",
+			CreationData: &compute.CreationData{},
 		},
-		//Tags: map[string]*string{
+	}
+
+	if s.DiskStorageAccountType != "" {
+		disk.Sku = &compute.DiskSku{
+			Name: compute.DiskStorageAccountTypes(s.DiskStorageAccountType),
+		}
+	}
+
+	if s.HyperVGeneration != "" {
+		disk.DiskProperties.HyperVGeneration = compute.HyperVGeneration(s.HyperVGeneration)
 	}
 
 	if s.DiskSizeGB > 0 {
 		disk.DiskProperties.DiskSizeGB = to.Int32Ptr(s.DiskSizeGB)
 	}
 
-	if s.SourceDiskResourceID != "" {
-		disk.CreationData.CreateOption = compute.Copy
-		disk.CreationData.SourceResourceID = to.StringPtr(s.SourceDiskResourceID)
-	} else if s.PlatformImage == nil {
-		disk.CreationData.CreateOption = compute.Empty
-	} else {
+	switch {
+	case s.PlatformImage != nil:
 		disk.CreationData.CreateOption = compute.FromImage
 		disk.CreationData.ImageReference = &compute.ImageDiskReference{
 			ID: to.StringPtr(fmt.Sprintf(
 				"/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/artifacttypes/vmimage/offers/%s/skus/%s/versions/%s",
 				s.subscriptionID, s.Location, s.PlatformImage.Publisher, s.PlatformImage.Offer, s.PlatformImage.Sku, s.PlatformImage.Version)),
 		}
+	case s.SourceDiskResourceID != "":
+		disk.CreationData.CreateOption = compute.Copy
+		disk.CreationData.SourceResourceID = to.StringPtr(s.SourceDiskResourceID)
+	case s.SourceImageResourceID != "":
+		disk.CreationData.CreateOption = compute.FromImage
+		disk.CreationData.GalleryImageReference = &compute.ImageDiskReference{
+			ID: to.StringPtr(s.SourceImageResourceID),
+		}
+	default:
+		disk.CreationData.CreateOption = compute.Empty
 	}
 
 	f, err := azcli.DisksClient().CreateOrUpdate(ctx, s.resourceGroup, s.diskName, disk)

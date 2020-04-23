@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 )
@@ -73,9 +73,11 @@ func (s *StepCreateSnapshot) Run(ctx context.Context, state multistep.StateBag) 
 
 	f, err := azcli.SnapshotsClient().CreateOrUpdate(ctx, s.resourceGroup, s.snapshotName, snapshot)
 	if err == nil {
-		cli := azcli.PollClient() // quick polling for quick operations
-		cli.PollingDelay = time.Second
-		err = f.WaitForCompletionRef(ctx, cli)
+		pollClient := azcli.PollClient()
+		pollClient.PollingDelay = 2 * time.Second
+		ctx, cancel := context.WithTimeout(ctx, time.Hour*12)
+		defer cancel()
+		err = f.WaitForCompletionRef(ctx, pollClient)
 	}
 	if err != nil {
 		log.Printf("StepCreateSnapshot.Run: error: %+v", err)
