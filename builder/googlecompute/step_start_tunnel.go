@@ -205,5 +205,9 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 
 // Cleanup stops the IAP tunnel and cleans up processes.
 func (s *StepStartTunnel) Cleanup(state multistep.StateBag) {
+	if !s.IAPConf.IAP {
+		log.Printf("Skipping cleanup of IAP tunnel; \"iap\" is false.")
+		return
+	}
 	s.tunnelDriver.StopTunnel()
 }

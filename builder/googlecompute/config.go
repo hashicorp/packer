@@ -336,12 +336,14 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Configure IAP: Update SSH config to use localhost proxy instead
-	if c.Comm.Type == "ssh" {
-		c.Comm.SSHHost = "localhost"
-	} else {
-		err := fmt.Errorf("Error: IAP tunnel currently only implemnted for" +
-			" SSH communicator")
-		errs = packer.MultiErrorAppend(errs, err)
+	if c.IAPConfig.IAP {
+		if c.Comm.Type == "ssh" {
+			c.Comm.SSHHost = "localhost"
+		} else {
+			err := fmt.Errorf("Error: IAP tunnel currently only implemnted for" +
+				" SSH communicator")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	// Process required parameters.

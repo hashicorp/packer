@@ -3,6 +3,7 @@
 package googlecompute
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -38,23 +39,24 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 			err)
 		return err
 	}
-	// Wait for tunnel to launch and gather response. TODO: do this without
-	// a sleep.
-	time.Sleep(30 * time.Second)
 
-	// Track stdout.
-	sout := stdout.String()
-	if sout != "" {
-		log.Printf("[start-iap-tunnel] stdout is:")
-	}
-
+	time.Sleep(10 * time.Second)
+	// read stdout
+	scanner := bufio.NewScanner(&stderr)
 	log.Printf("[start-iap-tunnel] stderr is:")
-	serr := stderr.String()
-	log.Println(serr)
-	if strings.Contains(serr, "ERROR") {
-		errIdx := strings.Index(serr, "ERROR:")
-		return fmt.Errorf("ERROR: %s", serr[errIdx+7:])
+	for scanner.Scan() {
+		line := scanner.Text()
+		log.Println(line)
+
+		if strings.Contains(line, "ERROR") {
+			errIdx := strings.Index(line, "ERROR:")
+			return fmt.Errorf("ERROR: %s", line[errIdx+7:])
+		}
 	}
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error scanning tunnel stderr: %s", err)
+	}
+
 	// Store successful command on step so we can access it to cancel it
 	// later.
 	t.cmd = cmd
