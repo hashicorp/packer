@@ -92,6 +92,11 @@ func (s *StepVerifySharedImageDestination) Run(ctx context.Context, state multis
 		s.Image.GalleryName,
 		s.Image.ImageName)
 
+	if err != nil {
+		return errorMessage("Could not ListByGalleryImageComplete group:%v gallery:%v image:%v",
+			s.Image.ResourceGroup, s.Image.GalleryName, s.Image.ImageName)
+	}
+
 	for versions.NotDone() {
 		version := versions.Value()
 
