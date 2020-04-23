@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vmware/govmomi/property"
+	"github.com/hashicorp/packer/packer"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/nfc"
-	"github.com/vmware/govmomi/ovf"
-
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -97,6 +98,31 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 		vm:     vm,
 		driver: d,
 	}, nil
+}
+
+func (d *Driver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+	vm, err := d.FindVM(vmPath)
+	if err != nil {
+		if _, ok := err.(*find.NotFoundError); !ok {
+			return fmt.Errorf("error looking up old vm: %v", err)
+		}
+	}
+	if force && vm != nil {
+		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
+
+		// power off just in case it is still on
+		vm.PowerOff()
+
+		err := vm.Destroy()
+		if err != nil {
+			return fmt.Errorf("error destroying %s: %v", vmPath, err)
+		}
+	}
+	if !force && vm != nil {
+		return fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err)
+	}
+
+	return nil
 }
 
 func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {

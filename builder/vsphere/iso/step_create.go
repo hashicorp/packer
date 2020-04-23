@@ -6,6 +6,7 @@ package iso
 import (
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
@@ -131,19 +132,12 @@ type StepCreateVM struct {
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
-	vmPath := fmt.Sprintf("%s/%s", s.Location.Folder, s.Location.VMName)
+	vmPath := path.Join(s.Location.Folder, s.Location.VMName)
 
-	vm, err := d.FindVM(vmPath)
-
-	if s.Force == false && err == nil {
-		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err))
+	err := d.PreCleanVM(ui, vmPath, s.Force)
+	if err != nil {
+		state.Put("error", err)
 		return multistep.ActionHalt
-	} else if s.Force == true && err == nil {
-		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
-		err := vm.Destroy()
-		if err != nil {
-			state.Put("error", fmt.Errorf("error destroying %s: %v", vmPath, err))
-		}
 	}
 
 	ui.Say("Creating VM...")
@@ -181,7 +175,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		})
 	}
 
-	vm, err = d.CreateVM(&driver.CreateConfig{
+	vm, err := d.CreateVM(&driver.CreateConfig{
 		DiskControllerType: s.Config.DiskControllerType,
 		Storage:            disks,
 		Annotation:         s.Config.Notes,
