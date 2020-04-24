@@ -352,7 +352,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 }
 
 // Convert -only and -except globs to glob.Glob instances.
-func convertFilterOption(patterns []string) ([]glob.Glob, hcl.Diagnostics) {
+func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl.Diagnostics) {
 	var globs []glob.Glob
 	var diags hcl.Diagnostics
 
@@ -360,7 +360,7 @@ func convertFilterOption(patterns []string) ([]glob.Glob, hcl.Diagnostics) {
 		g, err := glob.Compile(pattern)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
-				Summary:  fmt.Sprintf("Invalid -only pattern %s: %s", pattern, err),
+				Summary:  fmt.Sprintf("Invalid -%s pattern %s: %s", optionName, pattern, err),
 				Severity: hcl.DiagError,
 			})
 		}
@@ -383,7 +383,7 @@ func convertFilterOption(patterns []string) ([]glob.Glob, hcl.Diagnostics) {
 func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string, onlyBuilds []string, exceptBuilds []string) ([]packer.Build, hcl.Diagnostics) {
 	var onlyGlobs []glob.Glob
 	if len(onlyBuilds) > 0 {
-		og, diags := convertFilterOption(onlyBuilds)
+		og, diags := convertFilterOption(onlyBuilds, "only")
 		if diags.HasErrors() {
 			return nil, diags
 		}
@@ -392,7 +392,7 @@ func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string
 
 	var exceptGlobs []glob.Glob
 	if len(exceptBuilds) > 0 {
-		eg, diags := convertFilterOption(exceptBuilds)
+		eg, diags := convertFilterOption(exceptBuilds, "except")
 		if diags.HasErrors() {
 			return nil, diags
 		}

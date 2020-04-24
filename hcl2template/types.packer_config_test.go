@@ -274,7 +274,7 @@ func TestParser_ValidateFilterOption(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.pattern, func(t *testing.T) {
-			_, diags := convertFilterOption([]string{test.pattern})
+			_, diags := convertFilterOption([]string{test.pattern}, "")
 			if diags.HasErrors() && !test.expectError {
 				t.Fatalf("Expected %s to parse as glob", test.pattern)
 			}
