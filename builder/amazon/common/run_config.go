@@ -427,6 +427,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
+	if port := c.Comm.Port(); port == 0 {
+		if c.Comm.Type != "none" {
+			err := fmt.Errorf("port must be set to a non-zero value for a communicator of type %s", c.Comm.Type)
+			errs = append(errs, err)
+		}
+	}
+
 	// Copy singular tag maps
 	errs = append(errs, c.RunTag.CopyOn(&c.RunTags)...)
 	errs = append(errs, c.SpotTag.CopyOn(&c.SpotTags)...)

@@ -77,14 +77,6 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	// TODO move to some prevalidation step for
-	port := s.CommConfig.Port()
-	if port == 0 {
-		if s.CommConfig.Type != "none" {
-			panic("port must be set to a non-zero value.")
-		}
-	}
-
 	// Create the group
 	groupName := fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	ui.Say(fmt.Sprintf("Creating temporary security group for this instance: %s", groupName))
@@ -138,7 +130,8 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	// Authorize the SSH access for the security group
+	port := s.CommConfig.Port()
+	// Authorize access for the provided port within the security group
 	groupRules := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId: groupResp.GroupId,
 		IpPermissions: []*ec2.IpPermission{
