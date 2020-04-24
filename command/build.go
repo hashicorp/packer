@@ -21,7 +21,6 @@ import (
 	"github.com/hashicorp/packer/template"
 	"golang.org/x/sync/semaphore"
 
-	"github.com/gobwas/glob"
 	"github.com/posener/complete"
 )
 
@@ -105,7 +104,7 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
 	}
 
-	builds, diags := parser.Parse(path, c.varFiles, c.flagVars)
+	builds, diags := parser.Parse(path, c.varFiles, c.flagVars, c.CoreConfig.Only, c.CoreConfig.Except)
 	{
 		// write HCL errors/diagnostics if any.
 		b := bytes.NewBuffer(nil)
@@ -134,78 +133,7 @@ func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
 		return nil, 1
 	}
 	if isHCLLoaded {
-		builds, ret := c.GetBuildsFromHCL(path)
-		if ret != 0 {
-			return nil, ret
-		}
-
-		if len(c.Meta.CoreConfig.Only) > 0 {
-			// Build a slice of glob.Glob representing the -only filters.
-			var onlyGlobs []glob.Glob
-			for _, pattern := range c.Meta.CoreConfig.Only {
-				onlyGlob, err := glob.Compile(pattern)
-				if err != nil {
-					c.Ui.Error(fmt.Sprintf("invalid glob pattern %s for -only: %s", pattern, err))
-					return nil, 1
-				}
-
-				onlyGlobs = append(onlyGlobs, onlyGlob)
-			}
-
-			var filteredBuilds []packer.Build
-
-			for _, build := range builds {
-				include := false
-
-				for _, onlyGlob := range onlyGlobs {
-					if onlyGlob.Match(build.Name()) {
-						include = true
-						break
-					}
-				}
-
-				if include {
-					filteredBuilds = append(filteredBuilds, build)
-				}
-			}
-
-			builds = filteredBuilds
-		}
-
-		if len(c.Meta.CoreConfig.Except) > 0 {
-			// Build a slice of glob.Glob representing the -except filters.
-			var exceptGlobs []glob.Glob
-			for _, pattern := range c.Meta.CoreConfig.Except {
-				exceptGlob, err := glob.Compile(pattern)
-				if err != nil {
-					c.Ui.Error(fmt.Sprintf("invalid glob pattern %s for -except: %s", pattern, err))
-					return nil, 1
-				}
-
-				exceptGlobs = append(exceptGlobs, exceptGlob)
-			}
-
-			var filteredBuilds []packer.Build
-
-			for _, build := range builds {
-				exclude := false
-
-				for _, exceptGlob := range exceptGlobs {
-					if exceptGlob.Match(build.Name()) {
-						exclude = true
-						break
-					}
-				}
-
-				if !exclude {
-					filteredBuilds = append(filteredBuilds, build)
-				}
-			}
-
-			builds = filteredBuilds
-		}
-
-		return builds, 0
+		return c.GetBuildsFromHCL(path)
 	}
 
 	// TODO: uncomment in v1.5.1 once we've polished HCL a bit more.

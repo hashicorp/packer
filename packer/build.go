@@ -87,7 +87,6 @@ type Build interface {
 // as VirtualBox, EC2, etc.).
 type CoreBuild struct {
 	Type               string
-	Label              string
 	Builder            Builder
 	BuilderConfig      interface{}
 	BuilderType        string
@@ -129,11 +128,7 @@ type CoreBuildProvisioner struct {
 
 // Returns the name of the build.
 func (b *CoreBuild) Name() string {
-	if b.Label != "" {
-		return fmt.Sprintf("%s.%s", b.Type, b.Label)
-	} else {
-		return b.Type
-	}
+	return b.Type
 }
 
 // Prepare prepares the build by doing some initialization for the builder
