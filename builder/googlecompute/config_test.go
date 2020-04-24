@@ -384,17 +384,19 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 
 func TestConfigPrepareIAP(t *testing.T) {
 	config := map[string]interface{}{
-		"project_id":          "project",
-		"source_image":        "foo",
-		"ssh_username":        "packer",
-		"startup_script_file": "no-such-file",
-		"zone":                "us-central1-a",
-		"communicator":        "ssh",
-		"use_iap":             true,
+		"project_id":   "project",
+		"source_image": "foo",
+		"ssh_username": "packer",
+		"zone":         "us-central1-a",
+		"communicator": "ssh",
+		"use_iap":      true,
 	}
 
 	var c Config
-	c.Prepare(config)
+	_, err := c.Prepare(config)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors. Err = %s", err)
+	}
 
 	if c.IAPHashBang != "/bin/sh" {
 		t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
@@ -409,15 +411,14 @@ func TestConfigPrepareIAP(t *testing.T) {
 
 func TestConfigPrepareIAP_failures(t *testing.T) {
 	config := map[string]interface{}{
-		"project_id":          "project",
-		"source_image":        "foo",
-		"winrm_username":      "packer",
-		"startup_script_file": "no-such-file",
-		"zone":                "us-central1-a",
-		"communicator":        "winrm",
-		"iap_hashbang":        "/bin/bash",
-		"iap_ext":             ".ps1",
-		"use_iap":             true,
+		"project_id":     "project",
+		"source_image":   "foo",
+		"winrm_username": "packer",
+		"zone":           "us-central1-a",
+		"communicator":   "winrm",
+		"iap_hashbang":   "/bin/bash",
+		"iap_ext":        ".ps1",
+		"use_iap":        true,
 	}
 
 	var c Config
