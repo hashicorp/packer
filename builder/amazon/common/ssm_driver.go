@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
@@ -12,7 +13,8 @@ import (
 const SessionManagerPluginName string = "session-manager-plugin"
 
 type SSMDriver struct {
-	Ui packer.Ui
+	Ui  packer.Ui
+	Ctx context.Context
 	// Provided for testing purposes; if not specified it defaults to SessionManagerPluginName
 	PluginName string
 }
@@ -40,7 +42,7 @@ func (s *SSMDriver) StartSession(sessionData, region, profile, params, endpoint 
 	}
 
 	log.Printf("Attempting to start session with the following args: %v", args)
-	cmd := exec.Command(s.PluginName, args...)
+	cmd := exec.CommandContext(s.Ctx, s.PluginName, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 

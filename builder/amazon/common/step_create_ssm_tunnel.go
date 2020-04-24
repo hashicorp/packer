@@ -50,7 +50,6 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		"portNumber":      []*string{aws.String(dst)},
 		"localPortNumber": []*string{aws.String(src)},
 	}
-	l.Close()
 
 	instance, ok := state.Get("instance").(*ec2.Instance)
 	if !ok {
@@ -101,7 +100,11 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	driver := SSMDriver{Ui: ui}
+	// Stop listening on selected port so that the AWS session-manager-plugin can use it.
+	// The port is closed right before we start the session to avoid two Packer builds from getting the same port - fingers-crossed
+	l.Close()
+
+	driver := SSMDriver{Ui: ui, Ctx: ctx}
 	// sessionDetails, region, "StartSession", profile, paramJson, endpoint
 	region := aws.StringValue(s.AWSSession.Config.Region)
 	// how to best get Profile name
