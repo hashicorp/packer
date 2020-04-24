@@ -298,7 +298,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyBuilds []string, exceptBuilds 
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.
-			buildName := fmt.Sprintf("%s-%s", src.Type, src.Name)
+			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
 
 			// -only
 			if len(onlyGlobs) > 0 {

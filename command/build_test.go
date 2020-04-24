@@ -459,6 +459,16 @@ func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
 			[]string{"cherry.txt"},
 			[]string{"chocolate.txt", "vanilla.txt"},
 		},
+		{
+			[]string{"-only=file.chocolate"},
+			[]string{"chocolate.txt"},
+			[]string{"vanilla.txt", "cherry.txt"},
+		},
+		{
+			[]string{"-except=file.chocolate"},
+			[]string{"vanilla.txt", "cherry.txt"},
+			[]string{"chocolate.txt"},
+		},
 	}
 
 	for _, tt := range tests {
