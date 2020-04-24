@@ -262,3 +262,25 @@ func TestParser_complete(t *testing.T) {
 	}
 	testParse(t, tests)
 }
+
+func TestParser_ValidateFilterOption(t *testing.T) {
+	tests := []struct {
+		pattern     string
+		expectError bool
+	}{
+		{"*foo*", false},
+		{"foo[]bar", true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.pattern, func(t *testing.T) {
+			_, diags := convertFilterOption([]string{test.pattern})
+			if diags.HasErrors() && !test.expectError {
+				t.Fatalf("Expected %s to parse as glob", test.pattern)
+			}
+			if !diags.HasErrors() && test.expectError {
+				t.Fatalf("Expected %s to fail to parse as glob", test.pattern)
+			}
+		})
+	}
+}
