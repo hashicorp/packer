@@ -402,9 +402,7 @@ func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
 	defer cleanup()
 
 	finalArgs := []string{"-parallel=false"}
-	for _, arg := range args {
-		finalArgs = append(finalArgs, arg)
-	}
+	finalArgs = append(finalArgs, args...)
 	finalArgs = append(finalArgs, testFixture("hcl-only-except"))
 
 	if code := c.Run(finalArgs); code != 0 {
