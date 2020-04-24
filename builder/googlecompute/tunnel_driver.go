@@ -82,7 +82,6 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 				return fmt.Errorf("Non-retryable tunnel error: %s", lineStderr)
 			}
 		}
-		return nil
 	}
 
 	log.Printf("No error detected after tunnel launch; continuing...")

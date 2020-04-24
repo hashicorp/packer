@@ -17,7 +17,6 @@ type MockTunnelDriver struct {
 
 func (m *MockTunnelDriver) StopTunnel() {
 	m.StopTunnelCalled = true
-	return
 }
 
 func (m *MockTunnelDriver) StartTunnel(context.Context, string) error {
