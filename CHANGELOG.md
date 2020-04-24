@@ -17,17 +17,20 @@
 * builder/azure-arm: Add support for setting custom resource names [GH-9028]
 * builder/azure-arm: Data disk names are now randomly generated [GH-8986]
 * builder/azure: Add shared image destination for azure-chroot [GH-9021]
+* builder/azure: Add shared image source for chroot builder [GH-9070]
 * builder/google: Add support for custom shielded images [GH-8970]
 * builder/google: Allow `source_image_project_id` to be a list of several
     projects to search. [GH-8679]
 * builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
     [GH-8893]
+* builder/oracle-oci: Update Oracle SDK. [GH-9104]
 * builder/proxmox: Add ability to add a cloud-init drive [GH-9045]
 * builder/vsphere: Add support for EFI Secure Boot [GH-9018]
 * builder/yandex: Add `target_image_folder_id ` option for changing the folder
     where a built image will be saved to [GH-9080]
 * core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
     builder provisioners and post-processors [GH-8956]
+* core: New template function: aws_secretsmanager [GH-9099]
 * provisioner/ansible: Add option to not use localhost proxy adapter. Removes
     need for ansible connection_plugin when using WinRM. [GH-8625]
 * provisioner/powershell: Add `debug_mode` option to help with debugging
@@ -44,11 +47,17 @@
     [GH-9068]
 * builder/azure: Allow Managed Data Disks to be used with Azure Shared Image
     Gallery  [GH-8912]
+* builder/azure: Fix SSH connection for temporary admin users specified in
+    `ssh_username` [GH-9103]
+* builder/osc: Make compliant with oAPI spec for Outscale osc-bsu builder
+    [GH-9093]
 * builder/qemu: Remove `net_device` pre-validation [GH-8979]
 * builder/tencentcloud: Update builder to handle the
     InstanceOperationInProgress error [GH-9069]
 * builder/vsphere-iso: disk_size is no longer required if storage is defined
     [GH-8975]
+* builder/vsphere: Fix issue where -force is not working with vsphere builders
+    [GH-9039]
 * core: Fix crash in wrapperreadline helper when calling `os.NewFile` on
     unknown file descriptor [GH-9037]
 * core: Make sure CLI variables supersede variables from var files [GH-8964]
