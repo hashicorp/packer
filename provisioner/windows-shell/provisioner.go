@@ -28,8 +28,6 @@ import (
 //FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
 const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 
-var retryableSleep = 2 * time.Second
-
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
@@ -160,7 +158,7 @@ func extractScript(p *Provisioner) (string, error) {
 }
 
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
-	ui.Say(fmt.Sprintf("Provisioning with windows-shell..."))
+	ui.Say("Provisioning with windows-shell...")
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
