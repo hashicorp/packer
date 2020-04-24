@@ -3,10 +3,10 @@
 package googlecompute
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os/exec"
 	"strings"
@@ -33,29 +33,60 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	err := cmd.Start()
-	log.Printf("Waiting 30s for tunnel to create...")
 	if err != nil {
 		err := fmt.Errorf("Error calling gcloud sdk to launch IAP tunnel: %s",
 			err)
 		return err
 	}
 
-	time.Sleep(10 * time.Second)
-	// read stdout
-	scanner := bufio.NewScanner(&stderr)
-	log.Printf("[start-iap-tunnel] stderr is:")
-	for scanner.Scan() {
-		line := scanner.Text()
-		log.Println(line)
+	// Give tunnel 30 seconds to either launch, or return an error.
+	// Unfortunately, the SDK doesn't provide any official acknowledgment that
+	// the tunnel is launched when it's not being run through a TTY so we
+	// are just trusting here that 30s is enough to know whether the tunnel
+	// launch was going to fail. Yep, feels icky to me too. But I spent an
+	// afternoon trying to figure out how to get the SDK to actually send
+	// the "Listening on port [n]" line I see when I run it manually, and I
+	// can't justify spending more time than that on aesthetics.
+	for i := 0; i < 30; i++ {
+		time.Sleep(1 * time.Second)
 
-		if strings.Contains(line, "ERROR") {
-			errIdx := strings.Index(line, "ERROR:")
-			return fmt.Errorf("ERROR: %s", line[errIdx+7:])
+		lineStderr, err := stderr.ReadString('\n')
+		if err != nil && err != io.EOF {
+			log.Printf("Err from scanning stderr is %s", err)
+			return fmt.Errorf("Error reading stderr from tunnel launch: %s", err)
+		}
+		if lineStderr != "" {
+			log.Printf("stderr: %s", lineStderr)
+		}
+
+		lineStdout, err := stdout.ReadString('\n')
+		if err != nil && err != io.EOF {
+			log.Printf("Err from scanning stdout is %s", err)
+			return fmt.Errorf("Error reading stdout from tunnel launch: %s", err)
+		}
+		if lineStdout != "" {
+			log.Printf("stdout: %s", lineStdout)
+		}
+
+		if strings.Contains(lineStderr, "ERROR") {
+			// 4033: Either you don't have permission to access the instance,
+			// the instance doesn't exist, or the instance is stopped.
+			// The two sub-errors we may see while the permissions settle are
+			// "not authorized" and "failed to connect to backend," but after
+			// about a minute of retries this goes away and we're able to
+			// connect.
+			if strings.Contains(lineStderr, "4033") {
+				return RetryableTunnelError{lineStderr}
+			} else {
+				log.Printf("NOT RETRYABLE: %s", lineStderr)
+				return fmt.Errorf("Non-retryable tunnel error: %s", lineStderr)
+			}
+
+			return nil
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		log.Printf("Error scanning tunnel stderr: %s", err)
-	}
+
+	log.Printf("No error detected after tunnel launch; continuing...")
 
 	// Store successful command on step so we can access it to cancel it
 	// later.
@@ -68,10 +99,10 @@ func (t *TunnelDriverLinux) StopTunnel() {
 		log.Printf("Cleaning up the IAP tunnel...")
 		// Why not just cmd.Process.Kill()?  I'm glad you asked. The gcloud
 		// call spawns a python subprocess that listens on the port, and you
-		// need to use the process _group_ id to kill this process and its
+		// need to use the process _group_ id to halt this process and its
 		// daemon child. We create the group ID with the syscall.SysProcAttr
 		// call inside the retry loop above, and then store that ID on the
-		// command so we can destroy it here.
+		// command so we can halt it here.
 		err := syscall.Kill(-t.cmd.Process.Pid, syscall.SIGINT)
 		if err != nil {
 			log.Printf("Issue stopping IAP tunnel: %s", err)

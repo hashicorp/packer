@@ -53,6 +53,14 @@ type TunnelDriver interface {
 	StopTunnel()
 }
 
+type RetryableTunnelError struct {
+	s string
+}
+
+func (e RetryableTunnelError) Error() string {
+	return "Tunnel start: " + e.s
+}
+
 type StepStartTunnel struct {
 	IAPConf     *IAPConfig
 	CommConf    *communicator.Config
@@ -190,8 +198,12 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	err = retry.Config{
 		Tries: 11,
 		ShouldRetry: func(err error) bool {
-			// TODO be stricter with retries.
-			return true
+			switch err.(type) {
+			case RetryableTunnelError:
+				return true
+			default:
+				return false
+			}
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
