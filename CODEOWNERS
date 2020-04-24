@@ -56,8 +56,8 @@
 /builder/yandex/                      @GennadySpb @alexanderKhaustov @seukyaso
 /website/pages/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
 
-/builder/osc/                      @marinsalinas
-/website/pages/docs/builders/osc* @marinsalinas
+/builder/osc/                      @marinsalinas @Hakujou
+/website/pages/docs/builders/osc* @marinsalinas @Hakujou
 
 /builder/tencentcloud/                      @likexian
 /website/pages/docs/builders/tencentcloud* @likexian
