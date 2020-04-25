@@ -347,7 +347,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
 	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
-	if err = cmd.RunWithUi(ctx, comm, ui); err != nil || cmd.ExitStatus() != 0 {
+	if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
 		}
