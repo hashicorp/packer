@@ -256,6 +256,7 @@ export default [
       'vagrant-cloud',
       'vsphere',
       'vsphere-template',
+      'yandex-export',
     ],
   },
   '----------',
