@@ -15,12 +15,12 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type stepCreateSSHKey struct {
+type StepCreateSSHKey struct {
 	Debug        bool
 	DebugKeyPath string
 }
 
-func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
@@ -96,5 +96,5 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
+func (s *StepCreateSSHKey) Cleanup(state multistep.StateBag) {
 }

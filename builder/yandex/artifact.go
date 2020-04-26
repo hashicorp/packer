@@ -26,7 +26,7 @@ func (a *Artifact) Id() string {
 }
 
 func (*Artifact) Files() []string {
-	return nil
+	return []string{""}
 }
 
 //revive:enable:var-naming
