@@ -16,5 +16,5 @@ type Driver interface {
 	DeleteInstance(ctx context.Context, instanceID string) error
 	DeleteSubnet(ctx context.Context, subnetID string) error
 	DeleteNetwork(ctx context.Context, networkID string) error
-	GetInstanceMetadata(ctx context.Context, name string, key string) (string, error)
+	GetInstanceMetadata(ctx context.Context, instanceID string, key string) (string, error)
 }

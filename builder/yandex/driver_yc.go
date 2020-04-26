@@ -234,9 +234,9 @@ func (d *driverYC) DeleteDisk(ctx context.Context, diskID string) error {
 	return err
 }
 
-func (d *driverYC) GetInstanceMetadata(ctx context.Context, id string, key string) (string, error) {
+func (d *driverYC) GetInstanceMetadata(ctx context.Context, instanceID string, key string) (string, error) {
 	instance, err := d.sdk.Compute().Instance().Get(ctx, &compute.GetInstanceRequest{
-		InstanceId: id,
+		InstanceId: instanceID,
 		View:       compute.InstanceView_FULL,
 	})
 	if err != nil {
