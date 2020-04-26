@@ -11,6 +11,8 @@
 * **New Core Feature** provisioners now support a `max_retries` option that can
     be used for retrying a provisioner on error [GH-9061]
 
+* **New Post-Processor**: `yandex-export` Upload built image in Yandex Object Storage.
+
 ### IMPROVEMENTS:
 * builder/azure-arm: Add `boot_diag_storage_account` option for enabling boot
     diagnostics on a virtual machine [GH-9053]
@@ -38,8 +40,6 @@
 * provisioner/powershell: Add cleanup step to remove temporarily created
     scripts; cleanup can be skipped by setting the `skip_clean` option
     [GH-8908]
-* builder/yandex: Allow set `target_image_folder_id ` where save built 
-    image in [GH-9079]
 
 ### BUG FIXES:
 * builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
