@@ -131,6 +131,7 @@
 * plugins: Make plugin discovery stricter with respect to periods so that users
     can disable plugins by renaming the extension [GH-8735]
 * provisioner/shell: "inline" config option is now a template engine. [GH-8883]
+* provisioner/salt: Fix `no_exit_on_failure` config to work correctly as expected. [GH-9119]
 
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
