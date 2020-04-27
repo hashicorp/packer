@@ -298,14 +298,14 @@ func funcGenVault(ctx *Context) interface{} {
 		vaultConfig := vaultapi.DefaultConfig()
 		cli, err := vaultapi.NewClient(vaultConfig)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error getting Vault client: %s", err))
+			return "", fmt.Errorf("Error getting Vault client: %s", err)
 		}
 		secret, err := cli.Logical().Read(path)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error reading vault secret: %s", err))
+			return "", fmt.Errorf("Error reading vault secret: %s", err)
 		}
 		if secret == nil {
-			return "", errors.New(fmt.Sprintf("Vault Secret does not exist at the given path."))
+			return "", errors.New("Vault Secret does not exist at the given path")
 		}
 
 		data, ok := secret.Data["data"]
@@ -317,8 +317,8 @@ func funcGenVault(ctx *Context) interface{} {
 			}
 
 			// neither v1 nor v2 proudced a valid value
-			return "", errors.New(fmt.Sprintf("Vault data was empty at the "+
-				"given path. Warnings: %s", strings.Join(secret.Warnings, "; ")))
+			return "", fmt.Errorf("Vault data was empty at the "+
+				"given path. Warnings: %s", strings.Join(secret.Warnings, "; "))
 		}
 
 		value := data.(map[string]interface{})[key].(string)
