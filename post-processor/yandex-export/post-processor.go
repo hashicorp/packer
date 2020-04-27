@@ -108,7 +108,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != yandex.BuilderID {
 		err := fmt.Errorf(
-			"Unknown artifact typs\nCan only export from Yandex Cloud builder artifacts.",
+			"Unknown artifact type: %s\nCan only export from Yandex Cloud builder artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
