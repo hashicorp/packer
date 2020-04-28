@@ -10,7 +10,7 @@ func diskset(ids ...string) Diskset {
 		if err != nil {
 			panic(err)
 		}
-		diskset[i-1] = r
+		diskset[int32(i-1)] = r
 	}
 	return diskset
 }

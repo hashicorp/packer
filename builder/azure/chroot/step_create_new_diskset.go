@@ -22,6 +22,8 @@ type StepCreateNewDiskset struct {
 	OSDiskSizeGB             int32  // optional, ignored if 0
 	OSDiskStorageAccountType string // from compute.DiskStorageAccountTypes
 
+	DataDiskIDPrefix string
+
 	disks Diskset
 
 	HyperVGeneration string // For OS disk
@@ -43,10 +45,10 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
 
-	s.disks = make(map[int]client.Resource)
+	s.disks = make(Diskset)
 
 	errorMessage := func(format string, params ...interface{}) multistep.StepAction {
-		err := fmt.Errorf("StepCreateNewDisk.Run: error: "+format, params...)
+		err := fmt.Errorf("StepCreateNewDiskset.Run: error: "+format, params...)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -63,7 +65,7 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 	}
 
 	// transform step config to disk model
-	disk := s.getOSDiskDefinition(azcli)
+	disk := s.getOSDiskDefinition(azcli.SubscriptionID())
 
 	// Initiate disk creation
 	f, err := azcli.DisksClient().CreateOrUpdate(ctx, osDisk.ResourceGroup, osDisk.ResourceName.String(), disk)
@@ -74,21 +76,76 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 	state.Put(stateBagKey_Diskset, s.disks) // update the statebag
 	ui.Say(fmt.Sprintf("Creating disk %q", s.OSDiskID))
 
+	type Future struct {
+		client.Resource
+		compute.DisksCreateOrUpdateFuture
+	}
+	futures := []Future{{osDisk, f}}
+
+	if s.SourceImageResourceID != "" {
+		datadiskSuffix := 0 // initialize
+
+		// retrieve image to see if there are any datadisks
+		imageID, err := client.ParseResourceID(s.SourceImageResourceID)
+		if err != nil {
+			return errorMessage("could not parse source image id %q: %v", s.SourceImageResourceID, err)
+		}
+		if !strings.EqualFold(imageID.Provider+"/"+imageID.ResourceType.String(),
+			"Microsoft.Compute/galleries/images/versions") {
+			return errorMessage("source image id is not a shared image version %q, expected type 'Microsoft.Compute/galleries/images/versions'", imageID)
+		}
+		image, err := azcli.GalleryImageVersionsClient().Get(ctx,
+			imageID.ResourceGroup,
+			imageID.ResourceName[0], imageID.ResourceName[1], imageID.ResourceName[2], "")
+		if err != nil {
+			return errorMessage("error retrieving source image %q: %v", imageID, err)
+		}
+		if image.GalleryImageVersionProperties != nil &&
+			image.GalleryImageVersionProperties.StorageProfile != nil &&
+			image.GalleryImageVersionProperties.StorageProfile.DataDiskImages != nil {
+			for i, ddi := range *image.GalleryImageVersionProperties.StorageProfile.DataDiskImages {
+				if ddi.Lun == nil {
+					return errorMessage("unexpected: lun is null for data disk # %d", i)
+				}
+				datadiskID, err := client.ParseResourceID(fmt.Sprintf("%s%d", s.DataDiskIDPrefix, datadiskSuffix))
+				datadiskSuffix++
+				if err != nil {
+					return errorMessage("unable to construct resource id for datadisk: %v", err)
+				}
+
+				disk := s.getDatadiskDefinitionFromImage(*ddi.Lun)
+				// Initiate disk creation
+				f, err := azcli.DisksClient().CreateOrUpdate(ctx, datadiskID.ResourceGroup, datadiskID.ResourceName.String(), disk)
+				if err != nil {
+					return errorMessage("Failed to initiate resource creation: %q", datadiskID)
+				}
+				s.disks[*ddi.Lun] = datadiskID          // save the resoure we just create in our disk set
+				state.Put(stateBagKey_Diskset, s.disks) // update the statebag
+				ui.Say(fmt.Sprintf("Creating disk %q", datadiskID))
+
+				futures = append(futures, Future{datadiskID, f})
+			}
+		}
+	}
+
+	ui.Say("Waiting for disks to be created.")
+
 	// Wait for completion
-	{
+	for _, f := range futures {
 		cli := azcli.PollClient() // quick polling for quick operations
 		cli.PollingDelay = time.Second
 		err = f.WaitForCompletionRef(ctx, cli)
 		if err != nil {
 			return errorMessage(
-				"error creating new disk '%s': %v", s.OSDiskID, err)
+				"error creating new disk '%s': %v", f.Resource, err)
 		}
+		ui.Say(fmt.Sprintf("Disk %q created", f.Resource))
 	}
 
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateNewDiskset) getOSDiskDefinition(azcli client.AzureClientSet) compute.Disk {
+func (s StepCreateNewDiskset) getOSDiskDefinition(subscriptionID string) compute.Disk {
 	disk := compute.Disk{
 		Location: to.StringPtr(s.Location),
 		DiskProperties: &compute.DiskProperties{
@@ -117,7 +174,7 @@ func (s *StepCreateNewDiskset) getOSDiskDefinition(azcli client.AzureClientSet) 
 		disk.CreationData.ImageReference = &compute.ImageDiskReference{
 			ID: to.StringPtr(fmt.Sprintf(
 				"/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/artifacttypes/vmimage/offers/%s/skus/%s/versions/%s",
-				azcli.SubscriptionID(), s.Location,
+				subscriptionID, s.Location,
 				s.SourcePlatformImage.Publisher, s.SourcePlatformImage.Offer, s.SourcePlatformImage.Sku, s.SourcePlatformImage.Version)),
 		}
 	case s.SourceOSDiskResourceID != "":
@@ -130,6 +187,28 @@ func (s *StepCreateNewDiskset) getOSDiskDefinition(azcli client.AzureClientSet) 
 		}
 	default:
 		disk.CreationData.CreateOption = compute.Empty
+	}
+	return disk
+}
+
+func (s StepCreateNewDiskset) getDatadiskDefinitionFromImage(lun int32) compute.Disk {
+	disk := compute.Disk{
+		Location: to.StringPtr(s.Location),
+		DiskProperties: &compute.DiskProperties{
+			CreationData: &compute.CreationData{},
+		},
+	}
+
+	disk.CreationData.CreateOption = compute.FromImage
+	disk.CreationData.GalleryImageReference = &compute.ImageDiskReference{
+		ID:  to.StringPtr(s.SourceImageResourceID),
+		Lun: to.Int32Ptr(lun),
+	}
+
+	if s.OSDiskStorageAccountType != "" {
+		disk.Sku = &compute.DiskSku{
+			Name: compute.DiskStorageAccountTypes(s.OSDiskStorageAccountType),
+		}
 	}
 	return disk
 }
@@ -154,7 +233,7 @@ func (s *StepCreateNewDiskset) Cleanup(state multistep.StateBag) {
 				err = f.WaitForCompletionRef(context.TODO(), azcli.PollClient())
 			}
 			if err != nil {
-				log.Printf("StepCreateNewDisk.Cleanup: error: %+v", err)
+				log.Printf("StepCreateNewDiskset.Cleanup: error: %+v", err)
 				ui.Error(fmt.Sprintf("error deleting disk '%s': %v.", d, err))
 			}
 		}
