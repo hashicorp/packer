@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+
+	"github.com/gobwas/glob"
 )
 
 // PackerConfig represents a loaded Packer HCL config. It will contain
@@ -248,7 +250,7 @@ func (p *Parser) getCoreBuildPostProcessors(source *SourceBlock, blocks []*PostP
 // getBuilds will return a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) {
+func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs []glob.Glob) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
 
@@ -263,6 +265,38 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 				})
 				continue
 			}
+
+			// Apply the -only and -except command-line options to exclude matching builds.
+			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
+
+			// -only
+			if len(onlyGlobs) > 0 {
+				include := false
+				for _, onlyGlob := range onlyGlobs {
+					if onlyGlob.Match(buildName) {
+						include = true
+						break
+					}
+				}
+				if !include {
+					continue
+				}
+			}
+
+			// -except
+			if len(exceptGlobs) > 0 {
+				exclude := false
+				for _, exceptGlob := range exceptGlobs {
+					if exceptGlob.Match(buildName) {
+						exclude = true
+						break
+					}
+				}
+				if exclude {
+					continue
+				}
+			}
+
 			builder, moreDiags, generatedVars := p.startBuilder(src, cfg.EvalContext(nil))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
@@ -317,6 +351,25 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 	return res, diags
 }
 
+// Convert -only and -except globs to glob.Glob instances.
+func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl.Diagnostics) {
+	var globs []glob.Glob
+	var diags hcl.Diagnostics
+
+	for _, pattern := range patterns {
+		g, err := glob.Compile(pattern)
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  fmt.Sprintf("Invalid -%s pattern %s: %s", optionName, pattern, err),
+				Severity: hcl.DiagError,
+			})
+		}
+		globs = append(globs, g)
+	}
+
+	return globs, diags
+}
+
 // Parse will parse HCL file(s) in path. Path can be a folder or a file.
 //
 // Parse will first parse variables and then the rest; so that interpolation
@@ -327,12 +380,30 @@ func (p *Parser) getBuilds(cfg *PackerConfig) ([]packer.Build, hcl.Diagnostics) 
 //
 // Parse then return a slice of packer.Builds; which are what packer core uses
 // to run builds.
-func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string) ([]packer.Build, hcl.Diagnostics) {
+func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string, onlyBuilds []string, exceptBuilds []string) ([]packer.Build, hcl.Diagnostics) {
+	var onlyGlobs []glob.Glob
+	if len(onlyBuilds) > 0 {
+		og, diags := convertFilterOption(onlyBuilds, "only")
+		if diags.HasErrors() {
+			return nil, diags
+		}
+		onlyGlobs = og
+	}
+
+	var exceptGlobs []glob.Glob
+	if len(exceptBuilds) > 0 {
+		eg, diags := convertFilterOption(exceptBuilds, "except")
+		if diags.HasErrors() {
+			return nil, diags
+		}
+		exceptGlobs = eg
+	}
+
 	cfg, diags := p.parse(path, varFiles, argVars)
 	if diags.HasErrors() {
 		return nil, diags
 	}
 
-	builds, moreDiags := p.getBuilds(cfg)
+	builds, moreDiags := p.getBuilds(cfg, onlyGlobs, exceptGlobs)
 	return builds, append(diags, moreDiags...)
 }

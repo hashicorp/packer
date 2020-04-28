@@ -115,7 +115,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				return
 			}
 
-			gotBuilds, gotDiags := tt.parser.getBuilds(gotCfg)
+			gotBuilds, gotDiags := tt.parser.getBuilds(gotCfg, nil, nil)
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}

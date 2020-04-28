@@ -394,6 +394,88 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 }
 
+func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+
+	defer cleanup()
+
+	finalArgs := []string{"-parallel=false"}
+	finalArgs = append(finalArgs, args...)
+	finalArgs = append(finalArgs, testFixture("hcl-only-except"))
+
+	if code := c.Run(finalArgs); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	for _, f := range notPresent {
+		if fileExists(f) {
+			t.Errorf("Expected NOT to find %s", f)
+		}
+	}
+	for _, f := range present {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
+	}
+}
+
+func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
+	tests := []struct {
+		args       []string
+		present    []string
+		notPresent []string
+	}{
+		{
+			[]string{"-only=chocolate"},
+			[]string{},
+			[]string{"chocolate.txt", "vanilla.txt", "cherry.txt"},
+		},
+		{
+			[]string{"-only=*chocolate*"},
+			[]string{"chocolate.txt"},
+			[]string{"vanilla.txt", "cherry.txt"},
+		},
+		{
+			[]string{"-except=*chocolate*"},
+			[]string{"vanilla.txt", "cherry.txt"},
+			[]string{"chocolate.txt"},
+		},
+		{
+			[]string{"-except=*ch*"},
+			[]string{"vanilla.txt"},
+			[]string{"chocolate.txt", "cherry.txt"},
+		},
+		{
+			[]string{"-only=*chocolate*", "-only=*vanilla*"},
+			[]string{"chocolate.txt", "vanilla.txt"},
+			[]string{"cherry.txt"},
+		},
+		{
+			[]string{"-except=*chocolate*", "-except=*vanilla*"},
+			[]string{"cherry.txt"},
+			[]string{"chocolate.txt", "vanilla.txt"},
+		},
+		{
+			[]string{"-only=file.chocolate"},
+			[]string{"chocolate.txt"},
+			[]string{"vanilla.txt", "cherry.txt"},
+		},
+		{
+			[]string{"-except=file.chocolate"},
+			[]string{"vanilla.txt", "cherry.txt"},
+			[]string{"chocolate.txt"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s", tt.args), func(t *testing.T) {
+			testHCLOnlyExceptFlags(t, tt.args, tt.present, tt.notPresent)
+		})
+	}
+}
+
 func TestBuildWithNonExistingBuilder(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),

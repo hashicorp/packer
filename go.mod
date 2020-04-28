@@ -51,7 +51,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.25.4
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gobwas/glob v0.2.3
 	github.com/gocolly/colly v1.2.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
