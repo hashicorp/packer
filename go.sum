@@ -271,6 +271,10 @@ github.com/hashicorp/go-getter/v2 v2.0.0-20200318090939-0b1d527d9793 h1:jH222Ag2
 github.com/hashicorp/go-getter/v2 v2.0.0-20200318090939-0b1d527d9793/go.mod h1:jlmxRRjTpY0KdWrV1Uq38GUVskrjIZUrjOAybo0OArw=
 github.com/hashicorp/go-getter/v2 v2.0.0-20200427140258-32e0fe310a1d h1:EbUwSFm9Dkq/pgx6OtKZBmQheJtJRSqL/6ltzk4AheE=
 github.com/hashicorp/go-getter/v2 v2.0.0-20200427140258-32e0fe310a1d/go.mod h1:ouW3tfHUq9ebkm9+QYiGdnxwS5+YkNHEMiT9FAZdKKM=
+github.com/hashicorp/go-getter/v2 v2.0.0-20200428121039-ea2d4f264fe2 h1:ZM8JBXeUSU1+kF5x+3OmWhIvW95y5BmszLuiN6b7XaA=
+github.com/hashicorp/go-getter/v2 v2.0.0-20200428121039-ea2d4f264fe2/go.mod h1:ouW3tfHUq9ebkm9+QYiGdnxwS5+YkNHEMiT9FAZdKKM=
+github.com/hashicorp/go-getter/v2 v2.0.0-20200428131008-7ca0077af588 h1:jIkZMaAG0noQODaZLYgXeyZNhPBLrcdGoHRVN0KZBfQ=
+github.com/hashicorp/go-getter/v2 v2.0.0-20200428131008-7ca0077af588/go.mod h1:ouW3tfHUq9ebkm9+QYiGdnxwS5+YkNHEMiT9FAZdKKM=
 github.com/hashicorp/go-immutable-radix v1.0.0 h1:AKDB1HM5PWEA7i4nhcpwOrO2byshxBjXVn/J/3+z5/0=
 github.com/hashicorp/go-immutable-radix v1.0.0/go.mod h1:0y9vanUI8NX6FsYoO3zeMjhV/C5i9g4Q3DwcSNZ4P60=
 github.com/hashicorp/go-msgpack v0.5.3 h1:zKjpN5BK/P5lMYrLmBHdBULWbJ0XpYR+7NGzqkZzoD4=

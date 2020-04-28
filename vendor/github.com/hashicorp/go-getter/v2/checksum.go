@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,56 +72,6 @@ func (c *FileChecksum) checksum(source string) error {
 	}
 
 	return nil
-}
-
-// extractChecksum will return a FileChecksum based on the 'checksum'
-// parameter of u.
-// ex:
-//  http://hashicorp.com/terraform?checksum=<checksumValue>
-//  http://hashicorp.com/terraform?checksum=<checksumType>:<checksumValue>
-//  http://hashicorp.com/terraform?checksum=file:<checksum_url>
-// when checksumming from a file, extractChecksum will go get checksum_url
-// in a temporary directory, parse the content of the file then delete it.
-// Content of files are expected to be BSD style or GNU style.
-//
-// BSD-style checksum:
-//  MD5 (file1) = <checksum>
-//  MD5 (file2) = <checksum>
-//
-// GNU-style:
-//  <checksum>  file1
-//  <checksum> *file2
-//
-// see parseChecksumLine for more detail on checksum file parsing
-func (c *Client) extractChecksum(ctx context.Context, u *url.URL) (*FileChecksum, error) {
-	q := u.Query()
-	v := q.Get("checksum")
-
-	if v == "" {
-		return nil, nil
-	}
-
-	vs := strings.SplitN(v, ":", 2)
-	switch len(vs) {
-	case 2:
-		break // good
-	default:
-		// here, we try to guess the checksum from it's length
-		// if the type was not passed
-		return newChecksumFromValue(v, filepath.Base(u.EscapedPath()))
-	}
-
-	checksumType, checksumValue := vs[0], vs[1]
-
-	switch checksumType {
-	case "file":
-		req := &Request{
-			Src: checksumValue,
-		}
-		return c.ChecksumFromFile(ctx, req, u.Path)
-	default:
-		return newChecksumFromType(checksumType, checksumValue, filepath.Base(u.EscapedPath()))
-	}
 }
 
 func newChecksum(checksumValue, filename string) (*FileChecksum, error) {
@@ -187,16 +136,16 @@ func newChecksumFromValue(checksumValue, filename string) (*FileChecksum, error)
 	return c, nil
 }
 
-// ChecksumFromFile will return the first file checksum found in the
+// checksumFromFile will return the first file checksum found in the
 // `checksumURL` file that corresponds to the `checksummedPath` path.
 //
-// ChecksumFromFile will infer the hashing algorithm based on the checksumURL
+// checksumFromFile will infer the hashing algorithm based on the checksumURL
 // file content.
 //
-// ChecksumFromFile will only return checksums for files that match
+// checksumFromFile will only return checksums for files that match
 // checksummedPath, which is the object being checksummed.
-func (c *Client) ChecksumFromFile(ctx context.Context, req *Request, checksummedPath string) (*FileChecksum, error) {
-	checksumFileURL, err := urlhelper.Parse(req.Src)
+func (c *Client) checksumFromFile(ctx context.Context, checksumURL string, checksummedPath string, pwd string) (*FileChecksum, error) {
+	checksumFileURL, err := urlhelper.Parse(checksumURL)
 	if err != nil {
 		return nil, err
 	}
@@ -207,8 +156,13 @@ func (c *Client) ChecksumFromFile(ctx context.Context, req *Request, checksummed
 	}
 	defer os.Remove(tempfile)
 
-	req.Dst = tempfile
-	req.Mode = ModeFile
+	req := &Request{
+		Pwd:  pwd,
+		Mode: ModeFile,
+		Src:  checksumURL,
+		Dst:  tempfile,
+		// ProgressListener: c.ProgressListener, TODO(adrien): pass progress bar ?
+	}
 
 	if _, err = c.Get(ctx, req); err != nil {
 		return nil, fmt.Errorf(
@@ -281,7 +235,61 @@ func (c *Client) ChecksumFromFile(ctx context.Context, req *Request, checksummed
 			return checksum, nil
 		}
 	}
-	return nil, fmt.Errorf("no checksum found in: %s", req.Src)
+	return nil, fmt.Errorf("no checksum found in: %s", checksumURL)
+}
+
+// GetChecksum extracts the checksum from the `checksum` parameter
+// of the src of the Request
+// ex:
+//  http://hashicorp.com/terraform?checksum=<checksumValue>
+//  http://hashicorp.com/terraform?checksum=<checksumType>:<checksumValue>
+//  http://hashicorp.com/terraform?checksum=file:<checksum_url>
+// when the checksum is in a file, GetChecksum will first client.Get it
+// in a temporary directory, parse the content of the file and finally delete it.
+// The content of a checksum file is expected to be BSD style or GNU style.
+// For security reasons GetChecksum does not try to get the current working directory
+// and as a result, relative files will only be found when Request.Pwd is set.
+//
+// BSD-style checksum:
+//  MD5 (file1) = <checksum>
+//  MD5 (file2) = <checksum>
+//
+// GNU-style:
+//  <checksum>  file1
+//  <checksum> *file2
+func (c *Client) GetChecksum(ctx context.Context, req *Request) (*FileChecksum, error) {
+	var err error
+	if req.u == nil {
+		req.u, err = urlhelper.Parse(req.Src)
+		if err != nil {
+			return nil, err
+		}
+	}
+	q := req.u.Query()
+	v := q.Get("checksum")
+
+	if v == "" {
+		return nil, nil
+	}
+
+	vs := strings.SplitN(v, ":", 2)
+	switch len(vs) {
+	case 2:
+		break // good
+	default:
+		// here, we try to guess the checksum from it's length
+		// if the type was not passed
+		return newChecksumFromValue(v, filepath.Base(req.u.EscapedPath()))
+	}
+
+	checksumType, checksumValue := vs[0], vs[1]
+
+	switch checksumType {
+	case "file":
+		return c.checksumFromFile(ctx, checksumValue, req.u.Path, req.Pwd)
+	default:
+		return newChecksumFromType(checksumType, checksumValue, filepath.Base(req.u.EscapedPath()))
+	}
 }
 
 // parseChecksumLine takes a line from a checksum file and returns

@@ -319,7 +319,7 @@ github.com/hashicorp/go-cty-funcs/filesystem
 github.com/hashicorp/go-cty-funcs/uuid
 # github.com/hashicorp/go-getter v1.4.1
 github.com/hashicorp/go-getter/helper/url
-# github.com/hashicorp/go-getter/v2 v2.0.0-20200427140258-32e0fe310a1d
+# github.com/hashicorp/go-getter/v2 v2.0.0-20200428131008-7ca0077af588
 github.com/hashicorp/go-getter/v2
 github.com/hashicorp/go-getter/v2/helper/url
 # github.com/hashicorp/go-immutable-radix v1.0.0
