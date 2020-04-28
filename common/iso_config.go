@@ -7,6 +7,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-getter/v2"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/packer/template/interpolate"
@@ -155,7 +158,17 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		if c.ISOChecksumURL != "" {
 			url = c.ISOChecksumURL
 		}
-		cksum, err := defaultGetterClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Printf("get working directory: %v", err)
+			// here we ignore the error in case the
+			// working directory is not needed.
+		}
+		req := &getter.Request{
+			Src: url,
+			Pwd: wd,
+		}
+		cksum, err := defaultGetterClient.ChecksumFromFile(context.TODO(), req, c.ISOUrls[0])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
 		} else {

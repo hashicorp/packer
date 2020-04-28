@@ -116,7 +116,10 @@ func (c *Client) extractChecksum(ctx context.Context, u *url.URL) (*FileChecksum
 
 	switch checksumType {
 	case "file":
-		return c.ChecksumFromFile(ctx, checksumValue, u.Path)
+		req := &Request{
+			Src: checksumValue,
+		}
+		return c.ChecksumFromFile(ctx, req, u.Path)
 	default:
 		return newChecksumFromType(checksumType, checksumValue, filepath.Base(u.EscapedPath()))
 	}
@@ -192,8 +195,8 @@ func newChecksumFromValue(checksumValue, filename string) (*FileChecksum, error)
 //
 // ChecksumFromFile will only return checksums for files that match
 // checksummedPath, which is the object being checksummed.
-func (c *Client) ChecksumFromFile(ctx context.Context, checksumURL, checksummedPath string) (*FileChecksum, error) {
-	checksumFileURL, err := urlhelper.Parse(checksumURL)
+func (c *Client) ChecksumFromFile(ctx context.Context, req *Request, checksummedPath string) (*FileChecksum, error) {
+	checksumFileURL, err := urlhelper.Parse(req.Src)
 	if err != nil {
 		return nil, err
 	}
@@ -204,13 +207,9 @@ func (c *Client) ChecksumFromFile(ctx context.Context, checksumURL, checksummedP
 	}
 	defer os.Remove(tempfile)
 
-	req := &Request{
-		// Pwd:              c.Pwd, TODO(adrien): pass pwd ?
-		Mode: ModeFile,
-		Src:  checksumURL,
-		Dst:  tempfile,
-		// ProgressListener: c.ProgressListener, TODO(adrien): pass progress bar ?
-	}
+	req.Dst = tempfile
+	req.Mode = ModeFile
+
 	if _, err = c.Get(ctx, req); err != nil {
 		return nil, fmt.Errorf(
 			"Error downloading checksum file: %s", err)
@@ -282,7 +281,7 @@ func (c *Client) ChecksumFromFile(ctx context.Context, checksumURL, checksummedP
 			return checksum, nil
 		}
 	}
-	return nil, fmt.Errorf("no checksum found in: %s", checksumURL)
+	return nil, fmt.Errorf("no checksum found in: %s", req.Src)
 }
 
 // parseChecksumLine takes a line from a checksum file and returns
