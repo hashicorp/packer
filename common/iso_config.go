@@ -7,10 +7,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/go-getter/v2"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/hashicorp/go-getter/v2"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
