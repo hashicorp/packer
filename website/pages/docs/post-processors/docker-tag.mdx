@@ -30,7 +30,7 @@ settings are optional.
 
 - `repository` (string) - The repository of the image.
 
-- `tag` (string) - The tag for the image. By default this is not set.
+- `tag` (array of strings) - The tag for the image. By default this is not set.
 
 - `force` (boolean) - If true, this post-processor forcibly tag the image
   even if tag name is collided. Default to `false`. But it will be ignored if
@@ -53,7 +53,7 @@ An example is shown below, showing only the post-processor configuration:
 {
   "type": "docker-tag",
   "repository": "hashicorp/packer",
-  "tag": "0.7"
+  "tag": ["0.7", "anothertag"]
 }
 ```
 
