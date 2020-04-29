@@ -457,12 +457,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 	if b.config.SkipCleanup {
 		if d, ok := state.GetOk(stateBagKey_Diskset); ok {
-			for _, disk := range d.([]client.Resource) {
+			for _, disk := range d.(Diskset) {
 				artifact.Resources = append(artifact.Resources, disk.String())
 			}
 		}
 		if d, ok := state.GetOk(stateBagKey_Snapshotset); ok {
-			for _, snapshot := range d.([]client.Resource) {
+			for _, snapshot := range d.(Diskset) {
 				artifact.Resources = append(artifact.Resources, snapshot.String())
 			}
 		}
