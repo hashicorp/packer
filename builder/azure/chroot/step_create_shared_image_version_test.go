@@ -37,7 +37,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					ImageName:     "ImageName",
 					ImageVersion:  "0.1.2",
 					TargetRegions: []TargetRegion{
-						TargetRegion{
+						{
 							Name:               "region1",
 							ReplicaCount:       5,
 							StorageAccountType: "Standard_ZRS",
@@ -63,7 +63,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					"storageProfile": {
 						"osDiskImage": {
 							"source": {
-								"id": "osdisksnapshotresourceid"
+								"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/snapshot1"
 							}
 						}
 					}
@@ -94,7 +94,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 			GalleryImageVersionsClientMock: m,
 		})
 		state.Put("ui", packer.TestUi(t))
-		state.Put(stateBagKey_OSDiskSnapshotResourceID, "osdisksnapshotresourceid")
+		state.Put(stateBagKey_Snapshotset, diskset("/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/snapshot1"))
 
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StepCreateSharedImageVersion{

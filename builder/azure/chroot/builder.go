@@ -437,8 +437,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				artifact.Resources = append(artifact.Resources, disk.String())
 			}
 		}
-		if d, ok := state.GetOk(stateBagKey_OSDiskSnapshotResourceID); ok {
-			artifact.Resources = append(artifact.Resources, d.(string))
+		if d, ok := state.GetOk(stateBagKey_Snapshotset); ok {
+			for _, snapshot := range d.([]client.Resource) {
+				artifact.Resources = append(artifact.Resources, snapshot.String())
+			}
 		}
 	}
 
@@ -570,10 +572,11 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	}
 	if hasValidSharedImage {
 		addSteps(
-			&StepCreateSnapshot{
-				ResourceID:  config.TemporaryOSDiskSnapshotID,
-				Location:    info.Location,
-				SkipCleanup: config.SkipCleanup,
+			&StepCreateSnapshotset{
+				OSDiskSnapshotID:         config.TemporaryOSDiskSnapshotID,
+				DataDiskSnapshotIDPrefix: config.TemporaryDataDiskSnapshotIDPrefix,
+				Location:                 info.Location,
+				SkipCleanup:              config.SkipCleanup,
 			},
 			&StepCreateSharedImageVersion{
 				Destination:     config.SharedImageGalleryDestination,

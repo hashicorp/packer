@@ -22,7 +22,7 @@ type StepCreateSharedImageVersion struct {
 func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	osDiskSnapshotResourceID := state.Get(stateBagKey_OSDiskSnapshotResourceID).(string)
+	osDiskSnapshotResourceID := state.Get(stateBagKey_Snapshotset).(Diskset)[-1].String()
 
 	ui.Say(fmt.Sprintf("Creating image version %s\n   using %s for os disk.",
 		s.Destination.ResourceID(azcli.SubscriptionID()),
