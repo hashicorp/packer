@@ -15,9 +15,10 @@ import (
 )
 
 type StepCreateSharedImageVersion struct {
-	Destination     SharedImageGalleryDestination
-	OSDiskCacheType string
-	Location        string
+	Destination       SharedImageGalleryDestination
+	OSDiskCacheType   string
+	DataDiskCacheType string
+	Location          string
 }
 
 func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -60,8 +61,9 @@ func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.
 	for lun, resource := range snapshotset {
 		if lun != -1 {
 			datadisks = append(datadisks, compute.GalleryDataDiskImage{
-				Lun:    to.Int32Ptr(lun),
-				Source: &compute.GalleryArtifactVersionSource{ID: to.StringPtr(resource.String())},
+				Lun:         to.Int32Ptr(lun),
+				Source:      &compute.GalleryArtifactVersionSource{ID: to.StringPtr(resource.String())},
+				HostCaching: compute.HostCaching(s.DataDiskCacheType),
 			})
 		}
 	}

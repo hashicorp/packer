@@ -91,12 +91,13 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 		{
 			name: "from shared image",
 			fields: StepCreateNewDiskset{
-				OSDiskID:                 "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName",
-				OSDiskStorageAccountType: string(compute.StandardLRS),
-				DataDiskIDPrefix:         "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-",
-				HyperVGeneration:         string(compute.V1),
-				Location:                 "westus",
-				SourceImageResourceID:    "/subscriptions/SubscriptionID/resourcegroups/imagegroup/providers/Microsoft.Compute/galleries/MyGallery/images/MyImage/versions/1.2.3",
+				OSDiskID:                   "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName",
+				OSDiskStorageAccountType:   string(compute.StandardLRS),
+				DataDiskStorageAccountType: string(compute.PremiumLRS),
+				DataDiskIDPrefix:           "/subscriptions/SubscriptionID/resourcegroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-",
+				HyperVGeneration:           string(compute.V1),
+				Location:                   "westus",
+				SourceImageResourceID:      "/subscriptions/SubscriptionID/resourcegroups/imagegroup/providers/Microsoft.Compute/galleries/MyGallery/images/MyImage/versions/1.2.3",
 			},
 
 			expectedPutDiskBodies: []string{`
@@ -128,7 +129,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 						}
 					},
 					"sku": {
-						"name": "Standard_LRS"
+						"name": "Premium_LRS"
 					}
 				}`, `
 				{
@@ -143,7 +144,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 						}
 					},
 					"sku": {
-						"name": "Standard_LRS"
+						"name": "Premium_LRS"
 					}
 				}`, `
 				{
@@ -158,7 +159,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 						}
 					},
 					"sku": {
-						"name": "Standard_LRS"
+						"name": "Premium_LRS"
 					}
 				}`},
 			want: multistep.ActionContinue,

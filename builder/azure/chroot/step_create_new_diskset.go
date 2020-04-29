@@ -18,9 +18,10 @@ import (
 var _ multistep.Step = &StepCreateNewDiskset{}
 
 type StepCreateNewDiskset struct {
-	OSDiskID                 string // Disk ID
-	OSDiskSizeGB             int32  // optional, ignored if 0
-	OSDiskStorageAccountType string // from compute.DiskStorageAccountTypes
+	OSDiskID                   string // Disk ID
+	OSDiskSizeGB               int32  // optional, ignored if 0
+	OSDiskStorageAccountType   string // from compute.DiskStorageAccountTypes
+	DataDiskStorageAccountType string // from compute.DiskStorageAccountTypes
 
 	DataDiskIDPrefix string
 
@@ -205,9 +206,9 @@ func (s StepCreateNewDiskset) getDatadiskDefinitionFromImage(lun int32) compute.
 		Lun: to.Int32Ptr(lun),
 	}
 
-	if s.OSDiskStorageAccountType != "" {
+	if s.DataDiskStorageAccountType != "" {
 		disk.Sku = &compute.DiskSku{
-			Name: compute.DiskStorageAccountTypes(s.OSDiskStorageAccountType),
+			Name: compute.DiskStorageAccountTypes(s.DataDiskStorageAccountType),
 		}
 	}
 	return disk

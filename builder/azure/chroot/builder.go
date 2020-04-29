@@ -88,6 +88,14 @@ type Config struct {
 	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
 	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
 	OSDiskCacheType string `mapstructure:"os_disk_cache_type"`
+
+	// The [storage SKU](https://docs.microsoft.com/en-us/rest/api/compute/disks/createorupdate#diskstorageaccounttypes)
+	// to use for datadisks. Defaults to `Standard_LRS`.
+	DataDiskStorageAccountType string `mapstructure:"data_disk_storage_account_type"`
+	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
+	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
+	DataDiskCacheType string `mapstructure:"data_disk_cache_type"`
+
 	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
 	// Defaults to `V1`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
@@ -253,6 +261,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		b.config.OSDiskCacheType = string(compute.CachingTypesReadOnly)
 	}
 
+	if b.config.DataDiskStorageAccountType == "" {
+		b.config.DataDiskStorageAccountType = string(compute.PremiumLRS)
+	}
+
+	if b.config.DataDiskCacheType == "" {
+		b.config.DataDiskCacheType = string(compute.CachingTypesReadOnly)
+	}
+
 	if b.config.ImageHyperVGeneration == "" {
 		b.config.ImageHyperVGeneration = string(compute.V1)
 	}
@@ -298,6 +314,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if err := checkStorageAccountType(b.config.OSDiskStorageAccountType); err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("os_disk_storage_account_type: %v", err))
+	}
+
+	if err := checkDiskCacheType(b.config.DataDiskCacheType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("data_disk_cache_type: %v", err))
+	}
+
+	if err := checkStorageAccountType(b.config.DataDiskStorageAccountType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("data_disk_storage_account_type: %v", err))
 	}
 
 	if b.config.ImageResourceID != "" {
@@ -525,10 +549,12 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					Location:       info.Location,
 				},
 				&StepCreateNewDiskset{
-					OSDiskID:              config.TemporaryOSDiskID,
-					OSDiskSizeGB:          config.OSDiskSizeGB,
-					SourceImageResourceID: config.Source,
-					Location:              info.Location,
+					OSDiskID:                   config.TemporaryOSDiskID,
+					OSDiskSizeGB:               config.OSDiskSizeGB,
+					OSDiskStorageAccountType:   config.OSDiskStorageAccountType,
+					DataDiskStorageAccountType: config.DataDiskStorageAccountType,
+					SourceImageResourceID:      config.Source,
+					Location:                   info.Location,
 
 					SkipCleanup: config.SkipCleanup,
 				})
