@@ -153,11 +153,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if _, ok := state.GetOk("vm"); !ok {
 		return nil, nil
 	}
+
 	artifact := &common.Artifact{
 		Name:      b.config.VMName,
 		VM:        state.Get("vm").(*driver.VirtualMachine),
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
-		Outconfig: &b.config.Export.OutputDir,
 	}
+
+	if b.config.Export != nil {
+		artifact.Outconfig = &b.config.Export.OutputDir
+	}
+
 	return artifact, nil
 }

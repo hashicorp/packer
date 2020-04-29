@@ -55,7 +55,8 @@ type ExportConfig struct {
 	// include iso and img image files that are attached to the VM
 	Images bool `mapstructure:"images"`
 	// generate manifest using sha1, sha256, sha512. Defaults to 'sha256'. Use 'none' for no manifest.
-	Manifest  string       `mapstructure:"manifest"`
+	Manifest string `mapstructure:"manifest"`
+	// Directory on the computer running Packer to export files to
 	OutputDir OutputConfig `mapstructure:",squash"`
 	// Advanced ovf export options. Options can include:
 	// * mac - MAC address is exported for all ethernet devices
