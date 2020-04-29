@@ -165,9 +165,9 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 			want: multistep.ActionContinue,
 			verifyDiskset: &Diskset{
 				-1: resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryOSDiskName"),
-				3:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-2"),
-				5:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-0"),
-				9:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-1"),
+				3:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-3"),
+				5:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-5"),
+				9:  resource("/subscriptions/SubscriptionID/resourceGroups/ResourceGroupName/providers/Microsoft.Compute/disks/TemporaryDataDisk-9"),
 			},
 		},
 	}

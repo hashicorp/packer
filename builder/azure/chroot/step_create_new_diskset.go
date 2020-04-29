@@ -84,8 +84,6 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 	futures := []Future{{osDisk, f}}
 
 	if s.SourceImageResourceID != "" {
-		datadiskSuffix := 0 // initialize
-
 		// retrieve image to see if there are any datadisks
 		imageID, err := client.ParseResourceID(s.SourceImageResourceID)
 		if err != nil {
@@ -108,8 +106,7 @@ func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag
 				if ddi.Lun == nil {
 					return errorMessage("unexpected: lun is null for data disk # %d", i)
 				}
-				datadiskID, err := client.ParseResourceID(fmt.Sprintf("%s%d", s.DataDiskIDPrefix, datadiskSuffix))
-				datadiskSuffix++
+				datadiskID, err := client.ParseResourceID(fmt.Sprintf("%s%d", s.DataDiskIDPrefix, *ddi.Lun))
 				if err != nil {
 					return errorMessage("unable to construct resource id for datadisk: %v", err)
 				}
