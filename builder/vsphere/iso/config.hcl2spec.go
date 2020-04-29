@@ -54,6 +54,7 @@ type FlatConfig struct {
 	RAMReserveAll             *bool                    `mapstructure:"RAM_reserve_all" cty:"RAM_reserve_all"`
 	MemoryHotAddEnabled       *bool                    `mapstructure:"RAM_hot_plug" cty:"RAM_hot_plug"`
 	VideoRAM                  *int64                   `mapstructure:"video_ram" cty:"video_ram"`
+	VGPUProfile               *string                  `mapstructure:"vgpu_profile" cty:"vgpu_profile"`
 	NestedHV                  *bool                    `mapstructure:"NestedHV" cty:"NestedHV"`
 	ConfigParams              map[string]string        `mapstructure:"configuration_parameters" cty:"configuration_parameters"`
 	ISOChecksum               *string                  `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum"`
@@ -179,6 +180,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"RAM_reserve_all":              &hcldec.AttrSpec{Name: "RAM_reserve_all", Type: cty.Bool, Required: false},
 		"RAM_hot_plug":                 &hcldec.AttrSpec{Name: "RAM_hot_plug", Type: cty.Bool, Required: false},
 		"video_ram":                    &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
+		"vgpu_profile":                 &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                     &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
 		"configuration_parameters":     &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
