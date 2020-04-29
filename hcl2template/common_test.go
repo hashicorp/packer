@@ -68,6 +68,7 @@ func testParse(t *testing.T, tests []parseTest) {
 			}
 			if diff := cmp.Diff(tt.parseWantCfg, gotCfg,
 				cmpopts.IgnoreUnexported(
+					PackerConfig{},
 					cty.Value{},
 					cty.Type{},
 					Variable{},
@@ -115,7 +116,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				return
 			}
 
-			gotBuilds, gotDiags := tt.parser.getBuilds(gotCfg, nil, nil)
+			gotBuilds, gotDiags := gotCfg.getBuilds(nil, nil)
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}

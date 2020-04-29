@@ -89,7 +89,10 @@ func (p *Parser) parse(filename string, varFiles []string, argVars map[string]st
 		basedir = filepath.Dir(basedir)
 	}
 	cfg := &PackerConfig{
-		Basedir: basedir,
+		Basedir:               basedir,
+		builderSchemas:        p.BuilderSchemas,
+		provisionersSchemas:   p.ProvisionersSchemas,
+		postProcessorsSchemas: p.PostProcessorsSchemas,
 	}
 
 	// Decode variable blocks so that they are available later on. Here locals

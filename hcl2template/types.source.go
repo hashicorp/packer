@@ -38,10 +38,10 @@ func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) 
 	return source, diags
 }
 
-func (p *Parser) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
-	builder, err := p.BuilderSchemas.Start(source.Type)
+	builder, err := cfg.builderSchemas.Start(source.Type)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: "Failed to load " + sourceLabel + " type",
