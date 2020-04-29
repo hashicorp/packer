@@ -550,6 +550,7 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 				},
 				&StepCreateNewDiskset{
 					OSDiskID:                   config.TemporaryOSDiskID,
+					DataDiskIDPrefix:           config.TemporaryDataDiskIDPrefix,
 					OSDiskSizeGB:               config.OSDiskSizeGB,
 					OSDiskStorageAccountType:   config.OSDiskStorageAccountType,
 					DataDiskStorageAccountType: config.DataDiskStorageAccountType,
