@@ -60,6 +60,8 @@ func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.
 	var datadisks []compute.GalleryDataDiskImage
 	for lun, resource := range snapshotset {
 		if lun != -1 {
+			ui.Say(fmt.Sprintf("   using %q for data disk (lun %d).", resource, lun))
+
 			datadisks = append(datadisks, compute.GalleryDataDiskImage{
 				Lun:         to.Int32Ptr(lun),
 				Source:      &compute.GalleryArtifactVersionSource{ID: to.StringPtr(resource.String())},

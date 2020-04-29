@@ -70,6 +70,8 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	var datadisks []compute.ImageDataDisk
 	for lun, resource := range diskset {
 		if lun != -1 {
+			ui.Say(fmt.Sprintf("   using %q for data disk (lun %d).", resource, lun))
+
 			datadisks = append(datadisks, compute.ImageDataDisk{
 				Lun:                to.Int32Ptr(lun),
 				ManagedDisk:        &compute.SubResource{ID: to.StringPtr(resource.String())},
