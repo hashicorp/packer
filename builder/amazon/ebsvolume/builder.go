@@ -238,6 +238,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SecurityGroupIds:       b.config.SecurityGroupIds,
 			CommConfig:             &b.config.RunConfig.Comm,
 			TemporarySGSourceCidrs: b.config.TemporarySGSourceCidrs,
+			SkipSSHRuleCreation:    b.config.SSMAgentEnabled(),
 		},
 		&awscommon.StepIamInstanceProfile{
 			IamInstanceProfile:                        b.config.IamInstanceProfile,
@@ -255,12 +256,26 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Timeout:   b.config.WindowsPasswordTimeout,
 			BuildName: b.config.PackerBuildName,
 		},
+		&awscommon.StepCreateSSMTunnel{
+			AWSSession:       session,
+			Region:           *ec2conn.Config.Region,
+			RemotePortNumber: b.config.Comm.Port(),
+			SSMAgentEnabled:  b.config.SSMAgentEnabled(),
+		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
 				b.config.SSHInterface,
 				b.config.Comm.Host(),
+			),
+			SSHPort: awscommon.Port(
+				b.config.SSHInterface,
+				b.config.Comm.Port(),
+			),
+			WinRMPort: awscommon.Port(
+				b.config.SSHInterface,
+				b.config.Comm.Port(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},

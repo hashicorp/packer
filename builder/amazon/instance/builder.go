@@ -339,9 +339,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			BuildName: b.config.PackerBuildName,
 		},
 		&awscommon.StepCreateSSMTunnel{
-			AWSSession:      session,
-			DstPort:         b.config.Comm.Port(),
-			SSMAgentEnabled: b.config.SSMAgentEnabled(),
+			AWSSession:       session,
+			Region:           *ec2conn.Config.Region,
+			RemotePortNumber: b.config.Comm.Port(),
+			SSMAgentEnabled:  b.config.SSMAgentEnabled(),
 		},
 		&communicator.StepConnect{
 			// StepConnect is provided settings for WinRM and SSH, but
