@@ -105,12 +105,15 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 	// Write our contents to it
 	writer := bufio.NewWriter(tf)
 
-	s.IAPConf.IAPHashBang = fmt.Sprintf("#!%s\n", s.IAPConf.IAPHashBang)
-	log.Printf("[INFO] (google): Prepending inline gcloud setup script with %s",
-		s.IAPConf.IAPHashBang)
-	_, err = writer.WriteString(s.IAPConf.IAPHashBang)
-	if err != nil {
-		return "", fmt.Errorf("Error preparing inline hashbang: %s", err)
+	if s.IAPConf.IAPHashBang != "" {
+		s.IAPConf.IAPHashBang = fmt.Sprintf("#!%s\n", s.IAPConf.IAPHashBang)
+		log.Printf("[INFO] (google): Prepending inline gcloud setup script with %s",
+			s.IAPConf.IAPHashBang)
+		_, err = writer.WriteString(s.IAPConf.IAPHashBang)
+		if err != nil {
+			return "", fmt.Errorf("Error preparing inline hashbang: %s", err)
+		}
+
 	}
 
 	// authenticate to gcloud
@@ -130,7 +133,8 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 	if err := writer.Flush(); err != nil {
 		return "", fmt.Errorf("Error preparing shell script: %s", err)
 	}
-
+	// Have to close temp file before renaming it or Windows will complain.
+	tf.Close()
 	err = os.Chmod(tf.Name(), 0700)
 	if err != nil {
 		log.Printf("[ERROR] (google): error modifying permissions of temp script file: %s", err.Error())
@@ -181,8 +185,7 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	// TODO make setting LocalHostPort optional
 	s.CommConf.SSHPort = s.IAPConf.IAPLocalhostPort
 
-	log.Printf("Calling tunnel launch with args %#v", args)
-
+	log.Printf("Creating tunnel launch script with args %#v", args)
 	// Create temp file that contains both gcloud authentication, and gcloud
 	// proxy setup call.
 	tempScriptFileName, err := s.createTempGcloudScript(args)
@@ -211,6 +214,11 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 		err := s.tunnelDriver.StartTunnel(ctx, tempScriptFileName)
 		return err
 	})
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }
@@ -221,5 +229,7 @@ func (s *StepStartTunnel) Cleanup(state multistep.StateBag) {
 		log.Printf("Skipping cleanup of IAP tunnel; \"iap\" is false.")
 		return
 	}
-	s.tunnelDriver.StopTunnel()
+	if s.tunnelDriver != nil {
+		s.tunnelDriver.StopTunnel()
+	}
 }

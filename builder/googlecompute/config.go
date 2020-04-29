@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -329,10 +330,16 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// set defaults for IAP
 	if c.IAPConfig.IAPHashBang == "" {
-		c.IAPConfig.IAPHashBang = "/bin/sh"
+		if runtime.GOOS == "windows" {
+			c.IAPConfig.IAPHashBang = ""
+		} else {
+			c.IAPConfig.IAPHashBang = "/bin/sh"
+		}
 	}
 	if c.IAPConfig.IAPExt == "" {
-		c.IAPConfig.IAPExt = ".sh"
+		if runtime.GOOS == "windows" {
+			c.IAPConfig.IAPExt = ".cmd"
+		}
 	}
 
 	// Configure IAP: Update SSH config to use localhost proxy instead
