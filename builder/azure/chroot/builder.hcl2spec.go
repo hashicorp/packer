@@ -37,6 +37,8 @@ type FlatConfig struct {
 	OSDiskSizeGB                      *int32                             `mapstructure:"os_disk_size_gb" cty:"os_disk_size_gb" hcl:"os_disk_size_gb"`
 	OSDiskStorageAccountType          *string                            `mapstructure:"os_disk_storage_account_type" cty:"os_disk_storage_account_type" hcl:"os_disk_storage_account_type"`
 	OSDiskCacheType                   *string                            `mapstructure:"os_disk_cache_type" cty:"os_disk_cache_type" hcl:"os_disk_cache_type"`
+	DataDiskStorageAccountType        *string                            `mapstructure:"data_disk_storage_account_type" cty:"data_disk_storage_account_type" hcl:"data_disk_storage_account_type"`
+	DataDiskCacheType                 *string                            `mapstructure:"data_disk_cache_type" cty:"data_disk_cache_type" hcl:"data_disk_cache_type"`
 	ImageHyperVGeneration             *string                            `mapstructure:"image_hyperv_generation" cty:"image_hyperv_generation" hcl:"image_hyperv_generation"`
 	TemporaryOSDiskID                 *string                            `mapstructure:"temporary_os_disk_id" cty:"temporary_os_disk_id" hcl:"temporary_os_disk_id"`
 	TemporaryOSDiskSnapshotID         *string                            `mapstructure:"temporary_os_disk_snapshot_id" cty:"temporary_os_disk_snapshot_id" hcl:"temporary_os_disk_snapshot_id"`
@@ -87,6 +89,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"os_disk_size_gb":                 &hcldec.AttrSpec{Name: "os_disk_size_gb", Type: cty.Number, Required: false},
 		"os_disk_storage_account_type":    &hcldec.AttrSpec{Name: "os_disk_storage_account_type", Type: cty.String, Required: false},
 		"os_disk_cache_type":              &hcldec.AttrSpec{Name: "os_disk_cache_type", Type: cty.String, Required: false},
+		"data_disk_storage_account_type":  &hcldec.AttrSpec{Name: "data_disk_storage_account_type", Type: cty.String, Required: false},
+		"data_disk_cache_type":            &hcldec.AttrSpec{Name: "data_disk_cache_type", Type: cty.String, Required: false},
 		"image_hyperv_generation":         &hcldec.AttrSpec{Name: "image_hyperv_generation", Type: cty.String, Required: false},
 		"temporary_os_disk_id":            &hcldec.AttrSpec{Name: "temporary_os_disk_id", Type: cty.String, Required: false},
 		"temporary_os_disk_snapshot_id":   &hcldec.AttrSpec{Name: "temporary_os_disk_snapshot_id", Type: cty.String, Required: false},

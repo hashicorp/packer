@@ -40,6 +40,12 @@
 -   `os_disk_cache_type` (string) - The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
     specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
     
+-   `data_disk_storage_account_type` (string) - The [storage SKU](https://docs.microsoft.com/en-us/rest/api/compute/disks/createorupdate#diskstorageaccounttypes)
+    to use for datadisks. Defaults to `Standard_LRS`.
+    
+-   `data_disk_cache_type` (string) - The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
+    specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
+    
 -   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
     Defaults to `V1`.
     
