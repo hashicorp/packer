@@ -104,7 +104,7 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
 	}
 
-	builds, diags := parser.Parse(path, c.varFiles, c.flagVars, c.CoreConfig.Only, c.CoreConfig.Except)
+	cfg, diags := parser.Parse(path, c.varFiles, c.flagVars)
 	{
 		// write HCL errors/diagnostics if any.
 		b := bytes.NewBuffer(nil)
@@ -118,6 +118,24 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		}
 	}
 	ret := 0
+	if diags.HasErrors() {
+		ret = 1
+	}
+
+	builds, diags := cfg.GetBuilds(c.CoreConfig.Only, c.CoreConfig.Except)
+	{
+		// write HCL errors/diagnostics if any.
+		b := bytes.NewBuffer(nil)
+		err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
+		if err != nil {
+			c.Ui.Error("could not write diagnostic: " + err.Error())
+			return nil, 1
+		}
+		if b.Len() != 0 {
+			c.Ui.Message(b.String())
+		}
+	}
+	ret = 0
 	if diags.HasErrors() {
 		ret = 1
 	}

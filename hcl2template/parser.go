@@ -52,7 +52,11 @@ const (
 	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-func (p *Parser) parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
+// Parse will Parse HCL file(s) in path. Path can be a folder or a file.
+//
+// Parse will first Parse variables and then the rest; so that interpolation
+// can happen.
+func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
 	var diags hcl.Diagnostics
