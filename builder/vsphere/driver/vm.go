@@ -506,6 +506,15 @@ func (vm *VirtualMachine) PowerOff() error {
 	return err
 }
 
+func (vm *VirtualMachine) IsPoweredOff() (bool, error) {
+	state, err := vm.vm.PowerState(vm.driver.ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return state == types.VirtualMachinePowerStatePoweredOff, nil
+}
+
 func (vm *VirtualMachine) StartShutdown() error {
 	err := vm.vm.ShutdownGuest(vm.driver.ctx)
 	return err
@@ -514,11 +523,11 @@ func (vm *VirtualMachine) StartShutdown() error {
 func (vm *VirtualMachine) WaitForShutdown(ctx context.Context, timeout time.Duration) error {
 	shutdownTimer := time.After(timeout)
 	for {
-		powerState, err := vm.vm.PowerState(vm.driver.ctx)
+		off, err := vm.IsPoweredOff()
 		if err != nil {
 			return err
 		}
-		if powerState == "poweredOff" {
+		if off {
 			break
 		}
 
