@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -16,13 +17,13 @@ import (
 var _ multistep.Step = &StepCreateImage{}
 
 type StepCreateImage struct {
-	ImageResourceID          string
-	ImageOSState             string
-	OSDiskStorageAccountType string
-	OSDiskCacheType          string
-	Location                 string
-
-	imageResource azure.Resource
+	ImageResourceID            string
+	ImageOSState               string
+	OSDiskStorageAccountType   string
+	OSDiskCacheType            string
+	DataDiskStorageAccountType string
+	DataDiskCacheType          string
+	Location                   string
 }
 
 func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -35,8 +36,7 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		s.ImageResourceID,
 		diskResourceID))
 
-	var err error
-	s.imageResource, err = azure.ParseResourceID(s.ImageResourceID)
+	imageResource, err := azure.ParseResourceID(s.ImageResourceID)
 
 	if err != nil {
 		log.Printf("StepCreateImage.Run: error: %+v", err)
@@ -66,10 +66,29 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		},
 		//		Tags:            nil,
 	}
+
+	var datadisks []compute.ImageDataDisk
+	for lun, resource := range diskset {
+		if lun != -1 {
+			datadisks = append(datadisks, compute.ImageDataDisk{
+				Lun:                to.Int32Ptr(lun),
+				ManagedDisk:        &compute.SubResource{ID: to.StringPtr(resource.String())},
+				StorageAccountType: compute.StorageAccountTypes(s.DataDiskStorageAccountType),
+				Caching:            compute.CachingTypes(s.DataDiskCacheType),
+			})
+		}
+	}
+	if datadisks != nil {
+		sort.Slice(datadisks, func(i, j int) bool {
+			return *datadisks[i].Lun < *datadisks[j].Lun
+		})
+		image.ImageProperties.StorageProfile.DataDisks = &datadisks
+	}
+
 	f, err := azcli.ImagesClient().CreateOrUpdate(
 		ctx,
-		s.imageResource.ResourceGroup,
-		s.imageResource.ResourceName,
+		imageResource.ResourceGroup,
+		imageResource.ResourceName,
 		image)
 	if err == nil {
 		log.Println("Image creation in process...")
