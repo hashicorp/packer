@@ -464,8 +464,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, msg)
 		}
 
-		// TODO (nywilken) add support for temporary iam instance policy generation
-		if c.IamInstanceProfile == "" {
+		if c.IamInstanceProfile == "" && c.TemporaryIamInstanceProfilePolicyDocument == nil {
 			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with AmazonSSMManagedInstanceCore permissions is required`, c.SSHInterface)
 			errs = append(errs, msg)
 		}
@@ -544,7 +543,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.EnableT2Unlimited {
 		if c.SpotPrice != "" {
-			errs = append(errs, fmt.Errorf("Error: T2 Unlimited cannot be used in conjuction with Spot Instances"))
+			errs = append(errs, fmt.Errorf("Error: T2 Unlimited cannot be used in conjunction with Spot Instances"))
 		}
 		firstDotIndex := strings.Index(c.InstanceType, ".")
 		if firstDotIndex == -1 {
@@ -562,5 +561,6 @@ func (c *RunConfig) IsSpotInstance() bool {
 }
 
 func (c *RunConfig) SSMAgentEnabled() bool {
-	return c.SSHInterface == "session_manager" && c.IamInstanceProfile != ""
+	hasIamInstanceProfile := c.IamInstanceProfile != "" || c.TemporaryIamInstanceProfilePolicyDocument != nil
+	return c.SSHInterface == "session_manager" && hasIamInstanceProfile
 }
