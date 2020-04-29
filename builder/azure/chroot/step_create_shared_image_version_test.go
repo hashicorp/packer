@@ -25,6 +25,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 	tests := []struct {
 		name            string
 		fields          fields
+		snapshotset     Diskset
 		want            multistep.StepAction
 		expectedPutBody string
 	}{
@@ -47,6 +48,11 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 				},
 				Location: "region2",
 			},
+			snapshotset: diskset(
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/osdisksnapshot",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot0",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot1",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot2"),
 			expectedPutBody: `{
 				"location": "region2",
 				"properties": {
@@ -63,9 +69,23 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					"storageProfile": {
 						"osDiskImage": {
 							"source": {
-								"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/snapshot1"
+								"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/osdisksnapshot"
 							}
-						}
+						},
+						"dataDiskImages": [
+							{
+								"lun": 0,
+								"source": { "id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot0" }
+							},
+							{
+								"lun": 1,
+								"source": { "id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot1" }
+							},
+							{
+								"lun": 2,
+								"source": { "id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot2" }
+							}
+						]
 					}
 				}
 			}`,
@@ -94,7 +114,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 			GalleryImageVersionsClientMock: m,
 		})
 		state.Put("ui", packer.TestUi(t))
-		state.Put(stateBagKey_Snapshotset, diskset("/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/snapshot1"))
+		state.Put(stateBagKey_Snapshotset, tt.snapshotset)
 
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StepCreateSharedImageVersion{
