@@ -16,7 +16,6 @@ func TestSSMDriver_StartSession(t *testing.T) {
 		ErrorExpected bool
 	}{
 		{"NonExistingPlugin", "boguspluginname", true},
-		{"StubExecutablePlugin", "more", false},
 	}
 
 	for _, tc := range tt {
