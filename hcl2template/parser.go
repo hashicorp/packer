@@ -52,10 +52,14 @@ const (
 	hcl2VarJsonFileExt = ".auto.pkrvars.json"
 )
 
-// Parse will Parse HCL file(s) in path. Path can be a folder or a file.
+// Parse will Parse all HCL files in filename. Path can be a folder or a file.
 //
 // Parse will first Parse variables and then the rest; so that interpolation
 // can happen.
+//
+// Parse returns a PackerConfig that contains configuration layout of a packer
+// build; sources(builders)/provisioners/posts-processors will not be started
+// and their contents wont be verified; Most syntax errors will cause an error.
 func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 
 	var files []*hcl.File
