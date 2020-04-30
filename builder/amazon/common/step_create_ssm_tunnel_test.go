@@ -34,15 +34,27 @@ func TestStepCreateSSMTunnel_BuildTunnelInputForInstance(t *testing.T) {
 }
 
 func TestStepCreateSSMTunnel_ConfigureLocalHostPort(t *testing.T) {
-	tun := StepCreateSSMTunnel{}
-
-	ctx := context.TODO()
-	if err := tun.ConfigureLocalHostPort(ctx); err != nil {
-		t.Errorf("failed to configure a port on localhost")
+	tt := []struct {
+		Name      string
+		Step      StepCreateSSMTunnel
+		PortCheck func(int) bool
+	}{
+		{"WithLocalPortNumber", StepCreateSSMTunnel{LocalPortNumber: 9001}, func(port int) bool { return port == 9001 }},
+		{"WithNoLocalPortNumber", StepCreateSSMTunnel{}, func(port int) bool { return port >= 8000 && port <= 9000 }},
 	}
 
-	if tun.LocalPortNumber == 0 {
-		t.Errorf("failed to configure a port on localhost")
+	for _, tc := range tt {
+		tc := tc
+		t.Run(tc.Name, func(t *testing.T) {
+			step := tc.Step
+			if err := step.ConfigureLocalHostPort(context.TODO()); err != nil {
+				t.Errorf("failed to configure a port on localhost")
+			}
+
+			if !tc.PortCheck(step.LocalPortNumber) {
+				t.Errorf("failed to configure a port on localhost")
+			}
+		})
 	}
 
 }

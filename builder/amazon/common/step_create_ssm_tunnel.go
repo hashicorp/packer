@@ -109,13 +109,17 @@ func (s *StepCreateSSMTunnel) Cleanup(state multistep.StateBag) {
 // ConfigureLocalHostPort finds an available port on the localhost that can be used for the remote tunnel.
 // Defaults to using s.LocalPortNumber if it is set.
 func (s *StepCreateSSMTunnel) ConfigureLocalHostPort(ctx context.Context) error {
+	minPortNumber, maxPortNumber := 8000, 9000
+
 	if s.LocalPortNumber != 0 {
-		return nil
+		minPortNumber = s.LocalPortNumber
+		maxPortNumber = minPortNumber
 	}
+
 	// Find an available TCP port for our HTTP server
 	l, err := net.ListenRangeConfig{
-		Min:     8000,
-		Max:     9000,
+		Min:     minPortNumber,
+		Max:     maxPortNumber,
 		Addr:    "0.0.0.0",
 		Network: "tcp",
 	}.Listen(ctx)
