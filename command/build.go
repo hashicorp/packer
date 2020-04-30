@@ -120,8 +120,6 @@ func (m *Meta) GetConfigFromHCL(path string) (BuildStarter, int) {
 	ret := 0
 	if diags.HasErrors() {
 		ret = 1
-		// TODO(azr): Should we stop here or partially build ? Other builds could be
-		// working; should this be an option ?
 	}
 
 	return func(opts buildStarterOptions) ([]packer.Build, int) {
