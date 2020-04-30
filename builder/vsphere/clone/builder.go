@@ -108,5 +108,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		VM:        state.Get("vm").(*driver.VirtualMachine),
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
+	if b.config.Export != nil {
+		artifact.Outconfig = &b.config.Export.OutputDir
+	}
+
 	return artifact, nil
 }

@@ -1,14 +1,17 @@
 package common
 
 import (
+	"os"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 )
 
 const BuilderId = "jetbrains.vsphere"
 
 type Artifact struct {
-	Name string
-	VM   *driver.VirtualMachine
+	Outconfig *OutputConfig
+	Name      string
+	VM        *driver.VirtualMachine
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -20,6 +23,10 @@ func (a *Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Files() []string {
+	if a.Outconfig != nil {
+		files, _ := a.Outconfig.ListFiles()
+		return files
+	}
 	return []string{}
 }
 
@@ -36,5 +43,8 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
+	if a.Outconfig != nil {
+		os.RemoveAll(a.Outconfig.OutputDir)
+	}
 	return a.VM.Destroy()
 }
