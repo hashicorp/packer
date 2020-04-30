@@ -182,9 +182,10 @@ func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
 
 	// Get the core
 	core, err := m.Core(tpl)
+	ret := 0
 	if err != nil {
 		m.Ui.Error(err.Error())
-		return nil, 1
+		ret = 1
 	}
 	return func(opts buildStarterOptions) ([]packer.Build, int) {
 		ret := 0
@@ -203,7 +204,7 @@ func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
 			builds = append(builds, b)
 		}
 		return builds, ret
-	}, 0
+	}, ret
 }
 
 func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
