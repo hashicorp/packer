@@ -126,9 +126,22 @@ func NewCore(c *CoreConfig) (*Core, error) {
 }
 
 // BuildNames returns the builds that are available in this configured core.
-func (c *Core) BuildNames() []string {
+func (c *Core) BuildNames(only, except []string) []string {
+
+	sort.Strings(only)
+	sort.Strings(except)
+
 	r := make([]string, 0, len(c.builds))
 	for n := range c.builds {
+		onlyPos := sort.SearchStrings(only, n)
+		foundInOnly := onlyPos < len(only) && only[onlyPos] == n
+		if len(only) > 0 && !foundInOnly {
+			continue
+		}
+
+		if pos := sort.SearchStrings(except, n); pos < len(except) && except[pos] == n {
+			continue
+		}
 		r = append(r, n)
 	}
 	sort.Strings(r)

@@ -96,25 +96,25 @@ func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
 	return cfg, 0
 }
 
-func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
+func (m *Meta) GetConfigFromHCL(path string) (BuildStarter, int) {
 	parser := &hcl2template.Parser{
 		Parser:                hclparse.NewParser(),
-		BuilderSchemas:        c.CoreConfig.Components.BuilderStore,
-		ProvisionersSchemas:   c.CoreConfig.Components.ProvisionerStore,
-		PostProcessorsSchemas: c.CoreConfig.Components.PostProcessorStore,
+		BuilderSchemas:        m.CoreConfig.Components.BuilderStore,
+		ProvisionersSchemas:   m.CoreConfig.Components.ProvisionerStore,
+		PostProcessorsSchemas: m.CoreConfig.Components.PostProcessorStore,
 	}
 
-	cfg, diags := parser.Parse(path, c.varFiles, c.flagVars)
+	cfg, diags := parser.Parse(path, m.varFiles, m.flagVars)
 	{
 		// write HCL errors/diagnostics if any.
 		b := bytes.NewBuffer(nil)
 		err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
 		if err != nil {
-			c.Ui.Error("could not write diagnostic: " + err.Error())
+			m.Ui.Error("could not write diagnostic: " + err.Error())
 			return nil, 1
 		}
 		if b.Len() != 0 {
-			c.Ui.Message(b.String())
+			m.Ui.Message(b.String())
 		}
 	}
 	ret := 0
@@ -124,75 +124,88 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 		// working; should this be an option ?
 	}
 
-	builds, diags := cfg.GetBuilds(c.CoreConfig.Only, c.CoreConfig.Except)
-	{
-		// write HCL errors/diagnostics if any.
-		b := bytes.NewBuffer(nil)
-		err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
-		if err != nil {
-			c.Ui.Error("could not write diagnostic: " + err.Error())
-			return nil, 1
+	return func(opts buildStarterOptions) ([]packer.Build, int) {
+		builds, diags := cfg.GetBuilds(opts.only, opts.except)
+		{
+			// write HCL errors/diagnostics if any.
+			b := bytes.NewBuffer(nil)
+			err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
+			if err != nil {
+				m.Ui.Error("could not write diagnostic: " + err.Error())
+				return nil, 1
+			}
+			if b.Len() != 0 {
+				m.Ui.Message(b.String())
+			}
 		}
-		if b.Len() != 0 {
-			c.Ui.Message(b.String())
+		if diags.HasErrors() {
+			ret = 1
 		}
-	}
-	if diags.HasErrors() {
-		ret = 1
-	}
 
-	return builds, ret
+		return builds, ret
+	}, ret
 }
 
-func (c *BuildCommand) GetBuilds(path string) ([]packer.Build, int) {
+// GetBuilds will start all packer plugins ( builder, provisioner and
+// post-processor ) referenced in the config. These plugins will be in a
+// waiting to execute mode. Upon error a non nil error will be returned.
+type BuildStarter func(buildStarterOptions) ([]packer.Build, int)
 
+type buildStarterOptions struct {
+	except, only []string
+}
+
+func (m *Meta) GetConfig(path string) (BuildStarter, int) {
 	isHCLLoaded, err := isHCLLoaded(path)
 	if path != "-" && err != nil {
-		c.Ui.Error(fmt.Sprintf("could not tell whether %s is hcl enabled: %s", path, err))
+		m.Ui.Error(fmt.Sprintf("could not tell whether %s is hcl enabled: %s", path, err))
 		return nil, 1
 	}
 	if isHCLLoaded {
-		return c.GetBuildsFromHCL(path)
+		return m.GetConfigFromHCL(path)
 	}
 
-	// TODO: uncomment in v1.5.1 once we've polished HCL a bit more.
+	// TODO: uncomment once we've polished HCL a bit more.
 	// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
 	// The template will be parsed in the legacy configuration style. This style
 	// will continue to work but users are encouraged to move to the new style.
 	// See: https://packer.io/guides/hcl
 	// `)
+	return m.GetConfigFromJSON(path)
+}
 
+func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
 	// Parse the template
-	var tpl *template.Template
-	tpl, err = template.ParseFile(path)
+	tpl, err := template.ParseFile(path)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
+		m.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return nil, 1
 	}
 
 	// Get the core
-	core, err := c.Meta.Core(tpl)
+	core, err := m.Core(tpl)
 	if err != nil {
-		c.Ui.Error(err.Error())
+		m.Ui.Error(err.Error())
 		return nil, 1
 	}
+	return func(opts buildStarterOptions) ([]packer.Build, int) {
+		ret := 0
+		buildNames := core.BuildNames(opts.only, opts.except)
+		builds := make([]packer.Build, 0, len(buildNames))
+		for _, n := range buildNames {
+			b, err := core.Build(n)
+			if err != nil {
+				m.Ui.Error(fmt.Sprintf(
+					"Failed to initialize build '%s': %s",
+					n, err))
+				ret = 1
+				continue
+			}
 
-	ret := 0
-	buildNames := c.Meta.BuildNames(core)
-	builds := make([]packer.Build, 0, len(buildNames))
-	for _, n := range buildNames {
-		b, err := core.Build(n)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Failed to initialize build '%s': %s",
-				n, err))
-			ret = 1
-			continue
+			builds = append(builds, b)
 		}
-
-		builds = append(builds, b)
-	}
-	return builds, ret
+		return builds, ret
+	}, 0
 }
 
 func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
@@ -201,7 +214,15 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
 		return ret
 	}
 
-	builds, ret := c.GetBuilds(cfg.Path)
+	packerStarter, ret := c.GetConfig(cfg.Path)
+	if ret != 0 {
+		return ret
+	}
+
+	builds, ret := packerStarter(buildStarterOptions{
+		except: c.CoreConfig.Except,
+		only:   c.CoreConfig.Only,
+	})
 
 	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")

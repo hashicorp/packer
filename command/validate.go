@@ -57,7 +57,7 @@ func (c *ValidateCommand) Run(args []string) int {
 	warnings := make(map[string][]string)
 
 	// Get the builds we care about
-	buildNames := c.Meta.BuildNames(core)
+	buildNames := core.BuildNames(c.CoreConfig.Only, c.CoreConfig.Except)
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, n := range buildNames {
 		b, err := core.Build(n)

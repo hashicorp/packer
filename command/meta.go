@@ -73,54 +73,6 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	return core, nil
 }
 
-// BuildNames returns the list of builds that are in the given core
-// that we care about taking into account the only and except flags.
-func (m *Meta) BuildNames(c *packer.Core) []string {
-	// TODO: test
-
-	// Filter the "only"
-	if len(m.CoreConfig.Only) > 0 {
-		// Build a set of all the available names
-		nameSet := make(map[string]struct{})
-		for _, n := range c.BuildNames() {
-			nameSet[n] = struct{}{}
-		}
-
-		// Build our result set which we pre-allocate some sane number
-		result := make([]string, 0, len(m.CoreConfig.Only))
-		for _, n := range m.CoreConfig.Only {
-			if _, ok := nameSet[n]; ok {
-				result = append(result, n)
-			}
-		}
-
-		return result
-	}
-
-	// Filter the "except"
-	if len(m.CoreConfig.Except) > 0 {
-		// Build a set of the things we don't want
-		nameSet := make(map[string]struct{})
-		for _, n := range m.CoreConfig.Except {
-			nameSet[n] = struct{}{}
-		}
-
-		// Build our result set which is the names of all builds except
-		// those in the given set.
-		names := c.BuildNames()
-		result := make([]string, 0, len(names))
-		for _, n := range names {
-			if _, ok := nameSet[n]; !ok {
-				result = append(result, n)
-			}
-		}
-		return result
-	}
-
-	// We care about everything
-	return c.BuildNames()
-}
-
 // FlagSet returns a FlagSet with the common flags that every
 // command implements. The exact behavior of FlagSet can be configured
 // using the flags as the second parameter, for example to disable
