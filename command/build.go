@@ -120,6 +120,8 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 	ret := 0
 	if diags.HasErrors() {
 		ret = 1
+		// TODO(azr): Should we stop here or partially build ? Other builds could be
+		// working; should this be an option ?
 	}
 
 	builds, diags := cfg.GetBuilds(c.CoreConfig.Only, c.CoreConfig.Except)
@@ -135,7 +137,6 @@ func (c *BuildCommand) GetBuildsFromHCL(path string) ([]packer.Build, int) {
 			c.Ui.Message(b.String())
 		}
 	}
-	ret = 0
 	if diags.HasErrors() {
 		ret = 1
 	}
