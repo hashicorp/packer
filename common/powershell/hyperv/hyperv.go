@@ -249,6 +249,27 @@ func SetFirstBootDevice(vmName string, controllerType string, controllerNumber u
 	}
 }
 
+func SetBootOrder(vmName string, bootOrder []string) error {
+	var script = `
+param([string]$vmName, [Parameter(ValueFromRemainingArguments=$true)]$bootOrder)
+
+$bootOrderDrives = $bootOrder | ForEach-Object {
+	if ($_ -match 'SCSI:([0-9]+):([0-9]+)') {
+		$controllerNumber = $Matches[1]
+		$controllerLocation = $Matches[2]
+		$controller = Hyper-V\Get-VMScsiController -ControllerNumber $controllerNumber $vmName
+		$controller.Drives | Where-Object {$_.ControllerLocation -eq $controllerLocation} | Select-Object -First 1
+	}
+}
+
+Hyper-V\Set-VMFirmware $vmName -BootOrder $bootOrderDrives
+`
+	var ps powershell.PowerShellCmd
+	params := append([]string{vmName}, bootOrder...)
+	err := ps.Run(script, params...)
+	return err
+}
+
 func DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)

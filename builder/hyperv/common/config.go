@@ -163,6 +163,20 @@ type CommonConfig struct {
 	//   - `CD` *or* `DVD`
 	//   - `NET`
 	FirstBootDevice string `mapstructure:"first_boot_device" required:"false"`
+	// When configured, the boot order determines the order of the devices
+	// from which to boot.
+	//
+	// The device name must be in the form of `SCSI:x:y`, for example,
+	// to boot from the first scsi device use `SCSI:0:0`.
+	//
+	// **NB** You should also set `first_boot_device` (e.g. `DVD`).
+	//
+	// **NB** Although the VM will have this initial boot order, the OS can
+	// change it, for example, Ubuntu 18.04 will modify the boot order to
+	// include itself as the first boot option.
+	//
+	// **NB** This only works for Generation 2 machines.
+	BootOrder []string `mapstructure:"boot_order" required:"false"`
 }
 
 func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) ([]error, []string) {

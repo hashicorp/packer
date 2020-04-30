@@ -265,6 +265,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SwitchVlanId: b.config.SwitchVlanId,
 		},
 
+		&hypervcommon.StepSetBootOrder{
+			BootOrder: b.config.BootOrder,
+		},
 		&hypervcommon.StepSetFirstBootDevice{
 			Generation:      b.config.Generation,
 			FirstBootDevice: b.config.FirstBootDevice,
