@@ -94,7 +94,7 @@ func TestConfigUserNameOverride(t *testing.T) {
 		t.Errorf("Expected 'Password' to be set to generated password, but found %q!", c.Password)
 	}
 	if c.Comm.WinRMPassword != c.tmpAdminPassword {
-		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to generated password, but found %q!", c.Comm.SSHPassword)
+		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to generated password, but found %q!", c.Comm.WinRMPassword)
 	}
 	if c.UserName != "override_winrm_username" {
 		t.Errorf("Expected 'UserName' to be set to 'override_winrm_username', but found %q!", c.UserName)
@@ -159,13 +159,13 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 		t.Errorf("Expected 'Password' to be set to 'Override_winrm_password1', but found %q!", c.Password)
 	}
 	if c.Comm.WinRMPassword != "Override_winrm_password1" {
-		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to 'Override_winrm_password1', but found %q!", c.Comm.SSHPassword)
+		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to 'Override_winrm_password1', but found %q!", c.Comm.WinRMPassword)
 	}
 	if c.UserName != "override_winrm_username" {
 		t.Errorf("Expected 'UserName' to be set to 'override_winrm_username', but found %q!", c.UserName)
 	}
 	if c.Comm.WinRMUser != "override_winrm_username" {
-		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.SSHUsername)
+		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.WinRMUser)
 	}
 }
 
