@@ -21,13 +21,20 @@
 * builder/google: Add support for custom shielded images [GH-8970]
 * builder/google: Allow `source_image_project_id` to be a list of several
     projects to search. [GH-8679]
+* builder/hyperv: Add `boot_order` option to override the default boot order
+    [GH-9046]
 * builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
     [GH-8893]
 * builder/oracle-oci: Update Oracle SDK. [GH-9104]
 * builder/proxmox: Add ability to add a cloud-init drive [GH-9045]
+* builder/vsphere: Add `disable_shutdown` option to support manual vm shutdown
+    over the default automatic shutdown step [GH-9095]
+* builder/vsphere: Add `vgpu_profile` option for specifying vGPU profiles
+    [GH-8946]
 * builder/vsphere: Add support for EFI Secure Boot [GH-9018]
 * builder/yandex: Add `target_image_folder_id ` option for changing the folder
     where a built image will be saved to [GH-9080]
+* core/hcl2: HCL mode builds now honor -only and -except options [GH-8947]
 * core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
     builder provisioners and post-processors [GH-8956]
 * core: New template function: aws_secretsmanager [GH-9099]
@@ -40,7 +47,7 @@
     [GH-8908]
 
 ### BUG FIXES:
-* builder/amazon: Fix bug with launch_block_device_mappings in spot instances.
+* builder/amazon: Fix bug with `launch_block_device_mappings` in spot instances.
     [GH-8945]
 * builder/azure-arm: Fix issue where managed image builds were using a
     different `location` then what was specified in the build configuration
@@ -56,6 +63,7 @@
     InstanceOperationInProgress error [GH-9069]
 * builder/vsphere-iso: disk_size is no longer required if storage is defined
     [GH-8975]
+* builder/vsphere: Add exported files to VSphere artifact [GH-9020]
 * builder/vsphere: Fix issue where -force is not working with vsphere builders
     [GH-9039]
 * core: Fix crash in wrapperreadline helper when calling `os.NewFile` on
