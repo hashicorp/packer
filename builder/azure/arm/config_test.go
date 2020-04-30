@@ -55,6 +55,54 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	}
 }
 
+func TestConfigUserNameOverride(t *testing.T) {
+	builderValues := getArmBuilderConfiguration()
+	builderValues["ssh_username"] = "override_username"
+	builderValues["communicator"] = "ssh"
+
+	var c Config
+	_, err := c.Prepare(builderValues, getPackerConfiguration())
+
+	if err != nil {
+		t.Fatalf("newConfig failed: %s", err)
+	}
+
+	// SSH comm
+	if c.Password != c.tmpAdminPassword {
+		t.Errorf("Expected 'Password' to be set to generated password, but found %q!", c.Password)
+	}
+	if c.Comm.SSHPassword != c.tmpAdminPassword {
+		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to generated password, but found %q!", c.Comm.SSHPassword)
+	}
+	if c.UserName != "override_username" {
+		t.Errorf("Expected 'UserName' to be set to 'override_username', but found %q!", c.UserName)
+	}
+	if c.Comm.SSHUsername != "override_username" {
+		t.Errorf("Expected 'c.Comm.SSHUsername' to be set to 'override_username', but found %q!", c.Comm.SSHUsername)
+	}
+
+	// Winrm comm
+	c = Config{}
+	builderValues = getArmBuilderConfiguration()
+	builderValues["communicator"] = "winrm"
+	builderValues["winrm_username"] = "override_winrm_username"
+	_, err = c.Prepare(builderValues, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("newConfig failed: %s", err)
+	}
+	if c.Password != c.tmpAdminPassword {
+		t.Errorf("Expected 'Password' to be set to generated password, but found %q!", c.Password)
+	}
+	if c.Comm.WinRMPassword != c.tmpAdminPassword {
+		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to generated password, but found %q!", c.Comm.WinRMPassword)
+	}
+	if c.UserName != "override_winrm_username" {
+		t.Errorf("Expected 'UserName' to be set to 'override_winrm_username', but found %q!", c.UserName)
+	}
+	if c.Comm.WinRMUser != "override_winrm_username" {
+		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.WinRMUser)
+	}
+}
 func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues := getArmBuilderConfiguration()
 	builderValues["ssh_password"] = "override_password"
@@ -111,13 +159,13 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 		t.Errorf("Expected 'Password' to be set to 'Override_winrm_password1', but found %q!", c.Password)
 	}
 	if c.Comm.WinRMPassword != "Override_winrm_password1" {
-		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to 'Override_winrm_password1', but found %q!", c.Comm.SSHPassword)
+		t.Errorf("Expected 'c.Comm.WinRMPassword' to be set to 'Override_winrm_password1', but found %q!", c.Comm.WinRMPassword)
 	}
 	if c.UserName != "override_winrm_username" {
 		t.Errorf("Expected 'UserName' to be set to 'override_winrm_username', but found %q!", c.UserName)
 	}
 	if c.Comm.WinRMUser != "override_winrm_username" {
-		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.SSHUsername)
+		t.Errorf("Expected 'c.Comm.WinRMUser' to be set to 'override_winrm_username', but found %q!", c.Comm.WinRMUser)
 	}
 }
 
