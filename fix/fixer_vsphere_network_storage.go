@@ -41,24 +41,14 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 
 		networkRaw, ok := builder["network"]
 		if ok {
-			networkRawString, ok := networkRaw.(string)
-			if !ok {
-				// TODO: error?
-				continue
-			}
-			nic["network"] = networkRawString
+			nic["network"] = networkRaw
 			delete(builder, "network")
 			hasNetwork = true
 		}
 
 		networkCardRaw, ok := builder["networkCard"]
 		if ok {
-			networkCardRawString, ok := networkCardRaw.(string)
-			if !ok {
-				// TODO: error?
-				continue
-			}
-			nic["networkCard"] = networkCardRawString
+			nic["networkCard"] = networkCardRaw
 			delete(builder, "networkCard")
 			hasNetwork = true
 		}
@@ -80,36 +70,21 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 
 		diskSizeRaw, ok := builder["disk_size"]
 		if ok {
-			diskSizeRawInt, ok := diskSizeRaw.(int)
-			if !ok {
-				// TODO: error?
-				continue
-			}
-			disk["disk_size"] = diskSizeRawInt
+			disk["disk_size"] = diskSizeRaw
 			delete(builder, "disk_size")
 			hasStorage = true
 		}
 
 		discThinProvisionedRaw, ok := builder["disk_thin_provisioned"]
 		if ok {
-			discThinProvisionedRawBool, ok := discThinProvisionedRaw.(bool)
-			if !ok {
-				// TODO: error?
-				continue
-			}
-			disk["disk_thin_provisioned"] = discThinProvisionedRawBool
+			disk["disk_thin_provisioned"] = discThinProvisionedRaw
 			hasStorage = true
 			delete(builder, "disk_thin_provisioned")
 		}
 
 		diskEagerlyScrubRaw, ok := builder["disk_eagerly_scrub"]
 		if ok {
-			diskEagerlyScrubRawBool, ok := diskEagerlyScrubRaw.(bool)
-			if !ok {
-				// TODO: error?
-				continue
-			}
-			disk["disk_eagerly_scrub"] = diskEagerlyScrubRawBool
+			disk["disk_eagerly_scrub"] = diskEagerlyScrubRaw
 			hasStorage = true
 			delete(builder, "disk_eagerly_scrub")
 		}

@@ -39,10 +39,12 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 		},
 		{
 			Input: map[string]interface{}{
-				"type":        "vsphere-iso",
-				"network":     "myNetwork",
-				"networkCard": "vmxnet3",
-				"disk_size":   5000,
+				"type":                  "vsphere-iso",
+				"network":               "myNetwork",
+				"networkCard":           "vmxnet3",
+				"disk_size":             5000,
+				"disk_thin_provisioned": true,
+				"disk_eagerly_scrub":    true,
 			},
 
 			Expected: map[string]interface{}{
@@ -55,17 +57,21 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				},
 				"storage": []interface{}{
 					map[string]interface{}{
-						"disk_size": 5000,
+						"disk_size":             5000,
+						"disk_thin_provisioned": true,
+						"disk_eagerly_scrub":    true,
 					},
 				},
 			},
 		},
 		{
 			Input: map[string]interface{}{
-				"type":        "vsphere-iso",
-				"network":     "myNetwork",
-				"networkCard": "vmxnet3",
-				"disk_size":   5000,
+				"type":                  "vsphere-iso",
+				"network":               "myNetwork",
+				"networkCard":           "vmxnet3",
+				"disk_size":             5000,
+				"disk_thin_provisioned": true,
+				"disk_eagerly_scrub":    true,
 				"network_adapters": []interface{}{
 					map[string]interface{}{
 						"network":     "net1",
@@ -74,7 +80,9 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				},
 				"storage": []interface{}{
 					map[string]interface{}{
-						"disk_size": 5001,
+						"disk_size":             5001,
+						"disk_thin_provisioned": true,
+						"disk_eagerly_scrub":    true,
 					},
 				},
 			},
@@ -93,10 +101,14 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				},
 				"storage": []interface{}{
 					map[string]interface{}{
-						"disk_size": 5000,
+						"disk_size":             5000,
+						"disk_thin_provisioned": true,
+						"disk_eagerly_scrub":    true,
 					},
 					map[string]interface{}{
-						"disk_size": 5001,
+						"disk_size":             5001,
+						"disk_thin_provisioned": true,
+						"disk_eagerly_scrub":    true,
 					},
 				},
 			},
