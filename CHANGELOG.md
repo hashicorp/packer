@@ -1,4 +1,4 @@
-## 1.5.6 (Upcoming)
+## 1.5.6 (May 1, 2020)
 
 ### BACKWARDS INCOMPATIBILITIES:
 * core/hcl2: HCL2 singular blocks: use key/value or name/value depending on how
