@@ -106,5 +106,5 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 }
 
 func (FixerVSphereNetworkDisk) Synopsis() string {
-	return `Updates "vmware" builders to "vmware-iso"`
+	return `Removes deprecated network and disk fields from "vsphere-iso" builder`
 }
