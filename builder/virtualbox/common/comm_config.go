@@ -4,7 +4,6 @@ package common
 
 import (
 	"errors"
-	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -32,15 +31,9 @@ type CommConfig struct {
 	SSHHostPortMax int `mapstructure:"ssh_host_port_max"`
 	// TODO: remove later
 	SSHSkipNatMapping bool `mapstructure:"ssh_skip_nat_mapping" required:"false"`
-	// TODO: remove later
-	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" required:"false"`
 }
 
 func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
-	// Backwards compatibility
-	if c.SSHWaitTimeout != 0 {
-		c.Comm.SSHTimeout = c.SSHWaitTimeout
-	}
 
 	// Backwards compatibility
 	if c.SSHHostPortMin != 0 {
