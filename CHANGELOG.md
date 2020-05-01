@@ -1,6 +1,8 @@
 ## 1.5.6 (Upcoming)
 
 ### BACKWARDS INCOMPATIBILITIES:
+* core/hcl2: HCL2 singular blocks: use key/value or name/value depending on how
+    the service names things [GH-9078]
 * core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
     For example `tags = {}` instead of `tags {}` [GH-9035]
 
@@ -32,11 +34,13 @@
 * builder/vsphere: Add `vgpu_profile` option for specifying vGPU profiles
     [GH-8946]
 * builder/vsphere: Add support for EFI Secure Boot [GH-9018]
+* builder/vsphere: Add support for specifying vGPU profiles [GH-8946]
 * builder/yandex: Add `target_image_folder_id ` option for changing the folder
     where a built image will be saved to [GH-9080]
 * core/hcl2: HCL mode builds now honor -only and -except options [GH-8947]
 * core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
     builder provisioners and post-processors [GH-8956]
+* core/HCL: HCL mode now honors -only and -except options. [GH-8947]
 * core: New template function: aws_secretsmanager [GH-9099]
 * provisioner/ansible: Add option to not use localhost proxy adapter. Removes
     need for ansible connection_plugin when using WinRM. [GH-8625]
@@ -47,8 +51,8 @@
     [GH-8908]
 
 ### BUG FIXES:
-* builder/amazon: Fix bug with `launch_block_device_mappings` in spot instances.
-    [GH-8945]
+* builder/amazon: Fix bug with `launch_block_device_mappings` in spot
+    instances. [GH-8945]
 * builder/azure-arm: Fix issue where managed image builds were using a
     different `location` then what was specified in the build configuration
     [GH-9068]
