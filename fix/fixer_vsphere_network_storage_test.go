@@ -6,7 +6,7 @@ import (
 )
 
 func TestFixerVSphereNetwork_impl(t *testing.T) {
-	var _ Fixer = new(FixerVSphereNetwork)
+	var _ Fixer = new(FixerVSphereNetworkStorage)
 }
 
 func TestFixerVSphereNetwork_Fix(t *testing.T) {
@@ -75,7 +75,7 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		var f FixerVSphereNetwork
+		var f FixerVSphereNetworkStorage
 
 		input := map[string]interface{}{
 			"builders": []map[string]interface{}{tc.Input},

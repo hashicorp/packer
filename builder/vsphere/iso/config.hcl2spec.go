@@ -29,12 +29,7 @@ type FlatConfig struct {
 	GuestOSType               *string                  `mapstructure:"guest_os_type" cty:"guest_os_type"`
 	Firmware                  *string                  `mapstructure:"firmware" cty:"firmware"`
 	DiskControllerType        *string                  `mapstructure:"disk_controller_type" cty:"disk_controller_type"`
-	DiskSize                  *int64                   `mapstructure:"disk_size" cty:"disk_size"`
-	DiskThinProvisioned       *bool                    `mapstructure:"disk_thin_provisioned" cty:"disk_thin_provisioned"`
-	DiskEagerlyScrub          *bool                    `mapstructure:"disk_eagerly_scrub" cty:"disk_eagerly_scrub"`
 	Storage                   []FlatDiskConfig         `mapstructure:"storage" cty:"storage"`
-	Network                   *string                  `mapstructure:"network" cty:"network"`
-	NetworkCard               *string                  `mapstructure:"network_card" cty:"network_card"`
 	NICs                      []FlatNIC                `mapstructure:"network_adapters" cty:"network_adapters"`
 	USBController             *bool                    `mapstructure:"usb_controller" cty:"usb_controller"`
 	Notes                     *string                  `mapstructure:"notes" cty:"notes"`
@@ -142,7 +137,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                 &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
+		"packer_user_variables":        &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
@@ -156,12 +151,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"guest_os_type":                &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"disk_controller_type":         &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.String, Required: false},
-		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
-		"disk_thin_provisioned":        &hcldec.AttrSpec{Name: "disk_thin_provisioned", Type: cty.Bool, Required: false},
-		"disk_eagerly_scrub":           &hcldec.AttrSpec{Name: "disk_eagerly_scrub", Type: cty.Bool, Required: false},
 		"storage":                      &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
-		"network":                      &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
-		"network_card":                 &hcldec.AttrSpec{Name: "network_card", Type: cty.String, Required: false},
 		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":               &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
 		"notes":                        &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
@@ -183,7 +173,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"video_ram":                    &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"vgpu_profile":                 &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                     &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
-		"configuration_parameters":     &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
+		"configuration_parameters":     &hcldec.BlockAttrsSpec{TypeName: "configuration_parameters", ElementType: cty.String, Required: false},
 		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
 		"iso_checksum_url":             &hcldec.AttrSpec{Name: "iso_checksum_url", Type: cty.String, Required: false},
 		"iso_checksum_type":            &hcldec.AttrSpec{Name: "iso_checksum_type", Type: cty.String, Required: false},
