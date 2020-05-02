@@ -8,13 +8,18 @@ export default function Homepage() {
         <img src="/img/logo-hashicorp.svg" alt="HashiCorp Packer Logo" />
         <h1 className="g-type-display-3">Build Automated Machine Images</h1>
         <div className="buttons">
-          <Button title="Get Started" theme={{ brand: 'packer' }} />
+          <Button
+            title="Get Started"
+            theme={{ brand: 'packer' }}
+            url="/intro"
+          />
           <Button
             title={`Download ${VERSION}`}
             theme={{
               variant: 'secondary',
               background: 'light',
             }}
+            url="/downloads"
           />
         </div>
       </section>
