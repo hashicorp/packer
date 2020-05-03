@@ -1,14 +1,22 @@
 package qemu
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestStepHTTPIPDiscover_Run(t *testing.T) {
 	state := new(multistep.BasicStateBag)
+	state.Put("ui", &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	})
+	config := &Config{}
+	state.Put("config", config)
 	step := new(stepHTTPIPDiscover)
 	hostIp := "10.0.2.2"
 

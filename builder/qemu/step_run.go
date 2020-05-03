@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -79,16 +80,24 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		vnc = fmt.Sprintf("%s:%d", vncIP, vncPort-5900)
 	} else {
 		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort-5900)
+	}
+
+	if config.QMPEnable {
 		defaultArgs["-qmp"] = fmt.Sprintf("unix:%s,server,nowait", config.QMPSocketPath)
 	}
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	if config.Comm.Type != "none" {
-		sshHostPort = state.Get("sshHostPort").(int)
-		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+
+	if config.NetBridge == "" {
+		if config.Comm.Type != "none" {
+			sshHostPort = state.Get("sshHostPort").(int)
+			defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+		} else {
+			defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
+		}
 	} else {
-		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
+		defaultArgs["-netdev"] = fmt.Sprintf("bridge,id=user.0,br=%s", config.NetBridge)
 	}
 
 	rawVersion, err := driver.Version()
@@ -215,11 +224,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if len(config.QemuArgs) > 0 {
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
+		httpIp := common.GetHTTPIP()
 		httpPort := state.Get("http_port").(int)
 		ictx := config.ctx
 		if config.Comm.Type != "none" {
 			ictx.Data = qemuArgsTemplateData{
-				"10.0.2.2",
+				httpIp,
 				httpPort,
 				config.HTTPDir,
 				config.OutputDir,
@@ -228,7 +238,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			}
 		} else {
 			ictx.Data = qemuArgsTemplateData{
-				HTTPIP:    "10.0.2.2",
+				HTTPIP:    httpIp,
 				HTTPPort:  httpPort,
 				HTTPDir:   config.HTTPDir,
 				OutputDir: config.OutputDir,
